@@ -1,0 +1,8 @@
+Ka0s Skill Master — offline perf  (v0.1.0, label 'offline')
+
+scenario                  iters      ms/iter     api/iter   bytes/iter
+windowRenderOff            1000      0.00022          0.0          0.0
+windowRenderOn             1000      0.00052          0.0          0.3
+settingsRead              10000      0.00047          0.0          0.0
+
+timings are for orientation only — compare scenarios within a run, never across machines

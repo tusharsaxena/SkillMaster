@@ -1,0 +1,1 @@
+{"label":"offline","scenarios":[{"scenario":"windowRenderOff","iters":1000,"msPerIter":0.000216,"apiPerIter":0.0,"bytesPerIter":0.0},{"scenario":"windowRenderOn","iters":1000,"msPerIter":0.000520,"apiPerIter":0.0,"bytesPerIter":0.3},{"scenario":"settingsRead","iters":10000,"msPerIter":0.000467,"apiPerIter":0.0,"bytesPerIter":0.0}]}

@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "addon": "SkillMaster",
+  "addonVersion": "0.1.0",
+  "run": "20261110-025504",
+  "startedAt": "2026-11-10T02:55:04+05:30",
+  "durationMs": 11498,
+  "label": null,
+  "release": "0.1.0",
+  "git": { "sha": "9a66b145ad0c9a6ea0746778845c3c93af3011d6", "branch": "feat/2026-11-10-skill-master-v1", "dirty": false },
+  "host": { "lua": "Lua 5.1.5  Copyright (C) 1994-2012 Lua.org, PUC-Rio", "luacheck": "Luacheck: 1.2.0", "lizard": "1.24.0", "timingSource": "date +%s%3N" },
+  "suites": {
+    "lint": { "status": "pass", "durationMs": 1002, "warnings": 0, "errors": 0, "files": 43, "gating": true, "gates": { "commit": true, "release": true } },
+    "tests": { "status": "pass", "durationMs": 8257, "passed": 119, "failed": 0, "skipped": 1, "total": 120, "gating": true, "gates": { "commit": true, "release": true } },
+    "perf": { "status": "pass", "durationMs": 310, "scenarios": 3, "gating": false, "gates": { "commit": false, "release": true } },
+    "complexity": { "status": "pass", "durationMs": 1228, "warnings": 0, "maxCcn": 10, "nloc": 2363, "functions": 449, "avgCcn": 1.9, "avgNloc": 4.0, "avgToken": 31.4, "warnFunRatio": 0.00, "warnNlocRatio": 0.00, "bandFiles": 0, "overCapFiles": 0, "blindFiles": 0, "crashedFiles": 0, "gating": false, "gates": { "commit": false, "release": true } }
+  },
+  "verdict": "green"
+}
