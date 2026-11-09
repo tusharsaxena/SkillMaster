@@ -361,6 +361,15 @@ Total.
 - m5 seam: Journal > log length caps the live log, also while a simulation's override is in place
 - m5 seam: diagnostics report test mode's sample data in state, model and sim
 
+### test_m5_review.lua (6)
+
+- profile switch: the window's bars restyle from the new profile with the same row set
+- profile switch: the broker feeds re-read the new profile's templates
+- profile switch: the Journal takes the new profile's drop point and size
+- profile reset: one LAYOUT_CHANGED reaches the look listeners (the Bars preview, the Journal)
+- bars preview: the fill is the Fishing row's own color, and a palette or mode edit reaches it
+- test mode: a sample row's menu cannot pin the sample skill into the character's store
+
 ### test_surface_parity.lua (11)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
@@ -530,6 +539,7 @@ Total.
 | test_sim.lua | 12 |
 | test_seams.lua | 5 |
 | test_m5_seams.lua | 7 |
+| test_m5_review.lua | 6 |
 | test_surface_parity.lua | 11 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
@@ -543,4 +553,4 @@ Total.
 | test_skin_switch.lua | 13 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **353** |
+| **Total** | **359** |

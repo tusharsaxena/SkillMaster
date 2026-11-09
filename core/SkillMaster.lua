@@ -102,9 +102,13 @@ local function reloadProfile()
     NS.SyncEnabledHold()
     NS.ApplySkinChoice()
     if NS.MainWindow then NS.MainWindow.ApplySettings() end
-    if NS.MainWindow then NS.MainWindow.Refresh() end
-    if NS.Detached then NS.Detached.Refresh() end
+    -- A look change like any other: a FULL relayout of the window and the detached blocks (a
+    -- values-only pass keeps the old profile's bar styles while the row set is unchanged), and the
+    -- Bars page's preview and the Journal restyle on the same message.
+    if NS.Blocks then NS.Blocks.Changed() end
+    if NS.Broker then NS.Broker.Refresh() end   -- the feeds' templates are per profile
     if NS.Alerts then NS.Alerts.Refresh() end   -- T4.2: the toast's position from the new profile
+    if NS.Journal then NS.Journal.ApplyGeometry() end   -- its drop point and size are per profile
     if NS.Helpers and NS.Helpers.RefreshAllPanels then NS.Helpers.RefreshAllPanels() end
     NS.MaybeShowSkinPicker()
 end

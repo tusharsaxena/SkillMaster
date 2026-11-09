@@ -152,6 +152,9 @@ NS.RegisterSchemaRows(NS.Live(rows))
 NS.OptionsPreview = NS.OptionsPreview or {}
 local Preview = NS.OptionsPreview
 Preview.VALUES = { value = 107, max = 150, bonus = 25, bonusKind = "temp", ticks = { 75, 150, 225, 300 } }
+-- The row the preview stands for, as NS.Rows.FillColor reads it: the fill follows Color mode, the
+-- palette (Fishing is a secondary skill) and Bar > Fill exactly as the window's Fishing row does.
+Preview.ENTRY = { key = "fishing", category = "secondary", rank = 107, max = 150 }
 Preview.EXPIRES_IN = 252   -- 4:12
 local HEADER_H, NAME_W = 44, 110
 
@@ -159,7 +162,10 @@ function Preview.Refresh()
     local bar = Preview.bar
     if not bar then return end
     bar:ApplyStyle(NS.Bar.ResolveStyle("row"))
-    bar:SetValues(Preview.VALUES)
+    local v = {}
+    for k, x in pairs(Preview.VALUES) do v[k] = x end
+    v.color = NS.Rows.FillColor(Preview.ENTRY)
+    bar:SetValues(v)
     -- The lure's time left, drawn still: a preview arms no OnUpdate (nothing may run while the
     -- page is closed or the addon stood down).
     bar.timer:SetText(NS.Bar.FormatTimer(Preview.EXPIRES_IN))

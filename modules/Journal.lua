@@ -692,6 +692,17 @@ function J.ResetPosition()
     if frame then applyPoint() end
 end
 
+--- Re-apply the active profile's drop point and size (a profile switch, copy or reset): the
+--- default place and size where the profile stores none.
+function J.ApplyGeometry()
+    if not frame then return end
+    applyPoint()
+    local s = NS.db and NS.db.profile.journal and NS.db.profile.journal.size
+    if type(s) == "table" then return J.ApplySize() end
+    frame:SetSize(WIDTH, HEIGHT)
+    J.Relayout(WIDTH, HEIGHT)
+end
+
 -- A skill pass (after its SKILL_UPs, so the log is current) and a look change repaint it.
 J.events = NS.NewBusTarget()
 if J.events then

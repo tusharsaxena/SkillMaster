@@ -127,6 +127,7 @@ Kit.run{
         "test_sim",
         "test_seams",
         "test_m5_seams",
+        "test_m5_review",
         "test_surface_parity",
         "test_vendor_sync",
         -- slash-commands-§7: drives OnEnable and full disable/enable cycles on the shared
