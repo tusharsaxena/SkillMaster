@@ -11,6 +11,26 @@ NS.defaults = {
         -- Drag-only geometry, no control sets it: written by modules/MainWindow.lua alone
         -- (architecture-§5's named-owner rule; docs/ARCHITECTURE.md names the writer).
         window = { point = false },
+        -- T3.2 the main window's body and the blocks (modules/Blocks.lua). `blocks[id]` is named
+        -- non-setting state for `docked`, `order`, `collapsed` and `point` (the header clicks and
+        -- the detached frames' drag write them); `scale` and `locked` get rows in T5.1.
+        layout = {
+            maxHeight = 560,     -- the window scrolls past this
+            summary   = true,    -- the strip under the title: level, session gains, next alert
+            blocks = {
+                primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, locked = false },
+                secondary     = { docked = true, order = 2, collapsed = false, point = false, scale = 1, locked = false },
+                weapon        = { docked = true, order = 3, collapsed = false, point = false, scale = 1, locked = false },
+                other         = { docked = true, order = 4, collapsed = false, point = false, scale = 1, locked = false },
+                stats_base    = { docked = true, order = 5, collapsed = false, point = false, scale = 1, locked = false },
+                stats_spell   = { docked = true, order = 6, collapsed = true,  point = false, scale = 1, locked = false },
+                stats_defense = { docked = true, order = 7, collapsed = true,  point = false, scale = 1, locked = false },
+                stats_utility = { docked = true, order = 8, collapsed = false, point = false, scale = 1, locked = false },
+            },
+        },
+        -- Rows a player hid from the row menu (T3.3), and whether unlearned rows show.
+        skills = { showUnlearned = true, hidden = {}, helperHint = false },
+        stats  = { hidden = {} },
         -- T3.1 the bar widget's look (modules/Bar.lua). The colors are the player's picks; with
         -- `colors.fromSkin` they give way to the skin's owner tokens (core/SkinSetup.lua). The
         -- defaults are the approved mockup's (docs/superpowers/specs/2026-11-10-skill-master-mockups).
@@ -50,5 +70,7 @@ NS.defaults = {
     },
     -- 0, never the current version: AceDB strips a value equal to its default at logout
     -- (savedvariables-§1). `minimap` is LibDBIcon's own table (launcher-§3), per installation.
+    -- The pinned skill the broker's {pinned} token shows (design §7), set from the row menu (T3.3).
+    char = { pinned = false },
     global = { schemaVersion = 0, minimap = { hide = false } },
 }

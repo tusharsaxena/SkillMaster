@@ -32,7 +32,11 @@ position says so beside its TOC line (toc-file-§5).
 | `defaults/Racials_Forever.lua` | `NS.Racials_Forever.byRace`: the +5 racial weapon skills | read at call time by Bonuses |
 | `defaults/Stats_Forever.lua` | `NS.STAT_DEFS`: the 30 stats, their groups, references and markers | read at call time by StatData |
 | `modules/Bar.lua` | `NS.Bar`: the data bar (base, bonus segment clamped at the end, tier ticks, threshold markers, spark, text, expiry timer), its resolved style and its pool | conventional: reads the skin, the pool and the profile at call time |
-| `modules/MainWindow.lua` | the main window, its toggle, the test strip, the key binding button | publishes `NS.BINDINGS` for the General page |
+| `modules/Chrome.lua` | `NS.Chrome`: the title-bar and header icon controls (catalog marks, a glyph fallback) | conventional |
+| `modules/Rows.lua` | `NS.Rows`: one skill or stat row (initials icon, name, bar, timer; the unlearned variant with its trainer line and Go button), its pool and the pure helpers (values, colors, trainer line, money) | conventional |
+| `modules/Blocks.lua` | `NS.BLOCKS`, `NS.BlockDefs`, `NS.Blocks`: the eight blocks, their persisted layout, detach / dock / collapse (`LAYOUT_CHANGED`), the entries each shows, the block header, the shared row layout pass; repaints every surface on the data and layout messages | declares the block titles through `NS.L` at load; subscribes on its own bus target |
+| `modules/Detached.lua` | `NS.Detached`: a detached block's own HUD frame, its drag-only drop point | conventional |
+| `modules/MainWindow.lua` | the main window: title band (lock, journal, settings, close), summary strip, docked blocks in a scrolled body, bonus legend, test strip, toggle, key binding button | publishes `NS.BINDINGS` for the General page |
 | `modules/Probe.lua` | `/skm probe`: the Forever API report as JSON in a copy window | reads only core members at load |
 | `modules/SkillData.lua` | the skills model: scan, classify, synthesize unlearned rows, `SKILLS_UPDATED` / `SKILL_UP`; builds `NS.SkillNameToKey` | after the catalog and the locale, read at load |
 | `modules/Trainers.lua` | `NS.Trainers`: `For(key, faction?, race?)` and `NextRank(...)` over the trainer and rank tables | reads the defaults at call time |

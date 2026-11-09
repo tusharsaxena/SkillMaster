@@ -64,6 +64,14 @@ Kit.skinSwitch = {
             NS.MainWindow.Show()
             return NS.MainWindow.Frame()
         end, reset = function() NS.MainWindow.Hide() end },
+        { name = "a detached block", build = function()
+            NS.db.profile.layout.blocks.other.docked = false
+            NS.Detached.Refresh()
+            return NS.Detached.Frame("other")
+        end, reset = function()
+            NS.db.profile.layout.blocks.other.docked = true
+            NS.Detached.Refresh()
+        end },
         { name = "the debug console", build = function()
             NS.DebugLog:Show()
             return NS.DebugLog._frameForTest
@@ -91,6 +99,7 @@ Kit.run{
         "test_bonuses",
         "test_statdata",
         "test_bar",
+        "test_blocks",
         "test_surface_parity",
         "test_vendor_sync",
         -- slash-commands-§7: drives OnEnable and full disable/enable cycles on the shared

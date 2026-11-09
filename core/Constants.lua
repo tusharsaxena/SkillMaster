@@ -24,12 +24,18 @@ C.MINIMAP_PATH = "global.minimap.shown"
 
 -- The layers table (frame-layering-§5). Every SetFrameStrata / SetFrameLevel in this addon reads it.
 -- This addon's stack, bottom to top (frame-layering-§1 tiers):
---   T3 window  the main window (modules/MainWindow.lua), MEDIUM, toplevel, clamped; its title bar,
---              test strip and close control are levels over the window's own (+ OVERLAY, + CHROME)
+--   T1 HUD     a detached block (modules/Detached.lua), MEDIUM; its band controls at + CHROME, its
+--              rows at + CONTENT
+--   T4 window  the main window (modules/MainWindow.lua), MEDIUM, toplevel, clamped; its title bar,
+--              test strip and close control are levels over the window's own (+ OVERLAY, + CHROME);
+--              its scrolled body + CONTENT; the crafting rows' secure overlays (modules/SecureOverlay.lua,
+--              parented to UIParent, at their host's strata) + SECURE over the host, under its chrome
+--   T4 window  the trainer popup (modules/TrainerPopup.lua), HIGH: opened from the MEDIUM window, so
+--              one strata above it, toplevel, clamped, closed with it
 -- Library- and Blizzard-owned tiers this addon relies on (frame-layering-§6): the debug console
--- and perf panel DIALOG, toplevel; the copy window FULLSCREEN; menus FULLSCREEN_DIALOG; the
--- Settings panel HIGH; GameTooltip TOOLTIP.
+-- and perf panel DIALOG, toplevel; the copy window FULLSCREEN; menus (the row menu,
+-- LibKa0s-Widgets-1.0 ContextMenu) FULLSCREEN_DIALOG; the Settings panel HIGH; GameTooltip TOOLTIP.
 C.LAYERS = {
-    STRATA = { WINDOW = "MEDIUM" },
-    LEVEL  = { OVERLAY = 4, CHROME = 10 },
+    STRATA = { WINDOW = "MEDIUM", HUD = "MEDIUM", WINDOW_READ = "HIGH" },
+    LEVEL  = { CONTENT = 2, OVERLAY = 4, SECURE = 8, CHROME = 10 },
 }

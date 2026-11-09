@@ -249,6 +249,31 @@ L["crit immunity vs bosses"] = true
 L["repair"] = true
 -- ---- END T2.3 ----
 
+-- The display: bars, rows, blocks, the window body and the detached frames (T3.1, T3.2).
+L["Not learned"] = true
+L["Lv %d"] = true
+L["Go"] = true
+L["Primary Professions"] = true
+L["Secondary Skills"] = true
+L["Weapon Skills"] = true
+L["Defense \194\183 Lockpicking \194\183 Riding"] = true
+L["Stats \194\183 Base & Combat"] = true
+L["Stats \194\183 Spell & Regen"] = true
+L["Stats \194\183 Defense & Resists"] = true
+L["Stats \194\183 Utility"] = true
+L["cap %d (5 \195\151 level)"] = true
+L["vs highest primary"] = true
+L["Detach this block into its own frame"] = true
+L["Dock this block in the main window"] = true
+L["%s near cap: train %s"] = true
+L["Lock or unlock the window"] = true
+L["Open the journal"] = true
+L["temp bonus"] = true
+L["permanent bonus"] = true
+L["\226\148\130 rank tier \194\183 \226\150\143 threshold"] = true
+L["Lv %d \194\183 %s %s"] = true
+L["\226\150\178 +%d this session"] = true
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

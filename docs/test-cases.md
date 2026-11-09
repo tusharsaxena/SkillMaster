@@ -186,6 +186,18 @@ Total.
 - bar: the resolved style reads the profile and the skin's tokens
 - bar: the pool hands bars back in order and clears their timers on release
 
+### test_blocks.lua (9)
+
+- blocks: the eight blocks, four skill categories then four stat groups
+- test_blocks_detach_dock_roundtrip: a block leaves the window, gets its own frame and comes back
+- blocks: a detached frame saves its drop point; locked refuses the drag
+- test_rows_unlearned_variant: an unlearned skill is a dimmed row with its trainer and a Go button
+- rows: initials, money and the riding trainer line
+- rows: the color modes
+- test_mainwindow_collapsed_persisted: collapsing a block is stored, survives a re-render and the header toggles it
+- mainwindow: the title bar carries lock, journal, settings and close; the summary and legend show
+- mainwindow: an empty model shows the empty state, and data hides it
+
 ### test_surface_parity.lua (10)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
@@ -290,11 +302,13 @@ Total.
 - skin values: no typed value outside the kit's categories and the host's rows
 - skin values: the check is falsifiable, a planted value of each shape is reported
 
-### test_skin_switch.lua (5)
+### test_skin_switch.lua (7)
 
 - skin switch: the check is falsifiable, a surface that redraws a literal is reported
 - skin switch: the main window changes
 - skin switch: the main window changes with the Scope ignored
+- skin switch: a detached block changes
+- skin switch: a detached block changes with the Scope ignored
 - skin switch: the debug console changes
 - skin switch: the debug console changes with the Scope ignored
 
@@ -325,6 +339,7 @@ Total.
 | test_bonuses.lua | 14 |
 | test_statdata.lua | 14 |
 | test_bar.lua | 10 |
+| test_blocks.lua | 9 |
 | test_surface_parity.lua | 10 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
@@ -335,7 +350,7 @@ Total.
 | test_layout_cap.lua | 13 |
 | test_lizard_sighted.lua | 8 |
 | test_skin_values.lua | 3 |
-| test_skin_switch.lua | 5 |
+| test_skin_switch.lua | 7 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **208** |
+| **Total** | **219** |

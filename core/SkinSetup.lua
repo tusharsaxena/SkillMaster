@@ -54,6 +54,7 @@ NS.SKIN_OWNER_TOKENS = {
     ["sm.timer"]     = { default = { 0.50, 0.85, 0.77, 1 }, follow = "sem.info" },
     ["sm.iconBg"]    = { default = { 0.04, 0.035, 0.03, 1 }, follow = "card.bg" },
     ["sm.muted"]     = { default = { 0.64, 0.62, 0.59, 1 }, follow = "text.muted" },
+    ["sm.headerBg"]  = { default = { 0, 0, 0, 0.35 }, follow = "list.header.bg" },
 }
 
 local function stored(path)
