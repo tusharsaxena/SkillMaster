@@ -198,6 +198,18 @@ Total.
 - mainwindow: the title bar carries lock, journal, settings and close; the summary and legend show
 - mainwindow: an empty model shows the empty state, and data hides it
 
+### test_interact.lua (9)
+
+- test_secure_overlay_deferred_in_combat: crafting overlays are made and moved only out of combat
+- secure overlay: hiding the window hides its overlays; the stand-down takes them down
+- interact: the click map (design §6.5)
+- interact: shift-click links the row to chat; right-click opens the row menu
+- test_rowtooltip_lines_fishing_lure: the lure, its timer, the session and the fishing helper
+- rowtooltip: skinning names the mob level and the next breakpoint; a weapon its cap gap
+- rowtooltip: Show draws on GameTooltip with the bar, Hide gives it back
+- trainer popup: the faction's trainers, the selection and the waypoint button
+- test_waypoints_fallback_order: TomTom, then the native pin, then chat
+
 ### test_surface_parity.lua (10)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
@@ -302,13 +314,15 @@ Total.
 - skin values: no typed value outside the kit's categories and the host's rows
 - skin values: the check is falsifiable, a planted value of each shape is reported
 
-### test_skin_switch.lua (7)
+### test_skin_switch.lua (9)
 
 - skin switch: the check is falsifiable, a surface that redraws a literal is reported
 - skin switch: the main window changes
 - skin switch: the main window changes with the Scope ignored
 - skin switch: a detached block changes
 - skin switch: a detached block changes with the Scope ignored
+- skin switch: the trainer popup changes
+- skin switch: the trainer popup changes with the Scope ignored
 - skin switch: the debug console changes
 - skin switch: the debug console changes with the Scope ignored
 
@@ -340,6 +354,7 @@ Total.
 | test_statdata.lua | 14 |
 | test_bar.lua | 10 |
 | test_blocks.lua | 9 |
+| test_interact.lua | 9 |
 | test_surface_parity.lua | 10 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
@@ -350,7 +365,7 @@ Total.
 | test_layout_cap.lua | 13 |
 | test_lizard_sighted.lua | 8 |
 | test_skin_values.lua | 3 |
-| test_skin_switch.lua | 7 |
+| test_skin_switch.lua | 9 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **219** |
+| **Total** | **230** |

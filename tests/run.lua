@@ -72,6 +72,10 @@ Kit.skinSwitch = {
             NS.db.profile.layout.blocks.other.docked = true
             NS.Detached.Refresh()
         end },
+        { name = "the trainer popup", build = function()
+            NS.TrainerPopup.Show("fistWeapons")
+            return NS.TrainerPopup.Frame()
+        end, reset = function() NS.TrainerPopup.Hide() end },
         { name = "the debug console", build = function()
             NS.DebugLog:Show()
             return NS.DebugLog._frameForTest
@@ -100,6 +104,7 @@ Kit.run{
         "test_statdata",
         "test_bar",
         "test_blocks",
+        "test_interact",
         "test_surface_parity",
         "test_vendor_sync",
         -- slash-commands-§7: drives OnEnable and full disable/enable cycles on the shared

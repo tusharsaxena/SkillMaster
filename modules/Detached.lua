@@ -134,6 +134,7 @@ function D.Refresh()
         end
     end
     NS.Blocks.UpdateSpeedWatch()
+    if NS.SecureOverlay then NS.SecureOverlay:Sync() end
 end
 
 --- Redraw the shown rows' values without moving anything (a bonus tick, combat).

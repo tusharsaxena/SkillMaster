@@ -98,6 +98,14 @@ modules\Rows.lua
 modules\Blocks.lua
 # Conventional: NS.Detached, a detached block's frame (T3.2); reads NS.Blocks at CALL time.
 modules\Detached.lua
+# T3.3, each conventional (reached at CALL time): the combat queue and the crafting rows' secure
+# overlays (registers its two combat events on its own bus target at FILE SCOPE, after core\Bus.lua),
+# the click map, the row tooltip, the trainer popup and the waypoint providers.
+modules\SecureOverlay.lua
+modules\Interact.lua
+modules\RowTooltip.lua
+modules\TrainerPopup.lua
+modules\Waypoints.lua
 # Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
 modules\MainWindow.lua
 # Conventional: `/skm probe`; reads core\ members only at FILE SCOPE (NS.Widgets, NS.Constants).

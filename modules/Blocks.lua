@@ -69,8 +69,8 @@ function B.Changed()
     if NS.bus and NS.MSG then NS.bus:SendMessage(NS.MSG.LAYOUT_CHANGED) end
 end
 
---- Run `fn` now, or after combat where the combat queue (T3.3, NS.SecureOverlay) exists and the
---- player is in combat: a layout change re-anchors the rows a secure overlay is laid over.
+--- Run `fn` now, or after combat (NS.SecureOverlay's queue, T3.3): a dock, detach or collapse moves
+--- rows that crafting overlays are synced over, so in combat it waits (Review Focus 3).
 local function whenSafe(key, fn)
     local SO = NS.SecureOverlay
     if SO and SO.AfterCombat then return SO:AfterCombat(key, fn) end
@@ -265,7 +265,6 @@ function B.LayRows(entries, host, rowPool, y, styleKey, inset)
         row:SetPoint("TOPRIGHT", host, "TOPRIGHT", -inset, -y)
         if r.kind == "skill" then row:SetSkill(r.entry) else row:SetStat(r.entry) end
         row:SetStripe(i)
-        if NS.SecureOverlay and r.kind == "skill" then NS.SecureOverlay:Want(row) end
         y = y + row:GetHeight()
     end
     return y

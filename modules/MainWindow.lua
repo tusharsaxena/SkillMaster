@@ -5,8 +5,8 @@ local addonName, NS = ...
 -- test-mode strip, the drag-only position, the one toggle handler and the Show window key binding.
 --
 -- A render is a full layout only when the set of rows changed (blocks, collapse, keys); otherwise it
--- redraws values in place, which is also all it does in combat while secure overlays sit over its
--- rows (T3.3, modules/SecureOverlay.lua).
+-- redraws values in place. The crafting rows' secure overlays (T3.3, modules/SecureOverlay.lua)
+-- follow every layout through SecureOverlay:Sync, which defers itself in combat.
 
 NS.MainWindow = {}
 local W = NS.MainWindow
@@ -275,7 +275,6 @@ end
 local function layOut(blocks)
     NS.Blocks.ReleaseHeaders(headerPool)
     NS.Rows.ReleaseAll(rowPool)
-    if NS.SecureOverlay then NS.SecureOverlay:Release("main") end
     for k in pairs(headers) do headers[k] = nil end
     local y = 0
     for _, b in ipairs(blocks) do
@@ -315,8 +314,10 @@ function W.RefreshValues()
     NS.Rows.RefreshValues(rowPool, NS.Blocks.Lookup(NS.Blocks.Data()))
 end
 
---- The window's body, one pass: a full layout when the row set changed, else values in place. In
---- combat a layout is deferred while secure overlays sit over the rows (SecureOverlay:LayoutBlocked).
+--- The window's body, one pass: a full layout when the row set changed, else values in place. The
+--- rows are plain frames and no secure frame is anchored to them (the crafting overlays sit on
+--- UIParent at absolute coordinates), so a layout is safe in combat; the overlays follow it on the
+--- next out-of-combat sync (modules/SecureOverlay.lua).
 function W.Render()
     if not frame then return end
     local t0 = Perf.on and debugprofilestop()
@@ -324,7 +325,7 @@ function W.Render()
     local skills, stats = NS.Blocks.Data()
     local blocks, sig, total = plan(skills, stats)
     local SO = NS.SecureOverlay
-    if sig == lastSig or (SO and SO:LayoutBlocked("main", function() W.Refresh() end)) then
+    if sig == lastSig then
         W.RefreshValues()
     else
         local top = placeSummary(bodyTop())
@@ -377,7 +378,9 @@ function W.Show()
 end
 
 function W.Hide()
-    if frame then frame:Hide() end
+    if not frame then return end
+    frame:Hide()
+    if NS.SecureOverlay then NS.SecureOverlay:Sync() end   -- OnHide does too; an Escape reaches only that
 end
 
 --- The ONE toggle handler: `/skm toggle`, the launcher's Show window entry and the key binding.

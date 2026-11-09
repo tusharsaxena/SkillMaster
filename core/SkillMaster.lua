@@ -58,6 +58,9 @@ function NS.StandDown()
     NS.State.testMode = false
     if NS.MainWindow then NS.MainWindow.StandDown() end
     if NS.Detached then NS.Detached.StandDown() end
+    if NS.SecureOverlay then NS.SecureOverlay:StandDown() end
+    if NS.TrainerPopup then NS.TrainerPopup.Hide() end
+    if NS.Widgets and NS.Widgets.CloseMenu then NS.Widgets.CloseMenu() end   -- the row menu closes with us
     NS.HideSkinPicker()
     addon:UnregisterAllEvents()
     addon:CancelAllTimers()

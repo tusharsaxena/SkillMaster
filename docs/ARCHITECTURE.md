@@ -96,6 +96,7 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | Event | Registered by | Handler | Why |
 |---|---|---|---|
 | `PLAYER_REGEN_DISABLED` | `NS.RegisterRuntime` (`core/SkillMaster.lua`) | `addon:OnEnterCombat` | combat ends test mode (preview-mode) |
+| `PLAYER_REGEN_DISABLED`, `PLAYER_REGEN_ENABLED` | `modules/SecureOverlay.lua` at load, on its own bus target | disarm every crafting overlay at the combat-start edge; after combat run the queued layout work, then re-sync the overlays | Taint Notes below |
 | `SKILL_LINES_CHANGED` | `NS.SkillData:Enable` (from `NS.RegisterRuntime`) | debounced `SkillData:Scan` (0.1 s) | the skill list changed; the echo of the scan's own header toggles is ignored for 0.2 s |
 | `CHAT_MSG_SKILL` | `NS.SkillData:Enable` | debounced `SkillData:Scan` | a skill-up line |
 | `PLAYER_LEVEL_UP` | `NS.SkillData:Enable` | debounced `SkillData:Scan`, with the new level as the weapon-cap floor (5 x level) | the list can still answer the old cap |
@@ -108,16 +109,30 @@ down unregisters every event and cancels every timer; the stand-up re-registers 
 
 ## Taint Notes
 
-Nothing in v0.1.0 touches a protected function or a secure frame. The window is a plain frame and
-the key binding clicks a plain, non-secure button. The settings panel never opens in combat (the
-library refuses, options-ui-§2). The crafting-row secure overlays (T3.3) will be created out of
-combat and re-anchored only out of combat, queued on `PLAYER_REGEN_ENABLED`.
+The window, the detached frames, the rows and the trainer popup are plain frames, and the key
+binding clicks a plain, non-secure button. The settings panel never opens in combat (the library
+refuses, options-ui-§2). The one secure surface is the crafting rows' overlays
+(`modules/SecureOverlay.lua`, T3.3): one `SecureActionButtonTemplate` per profession whose window
+opens by a cast (`type1 = "spell"`, the localized open spell), parented to `UIParent` and laid over
+its row at absolute coordinates, so no plain frame is ever a secure frame's parent or anchor and
+the rows, the window and the detached frames hide, move and re-lay freely in combat. Every
+creation, attribute, anchor, strata, level, show and hide of an overlay happens in `Sync`, which in
+combat only marks itself dirty; `PLAYER_REGEN_DISABLED` (lockdown not yet on,
+events-frames-taint-§2) disarms every overlay so none stays mouse-live in combat, and
+`PLAYER_REGEN_ENABLED` replays the combat queue (`SecureOverlay:AfterCombat`: dock, detach and
+collapse wait there, Review Focus 3) and re-syncs. A crafting click in combat reaches the plain row
+and prints one line. Shift- and right-clicks pass through the overlay (`PostClick`) to the row's
+handlers. The broker's rows (T4.1) never use the overlays.
 
 ## Known Limitations
 
 - The Layout, Bars, Skills and Stats settings pages arrive in T5.1: until then the block layout,
   the bar look and the hidden rows follow their defaults and the row controls (collapse, detach,
   dock, the row menu's Hide).
+- An overlay is placed when its row is laid out, shown, scrolled or dragged; while the window is
+  being dragged it lags its row until the drop (a re-sync on `OnDragStop`).
+- The optional one-line gathering hint under a row (`skills.helperHint`, design §12 item 4) is not
+  drawn yet; the helpers are tooltip lines.
 - Test mode marks the window but still shows the live models: the sample character (the preview
   fixture) arrives in T5.2 through `NS.Blocks.source`.
 - Sim mode (the launcher entry and the Master-controls checkbox) arrives with the simulator in T5.2.
