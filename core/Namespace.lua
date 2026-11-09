@@ -13,5 +13,4 @@ NS.version = "0.1.0"
 NS.PREFIX = "|cff00ffff[SM]|r"
 
 -- Said once by each degradation stub, so a broken install names the folder it expected.
-NS.LIBKA0S_MISSING = "The LibKa0s library is missing from this installation of Ka0s Skill Master "
-    .. "(expected in libs/LibKa0s)"
+NS.LIBKA0S_MISSING = NS.L["The LibKa0s library is missing from this installation of Ka0s Skill Master (expected in libs/LibKa0s)"]

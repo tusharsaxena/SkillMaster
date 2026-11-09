@@ -36,6 +36,18 @@ libs\LibDBIcon-1.0\lib.xml
 # Locales
 # LOAD-BEARING: creates NS.L, which core\DebugLogSetup.lua and every settings\ file read at FILE SCOPE.
 locales\enUS.lua
+# LOAD-BEARING: each translation fills NS.L (created by locales\enUS.lua) at FILE SCOPE, after every
+# enUS file; each is gated on its own GetLocale() (localization-§1) and is a stub until filled.
+locales\deDE.lua
+locales\esES.lua
+locales\esMX.lua
+locales\frFR.lua
+locales\itIT.lua
+locales\koKR.lua
+locales\ptBR.lua
+locales\ruRU.lua
+locales\zhCN.lua
+locales\zhTW.lua
 
 # Core -- dependency-correct order (layout-§1)
 # LOAD-BEARING: NS.name, NS.version, NS.PREFIX and NS.LIBKA0S_MISSING, read by every file below.

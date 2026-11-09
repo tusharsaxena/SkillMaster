@@ -39,7 +39,7 @@ The library's Appearance tab over `skin.source`, `skin.skin`, `skin.ignorePanel`
 
 ### Keybindings
 
-The library's Keybindings tab over `NS.BINDINGS`: Toggle the Skill Master window. Keys stay the
+The library's Keybindings tab over `NS.BINDINGS`: Toggle skills window and Toggle journal. Keys stay the
 client's and are never stored in a profile (options-ui-§20).
 
 The launcher's right-click menu lists Enabled, Locked, Test mode and Show window; Show window shares

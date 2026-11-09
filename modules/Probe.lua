@@ -160,6 +160,22 @@ function P.Run()
     return report
 end
 
+--- A read-only summary for the diagnostics report (modules/Diagnostics.lua): which skill-list API
+--- this client has and its visible line count, and which probed globals are present. Unlike Run()
+--- it never expands a header, so it touches no client state.
+--- @return table { source = "C_SkillInfo"|"global"|"none", lines = n, present = n, total = n,
+---   missing = { names }, tomtom = bool }
+function P.Summary()
+    local api = skillApi()
+    local out = { source = api and api.source or "none", lines = api and lineCount(api) or 0,
+                  present = 0, total = #P.APIS, missing = {}, tomtom = addonLoaded("TomTom") }
+    for _, entry in ipairs(P.APIS) do
+        if type(entry[2]()) == "function" then out.present = out.present + 1
+        else out.missing[#out.missing + 1] = entry[1] end
+    end
+    return out
+end
+
 -- The copy window the verb shows the JSON in (LibKa0s-Widgets-1.0, lazy until the first Show).
 P.__copy = NS.Widgets.CopyWindow({
     addonName = addonName,

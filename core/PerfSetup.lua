@@ -12,7 +12,7 @@ if not lib then
         suspended = false,
         Note      = function() end,
         OnCommand = function()
-            return { NS.LIBKA0S_MISSING .. ", so performance measurement is unavailable." }
+            return { NS.L["%s, so performance measurement is unavailable."]:format(NS.LIBKA0S_MISSING) }
         end,
     }
     return

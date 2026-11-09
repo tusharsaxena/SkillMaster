@@ -106,9 +106,9 @@ local HELPERS = {}
 
 function HELPERS.skinning(out, e)
     local H = NS.SkillHelpers
-    line(out, L["Skinning %d \226\134\146 mobs up to Lv %d"]:format(e.rank, H.SkinnableLevel(e.rank)), nil, "body")
+    line(out, L["Skinning %d: mobs up to Lv %d"]:format(e.rank, H.SkinnableLevel(e.rank)), nil, "body")
     local nxt = skinBreakpoint(e.rank)
-    line(out, L["Next breakpoint: %d \226\134\146 Lv %d"]:format(nxt, H.SkinnableLevel(nxt)), nil, "muted")
+    line(out, L["Next breakpoint: %d (mobs up to Lv %d)"]:format(nxt, H.SkinnableLevel(nxt)), nil, "muted")
 end
 
 local function nodeLines(out, e)

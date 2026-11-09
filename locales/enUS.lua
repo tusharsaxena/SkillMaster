@@ -18,7 +18,6 @@ L["No skills to show yet."] = true
 L["Test mode: the skills shown are sample data."] = true
 L["Test mode"] = true
 L["Test mode cannot start in combat."] = true
-L["Toggle the Skill Master window"] = true
 L["Shows or hides the Skill Master window."] = true
 
 -- The Journal window (modules/Journal.lua).
@@ -309,7 +308,6 @@ L["temp bonus"] = true
 L["permanent bonus"] = true
 L["\226\148\130 rank tier \194\183 \226\150\143 threshold"] = true
 L["Lv %d \194\183 %s %s"] = true
-L["\226\150\178 +%d this session"] = true
 
 -- The interactions: the click map, the row menu, the row tooltip, the trainer popup, the waypoints (T3.3).
 L["Profession windows open from Skill Master out of combat."] = true
@@ -338,8 +336,8 @@ L["fine"] = true
 L["far below"] = true
 L["low"] = true
 L["Below cap by"] = true
-L["Skinning %d \226\134\146 mobs up to Lv %d"] = true
-L["Next breakpoint: %d \226\134\146 Lv %d"] = true
+L["Skinning %d: mobs up to Lv %d"] = true
+L["Next breakpoint: %d (mobs up to Lv %d)"] = true
 L["Can gather"] = true
 L["Next"] = true
 L["%s at %d"] = true
@@ -355,7 +353,7 @@ L["Also teaches: %s"] = true
 L["Coordinates unverified on WoW Forever (flagged until the smoke pass)"] = true
 L["Set waypoint"] = true
 L["Print to chat"] = true
-L["Waypoint order: TomTom \226\134\146 native map pin \226\134\146 chat directions"] = true
+L["Waypoint order: TomTom, then a native map pin, then chat directions"] = true
 L["TomTom"] = true
 L["map pin"] = true
 L["chat"] = true
@@ -365,7 +363,6 @@ L["Trainers for your faction (%s) who train %s to %s (%d):"] = true
 L["Learn: %s"] = true
 L["Trainers for your faction (%s) who teach %s:"] = true
 L["No trainer for your faction is recorded for this skill."] = true
-L["%s: %s"] = true
 L["Waypoint set (TomTom): %s"] = true
 L["Map pin set: %s"] = true
 
@@ -378,17 +375,36 @@ L["Skill Master: All skills"] = true
 L["Skill Master: Weapon Skills"] = true
 L["+%d this session"] = true
 L["Off"] = true
-L["Not learned"] = true
 L["No stats to show yet."] = true
 L["Ka0s Skill Master is disabled."] = true
-L["Primary"] = true
-L["Secondary"] = true
-L["Weapon"] = true
 L["Base"] = true
 L["Spell"] = true
 L["Utility"] = true
 L["Click label: toggle window \194\183 Click row: open its window \194\183 Right-click: settings"] = true
 -- ---- END T4.1 ----
+
+-- ==== BEGIN T5.3 (locales, bindings, diagnostics) -- merged by the integrator. ====
+-- The library-absent sentences (core/Namespace.lua and the setup files' degradation stubs).
+L["The LibKa0s library is missing from this installation of Ka0s Skill Master (expected in libs/LibKa0s)"] = true
+L["%s; running on reduced built-in fallbacks."] = true
+L["%s, so the debug console window is unavailable."] = true
+L["%s, so there is no minimap button and no broker plugin."] = true
+L["%s, so performance measurement is unavailable."] = true
+L["debug logging ON"] = true
+L["debug logging OFF"] = true
+L["Debug console"] = true
+L["no holds"] = true
+-- The skin option lists and the reload line (core/SkinSetup.lua).
+L["Ka0s skins"] = true
+L["All text"] = true
+L["HUD text only"] = true
+L["Ka0s Default"] = true
+L["Reload your interface (/reload) to finish changing the skin."] = true
+-- The key bindings (modules/MainWindow.lua, launcher-§6).
+L["Toggle skills window"] = true
+L["Toggle journal"] = true
+L["Shows or hides the Journal: the session log and your alts."] = true
+-- ==== END T5.3 ====
 
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.

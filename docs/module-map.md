@@ -8,6 +8,7 @@ position says so beside its TOC line (toc-file-§5).
 | File | Responsibility | Load-order note |
 |---|---|---|
 | `locales/enUS.lua` | `NS.L` with its key-is-the-string fallback | creates `NS.L`, read at load by DebugLogSetup and every settings file |
+| `locales/<locale>.lua` | a translation stub per client locale (deDE, esES, esMX, frFR, itIT, koKR, ptBR, ruRU, zhCN, zhTW), gated on its own `GetLocale()` | fills `NS.L` at load, after every enUS file |
 | `core/Namespace.lua` | folder name, version fallback, `[SM]` chat tag, library-missing sentence | first: every file reads it |
 | `core/Compat.lua` | `NS.Compat`: the skill-list shims, one normalized line record from either return shape ([compat-layer.md](compat-layer.md)) | conventional: reached at call time |
 | `core/MediaSetup.lua` | `NS.Icon`, `NS.MediaFont`, `RegisterLSM` (LibKa0s-Media-1.0) | before Constants, which resolves `FONT_MONO` from it |
@@ -41,13 +42,13 @@ position says so beside its TOC line (toc-file-§5).
 | `modules/RowTooltip.lua` | `NS.RowTooltip`: the row tooltip's lines (numbers, bar, bonuses with timers, session, next rank, cap gap, gathering and fishing helpers, stat markers, click hints) on GameTooltip | conventional |
 | `modules/TrainerPopup.lua` | `NS.TrainerPopup`: the trainers for the faction, one card each, the waypoint and print actions | conventional |
 | `modules/Waypoints.lua` | `NS.Waypoints`: TomTom, else the native user waypoint, else chat directions | conventional |
-| `modules/MainWindow.lua` | the main window: title band (lock, journal, settings, close), summary strip, docked blocks in a scrolled body, bonus legend, test strip, toggle, `ShowAndScrollTo(key)` (the broker's crafting rows), key binding button; the journal mark calls `NS.Journal.Toggle` | publishes `NS.BINDINGS` for the General page |
-| `modules/Probe.lua` | `/skm probe`: the Forever API report as JSON in a copy window | reads only core members at load |
+| `modules/MainWindow.lua` | the main window: title band (lock, journal, settings, close), summary strip, docked blocks in a scrolled body, bonus legend, test strip, toggle, `ShowAndScrollTo(key)` (the broker's crafting rows), the two key binding buttons (window, Journal); the journal mark calls `NS.Journal.Toggle` | publishes `NS.BINDINGS` for the General page |
+| `modules/Probe.lua` | `/skm probe`: the Forever API report as JSON in a copy window; `Summary()`, its read-only half for the diagnostics | reads only core members at load |
 | `modules/SkillData.lua` | the skills model: scan, classify, synthesize unlearned rows, `SKILLS_UPDATED` / `SKILL_UP`; builds `NS.SkillNameToKey` | after the catalog and the locale, read at load |
 | `modules/Trainers.lua` | `NS.Trainers`: `For(key, faction?, race?)` and `NextRank(...)` over the trainer and rank tables | reads the defaults at call time |
 | `modules/Helpers.lua` | `NS.SkillHelpers`: skinnable level, weapon cap, fishing need, gatherable nodes (`NS.Helpers` is the options library) | reads the defaults at call time |
 | `modules/Bonuses.lua` | `NS.Bonuses`: a skill's modifier broken into racial, item, enchant, buff and Other sources; `BONUSES_UPDATED` | defines `NS.addon:OnBonusesUnitChanged` at load, so after `core/SkillMaster.lua`; reads SkillData at call time |
-| `modules/Diagnostics.lua` | the diagnostics report's sections | read at run time |
+| `modules/Diagnostics.lua` | the diagnostics report's sections: identity, settings, state, skin, model, probe, bonuses, layout, rejected | read at run time |
 | `modules/StatData.lua` | `NS.StatData`: the stats model over `NS.STAT_DEFS`, `STATS_UPDATED`, the speed ticker | registers its events on its own bus target at load |
 | `modules/SessionLog.lua` | `NS.SessionLog`: the per-character ring of skill-ups (`db.char.log`, 500), session gains, `Rate`, per-skill `ETA`; hears `SKILL_UP` | subscribes on its own bus target at load (after `core/Bus.lua`) |
 | `modules/Alts.lua` | `NS.Alts`: each character's skills in `db.global.characters["<realm>-<name>"]` on `SKILLS_UPDATED` (debounced) and `PLAYER_LOGOUT`; `List`, `Forget` | subscribes on its own bus target at load; reads SkillData at call time |
@@ -61,5 +62,7 @@ position says so beside its TOC line (toc-file-§5).
 | `settings/General.lua` | landing spec, Master controls, Skin and Keybindings tabs | first page registered |
 | `settings/Profiles.lua` | the AceDBOptions Profiles page | last page registered |
 
-`Bindings.xml` sits at the root beside the TOC and is never a TOC line (launcher-§6).
+`Bindings.xml` sits at the root beside the TOC and is never a TOC line (launcher-§6). It carries two
+`CLICK` bindings, Show window first and then the Journal; `modules/MainWindow.lua` creates both buttons
+(`SkillMasterToggleWindow`, `SkillMasterToggleJournal`), their labels and `NS.BINDINGS`.
 `libs/` and `tests/_kit/` are vendored from LibKa0s v1.94.0 and never edited.

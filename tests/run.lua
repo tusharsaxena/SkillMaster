@@ -38,7 +38,7 @@ Kit.setSurfaceSource{
 }
 
 _G.SKM_TEST = Kit.expose{
-    NS = NS, mocks = mocks,
+    NS = NS, mocks = mocks, Loader = Loader,
     loadedAddonFiles = ADDON_FILES,
     loadedLibFiles   = LIB_FILES,
 }
@@ -103,6 +103,7 @@ Kit.run{
         "test_mainwindow",
         "test_launcher",
         "test_keybinds",
+        "test_locale",
         "test_skinsetup",
         "test_perf",
         "test_probe",

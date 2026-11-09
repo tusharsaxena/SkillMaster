@@ -31,7 +31,13 @@ section. This addon writes the sections, in `modules/Diagnostics.lua`:
 | `settings` | every setting that differs from its default, plus `enabled`, `skin.source`, `skin.skin` always |
 | `state` | whether the window is shown and test mode is on; or "stood down: runtime state released" |
 | `skin` | the skin engine's minor, the stored and the applied choice |
+| `model` | the live skill model's counts (total, learned, unlearned, rows per category), the stat count, the session log's entries and gains, the alts, whether test mode's preview source is on; stood down, a note that the last scan is kept |
+| `probe` | the probe's read-only half: the skill-list API (`C_SkillInfo`, `global` or `none`) and its visible line count, how many probed globals are present, TomTom, and the missing ones (capped) |
+| `bonuses` | each learned skill with a modifier as `key=+N (temp N)`, then the bonus cache as it stands (sources, items, buffs, whether the temp ticker runs) and each cached source; "bonus cache empty" before the first collect |
+| `layout` | the window's stored scale, opacity, lock, point, max height and summary strip; each block's docked, order, collapsed, scale, lock, point and detached-frame state; the docked order and the detached blocks |
 | `rejected` | the events `SafeRegisterEvent` refused this session |
 
 The report reads state only. It registers no event, takes no hold, starts no timer, calls no
-protected function and is safe in combat. It does not read other addons' data or the chat log.
+protected function and is safe in combat. It never runs the probe's scan (which expands a
+collapsed Skills-tab header) and never collects the bonus sources (which reads gear tooltips): both
+sections read what is already there. It does not read other addons' data or the chat log.

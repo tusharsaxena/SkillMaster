@@ -52,7 +52,7 @@ if not lib then
         Reevaluate = function() return reevaluate() end,
         PrintHolds = function(self)
             local holds = self:Holds()
-            NS.Print(addonName .. ": " .. (#holds > 0 and table.concat(holds, ", ") or "no holds"))
+            NS.Print(NS.L["%s: %s"]:format(addonName, #holds > 0 and table.concat(holds, ", ") or NS.L["no holds"]))
             return true
         end,
     }

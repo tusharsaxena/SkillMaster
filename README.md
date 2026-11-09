@@ -3,7 +3,7 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-284%2F284_passing-green)
+![Tests](https://img.shields.io/badge/Tests-300%2F300_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
@@ -13,7 +13,7 @@ You set it up in the game's Settings → AddOns → Ka0s Skill Master, or with `
 
 ## Usage
 
-Type `/skm toggle` to open or close the Skill Master window, or bind a key to it. You can set that key in two places: the game's Options → Keybindings → Ka0s Skill Master, and the General page's Keybindings tab in this addon's settings. The window remembers where you dropped it. `/skm lock` stops it from moving, `/skm unlock` lets you drag it again, and the window's close button or Escape puts it away.
+Type `/skm toggle` to open or close the Skill Master window, or bind a key to it (*Toggle skills window*; *Toggle journal* opens the Journal the same way). You can set those keys in two places: the game's Options → Keybindings → Ka0s Skill Master, and the General page's Keybindings tab in this addon's settings. The window remembers where you dropped it. `/skm lock` stops it from moving, `/skm unlock` lets you drag it again, and the window's close button or Escape puts it away.
 
 Test mode fills the window with sample data so you can try a layout before your character has the skills to show. Turn it on with `/skm test`, from the minimap button's right-click menu, or with the Test mode box under General → Master controls. A band across the top of the window says you are looking at sample data, and entering combat ends test mode on its own.
 
