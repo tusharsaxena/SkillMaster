@@ -82,7 +82,7 @@ passed (clients-§6, testing). Each check names what to do and what you should s
 ## Launcher and settings
 
 - **SM-LDB-1** The minimap button shows the logo. Left-click opens the settings; right-click shows
-  Enabled, Locked, Test mode, Show window. Hovering shows the status tooltip.
+  Enabled, Locked, Test mode, Sim mode, Show window. Hovering shows the status tooltip.
 - **SM-CFG-1** Settings → AddOns → Ka0s Skill Master: the landing page lists the slash commands; General
   has Master controls, Skin and Keybindings tabs; Profiles works.
 - **SM-CFG-2** Uncheck Minimap button: the button hides, and Reset all settings does not bring it back.
@@ -105,6 +105,22 @@ passed (clients-§6, testing). Each check names what to do and what you should s
 
 ## Disabled
 
+## Test mode and the simulator
+
+- **SM-TEST-1** `/skm test`: the window, a detached block, the broker feeds and the Journal all show
+  Ember Ironsong, the level-22 Dwarf Hunter (Leatherworking 146/150, Fishing 107 +25 with a lure
+  timer near 4:12, Guns 105 +5, Fist Weapons, Polearms, Thrown and Riding unlearned), the summary
+  reads "Lv 22 · Dwarf Hunter" and the strip says the data is sample data. `/skm test` again: your
+  own character everywhere.
+- **SM-SIM-1** Tick General → Master controls → Sim mode: the step panel opens beside the window and
+  the box stays ticked. Start the fishing trip: every 3 s a step plays; a skill-up flashes the broker
+  and adds a Journal line, the lure puts a teal segment on Fishing, the mount moves Run Speed to
+  160%. The window shows the cyan simulation strip.
+- **SM-SIM-2** Untick Sim mode (or the launcher's Sim mode entry, or `/skm sim stop`): the session
+  ends, your own skills, Journal log and broker gains are back, and `/reload` shows nothing of the
+  session was saved. Entering combat or `/skm disable` ends a session too; test mode refuses while one
+  runs and the simulator refuses in test mode, combat, an instance or a group.
+
 - **SM-OFF-1** `/skm disable`: the window hides, `/skm toggle` answers one disabled line, the key
   binding does nothing, the right-click menu grays all but Enabled. `/skm enable` restores it.
 
@@ -117,4 +133,4 @@ passed (clients-§6, testing). Each check names what to do and what you should s
 ## Skins and diagnostics
 
 - **SM-SKIN-1** `/skm skin`: pick Ka0s Default, Apply. The window and the debug console change look.
-- **SM-DIAG-1** `/skm diagnostics`: the report appears in the debug console with the five sections.
+- **SM-DIAG-1** `/skm diagnostics`: the report appears in the debug console with the six sections.

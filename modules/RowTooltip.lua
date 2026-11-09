@@ -59,7 +59,7 @@ function RT.FormatETA(sec)
 end
 
 local function sessionLines(out, e)
-    local log = NS.SessionLog
+    local log = NS.Preview.Log()
     if not log then return end
     -- This skill's points and its rate over the whole session (the mockup's "+6 (3 / h)").
     local gains = log:GainsFor(e.key)
@@ -86,7 +86,7 @@ local function rankLines(out, e)
 end
 
 local function weaponLines(out, e)
-    local level = type(UnitLevel) == "function" and UnitLevel("player") or 0
+    local level = NS.Preview.Character().level or 0
     local cap = NS.SkillHelpers.WeaponCap(level)
     line(out, L["Cap at your level"], L["%d (5 \195\151 %d)"]:format(cap, level), "muted", "body")
     local gap = cap - e.rank   -- the base rank's distance, as the weapon-gap alert measures it

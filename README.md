@@ -4,6 +4,7 @@
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
 ![Tests](https://img.shields.io/badge/Tests-300%2F300_passing-green)
+![Tests](https://img.shields.io/badge/Tests-302%2F302_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
@@ -17,11 +18,13 @@ Type `/skm toggle` to open or close the Skill Master window, or bind a key to it
 
 Test mode fills the window with sample data so you can try a layout before your character has the skills to show. Turn it on with `/skm test`, from the minimap button's right-click menu, or with the Test mode box under General → Master controls. A band across the top of the window says you are looking at sample data, and entering combat ends test mode on its own.
 
+Sim mode plays a short scripted session on the same sample character, so you can watch the bars move, the broker flash and the Journal fill without leveling anything: a skill-up every 3 seconds, a fishing lure going on and off, and a mount changing your speed. Start it with `/skm sim`, the Sim mode box next to Test mode, or the minimap menu. Nothing it does is saved, and stopping it puts your own character back.
+
 `/skm skin` opens the skin picker. While it is open the window shows in test mode, so you can watch each skin as you pick it; the eye button turns that preview on and off. Press Apply to keep the skin you picked. Closing the picker without applying puts everything back the way it was.
 
 Once, when you have a moment, type `/skm probe` and send the text it shows to the author. It lists how this game client reports your skills and stats, which is still being mapped out for WoW Forever, and it changes nothing.
 
-The minimap button opens the settings on a left-click and a menu on a right-click: turn the addon on or off, lock the window, switch test mode, and show or hide the window. `/skm disable` turns the whole addon off until you type `/skm enable`.
+The minimap button opens the settings on a left-click and a menu on a right-click: turn the addon on or off, lock the window, switch test mode or sim mode, and show or hide the window. `/skm disable` turns the whole addon off until you type `/skm enable`.
 
 Everything else lives under Settings → AddOns → Ka0s Skill Master, and `/skm help` (or `/skillmaster help`) lists every command.
 

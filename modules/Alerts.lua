@@ -31,6 +31,21 @@ function A.Reset()
     shownCap, shownGap, lastMax = {}, {}, {}
 end
 
+local function copy(t)
+    local out = {}
+    for k, v in pairs(t) do out[k] = v end
+    return out
+end
+
+--- What this session has alerted, as a copy (the simulator takes it at start).
+function A.State() return { cap = copy(shownCap), gap = copy(shownGap), max = copy(lastMax) } end
+
+--- Put a State() back (the simulator's stop): a simulated alert never silences a real one.
+function A.RestoreState(s)
+    if type(s) ~= "table" then return end
+    shownCap, shownGap, lastMax = copy(s.cap or {}), copy(s.gap or {}), copy(s.max or {})
+end
+
 local function setting(key) return NS.GetSetting and NS.GetSetting("alerts." .. key) end
 
 -- ---------------------------------------------------------------------------------------------
@@ -103,7 +118,7 @@ end
 function A.CheckGap(e)
     if not (e and e.learned and e.kind == "weapon") or shownGap[e.key] then return false end
     if setting("weapon") == false then return false end
-    local cap = math.max(e.max or 0, NS.SkillHelpers.WeaponCap(UnitLevel("player")))
+    local cap = math.max(e.max or 0, NS.SkillHelpers.WeaponCap(NS.Compat.PlayerLevel()))
     local gap = cap - (e.rank or 0)
     if gap < (tonumber(setting("weaponGap")) or A.DEFAULT_GAP) then return false end
     shownGap[e.key] = true

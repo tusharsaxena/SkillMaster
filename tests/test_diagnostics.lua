@@ -59,10 +59,10 @@ local function sectionLines(name)
     error("no section " .. name)
 end
 
-test("diagnostics: the section list is identity, settings, state, skin, the four domain sections, rejected", function()
+test("diagnostics: the section list is identity, settings, state, skin, the four domain sections, sim, rejected", function()
     local names = {}
     for i, s in ipairs(NS.Diagnostics.Sections()) do names[i] = s[1] end
-    assertEqual(table.concat(names, ","), "identity,settings,state,skin,model,probe,bonuses,layout,rejected")
+    assertEqual(table.concat(names, ","), "identity,settings,state,skin,model,probe,bonuses,layout,sim,rejected")
 end)
 
 test("diagnostics: model counts the skills by category and learned state, the stats and the stores", function()

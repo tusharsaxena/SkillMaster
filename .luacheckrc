@@ -48,6 +48,9 @@ files["modules/Alts.lua"] = { read_globals = { "time", "UnitClass", "UnitRace", 
 files["modules/Journal.lua"] = {
   read_globals = { "time", "date", "RAID_CLASS_COLORS", "GameTooltip", "IsShiftKeyDown" },
 }
+-- T5.2: the sample's clock (test mode), and the simulator's clock and world refusals.
+files["modules/Preview.lua"] = { read_globals = { "time" } }
+files["modules/Simulator.lua"] = { read_globals = { "time", "IsInInstance", "IsInGroup" } }
 
 -- The harness global is declared here, not in read_globals, so addon source cannot reach it (lint).
 files["tests/"] = {

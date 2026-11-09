@@ -6,7 +6,8 @@ LibKa0s-DebugLog-1.0's console (`core/DebugLogSetup.lua`). `/skm debug` toggles 
 `/skm debug on` and `/skm debug off` turn logging on and off. The flag is session-only
 (`NS.State.debug`, off at every login and `/reload`, never saved) and independent of the window, so a
 bug can be reproduced with the console closed and read afterwards. Lines are tag-first:
-`[Set]` (the write seam), `[Test]` (test mode), `[Migrate]`, `[Bus]`, plus the library's own `[Cmd]`,
+`[Set]` (the write seam), `[Test]` (test mode and its sample data), `[Sim]` (the simulator and its
+seam), `[Migrate]`, `[Bus]`, plus the library's own `[Cmd]`,
 `[Cfg]`, `[Launcher]` and `[Lifecycle]` lines.
 
 ## The diagnostics report
@@ -35,6 +36,7 @@ section. This addon writes the sections, in `modules/Diagnostics.lua`:
 | `probe` | the probe's read-only half: the skill-list API (`C_SkillInfo`, `global` or `none`) and its visible line count, how many probed globals are present, TomTom, and the missing ones (capped) |
 | `bonuses` | each learned skill with a modifier as `key=+N (temp N)`, then the bonus cache as it stands (sources, items, buffs, whether the temp ticker runs) and each cached source; "bonus cache empty" before the first collect |
 | `layout` | the window's stored scale, opacity, lock, point, max height and summary strip; each block's docked, order, collapsed, scale, lock, point and detached-frame state; the docked order and the detached blocks |
+| `sim` | the simulation's state (active, step panel, scenario, step, events), the seam's wrapped and unwrapped counts, whether test mode's sample data is on |
 | `rejected` | the events `SafeRegisterEvent` refused this session |
 
 The report reads state only. It registers no event, takes no hold, starts no timer, calls no

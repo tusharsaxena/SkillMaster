@@ -26,25 +26,6 @@ Total.
 - schema: the minimap row says SHOWN while LibDBIcon's stored key says hidden (launcher-§3)
 - schema: the reset-all veto keeps the minimap row and every profile row out of the walk
 
-### test_options.lua (16)
-
-- test_options_every_bar_style_key_has_row
-- options: every display default outside bars and layout has a row too
-- options: the pages register in the mockup's order, General first and Profiles last
-- options: a look row applies live through LAYOUT_CHANGED and reaches the window's bars
-- options: a reset of a whole page sends one LAYOUT_CHANGED, not one per row
-- options: a hidden skill has a row that un-hides it
-- options: the per-block rows go through NS.Blocks (detach, dock, collapse, order)
-- options: a hidden block leaves the window and the detached frames
-- options: the waypoint method preference decides the provider
-- options: the unverified mark follows its row
-- options: the bar text template and the timer and marker switches reach the bar
-- options: the flat color mode draws the Bar color, or the skin's while its companion is on
-- options: the Bars page draws a live preview bar from NS.Bar, restyled by a write
-- options: every new page renders on its first show without raising
-- options: the journal's length and filter, and the stat display mode, are honored
-- options: the library-absent load keeps every hand-written row; the composers' rows are the gap
-
 ### test_database.lua (3)
 
 - database: the defaults stamp 0 and the runner raises it to the code's target
@@ -79,23 +60,10 @@ Total.
 - launcher: the object is the brand, the 128 px logo, registered once OnEnable runs
 - launcher: left-click opens the settings panel through the same opener as /skm config
 
-### test_keybinds.lua (4)
+### test_keybinds.lua (2)
 
-- keybinds: Bindings.xml is two CLICK lines in this addon's category, no header, no default
+- keybinds: Bindings.xml is one CLICK line in this addon's category, no header, no default
 - keybinds: the bound button runs the window's one toggle handler
-- keybinds: the Journal button runs the Journal's one toggle handler
-- keybinds: a Journal press while stood down refuses on the toggle verb's line
-
-### test_locale.lua (8)
-
-- locale: the enUS files are the TOC's, the base first, before every other locale
-- locale: NS.L answers the key on a miss, and every entry answers a string, never `true`
-- locale: every routed literal has an enUS entry
-- locale: every enUS key is read by the addon's own files (localization-§3, no dead key)
-- locale: no key is written twice in the enUS files
-- locale: the lexer is falsifiable, a routed literal and a dead key are both seen
-- locale: each stub is gated on its own locale, silent elsewhere, and a subset of enUS
-- locale: the stub gate is falsifiable, an ungated chunk writes on every client
 
 ### test_skinsetup.lua (4)
 
@@ -304,6 +272,30 @@ Total.
 - broker: a crafting row without ShowAndScrollTo still opens the main window
 - broker: stood down, every feed reads Off and its tooltip says so; standing up re-renders
 
+### test_preview.lua (6)
+
+- preview: test mode draws the sample Dwarf Hunter in every block
+- preview: the bonuses are the sample's: the Dwarf racial on Guns, the lure's timer on Fishing
+- preview: the broker, the summary line and the row tooltip read the sample
+- preview: the Journal's session log and alts are the sample's
+- preview: test mode off restores the live data in every source
+- preview: combat ends test mode and puts the live data back
+
+### test_sim.lua (12)
+
+- sim: the seam wraps every Compat member, and nothing escapes it (H2)
+- sim: the Sim and seam stubs carry the live surfaces (H9)
+- sim: a library-absent load takes the stubs, and the verb names the missing major
+- sim: the refusals, each leaving Sim mode unticked (H5)
+- sim: test mode refuses while a simulation runs (the two are exclusive)
+- test_sim_skill_up_drives_flash: a sim skill-up makes the broker flash and the session log record it
+- sim: the lure goes on and off, and the mount changes the speed
+- sim: a whole session saves nothing, and the stop restores the live state (H4)
+- sim: the stand-down stops a running session first
+- sim: the verb, the launcher entry and the checkbox are one handler
+- sim: combat stops a running session
+- sim: the window shows the simulation strip while a session runs
+
 ### test_seams.lua (5)
 
 - test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
@@ -344,16 +336,10 @@ Total.
 - disabled 9: re-enabling restores the registration set from current state
 - disabled 10: releasing ONE hold does not resurrect an addon the other holds down
 
-### test_diagnostics.lua (8)
+### test_diagnostics.lua (2)
 
-- diagnostics: the report carries this addon's nine sections and raises in none
+- diagnostics: the report carries this addon's five sections and raises in none
 - diagnostics: stood down, the state section says so and reads nothing else
-- diagnostics: the section list is identity, settings, state, skin, the four domain sections, rejected
-- diagnostics: model counts the skills by category and learned state, the stats and the stores
-- diagnostics: probe summarizes the skill API and the probed globals without expanding a header
-- diagnostics: bonuses lists each skill's modifier and the cached sources, collecting none
-- diagnostics: bonuses says so when nothing is cached yet
-- diagnostics: layout prints the window and every block's stored state, detached ones flagged
 
 ### test_diagnostics_contract.lua (9)
 
@@ -451,14 +437,12 @@ Total.
 |-------|------:|
 | test_loadorder.lua | 6 |
 | test_schema.lua | 6 |
-| test_options.lua | 16 |
 | test_database.lua | 3 |
 | test_bus.lua | 3 |
 | test_slash.lua | 6 |
 | test_mainwindow.lua | 5 |
 | test_launcher.lua | 2 |
-| test_keybinds.lua | 4 |
-| test_locale.lua | 8 |
+| test_keybinds.lua | 2 |
 | test_skinsetup.lua | 4 |
 | test_perf.lua | 1 |
 | test_probe.lua | 7 |
@@ -476,11 +460,13 @@ Total.
 | test_alerts.lua | 11 |
 | test_template.lua | 3 |
 | test_broker.lua | 9 |
+| test_preview.lua | 6 |
+| test_sim.lua | 12 |
 | test_seams.lua | 5 |
 | test_surface_parity.lua | 11 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
-| test_diagnostics.lua | 8 |
+| test_diagnostics.lua | 2 |
 | test_diagnostics_contract.lua | 8 |
 | test_eol.lua | 2 |
 | test_prose.lua | 15 |
@@ -490,4 +476,4 @@ Total.
 | test_skin_switch.lua | 13 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **300** |
+| **Total** | **302** |

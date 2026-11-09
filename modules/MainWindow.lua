@@ -173,10 +173,18 @@ local function buildChrome()
         owner = addonName,
         onEnd = function() NS.ToggleTestMode() end,
     })
-    if frame.strip then
-        frame.strip:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -TITLE_H)
-        frame.strip:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -TITLE_H)
-        frame.strip:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.OVERLAY)
+    -- The simulation's flavor of the same strip (kind "sim"), in the same place: the two modes
+    -- are exclusive, so one marker shows at a time (preview-mode).
+    frame.simStrip = NS.Widgets.TestStrip(frame, {
+        text  = L["Simulation: a sample character plays scripted events."],
+        owner = addonName,
+        kind  = "sim",
+        sim   = NS.Sim,
+    })
+    for _, s in ipairs({ frame.strip, frame.simStrip }) do
+        s:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -TITLE_H)
+        s:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -TITLE_H)
+        s:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.OVERLAY)
     end
     buildSummary()
     buildBody()
@@ -246,7 +254,8 @@ end
 
 local function bodyTop()
     local top = TITLE_H
-    if frame.strip and frame.strip:IsShown() then top = top + (NS.Widgets.TEST_STRIP and NS.Widgets.TEST_STRIP.HEIGHT or 18) end
+    local shown = (frame.strip and frame.strip:IsShown()) or (frame.simStrip and frame.simStrip:IsShown())
+    if shown then top = top + (NS.Widgets.TEST_STRIP and NS.Widgets.TEST_STRIP.HEIGHT or 18) end
     return top
 end
 
@@ -269,10 +278,8 @@ end
 
 --- The summary strip's three parts: "Lv 22 · Dwarf Hunter", the session gains, the next alert.
 function W.SummaryParts(skills)
-    local level = type(UnitLevel) == "function" and UnitLevel("player") or 0
-    local race = type(UnitRace) == "function" and UnitRace("player") or ""
-    local class = type(UnitClass) == "function" and UnitClass("player") or ""
-    local who = L["Lv %d \194\183 %s %s"]:format(level or 0, race or "", class or "")
+    local c = NS.Preview.Character()   -- the sample character in test mode; NS.Compat's reads otherwise
+    local who = L["Lv %d \194\183 %s %s"]:format(c.level or 0, c.race or "", c.class or "")
     local gains = NS.Blocks.SessionGains()
     local gainText = gains > 0 and L["+%d this session"]:format(gains) or ""
     return who, gainText, NS.Blocks.NextAlert(skills) or ""
@@ -308,14 +315,16 @@ local function fit(top, y)
     frame:SetHeight(math.max(MIN_H, math.min(top + y + FOOTER_H + 4, maxH)))
 end
 
-local function renderTitle(test)
-    if frame.strip then
-        frame.strip:SetShown(test)
-        frame.title:SetText(L["Skill Master"])
-    else
-        frame.title:SetText(test and (L["Skill Master"] .. " - " .. L["Test mode"]) or L["Skill Master"])
-    end
+local function renderTitle(test, sim)
+    if frame.strip then frame.strip:SetShown(test) end
+    if frame.simStrip then frame.simStrip:SetShown(sim and not test) end
+    local word = (test and not frame.strip and L["Test mode"])
+        or (sim and not frame.simStrip and L["Simulation"]) or nil
+    frame.title:SetText(word and (L["Skill Master"] .. " - " .. word) or L["Skill Master"])
 end
+
+--- The marker state, part of the layout signature: a strip shown or hidden moves the body.
+local function markerSig(test, sim) return (test and "T" or "") .. (sim and "S" or "") end
 
 --- Redraw the rows' values in place (a bonus tick, a stat or a rank change): no anchor moves.
 function W.RefreshValues()
@@ -330,9 +339,11 @@ end
 function W.Render()
     if not frame then return end
     local t0 = Perf.on and debugprofilestop()
-    renderTitle(NS.IsTestMode())
+    local test, sim = NS.IsTestMode(), NS.IsSimRunning and NS.IsSimRunning() or false
+    renderTitle(test, sim)
     local skills, stats = NS.Blocks.Data()
     local blocks, sig, total = plan(skills, stats)
+    sig = sig .. "|" .. markerSig(test, sim)
     local SO = NS.SecureOverlay
     if sig == lastSig then
         W.RefreshValues()
