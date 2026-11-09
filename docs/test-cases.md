@@ -173,6 +173,19 @@ Total.
 - statdata: another unit's event schedules nothing
 - statdata: the speed ticker runs only while a speed display asks for it
 
+### test_bar.lua (10)
+
+- bar: a bonus past the cap clamps the base, draws to the end and keeps the full text (Review Focus 4)
+- bar: the bonus segment wears the temp or the permanent color
+- bar: an empty cap (an unlearned skill) draws nothing and raises nothing
+- bar: ticks at or beyond the cap are dropped
+- bar: markers keep the end and drop what is past it
+- bar: the timer formats m:ss and h:mm:ss
+- bar: SetTimer shows the time left, ticks it, and SetTimer(nil) disarms the OnUpdate
+- bar: a timer that runs out clears itself
+- bar: the resolved style reads the profile and the skin's tokens
+- bar: the pool hands bars back in order and clears their timers on release
+
 ### test_surface_parity.lua (10)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
@@ -311,6 +324,7 @@ Total.
 | test_helpers.lua | 8 |
 | test_bonuses.lua | 14 |
 | test_statdata.lua | 14 |
+| test_bar.lua | 10 |
 | test_surface_parity.lua | 10 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
@@ -324,4 +338,4 @@ Total.
 | test_skin_switch.lua | 5 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **198** |
+| **Total** | **208** |

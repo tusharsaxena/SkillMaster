@@ -43,6 +43,17 @@ NS.SKIN_OWNER_TOKENS = {
     ["sm.barBg"]     = { default = { 0.19, 0.20, 0.25, 0.9 }, follow = "bar.bg" },
     ["sm.bonusTemp"] = { default = { 0.95, 0.75, 0.20, 1 }, follow = "sem.warn" },
     ["sm.bonusPerm"] = { default = { 0.35, 0.75, 0.43, 1 }, follow = "sem.good" },
+    -- T3.1 the bar's edges, tier ticks, threshold markers, spark and text; the row's timer, icon
+    -- well and the unlearned row's muted line. The category and bonus colors a player picks live
+    -- in the profile (defaults/Profile.lua, bars.colors); these are what every skin draws.
+    ["sm.barBorder"] = { default = { 0.24, 0.22, 0.20, 1 }, follow = "bar.border" },
+    ["sm.tick"]      = { default = { 1, 1, 1, 0.45 }, follow = "chart.marker" },
+    ["sm.marker"]    = { default = { 0.95, 0.70, 0.24, 1 }, follow = "hud.label" },
+    ["sm.spark"]     = { default = { 1, 1, 1, 0.6 }, follow = "hud.text" },
+    ["sm.barText"]   = { default = { 1, 1, 1, 1 }, follow = "hud.text" },
+    ["sm.timer"]     = { default = { 0.50, 0.85, 0.77, 1 }, follow = "sem.info" },
+    ["sm.iconBg"]    = { default = { 0.04, 0.035, 0.03, 1 }, follow = "card.bg" },
+    ["sm.muted"]     = { default = { 0.64, 0.62, 0.59, 1 }, follow = "text.muted" },
 }
 
 local function stored(path)

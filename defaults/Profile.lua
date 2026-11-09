@@ -11,6 +11,32 @@ NS.defaults = {
         -- Drag-only geometry, no control sets it: written by modules/MainWindow.lua alone
         -- (architecture-§5's named-owner rule; docs/ARCHITECTURE.md names the writer).
         window = { point = false },
+        -- T3.1 the bar widget's look (modules/Bar.lua). The colors are the player's picks; with
+        -- `colors.fromSkin` they give way to the skin's owner tokens (core/SkinSetup.lua). The
+        -- defaults are the approved mockup's (docs/superpowers/specs/2026-11-10-skill-master-mockups).
+        bars = {
+            height        = 14,          -- a row's bar, px
+            compactHeight = 11,          -- a detached block's compact bar
+            tooltipHeight = 8,           -- the bar inside a row tooltip
+            miniHeight    = 6,           -- the journal's and the broker tooltip's mini bars
+            rowHeight     = 20,          -- one skill or stat row
+            fontSize      = 11,          -- the bar text, before the skin's HUD scale
+            textAnchor    = "CENTER",    -- "LEFT" | "CENTER" | "RIGHT"
+            spark         = true,        -- a thin line riding the end of the fill
+            ticks         = true,        -- profession tier ticks (75 / 150 / 225)
+            border        = true,        -- a 1 px edge around each bar
+            colorMode     = "category",  -- "category" | "progress" | "likelihood" | "flat"
+            colors = {
+                fromSkin  = false,
+                primary   = { 0.357, 0.608, 0.878, 1 },
+                secondary = { 0.373, 0.702, 0.427, 1 },
+                weapon    = { 0.851, 0.569, 0.247, 1 },
+                other     = { 0.627, 0.549, 0.878, 1 },
+                stats     = { 0.788, 0.627, 0.478, 1 },
+                bonusTemp = { 0.498, 0.847, 0.769, 1 },
+                bonusPerm = { 0.553, 0.722, 1, 1 },
+            },
+        },
         skin = {
             source      = "ka0s",                     -- Ka0s skins, or EllesmereUI
             skin        = NS.DEFAULT_SKIN or "ka0s",  -- the library's per-client default: WoW Forever here

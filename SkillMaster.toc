@@ -87,6 +87,8 @@ defaults\Racials_Forever.lua
 defaults\Stats_Forever.lua
 
 # Modules -- each reaches the others at CALL time
+# Conventional: NS.Bar, the data bar (T3.1); reads NS.Skin, NS.Pool and the profile at CALL time.
+modules\Bar.lua
 # Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
 modules\MainWindow.lua
 # Conventional: `/skm probe`; reads core\ members only at FILE SCOPE (NS.Widgets, NS.Constants).

@@ -31,6 +31,7 @@ position says so beside its TOC line (toc-file-§5).
 | `defaults/Ranks_Forever.lua`, `Trainers_Forever.lua`, `Gathering_Forever.lua`, `Fishing_Forever.lua` | the rank ladders, trainer records, gathering needs and fishing zones (all `verified = false`) | read at call time by Trainers and SkillHelpers; through `NS.L` at load |
 | `defaults/Racials_Forever.lua` | `NS.Racials_Forever.byRace`: the +5 racial weapon skills | read at call time by Bonuses |
 | `defaults/Stats_Forever.lua` | `NS.STAT_DEFS`: the 30 stats, their groups, references and markers | read at call time by StatData |
+| `modules/Bar.lua` | `NS.Bar`: the data bar (base, bonus segment clamped at the end, tier ticks, threshold markers, spark, text, expiry timer), its resolved style and its pool | conventional: reads the skin, the pool and the profile at call time |
 | `modules/MainWindow.lua` | the main window, its toggle, the test strip, the key binding button | publishes `NS.BINDINGS` for the General page |
 | `modules/Probe.lua` | `/skm probe`: the Forever API report as JSON in a copy window | reads only core members at load |
 | `modules/SkillData.lua` | the skills model: scan, classify, synthesize unlearned rows, `SKILLS_UPDATED` / `SKILL_UP`; builds `NS.SkillNameToKey` | after the catalog and the locale, read at load |

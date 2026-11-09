@@ -1,0 +1,376 @@
+local _, NS = ...
+-- modules/Bar.lua — the skill/stat data bar (plan Task 3.1, design §6.2/§6.3): a base fill, a bonus
+-- segment past it in its own color (temp or permanent), tier ticks, threshold markers, a spark,
+-- the "rank +bonus / max" text and an optional expiry timer. Drawn on the skin's tokens
+-- (core/SkinSetup.lua owner tokens, the bar texture through S.BarTexture) and pooled (NS.Pool).
+--
+-- Interface (the main window, the detached blocks, the row tooltip, and later the journal and the
+-- broker tooltip all draw through it):
+--   NS.Bar.Create(parent, styleKey) -> bar           styleKey: "row" | "compact" | "tooltip" | "mini"
+--   bar:SetValues{ value, max, bonus, bonusKind = "temp"|"perm", ticks = { n... },
+--                  markers = { { at, label } }, text, color }
+--   bar:SetTimer(expires|nil)                         expires: a GetTime() second
+--   bar:ApplyStyle(style)                             a NS.Bar.ResolveStyle(styleKey) table
+--   NS.Bar.NewPool() / Acquire(pool, parent, styleKey) / ReleaseAll(pool)
+--   NS.Bar.Compute(values) -> geom, NS.Bar.FormatTimer(seconds), NS.Bar.Color(token)
+-- `bar.geom` is the last Compute: fill and bonus as fractions of the width, ticks and markers as
+-- fractions; read by the tests and by the tooltip, written by SetValues only.
+
+NS.Bar = {}
+local Bar = NS.Bar
+local floor, max, min = math.floor, math.max, math.min
+
+Bar.TIMER_TICK = 0.2   -- seconds between timer redraws while one runs (the only per-frame work)
+Bar.TIMER_W    = 38    -- the timer column a row reserves right of its bar
+local EDGE = 1         -- the border's width, px
+
+-- ---------------------------------------------------------------------------------------------
+-- Colors and the resolved style
+-- ---------------------------------------------------------------------------------------------
+
+--- A token's color as { r, g, b, a }: the skin's, else the owner token's own default (a degraded
+--- load, no LibKa0s, still draws).
+function Bar.Color(token)
+    local c = NS.Skin.Token and NS.Skin.Token(token)
+    if type(c) == "table" then return c end
+    local own = NS.SKIN_OWNER_TOKENS and NS.SKIN_OWNER_TOKENS[token]
+    return own and own.default or nil
+end
+
+local function profileBars()
+    return (NS.db and NS.db.profile.bars) or NS.defaults.profile.bars
+end
+
+--- A player color (bars.colors[key]) unless the colors follow the skin, then `token`.
+function Bar.PlayerColor(key, token)
+    local colors = profileBars().colors
+    if colors.fromSkin or type(colors[key]) ~= "table" then return Bar.Color(token) end
+    return colors[key]
+end
+
+local HEIGHT_KEY = { row = "height", compact = "compactHeight", tooltip = "tooltipHeight", mini = "miniHeight" }
+
+--- The style one kind of bar draws with: the profile's sizes and switches, the skin's colors.
+function Bar.ResolveStyle(styleKey)
+    local p = profileBars()
+    styleKey = HEIGHT_KEY[styleKey] and styleKey or "row"
+    return {
+        key = styleKey,
+        height = p[HEIGHT_KEY[styleKey]] or p.height,
+        fill = Bar.Color("sm.barFill"), bg = Bar.Color("sm.barBg"), border = p.border and Bar.Color("sm.barBorder"),
+        tick = Bar.Color("sm.tick"), marker = Bar.Color("sm.marker"), spark = p.spark and Bar.Color("sm.spark"),
+        text = Bar.Color("sm.barText"), timer = Bar.Color("sm.timer"),
+        bonusTemp = Bar.PlayerColor("bonusTemp", "sm.bonusTemp"),
+        bonusPerm = Bar.PlayerColor("bonusPerm", "sm.bonusPerm"),
+        fontSize = p.fontSize, textAnchor = p.textAnchor or "CENTER",
+        showText = styleKey ~= "mini" and styleKey ~= "tooltip", showTicks = p.ticks ~= false,
+    }
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- The geometry, pure
+-- ---------------------------------------------------------------------------------------------
+
+local function clamp01(x)
+    if x < 0 then return 0 end
+    if x > 1 then return 1 end
+    return x
+end
+
+local function fractions(list, cap, inclusive)
+    local out = {}
+    for _, t in ipairs(list or {}) do
+        if t > 0 and (t < cap or (inclusive and t == cap)) then out[#out + 1] = t / cap end
+    end
+    return out
+end
+
+local function markerFractions(list, cap)
+    local out = {}
+    for _, m in ipairs(list or {}) do
+        local at = tonumber(m.at)
+        if at and at >= 0 and at <= cap then out[#out + 1] = { at = at / cap, label = m.label } end
+    end
+    return out
+end
+
+--- The default text: "rank / max", or "rank +bonus / max" (a negative bonus shows its sign).
+function Bar.Text(value, bonus, cap)
+    if bonus and bonus > 0 then return ("%d +%d / %d"):format(value, bonus, cap) end
+    if bonus and bonus < 0 then return ("%d %d / %d"):format(value, bonus, cap) end
+    return ("%d / %d"):format(value, cap)
+end
+
+--- The bar's geometry from its values. The base clamps to [0, 1]; the bonus reaches at most the
+--- end (Review Focus 4); the text keeps the full numbers. Ticks strictly under the cap, markers
+--- up to and including it.
+function Bar.Compute(v)
+    local cap = tonumber(v.max) or 0
+    local value = tonumber(v.value) or 0
+    local bonus = tonumber(v.bonus) or 0
+    local g = { fill = 0, bonus = 0, ticks = {}, markers = {} }
+    if cap > 0 then
+        g.fill = clamp01(value / cap)
+        g.bonus = max(0, clamp01((value + max(bonus, 0)) / cap) - g.fill)
+        g.ticks = fractions(v.ticks, cap, false)
+        g.markers = markerFractions(v.markers, cap)
+    end
+    g.text = v.text or Bar.Text(value, bonus, cap)
+    return g
+end
+
+--- Seconds as m:ss, or h:mm:ss from an hour; never negative.
+function Bar.FormatTimer(seconds)
+    local s = max(0, floor((tonumber(seconds) or 0) + 0.5))
+    local h, m = floor(s / 3600), floor(s % 3600 / 60)
+    if h > 0 then return ("%d:%02d:%02d"):format(h, m, s % 60) end
+    return ("%d:%02d"):format(m, s % 60)
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- Painting
+-- ---------------------------------------------------------------------------------------------
+
+local function rgba(c) return c[1], c[2], c[3], c[4] or 1 end
+
+--- A data fill: the skin's bar texture tinted (S.BarTexture, recorded so a skin switch follows),
+--- or a flat color where the skin library is absent.
+local function paintFill(tex, c)
+    if not c then return end
+    if NS.Skin.IsEnabled() then
+        NS.Skin.BarTexture(tex, rgba(c))
+    else
+        tex:SetColorTexture(rgba(c))
+    end
+end
+
+--- Four 1 px edge textures on `frame`, answered as a list.
+function Bar.MakeEdges(frame, layer)
+    local edges = {}
+    for i, side in ipairs({ "TOP", "BOTTOM", "LEFT", "RIGHT" }) do
+        local t = frame:CreateTexture(nil, layer or "BORDER")
+        if side == "TOP" or side == "BOTTOM" then
+            t:SetPoint(side .. "LEFT", frame, side .. "LEFT", 0, 0)
+            t:SetPoint(side .. "RIGHT", frame, side .. "RIGHT", 0, 0)
+            t:SetHeight(EDGE)
+        else
+            t:SetPoint("TOP" .. side, frame, "TOP" .. side, 0, 0)
+            t:SetPoint("BOTTOM" .. side, frame, "BOTTOM" .. side, 0, 0)
+            t:SetWidth(EDGE)
+        end
+        edges[i] = t
+    end
+    return edges
+end
+
+--- Color the edges, or hide them for a nil color.
+function Bar.PaintEdges(edges, c)
+    for _, t in ipairs(edges) do
+        if c then
+            t:SetColorTexture(rgba(c))
+            t:Show()
+        else
+            t:Hide()
+        end
+    end
+end
+
+local function textureList(bar, field, n, layer)
+    local list = bar[field]
+    while #list < n do list[#list + 1] = bar:CreateTexture(nil, layer) end
+    return list
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- The widget
+-- ---------------------------------------------------------------------------------------------
+
+local Methods = {}
+
+--- Place the fill, the bonus, the spark, the ticks and the markers from `geom` on the current width.
+--- Cheap: anchors and widths only (standalone-windows, Resizing).
+function Methods:Layout()
+    local g, w = self.geom, self:GetWidth()
+    w = (type(w) == "number" and w or 0) - 2 * EDGE
+    local fillW, bonusW = max(0, w * g.fill), max(0, w * g.bonus)
+    self.fill:SetWidth(max(fillW, 0.01))
+    self.fill:SetShown(fillW >= 0.5)
+    self.bonus:ClearAllPoints()
+    self.bonus:SetPoint("TOPLEFT", self, "TOPLEFT", EDGE + fillW, -EDGE)
+    self.bonus:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", EDGE + fillW, EDGE)
+    self.bonus:SetWidth(max(bonusW, 0.01))
+    self.bonus:SetShown(bonusW >= 0.5)
+    self.spark:ClearAllPoints()
+    self.spark:SetPoint("TOP", self, "TOPLEFT", EDGE + fillW, 0)
+    self.spark:SetPoint("BOTTOM", self, "BOTTOMLEFT", EDGE + fillW, 0)
+    self.spark:SetShown(self.style.spark ~= nil and fillW >= 1 and g.fill < 1)
+    self:LayoutMarks(self.tickTextures, g.ticks, w, function(t) return t end)
+    self:LayoutMarks(self.markerTextures, g.markers, w, function(m) return m.at end)
+end
+
+function Methods:LayoutMarks(list, marks, w, at)
+    for i, t in ipairs(list) do
+        local m = marks[i]
+        if m then
+            local x = EDGE + min(w * at(m), max(w - 1, 0))
+            t:ClearAllPoints()
+            t:SetPoint("TOPLEFT", self, "TOPLEFT", x, 0)
+            t:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", x, 0)
+        end
+        t:SetShown(m ~= nil)
+    end
+end
+
+function Methods:PaintMarks()
+    local g, s = self.geom, self.style
+    local ticks = textureList(self, "tickTextures", #g.ticks, "ARTWORK")
+    for i, t in ipairs(ticks) do
+        if g.ticks[i] and s.tick then t:SetColorTexture(rgba(s.tick)) end
+        t:SetWidth(1)
+    end
+    if not s.showTicks then for i = #g.ticks, 1, -1 do g.ticks[i] = nil end end
+    local marks = textureList(self, "markerTextures", #g.markers, "OVERLAY")
+    for i, t in ipairs(marks) do
+        if g.markers[i] and s.marker then t:SetColorTexture(rgba(s.marker)) end
+        t:SetWidth(2)
+    end
+end
+
+--- Set the numbers. Recomputes the geometry, repaints the fill and bonus colors, redraws.
+function Methods:SetValues(v)
+    self.values = v
+    self.geom = Bar.Compute(v)
+    local s = self.style
+    local fillColor = v.color or s.fill
+    if fillColor ~= self.fillColor then
+        self.fillColor = fillColor
+        paintFill(self.fill, fillColor)
+    end
+    local bonusColor = v.bonusKind == "temp" and s.bonusTemp or s.bonusPerm
+    if bonusColor ~= self.bonusColor then
+        self.bonusColor = bonusColor
+        paintFill(self.bonus, bonusColor)
+    end
+    self.text:SetText(self.geom.text)
+    self.text:SetShown(s.showText)
+    self:PaintMarks()
+    self:Layout()
+end
+
+local function timerTick(self, elapsed)
+    self.__acc = (self.__acc or 0) + (elapsed or 0)
+    if self.__acc < Bar.TIMER_TICK then return end
+    self.__acc = 0
+    self:RedrawTimer()
+end
+
+function Methods:RedrawTimer()
+    local left = self.expires and self.expires - GetTime()
+    if not left or left <= 0 then
+        self:SetTimer(nil)
+        return
+    end
+    self.timer:SetText(Bar.FormatTimer(left))
+end
+
+--- Show the time left until `expires` (a GetTime() second) beside the bar, or clear it with nil.
+--- The OnUpdate runs only while a timer does, and is disarmed when it is cleared or runs out.
+function Methods:SetTimer(expires)
+    self.expires = tonumber(expires)
+    if not self.expires or self.expires <= GetTime() then
+        self.expires = nil
+        self.timer:SetText("")
+        self.timer:Hide()
+        self:SetScript("OnUpdate", nil)
+        return
+    end
+    self.timer:Show()
+    self.__acc = 0
+    self:RedrawTimer()
+    self:SetScript("OnUpdate", timerTick)
+end
+
+local function placeText(bar, anchor)
+    bar.text:ClearAllPoints()
+    local x = anchor == "LEFT" and 4 or (anchor == "RIGHT" and -4 or 0)
+    bar.text:SetPoint(anchor, bar, anchor, x, 0)
+    bar.text:SetJustifyH(anchor)
+end
+
+local function paintText(bar, s)
+    local S = NS.Skin
+    local size = S.HudFontSize(s.fontSize or 11)
+    if S.IsEnabled() then S.HudFont(bar.text, { size = size, flags = S.FontFlags(S.FROM_SKIN) }) end
+    if s.text then bar.text:SetTextColor(rgba(s.text)) end
+    if s.timer then bar.timer:SetTextColor(rgba(s.timer)) end
+end
+
+--- Apply a resolved style (Bar.ResolveStyle, or a partial table over the current one).
+function Methods:ApplyStyle(style)
+    local s = {}
+    for k, v in pairs(self.style or {}) do s[k] = v end
+    for k, v in pairs(style or {}) do s[k] = v end
+    self.style = s
+    self:SetHeight(s.height or 14)
+    if s.bg then self.bg:SetColorTexture(rgba(s.bg)) end
+    Bar.PaintEdges(self.edges, s.border)
+    if s.spark then self.spark:SetColorTexture(rgba(s.spark)) end
+    placeText(self, s.textAnchor or "CENTER")
+    paintText(self, s)
+    self.fillColor, self.bonusColor = nil, nil
+    if self.values then self:SetValues(self.values) end
+end
+
+local function buildRegions(bar)
+    bar.bg = bar:CreateTexture(nil, "BACKGROUND")
+    bar.bg:SetAllPoints(bar)
+    bar.fill = bar:CreateTexture(nil, "ARTWORK", nil, 1)
+    bar.fill:SetPoint("TOPLEFT", bar, "TOPLEFT", EDGE, -EDGE)
+    bar.fill:SetPoint("BOTTOMLEFT", bar, "BOTTOMLEFT", EDGE, EDGE)
+    bar.bonus = bar:CreateTexture(nil, "ARTWORK", nil, 2)
+    bar.spark = bar:CreateTexture(nil, "OVERLAY")
+    bar.spark:SetWidth(1)
+    bar.edges = Bar.MakeEdges(bar, "OVERLAY")
+    bar.tickTextures, bar.markerTextures = {}, {}
+    bar.text = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    bar.text:SetWordWrap(false)
+    bar.timer = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    bar.timer:SetPoint("LEFT", bar, "RIGHT", 4, 0)
+    bar.timer:SetWidth(Bar.TIMER_W - 4)
+    bar.timer:SetJustifyH("LEFT")
+    bar.timer:Hide()
+end
+
+--- One bar, parented to `parent`, in the style `styleKey` resolves to.
+function Bar.Create(parent, styleKey)
+    local bar = CreateFrame("Frame", nil, parent)
+    for k, fn in pairs(Methods) do bar[k] = fn end
+    buildRegions(bar)
+    bar.geom = Bar.Compute({ value = 0, max = 0 })
+    bar:ApplyStyle(Bar.ResolveStyle(styleKey))
+    bar:SetScript("OnSizeChanged", function(self) self:Layout() end)
+    return bar
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- The pool (LibKa0s-Pool-1.0, ordered: position n gets its bar back after a release)
+-- ---------------------------------------------------------------------------------------------
+
+function Bar.NewPool() return NS.Pool.New() end
+
+--- A bar from `pool`, (re)parented to `parent` and restyled to `styleKey` (a skin or profile change
+--- reaches every bar on the next render).
+function Bar.Acquire(pool, parent, styleKey)
+    local bar = NS.Pool.Acquire(pool, function() return Bar.Create(parent, styleKey) end)
+    bar:SetParent(parent)
+    bar:ApplyStyle(Bar.ResolveStyle(styleKey))
+    bar:Show()
+    return bar
+end
+
+local function park(bar)
+    bar:SetTimer(nil)
+    bar:ClearAllPoints()
+end
+
+function Bar.ReleaseAll(pool) NS.Pool.ReleaseAll(pool, park) end
