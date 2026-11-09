@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Journal window</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0} button{font:inherit;cursor:pointer}</style>
+</helmet>
+<div style="width: 1000px; height: 640px; box-sizing: border-box; padding: 20px; background: #0f0d0b; font-family: 'Fira Sans', sans-serif; font-weight: 500; font-size: 12px; color: #FFFFFF">
+<div style="width: 960px; height: 600px; display: flex; flex-direction: column; background: linear-gradient(180deg, #2e251c, #18120d); border: 1px solid #3a3530">
+<div style="height: 28px; background: #050505; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13.5px; position: relative">Skill Master · Journal
+<button aria-label="Close" style="position: absolute; right: 6px; top: 5px; width: 18px; height: 18px; background: none; border: 0; color: #FFFFFF; padding: 0">✕</button></div>
+<div style="display: flex; gap: 0; padding: 0 12px; border-bottom: 1px solid #48433d">
+<button onClick="{{showLog}}" style="height: 30px; padding: 0 16px; background: {{logBg}}; border: 0; border-bottom: 2px solid {{logLine}}; color: {{logText}}">Session Log</button>
+<button onClick="{{showAlts}}" style="height: 30px; padding: 0 16px; background: {{altBg}}; border: 0; border-bottom: 2px solid {{altLine}}; color: {{altText}}">Alts</button>
+</div>
+
+<sc-if value="{{isLog}}" hint-placeholder-val="{{true}}">
+<div style="flex-grow: 1; display: flex; gap: 14px; padding: 12px; min-height: 0">
+<div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0">
+<div style="display: flex; padding: 0 8px 4px; font-size: 10.5px; color: #c9a07a; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600"><span style="width: 70px">Time</span><span style="flex-grow: 1">Skill</span><span style="width: 90px; text-align: right">Change</span><span style="width: 90px; text-align: right">Zone</span></div>
+<sc-for list="{{log}}" as="e" hint-placeholder-count="10">
+<div style="display: flex; padding: 4px 8px; background: {{e.bg}}; font-size: 11.5px"><span style="width: 70px; color: #A39E97">{{e.t}}</span><span style="flex-grow: 1; color: {{e.c}}">{{e.s}}</span><span style="width: 90px; text-align: right">{{e.d}}</span><span style="width: 90px; text-align: right; color: #A39E97">{{e.z}}</span></div>
+</sc-for>
+</div>
+<div style="width: 260px; display: flex; flex-direction: column; gap: 10px">
+<div style="background: rgba(0,0,0,0.3); border: 1px solid #2e2a26; padding: 10px 12px">
+<div style="font-size: 10.5px; font-weight: 600; color: #c9a07a; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px">This session · 1 h 52 m</div>
+<div style="font-size: 26px; font-weight: 700; color: #F2B33D">+14</div>
+<div style="font-size: 11.5px; color: #A39E97">7.5 skill-ups / hour</div>
+</div>
+<div style="background: rgba(0,0,0,0.3); border: 1px solid #2e2a26; padding: 10px 12px">
+<div style="font-size: 10.5px; font-weight: 600; color: #c9a07a; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px">ETA to cap</div>
+<sc-for list="{{eta}}" as="x" hint-placeholder-count="4"><div style="display: flex; font-size: 11.5px; padding: 2px 0"><span style="flex-grow: 1">{{x.n}}</span><span style="color: #D8D3CB">{{x.v}}</span></div></sc-for>
+</div>
+<div style="display: flex; gap: 8px"><button style="flex-grow: 1; height: 26px; background: #1f1d1b; border: 1px solid #48433d; color: #FFFFFF">New session</button><button style="flex-grow: 1; height: 26px; background: #1f1d1b; border: 1px solid #48433d; color: #FFFFFF">Clear log</button></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isAlts}}" hint-placeholder-val="{{false}}">
+<div style="flex-grow: 1; padding: 12px; overflow: auto">
+<div style="display: flex; gap: 8px; margin-bottom: 10px; font-size: 11px">
+<span style="padding: 3px 10px; background: rgba(201,160,122,0.16); border: 1px solid #c9a07a">Professions</span>
+<span style="padding: 3px 10px; border: 1px solid #48433d; color: #A39E97">Weapons</span>
+<span style="padding: 3px 10px; border: 1px solid #48433d; color: #A39E97">Other</span>
+</div>
+<div style="display: grid; grid-template-columns: 170px repeat(5, minmax(0, 1fr)); gap: 0">
+<div style="padding: 6px 8px; font-size: 10.5px; color: #c9a07a; font-weight: 600; text-transform: uppercase">Character</div>
+<sc-for list="{{cols}}" as="c" hint-placeholder-count="5"><div style="padding: 6px 8px; font-size: 10.5px; color: #c9a07a; font-weight: 600; text-transform: uppercase">{{c}}</div></sc-for>
+<sc-for list="{{alts}}" as="a" hint-placeholder-count="4">
+<div style="padding: 7px 8px; border-top: 1px solid #2e2a26"><div style="color: {{a.cc}}; font-weight: 600">{{a.n}}</div><div style="font-size: 10.5px; color: #A39E97">{{a.sub}}</div></div>
+<sc-for list="{{a.cells}}" as="v" hint-placeholder-count="5">
+<div style="padding: 7px 8px; border-top: 1px solid #2e2a26">
+<sc-if value="{{v.has}}" hint-placeholder-val="{{true}}">
+<div style="font-size: 11px">{{v.t}}</div>
+<div style="height: 5px; margin-top: 3px; background: #0a0806; border: 1px solid #3e3934; position: relative"><div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{v.w}}%; background: #5b9be0"></div></div>
+</sc-if>
+<sc-if value="{{v.none}}" hint-placeholder-val="{{false}}"><span style="color: #7A756E">—</span></sc-if>
+</div>
+</sc-for>
+</sc-for>
+</div>
+<div style="font-size: 10.5px; color: #7A756E; margin-top: 10px">Snapshots update on login, logout and every skill change. Right-click a character to forget it.</div>
+</div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1000,"height":640}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { tab: 'log' }; }
+  renderVals() {
+    const isLog = this.state.tab === 'log';
+    const on = (b) => b ? { bg: 'rgba(0,0,0,0.4)', line: '#c9a07a', text: '#FFFFFF' } : { bg: 'transparent', line: 'transparent', text: '#A39E97' };
+    const L = on(isLog), A = on(!isLog);
+    const raw = [['21:42', 'Bows', '80 → 81', 'Loch Modan', '#d9913f'], ['21:39', 'Fishing', '106 → 107', 'Loch Modan', '#5fb36d'], ['21:31', 'Skinning', '121 → 122', 'Loch Modan', '#5b9be0'], ['21:30', 'Two-Handed Axes', '106 → 107', 'Loch Modan', '#d9913f'], ['21:18', 'Leatherworking', '145 → 146', 'Ironforge', '#5b9be0'], ['21:16', 'Leatherworking', '144 → 145', 'Ironforge', '#5b9be0'], ['21:12', 'Fishing', '105 → 106', 'Ironforge', '#5fb36d'], ['20:58', 'Defense', '99 → 100', 'Wetlands', '#a08ce0'], ['20:41', 'Cooking', '132 → 133', 'Wetlands', '#5fb36d'], ['20:22', 'Skinning', '120 → 121', 'Wetlands', '#5b9be0'], ['20:10', 'Fishing', '104 → 105', 'Wetlands', '#5fb36d']];
+    const cell = (t, w) => t ? { has: true, none: false, t, w } : { has: false, none: true };
+    return {
+      isLog, isAlts: !isLog,
+      showLog: () => this.setState({ tab: 'log' }), showAlts: () => this.setState({ tab: 'alts' }),
+      logBg: L.bg, logLine: L.line, logText: L.text, altBg: A.bg, altLine: A.line, altText: A.text,
+      log: raw.map((e, i) => ({ t: e[0], s: e[1], d: e[2], z: e[3], c: e[4], bg: i % 2 ? 'rgba(255,255,255,0.04)' : 'transparent' })),
+      eta: [{ n: 'Leatherworking', v: '~30 m' }, { n: 'Skinning', v: '~5 h' }, { n: 'Fishing', v: '~14 h' }, { n: 'Bows', v: '~3 h (combat)' }],
+      cols: ['Leatherworking', 'Skinning', 'Mining', 'Cooking', 'Fishing'],
+      alts: [
+        { n: 'Ember Ironsong', sub: 'Lv 22 Dwarf Hunter · this char', cc: '#ABD473', cells: [cell('146/150', 97), cell('122/150', 81), cell(), cell('133/150', 89), cell('107/150', 71)] },
+        { n: 'Quill Ashbrook', sub: 'Lv 41 Human Warrior', cc: '#C79C6E', cells: [cell(), cell(), cell('212/225', 94), cell('201/225', 89), cell('150/225', 67)] },
+        { n: 'Tamsin Reedwhistle', sub: 'Lv 17 Gnome Mage', cc: '#69CCF0', cells: [cell(), cell(), cell(), cell('62/75', 83), cell('38/75', 51)] },
+        { n: 'Brannoch Deepvale', sub: 'Lv 60 Dwarf Paladin', cc: '#F58CBA', cells: [cell(), cell(), cell('300/300', 100), cell('300/300', 100), cell('265/300', 88)] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

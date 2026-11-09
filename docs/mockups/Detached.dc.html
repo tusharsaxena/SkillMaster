@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Detached blocks and alerts</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1180px; height: 720px; position: relative; overflow: hidden; font-family: 'Fira Sans', sans-serif; font-weight: 500; font-size: 12px; color: #FFFFFF; background: radial-gradient(ellipse at 70% 30%, #3d4a3a 0%, #232b22 45%, #121510 100%)">
+
+<div style="position: absolute; left: 24px; bottom: 18px; font-size: 11px; color: rgba(255,255,255,0.55)">[ game world: Loch Modan ]</div>
+
+<div style="position: absolute; left: 24px; top: 24px; width: 300px; background: rgba(24,18,13,0.82); border: 1px solid #3a3530">
+<div style="height: 22px; background: #050505; display: flex; align-items: center; padding: 0 8px; gap: 6px; font-size: 11px; font-weight: 600; color: #c9a07a; letter-spacing: 0.6px; text-transform: uppercase">
+<span style="flex-grow: 1">Weapon Skills</span>
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A39E97" stroke-width="2" role="img" aria-label="Dock block back into main window"><path d="M10 20H4v-6M4 20l8-8M6 10V4h14v14h-6"></path></svg>
+</div>
+<sc-for list="{{weapons}}" as="r" hint-placeholder-count="6">
+<div style="height: 18px; display: flex; align-items: center; gap: 6px; padding: 0 8px">
+<div style="width: 96px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: {{r.nameColor}}">{{r.name}}</div>
+<div style="position: relative; flex-grow: 1; height: 11px; background: #0a0806; border: 1px solid #3e3934">
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{r.w}}%; background: linear-gradient(180deg, #d9913f, #8a5420)"></div>
+<div style="position: absolute; top: 0; bottom: 0; left: {{r.w}}%; width: {{r.bw}}%; background: repeating-linear-gradient(135deg, #8db8ff 0 3px, #3a5f9e 3px 6px)"></div>
+</div>
+<div style="width: 54px; text-align: right; font-size: 10.5px; color: #D8D3CB">{{r.txt}}</div>
+</div>
+</sc-for>
+<div style="padding: 4px 8px 6px; font-size: 10px; color: #A39E97">Compact preset · 18 px rows · only equipped + below-cap shown</div>
+</div>
+
+<div style="position: absolute; right: 24px; top: 24px; width: 230px; background: rgba(24,18,13,0.82); border: 1px solid #3a3530">
+<div style="height: 22px; background: #050505; display: flex; align-items: center; padding: 0 8px; font-size: 11px; font-weight: 600; color: #c9a07a; letter-spacing: 0.6px; text-transform: uppercase">Stats · Utility (text mode)</div>
+<sc-for list="{{util}}" as="s" hint-placeholder-count="5">
+<div style="display: flex; padding: 3px 8px; font-size: 11.5px"><span style="flex-grow: 1; color: #A39E97">{{s.k}}</span><span style="color: {{s.c}}; font-weight: 600">{{s.v}}</span></div>
+</sc-for>
+<div style="height: 4px"></div>
+</div>
+
+<div style="position: absolute; right: 24px; top: 210px; width: 230px; background: rgba(24,18,13,0.82); border: 1px solid #3a3530">
+<div style="height: 22px; background: #050505; display: flex; align-items: center; padding: 0 8px; font-size: 11px; font-weight: 600; color: #c9a07a; letter-spacing: 0.6px; text-transform: uppercase">Stats · Defense (bars + text)</div>
+<sc-for list="{{def}}" as="s" hint-placeholder-count="5">
+<div style="padding: 3px 8px">
+<div style="display: flex; font-size: 11px"><span style="flex-grow: 1; color: #A39E97">{{s.k}}</span><span style="font-weight: 600">{{s.v}}</span></div>
+<div style="position: relative; height: 6px; margin-top: 2px; background: #0a0806; border: 1px solid #3e3934">
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{s.w}}%; background: #c9a07a"></div>
+<div style="position: absolute; top: -3px; bottom: -3px; left: {{s.m}}%; width: 2px; background: #F2B33D"></div>
+</div>
+</div>
+</sc-for>
+<div style="padding: 3px 8px 6px; font-size: 10px; color: #A39E97">▏gold = threshold (hover for label)</div>
+</div>
+
+<div style="position: absolute; left: 50%; top: 150px; transform: translateX(-50%); width: 420px; background: #0e0d0b; border: 1px solid #c9a07a; box-shadow: 0 6px 24px rgba(0,0,0,0.7); display: flex; gap: 12px; padding: 12px 14px; align-items: center">
+<div style="width: 36px; height: 36px; background: #1f1d1b; border: 1px solid #F2B33D; color: #F2B33D; font-weight: 700; display: flex; align-items: center; justify-content: center">LW</div>
+<div style="flex-grow: 1">
+<div style="font-weight: 600; font-size: 13px; color: #F2B33D">Leatherworking 150 / 150 · Journeyman cap</div>
+<div style="font-size: 11.5px; color: #D8D3CB; margin-top: 2px">Train Expert (Lv 20): Fimble Finespindle, Ironforge (40, 32)</div>
+<div style="font-size: 11px; color: #c9a07a; margin-top: 4px">◎ Click to set waypoint · right-click to dismiss</div>
+</div>
+</div>
+
+<div style="position: absolute; left: 50%; top: 262px; transform: translateX(-50%); width: 420px; background: #0e0d0b; border: 1px solid #48433d; display: flex; gap: 12px; padding: 10px 14px; align-items: center; opacity: 0.92">
+<div style="width: 28px; height: 28px; background: #1f1d1b; border: 1px solid #d9913f; color: #d9913f; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center">DG</div>
+<div style="flex-grow: 1; font-size: 11.5px"><span style="color: #d9913f; font-weight: 600">Daggers 74 / 110</span><span style="color: #A39E97"> is 36 below your cap. Glancing blows and misses are more likely.</span></div>
+</div>
+
+<div style="position: absolute; left: 50%; top: 420px; transform: translateX(-50%); font-size: 22px; font-weight: 700; color: #5b9be0; text-shadow: 0 2px 4px #000">▲ Skinning 123</div>
+<div style="position: absolute; left: 50%; top: 452px; transform: translateX(-50%); font-size: 11px; color: rgba(255,255,255,0.6)">optional skill-up splash (off by default)</div>
+
+<div style="position: absolute; left: 24px; top: 440px; width: 300px; background: rgba(24,18,13,0.82); border: 1px solid #3a3530; padding: 8px">
+<div style="font-size: 11px; font-weight: 600; color: #c9a07a; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 6px">Gathering helper (Skinning row, hover)</div>
+<div style="font-size: 11.5px; color: #D8D3CB">Skinning 122 → mobs up to <span style="color: #FFFFFF; font-weight: 600">Lv 24</span></div>
+<div style="font-size: 11.5px; color: #D8D3CB">Next breakpoint: 125 → Lv 25</div>
+<div style="font-size: 11.5px; color: #D8D3CB; margin-top: 4px">Fishing in Loch Modan needs <span style="color: #5fb36d">~75</span> (you: 107 +25) <span style="color: #5fb36d">✓ no fish escape</span></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1180,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const w = (n, r, m, b) => ({ name: n, w: (r / m * 100).toFixed(1), bw: b ? Math.min(100 - r / m * 100, b / m * 100).toFixed(1) : 0, txt: r + (b ? ' +' + b : '') + '/' + m, nameColor: n.indexOf('▸') === 0 ? '#F2B33D' : '#FFFFFF' });
+    return {
+      weapons: [w('▸ Guns', 105, 110, 5), w('Bows', 80, 110), w('Daggers', 74, 110), w('Two-Handed Axes', 107, 110), w('Unarmed', 4, 110), w('Defense', 100, 110)],
+      util: [{ k: 'Run speed', v: '100%', c: '#FFFFFF' }, { k: 'Mounted', v: '—', c: '#7A756E' }, { k: 'Swim speed', v: '67%', c: '#FFFFFF' }, { k: 'Durability', v: '82%', c: '#d9913f' }, { k: 'Ranged speed', v: '2.65 s', c: '#FFFFFF' }],
+      def: [{ k: 'Armor (31.8% mitigation)', v: '1104', w: 42, m: 100 }, { k: 'Defense', v: '100 / 110', w: 23, m: 100 }, { k: 'Dodge', v: '8.31%', w: 28, m: 100 }, { k: 'Nature resist', v: '10', w: 3, m: 100 }]
+    };
+  }
+}
+</script>
+</body>
+</html>

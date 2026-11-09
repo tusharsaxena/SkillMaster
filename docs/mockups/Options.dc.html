@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Options panel</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0} button,select,input{font:inherit}</style>
+</helmet>
+<div style="width: 1180px; height: 760px; box-sizing: border-box; padding: 20px; background: #0f0d0b; font-family: 'Fira Sans', sans-serif; font-weight: 500; font-size: 12px; color: #FFFFFF">
+<div style="width: 1140px; height: 720px; display: flex; flex-direction: column; background: linear-gradient(180deg, #2e251c, #18120d); border: 1px solid #3a3530">
+<div style="height: 28px; background: #050505; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13.5px">Ka0s Skill Master · Settings</div>
+<div style="flex-grow: 1; display: flex; min-height: 0">
+<nav style="width: 180px; background: rgba(0,0,0,0.3); padding: 8px 0">
+<sc-for list="{{pages}}" as="p" hint-placeholder-count="10">
+<button onClick="{{p.pick}}" style="width: 100%; height: 28px; text-align: left; padding: 0 14px; border: 0; border-left: 3px solid {{p.bar}}; background: {{p.bg}}; color: {{p.color}}; cursor: pointer">{{p.n}}</button>
+</sc-for>
+</nav>
+<div style="flex-grow: 1; padding: 14px 18px; overflow: auto; min-width: 0">
+<div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px"><div style="font-size: 16px; font-weight: 600; color: #F2B33D">{{page}}</div><div style="font-size: 11px; color: #A39E97">Every value can follow the skin (↺) or be set here</div></div>
+
+<div style="background: rgba(0,0,0,0.3); border: 1px solid #2e2a26; padding: 10px 12px; margin-bottom: 12px">
+<div style="font-size: 10.5px; font-weight: 600; color: #c9a07a; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px">Live preview</div>
+<div style="display: flex; align-items: center; gap: 8px; height: 26px">
+<span style="width: 110px">Fishing</span>
+<div style="position: relative; width: 380px; height: {{h}}px; background: #0a0806; border: {{bw}}px solid #3e3934">
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: 71.3%; background: linear-gradient(180deg, #5fb36d, #2f6e3a)"></div>
+<div style="position: absolute; left: 71.3%; top: 0; bottom: 0; width: 16.7%; background: repeating-linear-gradient(135deg, #7fd8c4 0 4px, #2f7a6a 4px 8px)"></div>
+<div style="position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: rgba(255,255,255,0.45)"></div>
+<div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; text-shadow: 0 1px 2px #000">107 <span style="color: #7fd8c4; margin: 0 4px">+25</span> / 150</div>
+</div>
+<span style="color: #7fd8c4; font-size: 10.5px">4:12</span>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+<div style="background: rgba(0,0,0,0.3); border: 1px solid #2e2a26; padding: 10px 12px">
+<div style="font-size: 10.5px; font-weight: 600; color: #c9a07a; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px">{{g.t}}</div>
+<sc-for list="{{g.rows}}" as="r" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 8px; height: 26px">
+<label style="width: 130px; color: #D8D3CB; font-size: 11.5px" for="{{r.id}}">{{r.l}}</label>
+<sc-if value="{{r.isSel}}" hint-placeholder-val="{{true}}"><select id="{{r.id}}" style="flex-grow: 1; height: 22px; background: #0a0908; border: 1px solid #3e3934; color: #FFFFFF"><option>{{r.v}}</option></select></sc-if>
+<sc-if value="{{r.isColor}}" hint-placeholder-val="{{false}}"><span style="width: 18px; height: 18px; background: {{r.v}}; border: 1px solid #48433d"></span><input id="{{r.id}}" value="{{r.v}}" style="flex-grow: 1; height: 22px; box-sizing: border-box; background: #0a0908; border: 1px solid #3e3934; color: #FFFFFF; padding: 0 6px; font-family: monospace; font-size: 11px"></sc-if>
+<sc-if value="{{r.isCheck}}" hint-placeholder-val="{{false}}"><input id="{{r.id}}" type="checkbox" checked="{{r.on}}" style="accent-color: #c9a07a"><span style="flex-grow: 1"></span></sc-if>
+<button aria-label="Reset to skin value" style="width: 20px; height: 20px; padding: 0; background: none; border: 0; color: #A39E97">↺</button>
+</div>
+</sc-for>
+</div>
+</sc-for>
+
+<div style="background: rgba(0,0,0,0.3); border: 1px solid #2e2a26; padding: 10px 12px">
+<div style="font-size: 10.5px; font-weight: 600; color: #c9a07a; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px">Geometry</div>
+<div style="display: flex; align-items: center; gap: 8px; height: 26px"><label for="bh" style="width: 130px; color: #D8D3CB; font-size: 11.5px">Bar height</label><input id="bh" type="range" min="6" max="26" value="{{h}}" onInput="{{setH}}" style="flex-grow: 1; accent-color: #c9a07a"><span style="width: 32px; text-align: right">{{h}} px</span></div>
+<div style="display: flex; align-items: center; gap: 8px; height: 26px"><label for="bb" style="width: 130px; color: #D8D3CB; font-size: 11.5px">Border size</label><input id="bb" type="range" min="0" max="3" value="{{bw}}" onInput="{{setB}}" style="flex-grow: 1; accent-color: #c9a07a"><span style="width: 32px; text-align: right">{{bw}} px</span></div>
+<div style="display: flex; align-items: center; gap: 8px; height: 26px"><label style="width: 130px; color: #D8D3CB; font-size: 11.5px">Row spacing</label><span style="flex-grow: 1; color: #A39E97">2 px</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1180,"height":760}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { page: 'Bars', h: 17, bw: 1 }; }
+  renderVals() {
+    const names = ['General', 'Layout', 'Bars', 'Skills', 'Stats', 'Broker', 'Alerts', 'Journal', 'Trainers & Waypoints', 'Profiles'];
+    const pages = names.map(n => { const on = n === this.state.page; return { n, bar: on ? '#c9a07a' : 'transparent', bg: on ? 'rgba(255,255,255,0.07)' : 'transparent', color: on ? '#FFFFFF' : '#D8D3CB', pick: () => this.setState({ page: n }) }; });
+    let i = 0;
+    const sel = (l, v) => ({ id: 'o' + (i++), l, v, isSel: true, isColor: false, isCheck: false });
+    const col = (l, v) => ({ id: 'o' + (i++), l, v, isSel: false, isColor: true, isCheck: false });
+    const chk = (l, on) => ({ id: 'o' + (i++), l, on, isSel: false, isColor: false, isCheck: true });
+    return {
+      pages, page: this.state.page, h: this.state.h, bw: this.state.bw,
+      setH: (e) => this.setState({ h: +e.target.value }), setB: (e) => this.setState({ bw: +e.target.value }),
+      groups: [
+        { t: 'Texture & fill', rows: [sel('Bar texture', 'Ka0s Classic (skin)'), sel('Fill colour mode', 'By category'), sel('Fill direction', 'Left → right'), chk('Spark at fill edge', true)] },
+        { t: 'Category colours', rows: [col('Primary', '#5b9be0'), col('Secondary', '#5fb36d'), col('Weapon', '#d9913f'), col('Other', '#a08ce0')] },
+        { t: 'Bonus & markers', rows: [col('Temp bonus', '#7fd8c4'), col('Permanent bonus', '#8db8ff'), chk('Rank tier ticks', true), chk('Expiry timer', true)] },
+        { t: 'Bar text', rows: [sel('Template', '{rank} {bonus} / {max}'), sel('Font', 'Ka0s Fira Sans SemiBold (skin)'), sel('Size / outline', '11 · shadow'), sel('Anchor', 'Center')] },
+        { t: 'Border & background', rows: [sel('Border style', 'Solid (skin)'), col('Border colour', '#3e3934'), col('Background', '#0a0806'), chk('Pixel-perfect edges', true)] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

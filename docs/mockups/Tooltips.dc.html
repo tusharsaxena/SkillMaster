@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tooltips and trainer popup</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1180px; height: 620px; box-sizing: border-box; padding: 28px; background: #0f0d0b; font-family: 'Fira Sans', sans-serif; font-weight: 500; font-size: 12px; color: #FFFFFF; display: flex; gap: 28px; align-items: flex-start">
+
+<div style="width: 340px; background: #0e0d0b; border: 1px solid #3a3530; padding: 10px 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.7)">
+<div style="display: flex; align-items: baseline"><span style="flex-grow: 1; font-size: 14px; font-weight: 600">Fishing</span><span style="color: #A39E97; font-size: 11px">Secondary</span></div>
+<div style="font-size: 12px; margin-top: 4px"><span style="font-weight: 600">107</span> <span style="color: #7fd8c4">+25</span> <span style="color: #A39E97">/ 150 · effective</span> <span style="font-weight: 600">132</span></div>
+<div style="position: relative; height: 8px; margin: 6px 0 8px; background: #0a0806; border: 1px solid #3e3934">
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: 71.3%; background: #5fb36d"></div>
+<div style="position: absolute; left: 71.3%; top: 0; bottom: 0; width: 16.7%; background: repeating-linear-gradient(135deg, #7fd8c4 0 3px, #2f7a6a 3px 6px)"></div>
+<div style="position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: rgba(255,255,255,0.5)"></div>
+</div>
+<div style="font-size: 10.5px; font-weight: 600; color: #c9a07a; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 3px">Bonuses</div>
+<div style="display: flex; font-size: 11.5px; padding: 1px 0"><span style="color: #7fd8c4; width: 16px">⏱</span><span style="flex-grow: 1">Shiny Bauble (lure)</span><span style="color: #7fd8c4">+25 · 4:12</span></div>
+<div style="display: flex; font-size: 11.5px; padding: 1px 0; color: #7A756E"><span style="width: 16px">∅</span><span style="flex-grow: 1">Racial / items / buffs</span><span>none</span></div>
+<div style="height: 1px; background: #48433d; margin: 7px 0"></div>
+<div style="display: flex; font-size: 11.5px; padding: 1px 0"><span style="flex-grow: 1; color: #A39E97">This session</span><span>+6 (3 / h)</span></div>
+<div style="display: flex; font-size: 11.5px; padding: 1px 0"><span style="flex-grow: 1; color: #A39E97">ETA to 150</span><span>~14 h at this rate</span></div>
+<div style="display: flex; font-size: 11.5px; padding: 1px 0"><span style="flex-grow: 1; color: #A39E97">Next rank</span><span>Expert at 150 · Lv 20</span></div>
+<div style="display: flex; font-size: 11.5px; padding: 1px 0"><span style="flex-grow: 1; color: #A39E97">Trainer</span><span>Grimnur Stonebrand, Ironforge</span></div>
+<div style="height: 1px; background: #48433d; margin: 7px 0"></div>
+<div style="font-size: 10.5px; color: #A39E97">Click: Skills tab · Shift-click: link · Right-click: menu</div>
+</div>
+
+<div style="width: 340px; display: flex; flex-direction: column; gap: 16px">
+<div style="background: #0e0d0b; border: 1px solid #3a3530; padding: 10px 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.7)">
+<div style="display: flex; align-items: baseline"><span style="flex-grow: 1; font-size: 14px; font-weight: 600">Guns</span><span style="color: #A39E97; font-size: 11px">Weapon · equipped ranged</span></div>
+<div style="font-size: 12px; margin-top: 4px"><span style="font-weight: 600">105</span> <span style="color: #8db8ff">+5</span> <span style="color: #A39E97">/ 110 · effective</span> <span style="font-weight: 600">110</span></div>
+<div style="font-size: 10.5px; font-weight: 600; color: #c9a07a; text-transform: uppercase; letter-spacing: 0.6px; margin: 8px 0 3px">Bonuses</div>
+<div style="display: flex; font-size: 11.5px"><span style="color: #8db8ff; width: 16px">◆</span><span style="flex-grow: 1">Racial: Gun Specialization (Dwarf)</span><span style="color: #8db8ff">+5</span></div>
+<div style="height: 1px; background: #48433d; margin: 7px 0"></div>
+<div style="display: flex; font-size: 11.5px"><span style="flex-grow: 1; color: #A39E97">Cap at your level</span><span>110 (5 × 22)</span></div>
+<div style="display: flex; font-size: 11.5px"><span style="flex-grow: 1; color: #A39E97">Below cap by</span><span style="color: #5fb36d">5 · fine</span></div>
+</div>
+
+<div style="background: #0e0d0b; border: 1px solid #3a3530; padding: 10px 12px">
+<div style="display: flex; align-items: baseline"><span style="flex-grow: 1; font-size: 13px; font-weight: 600">Hit chance</span><span style="font-weight: 600">2.0%</span></div>
+<div style="position: relative; height: 8px; margin: 6px 0; background: #0a0806; border: 1px solid #3e3934">
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: 22%; background: #c9a07a"></div>
+<div style="position: absolute; left: 55.5%; top: -3px; bottom: -3px; width: 2px; background: #F2B33D"></div>
+<div style="position: absolute; left: 100%; top: -3px; bottom: -3px; width: 2px; margin-left: -2px; background: #F2B33D"></div>
+</div>
+<div style="display: flex; font-size: 11px; color: #A39E97"><span style="flex-grow: 1">▏5% vs same-level mobs</span><span>▏9% vs raid bosses</span></div>
+<div style="font-size: 10.5px; color: #7A756E; margin-top: 4px">Scale: vs 9% cap (per-stat reference)</div>
+</div>
+</div>
+
+<div style="width: 380px; background: linear-gradient(180deg, #2e251c, #18120d); border: 1px solid #3a3530; box-shadow: 0 8px 28px rgba(0,0,0,0.7)">
+<div style="height: 26px; background: #050505; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; position: relative">Learn: Fist Weapons
+<button aria-label="Close" style="position: absolute; right: 6px; top: 4px; width: 18px; height: 18px; background: none; border: 0; color: #FFFFFF; padding: 0">✕</button></div>
+<div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 10px">
+<div style="font-size: 11.5px; color: #A39E97">Weapon Masters for your faction (Alliance) that teach Fist Weapons:</div>
+<div style="background: rgba(201,160,122,0.16); border: 1px solid #c9a07a; padding: 8px 10px">
+<div style="display: flex"><span style="flex-grow: 1; font-weight: 600">Bixi Wobblebonk</span><span style="color: #F2B33D">10s</span></div>
+<div style="font-size: 11.5px; color: #D8D3CB">Ironforge · Military Ward (62, 89)</div>
+<div style="font-size: 11px; color: #A39E97; margin-top: 2px">Also teaches: Crossbows, Daggers, Thrown</div>
+</div>
+<div style="background: rgba(0,0,0,0.3); border: 1px solid #2e2a26; padding: 8px 10px">
+<div style="display: flex"><span style="flex-grow: 1; font-weight: 600">Ilyenia Moonfire</span><span style="color: #F2B33D">10s</span></div>
+<div style="font-size: 11.5px; color: #D8D3CB">Darnassus · Warrior's Terrace (57, 46)</div>
+<div style="font-size: 11px; color: #A39E97; margin-top: 2px">Also teaches: Bows, Daggers, Fist Weapons, Staves, Thrown</div>
+</div>
+<div style="font-size: 10.5px; color: #d9913f">⚠ Coordinates unverified on Forever (flagged until the smoke pass)</div>
+<div style="display: flex; gap: 8px">
+<button style="flex-grow: 1; height: 26px; background: #9C7A58; border: 1px solid #c9a07a; color: #FFFFFF; font-weight: 600">◎ Set waypoint (TomTom)</button>
+<button style="height: 26px; padding: 0 12px; background: #1f1d1b; border: 1px solid #48433d; color: #FFFFFF">Print to chat</button>
+</div>
+<div style="font-size: 10.5px; color: #7A756E">Waypoint order: TomTom → native map pin → chat directions</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1180,"height":620}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

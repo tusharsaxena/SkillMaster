@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Broker feeds</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 1180px; height: 720px; position: relative; background: #121510; font-family: 'Fira Sans', sans-serif; font-weight: 500; font-size: 12px; color: #FFFFFF">
+
+<div style="height: 24px; background: #050505; border-bottom: 1px solid #3a3530; display: flex; align-items: center; gap: 0; font-size: 11.5px">
+<div style="padding: 0 12px; color: #A39E97">[ broker bar: Titan / ChocolateBar / ElvUI datatexts ]</div>
+<div style="padding: 0 12px; height: 24px; display: flex; align-items: center; gap: 6px; background: rgba(201,160,122,0.16); border-left: 1px solid #3a3530; border-right: 1px solid #3a3530"><span style="color: #c9a07a">SM</span><span>Fishing 107+25/150 · <span style="color: #F2B33D">+14</span></span></div>
+<div style="padding: 0 12px; display: flex; gap: 6px; border-right: 1px solid #3a3530"><span style="color: #5b9be0">Prof</span><span>Skinning 122/150</span></div>
+<div style="padding: 0 12px; display: flex; gap: 6px; border-right: 1px solid #3a3530"><span style="color: #d9913f">Wpn</span><span>Guns 105+5/110</span></div>
+<div style="padding: 0 12px; display: flex; gap: 6px; border-right: 1px solid #3a3530"><span style="color: #c9a07a">Stats</span><span>9.12% crit · 100% run</span></div>
+<div style="padding: 0 12px; display: flex; gap: 6px; background: #1f2a1f; color: #9be09b; font-weight: 600">▲ Bows 81  <span style="color: #A39E97; font-weight: 500">(flash, 5 s)</span></div>
+</div>
+
+<div style="position: absolute; left: 150px; top: 30px; width: 380px; background: #0e0d0b; border: 1px solid #3a3530; box-shadow: 0 8px 24px rgba(0,0,0,0.75); padding: 10px 12px">
+<div style="display: flex; align-items: baseline; margin-bottom: 6px"><span style="flex-grow: 1; font-size: 14px; font-weight: 600">Skill Master: All skills</span><span style="font-size: 11px; color: #A39E97">+14 this session</span></div>
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+<div style="font-size: 10.5px; font-weight: 600; color: #c9a07a; text-transform: uppercase; letter-spacing: 0.6px; margin: 6px 0 2px">{{g.title}}</div>
+<sc-for list="{{g.rows}}" as="r" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 8px; height: 17px">
+<span style="width: 120px; font-size: 11.5px; white-space: nowrap">{{r.n}}</span>
+<div style="position: relative; flex-grow: 1; height: 7px; background: #0a0806; border: 1px solid #3e3934">
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{r.w}}%; background: {{g.color}}"></div>
+<div style="position: absolute; top: 0; bottom: 0; left: {{r.w}}%; width: {{r.bw}}%; background: {{r.bc}}"></div>
+</div>
+<span style="width: 84px; text-align: right; font-size: 11px">{{r.t}} <span style="color: {{r.bc}}">{{r.b}}</span></span>
+<span style="width: 26px; text-align: right; font-size: 10.5px; color: #9be09b">{{r.g}}</span>
+</div>
+</sc-for>
+</sc-for>
+<div style="height: 1px; background: #48433d; margin: 8px 0 5px"></div>
+<div style="font-size: 10.5px; color: #A39E97">Click label: toggle window · Click row: open its window · Right-click: feed options</div>
+</div>
+
+<div style="position: absolute; left: 600px; top: 40px; width: 540px; display: flex; flex-direction: column; gap: 14px">
+<div style="background: linear-gradient(180deg, #2e251c, #18120d); border: 1px solid #3a3530; padding: 12px 14px">
+<div style="font-size: 10.5px; font-weight: 600; color: #c9a07a; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px">Feed text templates (Options › Broker)</div>
+<sc-for list="{{feeds}}" as="f" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 10px; padding: 4px 0">
+<label style="width: 108px; font-size: 11.5px; color: #D8D3CB" for="{{f.id}}">{{f.n}}</label>
+<input id="{{f.id}}" value="{{f.tpl}}" style="flex-grow: 1; height: 22px; box-sizing: border-box; background: #0a0908; border: 1px solid #3e3934; color: #FFFFFF; font-family: monospace; font-size: 11.5px; padding: 0 6px">
+<span style="width: 160px; font-size: 11px; color: #A39E97; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">→ {{f.out}}</span>
+</div>
+</sc-for>
+<div style="font-size: 10.5px; color: #7A756E; margin-top: 6px">Tokens: {pinned} {gains} {last} {lowestProf} {equippedWeapon} {skill:key} {stat:key} {level}</div>
+</div>
+
+<div style="display: flex; gap: 14px; align-items: flex-start">
+<div style="width: 220px; background: #0e0d0b; border: 1px solid #3a3530; padding: 6px 0; box-shadow: 0 6px 20px rgba(0,0,0,0.7)">
+<div style="padding: 2px 12px 6px; font-weight: 600; color: #F2B33D">Ka0s Skill Master</div>
+<sc-for list="{{menu}}" as="m" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 8px; padding: 3px 12px; font-size: 11.5px">
+<span style="width: 12px; height: 12px; background: #0a0908; border: 1px solid #8a7a52; color: #c9a07a; font-size: 10px; line-height: 12px; text-align: center">{{m.c}}</span><span>{{m.n}}</span>
+</div>
+</sc-for>
+</div>
+<div style="flex-grow: 1; font-size: 11.5px; color: #A39E97; line-height: 1.5">
+<div style="color: #FFFFFF; font-weight: 600; margin-bottom: 4px">Launcher (standard, launcher-§2)</div>
+Minimap button + its own broker object. Left-click opens settings, right-click this menu. "Show window" also has a key binding. The four data feeds are separate broker objects and never replace the launcher.
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1180,"height":720}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const r = (n, rank, max, b, temp, g) => ({ n, w: (rank / max * 100).toFixed(1), bw: b ? Math.min(100 - rank / max * 100, b / max * 100).toFixed(1) : 0, t: rank + '/' + max, b: b ? '+' + b : '', bc: temp ? '#7fd8c4' : '#8db8ff', g: g ? '+' + g : '' });
+    return {
+      groups: [
+        { title: 'Primary', color: '#5b9be0', rows: [r('Leatherworking', 146, 150, 0, 0, 4), r('Skinning', 122, 150, 0, 0, 2)] },
+        { title: 'Secondary', color: '#5fb36d', rows: [r('Cooking', 133, 150), r('First Aid', 121, 150), r('Fishing', 107, 150, 25, 1, 6)] },
+        { title: 'Weapon', color: '#d9913f', rows: [r('Guns', 105, 110, 5), r('Bows', 81, 110, 0, 0, 1), r('Daggers', 74, 110), r('Two-Handed Axes', 107, 110, 0, 0, 1)] },
+        { title: 'Other', color: '#a08ce0', rows: [r('Defense', 100, 110)] }
+      ],
+      feeds: [
+        { id: 'f1', n: 'All skills', tpl: '{pinned} · {gains}', out: 'Fishing 107+25/150 · +14' },
+        { id: 'f2', n: 'Professions', tpl: '{lowestProf}', out: 'Skinning 122/150' },
+        { id: 'f3', n: 'Weapon Skills', tpl: '{equippedWeapon}', out: 'Guns 105+5/110' },
+        { id: 'f4', n: 'Stats', tpl: '{stat:rcrit} crit · {stat:run} run', out: '9.12% crit · 100% run' }
+      ],
+      menu: [{ c: '✓', n: 'Enabled' }, { c: '', n: 'Locked' }, { c: '', n: 'Test mode' }, { c: '', n: 'Sim mode' }, { c: '✓', n: 'Show window' }, { c: '', n: 'Journal' }]
+    };
+  }
+}
+</script>
+</body>
+</html>

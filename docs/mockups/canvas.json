@@ -1,0 +1,15 @@
+{"v":3,"createdOnFiles":{"v":1,"at":"2026-11-10T12:00:00Z"},"title":"Skill Master UX","launch":{"view":"canvas"},"pages":[],
+"boards":{
+"Main.dc.html":{"x":0,"y":0,"w":460,"h":1240,"title":"1 · Main window (docked blocks)","is_interactive":true},
+"Detached.dc.html":{"x":540,"y":0,"w":1180,"h":720,"title":"2 · Detached blocks + alerts over the game world"},
+"Tooltips.dc.html":{"x":540,"y":840,"w":1180,"h":620,"title":"3 · Row tooltip, unlearned skill + trainer popup, stat markers"},
+"Broker.dc.html":{"x":1800,"y":0,"w":1180,"h":720,"title":"4 · LDB feeds, skill-up flash, feed tooltip, launcher menu"},
+"Journal.dc.html":{"x":1800,"y":840,"w":1000,"h":640,"title":"5 · Journal: Session Log / Alts","is_interactive":true},
+"Options.dc.html":{"x":0,"y":1560,"w":1180,"h":760,"title":"6 · Options panel (Bars page)","is_interactive":true}
+},
+"order":["Main.dc.html","Detached.dc.html","Tooltips.dc.html","Broker.dc.html","Journal.dc.html","Options.dc.html"],
+"notes":{
+"t1":{"x":0,"y":-300,"text":"Ka0s Skill Master — UX mockup (WoW Forever skin)","kind":"title1","maxW":2980},
+"n1":{"x":0,"y":-190,"text":"Skin shown: WoW Forever (default on Forever). Every colour, texture, font, size and border here is an option or follows the active LibKa0s skin. Character: Lv 22 Dwarf Hunter. Icons are placeholders for the real spell/skill icons.","w":460,"fill":"orange"}
+},
+"designSystems":[]}

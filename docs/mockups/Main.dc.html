@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Skill Master main window</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+button{font:inherit;cursor:pointer}
+.skm-row:hover{background:rgba(201,160,122,0.16) !important}
+</style>
+</helmet>
+<div style="width: 460px; min-height: 1240px; box-sizing: border-box; padding: 10px; background: #0f0d0b; font-family: 'Fira Sans', sans-serif; font-weight: 500; font-size: 12px; color: #FFFFFF">
+<div style="width: 440px; background: linear-gradient(180deg, #2e251c, #18120d); border: 1px solid #3a3530; box-shadow: 0 8px 28px rgba(0,0,0,0.6)">
+
+<div style="height: 28px; background: #050505; display: flex; align-items: center; padding: 0 6px; gap: 4px">
+<button aria-label="Lock window" style="width: 22px; height: 22px; background: none; border: 0; color: #A39E97; display: flex; align-items: center; justify-content: center; padding: 0">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="10"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+</button>
+<div style="flex-grow: 1; text-align: center; font-weight: 600; font-size: 13.5px; letter-spacing: 0.2px">Skill Master</div>
+<button aria-label="Open journal" style="width: 22px; height: 22px; background: none; border: 0; color: #A39E97; display: flex; align-items: center; justify-content: center; padding: 0">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"></path><path d="M8 8h6M8 12h6"></path></svg>
+</button>
+<button aria-label="Settings" style="width: 22px; height: 22px; background: none; border: 0; color: #A39E97; display: flex; align-items: center; justify-content: center; padding: 0">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"></path></svg>
+</button>
+<button aria-label="Close" style="width: 22px; height: 22px; background: none; border: 0; color: #FFFFFF; display: flex; align-items: center; justify-content: center; padding: 0">
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"></path></svg>
+</button>
+</div>
+
+<div style="display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-bottom: 1px solid #48433d; font-size: 11px; color: #A39E97">
+<span style="color: #FFFFFF">Lv 22 · Dwarf Hunter</span>
+<span>▲ <span style="color: #F2B33D">+14</span> this session</span>
+<span style="flex-grow: 1"></span>
+<span style="color: #c9a07a">⚑ Leatherworking near cap: train Expert</span>
+</div>
+
+<sc-for list="{{sections}}" as="sec" hint-placeholder-count="6">
+<div>
+<button onClick="{{sec.toggle}}" style="width: 100%; height: 24px; display: flex; align-items: center; gap: 8px; padding: 0 10px; background: rgba(0,0,0,0.35); border: 0; border-top: 1px solid #48433d; color: #c9a07a; text-align: left; font-weight: 600; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase">
+<span style="width: 10px; color: #FFFFFF">{{sec.chev}}</span>
+<span style="flex-grow: 1">{{sec.title}}</span>
+<span style="color: #A39E97; font-weight: 500; letter-spacing: 0; text-transform: none">{{sec.meta}}</span>
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#A39E97" stroke-width="2" role="img" aria-label="Detach block"><path d="M14 4h6v6M20 4l-8 8M18 14v6H4V6h6"></path></svg>
+</button>
+<sc-if value="{{sec.open}}" hint-placeholder-val="{{true}}">
+<div style="padding: 3px 0">
+<sc-for list="{{sec.rows}}" as="r" hint-placeholder-count="4">
+<div class="skm-row" style="height: {{rowH}}px; display: flex; align-items: center; gap: 8px; padding: 0 10px; background: {{r.bg}}; opacity: {{r.op}}">
+<div style="width: 16px; height: 16px; flex-shrink: 0; background: #0a0908; border: 1px solid {{r.color}}; color: {{r.color}}; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{r.ini}}</div>
+<div style="width: 118px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.name}}</div>
+<sc-if value="{{r.learned}}" hint-placeholder-val="{{true}}">
+<div style="position: relative; flex-grow: 1; height: {{barH}}px; background: #0a0806; border: 1px solid #3e3934">
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: {{r.w}}%; background: linear-gradient(180deg, {{r.color}}, {{r.colorDk}})"></div>
+<div style="position: absolute; top: 0; bottom: 0; left: {{r.w}}%; width: {{r.bw}}%; background: repeating-linear-gradient(135deg, {{r.bonusColor}} 0 4px, {{r.bonusColorDk}} 4px 8px)"></div>
+<sc-for list="{{r.ticks}}" as="t" hint-placeholder-count="0"><div style="position: absolute; top: -2px; bottom: -2px; left: {{t}}%; width: 1px; background: rgba(255,255,255,0.45)"></div></sc-for>
+<div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 600; text-shadow: 0 1px 2px #000">
+<span>{{r.rank}}</span><span style="color: {{r.bonusText}}">{{r.bonusLabel}}</span><span style="color: #D8D3CB">/ {{r.max}}</span>
+</div>
+</div>
+<div style="width: 38px; text-align: right; font-size: 10.5px; color: #7fd8c4">{{r.timer}}</div>
+</sc-if>
+<sc-if value="{{r.unlearned}}" hint-placeholder-val="{{false}}">
+<div style="flex-grow: 1; display: flex; align-items: center; gap: 6px; font-size: 11px; color: #A39E97; white-space: nowrap; overflow: hidden">
+<span style="color: #7A756E; font-style: italic">Not learned</span><span>·</span><span style="overflow: hidden; text-overflow: ellipsis">{{r.where}}</span>
+</div>
+<button aria-label="Set waypoint to trainer" style="width: 38px; height: 18px; background: #1f1d1b; border: 1px solid #48433d; color: #c9a07a; font-size: 10px; padding: 0">◎ Go</button>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-for>
+
+<div style="height: 24px; display: flex; align-items: center; gap: 8px; padding: 0 10px; background: #050505; border-top: 1px solid #48433d; font-size: 10.5px; color: #A39E97">
+<span style="display: inline-block; width: 10px; height: 8px; background: repeating-linear-gradient(135deg, #7fd8c4 0 3px, #2f7a6a 3px 6px)"></span><span>temp bonus</span>
+<span style="display: inline-block; width: 10px; height: 8px; background: repeating-linear-gradient(135deg, #8db8ff 0 3px, #3a5f9e 3px 6px)"></span><span>permanent bonus</span>
+<span style="flex-grow: 1"></span><span>│ rank tier · ▏threshold</span>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"colorMode":{"editor":"enum","options":["category","progress","likelihood"],"default":"category","section":"Bars"},"compact":{"editor":"boolean","default":false,"section":"Bars"},"$preview":{"width":460,"height":1240}}'>
+class Component extends DCLogic {
+  constructor(p) { super(p); this.state = { closed: { spell: true, def: true } }; }
+  renderVals() {
+    const mode = this.props.colorMode ?? 'category';
+    const compact = this.props.compact ?? false;
+    const CAT = { pri: ['#5b9be0', '#2c5f99'], sec: ['#5fb36d', '#2f6e3a'], wpn: ['#d9913f', '#8a5420'], oth: ['#a08ce0', '#5a4a99'], stat: ['#c9a07a', '#7a5f45'] };
+    const prog = (p) => p >= 0.95 ? ['#e0c35a', '#8a7520'] : p >= 0.6 ? ['#5fb36d', '#2f6e3a'] : p >= 0.3 ? ['#d9913f', '#8a5420'] : ['#c75a4a', '#7a2e24'];
+    const like = (p) => p >= 0.95 ? ['#9d9d9d', '#555'] : p >= 0.8 ? ['#40bf40', '#206020'] : p >= 0.5 ? ['#ffd100', '#8a7000'] : ['#ff8000', '#8a4500'];
+    const mk = (cat, name, rank, max, o) => {
+      o = o || {};
+      const learned = rank != null;
+      const p = learned ? rank / max : 0;
+      const c = mode === 'category' ? CAT[cat] : mode === 'progress' ? prog(p) : like(p);
+      const bonus = o.bonus || 0;
+      const temp = !!o.timer;
+      const bw = learned ? Math.max(0, Math.min(100 - p * 100, (bonus / max) * 100)) : 0;
+      return {
+        name, ini: name.replace(/[^A-Z]/g, '').slice(0, 2) || name.slice(0, 2), learned, unlearned: !learned,
+        rank: learned ? rank : '', max, w: (p * 100).toFixed(1), bw: bw.toFixed(1),
+        color: c[0], colorDk: c[1],
+        bonusColor: temp ? '#7fd8c4' : '#8db8ff', bonusColorDk: temp ? '#2f7a6a' : '#3a5f9e',
+        bonusText: temp ? '#7fd8c4' : '#8db8ff', bonusLabel: bonus ? '+' + bonus : '',
+        ticks: (o.ticks || []).filter(t => t < max).map(t => ((t / max) * 100).toFixed(1)),
+        timer: o.timer || '', where: o.where || '', bg: 'transparent', op: learned ? 1 : 0.8
+      };
+    };
+    const T = [75, 150, 225];
+    const stripe = (rows) => rows.map((r, i) => ({ ...r, bg: i % 2 ? 'rgba(255,255,255,0.04)' : 'transparent' }));
+    const raw = [
+      { id: 'pri', title: 'Primary Professions', meta: '2 / 2', rows: [mk('pri', 'Leatherworking', 146, 150, { ticks: T }), mk('pri', 'Skinning', 122, 150, { ticks: T })] },
+      { id: 'sec', title: 'Secondary Skills', meta: '3', rows: [mk('sec', 'Cooking', 133, 150, { ticks: T }), mk('sec', 'First Aid', 121, 150, { ticks: T }), mk('sec', 'Fishing', 107, 150, { ticks: T, bonus: 25, timer: '4:12' })] },
+      { id: 'wpn', title: 'Weapon Skills', meta: 'cap 110 (5 × level)', rows: [
+        mk('wpn', 'Axes', 1, 110), mk('wpn', 'Bows', 80, 110), mk('wpn', 'Crossbows', 1, 110), mk('wpn', 'Daggers', 74, 110),
+        mk('wpn', 'Guns', 105, 110, { bonus: 5 }), mk('wpn', 'Staves', 1, 110), mk('wpn', 'Swords', 1, 110),
+        mk('wpn', 'Two-Handed Axes', 107, 110), mk('wpn', 'Two-Handed Swords', 1, 110), mk('wpn', 'Unarmed', 4, 110),
+        mk('wpn', 'Fist Weapons', null, 110, { where: 'Bixi Wobblebonk, Ironforge · 10s' }),
+        mk('wpn', 'Polearms', null, 110, { where: 'Ilyenia Moonfire, Darnassus · 10s' }),
+        mk('wpn', 'Thrown', null, 110, { where: 'Bixi Wobblebonk, Ironforge · 10s' })] },
+      { id: 'oth', title: 'Defense · Lockpicking · Riding', meta: '', rows: [mk('oth', 'Defense', 100, 110), mk('oth', 'Riding', null, 75, { where: 'Ultham Ironhorn, Dun Morogh · Lv 40 · 90g' })] },
+    ];
+    const sKey = (name, val, pct, markers, ref) => ({ name, val, pct, markers: markers || [], ref: ref || '' });
+    const statRaw = [
+      { id: 'base', title: 'Stats · Base & Combat', meta: 'vs highest primary', stats: [
+        sKey('Strength', '48', 43), sKey('Agility', '112', 100), sKey('Stamina', '86', 77), sKey('Intellect', '41', 37), sKey('Spirit', '52', 46),
+        sKey('Ranged AP', '248', 62, [], 'vs 400'), sKey('Ranged Crit', '9.12%', 30, [], 'vs 30%'), sKey('Hit', '2.0%', 22, [{ at: 100, label: '9% cap' }], 'vs 9%'),
+        sKey('Melee AP', '164', 41, [], 'vs 400'), sKey('Melee Crit', '7.42%', 25, [], 'vs 30%')] },
+      { id: 'spell', title: 'Stats · Spell & Regen', meta: '6', stats: [] },
+      { id: 'def', title: 'Stats · Defense & Resists', meta: '9', stats: [] },
+      { id: 'util', title: 'Stats · Utility', meta: '', stats: [
+        sKey('Run speed', '100%', 50, [{ at: 50, label: '100%' }], 'vs 200%'), sKey('Swim speed', '67%', 34, [{ at: 50, label: '100%' }]),
+        sKey('Durability', '82%', 82, [{ at: 20, label: 'repair' }]), sKey('Ranged speed', '2.65s', 60)] }
+    ];
+    const closed = this.state.closed;
+    const toggle = (id) => () => this.setState({ closed: { ...closed, [id]: !closed[id] } });
+    const sections = raw.map(s => ({ ...s, rows: stripe(s.rows), open: !closed[s.id], chev: closed[s.id] ? '▸' : '▾', toggle: toggle(s.id) }));
+    statRaw.forEach(s => {
+      const rows = s.stats.map(st => {
+        const c = mode === 'category' ? CAT.stat : prog(st.pct / 100);
+        return { name: st.name, ini: st.name.slice(0, 2).toUpperCase(), learned: true, unlearned: false, rank: st.val, max: st.ref ? st.ref.replace('vs ', '') : '', w: st.pct, bw: 0,
+          color: c[0], colorDk: c[1], bonusColor: '#000', bonusColorDk: '#000', bonusText: '#fff', bonusLabel: '',
+          ticks: st.markers.map(m => m.at), timer: '', where: '', bg: 'transparent', op: 1 };
+      });
+      sections.push({ id: s.id, title: s.title, meta: s.meta, rows: stripe(rows), open: !closed[s.id] && rows.length > 0, chev: (closed[s.id] || !rows.length) ? '▸' : '▾', toggle: toggle(s.id) });
+    });
+    return { sections, rowH: compact ? 18 : 24, barH: compact ? 12 : 17 };
+  }
+}
+</script>
+</body>
+</html>
