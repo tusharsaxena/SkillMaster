@@ -82,4 +82,3 @@
 #   tr -dc '\n' < <path> | wc -c     # …this, in a CRLF repo.
 # Not `file <path>`: it reports nothing about line terminators for JSON or
 # for any binary, so it passes files it never examined (line-endings-§7).
-
