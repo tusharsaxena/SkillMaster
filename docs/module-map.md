@@ -52,6 +52,7 @@ position says so beside its TOC line (toc-file-§5).
 | `modules/SessionLog.lua` | `NS.SessionLog`: the per-character ring of skill-ups (`db.char.log`, 500), session gains, `Rate`, per-skill `ETA`; hears `SKILL_UP` | subscribes on its own bus target at load (after `core/Bus.lua`) |
 | `modules/Alts.lua` | `NS.Alts`: each character's skills in `db.global.characters["<realm>-<name>"]` on `SKILLS_UPDATED` (debounced) and `PLAYER_LOGOUT`; `List`, `Forget` | subscribes on its own bus target at load; reads SkillData at call time |
 | `modules/Journal.lua` | the Journal window: Session Log and Alts tabs, `/skm journal` | reads SessionLog and Alts at call time; repaints on `SKILLS_UPDATED` / `LAYOUT_CHANGED` |
+| `modules/Alerts.lua` | `NS.Alerts`: the rank-cap and weapon-gap toasts (LibKa0s-Toast-1.0), the cap's chat line, the click-to-waypoint | subscribes to `SKILL_UP` / `SKILLS_UPDATED` on its own bus target at load; reads SkillData, Trainers and the settings at call time |
 | `settings/Schema.lua` | the schema and the single write seam (LibKa0s-Schema-1.0) | before Slash, OptionsSetup and the pages |
 | `settings/Slash.lua` | `NS.COMMANDS` and the dispatcher (LibKa0s-Slash-1.0) | before the landing spec reads it |
 | `settings/OptionsSetup.lua` | the panel descriptor, `NS.Helpers` (LibKa0s-Options-1.0) | before every page file |

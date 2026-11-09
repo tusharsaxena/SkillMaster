@@ -36,6 +36,16 @@ session's points, `Rate(window)` is points an hour over the last `window` second
 gains). `SKILLS_UPDATED` asks for one alt snapshot 2 s later and `PLAYER_LOGOUT` takes one at once;
 an empty model (a list not loaded yet) keeps the skills the last snapshot had. The Journal reads
 both at render time and repaints on `SKILLS_UPDATED`, which follows a pass's `SKILL_UP`s.
+## Alerts (T4.2)
+
+`modules/Alerts.lua` listens on its own bus target. `SKILL_UP(key)` reads the new entry: a
+profession at its cap whose `NS.Trainers:NextRank` answers a rank toasts once per skill and cap
+(`cap:<key>:<max>`) and prints one chat line naming the first trainer; a weapon skill
+`alerts.weaponGap` (25) or more below `max(max, 5 x level)` toasts once per skill per session
+(`weapon:<key>`). `SKILLS_UPDATED(model)` checks every weapon whose cap rose since the previous model
+(a level-up); the first model only records the caps. A left-click on a cap toast hands its trainer
+to `NS.Waypoints:Set` when that module exists, else prints the directions. The stand-down clears
+the toast; a profile reload re-reads its position.
 
 ## What runs in v0.1.0
 

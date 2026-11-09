@@ -62,6 +62,7 @@ function NS.StandDown()
     if NS.TrainerPopup then NS.TrainerPopup.Hide() end
     if NS.Widgets and NS.Widgets.CloseMenu then NS.Widgets.CloseMenu() end   -- the row menu closes with us
     if NS.Journal then NS.Journal.StandDown() end
+    if NS.Alerts then NS.Alerts.StandDown() end   -- T4.2: no toast stays up or waits
     NS.HideSkinPicker()
     addon:UnregisterAllEvents()
     addon:CancelAllTimers()
@@ -88,6 +89,7 @@ local function reloadProfile()
     if NS.MainWindow then NS.MainWindow.ApplySettings() end
     if NS.MainWindow then NS.MainWindow.Refresh() end
     if NS.Detached then NS.Detached.Refresh() end
+    if NS.Alerts then NS.Alerts.Refresh() end   -- T4.2: the toast's position from the new profile
     if NS.Helpers and NS.Helpers.RefreshAllPanels then NS.Helpers.RefreshAllPanels() end
     NS.MaybeShowSkinPicker()
 end

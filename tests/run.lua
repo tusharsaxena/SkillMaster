@@ -76,6 +76,11 @@ Kit.skinSwitch = {
             NS.TrainerPopup.Show("fistWeapons")
             return NS.TrainerPopup.Frame()
         end, reset = function() NS.TrainerPopup.Hide() end },
+        { name = "the alert toast", build = function()
+            NS.Alerts.toast:Preview({ kind = "cap", name = "Leatherworking",
+                title = "Leatherworking 150 / 150", detail = "Train Expert (Lv 20)" })
+            return NS.Alerts.toast:Frame()
+        end, reset = function() NS.Alerts.toast:Clear() end },
         { name = "the debug console", build = function()
             NS.DebugLog:Show()
             return NS.DebugLog._frameForTest
@@ -108,6 +113,7 @@ Kit.run{
         "test_sessionlog",
         "test_alts",
         "test_journal",
+        "test_alerts",
         "test_surface_parity",
         "test_vendor_sync",
         -- slash-commands-§7: drives OnEnable and full disable/enable cycles on the shared

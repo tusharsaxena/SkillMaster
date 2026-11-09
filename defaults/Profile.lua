@@ -69,6 +69,15 @@ NS.defaults = {
             outline     = "hud",
             pickerSeen  = false,                      -- the first-run skin picker was closed here
         },
+        -- T4.2: the alerts (modules/Alerts.lua). `point` is drag-only toast geometry, written by
+        -- modules/Alerts.lua alone (architecture-§5's named-owner rule), like window.point.
+        alerts = {
+            cap       = true,   -- a profession at its rank's cap, with a next rank: toast + chat
+            weapon    = true,   -- a weapon skill weaponGap or more below its cap: toast
+            weaponGap = 25,     -- skill points below the cap (5 x level) that count as behind
+            sound     = false,  -- play the toast's sound as each alert shows
+            point     = false,  -- the toast stack's drop point, in UIParent's units
+        },
     },
     -- 0, never the current version: AceDB strips a value equal to its default at logout
     -- (savedvariables-§1). `minimap` is LibDBIcon's own table (launcher-§3), per installation.

@@ -55,6 +55,12 @@ test("parity: the Schema stub carries the library's lib-level surface, and its i
     T.assertSurfaceParity(NS.SchemaRuntime, NS2.SchemaRuntime, "schema instance vs host stub")
 end)
 
+test("parity: the Toast instance stub carries a live instance's whole surface", function()
+    local NS2 = loadDegraded()
+    assertTrue(NS2.Alerts.toast == NS2.Alerts.ToastStub, "a library-absent load takes the stub")
+    T.assertSurfaceParity(NS.Alerts.NewToast(), NS2.Alerts.ToastStub, "Toast instance")
+end)
+
 test("parity: the Perf, Pool and Widgets stubs carry every member the addon reaches", function()
     local NS2 = loadDegraded()
     local reached = {

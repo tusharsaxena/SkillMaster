@@ -277,6 +277,14 @@ L["cap"] = true
 L["crit immunity vs bosses"] = true
 L["repair"] = true
 -- ---- END T2.3 ----
+-- BEGIN T4.2 (Alerts) -- merged by the integrator.
+L["%s cap"] = true
+L["Train %s (Lv %d): %s"] = true
+L["is %d below your cap. Glancing blows and misses are more likely."] = true
+L["Click to set waypoint · right-click to dismiss"] = true
+L["no trainer known"] = true
+L["%s: %s"] = true
+-- ---- END T4.2 ----
 
 -- The display: bars, rows, blocks, the window body and the detached frames (T3.1, T3.2).
 L["Not learned"] = true

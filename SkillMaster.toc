@@ -127,6 +127,9 @@ modules\SessionLog.lua
 modules\Alts.lua
 # T4.3: the Journal window; reads NS.SessionLog and NS.Alts at call time.
 modules\Journal.lua
+# T4.2: subscribes to SKILL_UP / SKILLS_UPDATED on its own bus target at FILE SCOPE (after core\Bus.lua);
+# reads NS.SkillData, NS.Trainers and the settings at CALL time.
+modules\Alerts.lua
 
 # Settings (last -- depend on everything else being initialized)
 # LOAD-BEARING: NS.Schema, NS.SetByPath and NS.SchemaRuntime, read at FILE SCOPE by the three files below.
