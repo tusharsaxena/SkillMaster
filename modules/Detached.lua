@@ -5,7 +5,12 @@ local _, NS = ...
 -- stored in profile.layout.blocks[id].point (geometry only a drag sets; this module is its one
 -- writer, docs/ARCHITECTURE.md).
 --
+-- The weapon block is the mockup's compact preset: the equipped weapons carry the marker, and with
+-- profile.layout.blocks.weapon.belowCapOnly only the equipped weapons and the skills below their
+-- cap are shown. An equipment change redraws it.
+--
 -- NS.Detached.Refresh() / .RefreshValues() / .StandDown() / .Frame(id) / .Rows(id) / .Render(id)
+-- NS.Detached.Entries(id) -> the entries a detached frame draws
 
 NS.Detached = {}
 local D = NS.Detached
@@ -53,12 +58,35 @@ end
 local function onDragStart(self)
     if isLocked(self.id) then return end
     self:StartMoving()
+    if NS.SecureOverlay then NS.SecureOverlay:SetMoving(self, true) end
 end
 
 local function onDragStop(self)
     self:StopMovingOrSizing()
     savePoint(self)
-    if NS.SecureOverlay then NS.SecureOverlay:Sync() end
+    if NS.SecureOverlay then NS.SecureOverlay:SetMoving(self, false) end
+end
+
+local function belowCapOnly(id)
+    return id == "weapon" and settings(id).belowCapOnly == true
+end
+
+--- The entries detached block `id` draws: the block's, the equipped weapons marked, and for the
+--- weapon block's compact filter only the equipped ones and the learned skills below their cap.
+function D.Entries(id)
+    local entries = NS.Blocks.Entries(id)
+    if id ~= "weapon" then return entries end
+    local equipped = NS.SkillHelpers.EquippedWeaponSkills()
+    local filter = belowCapOnly(id)
+    local out = {}
+    for _, r in ipairs(entries) do
+        local e = r.entry
+        local on = equipped[e.key] == true
+        if not filter or on or (e.learned ~= false and (e.rank or 0) < (e.max or 0)) then
+            out[#out + 1] = { kind = r.kind, entry = e, marked = on }
+        end
+    end
+    return out
 end
 
 local function buildBand(f)
@@ -89,6 +117,7 @@ local function build(id)
     f:RegisterForDrag("LeftButton")
     f:SetScript("OnDragStart", onDragStart)
     f:SetScript("OnDragStop", onDragStop)
+    if NS.SecureOverlay then NS.SecureOverlay:Follow(f) end
     f.body = CreateFrame("Frame", nil, f)
     f.body:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -D.TITLE_H)
     f.body:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, -D.TITLE_H)
@@ -110,7 +139,7 @@ function D.Render(id)
         collapsed and "\226\150\184" or "\226\150\190")
     local y = 0
     if not collapsed then
-        y = NS.Blocks.LayRows(NS.Blocks.Entries(id), f.body, f.rowPool, 0, D.STYLE, D.PAD)
+        y = NS.Blocks.LayRows(D.Entries(id), f.body, f.rowPool, 0, D.STYLE, D.PAD)
     end
     f.body:SetHeight(math.max(y, 1))
     f:SetHeight(D.TITLE_H + y + D.PAD)
@@ -154,4 +183,19 @@ function D.StandDown()
         NS.Rows.ReleaseAll(f.rowPool)
         f:Hide()
     end
+end
+
+-- The equipped marker and the compact filter follow the equipment: a shown weapon block redraws.
+-- A tracked bus target, stood down with the addon (LibKa0s-Bus-1.0).
+local function onEquipmentChanged()
+    local f = frames.weapon
+    if f and f:IsShown() then
+        D.Render("weapon")
+        if NS.SecureOverlay then NS.SecureOverlay:Sync() end
+    end
+end
+
+D.events = NS.NewBusTarget()
+if D.events then
+    NS.SafeRegisterEvent(D.events, "PLAYER_EQUIPMENT_CHANGED", onEquipmentChanged, NS.rejectedEvents)
 end

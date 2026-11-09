@@ -6,6 +6,10 @@ local _, NS = ...
 --
 -- standalone-windows: a plain frame, toplevel in the window tier, Escape closes it, the close
 -- control through NS.MakeCloseButton, the drop point saved by its one writer (savePoint, below).
+-- Resizable from a bottom-right grip (NS.Chrome.MakeResizable), never smaller than its default:
+-- while sizing only the visible row counts change (J.Relayout, at most once a frame); the rows are
+-- re-bound once, on release, and the size is saved then (saveSize, its one writer). The lists
+-- stretch with the width through their anchors; the alts grid keeps its column pitch.
 -- A display: it reads NS.SessionLog and NS.Alts and repaints on SKILLS_UPDATED and LAYOUT_CHANGED.
 
 NS.Journal = {}
@@ -28,16 +32,19 @@ local FILTER_LABEL = { professions = L["Professions"], weapons = L["Weapons"], o
 local WIDTH, HEIGHT, TITLE_H, TAB_H, PAD = 640, 420, 26, 24, 12
 local SIDE_W, ROW_H, ALT_ROW_H, CHAR_W, ETA_LINES = 190, 18, 32, 150, 5
 local BODY_TOP = TITLE_H + TAB_H + 8
-local LIST_W = WIDTH - PAD * 3 - SIDE_W
-J.LOG_ROWS = floor((HEIGHT - BODY_TOP - PAD - 20) / ROW_H)
-J.ALT_ROWS = floor((HEIGHT - BODY_TOP - PAD - 26 - 22 - 20) / ALT_ROW_H)
+local LOG_CHROME_H = BODY_TOP + PAD + 20             -- above and below the log's rows
+local ALT_CHROME_H = BODY_TOP + PAD + 26 + 22 + 20   -- the chips, the header and the footnote
+J.MIN_W, J.MIN_H = WIDTH, HEIGHT
+J.LOG_ROWS = floor((HEIGHT - LOG_CHROME_H) / ROW_H)
+J.ALT_ROWS = floor((HEIGHT - ALT_CHROME_H) / ALT_ROW_H)
 local COL_W = floor((WIDTH - PAD * 2 - CHAR_W) / J.MAX_COLS)
 local ARROW = " \226\134\146 "
 local DASH = "\226\128\148"
 local CAT_RANK = { primary = 1, secondary = 2, weapon = 3, other = 4 }
 
 local frame   -- built on first show
-local state = { tab = "log", filter = "professions", logOffset = 0, altOffset = 0, colOffset = 0 }
+local state = { tab = "log", filter = "professions", logOffset = 0, altOffset = 0, colOffset = 0,
+                logRows = J.LOG_ROWS, altRows = J.ALT_ROWS }
 
 local function clamp(v, lo, hi) return max(lo, min(v, hi)) end
 
@@ -90,6 +97,12 @@ local function savePoint()
     NS.db.profile.journal.point = { point = point, relPoint = relPoint or point, x = x or 0, y = y or 0 }
 end
 
+-- The Journal's size: geometry only the grip sets, written on release by this one writer.
+local function saveSize(w, h)
+    if not (NS.db and tonumber(w) and tonumber(h)) then return end
+    NS.db.profile.journal.size = { w = floor(w + 0.5), h = floor(h + 0.5) }
+end
+
 local function applyPoint()
     local p = NS.db and NS.db.profile.journal and NS.db.profile.journal.point
     frame:ClearAllPoints()
@@ -134,19 +147,22 @@ end
 
 -- ── Session Log ──────────────────────────────────────────────────────────────────────────────
 
-local LOG_COLS = {   -- x, width, justification; Skill takes what the others leave
+-- Each column from the list's left (x) or its right edge (r), a fixed width or (Skill) stretching
+-- between the two, so the list follows the window's width with no per-tick work.
+local LOG_COLS = {
     { x = 6, w = 50, j = "LEFT" },
-    { x = 60, w = LIST_W - 60 - 80 - 110 - 14, j = "LEFT" },
-    { x = LIST_W - 80 - 110 - 10, w = 80, j = "RIGHT" },
-    { x = LIST_W - 110 - 6, w = 110, j = "RIGHT" },
+    { x = 60, r = -(80 + 110 + 14), j = "LEFT" },
+    { r = -(110 + 10), w = 80, j = "RIGHT" },
+    { r = -6, w = 110, j = "RIGHT" },
 }
 
 local function placeColumns(parent, cols, role)
     local out = {}
     for i, c in ipairs(LOG_COLS) do
         local fs = text(parent, role)
-        fs:SetPoint("LEFT", parent, "LEFT", c.x, 0)
-        fs:SetWidth(c.w)
+        if c.x then fs:SetPoint("LEFT", parent, "LEFT", c.x, 0) end
+        if c.r then fs:SetPoint("RIGHT", parent, "RIGHT", c.r, 0) end
+        if c.w then fs:SetWidth(c.w) end
         fs:SetJustifyH(c.j)
         if cols then fs:SetText(cols[i]) end
         out[i] = fs
@@ -156,7 +172,7 @@ end
 
 local function newLogRow(p)
     local row = CreateFrame("Frame", nil, p)
-    row:SetSize(LIST_W, ROW_H)
+    row:SetHeight(ROW_H)
     row.cols = placeColumns(row, nil, "body")
     NS.Skin.Text(row.cols[1], "muted")
     NS.Skin.Text(row.cols[4], "muted")
@@ -166,6 +182,7 @@ end
 local function bindLogRow(p, row, e, i)
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", p.header, "BOTTOMLEFT", 0, -(i - 1) * ROW_H)
+    row:SetPoint("TOPRIGHT", p.header, "BOTTOMRIGHT", 0, -(i - 1) * ROW_H)
     row.cols[1]:SetText(date("%H:%M", e.t))
     row.cols[2]:SetText(skillName(e.key))
     row.cols[3]:SetText(tostring(e.old) .. ARROW .. tostring(e.new))
@@ -179,9 +196,9 @@ local function renderLogRows(p)
     Pool.ReleaseAll(p.pool)
     local log = NS.SessionLog:Entries()
     local n = #log
-    state.logOffset = clamp(state.logOffset, 0, max(n - J.LOG_ROWS, 0))
+    state.logOffset = clamp(state.logOffset, 0, max(n - state.logRows, 0))
     local shown, first = 0, n - state.logOffset
-    for i = first, max(1, first - J.LOG_ROWS + 1), -1 do
+    for i = first, max(1, first - state.logRows + 1), -1 do
         shown = shown + 1
         bindLogRow(p, Pool.Acquire(p.pool, function() return newLogRow(p) end), log[i], shown)
     end
@@ -268,8 +285,9 @@ end
 local function buildLog()
     local p = panel()
     p.header = CreateFrame("Frame", nil, p)
-    p.header:SetSize(LIST_W, 16)
+    p.header:SetHeight(16)
     p.header:SetPoint("TOPLEFT", p, "TOPLEFT", 0, 0)
+    p.header:SetPoint("TOPRIGHT", p, "TOPRIGHT", -(SIDE_W + PAD), 0)
     p.headers = placeColumns(p.header, { L["Time"], L["Skill"], L["Change"], L["Zone"] }, "heading")
     p.empty = text(p, "muted")
     p.empty:SetPoint("TOPLEFT", p.header, "BOTTOMLEFT", 6, -8)
@@ -336,7 +354,7 @@ end
 
 local function newAltRow(p)
     local row = CreateFrame("Frame", nil, p)
-    row:SetSize(WIDTH - PAD * 2, ALT_ROW_H)
+    row:SetHeight(ALT_ROW_H)
     row:EnableMouse(true)
     row.name = text(row, "body", "GameFontNormalSmall")
     row.name:SetPoint("TOPLEFT", row, "TOPLEFT", 8, -4)
@@ -379,6 +397,7 @@ local function bindAltRow(p, row, item, cols, i)
     local r = item.record
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", p.header, "BOTTOMLEFT", 0, -(i - 1) * ALT_ROW_H)
+    row:SetPoint("TOPRIGHT", p.header, "BOTTOMRIGHT", 0, -(i - 1) * ALT_ROW_H)
     row.altKey, row.altName = item.key, r.name or item.key
     row.name:SetText(row.altName)
     NS.Skin.Text(row.name, "body")
@@ -394,7 +413,7 @@ local function renderAlts(p)
     local list = NS.Alts:List()
     local cols, names = J.AltColumns(list, state.filter)
     state.colOffset = clamp(state.colOffset, 0, max(#cols - J.MAX_COLS, 0))
-    state.altOffset = clamp(state.altOffset, 0, max(#list - J.ALT_ROWS, 0))
+    state.altOffset = clamp(state.altOffset, 0, max(#list - state.altRows, 0))
     for c = 1, J.MAX_COLS do
         local key = cols[c + state.colOffset]
         p.colLabels[c]:SetText(key and names[key] or "")
@@ -402,7 +421,7 @@ local function renderAlts(p)
     for f, chip in pairs(p.chips) do NS.Skin.SetTabSelection(chip, f == state.filter) end
     Pool.ReleaseAll(p.pool)
     local shown = 0
-    for i = 1 + state.altOffset, min(#list, state.altOffset + J.ALT_ROWS) do
+    for i = 1 + state.altOffset, min(#list, state.altOffset + state.altRows) do
         shown = shown + 1
         bindAltRow(p, Pool.Acquire(p.pool, function() return newAltRow(p) end), list[i], cols, shown)
     end
@@ -412,8 +431,9 @@ end
 
 local function buildAltHeader(p)
     p.header = CreateFrame("Frame", nil, p)
-    p.header:SetSize(WIDTH - PAD * 2, 18)
+    p.header:SetHeight(18)
     p.header:SetPoint("TOPLEFT", p, "TOPLEFT", 0, -28)
+    p.header:SetPoint("TOPRIGHT", p, "TOPRIGHT", 0, -28)
     local who = text(p.header, "heading")
     who:SetPoint("LEFT", p.header, "LEFT", 8, 0)
     who:SetText(L["Character"])
@@ -498,6 +518,53 @@ local function onDragStop(self)
     savePoint()
 end
 
+-- ── sizing ───────────────────────────────────────────────────────────────────────────────────
+
+local function rowsFor(h, chrome, rowH)
+    h = max(tonumber(h) or 0, HEIGHT)
+    return max(1, floor((h - chrome) / rowH))
+end
+
+local function hideBeyond(p, count)
+    for i, row in ipairs(p.pool.active) do
+        if i > count then row:Hide() end
+    end
+end
+
+--- The cheap layout a size change runs (at most once a frame while the grip is dragged): the
+--- visible row counts from the new height, and the rows past them hidden. Nothing is re-bound and
+--- nothing is read from the log or the snapshots; the release re-binds once (J.Render).
+function J.Relayout(_, h)
+    if not frame then return end
+    state.logRows = rowsFor(h or frame:GetHeight(), LOG_CHROME_H, ROW_H)
+    state.altRows = rowsFor(h or frame:GetHeight(), ALT_CHROME_H, ALT_ROW_H)
+    hideBeyond(frame.logPanel, state.logRows)
+    hideBeyond(frame.altsPanel, state.altRows)
+end
+
+--- How many log rows the current size shows.
+function J.VisibleLogRows() return state.logRows end
+
+--- Re-apply the saved size, never below the default.
+function J.ApplySize()
+    if not frame then return end
+    local s = NS.db and NS.db.profile.journal and NS.db.profile.journal.size
+    if type(s) ~= "table" then return end
+    local w, h = max(tonumber(s.w) or WIDTH, WIDTH), max(tonumber(s.h) or HEIGHT, HEIGHT)
+    frame:SetSize(w, h)
+    J.Relayout(w, h)
+end
+
+local function makeResizable()
+    NS.Chrome.MakeResizable(frame, {
+        minWidth = WIDTH, minHeight = HEIGHT,
+        layout = function(w, h) J.Relayout(w, h) end,
+        redraw = function() J.Render() end,
+        save = saveSize,
+        canResize = function() return not NS.GetSetting("locked") end,
+    })
+end
+
 local function build()
     if frame then return frame end
     frame = CreateFrame("Frame", J.FRAME_NAME, UIParent, "BackdropTemplate")
@@ -517,6 +584,8 @@ local function build()
     UISpecialFrames[#UISpecialFrames + 1] = J.FRAME_NAME   -- Escape closes it
     frame:Hide()
     applyPoint()
+    makeResizable()
+    J.ApplySize()
     return frame
 end
 

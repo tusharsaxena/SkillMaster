@@ -7,7 +7,11 @@ local _, NS = ...
 -- row:SetSkill(entry), row:SetStat(entry), row:SetStripe(index), row.entry, row.kind ("skill"|"stat")
 -- Pure helpers the tooltip, the broker and the journal reuse: SkillValues(entry), FillColor(entry),
 -- StatValues(entry), UnlearnedText(entry), TrainerFor(entry), Place(trainer), Money(copper),
--- Initials(name).
+-- Initials(name), HelperHint(entry).
+-- row.marked (set before SetSkill, cleared on release): the equipped weapon's "> " marker.
+-- The optional gathering hint (profile.skills.helperHint, design §12 item 4) is one muted line
+-- under a Skinning, Mining, Herbalism or Fishing row, read from NS.SkillHelpers; the row grows by
+-- R.HINT_H while it shows.
 -- Clicks and hover go to NS.Interact and NS.RowTooltip (T3.3) when they are loaded.
 
 NS.Rows = {}
@@ -17,6 +21,8 @@ local floor = math.floor
 
 R.PAD, R.ICON, R.NAME_W, R.GO_W = 6, 16, 118, 38
 R.DIM = 0.8   -- an unlearned row's alpha (the mockup's)
+R.HINT_H = 12 -- the gathering hint's line under a row
+R.MARK = "\226\150\184 "   -- the equipped weapon's marker (Detached.dc.html)
 
 -- ---------------------------------------------------------------------------------------------
 -- Pure helpers
@@ -74,6 +80,43 @@ function R.UnlearnedText(e)
 end
 
 local function bars() return (NS.db and NS.db.profile.bars) or NS.defaults.profile.bars end
+
+local function hintsOn()
+    local skills = NS.db and NS.db.profile.skills
+    return skills ~= nil and skills.helperHint == true
+end
+
+local HINTS = {}
+
+function HINTS.skinning(e)
+    return L["Skinning %d \226\134\146 mobs up to Lv %d"]:format(e.rank, NS.SkillHelpers.SkinnableLevel(e.rank))
+end
+
+local function nodeHint(e)
+    local n = NS.SkillHelpers.Nodes(e.key, e.rank)
+    if not n then return nil end
+    local best = n.gatherable[#n.gatherable]
+    if best and n.next then return L["Gathers %s \194\183 next: %s at %d"]:format(best.name, n.next.name, n.next.need) end
+    if best then return L["Gathers %s"]:format(best.name) end
+    if n.next then return L["Next: %s at %d"]:format(n.next.name, n.next.need) end
+    return nil
+end
+HINTS.mining, HINTS.herbalism = nodeHint, nodeHint
+
+function HINTS.fishing(e)
+    local need = NS.SkillHelpers.FishingNeedHere()
+    if not need then return L["No fishing data for this zone"] end
+    local zone = type(GetZoneText) == "function" and GetZoneText() or ""
+    return L["Fishing in %s needs ~%d (you: %d +%d)"]:format(zone, need, e.rank, tonumber(e.modifier) or 0)
+end
+
+--- The one-line gathering hint under a learned Skinning, Mining, Herbalism or Fishing row, from
+--- NS.SkillHelpers; nil with profile.skills.helperHint off or for any other skill.
+function R.HelperHint(e)
+    if not (hintsOn() and e and e.learned ~= false) then return nil end
+    local fn = HINTS[e.key]
+    return fn and fn(e) or nil
+end
 
 local PROGRESS = { { 0.95, "sem.gold" }, { 0.6, "sem.good" }, { 0.3, "sem.warn" }, { 0, "sem.bad" } }
 local LIKELIHOOD = { { 0.95, "sem.neutral" }, { 0.8, "sem.good" }, { 0.5, "sem.statusWarn" }, { 0, "sem.warn" } }
@@ -137,10 +180,22 @@ local function setLearnedLook(row, learned)
     row:SetAlpha(learned and 1 or R.DIM)
 end
 
+local function setName(row, text, marked)
+    row.name:SetText(marked and (R.MARK .. text) or text)
+    NS.Skin.Text(row.name, marked and "accent" or "body")
+end
+
+local function setHint(row, text)
+    row.hint:SetText(text or "")
+    row.hint:SetShown(text ~= nil)
+    row:SetHeight((row.baseH or bars().rowHeight or 20) + (text and R.HINT_H or 0))
+end
+
 --- Draw a skill entry (SkillData's model entry).
 function Row:SetSkill(e)
     self.kind, self.entry = "skill", e
-    self.name:SetText(e.name)
+    setName(self, e.name, self.marked)
+    setHint(self, R.HelperHint(e))
     self.initials:SetText(R.Initials(e.name))
     local color = R.FillColor(e)
     paintIcon(self, color)
@@ -160,7 +215,8 @@ end
 --- Draw a stat entry (StatData's model entry).
 function Row:SetStat(e)
     self.kind, self.entry = "stat", e
-    self.name:SetText(e.label)
+    setName(self, e.label, false)
+    setHint(self, nil)
     self.initials:SetText(R.Initials(e.label))
     local color = R.FillColor(e, true)
     paintIcon(self, color)
@@ -189,6 +245,11 @@ end
 
 local function onClick(self, button)
     if NS.Interact and self.entry then NS.Interact.OnRowClick(self, button) end
+end
+
+-- A click raises a toplevel window: the crafting overlays follow its new level (SecureOverlay).
+local function onMouseDown()
+    if NS.SecureOverlay and NS.SecureOverlay.OnRaise then NS.SecureOverlay:OnRaise() end
 end
 
 local function onGo(self)
@@ -221,6 +282,13 @@ local function buildText(row)
     row.where:SetJustifyH("LEFT")
     row.where:SetWordWrap(false)
     NS.Skin.Text(row.where, "muted")
+    row.hint = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    row.hint:SetPoint("TOPLEFT", row.name, "BOTTOMLEFT", 0, -2)
+    row.hint:SetPoint("RIGHT", row, "RIGHT", -R.PAD, 0)
+    row.hint:SetJustifyH("LEFT")
+    row.hint:SetWordWrap(false)
+    row.hint:Hide()
+    NS.Skin.Text(row.hint, "muted")
 end
 
 local function buildGo(row)
@@ -248,6 +316,7 @@ local function build(parent, styleKey)
     row:SetScript("OnEnter", onEnter)
     row:SetScript("OnLeave", onLeave)
     row:SetScript("OnClick", onClick)
+    row:HookScript("OnMouseDown", onMouseDown)
     return row
 end
 
@@ -262,14 +331,21 @@ function R.Acquire(pool, parent, styleKey)
     local c = NS.Bar.Color("sm.iconBg")   -- every acquire, so a skin switch reaches a pooled row
     if c then row.iconBg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
     local h = bars().rowHeight or 20
-    row:SetHeight(styleKey == "compact" and h - 2 or h)
+    if styleKey == "compact" then h = h - 2 end
+    -- The icon and the Go button sit in the row's first line, so a hint line can grow it below.
+    row.baseH = h
+    row.iconFrame:ClearAllPoints()
+    row.iconFrame:SetPoint("TOPLEFT", row, "TOPLEFT", R.PAD, -(h - R.ICON) / 2)
+    row.go:ClearAllPoints()
+    row.go:SetPoint("TOPRIGHT", row, "TOPRIGHT", -R.PAD, -(h - 18) / 2)
+    row:SetHeight(h)
     row:Show()
     return row
 end
 
 local function park(row)
     row.bar:SetTimer(nil)
-    row.entry, row.kind = nil, nil
+    row.entry, row.kind, row.marked = nil, nil, nil
     row:ClearAllPoints()
 end
 

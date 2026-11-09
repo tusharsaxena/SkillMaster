@@ -272,6 +272,21 @@ Total.
 - broker: a crafting row without ShowAndScrollTo still opens the main window
 - broker: stood down, every feed reads Off and its tooltip says so; standing up re-renders
 
+### test_polish.lua (12)
+
+- broker: the leave poll hides GameTooltip only while the feed still owns it
+- broker: the footer reads as the mockup; a right-click opens the Broker settings page
+- helpers: the equipped weapon skills read the main hand, off hand and ranged slots
+- detached: the weapon block marks the equipped weapon; the compact filter keeps equipped + below-cap
+- detached: an equipment change redraws a shown weapon block
+- rows: the gathering hint is off by default and reads NS.SkillHelpers when on
+- rows: a hinted row is one line taller and shows its hint; the setting off hides it
+- secure overlay: raising the window re-levels its overlays above the rows (out of combat only)
+- secure overlay: a row click raises too; a detached frame's mouse-down re-levels its overlays
+- secure overlay: a dragged window's overlays come down for the drag and back at the drop
+- journal: a grip drag lays out at most once per frame and redraws once, after the release
+- journal: the saved size is restored, clamped to the minimum; locked refuses the grip
+
 ### test_seams.lua (5)
 
 - test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
@@ -436,6 +451,7 @@ Total.
 | test_alerts.lua | 11 |
 | test_template.lua | 3 |
 | test_broker.lua | 9 |
+| test_polish.lua | 12 |
 | test_seams.lua | 5 |
 | test_surface_parity.lua | 11 |
 | test_vendor_sync.lua | 3 |
@@ -450,4 +466,4 @@ Total.
 | test_skin_switch.lua | 13 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **284** |
+| **Total** | **296** |

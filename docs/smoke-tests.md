@@ -40,6 +40,14 @@ passed (clients-§6, testing). Each check names what to do and what you should s
 - **SM-DISP-6** In combat, click a crafting row: nothing opens and one line says why; no "action
   blocked" error. Detach a block in combat: it moves only when combat ends. Escape the window in
   combat: no error, and no invisible button is left where the rows were after combat.
+- **SM-DISP-8** Open the window and the Journal over it, then click the window: it comes to the
+  front and a crafting row still opens its profession (the overlay was re-leveled above the rows).
+  Drag the window by its title: no invisible button is left at the old place, and at the drop
+  clicking Leatherworking opens it.
+- **SM-DISP-9** Detach the Weapon block: the equipped weapon (a Dwarf Hunter's Guns) reads
+  `▸ Guns` in gold. With `layout.blocks.weapon.belowCapOnly` on, only the equipped weapon and the
+  skills below their cap show; swap weapons and the marker follows. With `skills.helperHint` on, the
+  Skinning, Mining, Herbalism and Fishing rows carry one muted hint line under the bar.
 - **SM-DISP-7** An unlearned weapon row reads `Not learned · <trainer>, <city> · 10s`. Its Go button
   (or a click) opens the trainer popup: the faction's weapon masters, the unverified warning. Set
   waypoint with TomTom loaded (a TomTom arrow), without it (a map pin), and Print to chat.
@@ -47,6 +55,9 @@ passed (clients-§6, testing). Each check names what to do and what you should s
 
 - **SM-JRN-1** `/skm journal` opens "Skill Master · Journal" with Session Log and Alts tabs; Escape and
   the close mark close it; drag it, `/reload`, and it opens where it was dropped.
+- **SM-JRN-4** Drag the Journal's bottom-right grip continuously: the window follows the pointer
+  without lag and never gets smaller than it opened; release: more log rows show. `/reload`: it
+  opens at the dragged size. Lock the window (`/skm lock`): the grip does nothing.
 - **SM-JRN-2** Gain a skill point: a row appears at the top of Session Log with the time, the skill,
   `old → new` and the zone, and the session card counts it. A second gain of the same skill gives it
   an ETA. Clear log empties the list; New session sets the count back to +0.
@@ -62,6 +73,10 @@ passed (clients-§6, testing). Each check names what to do and what you should s
 - **SM-SEAM-2** The broker tooltip's and the Journal's mini bars match the window's bar colors;
   switch skins and reopen both: they follow. Click the cap toast with TomTom loaded: an arrow.
 - **SM-SEAM-3** Click the main window's journal mark: the Journal opens; again: it closes.
+- **SM-SEAM-4** Hover a feed, then move straight onto another addon's tooltip owner (a bag item):
+  the other tooltip stays up (the feed's leave check hides only its own). The feed tooltip's footer
+  reads `Click label: toggle window · Click row: open its window · Right-click: feed options`;
+  right-click the feed opens the settings on the Broker page (the main page until it exists).
 
 ## Launcher and settings
 

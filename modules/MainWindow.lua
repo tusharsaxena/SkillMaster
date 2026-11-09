@@ -45,12 +45,13 @@ end
 local function onDragStart(self)
     if NS.GetSetting("locked") then return end
     self:StartMoving()
+    if NS.SecureOverlay then NS.SecureOverlay:SetMoving(self, true) end   -- none trails the drag
 end
 
 local function onDragStop(self)
     self:StopMovingOrSizing()
     savePoint()
-    if NS.SecureOverlay then NS.SecureOverlay:Sync() end
+    if NS.SecureOverlay then NS.SecureOverlay:SetMoving(self, false) end  -- laid at the drop
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -201,6 +202,8 @@ local function build()
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", onDragStart)
     frame:SetScript("OnDragStop", onDragStop)
+    -- A click raises the toplevel window: its overlays are re-leveled above its rows.
+    if NS.SecureOverlay then NS.SecureOverlay:Follow(frame) end
 
     buildChrome()
 
@@ -235,6 +238,8 @@ local function plan(skills, stats)
             total = total + #entries
         end
     end
+    -- The gathering hint changes a row's height: turning it on or off is a new layout.
+    sig[#sig + 1] = (NS.db and NS.db.profile.skills.helperHint) and "hint" or "-"
     return out, table.concat(sig, ","), total
 end
 

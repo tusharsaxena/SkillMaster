@@ -390,6 +390,16 @@ L["Utility"] = true
 L["Click label: toggle window \194\183 Click row: open its window \194\183 Right-click: settings"] = true
 -- ---- END T4.1 ----
 
+-- ---- BEGIN M5 polish (the M3/M4 review leftovers) ----
+-- The broker tooltip's footer (modules/Broker.lua), as the mockup writes it.
+L["Click label: toggle window \194\183 Click row: open its window \194\183 Right-click: feed options"] = true
+-- The one-line gathering hint under a row (modules/Rows.lua, profile.skills.helperHint).
+L["Gathers %s \194\183 next: %s at %d"] = true
+L["Gathers %s"] = true
+L["Next: %s at %d"] = true
+L["No fishing data for this zone"] = true
+-- ---- END M5 polish ----
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

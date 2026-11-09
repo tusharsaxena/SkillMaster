@@ -20,7 +20,10 @@ NS.defaults = {
             blocks = {
                 primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, locked = false },
                 secondary     = { docked = true, order = 2, collapsed = false, point = false, scale = 1, locked = false },
-                weapon        = { docked = true, order = 3, collapsed = false, point = false, scale = 1, locked = false },
+                -- belowCapOnly: the detached compact preset shows only the equipped weapons and the
+                -- skills below their cap (Detached.dc.html); its row arrives with the Layout page.
+                weapon        = { docked = true, order = 3, collapsed = false, point = false, scale = 1, locked = false,
+                                  belowCapOnly = false },
                 other         = { docked = true, order = 4, collapsed = false, point = false, scale = 1, locked = false },
                 stats_base    = { docked = true, order = 5, collapsed = false, point = false, scale = 1, locked = false },
                 stats_spell   = { docked = true, order = 6, collapsed = true,  point = false, scale = 1, locked = false },
@@ -57,8 +60,9 @@ NS.defaults = {
                 bonusPerm = { 0.553, 0.722, 1, 1 },
             },
         },
-        -- The Journal window's drop point, the same rule: written by modules/Journal.lua alone.
-        journal = { point = false },
+        -- The Journal window's drop point and size ({ w, h }, from its resize grip), the same rule:
+        -- written by modules/Journal.lua alone.
+        journal = { point = false, size = false },
         skin = {
             source      = "ka0s",                     -- Ka0s skins, or EllesmereUI
             skin        = NS.DEFAULT_SKIN or "ka0s",  -- the library's per-client default: WoW Forever here

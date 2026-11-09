@@ -260,7 +260,7 @@ end
 -- ---------------------------------------------------------------------------------------------
 
 --- Lay `entries` out as rows in `host` from `y` (px down from its top), each `inset` px in from
---- both sides. Answers the y under the last row; each row keeps its own top as `row.layY` (the
+--- both sides. An entry's `marked` draws the row's equipped marker. Answers the y under the last row; each row keeps its own top as `row.layY` (the
 --- main window's ShowAndScrollTo reads it).
 function B.LayRows(entries, host, rowPool, y, styleKey, inset)
     inset = inset or 0
@@ -270,6 +270,7 @@ function B.LayRows(entries, host, rowPool, y, styleKey, inset)
         row:SetPoint("TOPLEFT", host, "TOPLEFT", inset, -y)
         row:SetPoint("TOPRIGHT", host, "TOPRIGHT", -inset, -y)
         row.layY = y
+        row.marked = r.marked or nil
         if r.kind == "skill" then row:SetSkill(r.entry) else row:SetStat(r.entry) end
         row:SetStripe(i)
         y = y + row:GetHeight()

@@ -1,10 +1,11 @@
-local _, NS = ...
+local addonName, NS = ...
 -- modules/Chrome.lua — the small chrome every Skill Master surface shares: the title-bar and header
 -- icon controls (standalone-windows: catalog marks at one size and one pitch, a plain glyph as the
 -- fallback rung) and the hover tooltip line they carry.
 --
 -- NS.Chrome.IconButton(parent, icon, glyph, onClick, tip) -> button   (button.icon or button.glyph)
 -- NS.Chrome.SetIcon(button, icon, glyph)                               swap the mark (lock / unlock)
+-- NS.Chrome.MakeResizable(frame, spec) -> grip                         the one resize helper
 
 NS.Chrome = {}
 local C = NS.Chrome
@@ -69,4 +70,41 @@ function C.IconButton(parent, icon, glyph, onClick, tip)
     b:SetScript("OnLeave", onLeave)
     if onClick then b:SetScript("OnClick", onClick) end
     return b
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- The one resize helper (standalone-windows, Resizing): every resizable window hands it its cheap
+-- layout and its full redraw. A size change only marks the layout dirty, and one pass runs on the
+-- next rendered frame (a driver's one-shot OnUpdate), however many OnSizeChanged calls came in.
+-- The full redraw and the save run once, on the grip's release (LibKa0s's onResizeStop).
+-- ---------------------------------------------------------------------------------------------
+
+--- spec = { minWidth, minHeight, layout = fn(w, h), redraw = fn(), save = fn(w, h), canResize = fn(frame) }
+--- Answers the grip (frame.resizeGrip), or nil where the library offers none. frame.resizeDriver
+--- is the frame whose OnUpdate runs the coalesced pass.
+function C.MakeResizable(frame, spec)
+    local driver = CreateFrame("Frame", nil, frame)
+    local pending = false
+    local function pass(self)
+        self:SetScript("OnUpdate", nil)
+        pending = false
+        spec.layout(frame:GetWidth(), frame:GetHeight())
+    end
+    local function mark()
+        if pending then return end
+        pending = true
+        driver:SetScript("OnUpdate", pass)
+    end
+    local function stop(w, h)
+        driver:SetScript("OnUpdate", nil)
+        pending = false
+        spec.layout(w, h)
+        spec.redraw()
+        if spec.save then spec.save(w, h) end
+    end
+    frame.resizeDriver = driver
+    return NS.MakeResizable(frame, {
+        minWidth = spec.minWidth, minHeight = spec.minHeight,
+        onResize = mark, onResizeStop = stop, canResize = spec.canResize, owner = addonName,
+    })
 end

@@ -16,7 +16,14 @@ local _, NS = ...
 -- A shift-click and a right-click pass through to the row's own handlers (PostClick); only a
 -- plain left click is secure.
 --
+-- An overlay's level is its host's plus LEVEL.SECURE, read at each Sync. A toplevel window that a
+-- click raises, a Raise() and a show move the host's level, so Follow(host) re-syncs on each
+-- (OnMouseDown, Raise, OnShow; a row's mouse-down calls OnRaise too), out of combat, and once more
+-- on the next frame in case the raise lands after the script. While a host is dragged its overlays
+-- come down (SetMoving), so none trails the window, and they are laid again at the drop.
+--
 -- NS.SecureOverlay:Sync() / :AfterCombat(key, fn) -> ran / :Pending() / :StandDown() / .Overlay(key)
+-- NS.SecureOverlay:Follow(host) / :OnRaise() / :SetMoving(host, moving)
 
 NS.SecureOverlay = {}
 local SO = NS.SecureOverlay
@@ -26,6 +33,8 @@ local LAYERS = NS.Constants.LAYERS
 local overlays = {}   -- [skill key] = button, made once, never destroyed (frames are not)
 local queue, order = {}, {}
 local dirty = false
+local moving = {}     -- [host frame] = true while it is being dragged
+local raisePending = false
 
 function SO.Overlay(key) return overlays[key] end
 
@@ -118,11 +127,11 @@ local function wanted()
         end
     end
     local W = NS.MainWindow
-    if W and W.IsShown() then scan(W.Rows(), W.Frame(), W.Frame().scroll) end
+    if W and W.IsShown() and not moving[W.Frame()] then scan(W.Rows(), W.Frame(), W.Frame().scroll) end
     local D = NS.Detached
     for _, id in ipairs(D and NS.BLOCKS or {}) do
         local f = D.Frame(id)
-        if f and f:IsShown() then scan(D.Rows(id), f, nil) end
+        if f and f:IsShown() and not moving[f] then scan(D.Rows(id), f, nil) end
     end
     return out
 end
@@ -155,9 +164,46 @@ function SO:Sync()
     return true
 end
 
+--- A host is being dragged (true) or was dropped (false): its overlays come down for the drag and
+--- are laid over the rows' new places at the drop. In combat Sync waits, as ever.
+function SO:SetMoving(host, isMoving)
+    moving[host] = isMoving and true or nil
+    return SO:Sync()
+end
+
+local function afterRaise()
+    raisePending = false
+    SO:Sync()
+end
+
+--- A host was (or may have been) raised: re-level its overlays now and once more next frame.
+function SO:OnRaise()
+    SO:Sync()
+    if raisePending or not (NS.addon and NS.addon.ScheduleTimer) then return end
+    raisePending = true
+    NS.addon:ScheduleTimer(afterRaise, 0)
+end
+
+--- Keep the overlays above `host`'s rows whenever it is raised or shown.
+function SO:Follow(host)
+    local function raised() SO:OnRaise() end
+    host:HookScript("OnMouseDown", raised)
+    host:HookScript("OnShow", raised)
+    -- The host is the addon's own plain frame, so its Raise is wrapped in place (no secure hook).
+    local raise = host.Raise
+    if type(raise) == "function" then
+        host.Raise = function(frame, ...)
+            local r = raise(frame, ...)
+            raised()
+            return r
+        end
+    end
+end
+
 --- Stand-down: every overlay disarmed (out of combat; in combat they were disarmed at its start).
 function SO:StandDown()
     queue, order, dirty = {}, {}, false
+    moving = {}
     if InCombatLockdown() then return end
     for _, b in pairs(overlays) do disarm(b) end
 end
