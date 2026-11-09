@@ -39,6 +39,9 @@ position says so beside its TOC line (toc-file-§5).
 | `modules/Bonuses.lua` | `NS.Bonuses`: a skill's modifier broken into racial, item, enchant, buff and Other sources; `BONUSES_UPDATED` | defines `NS.addon:OnBonusesUnitChanged` at load, so after `core/SkillMaster.lua`; reads SkillData at call time |
 | `modules/Diagnostics.lua` | the diagnostics report's sections | read at run time |
 | `modules/StatData.lua` | `NS.StatData`: the stats model over `NS.STAT_DEFS`, `STATS_UPDATED`, the speed ticker | registers its events on its own bus target at load |
+| `modules/SessionLog.lua` | `NS.SessionLog`: the per-character ring of skill-ups (`db.char.log`, 500), session gains, `Rate`, per-skill `ETA`; hears `SKILL_UP` | subscribes on its own bus target at load (after `core/Bus.lua`) |
+| `modules/Alts.lua` | `NS.Alts`: each character's skills in `db.global.characters["<realm>-<name>"]` on `SKILLS_UPDATED` (debounced) and `PLAYER_LOGOUT`; `List`, `Forget` | subscribes on its own bus target at load; reads SkillData at call time |
+| `modules/Journal.lua` | the Journal window: Session Log and Alts tabs, `/skm journal` | reads SessionLog and Alts at call time; repaints on `SKILLS_UPDATED` / `LAYOUT_CHANGED` |
 | `settings/Schema.lua` | the schema and the single write seam (LibKa0s-Schema-1.0) | before Slash, OptionsSetup and the pages |
 | `settings/Slash.lua` | `NS.COMMANDS` and the dispatcher (LibKa0s-Slash-1.0) | before the landing spec reads it |
 | `settings/OptionsSetup.lua` | the panel descriptor, `NS.Helpers` (LibKa0s-Options-1.0) | before every page file |

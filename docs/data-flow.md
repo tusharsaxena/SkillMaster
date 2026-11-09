@@ -27,6 +27,16 @@ model with nothing synthesized. Each pass sends `SKILL_UP(key, old, new)` for ev
 rose, then `SKILLS_UPDATED(model)`. Stand-up rescans; stand-down cancels the pending scan with every
 other timer.
 
+## SessionLog, Alts and the Journal (T4.3)
+
+`SKILL_UP(key, old, new)` adds one `{ t, key, old, new, zone }` to `db.char.log`, a ring of the
+newest 500. A session starts at login and again on the Journal's New session; `Gains` sums this
+session's points, `Rate(window)` is points an hour over the last `window` seconds of it, and
+`ETA(key)` is `(max - rank)` over the rate that skill's own gains this session set (nil under two
+gains). `SKILLS_UPDATED` asks for one alt snapshot 2 s later and `PLAYER_LOGOUT` takes one at once;
+an empty model (a list not loaded yet) keeps the skills the last snapshot had. The Journal reads
+both at render time and repaints on `SKILLS_UPDATED`, which follows a pass's `SKILL_UP`s.
+
 ## What runs in v0.1.0
 
 - `OnInitialize` builds the store, runs migrations, applies the skin, registers the slash commands

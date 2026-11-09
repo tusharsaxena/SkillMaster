@@ -20,6 +20,17 @@ passed (clients-§6, testing). Each check names what to do and what you should s
   band disappears and test mode is off.
 - **SM-WIN-4** Bind a key under Options → Keybindings → Ka0s Skill Master; it toggles the window.
 
+## Journal
+
+- **SM-JRN-1** `/skm journal` opens "Skill Master · Journal" with Session Log and Alts tabs; Escape and
+  the close mark close it; drag it, `/reload`, and it opens where it was dropped.
+- **SM-JRN-2** Gain a skill point: a row appears at the top of Session Log with the time, the skill,
+  `old → new` and the zone, and the session card counts it. A second gain of the same skill gives it
+  an ETA. Clear log empties the list; New session sets the count back to +0.
+- **SM-JRN-3** Log in a second character, then back: Alts lists both, each under its whole two-word
+  name, this character first, with mini bars per skill; Professions / Weapons / Other filter the
+  columns. Right-click the other character, confirm, and it is gone.
+
 ## Launcher and settings
 
 - **SM-LDB-1** The minimap button shows the logo. Left-click opens the settings; right-click shows

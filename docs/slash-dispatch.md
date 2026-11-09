@@ -10,6 +10,7 @@
 | `config` | `NS.OpenOptionsPanel` | answers |
 | `skin` | `NS.RunSkinVerb` → `O.SkinVerb` | refused (one line) |
 | `show` / `hide` / `toggle` | `NS.MainWindow.Show` / `Hide` / `Toggle` | refused |
+| `journal` | `NS.Journal.Toggle`: the Journal window | refused |
 | `lock` / `unlock` | `NS.SetByPath("locked", ...)` then the stored echo | refused |
 | `test` | `NS.ToggleTestMode` | refused |
 | `probe` | `NS.Probe.Verb`: the report as JSON in a copy window | refused |

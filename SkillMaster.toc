@@ -103,6 +103,11 @@ modules\Bonuses.lua
 modules\Diagnostics.lua
 # Conventional: registers its events on a tracked bus target at FILE SCOPE (after core\Bus.lua).
 modules\StatData.lua
+# T4.3: subscribe on tracked bus targets at FILE SCOPE (after core\Bus.lua); read NS.SkillData at call time.
+modules\SessionLog.lua
+modules\Alts.lua
+# T4.3: the Journal window; reads NS.SessionLog and NS.Alts at call time.
+modules\Journal.lua
 
 # Settings (last -- depend on everything else being initialized)
 # LOAD-BEARING: NS.Schema, NS.SetByPath and NS.SchemaRuntime, read at FILE SCOPE by the three files below.

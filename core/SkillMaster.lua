@@ -57,6 +57,7 @@ end
 function NS.StandDown()
     NS.State.testMode = false
     if NS.MainWindow then NS.MainWindow.StandDown() end
+    if NS.Journal then NS.Journal.StandDown() end
     NS.HideSkinPicker()
     addon:UnregisterAllEvents()
     addon:CancelAllTimers()
