@@ -113,8 +113,8 @@ API cannot give is left out of the defaults (clients-§3 feature detection), nev
 
 The mockup is the visual spec: the private claude.ai canvas *Skill Master UX*
 (https://claude.ai/artifact/NHcfE8qKUA5a8jJgSprc2N), six artboards: main window, detached blocks + alerts,
-tooltips + trainer popup, broker feeds + launcher menu, journal, options. Its artboard sources are copied into
-`docs/mockups/` so the repo holds the spec. Summary:
+tooltips + trainer popup, broker feeds + launcher menu, journal, options. Its artboard sources are saved in
+`docs/superpowers/specs/2026-11-10-skill-master-mockups/` so the repo holds the spec. Summary:
 
 ### 6.1 Main window
 Title bar "Skill Master" with buttons: lock, settings, journal and close. An optional summary strip shows the
