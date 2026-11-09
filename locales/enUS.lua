@@ -21,6 +21,34 @@ L["Test mode cannot start in combat."] = true
 L["Toggle the Skill Master window"] = true
 L["Shows or hides the Skill Master window."] = true
 
+-- The Journal window (modules/Journal.lua).
+L["Skill Master \194\183 Journal"] = true
+L["Session Log"] = true
+L["Alts"] = true
+L["Time"] = true
+L["Skill"] = true
+L["Change"] = true
+L["Zone"] = true
+L["No skill-ups logged yet."] = true
+L["This session \194\183 %s"] = true
+L["%.1f skill-ups / hour"] = true
+L["ETA to cap"] = true
+L["Two skill-ups of a skill give it an ETA."] = true
+L["New session"] = true
+L["Clear log"] = true
+L["%d h %d m"] = true
+L["%d m"] = true
+L["~%d m"] = true
+L["~%d h"] = true
+L["Professions"] = true
+L["Weapons"] = true
+L["Character"] = true
+L["No characters recorded yet."] = true
+L["Lv %d %s %s"] = true
+L["this character"] = true
+L["Snapshots update on login, logout and every skill change. Right-click a character to forget it."] = true
+L["Forget %s? Their snapshot is removed until they log in again."] = true
+
 -- Slash help rows.
 L["List available commands"] = true
 L["Open the settings panel"] = true
@@ -28,6 +56,7 @@ L["Choose a skin: open the skin picker"] = true
 L["Show the Skill Master window"] = true
 L["Hide the Skill Master window"] = true
 L["Show or hide the Skill Master window"] = true
+L["Show or hide the Journal: the session log and your alts"] = true
 L["Lock the window in place"] = true
 L["Unlock the window so it can be dragged"] = true
 L["Turn test mode on or off"] = true

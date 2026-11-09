@@ -57,6 +57,8 @@ NS.defaults = {
                 bonusPerm = { 0.553, 0.722, 1, 1 },
             },
         },
+        -- The Journal window's drop point, the same rule: written by modules/Journal.lua alone.
+        journal = { point = false },
         skin = {
             source      = "ka0s",                     -- Ka0s skins, or EllesmereUI
             skin        = NS.DEFAULT_SKIN or "ka0s",  -- the library's per-client default: WoW Forever here
@@ -70,7 +72,9 @@ NS.defaults = {
     },
     -- 0, never the current version: AceDB strips a value equal to its default at logout
     -- (savedvariables-§1). `minimap` is LibDBIcon's own table (launcher-§3), per installation.
-    -- The pinned skill the broker's {pinned} token shows (design §7), set from the row menu (T3.3).
-    char = { pinned = false },
-    global = { schemaVersion = 0, minimap = { hide = false } },
+    -- `characters` is the alt overview's store (modules/Alts.lua), keyed "<realm>-<name>".
+    global = { schemaVersion = 0, minimap = { hide = false }, characters = {} },
+    -- Per character: the pinned skill the broker's {pinned} token shows (design §7), set from the
+    -- row menu (T3.3), and the session log's ring (modules/SessionLog.lua).
+    char = { pinned = false, log = {} },
 }

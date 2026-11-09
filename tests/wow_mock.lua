@@ -43,6 +43,27 @@ return function()
         Hide = function(_, name) local b = M.__minimapButtons[name] if b then b.shown = false end end,
         GetMinimapButton = function(_, name) return M.__minimapButtons[name] end,
     }
+    -- AceDB 40's db.keys and db.char, which the kit's AceDB fake leaves out (the session log keeps
+    -- its ring in db.char, the alt snapshots key by db.keys). Built as the real library builds them
+    -- off a client without regional names: char "Name - Realm", realm the realm; db.char is
+    -- sv.char[that key] with the defaults' char section merged in.
+    local aceDB = M.__libs["AceDB-3.0"]
+    local kitNew = aceDB.New
+    aceDB.New = function(self, tbl, defaults, ...)
+        local db = kitNew(self, tbl, defaults, ...)
+        local ctx = M.__context
+        db.keys = db.keys or { char = ctx.name .. " - " .. ctx.realm, realm = ctx.realm }
+        if db.char == nil and type(db.sv) == "table" then
+            db.sv.char = db.sv.char or {}
+            local section = db.sv.char[db.keys.char] or {}
+            for k, v in pairs(defaults and defaults.char or {}) do
+                if section[k] == nil then section[k] = type(v) == "table" and {} or v end
+            end
+            db.sv.char[db.keys.char] = section
+            db.char = section
+        end
+        return db
+    end
     installBindings(M)
     -- Frames answer strata and level (frame-layering-§5): the window sets both.
     installLayers(M)

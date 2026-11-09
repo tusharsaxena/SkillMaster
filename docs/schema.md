@@ -14,12 +14,20 @@ SkillMasterDB
   global
     schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (1)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
+    characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
+                                 -- AceDB 40's db.keys: "PvP-Traxex Silentshot" (client-quirks-§5);
+                                 -- each { name, class, className, race, faction, level, updated,
+                                 -- skills = { [key] = { name, category, rank, max } } }
+  char.<db.keys.char>
+    log = {}                     -- the session log's ring (modules/SessionLog.lua): the newest 500
+                                 -- { t, key, old, new, zone }, oldest first
   profiles.<name>
     enabled = true               -- Enable Ka0s Skill Master; /skm enable, /skm disable
     scale   = 1                  -- Master scale (0.5 .. 2)
     alpha   = 1                  -- Master opacity (0 .. 1)
     locked  = false              -- Lock frame; /skm lock, /skm unlock
     window  = { point = false }  -- drop point, written only by modules/MainWindow.lua
+    journal = { point = false }  -- the Journal's drop point, written only by modules/Journal.lua
     skin = {
       source = "ka0s", skin = <library default: WoW Forever>,
       ignorePanel = false, ignoreFonts = false,
@@ -35,7 +43,10 @@ The Minimap button row's path is `global.minimap.shown`; its get/set invert onto
 
 Every row goes through `NS.SetByPath` (`settings/Schema.lua`). The named non-setting state and its
 writers: `profile.window.point`, owned by `modules/MainWindow.lua` (`savePoint` on drag stop,
-`W.ResetPosition`); `global.minimap.minimapPos`, LibDBIcon's own.
+`W.ResetPosition`); `profile.journal.point`, owned by `modules/Journal.lua` (`savePoint` on drag
+stop, `J.ResetPosition`); `global.characters`, owned by `modules/Alts.lua` (`Snapshot`, `Forget`);
+`char.log`, owned by `modules/SessionLog.lua` (`Add`, `Clear`); `global.minimap.minimapPos`,
+LibDBIcon's own.
 
 ## Migrations
 

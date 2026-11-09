@@ -56,7 +56,10 @@ installation's rows under `SkillMasterDB.global`. Every row, default and migrati
 Named non-setting state (architecture-§5): `profile.window.point`, the main window's drop point, is
 geometry only a drag sets. Its one owner is `modules/MainWindow.lua`; its writers are `savePoint`
 (on `OnDragStop`) and `W.ResetPosition` (the Master-controls Reset position button). LibDBIcon also
-writes its own `minimapPos` into `global.minimap`, the table the Minimap button row shares.
+writes its own `minimapPos` into `global.minimap`, the table the Minimap button row shares. The
+Journal's `profile.journal.point` follows the same rule with `modules/Journal.lua` as its one owner
+(`savePoint`, `J.ResetPosition`); `char.log` is `modules/SessionLog.lua`'s and `global.characters`
+`modules/Alts.lua`'s ([schema.md](schema.md)).
 
 `profile.layout.blocks[id]` (T3.2) is named non-setting state for `docked`, `order`, `collapsed`
 and `point`: `modules/Blocks.lua` owns it, and its writers are `NS.Blocks:Detach` / `:Dock` /
@@ -86,7 +89,7 @@ with their modules.
 ## Slash Commands
 
 `/skm` and `/skillmaster`, one LibKa0s-Slash-1.0 dispatcher over `NS.COMMANDS` (`settings/Slash.lua`):
-`help`, `config`, `skin`, `show`, `hide`, `toggle`, `lock`, `unlock`, `test`, `probe`, `enable`, `disable`,
+`help`, `config`, `skin`, `show`, `hide`, `toggle`, `journal`, `lock`, `unlock`, `test`, `probe`, `enable`, `disable`,
 `list`, `get`, `set`, `reset`, `resetall`, `debug`, `diagnostics`, `perf`, `version`. The bare
 command opens the settings panel. While disabled, every verb but the library's live set refuses on
 one line. The table with each verb's handler and refusal: [slash-dispatch.md](slash-dispatch.md).
@@ -102,6 +105,12 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | `PLAYER_LEVEL_UP` | `NS.SkillData:Enable` | debounced `SkillData:Scan`, with the new level as the weapon-cap floor (5 x level) | the list can still answer the old cap |
 | `UNIT_INVENTORY_CHANGED`, `UNIT_AURA` | `NS.Bonuses.RegisterRuntime` (from `NS.RegisterRuntime`) | `addon:OnBonusesUnitChanged`: player only, debounced `Bonuses.Refresh` (0.2 s), which re-reads only the part the event touched (an aura change never re-reads the 19 item tooltips); a 1 s ticker while a temp bonus naming a skill is live | gear, lures and buffs change the breakdown |
 | `UNIT_STATS`, `UNIT_ATTACK_POWER`, `UNIT_RANGED_ATTACK_POWER`, `UNIT_RESISTANCES`, `UNIT_DAMAGE`, `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
+
+| `PLAYER_LOGOUT` | `modules/Alts.lua` at load, on its own bus target | `Alts:Snapshot` | the last snapshot of the session |
+
+The bus subscribers on their own targets: `modules/SessionLog.lua` hears `SKILL_UP` (one log entry,
+with the zone); `modules/Alts.lua` hears `SKILLS_UPDATED` (one snapshot 2 s after a burst);
+`modules/Journal.lua` hears `SKILLS_UPDATED` and `LAYOUT_CHANGED` (a repaint while shown).
 
 Every registration goes through `NS.SafeRegisterEvent` (events-frames-taint-§1); a refused name
 lands in `NS.rejectedEvents`, which the `[Init]` summary and the diagnostics report print. The stand-
@@ -135,6 +144,10 @@ handlers. The broker's rows (T4.1) never use the overlays.
   drawn yet; the helpers are tooltip lines.
 - Test mode marks the window but still shows the live models: the sample character (the preview
   fixture) arrives in T5.2 through `NS.Blocks.source`.
+- The Journal opens from `/skm journal` only. The launcher menu's Journal entry (design §6.8)
+  needs an extra-entry hook LibKa0s-Launcher-1.0 v1.94.0 does not have; the main window's title-bar
+  button arrives with the title-bar strip (T3.2) and calls `NS.Journal.Toggle`.
+- The Alts grid shows five skill columns at a time; Shift + mouse wheel pages through the rest.
 - Sim mode (the launcher entry and the Master-controls checkbox) arrives with the simulator in T5.2.
 - Every client API the data modules will use is assumed until `/skm probe` confirms it
   ([midnight-quirks.md](midnight-quirks.md), the addon's own section). The kit's Forever API set
@@ -158,7 +171,7 @@ handlers. The broker's rows (T4.1) never use the overlays.
 
 | Doc | Status | Trigger |
 |---|---|---|
-| `slash-dispatch.md` | Present | 21 commands in `NS.COMMANDS` |
+| `slash-dispatch.md` | Present | 22 commands in `NS.COMMANDS` |
 | `midnight-quirks.md` | Present | Always (client-quirks-§1); holds the vendored catalog and this addon's assumed-API table |
 | `debug.md` | Present | The diagnostics dump is a debug surface beyond the default console (debug-logging-§14) |
 | `profiles.md` | Present | The Profiles page ships in the options UI |

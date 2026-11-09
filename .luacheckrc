@@ -39,6 +39,14 @@ read_globals = {
   "TomTom", "UiMapPoint", "C_SuperTrack",
 }
 
+-- T4.3: the session log's clock and zone, the alt snapshot's identity reads, the Journal's popup,
+-- class colors, tooltip and shift-wheel.
+files["modules/SessionLog.lua"] = { read_globals = { "time", "GetZoneText" } }
+files["modules/Alts.lua"] = { read_globals = { "time", "UnitClass", "UnitRace", "UnitFactionGroup", "UnitLevel" } }
+files["modules/Journal.lua"] = {
+  read_globals = { "time", "date", "RAID_CLASS_COLORS", "GameTooltip", "IsShiftKeyDown" },
+}
+
 -- The harness global is declared here, not in read_globals, so addon source cannot reach it (lint).
 files["tests/"] = {
   globals = { "_G.SKM_TEST" },

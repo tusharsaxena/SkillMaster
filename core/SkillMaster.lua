@@ -61,6 +61,7 @@ function NS.StandDown()
     if NS.SecureOverlay then NS.SecureOverlay:StandDown() end
     if NS.TrainerPopup then NS.TrainerPopup.Hide() end
     if NS.Widgets and NS.Widgets.CloseMenu then NS.Widgets.CloseMenu() end   -- the row menu closes with us
+    if NS.Journal then NS.Journal.StandDown() end
     NS.HideSkinPicker()
     addon:UnregisterAllEvents()
     addon:CancelAllTimers()
