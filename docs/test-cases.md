@@ -111,6 +111,64 @@ Total.
 - skilldata: PLAYER_LEVEL_UP lifts the weapon cap to 5 x the new level before the list catches up
 - skilldata: the scan's own header toggles do not schedule another scan
 
+### test_trainers.lua (12)
+
+- test_trainers_fist_alliance: Alliance fist weapons are taught in Ironforge and Darnassus
+- test_trainers_fist_alliance: the home city of the player's race sorts first
+- trainers: Horde fist weapons come from Sayoc in Orgrimmar only
+- trainers: For reads the player's faction and race when none is passed
+- trainers: Neutral trainers are on both factions' lists
+- trainers: an unknown key answers an empty list, never an error
+- trainers: every record is unverified and names its source
+- test_trainers_next_rank_at_cap: Leatherworking 150/150 at level 22 trains Expert
+- trainers: NextRank answers nil at Artisan and for a skill with no ranks
+- trainers: NextRank's skill gate (Journeyman wants 50)
+- test_trainers_riding_level_gate: riding 75 opens at 40, 150 at 60
+- test_trainers_riding_level_gate: the race's own riding trainer sorts first
+
+### test_helpers.lua (8)
+
+- test_helpers_skinnable_level: 122 -> 24, 100 -> 20, 50 -> 15, 1 -> 10
+- test_helpers_fishing_need_unknown_nil: a zone the table lacks answers nil
+- helpers: FishingNeed answers the getaway-free skill for a known zone
+- helpers: FishingNeed prefers the uiMapID over the name
+- helpers: Nodes lists what the rank can gather and the next node up
+- helpers: Nodes at the top has no next node, and an unknown key answers nil
+- helpers: WeaponCap is five per level
+- helpers: FishingNeedHere reads the map ID first, then the zone text
+
+### test_bonuses.lua (12)
+
+- bonuses: lure on the pole is one temp enchant source with its expiry
+- bonuses: a Dwarf's Guns +5 is one permanent racial source
+- bonuses: modifier 12 with 7 attributed leaves one Other 5
+- bonuses: no modifier, no sources
+- bonuses: an unknown or unlearned skill answers an empty breakdown
+- bonuses: the '+N <Skill>' item pattern, case-insensitive, other stats ignored
+- bonuses: a skill buff is a temp source with its aura's expiry
+- bonuses: more attributed than the modifier shows a negative Other, never a silent mismatch
+- bonuses: the 1.12 globals and a scanning tooltip are the fallback readers
+- bonuses: inventory change publishes BONUSES_UPDATED; the 1 s ticker runs only while a temp bonus lives
+- racials: the table is Forever data, unverified, with a source, +5 per racial skill
+- racials: every racial skill key is a catalog key
+
+### test_statdata.lua (14)
+
+- statdata (primary_vs_highest): the primaries scale against the highest, Agi 112 -> 100%, Str 48 -> 42.9%
+- statdata: attack power is base plus buffs against 400, crit against 30%
+- statdata (hit_markers): hit scales to 9% with markers at 5% and 9%, spell hit to 16%
+- statdata (armor_mitigation): 1104 armor at level 22 -> 1104/(1104+400+1870) = 32.7%, against 75%
+- statdata (missing_api_omitted): a stat the client cannot give is left out, never faked
+- statdata (resist_ref_at_60): resists scale to 5 x (level + 3) = 315 at 60, with the cap marker
+- statdata: defense scales to 5 x level, and the 440 marker shows only at 60
+- statdata: speed is yards per second over 7, against 200% with the 100% marker
+- statdata: durability is the lowest equipped slot, with the 20% repair marker
+- statdata: every def declares a known group, an api, a ref and a source record
+- statdata: Model() and Get(key) answer the last scan
+- statdata: a burst of stat events sends STATS_UPDATED once, after the 0.2 s throttle
+- statdata: another unit's event schedules nothing
+- statdata: the speed ticker runs only while a speed display asks for it
+
 ### test_surface_parity.lua (10)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
@@ -245,6 +303,10 @@ Total.
 | test_perf.lua | 1 |
 | test_probe.lua | 7 |
 | test_skilldata.lua | 22 |
+| test_trainers.lua | 12 |
+| test_helpers.lua | 8 |
+| test_bonuses.lua | 12 |
+| test_statdata.lua | 14 |
 | test_surface_parity.lua | 10 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
@@ -258,4 +320,4 @@ Total.
 | test_skin_switch.lua | 5 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **148** |
+| **Total** | **194** |

@@ -33,8 +33,10 @@ In short: `core/` holds the identity, the constants, the one setup file per LibK
 Env, Core, Skin, Bus, Pool, Widgets, Lifecycle, Perf, DebugLog, Launcher), the AceAddon entry
 (`core/SkillMaster.lua`) and the store (`core/Database.lua`); `core/Compat.lua` is the compat family (the skill-list shims);
 `defaults/Profile.lua` is the defaults tree and `defaults/*_Forever.lua` the data tables (the skill
-catalog, the class weapon lists); `modules/` holds the main window, the `/skm probe` report, the
-skills model (`SkillData`) and the diagnostics sections;
+catalog, the class weapon lists, trainers, ranks, gathering, fishing, racials, stat definitions);
+`modules/` holds the main window, the `/skm probe` report, the skills model (`SkillData`), the
+bonus breakdown (`Bonuses`), the stats model (`StatData`), the trainer lookups (`Trainers`), the
+skill helpers (`NS.SkillHelpers`, `modules/Helpers.lua`) and the diagnostics sections;
 `settings/` holds the schema,
 the slash table and the settings pages.
 
@@ -61,8 +63,9 @@ No structural registry exists yet.
 ## Message Bus
 
 Six messages, each declared once in `core/Bus.lua` as `NS.MSG.<KEY>` through LibKa0s-Bus-1.0's
-strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDATED` and `SKILL_UP`;
-the other senders arrive with their modules.
+strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDATED` and `SKILL_UP`,
+`Bonuses` sends `BONUSES_UPDATED` and `StatData` sends `STATS_UPDATED`; the other senders arrive
+with their modules.
 
 | Constant | Wire name | Sender | Payload | Consumers |
 |---|---|---|---|---|
@@ -89,6 +92,8 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | `SKILL_LINES_CHANGED` | `NS.SkillData:Enable` (from `NS.RegisterRuntime`) | debounced `SkillData:Scan` (0.1 s) | the skill list changed; the echo of the scan's own header toggles is ignored for 0.2 s |
 | `CHAT_MSG_SKILL` | `NS.SkillData:Enable` | debounced `SkillData:Scan` | a skill-up line |
 | `PLAYER_LEVEL_UP` | `NS.SkillData:Enable` | debounced `SkillData:Scan`, with the new level as the weapon-cap floor (5 x level) | the list can still answer the old cap |
+| `UNIT_INVENTORY_CHANGED`, `UNIT_AURA` | `NS.Bonuses.RegisterRuntime` (from `NS.RegisterRuntime`) | `addon:OnBonusesUnitChanged`: player only, debounced `Bonuses.Refresh` (0.2 s); a 1 s ticker while a temp bonus is live | gear, lures and buffs change the breakdown |
+| `UNIT_STATS`, `UNIT_ATTACK_POWER`, `UNIT_RANGED_ATTACK_POWER`, `UNIT_RESISTANCES`, `UNIT_DAMAGE`, `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
 
 Every registration goes through `NS.SafeRegisterEvent` (events-frames-taint-§1); a refused name
 lands in `NS.rejectedEvents`, which the `[Init]` summary and the diagnostics report print. The stand-

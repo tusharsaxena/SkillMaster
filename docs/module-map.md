@@ -28,10 +28,17 @@ position says so beside its TOC line (toc-file-§5).
 | `defaults/Profile.lua` | `NS.defaults`, the only place a default is written | read by the schema rows at load |
 | `defaults/SkillCatalog_Forever.lua` | `NS.SkillCatalog` (every profession, the 16 weapon lines, Defense, Lockpicking, Riding), the excluded Skills-tab headers, `NS.DataMeta` | read at load by SkillData |
 | `defaults/ClassWeapons_Forever.lua` | `NS.ClassWeapons_Forever[classFile]`: the weapon lines and Riding each class can train | read at load by SkillData |
+| `defaults/Ranks_Forever.lua`, `Trainers_Forever.lua`, `Gathering_Forever.lua`, `Fishing_Forever.lua` | the rank ladders, trainer records, gathering needs and fishing zones (all `verified = false`) | read at call time by Trainers and SkillHelpers; through `NS.L` at load |
+| `defaults/Racials_Forever.lua` | `NS.Racials_Forever.byRace`: the +5 racial weapon skills | read at call time by Bonuses |
+| `defaults/Stats_Forever.lua` | `NS.STAT_DEFS`: the 30 stats, their groups, references and markers | read at call time by StatData |
 | `modules/MainWindow.lua` | the main window, its toggle, the test strip, the key binding button | publishes `NS.BINDINGS` for the General page |
 | `modules/Probe.lua` | `/skm probe`: the Forever API report as JSON in a copy window | reads only core members at load |
 | `modules/SkillData.lua` | the skills model: scan, classify, synthesize unlearned rows, `SKILLS_UPDATED` / `SKILL_UP`; builds `NS.SkillNameToKey` | after the catalog and the locale, read at load |
+| `modules/Trainers.lua` | `NS.Trainers`: `For(key, faction?, race?)` and `NextRank(...)` over the trainer and rank tables | reads the defaults at call time |
+| `modules/Helpers.lua` | `NS.SkillHelpers`: skinnable level, weapon cap, fishing need, gatherable nodes (`NS.Helpers` is the options library) | reads the defaults at call time |
+| `modules/Bonuses.lua` | `NS.Bonuses`: a skill's modifier broken into racial, item, enchant, buff and Other sources; `BONUSES_UPDATED` | defines `NS.addon:OnBonusesUnitChanged` at load, so after `core/SkillMaster.lua`; reads SkillData at call time |
 | `modules/Diagnostics.lua` | the diagnostics report's sections | read at run time |
+| `modules/StatData.lua` | `NS.StatData`: the stats model over `NS.STAT_DEFS`, `STATS_UPDATED`, the speed ticker | registers its events on its own bus target at load |
 | `settings/Schema.lua` | the schema and the single write seam (LibKa0s-Schema-1.0) | before Slash, OptionsSetup and the pages |
 | `settings/Slash.lua` | `NS.COMMANDS` and the dispatcher (LibKa0s-Slash-1.0) | before the landing spec reads it |
 | `settings/OptionsSetup.lua` | the panel descriptor, `NS.Helpers` (LibKa0s-Options-1.0) | before every page file |

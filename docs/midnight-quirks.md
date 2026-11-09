@@ -315,6 +315,15 @@ below on both clients.
 | `GetSpellHitModifier()`, `GetSpellBonusDamage(school)`, `GetSpellCritChance(school)` | spell hit %, bonus damage, crit % | listed (inherited from live); shape assumed | StatData |
 | `GetCombatRating(id)` | a rating | listed (inherited from live); meaning on Forever unknown | StatData (left out unless it answers) |
 | `GetUnitSpeed(unit)` | `current, run, flight, swim` in yards/s (7 = 100%) | listed (inherited from live); shape assumed | StatData (run speed) |
+| `UnitStat(unit, i)`, `UnitAttackPower(unit)`, `UnitRangedAttackPower(unit)` | `base, effective, pos, neg`; `base, pos, neg` | assumed (1.12) | StatData (T2.3) |
+| `UnitArmor(unit)` | `base, effective, armor, pos, neg`; mitigation derived from the effective armor and the level, capped at 75% | assumed (1.12) | StatData (T2.3) |
+| `UnitDefenseSkill(unit)` | `base, modifier` (the kit's Forever set lists it; neither set lists `UnitDefense`) | listed by the kit's Forever set; shape assumed | StatData (T2.3) |
+| `GetRangedHitModifier()`, `GetSpellBonusHealing()` | ranged hit % from gear; bonus healing | `GetRangedHitModifier` listed by the kit's Forever set only; shapes assumed | StatData (T2.3) |
+| `GetManaRegen()` | mana per second (shown x5 as mp5) | assumed | StatData (T2.3) |
+| `GetInventoryItemDurability(slot)` | `current, max`, nil for an item without durability (no durable item worn reads 100%) | assumed (1.12) | StatData (T2.3) |
+| `UnitClass("player")`, `UnitLevel("player")` | `localized, classFile`; the level | assumed (1.12) | SkillData (class weapon lists, 5 x level cap, T2.1), StatData |
+| `UnitRace("player")`, `UnitFactionGroup("player")` | `localized, raceFile` (`Human`, `Dwarf`, `Orc`, `Troll`, ...); `"Alliance"` / `"Horde"` | assumed (1.12) | Bonuses (racials, T2.2), Trainers (T2.4) |
+| `GetZoneText()` | the localized zone name, matched against the fishing table when no uiMapID matches | assumed (1.12) | SkillHelpers.FishingNeedHere (T2.4) |
 | `C_Map.GetBestMapForUnit`, `C_Map.SetUserWaypoint` | a uiMapID; a native map pin | listed (inherited from live); behavior unknown | Helpers, Waypoints (T2.4, T3.3) |
 | `CastSpellByName(name)` | protected from insecure code in combat | listed; protection unknown | the crafting rows' secure overlay (T3.3) |
 | `C_AddOns.IsAddOnLoaded("TomTom")` | true when TomTom is loaded; the bare `IsAddOnLoaded` is in neither set | listed | Waypoints (T3.3) |
