@@ -1,8 +1,9 @@
 local _, NS = ...
 -- modules/Helpers.lua — the gathering and fishing helpers (design §12 item 4): the highest
 -- skinnable mob level, the nodes a Mining or Herbalism rank can gather, the fishing skill a zone
--- wants, and the weapon-skill cap. Tooltip lines on the Skinning, Mining, Herbalism, Fishing and
--- weapon rows read these.
+-- wants, the weapon-skill cap and the equipped weapons' skills. Tooltip lines on the Skinning,
+-- Mining, Herbalism, Fishing and weapon rows, the rows' one-line hint, the broker and the detached
+-- weapon block read these.
 --
 -- Published as NS.SkillHelpers: NS.Helpers is the LibKa0s-Options-1.0 instance
 -- (settings/OptionsSetup.lua), assigned after this file loads, and would replace it.
@@ -69,6 +70,49 @@ function H.Nodes(key, rank)
         elseif not out.next then
             out.next = { name = node.name, need = node.need }
         end
+    end
+    return out
+end
+
+-- -----------------------------------------------------------------------------------------------
+-- The equipped weapons (the broker's {equippedWeapon}, the detached weapon block's marker)
+-- -----------------------------------------------------------------------------------------------
+
+-- Enum.ItemWeaponSubclass -> skill key: an equipped weapon's class names its weapon skill.
+local WEAPON_SUBCLASS = {
+    [0] = "axes", [1] = "twoHandedAxes", [2] = "bows", [3] = "guns", [4] = "maces", [5] = "twoHandedMaces",
+    [6] = "polearms", [7] = "swords", [8] = "twoHandedSwords", [10] = "staves", [13] = "fistWeapons",
+    [15] = "daggers", [16] = "thrown", [18] = "crossbows", [19] = "wands",
+}
+local ITEM_CLASS_WEAPON = 2
+local MAIN_HAND, OFF_HAND, RANGED = 16, 17, 18
+H.WEAPON_SLOTS = { MAIN_HAND, OFF_HAND, RANGED }
+
+local function itemInfoInstant()
+    if type(GetItemInfoInstant) == "function" then return GetItemInfoInstant end
+    local C = C_Item
+    if type(C) == "table" and type(C.GetItemInfoInstant) == "function" then return C.GetItemInfoInstant end
+    return nil
+end
+
+--- The weapon skill of the item in inventory `slot`: nil for an empty slot or a non-weapon, and
+--- "unarmed" for an empty main hand.
+function H.WeaponSkillInSlot(slot)
+    local link = type(GetInventoryItemLink) == "function" and GetInventoryItemLink("player", slot) or nil
+    if not link then return slot == MAIN_HAND and "unarmed" or nil end
+    local info = itemInfoInstant()
+    if not info then return nil end
+    local ok, _, _, _, _, _, classID, subclassID = pcall(info, link)
+    if not ok or classID ~= ITEM_CLASS_WEAPON then return nil end
+    return WEAPON_SUBCLASS[subclassID]
+end
+
+--- The weapon skills the player has equipped (main hand, off hand, ranged): { [key] = true }.
+function H.EquippedWeaponSkills()
+    local out = {}
+    for _, slot in ipairs(H.WEAPON_SLOTS) do
+        local key = H.WeaponSkillInSlot(slot)
+        if key then out[key] = true end
     end
     return out
 end

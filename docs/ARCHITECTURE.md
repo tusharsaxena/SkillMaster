@@ -64,8 +64,9 @@ Named non-setting state (architecture-§5): `profile.window.point`, the main win
 geometry only a drag sets. Its one owner is `modules/MainWindow.lua`; its writers are `savePoint`
 (on `OnDragStop`) and `W.ResetPosition` (the Master-controls Reset position button). LibDBIcon also
 writes its own `minimapPos` into `global.minimap`, the table the Minimap button row shares. The
-Journal's `profile.journal.point` follows the same rule with `modules/Journal.lua` as its one owner
-(`savePoint`, `J.ResetPosition`); `char.log` is `modules/SessionLog.lua`'s and `global.characters`
+Journal's `profile.journal.point` and `profile.journal.size` follow the same rule with
+`modules/Journal.lua` as their one owner (`savePoint`, `J.ResetPosition`; `saveSize`, on the resize
+grip's release); `char.log` is `modules/SessionLog.lua`'s and `global.characters`
 `modules/Alts.lua`'s ([schema.md](schema.md)). `profile.alerts.point`, the alert toasts' drop point,
 is the same kind: its one owner is `modules/Alerts.lua`, whose toast descriptor's `setPosition` (a
 test-mode drag, or the toast's `ResetPosition`) is its only writer.
@@ -151,10 +152,14 @@ a crafting row opens the main window scrolled to it rather than casting (design 
 - The Layout, Bars, Skills and Stats settings pages arrive in T5.1: until then the block layout,
   the bar look and the hidden rows follow their defaults and the row controls (collapse, detach,
   dock, the row menu's Hide).
-- An overlay is placed when its row is laid out, shown, scrolled or dragged; while the window is
-  being dragged it lags its row until the drop (a re-sync on `OnDragStop`).
-- The optional one-line gathering hint under a row (`skills.helperHint`, design §12 item 4) is not
-  drawn yet; the helpers are tooltip lines.
+- An overlay is placed when its row is laid out, shown, scrolled, raised or dropped; while its
+  window is being dragged it is taken down (`SecureOverlay:SetMoving`) and laid again at the drop,
+  so a crafting row cannot be cast from mid-drag. A raise re-levels it on the host's mouse-down,
+  `Raise` and `OnShow` and once more on the next frame; a window of the same strata raised above
+  the host (the Journal) does not re-level the host's overlays.
+- `layout.blocks.weapon.belowCapOnly` (the detached compact preset's filter) and
+  `skills.helperHint` (the one-line gathering hint under a row) have no settings rows yet: their
+  rows arrive with the Layout and Skills pages.
 - Test mode marks the window but still shows the live models: the sample character (the preview
   fixture) arrives in T5.2 through `NS.Blocks.source`.
 - The launcher menu has no *Journal* entry yet (design §6.8): `LibKa0s-Launcher-1.0` minor 9 builds

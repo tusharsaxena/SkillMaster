@@ -1,6 +1,6 @@
 local addonName, NS = ...
 -- core/CoreSetup.lua — NS.Print from LibKa0s-Core-1.0, the SafeRegister* family, the shared window
--- chrome and the one MakeCloseButton wrapper.
+-- chrome, the one MakeCloseButton wrapper and the resize grip (NS.MakeResizable).
 --
 -- LOAD-BEARING: after core/Namespace.lua (NS.PREFIX) and before everything that prints.
 NS.Util = NS.Util or {}
@@ -27,6 +27,7 @@ if not lib then
     NS.SKIN            = {}
     NS.ApplySkin       = function() end
     NS.MakeCloseButton = function() return nil end
+    NS.MakeResizable   = function() return nil end   -- no grip: the window keeps its size
 
     local function reject(rejected, event)
         if type(rejected) ~= "table" then return end
@@ -84,6 +85,10 @@ NS.ApplySkin = lib.ApplySkin
 NS.MakeCloseButton = function(parent, onClick)
     return lib.MakeCloseButton(parent, onClick, addonName)
 end
+
+-- The bottom-right resize grip (standalone-windows, Resizing); modules/Chrome.lua's
+-- NS.Chrome.MakeResizable is the one caller, which coalesces the relayout and saves on release.
+NS.MakeResizable = lib.MakeResizable
 
 -- The prefix as a FUNCTION, so a later change to NS.PREFIX is not frozen in at load.
 local printer = lib:New({ prefix = function() return NS.PREFIX end })

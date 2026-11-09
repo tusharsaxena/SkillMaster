@@ -27,7 +27,8 @@ SkillMasterDB
     alpha   = 1                  -- Master opacity (0 .. 1)
     locked  = false              -- Lock frame; /skm lock, /skm unlock
     window  = { point = false }  -- drop point, written only by modules/MainWindow.lua
-    journal = { point = false }  -- the Journal's drop point, written only by modules/Journal.lua
+    journal = { point = false, size = false }  -- the Journal's drop point and its { w, h } (the
+                                 -- resize grip), both written only by modules/Journal.lua
     skin = {
       source = "ka0s", skin = <library default: WoW Forever>,
       ignorePanel = false, ignoreFonts = false,
@@ -50,8 +51,9 @@ The Minimap button row's path is `global.minimap.shown`; its get/set invert onto
 
 Every row goes through `NS.SetByPath` (`settings/Schema.lua`). The named non-setting state and its
 writers: `profile.window.point`, owned by `modules/MainWindow.lua` (`savePoint` on drag stop,
-`W.ResetPosition`); `profile.journal.point`, owned by `modules/Journal.lua` (`savePoint` on drag
-stop, `J.ResetPosition`); `global.characters`, owned by `modules/Alts.lua` (`Snapshot`, `Forget`);
+`W.ResetPosition`); `profile.journal.point` and `profile.journal.size`, owned by
+`modules/Journal.lua` (`savePoint` on drag stop and `J.ResetPosition`; `saveSize` on the resize
+grip's release); `global.characters`, owned by `modules/Alts.lua` (`Snapshot`, `Forget`);
 `char.log`, owned by `modules/SessionLog.lua` (`Add`, `Clear`); `profile.alerts.point`, owned by
 `modules/Alerts.lua` (the toast's `setPosition`); `global.minimap.minimapPos`, LibDBIcon's own.
 

@@ -34,13 +34,9 @@ local FLASH_FEEDS = {
 }
 FLASH_FEEDS.defense = { "all", "weapons" }
 
--- Enum.ItemWeaponSubclass -> skill key: the main hand's class names its weapon skill.
-local WEAPON_SUBCLASS = {
-    [0] = "axes", [1] = "twoHandedAxes", [2] = "bows", [3] = "guns", [4] = "maces", [5] = "twoHandedMaces",
-    [6] = "polearms", [7] = "swords", [8] = "twoHandedSwords", [10] = "staves", [13] = "fistWeapons",
-    [15] = "daggers", [16] = "thrown", [18] = "crossbows", [19] = "wands",
-}
-local ITEM_CLASS_WEAPON = 2
+-- The settings page a feed's right-click opens (the Broker page's registration key). The library
+-- opens the main panel when no page of that key is built.
+B.SETTINGS_PAGE = "broker"
 
 -- ---------------------------------------------------------------------------------------------
 -- State: the last models the bus handed over, the session's gains, the flash
@@ -77,22 +73,9 @@ end
 -- The template context
 -- ---------------------------------------------------------------------------------------------
 
-local function itemInfoInstant()
-    if type(GetItemInfoInstant) == "function" then return GetItemInfoInstant end
-    local C = C_Item
-    if type(C) == "table" and type(C.GetItemInfoInstant) == "function" then return C.GetItemInfoInstant end
-    return nil
-end
-
 --- The skill key of the main-hand weapon: "unarmed" with none, nil for a non-skill item.
 function B.MainHandSkill()
-    local link = type(GetInventoryItemLink) == "function" and GetInventoryItemLink("player", MAIN_HAND) or nil
-    if not link then return "unarmed" end
-    local info = itemInfoInstant()
-    if not info then return nil end
-    local ok, _, _, _, _, _, classID, subclassID = pcall(info, link)
-    if not ok or classID ~= ITEM_CLASS_WEAPON then return nil end
-    return WEAPON_SUBCLASS[subclassID]
+    return NS.SkillHelpers.WeaponSkillInSlot(MAIN_HAND)
 end
 
 local function pinnedKey()
@@ -395,7 +378,7 @@ function B.FillTooltip(id, tip)
         return rows
     end
     if id == "stats" then fillStats(tip, rows) else fillSkills(tip, id, rows) end
-    tip:AddLine(colored("gtip.footer", L["Click label: toggle window \194\183 Click row: open its window \194\183 Right-click: settings"]))
+    tip:AddLine(colored("gtip.footer", L["Click label: toggle window \194\183 Click row: open its window \194\183 Right-click: feed options"]))
     return rows
 end
 
@@ -444,12 +427,20 @@ function B.OpenRow(row)
     if row.kind == "skill" then return openSkillRow(row.key) end
 end
 
---- The feed's own cell: left toggles the main window, right opens the settings panel.
-function B.OnClick(_, button)
-    if button == "RightButton" then
-        if type(NS.OpenOptionsPanel) == "function" then NS.OpenOptionsPanel() end
-        return
+--- The feed options: the Broker settings page through the options library's page opener, else
+--- the main settings panel (the library absent: its stub prints why), else nothing.
+function B.OpenSettings()
+    local H = NS.Helpers
+    if type(H) == "table" and type(H.OpenOptionsPanel) == "function" then
+        return H.OpenOptionsPanel(B.SETTINGS_PAGE)
     end
+    if type(NS.OpenOptionsPanel) == "function" then return NS.OpenOptionsPanel() end
+    return nil
+end
+
+--- The feed's own cell: left toggles the main window, right opens the feed options.
+function B.OnClick(_, button)
+    if button == "RightButton" then return B.OpenSettings() end
     toggleWindow()
 end
 
@@ -495,13 +486,22 @@ local function stillHovered(tip)
     return owner ~= nil and owner.IsMouseOver ~= nil and owner:IsMouseOver()
 end
 
+--- Whether GameTooltip is still the feed's: another frame may have taken it since (SetOwner).
+local function ownsTip(tip)
+    if owner == nil then return false end
+    if type(tip.GetOwner) ~= "function" then return true end
+    return tip:GetOwner() == owner
+end
+
 function B.OnLeave()
     local tip = GameTooltip
     stopPoll()
     poll = NS.addon:ScheduleRepeatingTimer(function()
-        if owner and tip:IsShown() and stillHovered(tip) then return end
+        local mine = ownsTip(tip)
+        if mine and tip:IsShown() and stillHovered(tip) then return end
         stopPoll()
-        if owner then tip:Hide() end
+        if mine then tip:Hide() end
+        owner = nil
     end, HIDE_POLL)
 end
 
