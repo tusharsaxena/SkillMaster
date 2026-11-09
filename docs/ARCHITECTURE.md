@@ -105,8 +105,15 @@ Nothing in v0.1.0 touches a protected function or a secure frame. The window is 
 the key binding clicks a plain, non-secure button. The settings panel never opens in combat (the
 library refuses, options-ui-§2). The crafting-row secure overlays (T3.3) will be created out of
 combat and re-anchored only out of combat, queued on `PLAYER_REGEN_ENABLED`.
+The broker feeds (`modules/Broker.lua`) are never secure: their tooltip rows are plain buttons
+parented to GameTooltip that open windows (the main window, the character frame), and a crafting
+row opens the main window scrolled to it rather than casting (design §6.5).
 
 ## Known Limitations
+
+- The launcher menu has no *Journal* entry yet (design §6.8): `LibKa0s-Launcher-1.0` minor 9 builds
+  only its fixed entries (Enabled, Locked, Test mode, Sim mode, Show window, Open settings), takes
+  no extra entry from the descriptor, and launcher-§2 forbids a host menu. It needs a library seam.
 
 - The window has no content yet: the skill and stat bars arrive with milestones 2 and 3.
 - Sim mode (the launcher entry and the Master-controls checkbox) arrives with the simulator in T5.2.

@@ -61,6 +61,7 @@ function NS.StandDown()
     addon:UnregisterAllEvents()
     addon:CancelAllTimers()
     NS.BusStandDown()
+    if NS.Broker then NS.Broker.Refresh() end   -- the feeds read "Off" (T4.1)
 end
 
 --- Rebuild from current state.
@@ -68,6 +69,7 @@ function NS.StandUp()
     NS.BusStandUp()
     NS.RegisterRuntime()
     if NS.MainWindow then NS.MainWindow.Refresh() end
+    if NS.Broker then NS.Broker.Refresh() end
 end
 
 -- ---------------------------------------------------------------------------------------------

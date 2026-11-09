@@ -27,6 +27,15 @@ model with nothing synthesized. Each pass sends `SKILL_UP(key, old, new)` for ev
 rose, then `SKILLS_UPDATED(model)`. Stand-up rescans; stand-down cancels the pending scan with every
 other timer.
 
+## Broker (T4.1)
+
+`modules/Broker.lua` keeps the last `SKILLS_UPDATED` and `STATS_UPDATED` models, counts the
+session's gains from `SKILL_UP`, and re-renders each feed's template (`profile.broker.templates`)
+on every message; an unchanged text is not re-assigned. A `SKILL_UP` flashes "^ <name> <new>" on
+the All feed and the skill's own feed for `profile.broker.flashSeconds` (one AceTimer, restarted by
+the next skill-up). The only client read is the main hand's weapon class, for `{equippedWeapon}`.
+The stand-down shows "Off" on every feed; the stand-up re-renders.
+
 ## What runs in v0.1.0
 
 - `OnInitialize` builds the store, runs migrations, applies the skin, registers the slash commands

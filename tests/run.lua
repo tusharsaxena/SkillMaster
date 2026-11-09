@@ -90,6 +90,8 @@ Kit.run{
         "test_helpers",
         "test_bonuses",
         "test_statdata",
+        "test_template",
+        "test_broker",
         "test_surface_parity",
         "test_vendor_sync",
         -- slash-commands-§7: drives OnEnable and full disable/enable cycles on the shared

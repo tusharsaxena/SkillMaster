@@ -21,6 +21,23 @@ NS.defaults = {
             outline     = "hud",
             pickerSeen  = false,                      -- the first-run skin picker was closed here
         },
+        -- The broker data feeds (modules/Broker.lua, design §6.7). Tokens: modules/Template.lua.
+        broker = {
+            flashSeconds = 5,   -- how long "^ Bows 81" replaces a feed's text after a skill-up
+            templates = {
+                all         = "{pinned} \194\183 +{gains}",
+                professions = "{lowestProf}",
+                weapons     = "{equippedWeapon}",
+                stats       = "{stat:crit} crit \194\183 {stat:speed}",
+            },
+            -- The tooltip's mini-bar fill per category (the approved mockup's colors).
+            categoryColors = {
+                primary   = { 0.36, 0.61, 0.88, 1 },
+                secondary = { 0.37, 0.70, 0.43, 1 },
+                weapon    = { 0.85, 0.57, 0.25, 1 },
+                other     = { 0.63, 0.55, 0.88, 1 },
+            },
+        },
     },
     -- 0, never the current version: AceDB strips a value equal to its default at logout
     -- (savedvariables-§1). `minimap` is LibDBIcon's own table (launcher-§3), per installation.

@@ -39,6 +39,8 @@ position says so beside its TOC line (toc-file-§5).
 | `modules/Bonuses.lua` | `NS.Bonuses`: a skill's modifier broken into racial, item, enchant, buff and Other sources; `BONUSES_UPDATED` | defines `NS.addon:OnBonusesUnitChanged` at load, so after `core/SkillMaster.lua`; reads SkillData at call time |
 | `modules/Diagnostics.lua` | the diagnostics report's sections | read at run time |
 | `modules/StatData.lua` | `NS.StatData`: the stats model over `NS.STAT_DEFS`, `STATS_UPDATED`, the speed ticker | registers its events on its own bus target at load |
+| `modules/Template.lua` | `NS.Template.Render(tpl, ctx)`: the broker feed text tokens (`{pinned}`, `{gains}`, `{last}`, `{lowestProf}`, `{equippedWeapon}`, `{skill:<key>}`, `{stat:<key>}`, `{level}`); an unknown token renders empty | pure; read by Broker at call time |
+| `modules/Broker.lua` | `NS.Broker`: the four LibDataBroker data sources (`SkillMaster_All`, `_Professions`, `_Weapons`, `_Stats`), the skill-up flash, the GameTooltip with mini bars and clickable rows; never the launcher, never secure | builds its data objects and bus target at load (after Bus, Pool and the libraries) |
 | `settings/Schema.lua` | the schema and the single write seam (LibKa0s-Schema-1.0) | before Slash, OptionsSetup and the pages |
 | `settings/Slash.lua` | `NS.COMMANDS` and the dispatcher (LibKa0s-Slash-1.0) | before the landing spec reads it |
 | `settings/OptionsSetup.lua` | the panel descriptor, `NS.Helpers` (LibKa0s-Options-1.0) | before every page file |

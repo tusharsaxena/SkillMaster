@@ -33,6 +33,8 @@ read_globals = {
   "UnitFactionGroup", "UnitRace", "GetZoneText",
   -- T2.2 Bonuses (modules/Bonuses.lua): the clock, the race, tooltips and buffs
   "C_TooltipInfo", "C_UnitAuras", "issecretvalue",
+  -- T4.1 Broker (modules/Broker.lua): the main hand's weapon class, the tooltip, the character frame
+  "GetInventoryItemLink", "GetItemInfoInstant", "GameTooltip", "ToggleCharacter",
 }
 
 -- The harness global is declared here, not in read_globals, so addon source cannot reach it (lint).
