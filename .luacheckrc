@@ -33,6 +33,10 @@ read_globals = {
   "UnitFactionGroup", "UnitRace", "GetZoneText",
   -- T2.2 Bonuses (modules/Bonuses.lua): the clock, the race, tooltips and buffs
   "C_TooltipInfo", "C_UnitAuras", "issecretvalue",
+  -- M3 the display (modules/Chrome.lua .. modules/Waypoints.lua): the tooltip, the character frame,
+  -- chat linking, the modifier keys and the waypoint providers (TomTom, the native user waypoint)
+  "GameTooltip", "ToggleCharacter", "ChatEdit_InsertLink", "ChatFrame_OpenChat", "IsShiftKeyDown",
+  "TomTom", "UiMapPoint", "C_SuperTrack",
 }
 
 -- The harness global is declared here, not in read_globals, so addon source cannot reach it (lint).

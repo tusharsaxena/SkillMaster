@@ -58,6 +58,13 @@ geometry only a drag sets. Its one owner is `modules/MainWindow.lua`; its writer
 (on `OnDragStop`) and `W.ResetPosition` (the Master-controls Reset position button). LibDBIcon also
 writes its own `minimapPos` into `global.minimap`, the table the Minimap button row shares.
 
+`profile.layout.blocks[id]` (T3.2) is named non-setting state for `docked`, `order`, `collapsed`
+and `point`: `modules/Blocks.lua` owns it, and its writers are `NS.Blocks:Detach` / `:Dock` /
+`:SetCollapsed` (the header and band controls) and, for `point` alone, `savePoint` in
+`modules/Detached.lua` (a detached frame's `OnDragStop`). `scale` and `locked` are read today and
+get their schema rows with the Layout page (T5.1), as do the `bars.*` look and `skills.hidden` /
+`stats.hidden` (written by the row menu, T3.3).
+
 No structural registry exists yet.
 
 ## Message Bus
@@ -73,7 +80,7 @@ with their modules.
 | `SKILL_UP` | `Ka0s_SkillMaster_SkillUp` | `modules/SkillData.lua` (T2.1) | key, old, new | broker flash, alerts, session log |
 | `STATS_UPDATED` | `Ka0s_SkillMaster_StatsUpdated` | `modules/StatData.lua` (T2.3) | the stats model | stat blocks, broker |
 | `BONUSES_UPDATED` | `Ka0s_SkillMaster_BonusesUpdated` | `modules/Bonuses.lua` (T2.2) | none | bars, tooltips |
-| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (T3.2); the skin owner's look-change hook until then | none | the window and detached frames |
+| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse); the skin owner's look-change hook | none | `modules/Blocks.lua`, which repaints the window and the detached frames |
 | `SIM_TICK` | `Ka0s_SkillMaster_SimTicked` | the simulator (T5.2) | the step's name | displays under simulation |
 
 ## Slash Commands
@@ -89,6 +96,7 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | Event | Registered by | Handler | Why |
 |---|---|---|---|
 | `PLAYER_REGEN_DISABLED` | `NS.RegisterRuntime` (`core/SkillMaster.lua`) | `addon:OnEnterCombat` | combat ends test mode (preview-mode) |
+| `PLAYER_REGEN_DISABLED`, `PLAYER_REGEN_ENABLED` | `modules/SecureOverlay.lua` at load, on its own bus target | disarm every crafting overlay at the combat-start edge; after combat run the queued layout work, then re-sync the overlays | Taint Notes below |
 | `SKILL_LINES_CHANGED` | `NS.SkillData:Enable` (from `NS.RegisterRuntime`) | debounced `SkillData:Scan` (0.1 s) | the skill list changed; the echo of the scan's own header toggles is ignored for 0.2 s |
 | `CHAT_MSG_SKILL` | `NS.SkillData:Enable` | debounced `SkillData:Scan` | a skill-up line |
 | `PLAYER_LEVEL_UP` | `NS.SkillData:Enable` | debounced `SkillData:Scan`, with the new level as the weapon-cap floor (5 x level) | the list can still answer the old cap |
@@ -101,14 +109,32 @@ down unregisters every event and cancels every timer; the stand-up re-registers 
 
 ## Taint Notes
 
-Nothing in v0.1.0 touches a protected function or a secure frame. The window is a plain frame and
-the key binding clicks a plain, non-secure button. The settings panel never opens in combat (the
-library refuses, options-ui-§2). The crafting-row secure overlays (T3.3) will be created out of
-combat and re-anchored only out of combat, queued on `PLAYER_REGEN_ENABLED`.
+The window, the detached frames, the rows and the trainer popup are plain frames, and the key
+binding clicks a plain, non-secure button. The settings panel never opens in combat (the library
+refuses, options-ui-§2). The one secure surface is the crafting rows' overlays
+(`modules/SecureOverlay.lua`, T3.3): one `SecureActionButtonTemplate` per profession whose window
+opens by a cast (`type1 = "spell"`, the localized open spell), parented to `UIParent` and laid over
+its row at absolute coordinates, so no plain frame is ever a secure frame's parent or anchor and
+the rows, the window and the detached frames hide, move and re-lay freely in combat. Every
+creation, attribute, anchor, strata, level, show and hide of an overlay happens in `Sync`, which in
+combat only marks itself dirty; `PLAYER_REGEN_DISABLED` (lockdown not yet on,
+events-frames-taint-§2) disarms every overlay so none stays mouse-live in combat, and
+`PLAYER_REGEN_ENABLED` replays the combat queue (`SecureOverlay:AfterCombat`: dock, detach and
+collapse wait there, Review Focus 3) and re-syncs. A crafting click in combat reaches the plain row
+and prints one line. Shift- and right-clicks pass through the overlay (`PostClick`) to the row's
+handlers. The broker's rows (T4.1) never use the overlays.
 
 ## Known Limitations
 
-- The window has no content yet: the skill and stat bars arrive with milestones 2 and 3.
+- The Layout, Bars, Skills and Stats settings pages arrive in T5.1: until then the block layout,
+  the bar look and the hidden rows follow their defaults and the row controls (collapse, detach,
+  dock, the row menu's Hide).
+- An overlay is placed when its row is laid out, shown, scrolled or dragged; while the window is
+  being dragged it lags its row until the drop (a re-sync on `OnDragStop`).
+- The optional one-line gathering hint under a row (`skills.helperHint`, design §12 item 4) is not
+  drawn yet; the helpers are tooltip lines.
+- Test mode marks the window but still shows the live models: the sample character (the preview
+  fixture) arrives in T5.2 through `NS.Blocks.source`.
 - Sim mode (the launcher entry and the Master-controls checkbox) arrives with the simulator in T5.2.
 - Every client API the data modules will use is assumed until `/skm probe` confirms it
   ([midnight-quirks.md](midnight-quirks.md), the addon's own section). The kit's Forever API set

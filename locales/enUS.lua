@@ -249,6 +249,89 @@ L["crit immunity vs bosses"] = true
 L["repair"] = true
 -- ---- END T2.3 ----
 
+-- The display: bars, rows, blocks, the window body and the detached frames (T3.1, T3.2).
+L["Not learned"] = true
+L["Lv %d"] = true
+L["Go"] = true
+L["Primary Professions"] = true
+L["Secondary Skills"] = true
+L["Weapon Skills"] = true
+L["Defense \194\183 Lockpicking \194\183 Riding"] = true
+L["Stats \194\183 Base & Combat"] = true
+L["Stats \194\183 Spell & Regen"] = true
+L["Stats \194\183 Defense & Resists"] = true
+L["Stats \194\183 Utility"] = true
+L["cap %d (5 \195\151 level)"] = true
+L["vs highest primary"] = true
+L["Detach this block into its own frame"] = true
+L["Dock this block in the main window"] = true
+L["%s near cap: train %s"] = true
+L["Lock or unlock the window"] = true
+L["Open the journal"] = true
+L["temp bonus"] = true
+L["permanent bonus"] = true
+L["\226\148\130 rank tier \194\183 \226\150\143 threshold"] = true
+L["Lv %d \194\183 %s %s"] = true
+L["\226\150\178 +%d this session"] = true
+
+-- The interactions: the click map, the row menu, the row tooltip, the trainer popup, the waypoints (T3.3).
+L["Profession windows open from Skill Master out of combat."] = true
+L["Pin to the broker feed"] = true
+L["Set a waypoint to the trainer"] = true
+L["Show trainers"] = true
+L["Hide this row"] = true
+L["Primary"] = true
+L["Secondary"] = true
+L["Weapon"] = true
+L["effective %d"] = true
+L["Bonuses"] = true
+L["Racial / items / buffs"] = true
+L["none"] = true
+L["This session"] = true
+L["+%d (%d / h)"] = true
+L["ETA to %d"] = true
+L["~%s at this rate"] = true
+L["(unverified)"] = true
+L["Next rank"] = true
+L["%s at %d \194\183 Lv %d"] = true
+L["Trainer"] = true
+L["Cap at your level"] = true
+L["%d (5 \195\151 %d)"] = true
+L["fine"] = true
+L["far below"] = true
+L["low"] = true
+L["Below cap by"] = true
+L["Skinning %d \226\134\146 mobs up to Lv %d"] = true
+L["Next breakpoint: %d \226\134\146 Lv %d"] = true
+L["Can gather"] = true
+L["Next"] = true
+L["%s at %d"] = true
+L["Fishing in %s needs ~%d (you: %d +%d)"] = true
+L["no fish escape"] = true
+L["fish will escape"] = true
+L["Click: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"] = true
+L["Click: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"] = true
+L["Click: trainers and waypoint \194\183 Right-click: menu"] = true
+L["Click: character panel \194\183 Shift-click: link \194\183 Right-click: menu"] = true
+L["Scale: vs %s"] = true
+L["Also teaches: %s"] = true
+L["Coordinates unverified on WoW Forever (flagged until the smoke pass)"] = true
+L["Set waypoint"] = true
+L["Print to chat"] = true
+L["Waypoint order: TomTom \226\134\146 native map pin \226\134\146 chat directions"] = true
+L["TomTom"] = true
+L["map pin"] = true
+L["chat"] = true
+L["Set waypoint (%s)"] = true
+L["Train: %s (%s)"] = true
+L["Trainers for your faction (%s) who train %s to %s (%d):"] = true
+L["Learn: %s"] = true
+L["Trainers for your faction (%s) who teach %s:"] = true
+L["No trainer for your faction is recorded for this skill."] = true
+L["%s: %s"] = true
+L["Waypoint set (TomTom): %s"] = true
+L["Map pin set: %s"] = true
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

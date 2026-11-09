@@ -38,4 +38,4 @@ profile only. Green gate before every commit: `KA0S_KIT_CLIENT=forever lua tests
 auto-stage/commit/push and never bump the version without an explicit instruction.
 
 Bundles [LibKa0s](https://github.com/tusharsaxena/LibKa0s) v1.94.0 (MIT).
-LibKa0s icons: chevron-down, chevron-up, clear, close, confirm, copy, info, move, reset, volume-high.
+LibKa0s icons: chevron-down, chevron-right, chevron-up, clear, close, confirm, copy, document, external-link, fullscreen-exit, info, lock, map-marker, move, reset, settings, unlock, volume-high.

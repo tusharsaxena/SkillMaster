@@ -20,6 +20,30 @@ passed (clients-§6, testing). Each check names what to do and what you should s
   band disappears and test mode is off.
 - **SM-WIN-4** Bind a key under Options → Keybindings → Ka0s Skill Master; it toggles the window.
 
+## Display (M3)
+
+- **SM-DISP-1** Open the window: Primary, Secondary, Weapon and Other blocks, then the stat blocks
+  (Spell and Defense collapsed). Bars fill rank / max; profession bars show ticks at 75 / 150 / 225.
+- **SM-DISP-2** Put on a fishing lure: the Fishing bar gains a teal segment, the text reads
+  `rank +N / max`, a timer counts down beside it and the segment goes when the lure runs out. A
+  Dwarf's Guns shows a blue (permanent) +5 segment that stops at the bar's end.
+- **SM-DISP-3** Click a block header: it collapses; `/reload`: still collapsed. Click the header's
+  detach control: the block leaves the window into its own frame; drag it, `/reload`, it stays put;
+  its dock control puts it back in its old place.
+- **SM-DISP-4** Hover a row: the tooltip shows the numbers, the bar, the bonuses (a lure with its
+  time left), the next rank and trainer, a weapon's cap gap, Skinning's mob level, the gathering
+  nodes and, for Fishing, the zone's need. Hover a stat: its markers and scale.
+- **SM-DISP-5** Click Leatherworking (or any craft, Cooking, First Aid, Mining's Smelting): its
+  window opens. Click Skinning, a weapon, Defense or Riding: Character → Skills. Click a stat:
+  the paper doll. Shift-click a row with the chat box open: `[Guns 105 +5 / 110]` is inserted.
+  Right-click: the row menu (pin, waypoint, trainers, hide).
+- **SM-DISP-6** In combat, click a crafting row: nothing opens and one line says why; no "action
+  blocked" error. Detach a block in combat: it moves only when combat ends. Escape the window in
+  combat: no error, and no invisible button is left where the rows were after combat.
+- **SM-DISP-7** An unlearned weapon row reads `Not learned · <trainer>, <city> · 10s`. Its Go button
+  (or a click) opens the trainer popup: the faction's weapon masters, the unverified warning. Set
+  waypoint with TomTom loaded (a TomTom arrow), without it (a map pin), and Print to chat.
+
 ## Launcher and settings
 
 - **SM-LDB-1** The minimap button shows the logo. Left-click opens the settings; right-click shows

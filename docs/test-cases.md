@@ -173,6 +173,43 @@ Total.
 - statdata: another unit's event schedules nothing
 - statdata: the speed ticker runs only while a speed display asks for it
 
+### test_bar.lua (10)
+
+- bar: a bonus past the cap clamps the base, draws to the end and keeps the full text (Review Focus 4)
+- bar: the bonus segment wears the temp or the permanent color
+- bar: an empty cap (an unlearned skill) draws nothing and raises nothing
+- bar: ticks at or beyond the cap are dropped
+- bar: markers keep the end and drop what is past it
+- bar: the timer formats m:ss and h:mm:ss
+- bar: SetTimer shows the time left, ticks it, and SetTimer(nil) disarms the OnUpdate
+- bar: a timer that runs out clears itself
+- bar: the resolved style reads the profile and the skin's tokens
+- bar: the pool hands bars back in order and clears their timers on release
+
+### test_blocks.lua (9)
+
+- blocks: the eight blocks, four skill categories then four stat groups
+- test_blocks_detach_dock_roundtrip: a block leaves the window, gets its own frame and comes back
+- blocks: a detached frame saves its drop point; locked refuses the drag
+- test_rows_unlearned_variant: an unlearned skill is a dimmed row with its trainer and a Go button
+- rows: initials, money and the riding trainer line
+- rows: the color modes
+- test_mainwindow_collapsed_persisted: collapsing a block is stored, survives a re-render and the header toggles it
+- mainwindow: the title bar carries lock, journal, settings and close; the summary and legend show
+- mainwindow: an empty model shows the empty state, and data hides it
+
+### test_interact.lua (9)
+
+- test_secure_overlay_deferred_in_combat: crafting overlays are made and moved only out of combat
+- secure overlay: hiding the window hides its overlays; the stand-down takes them down
+- interact: the click map (design §6.5)
+- interact: shift-click links the row to chat; right-click opens the row menu
+- test_rowtooltip_lines_fishing_lure: the lure, its timer, the session and the fishing helper
+- rowtooltip: skinning names the mob level and the next breakpoint; a weapon its cap gap
+- rowtooltip: Show draws on GameTooltip with the bar, Hide gives it back
+- trainer popup: the faction's trainers, the selection and the waypoint button
+- test_waypoints_fallback_order: TomTom, then the native pin, then chat
+
 ### test_surface_parity.lua (10)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
@@ -277,11 +314,15 @@ Total.
 - skin values: no typed value outside the kit's categories and the host's rows
 - skin values: the check is falsifiable, a planted value of each shape is reported
 
-### test_skin_switch.lua (5)
+### test_skin_switch.lua (9)
 
 - skin switch: the check is falsifiable, a surface that redraws a literal is reported
 - skin switch: the main window changes
 - skin switch: the main window changes with the Scope ignored
+- skin switch: a detached block changes
+- skin switch: a detached block changes with the Scope ignored
+- skin switch: the trainer popup changes
+- skin switch: the trainer popup changes with the Scope ignored
 - skin switch: the debug console changes
 - skin switch: the debug console changes with the Scope ignored
 
@@ -311,6 +352,9 @@ Total.
 | test_helpers.lua | 8 |
 | test_bonuses.lua | 14 |
 | test_statdata.lua | 14 |
+| test_bar.lua | 10 |
+| test_blocks.lua | 9 |
+| test_interact.lua | 9 |
 | test_surface_parity.lua | 10 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
@@ -321,7 +365,7 @@ Total.
 | test_layout_cap.lua | 13 |
 | test_lizard_sighted.lua | 8 |
 | test_skin_values.lua | 3 |
-| test_skin_switch.lua | 5 |
+| test_skin_switch.lua | 9 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **198** |
+| **Total** | **230** |

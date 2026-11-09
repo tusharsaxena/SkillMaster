@@ -7,3 +7,7 @@ NS.State.debug = false
 
 -- Test mode (preview-mode): session-only, on until turned off, ended by combat.
 NS.State.testMode = false
+
+-- Skill points gained since login, counted from SKILL_UP for the main window's summary strip
+-- (modules/Blocks.lua) until the session log (T4.3) answers it.
+NS.State.sessionGains = 0
