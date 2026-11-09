@@ -30,7 +30,7 @@ section. This addon writes the sections, in `modules/Diagnostics.lua`:
 |---|---|
 | `identity` | stored and code schema version, the profile, `enabled` and stood-down, the latch's holds |
 | `settings` | every setting that differs from its default, plus `enabled`, `skin.source`, `skin.skin` always |
-| `state` | whether the window is shown and test mode is on; or "stood down: runtime state released" |
+| `state` | whether the window is shown, test mode is on and Sim mode is on (`simMode`); or "stood down: runtime state released" |
 | `skin` | the skin engine's minor, the stored and the applied choice |
 | `model` | the live skill model's counts (total, learned, unlearned, rows per category), the stat count, the session log's entries and gains, the alts, whether test mode's preview source is on; stood down, a note that the last scan is kept |
 | `probe` | the probe's read-only half: the skill-list API (`C_SkillInfo`, `global` or `none`) and its visible line count, how many probed globals are present, TomTom, and the missing ones (capped) |

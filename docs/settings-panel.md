@@ -7,9 +7,9 @@ login; each page body builds on its first show.
 |---|---|---|
 | Ka0s Skill Master (landing) | none | The logo, the tagline and the slash command list |
 | General | Master controls, Skin, Keybindings | Master controls, the skin, the key binding |
-| Layout | Window, Blocks, Block order | The window's width, maximum height, block spacing and summary strip; per block show, dock, collapse, lock and scale; the block order, dragged |
+| Layout | Window, Blocks, Block order | The window's width, maximum height, block spacing and summary strip; per block show, dock, collapse, lock and scale; the weapon block's compact filter (equipped and below cap only); the block order, dragged |
 | Bars | Bar, Colors, Text, Marks | The bar heights; the composed fill, background, border and font blocks; the color mode and palette; the bar text template and position; ticks, markers, timer and spark. A live preview bar is pinned above the strip |
-| Skills | General, Professions, Weapons and other | Unlearned rows, the gathering and fishing hints, one Hide row per catalog skill |
+| Skills | General, Professions, Weapons and other | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default), one Hide row per catalog skill |
 | Stats | General, then one tab per stat group | How a stat row draws, one Hide row per stat |
 | Broker | Feeds | Each feed's text template and the skill-up flash |
 | Alerts | Alerts | The rank-cap and weapon-gap alerts, the gap, the sound |
@@ -74,6 +74,16 @@ The Block order tab is a host tab keyed by its group (the rows `layout.blocks.<i
 `skipRender`): one row per block in `NS.Blocks.Ordered()`, dragged through LibKa0s-Widgets-1.0's
 `ReorderList` (options-ui-§18); a drop calls `NS.Blocks:Move(from, to)`. The controller is
 canceled before every render (`spec.beforeRender`).
+
+The Weapon skills subsection adds *Equipped and below cap only*
+(`layout.blocks.weapon.belowCapOnly`): the detached block keeps the equipped weapons and the
+learned skills below their cap, redrawn on the write's `LAYOUT_CHANGED`. The Journal's size
+(`journal.size`, the resize grip) and every `point` are drag state with no row.
+
+## Broker
+
+The feeds' right-click opens this page by its key (`NS.Broker.SETTINGS_PAGE = "broker"`, through
+`NS.Helpers.OpenOptionsPanel`); with the library absent it opens the main settings panel.
 
 ## Bars
 

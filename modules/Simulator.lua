@@ -270,7 +270,7 @@ end
 
 -- ── the instance, or the reference stub (H9) ──────────────────────────────────────────────────
 
-local NEEDS_LINE = "The simulator needs LibKa0s-Sim-1.0."
+local NEEDS_LINE = L["The simulator needs LibKa0s-Sim-1.0."]
 
 local function newSimStub(say)
     local sim = {}

@@ -1,8 +1,9 @@
 local addonName, NS = ...
 -- modules/Diagnostics.lua — this addon's sections of `/skm diagnostics` (debug-logging-§14). The
 -- library writes the markers, the identity header, a pcall per section and the cap. The domain
--- sections (model, probe, bonuses, layout) read the live models, the caches and the stored layout;
--- none scans, collects, expands a Skills-tab header or builds a frame.
+-- sections (model, probe, bonuses, layout) read the live models, the caches and the stored layout,
+-- and `sim` the simulator and test mode's sample data (state carries both mode flags); none scans,
+-- collects, expands a Skills-tab header or builds a frame.
 NS.Diagnostics = NS.Diagnostics or {}
 
 local TAG = "Diag"
@@ -23,7 +24,8 @@ end
 
 local function state(out)
     if NS.IsStoodDown() then out:add(TAG, "stood down: runtime state released") return end
-    out:add(TAG, "window shown=%s testMode=%s", NS.MainWindow.IsShown(), NS.IsTestMode())
+    out:add(TAG, "window shown=%s testMode=%s simMode=%s", NS.MainWindow.IsShown(), NS.IsTestMode(),
+        NS.IsSimMode and NS.IsSimMode() or false)
 end
 
 local function skin(out)

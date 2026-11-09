@@ -611,6 +611,28 @@ L["Mage"] = true
 L["Paladin"] = true
 -- ---- END T5.2 ----
 
+-- ---- BEGIN M5 integration (the settings stubs and the Skin tab rows routed through L) ----
+L["Skin source"] = true
+L["Where this addon's look comes from: the Ka0s skin chosen below, or EllesmereUI."] = true
+L["Skin"] = true
+L["The Ka0s skin this addon wears. Changes the window, the tool windows and the settings pages right away."] = true
+L["Ignore settings panel"] = true
+L["Keep this addon's settings panel in the game's own look. Its other surfaces still wear the skin."] = true
+L["Ignore fonts"] = true
+L["Keep every font in this addon as the game draws it. The skin still colors the text."] = true
+L["The font this addon's text uses, over the skin's own. Empty keeps the skin's."] = true
+L["Texture"] = true
+L["The texture this addon's bars use, over the skin's own. Empty keeps the skin's."] = true
+L["Font outline"] = true
+L["Where the skin outlines this addon's text: all of it, its HUD text only, or nowhere."] = true
+L["Skin picker seen"] = true
+L["Whether the first-run skin picker was closed on this profile."] = true
+L["%s, so the settings panel is unavailable."] = true
+L["unknown command '%s'"] = true
+L["v%s slash commands"] = true
+L["The simulator needs LibKa0s-Sim-1.0."] = true
+-- ---- END M5 integration ----
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

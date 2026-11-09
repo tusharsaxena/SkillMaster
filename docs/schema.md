@@ -27,8 +27,6 @@ SkillMasterDB
     alpha   = 1                  -- Master opacity (0 .. 1)
     locked  = false              -- Lock frame; /skm lock, /skm unlock
     window  = { point = false }  -- drop point, written only by modules/MainWindow.lua
-    journal = { point = false, size = false }  -- the Journal's drop point and its { w, h } (the
-                                 -- resize grip), both written only by modules/Journal.lua
     skin = {
       source = "ka0s", skin = <library default: WoW Forever>,
       ignorePanel = false, ignoreFonts = false,
@@ -39,6 +37,7 @@ SkillMasterDB
       width = 440, maxHeight = 560, blockGap = 0, summary = true,
       blocks.<id> = { shown = true, docked = true, order = n, collapsed, scale = 1, locked = false,
                       point = false }   -- point: drag-only, written only by modules/Detached.lua
+      blocks.weapon.belowCapOnly = false   -- the detached compact preset's filter (M5 polish)
     }
     bars = {                     -- the Bars page (T5.1); defaults/Profile.lua comments each key
       height, compactHeight, tooltipHeight, miniHeight, rowHeight, fontSize, textAnchor,
@@ -51,10 +50,14 @@ SkillMasterDB
       fontColorFromSkin, fontShadowFromSkin,   -- every *FromSkin defaults true
       colors = { fromSkin = false, primary, secondary, weapon, other, stats, bonusTemp, bonusPerm },
     }                            -- colors are positional { r, g, b, a }
-    skills = { showUnlearned = true, helperHint = true, hidden = { [key] = true } }
+    skills = { showUnlearned = true, hidden = { [key] = true },
+               helperTooltip = true,   -- the gathering and fishing lines in a row's tooltip
+               helperHint = false }    -- the one-line hint under the row (design §12 item 4)
     stats  = { display = "both", hidden = { [key] = true } }   -- display: "both" | "bar" | "text"
     broker = { flashSeconds = 5, templates = { all, professions, weapons, stats } }
-    journal = { point = false, keep = 500, filter = "professions" }
+    journal = { point = false, size = false, keep = 500, filter = "professions" }
+                                 -- point and size ({ w, h }, the resize grip): drag state, written
+                                 -- only by modules/Journal.lua; keep and filter: the Journal page
     waypoints = { method = "auto", announce = true }   -- method: "auto" | "tomtom" | "native" | "chat"
     trainers = { unverified = true }
     alerts = {                   -- modules/Alerts.lua (T4.2); the Alerts page (T5.1)

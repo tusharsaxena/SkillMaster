@@ -112,7 +112,7 @@ local descriptor = {
 if not lib then
     -- The LOAD-COMPLETING stub (options-ui-§1): every member a page file touches at load, the
     -- composers hollow ({}), the global reset real, everything else a no-op or one honest line.
-    local MISSING = NS.LIBKA0S_MISSING .. ", so the settings panel is unavailable."
+    local MISSING = NS.L["%s, so the settings panel is unavailable."]:format(NS.LIBKA0S_MISSING)
     local H = {}
     NS.Helpers = H
     H.LSMValues = function() return function() return {} end end
@@ -149,7 +149,7 @@ if not lib then
     H.KEYBINDS_UNCHANGED = ""
     H.StrataTooltip      = function() return "" end
     H.ResetAllTooltip    = function(tail) return type(tail) == "string" and tail or "" end
-    H.AppearanceTab      = function() return { key = "Appearance", label = "Skin", render = function() end } end
+    H.AppearanceTab      = function() return { key = "Appearance", label = NS.L["Skin"], render = function() end } end
     H.AppearanceRows     = function() return nil end
     H.SkinPicker         = function() return nil end
     H.SkinVerb           = function() return nil, "absent" end

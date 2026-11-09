@@ -21,9 +21,9 @@ Plan: `2026-11-10-skill-master-v1.md`. Update a row in the same commit that fini
 | 4.1 Broker | done | 6539729, merged in d257a6f; integration: mini bars on `NS.Bar`, `broker.categoryColors` dropped for `bars.colors`, crafting row -> `MainWindow.ShowAndScrollTo`; no launcher Journal entry (Launcher minor 9 has no hook) |
 | 4.2 Alerts | done | fa0bc74, merged in 547fc27; cap-toast click -> real `NS.Waypoints:Set` (seam test); no settings rows until 5.1 |
 | 4.3 Log/Alts/Journal | done | e6cf6c4, merged in e72d438; Alts keyed by `db.keys` (realm + full name), not `UnitFullName`; mini bars on `NS.Bar`; title-bar journal mark wired |
-| 5.1 Options | todo | |
-| 5.2 Test/Sim | todo | |
-| 5.3 Locales/bindings/diag | todo | |
+| 5.1 Options | done | 71df5f5, merged in b9fddca; 193 schema rows (160 library-absent); integration: `skills.helperHint` (under-row hint, off) split from the new `skills.helperTooltip` (tooltip helpers, on), rows for both and for `layout.blocks.weapon.belowCapOnly`, `journal.size` named drag state, broker right-click opens the Broker page (seam suite `test_m5_seams`); open: `bars.colors.fromSkin` default false vs skinning-§6; no fill direction/columns/strata rows; not run in the client |
+| 5.2 Test/Sim | done | f7625d9, merged in f767d92; SessionLog constructor keeps the `journal.keep` cap; diagnostics `sim` section after the domain sections, `state` carries `simMode`; not run in the client |
+| 5.3 Locales/bindings/diag | done | 1d23d09, merged in bbcd089; M5 polish (c0779cc) merged first in 5537d01; integration routed the Skin rows, the settings stubs and the sim line through `L`; open: the second (Journal) binding needs owner sign-off (launcher-§6), 22 font-unsafe glyphs remain, stub locale set chosen by the agent |
 | 6.x Docs/battery/audit/review | todo | |
 | 7.x Merge + cleanup | blocked on owner go | |
 
@@ -31,4 +31,5 @@ Plan: `2026-11-10-skill-master-v1.md`. Update a row in the same commit that fini
 - SkillMaster: `feat/2026-11-10-skill-master-v1`
 - dev-copilot: `feat/2026-11-10-single-client-forever` (worktree `#Worktrees/dev-copilot-forever-only`, pushed)
 - SkillMaster M3/M4 worktrees `#Worktrees/skm-m3/display`, `skm-m4/{broker,alerts,journal}` and branches `m3/display`, `m4/*`: removed after the M3+M4 integration
+- SkillMaster M5 worktrees `#Worktrees/skm-m5-{options,testsim,locales,polish}` and branches `m5/*`: removed after the M5 integration
 - WowAddonStandards: branch `feat/2026-11-10-single-client-forever` (local + origin), worktree `#Worktrees/WowAddonStandards-forever-only`

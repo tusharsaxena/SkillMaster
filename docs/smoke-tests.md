@@ -102,8 +102,16 @@ passed (clients-§6, testing). Each check names what to do and what you should s
 - **SM-OPT-5** Trainers and Waypoints: Waypoint method Chat only, click an unlearned row's Go: only
   the chat line, no TomTom arrow. Turn Mark unverified trainers off: no "(unverified)".
 - **SM-OPT-6** Each page's Defaults button restores the page; the window repaints once.
+- **SM-OPT-7** (M5 integration) Right-click a broker feed: the Broker settings page opens, not
+  the landing page. Skills > General: tick Hint under the row and the Skinning, Mining, Herbalism and
+  Fishing rows gain their hint line at once; untick Gathering and fishing hints and the tooltips lose
+  their helper lines while the row hint stays. Detach Weapon Skills, then Layout > Blocks > Weapon
+  skills > Equipped and below cap only: the detached frame drops the capped, unequipped weapons.
 
 ## Disabled
+
+- **SM-OFF-1** `/skm disable`: the window hides, `/skm toggle` answers one disabled line, the key
+  binding does nothing, the right-click menu grays all but Enabled. `/skm enable` restores it.
 
 ## Test mode and the simulator
 
@@ -120,9 +128,10 @@ passed (clients-§6, testing). Each check names what to do and what you should s
   ends, your own skills, Journal log and broker gains are back, and `/reload` shows nothing of the
   session was saved. Entering combat or `/skm disable` ends a session too; test mode refuses while one
   runs and the simulator refuses in test mode, combat, an instance or a group.
+- **SM-SIM-3** With test mode on, `/skm diagnostics`: the state line reads `testMode=true`, the model
+  section `preview source=on` and the sim section `preview data=true`; during a simulation the state
+  line reads `simMode=true` and the sim section names the scenario and its step.
 
-- **SM-OFF-1** `/skm disable`: the window hides, `/skm toggle` answers one disabled line, the key
-  binding does nothing, the right-click menu grays all but Enabled. `/skm enable` restores it.
 
 ## Probe
 

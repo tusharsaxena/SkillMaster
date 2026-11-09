@@ -91,14 +91,14 @@ if not SlashLib then
             for _, e in ipairs(NS.COMMANDS) do
                 if e[1] == name then return e[3](rest or "") end
             end
-            NS.Print("unknown command '" .. name .. "'")
+            NS.Print(L["unknown command '%s'"]:format(name))
             self:PrintHelp()
         end,
         PrintHelp = function()
-            NS.Print("v" .. NS.Version() .. " slash commands")
+            NS.Print(L["v%s slash commands"]:format(NS.Version()))
             for _, line in ipairs(rows("  ")) do NS.Print(line) end
         end,
-        HelpHeader      = function() return "v" .. NS.Version() .. " slash commands" end,
+        HelpHeader      = function() return L["v%s slash commands"]:format(NS.Version()) end,
         HelpRows        = function() return rows("  ") end,
         LandingRows     = function() return rows("") end,
         DisabledLine    = function() return DISABLED_LINE_FORMAT:format(NS.Constants.BRAND, "/skm enable") end,

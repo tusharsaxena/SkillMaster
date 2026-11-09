@@ -153,9 +153,6 @@ a crafting row opens the main window scrolled to it rather than casting (design 
 
 ## Known Limitations
 
-- The Layout, Bars, Skills and Stats settings pages arrive in T5.1: until then the block layout,
-  the bar look and the hidden rows follow their defaults and the row controls (collapse, detach,
-  dock, the row menu's Hide).
 - An overlay is placed when its row is laid out, shown, scrolled, raised or dropped; while its
   window is being dragged it is taken down (`SecureOverlay:SetMoving`) and laid again at the drop,
   so a crafting row cannot be cast from mid-drag. A raise re-levels it on the host's mouse-down,

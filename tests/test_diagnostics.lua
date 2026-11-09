@@ -11,10 +11,10 @@ local function flat(report)
     return table.concat(out, "\n")
 end
 
-test("diagnostics: the report carries this addon's nine sections and raises in none", function()
+test("diagnostics: the report carries this addon's ten sections and raises in none", function()
     local text = flat(NS.DebugLog:BuildDiagnostics())
     for _, needle in ipairs({ "schema stored=", "profile=", "enabled=", "window shown=", "skin engine=",
-                                     "model skills=", "probe skill api=", "bonus cache", "layout window" }) do
+                                     "model skills=", "probe skill api=", "bonus cache", "layout window", "sim active=" }) do
         assertTrue(text:find(needle, 1, true) ~= nil, "missing '" .. needle .. "' in:\n" .. text)
     end
     assertTrue(not text:find("raised", 1, true), "a section raised:\n" .. text)
