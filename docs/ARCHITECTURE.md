@@ -31,8 +31,10 @@ models, so test mode, the simulator and the headless harness drive them the same
 Every file, its responsibility and why the TOC orders it as it does: [module-map.md](module-map.md).
 In short: `core/` holds the identity, the constants, the one setup file per LibKa0s major (Media,
 Env, Core, Skin, Bus, Pool, Widgets, Lifecycle, Perf, DebugLog, Launcher), the AceAddon entry
-(`core/SkillMaster.lua`) and the store (`core/Database.lua`); `defaults/Profile.lua` is the defaults
-tree; `modules/` holds the main window, the `/skm probe` report and the diagnostics sections;
+(`core/SkillMaster.lua`) and the store (`core/Database.lua`); `core/Compat.lua` is the compat family (the skill-list shims);
+`defaults/Profile.lua` is the defaults tree and `defaults/*_Forever.lua` the data tables (the skill
+catalog, the class weapon lists); `modules/` holds the main window, the `/skm probe` report, the
+skills model (`SkillData`) and the diagnostics sections;
 `settings/` holds the schema,
 the slash table and the settings pages.
 
@@ -59,8 +61,8 @@ No structural registry exists yet.
 ## Message Bus
 
 Six messages, each declared once in `core/Bus.lua` as `NS.MSG.<KEY>` through LibKa0s-Bus-1.0's
-strict catalog, so a misspelled constant raises. None is sent yet; the senders arrive with the data
-modules.
+strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDATED` and `SKILL_UP`;
+the other senders arrive with their modules.
 
 | Constant | Wire name | Sender | Payload | Consumers |
 |---|---|---|---|---|
@@ -84,6 +86,9 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | Event | Registered by | Handler | Why |
 |---|---|---|---|
 | `PLAYER_REGEN_DISABLED` | `NS.RegisterRuntime` (`core/SkillMaster.lua`) | `addon:OnEnterCombat` | combat ends test mode (preview-mode) |
+| `SKILL_LINES_CHANGED` | `NS.SkillData:Enable` (from `NS.RegisterRuntime`) | debounced `SkillData:Scan` (0.1 s) | the skill list changed; the echo of the scan's own header toggles is ignored for 0.2 s |
+| `CHAT_MSG_SKILL` | `NS.SkillData:Enable` | debounced `SkillData:Scan` | a skill-up line |
+| `PLAYER_LEVEL_UP` | `NS.SkillData:Enable` | debounced `SkillData:Scan`, with the new level as the weapon-cap floor (5 x level) | the list can still answer the old cap |
 
 Every registration goes through `NS.SafeRegisterEvent` (events-frames-taint-§1); a refused name
 lands in `NS.rejectedEvents`, which the `[Init]` summary and the diagnostics report print. The stand-
@@ -127,7 +132,7 @@ combat and re-anchored only out of combat, queued on `PLAYER_REGEN_ENABLED`.
 | `debug.md` | Present | The diagnostics dump is a debug surface beyond the default console (debug-logging-§14) |
 | `profiles.md` | Present | The Profiles page ships in the options UI |
 | `perf-analysis/README.md` | Present | The performance harness is wired (`core/PerfSetup.lua`) |
-| `compat-layer.md` | Not applicable | No `core/Compat.lua`: the addon makes no deprecated or version-variant client call outside LibKa0s's majors (compat's applicability condition) |
+| `compat-layer.md` | Present | `core/Compat.lua` publishes three addon-specific shims (the skill list, T2.1) |
 | `message-bus.md` | Not applicable | Six messages, not more than ten |
 | `known-limitations.md` | Not applicable | Known Limitations is under 60 lines |
 | `taint.md` | Not applicable | Taint Notes is under 60 lines |

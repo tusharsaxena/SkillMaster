@@ -9,6 +9,7 @@ position says so beside its TOC line (toc-file-§5).
 |---|---|---|
 | `locales/enUS.lua` | `NS.L` with its key-is-the-string fallback | creates `NS.L`, read at load by DebugLogSetup and every settings file |
 | `core/Namespace.lua` | folder name, version fallback, `[SM]` chat tag, library-missing sentence | first: every file reads it |
+| `core/Compat.lua` | `NS.Compat`: the skill-list shims, one normalized line record from either return shape ([compat-layer.md](compat-layer.md)) | conventional: reached at call time |
 | `core/MediaSetup.lua` | `NS.Icon`, `NS.MediaFont`, `RegisterLSM` (LibKa0s-Media-1.0) | before Constants, which resolves `FONT_MONO` from it |
 | `core/Constants.lua` | brand, logo paths, monospace face, minimap path, `LAYERS` | read at load by the setup files below |
 | `core/State.lua` | session-only state: the debug flag, test mode | conventional |
@@ -25,8 +26,11 @@ position says so beside its TOC line (toc-file-§5).
 | `core/Database.lua` | AceDB store and the migration runner | conventional |
 | `core/LauncherSetup.lua` | the launcher object (LibKa0s-Launcher-1.0), registered OnEnable | conventional |
 | `defaults/Profile.lua` | `NS.defaults`, the only place a default is written | read by the schema rows at load |
+| `defaults/SkillCatalog_Forever.lua` | `NS.SkillCatalog` (every profession, the 16 weapon lines, Defense, Lockpicking, Riding), the excluded Skills-tab headers, `NS.DataMeta` | read at load by SkillData |
+| `defaults/ClassWeapons_Forever.lua` | `NS.ClassWeapons_Forever[classFile]`: the weapon lines and Riding each class can train | read at load by SkillData |
 | `modules/MainWindow.lua` | the main window, its toggle, the test strip, the key binding button | publishes `NS.BINDINGS` for the General page |
 | `modules/Probe.lua` | `/skm probe`: the Forever API report as JSON in a copy window | reads only core members at load |
+| `modules/SkillData.lua` | the skills model: scan, classify, synthesize unlearned rows, `SKILLS_UPDATED` / `SKILL_UP`; builds `NS.SkillNameToKey` | after the catalog and the locale, read at load |
 | `modules/Diagnostics.lua` | the diagnostics report's sections | read at run time |
 | `settings/Schema.lua` | the schema and the single write seam (LibKa0s-Schema-1.0) | before Slash, OptionsSetup and the pages |
 | `settings/Slash.lua` | `NS.COMMANDS` and the dispatcher (LibKa0s-Slash-1.0) | before the landing spec reads it |

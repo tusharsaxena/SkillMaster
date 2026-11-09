@@ -27,6 +27,8 @@ read_globals = {
   "GetSpellBonusDamage", "GetSpellCritChance", "GetHitModifier", "GetSpellHitModifier",
   "GetCombatRating", "GetCritChance", "GetRangedCritChance", "GetDodgeChance", "GetParryChance",
   "GetBlockChance", "UnitResistance", "CastSpellByName", "C_SkillInfo", "C_Item",
+  -- the skill model (modules/SkillData.lua): the class, the level and the debounce clock
+  "UnitClass", "UnitLevel", "GetTime",
 }
 
 -- The harness global is declared here, not in read_globals, so addon source cannot reach it (lint).
