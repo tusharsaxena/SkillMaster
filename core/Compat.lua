@@ -73,9 +73,9 @@ end
 function Compat.SkillLineInfo(i)
     local _, info = skillApi()
     if not info then return nil end
-    local first = info(i)
+    local first, isHeader, isExpanded, rank, tempPoints, modifier, max = info(i)
     if type(first) == "table" then return fromStruct(first) end
-    return fromList(info(i))
+    return fromList(first, isHeader, isExpanded, rank, tempPoints, modifier, max)
 end
 
 --- Expand (open = true) or collapse header i. The children below shift the indices.

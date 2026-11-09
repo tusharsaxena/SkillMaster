@@ -283,3 +283,53 @@ test("racials: every racial skill key is a catalog key", function()
         end
     end
 end)
+
+test("bonuses: UNIT_AURA re-reads the buffs only, never the equipped tooltips", function()
+    withWorld({
+        race = { "Dwarf", "Dwarf" }, now = 1000,
+        skills = { fishing = entry("fishing", "Fishing", 107, 150, 10) },
+        items = { [16] = { "Strong Fishing Pole" } },
+    }, function()
+        local itemReads, buffReads = 0, 0
+        local tip = M.C_TooltipInfo
+        local getItem, getBuff = tip.GetInventoryItem, M.C_UnitAuras.GetBuffDataByIndex
+        tip.GetInventoryItem = function(...) itemReads = itemReads + 1; return getItem(...) end
+        M.C_UnitAuras.GetBuffDataByIndex = function(...) buffReads = buffReads + 1; return getBuff(...) end
+        for i = #M.__timers, 1, -1 do M.__timers[i] = nil end
+        local ok, err = pcall(function()
+            NS.RegisterRuntime()
+            M.__fireTimers()
+            assertEqual(itemReads, NS.Bonuses.SLOTS, "the start-up refresh reads every slot")
+            itemReads, buffReads = 0, 0
+            M.__fire("UNIT_AURA", "player")
+            M.__fireTimers()
+            assertEqual(itemReads, 0, "an aura change leaves the item tooltips cached")
+            assertTrue(buffReads > 0, "an aura change re-reads the buffs")
+            itemReads, buffReads = 0, 0
+            M.__fire("UNIT_INVENTORY_CHANGED", "player")
+            M.__fireTimers()
+            assertEqual(itemReads, NS.Bonuses.SLOTS, "an inventory change re-reads every slot")
+        end)
+        NS.addon:UnregisterEvent("UNIT_INVENTORY_CHANGED")
+        NS.addon:UnregisterEvent("UNIT_AURA")
+        NS.addon:CancelAllTimers()
+        NS.Bonuses.__ticker, NS.Bonuses.__pending = nil, nil
+        if not ok then error(err, 0) end
+    end)
+end)
+
+test("bonuses: a temp '+N' line that names no skill starts no ticker", function()
+    withWorld({
+        race = { "Human", "Human" }, now = 1000,
+        skills = {},
+        buffs = { { name = "Some Elixir", auraInstanceID = 3, expirationTime = 0 } },
+        buffLines = { [3] = { "Some Elixir", "+15 Stamina" } },
+    }, function()
+        for i = #M.__timers, 1, -1 do M.__timers[i] = nil end
+        NS.Bonuses.Refresh()
+        local ticker = NS.Bonuses.__ticker
+        NS.addon:CancelAllTimers()
+        NS.Bonuses.__ticker = nil
+        assertTrue(ticker == nil, "no skill bonus is live: no 1 s ticker")
+    end)
+end)

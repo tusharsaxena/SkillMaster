@@ -86,7 +86,7 @@ Total.
 - probe: /skm probe shows the report as JSON in the copy window
 - probe: C_SkillInfo and C_Item are read first, a table-shaped line kept whole
 
-### test_skilldata.lua (22)
+### test_skilldata.lua (24)
 
 - skillcatalog: every vanilla profession, the 16 weapon lines, Defense, Lockpicking and Riding
 - skillcatalog: kinds, tiers and the window each row opens
@@ -110,6 +110,8 @@ Total.
 - skilldata: the three events are debounced into one scan 0.1 s later
 - skilldata: PLAYER_LEVEL_UP lifts the weapon cap to 5 x the new level before the list catches up
 - skilldata: the scan's own header toggles do not schedule another scan
+- skilldata: two racial riding lines are one Riding row at the higher rank
+- compat: the 1.12 positional reader asks the client once per line
 
 ### test_trainers.lua (12)
 
@@ -137,7 +139,7 @@ Total.
 - helpers: WeaponCap is five per level
 - helpers: FishingNeedHere reads the map ID first, then the zone text
 
-### test_bonuses.lua (12)
+### test_bonuses.lua (14)
 
 - bonuses: lure on the pole is one temp enchant source with its expiry
 - bonuses: a Dwarf's Guns +5 is one permanent racial source
@@ -151,6 +153,8 @@ Total.
 - bonuses: inventory change publishes BONUSES_UPDATED; the 1 s ticker runs only while a temp bonus lives
 - racials: the table is Forever data, unverified, with a source, +5 per racial skill
 - racials: every racial skill key is a catalog key
+- bonuses: UNIT_AURA re-reads the buffs only, never the equipped tooltips
+- bonuses: a temp '+N' line that names no skill starts no ticker
 
 ### test_statdata.lua (14)
 
@@ -302,10 +306,10 @@ Total.
 | test_skinsetup.lua | 4 |
 | test_perf.lua | 1 |
 | test_probe.lua | 7 |
-| test_skilldata.lua | 22 |
+| test_skilldata.lua | 24 |
 | test_trainers.lua | 12 |
 | test_helpers.lua | 8 |
-| test_bonuses.lua | 12 |
+| test_bonuses.lua | 14 |
 | test_statdata.lua | 14 |
 | test_surface_parity.lua | 10 |
 | test_vendor_sync.lua | 3 |
@@ -320,4 +324,4 @@ Total.
 | test_skin_switch.lua | 5 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **194** |
+| **Total** | **198** |

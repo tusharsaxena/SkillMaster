@@ -437,3 +437,29 @@ test("skilldata: the scan's own header toggles do not schedule another scan", fu
         assertEqual(queued, 0, "the expand/collapse echo was ignored")
     end, DWARF_HUNTER)
 end)
+
+test("skilldata: two racial riding lines are one Riding row at the higher rank", function()
+    local spec = hunterSpec()
+    spec[#spec + 1] = { name = "Secondary Skills", expanded = true, lines = {
+        { "Ram Riding", 75, 0, 0, 75 }, { "Horse Riding", 150, 0, 0, 150 } } }
+    withSkills(spec, "table", function()
+        local m = NS.SkillData:Scan()
+        local r = m.byKey.riding
+        assertTrue(r and r.learned, "riding learned")
+        assertEqual(r.rank, 150, "the higher of the two lines")
+        assertEqual(r.max, 150)
+        local n = 0
+        for _, k in ipairs(m.order.other) do if k == "riding" then n = n + 1 end end
+        assertEqual(n, 1, "one Riding row")
+    end, DWARF_HUNTER)
+end)
+
+test("compat: the 1.12 positional reader asks the client once per line", function()
+    withSkills(hunterSpec(), "global", function()
+        local real, calls = M.GetSkillLineInfo, 0
+        M.GetSkillLineInfo = function(i) calls = calls + 1; return real(i) end
+        local r = NS.Compat.SkillLineInfo(2)
+        assertEqual(r and r.name, "Marksmanship")
+        assertEqual(calls, 1)
+    end, DWARF_HUNTER)
+end)

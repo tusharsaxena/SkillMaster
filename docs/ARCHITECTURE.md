@@ -92,7 +92,7 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | `SKILL_LINES_CHANGED` | `NS.SkillData:Enable` (from `NS.RegisterRuntime`) | debounced `SkillData:Scan` (0.1 s) | the skill list changed; the echo of the scan's own header toggles is ignored for 0.2 s |
 | `CHAT_MSG_SKILL` | `NS.SkillData:Enable` | debounced `SkillData:Scan` | a skill-up line |
 | `PLAYER_LEVEL_UP` | `NS.SkillData:Enable` | debounced `SkillData:Scan`, with the new level as the weapon-cap floor (5 x level) | the list can still answer the old cap |
-| `UNIT_INVENTORY_CHANGED`, `UNIT_AURA` | `NS.Bonuses.RegisterRuntime` (from `NS.RegisterRuntime`) | `addon:OnBonusesUnitChanged`: player only, debounced `Bonuses.Refresh` (0.2 s); a 1 s ticker while a temp bonus is live | gear, lures and buffs change the breakdown |
+| `UNIT_INVENTORY_CHANGED`, `UNIT_AURA` | `NS.Bonuses.RegisterRuntime` (from `NS.RegisterRuntime`) | `addon:OnBonusesUnitChanged`: player only, debounced `Bonuses.Refresh` (0.2 s), which re-reads only the part the event touched (an aura change never re-reads the 19 item tooltips); a 1 s ticker while a temp bonus naming a skill is live | gear, lures and buffs change the breakdown |
 | `UNIT_STATS`, `UNIT_ATTACK_POWER`, `UNIT_RANGED_ATTACK_POWER`, `UNIT_RESISTANCES`, `UNIT_DAMAGE`, `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
 
 Every registration goes through `NS.SafeRegisterEvent` (events-frames-taint-§1); a refused name

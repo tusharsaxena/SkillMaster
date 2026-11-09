@@ -164,27 +164,59 @@ local function parseBuffs(list, pats)
     end
 end
 
---- Read every source once; Breakdown reads this until the next Invalidate.
-local function collect()
+--- The equipped slots and the main-hand enchant: read again only on an inventory change.
+local function collectItems()
     local list, pats = {}, patterns()
     local enchantExpires = mainEnchantExpiry()
     for slot = 1, B.SLOTS do parseSlot(list, slot, enchantExpires, pats) end
-    parseBuffs(list, pats)
     return list
 end
 
+--- The player's buffs: read again on an aura change, which never touches the 19 item tooltips.
+local function collectBuffs()
+    local list = {}
+    parseBuffs(list, patterns())
+    return list
+end
+
+--- Every source, read once per part; Breakdown reads this until the next Invalidate.
 local function candidates()
-    if not B.__cache then B.__cache = collect() end
+    if not B.__cache then
+        B.__items = B.__items or collectItems()
+        B.__buffs = B.__buffs or collectBuffs()
+        local all = {}
+        for _, c in ipairs(B.__items) do all[#all + 1] = c end
+        for _, c in ipairs(B.__buffs) do all[#all + 1] = c end
+        B.__cache = all
+    end
     return B.__cache
 end
 
-function B.Invalidate() B.__cache = nil end
+--- Drop the cached sources: `part` "items" or "buffs" drops that part only, nil drops both.
+function B.Invalidate(part)
+    if part ~= "buffs" then B.__items = nil end
+    if part ~= "items" then B.__buffs = nil end
+    B.__cache = nil
+end
 
---- True while a cached temp candidate has not run out.
+--- The catalog's skill names, normalized like a candidate's name (built on first use).
+local function skillNames()
+    if not B.__skillNames then
+        local set = {}
+        for name in pairs(NS.SkillNameToKey or {}) do
+            if type(name) == "string" then set[norm(name)] = true end
+        end
+        B.__skillNames = set
+    end
+    return B.__skillNames
+end
+
+--- True while a cached temp candidate that names a skill has not run out. A temp line naming no
+--- skill ("+15 Stamina" on a buff) is no skill bonus and keeps no ticker alive.
 function B.HasLiveTemp()
-    local t = now()
+    local t, names = now(), skillNames()
     for _, c in ipairs(candidates()) do
-        if c.kind == "temp" and (c.expires == nil or c.expires > t) then return true end
+        if c.kind == "temp" and names[c.name] and (c.expires == nil or c.expires > t) then return true end
     end
     return false
 end
@@ -248,10 +280,12 @@ local function stopTicker()
     B.__ticker = nil
 end
 
---- Re-read everything, publish, and keep the ticker running exactly while a temp bonus lives.
+--- Re-read what the debounced events touched (everything when called directly), publish, and keep
+--- the ticker running exactly while a temp bonus lives.
 function B.Refresh()
-    B.__pending = nil
-    B.Invalidate()
+    local part = B.__dirty
+    B.__pending, B.__dirty = nil, nil
+    B.Invalidate(part ~= "all" and part or nil)
     local live = B.HasLiveTemp()
     if live and not B.__ticker then
         B.__ticker = NS.addon:ScheduleRepeatingTimer(B.Tick, B.TICK)
@@ -267,20 +301,25 @@ function B.Tick()
     B.Refresh()
 end
 
-function B.Schedule()
+--- Debounce a refresh of `part` ("items" | "buffs" | nil for both); parts asked for inside one
+--- window merge.
+function B.Schedule(part)
+    part = part or "all"
+    if B.__dirty and B.__dirty ~= part then part = "all" end
+    B.__dirty = part
     if B.__pending then return end
     B.__pending = NS.addon:ScheduleTimer(B.Refresh, B.DEBOUNCE)
 end
 
 --- The game events, on the addon object (NS.RegisterRuntime calls this from current state).
 function B.RegisterRuntime(addon)
-    B.__pending, B.__ticker = nil, nil
+    B.__pending, B.__ticker, B.__dirty = nil, nil, nil
     NS.SafeRegisterEvent(addon, "UNIT_INVENTORY_CHANGED", "OnBonusesUnitChanged", NS.rejectedEvents)
     NS.SafeRegisterEvent(addon, "UNIT_AURA", "OnBonusesUnitChanged", NS.rejectedEvents)
     B.Schedule()
 end
 
-function NS.addon:OnBonusesUnitChanged(_, unit)
+function NS.addon:OnBonusesUnitChanged(event, unit)
     if unit ~= "player" or NS.IsStoodDown() then return end
-    B.Schedule()
+    B.Schedule(event == "UNIT_AURA" and "buffs" or "items")
 end

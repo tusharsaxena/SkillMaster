@@ -143,14 +143,18 @@ local function unlearnedEntry(key, cat)
              rank = 0, max = 0, tempPoints = 0, modifier = 0, learned = false }
 end
 
+--- One row per key: two lines on one key (a second racial riding line) keep the higher rank.
 local function addLearned(m, lines)
     for _, line in ipairs(lines) do
         local key, cat = classify(line.rec.name, line.header)
-        if key and not m.byKey[key] then
+        local had = key and m.byKey[key]
+        if key and not had then
             local e = learnedEntry(key, cat, line.rec)
             m.byKey[key] = e
             local list = m.order[e.category]
             list[#list + 1] = key
+        elseif had and line.rec.rank > had.rank then
+            m.byKey[key] = learnedEntry(key, cat, line.rec)
         end
     end
 end
