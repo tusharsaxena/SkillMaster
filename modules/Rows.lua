@@ -202,8 +202,6 @@ local function buildIcon(row)
     f:SetPoint("LEFT", row, "LEFT", R.PAD, 0)
     local bg = f:CreateTexture(nil, "BACKGROUND")
     bg:SetAllPoints(f)
-    local c = NS.Bar.Color("sm.iconBg")
-    if c then bg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
     row.iconFrame, row.iconBg = f, bg
     row.iconEdges = NS.Bar.MakeEdges(f, "BORDER")
     row.initials = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -261,6 +259,8 @@ function R.Acquire(pool, parent, styleKey)
     local row = NS.Pool.Acquire(pool, function() return build(parent, styleKey) end)
     row:SetParent(parent)
     row.bar:ApplyStyle(NS.Bar.ResolveStyle(styleKey))
+    local c = NS.Bar.Color("sm.iconBg")   -- every acquire, so a skin switch reaches a pooled row
+    if c then row.iconBg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
     local h = bars().rowHeight or 20
     row:SetHeight(styleKey == "compact" and h - 2 or h)
     row:Show()

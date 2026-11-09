@@ -69,14 +69,21 @@ function SL:Gains()
     return total, byKey
 end
 
+--- The points `key` gained this session (0 with none).
+function SL:GainsFor(key)
+    local _, byKey = SL:Gains()
+    return byKey[key] or 0
+end
+
 --- Points an hour over the last `windowSec` (3600) of this session; 0 before any time has passed.
+--- With `key`, that skill's points only (a row tooltip's "This session" line).
 --- @param now number|nil epoch seconds, for the suites
-function SL:Rate(windowSec, now)
+function SL:Rate(windowSec, now, key)
     now = tonumber(now) or time()
     local span = math.min(tonumber(windowSec) or SL.WINDOW, now - sessionStart)
     if span <= 0 then return 0 end
     local from, sum = now - span, 0
-    for _, e in ipairs(sessionEntries()) do
+    for _, e in ipairs(sessionEntries(key)) do
         if e.t >= from then sum = sum + points(e) end
     end
     return sum / span * 3600

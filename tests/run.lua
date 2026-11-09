@@ -72,6 +72,10 @@ Kit.skinSwitch = {
             NS.db.profile.layout.blocks.other.docked = true
             NS.Detached.Refresh()
         end },
+        { name = "the journal", build = function()
+            NS.Journal.Show()
+            return NS.Journal.Frame()
+        end, reset = function() NS.Journal.Hide() end },
         { name = "the trainer popup", build = function()
             NS.TrainerPopup.Show("fistWeapons")
             return NS.TrainerPopup.Frame()

@@ -191,8 +191,14 @@ end
 
 local Header = {}
 
+local function paintHeaderBg(h)
+    local c = NS.Bar.Color("sm.headerBg")
+    if c then h.bg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
+end
+
 function Header:SetBlock(id, meta, collapsed, docked)
     self.id, self.collapsed = id, collapsed and true or false
+    paintHeaderBg(self)   -- every layout, so a skin switch reaches a pooled header
     self.title:SetText(NS.BlockDefs[id].title)
     self.meta:SetText(meta or "")
     NS.Chrome.SetIcon(self.chevron, collapsed and "chevron-right" or "chevron-down",
@@ -216,8 +222,7 @@ local function buildHeader(parent)
     h:RegisterForClicks("AnyUp")
     h.bg = h:CreateTexture(nil, "BACKGROUND")
     h.bg:SetAllPoints(h)
-    local c = NS.Bar.Color("sm.headerBg")
-    if c then h.bg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
+    paintHeaderBg(h)
     h.rule = h:CreateTexture(nil, "BORDER")
     h.rule:SetPoint("TOPLEFT", h, "TOPLEFT", 0, 0)
     h.rule:SetPoint("TOPRIGHT", h, "TOPRIGHT", 0, 0)
@@ -340,6 +345,15 @@ local function repaint()
     if NS.Detached then NS.Detached.Refresh() end
 end
 
+-- A layout change (a dock, a collapse, a hidden row) or a skin switch: a full layout even when the
+-- row set did not move, because a values-only pass would leave every bar, header and icon well in
+-- the old skin's colors.
+local function relayout()
+    if NS.IsStoodDown and NS.IsStoodDown() then return end
+    if NS.MainWindow then NS.MainWindow.Refresh(true) end
+    if NS.Detached then NS.Detached.Refresh() end
+end
+
 local function revalue()
     if NS.IsStoodDown and NS.IsStoodDown() then return end
     if NS.MainWindow then NS.MainWindow.RefreshValues() end
@@ -351,7 +365,7 @@ if B.events then
     B.events:RegisterMessage(NS.MSG.SKILLS_UPDATED, repaint)
     B.events:RegisterMessage(NS.MSG.STATS_UPDATED, repaint)
     B.events:RegisterMessage(NS.MSG.BONUSES_UPDATED, revalue)
-    B.events:RegisterMessage(NS.MSG.LAYOUT_CHANGED, repaint)
+    B.events:RegisterMessage(NS.MSG.LAYOUT_CHANGED, relayout)
     B.events:RegisterMessage(NS.MSG.SKILL_UP, function(_, _, old, new)
         NS.State.sessionGains = (NS.State.sessionGains or 0) + math.max(0, (new or 0) - (old or 0))
     end)

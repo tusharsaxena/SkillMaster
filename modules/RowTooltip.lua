@@ -52,18 +52,24 @@ local function bonusLines(out, e)
     end
 end
 
+--- An ETA as the mockup reads it: "~30 m", "~14 h".
+function RT.FormatETA(sec)
+    if sec < 3600 then return L["~%d m"]:format(math.max(1, math.floor(sec / 60 + 0.5))) end
+    return L["~%d h"]:format(math.floor(sec / 3600 + 0.5))
+end
+
 local function sessionLines(out, e)
     local log = NS.SessionLog
     if not log then return end
-    local gains = log.GainsFor and log:GainsFor(e.key)
-    local rate = log.Rate and log:Rate()
-    if type(gains) == "number" then
-        line(out, L["This session"], type(rate) == "number" and L["+%d (%d / h)"]:format(gains, rate)
-            or ("+%d"):format(gains), "muted", "body")
+    -- This skill's points and its rate over the whole session (the mockup's "+6 (3 / h)").
+    local gains = log:GainsFor(e.key)
+    if gains > 0 then
+        local rate = math.floor(log:Rate(math.huge, nil, e.key) + 0.5)
+        line(out, L["This session"], L["+%d (%d / h)"]:format(gains, rate), "muted", "body")
     end
-    local eta = log.ETA and log:ETA(e.key)
+    local eta = log:ETA(e.key)
     if type(eta) == "number" then
-        line(out, L["ETA to %d"]:format(e.max), L["~%s at this rate"]:format(Bar.FormatTimer(eta)), "muted", "body")
+        line(out, L["ETA to %d"]:format(e.max), L["%s at this rate"]:format(RT.FormatETA(eta)), "muted", "body")
     end
 end
 
@@ -84,7 +90,7 @@ local function weaponLines(out, e)
     local level = type(UnitLevel) == "function" and UnitLevel("player") or 0
     local cap = NS.SkillHelpers.WeaponCap(level)
     line(out, L["Cap at your level"], L["%d (5 \195\151 %d)"]:format(cap, level), "muted", "body")
-    local gap = cap - (e.rank + (tonumber(e.modifier) or 0))
+    local gap = cap - e.rank   -- the base rank's distance, as the weapon-gap alert measures it
     local tone, word = "good", L["fine"]
     if gap >= 25 then tone, word = "bad", L["far below"] elseif gap > 10 then tone, word = "warn", L["low"] end
     line(out, L["Below cap by"], ("%d" .. DOT .. "%s"):format(math.max(gap, 0), word), "muted", tone)

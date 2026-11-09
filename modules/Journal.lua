@@ -61,8 +61,7 @@ end
 --- "~30 m", "~5 h"; nil for no ETA.
 function J.FormatETA(sec)
     if sec == nil then return nil end
-    if sec < 3600 then return L["~%d m"]:format(max(1, floor(sec / 60 + 0.5))) end
-    return L["~%d h"]:format(floor(sec / 3600 + 0.5))
+    return NS.RowTooltip.FormatETA(sec)
 end
 
 local function skillName(key)

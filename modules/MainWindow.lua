@@ -426,8 +426,10 @@ function W.ShowAndScrollTo(key)
     return true
 end
 
---- Re-read state after a mode or data change.
-function W.Refresh()
+--- Re-read state after a mode or data change. `relayout` forces the full layout pass (a layout
+--- change or a skin switch: every pooled row and header is restyled, not only revalued).
+function W.Refresh(relayout)
+    if relayout then lastSig = nil end
     if W.IsShown() then W.Render() end
 end
 

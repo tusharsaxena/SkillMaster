@@ -186,7 +186,7 @@ Total.
 - bar: the resolved style reads the profile and the skin's tokens
 - bar: the pool hands bars back in order and clears their timers on release
 
-### test_blocks.lua (9)
+### test_blocks.lua (10)
 
 - blocks: the eight blocks, four skill categories then four stat groups
 - test_blocks_detach_dock_roundtrip: a block leaves the window, gets its own frame and comes back
@@ -197,14 +197,16 @@ Total.
 - test_mainwindow_collapsed_persisted: collapsing a block is stored, survives a re-render and the header toggles it
 - mainwindow: the title bar carries lock, journal, settings and close; the summary and legend show
 - mainwindow: an empty model shows the empty state, and data hides it
+- mainwindow: a skin switch restyles every bar, header and icon well, not only the values
 
-### test_interact.lua (9)
+### test_interact.lua (10)
 
 - test_secure_overlay_deferred_in_combat: crafting overlays are made and moved only out of combat
 - secure overlay: hiding the window hides its overlays; the stand-down takes them down
 - interact: the click map (design §6.5)
 - interact: shift-click links the row to chat; right-click opens the row menu
 - test_rowtooltip_lines_fishing_lure: the lure, its timer, the session and the fishing helper
+- rowtooltip: the session line is this skill's gains and rate; the ETA reads in hours
 - rowtooltip: skinning names the mob level and the next breakpoint; a weapon its cap gap
 - rowtooltip: Show draws on GameTooltip with the bar, Hide gives it back
 - trainer popup: the faction's trainers, the selection and the waypoint button
@@ -383,13 +385,15 @@ Total.
 - skin values: no typed value outside the kit's categories and the host's rows
 - skin values: the check is falsifiable, a planted value of each shape is reported
 
-### test_skin_switch.lua (11)
+### test_skin_switch.lua (13)
 
 - skin switch: the check is falsifiable, a surface that redraws a literal is reported
 - skin switch: the main window changes
 - skin switch: the main window changes with the Scope ignored
 - skin switch: a detached block changes
 - skin switch: a detached block changes with the Scope ignored
+- skin switch: the journal changes
+- skin switch: the journal changes with the Scope ignored
 - skin switch: the trainer popup changes
 - skin switch: the trainer popup changes with the Scope ignored
 - skin switch: the alert toast changes
@@ -424,8 +428,8 @@ Total.
 | test_bonuses.lua | 14 |
 | test_statdata.lua | 14 |
 | test_bar.lua | 10 |
-| test_blocks.lua | 9 |
-| test_interact.lua | 9 |
+| test_blocks.lua | 10 |
+| test_interact.lua | 10 |
 | test_sessionlog.lua | 5 |
 | test_alts.lua | 4 |
 | test_journal.lua | 10 |
@@ -443,7 +447,7 @@ Total.
 | test_layout_cap.lua | 13 |
 | test_lizard_sighted.lua | 8 |
 | test_skin_values.lua | 3 |
-| test_skin_switch.lua | 11 |
+| test_skin_switch.lua | 13 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **280** |
+| **Total** | **284** |

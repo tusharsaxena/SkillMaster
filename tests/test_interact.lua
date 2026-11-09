@@ -239,6 +239,37 @@ test("test_rowtooltip_lines_fishing_lure: the lure, its timer, the session and t
     end)
 end)
 
+test("rowtooltip: the session line is this skill's gains and rate; the ETA reads in hours", function()
+    -- red under: the tooltip asks the session log for a method it does not have, so the mockup's
+    -- "This session +6 (3 / h)" line never draws; or the ETA prints as a clock ("14:00:00")
+    withWorld(function(_, skills)
+        local SL = NS.SessionLog
+        local c = NS.db.char
+        local savedLog, savedStart, savedETA = c.log, SL:SessionStart(), SL.ETA
+        local now = M.time()
+        c.log = {}
+        SL:NewSession(now - 7200)
+        SL:Add("fishing", 101, 104, now - 7000)
+        SL:Add("guns", 100, 105, now - 6000)
+        SL:Add("fishing", 104, 107, now - 100)
+        SL.ETA = function(_, key) return key == "fishing" and 14 * 3600 or nil end
+        local ok, err = pcall(function()
+            local session, eta
+            for _, l in ipairs(NS.RowTooltip.Lines(skills.byKey.fishing, "skill")) do
+                if l.left == "This session" then session = l end
+                if (l.left or ""):find("ETA to", 1, true) then eta = l end
+            end
+            assertTrue(session ~= nil, "the session line draws")
+            assertEqual(session.right, "+6 (3 / h)", "this skill's points and its rate over the session")
+            assertTrue(eta ~= nil, "the ETA line draws")
+            assertEqual(eta.right, "~14 h at this rate")
+        end)
+        c.log, SL.ETA = savedLog, savedETA
+        SL:NewSession(savedStart)
+        if not ok then error(err, 0) end
+    end)
+end)
+
 test("rowtooltip: skinning names the mob level and the next breakpoint; a weapon its cap gap", function()
     withWorld(function(_, skills)
         local function joined(e)
@@ -251,6 +282,9 @@ test("rowtooltip: skinning names the mob level and the next breakpoint; a weapon
         assertTrue(sk:find("125", 1, true) ~= nil and sk:find("Lv 25", 1, true) ~= nil, sk)
         local guns = joined(skills.byKey.guns)
         assertTrue(guns:find("110 (5 \195\151 22)", 1, true) ~= nil, guns)
+        -- the mockup's "Below cap by 5 · fine" for Guns 105 +5 / 110: the base rank's distance, the
+        -- same number the weapon-gap alert measures (red under: the effective rank's 0)
+        assertTrue(guns:find("Below cap by | 5 \194\183 fine", 1, true) ~= nil, guns)
         assertTrue(guns:find("Bonuses", 1, true) ~= nil, guns)
         local stat = {}
         for _, l in ipairs(NS.RowTooltip.Lines({ key = "hit", label = "Hit", display = "2.0%", pct = 22.2, ref = 9,

@@ -222,3 +222,38 @@ test("mainwindow: an empty model shows the empty state, and data hides it", func
         assertFalse(W.Frame().empty:IsShown(), "rows instead")
     end)
 end)
+
+test("mainwindow: a skin switch restyles every bar, header and icon well, not only the values", function()
+    -- red under: a skin switch keeps the row set, so the window took its values-only path and the
+    -- bars' background, edges, ticks and text, the block headers and the icon wells kept the old skin
+    withWorld(function()
+        W.Show()
+        local Skin = M.LibStub("LibKa0s-Skin-1.0")
+        local source, current = Skin:GetChoice("SkillMaster")
+        local other
+        for _, def in ipairs(Skin:Skins()) do if def.key ~= current then other = def.key break end end
+        assertTrue(other ~= nil, "a second skin to switch to")
+        local styled, headerPaints, wellPaints = 0, 0, 0
+        local rows = W.Rows()
+        assertTrue(#rows > 0, "rows to restyle")
+        local realStyle = {}
+        for _, row in ipairs(rows) do
+            local real = row.bar.ApplyStyle
+            realStyle[row] = real
+            row.bar.ApplyStyle = function(bar, s) styled = styled + 1 return real(bar, s) end
+            local wr = row.iconBg.SetColorTexture
+            row.iconBg.SetColorTexture = function(t, ...) wellPaints = wellPaints + 1 return wr(t, ...) end
+        end
+        local header = W.HeaderFor("weapon")
+        local hr = header.bg.SetColorTexture
+        header.bg.SetColorTexture = function(t, ...) headerPaints = headerPaints + 1 return hr(t, ...) end
+        local ok, err = pcall(function() Skin:SetChoice("SkillMaster", source, other) end)
+        Skin:SetChoice("SkillMaster", source, current)
+        for _, row in ipairs(rows) do row.bar.ApplyStyle, row.iconBg.SetColorTexture = realStyle[row], nil end
+        header.bg.SetColorTexture = nil
+        if not ok then error(err, 0) end
+        assertTrue(styled >= #rows, ("every bar restyled (%d of %d)"):format(styled, #rows))
+        assertTrue(wellPaints >= #rows, "every icon well repainted")
+        assertTrue(headerPaints >= 1, "the block header repainted")
+    end)
+end)
