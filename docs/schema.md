@@ -34,7 +34,29 @@ SkillMasterDB
       font = "", texture = "", outline = "hud",
       pickerSeen = false,
     }
-    alerts = {                   -- modules/Alerts.lua (T4.2); the rows arrive with T5.1's Alerts page
+    layout = {                   -- the Layout page (T5.1)
+      width = 440, maxHeight = 560, blockGap = 0, summary = true,
+      blocks.<id> = { shown = true, docked = true, order = n, collapsed, scale = 1, locked = false,
+                      point = false }   -- point: drag-only, written only by modules/Detached.lua
+    }
+    bars = {                     -- the Bars page (T5.1); defaults/Profile.lua comments each key
+      height, compactHeight, tooltipHeight, miniHeight, rowHeight, fontSize, textAnchor,
+      textTemplate = "{rank} {bonus} / {max}", spark, ticks, markers, timer, colorMode,
+      barTexture, barAlpha, barColor, useClassColorBar, barTextureFromSkin, barColorFromSkin,
+      bgColor, useClassColorBg, bgColorFromSkin,
+      border, borderStyle, borderSize, borderColor, useClassColorBorder, borderStyleFromSkin,
+      borderColorFromSkin,
+      font, fontColor, useClassColorFont, fontFlags = "@skin", fontShadow, fontFromSkin,
+      fontColorFromSkin, fontShadowFromSkin,   -- every *FromSkin defaults true
+      colors = { fromSkin = false, primary, secondary, weapon, other, stats, bonusTemp, bonusPerm },
+    }                            -- colors are positional { r, g, b, a }
+    skills = { showUnlearned = true, helperHint = true, hidden = { [key] = true } }
+    stats  = { display = "both", hidden = { [key] = true } }   -- display: "both" | "bar" | "text"
+    broker = { flashSeconds = 5, templates = { all, professions, weapons, stats } }
+    journal = { point = false, keep = 500, filter = "professions" }
+    waypoints = { method = "auto", announce = true }   -- method: "auto" | "tomtom" | "native" | "chat"
+    trainers = { unverified = true }
+    alerts = {                   -- modules/Alerts.lua (T4.2); the Alerts page (T5.1)
       cap = true,                -- rank-cap toast + chat line
       weapon = true,             -- weapon-gap toast
       weaponGap = 25,            -- points below the weapon cap (5 x level) that count as behind

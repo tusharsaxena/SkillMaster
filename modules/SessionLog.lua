@@ -9,7 +9,13 @@ local _, NS = ...
 NS.SessionLog = {}
 local SL = NS.SessionLog
 
-SL.CAP = 500        -- entries kept per character (oldest dropped first)
+SL.CAP = 500        -- the default of journal.keep: entries kept per character (oldest dropped first)
+
+--- The entries kept per character: the Journal page's row (journal.keep), else SL.CAP.
+function SL.Cap()
+    local n = NS.GetSetting and NS.db and tonumber(NS.GetSetting("journal.keep"))
+    return n and n >= 1 and math.floor(n) or SL.CAP
+end
 SL.WINDOW = 3600    -- seconds: Rate's default sliding window
 
 local sessionStart = time()
@@ -30,7 +36,8 @@ function SL:Add(key, old, new, t, zone)
     if not log then return nil end
     local e = { t = tonumber(t) or time(), key = key, old = tonumber(old) or (new - 1), new = new, zone = zone }
     log[#log + 1] = e
-    while #log > SL.CAP do table.remove(log, 1) end
+    local cap = SL.Cap()
+    while #log > cap do table.remove(log, 1) end
     return e
 end
 

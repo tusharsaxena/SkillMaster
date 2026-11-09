@@ -59,6 +59,13 @@ position says so beside its TOC line (toc-file-§5).
 | `settings/Slash.lua` | `NS.COMMANDS` and the dispatcher (LibKa0s-Slash-1.0) | before the landing spec reads it |
 | `settings/OptionsSetup.lua` | the panel descriptor, `NS.Helpers` (LibKa0s-Options-1.0) | before every page file |
 | `settings/General.lua` | landing spec, Master controls, Skin and Keybindings tabs | first page registered |
+| `settings/Layout.lua` | the Layout page: window, per-block rows, the Block order drag list (`NS.OptionsBlockOrder`) | after General |
+| `settings/Bars.lua` | the Bars page and its live preview bar (`NS.OptionsPreview`) | after Layout |
+| `settings/Skills.lua` | the Skills and Stats pages, the Hide rows from the catalog and `NS.STAT_DEFS` | after Bars |
+| `settings/Broker.lua` | the Broker page: feed templates, flash | after Skills |
+| `settings/Alerts.lua` | the Alerts page | after Broker |
+| `settings/Journal.lua` | the Journal page: log length, Alts filter | after Alerts |
+| `settings/Trainers.lua` | the Trainers and Waypoints page | before Profiles |
 | `settings/Profiles.lua` | the AceDBOptions Profiles page | last page registered |
 
 `Bindings.xml` sits at the root beside the TOC and is never a TOC line (launcher-§6).

@@ -41,6 +41,17 @@ local function profileBars()
     return (NS.db and NS.db.profile.bars) or NS.defaults.profile.bars
 end
 
+local Core = LibStub and LibStub("LibKa0s-Core-1.0", true)
+
+--- `stored` with the player's class color in place of its RGB while `useClass` is on; the stored
+--- alpha always applies, and an unresolvable class keeps the stored swatch (options-ui-§17).
+function Bar.WithClass(stored, useClass)
+    if not (useClass and Core and Core.ClassColor) then return stored end
+    local r, g, b = Core.ClassColor("player")
+    if r == nil then return stored end
+    return { r, g, b, type(stored) == "table" and stored[4] or 1 }
+end
+
 --- A player color (bars.colors[key]) unless the colors follow the skin, then `token`.
 function Bar.PlayerColor(key, token)
     local colors = profileBars().colors
@@ -48,22 +59,70 @@ function Bar.PlayerColor(key, token)
     return colors[key]
 end
 
+--- A composed swatch (options-ui-§16/§17): the skin's `token` while `<key>FromSkin` is on, else the
+--- stored `key` through its class-color companion `classKey`.
+function Bar.Swatch(key, token, classKey)
+    local p = profileBars()
+    if p[key .. "FromSkin"] ~= false or type(p[key]) ~= "table" then return Bar.Color(token) end
+    return Bar.WithClass(p[key], p[classKey])
+end
+
+--- The media path for an LSM key, or nil (no LibSharedMedia, an unknown key).
+local function media(kind, key)
+    local LSM = LibStub and LibStub("LibSharedMedia-3.0", true)
+    if not (LSM and type(key) == "string" and key ~= "") then return nil end
+    local ok, path = pcall(LSM.Fetch, LSM, kind, key, true)
+    return ok and path or nil
+end
+Bar.Media = media
+
+--- What the border draws: show, style, size, through the skin's bar border while its companion is
+--- on (S.BarBorder), else the stored three.
+local function border(p)
+    local show, style, size = p.border ~= false, p.borderStyle or "Solid", tonumber(p.borderSize) or 1
+    local S = NS.Skin
+    if S.IsEnabled() and S.BarBorder then
+        local st, sh, sz = S.BarBorder(style, show, size, p.borderStyleFromSkin ~= false)
+        if st ~= nil then style, show, size = st, sh, sz end
+    end
+    if style == "None" or (tonumber(size) or 0) <= 0 then show = false end
+    return { show = show and true or false, style = style, size = tonumber(size) or 1,
+             color = Bar.Swatch("borderColor", "sm.barBorder", "useClassColorBorder") }
+end
+
+local function font(p)
+    return {
+        size = p.fontSize, flags = p.fontFlags, shadow = p.fontShadow,
+        shadowFromSkin = p.fontShadowFromSkin ~= false,
+        face = p.fontFromSkin == false and media("font", p.font) or nil,
+        fromSkin = p.fontFromSkin ~= false,
+    }
+end
+
 local HEIGHT_KEY = { row = "height", compact = "compactHeight", tooltip = "tooltipHeight", mini = "miniHeight" }
 
---- The style one kind of bar draws with: the profile's sizes and switches, the skin's colors.
+--- The style one kind of bar draws with: the profile's sizes, switches, media and colors, each
+--- following the skin where its companion says so.
 function Bar.ResolveStyle(styleKey)
     local p = profileBars()
     styleKey = HEIGHT_KEY[styleKey] and styleKey or "row"
+    local edge = border(p)
     return {
         key = styleKey,
         height = p[HEIGHT_KEY[styleKey]] or p.height,
-        fill = Bar.Color("sm.barFill"), bg = Bar.Color("sm.barBg"), border = p.border and Bar.Color("sm.barBorder"),
+        fill = Bar.Color("sm.barFill"),
+        bg = Bar.Swatch("bgColor", "sm.barBg", "useClassColorBg"),
+        border = edge.show and edge.color or nil, borderStyle = edge.style, borderSize = edge.size,
         tick = Bar.Color("sm.tick"), marker = Bar.Color("sm.marker"), spark = p.spark and Bar.Color("sm.spark"),
-        text = Bar.Color("sm.barText"), timer = Bar.Color("sm.timer"),
+        text = Bar.Swatch("fontColor", "sm.barText", "useClassColorFont"), timer = Bar.Color("sm.timer"),
         bonusTemp = Bar.PlayerColor("bonusTemp", "sm.bonusTemp"),
         bonusPerm = Bar.PlayerColor("bonusPerm", "sm.bonusPerm"),
-        fontSize = p.fontSize, textAnchor = p.textAnchor or "CENTER",
+        texture = p.barTextureFromSkin == false and media("statusbar", p.barTexture) or nil,
+        alpha = tonumber(p.barAlpha) or 1,
+        font = font(p), fontSize = p.fontSize, textAnchor = p.textAnchor or "CENTER",
+        template = p.textTemplate,
         showText = styleKey ~= "mini" and styleKey ~= "tooltip", showTicks = p.ticks ~= false,
+        showMarkers = p.markers ~= false, showTimer = p.timer ~= false,
     }
 end
 
@@ -94,17 +153,29 @@ local function markerFractions(list, cap)
     return out
 end
 
---- The default text: "rank / max", or "rank +bonus / max" (a negative bonus shows its sign).
-function Bar.Text(value, bonus, cap)
-    if bonus and bonus > 0 then return ("%d +%d / %d"):format(value, bonus, cap) end
-    if bonus and bonus < 0 then return ("%d %d / %d"):format(value, bonus, cap) end
-    return ("%d / %d"):format(value, cap)
+Bar.TEMPLATE = "{rank} {bonus} / {max}"
+
+local function signed(bonus)
+    if bonus and bonus > 0 then return "+" .. bonus end
+    if bonus and bonus < 0 then return tostring(bonus) end
+    return ""
+end
+
+--- The bar text from `template` (bars.textTemplate; Bar.TEMPLATE when nil): {rank}, {bonus} ("+25",
+--- "-3" or nothing), {max}, {pct} (whole percent of the cap) and {left} (points to the cap). A
+--- token with nothing to say leaves no double space behind. The default reads "107 +25 / 150".
+function Bar.Text(value, bonus, cap, template)
+    local pct = cap > 0 and floor(value / cap * 100 + 0.5) or 0
+    local subs = { rank = tostring(value), bonus = signed(bonus), max = tostring(cap),
+                   pct = tostring(pct), left = tostring(max(cap - value, 0)) }
+    local out = tostring(template or Bar.TEMPLATE):gsub("{(%a+)}", function(k) return subs[k] end)
+    return (out:gsub("%s%s+", " "):gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
 --- The bar's geometry from its values. The base clamps to [0, 1]; the bonus reaches at most the
 --- end (Review Focus 4); the text keeps the full numbers. Ticks strictly under the cap, markers
 --- up to and including it.
-function Bar.Compute(v)
+function Bar.Compute(v, template)
     local cap = tonumber(v.max) or 0
     local value = tonumber(v.value) or 0
     local bonus = tonumber(v.bonus) or 0
@@ -115,7 +186,7 @@ function Bar.Compute(v)
         g.ticks = fractions(v.ticks, cap, false)
         g.markers = markerFractions(v.markers, cap)
     end
-    g.text = v.text or Bar.Text(value, bonus, cap)
+    g.text = v.text or Bar.Text(value, bonus, cap, template)
     return g
 end
 
@@ -135,12 +206,17 @@ local function rgba(c) return c[1], c[2], c[3], c[4] or 1 end
 
 --- A data fill: the skin's bar texture tinted (S.BarTexture, recorded so a skin switch follows),
 --- or a flat color where the skin library is absent.
-local function paintFill(tex, c)
+local function paintFill(tex, c, s)
     if not c then return end
-    if NS.Skin.IsEnabled() then
-        NS.Skin.BarTexture(tex, rgba(c))
+    local r, g, b, a = rgba(c)
+    a = a * (s and s.alpha or 1)
+    if s and s.texture then
+        tex:SetTexture(s.texture)
+        tex:SetVertexColor(r, g, b, a)
+    elseif NS.Skin.IsEnabled() then
+        NS.Skin.BarTexture(tex, r, g, b, a)
     else
-        tex:SetColorTexture(rgba(c))
+        tex:SetColorTexture(r, g, b, a)
     end
 end
 
@@ -172,6 +248,29 @@ function Bar.PaintEdges(edges, c)
         else
             t:Hide()
         end
+    end
+end
+
+--- The bar's border: the four edges at `borderSize` px for a Solid style, else the LSM border
+--- drawn by a backdrop child (made on first use), else nothing.
+function Bar.PaintBorder(bar, s)
+    local path = s.border and s.borderStyle ~= "Solid" and media("border", s.borderStyle) or nil
+    local size = s.borderSize or EDGE
+    for i, t in ipairs(bar.edges) do
+        if i <= 2 then t:SetHeight(size) else t:SetWidth(size) end
+    end
+    Bar.PaintEdges(bar.edges, (s.border and not path) and s.border or nil)
+    if not (path or bar.edgeFrame) then return end
+    local f = bar.edgeFrame
+    if not f then
+        f = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+        f:SetAllPoints(bar)
+        bar.edgeFrame = f
+    end
+    f:SetShown(path ~= nil)
+    if path and f.SetBackdrop then
+        f:SetBackdrop({ edgeFile = path, edgeSize = size })
+        f:SetBackdropBorderColor(rgba(s.border))
     end
 end
 
@@ -229,6 +328,7 @@ function Methods:PaintMarks()
         t:SetWidth(1)
     end
     if not s.showTicks then for i = #g.ticks, 1, -1 do g.ticks[i] = nil end end
+    if s.showMarkers == false then for i = #g.markers, 1, -1 do g.markers[i] = nil end end
     local marks = textureList(self, "markerTextures", #g.markers, "OVERLAY")
     for i, t in ipairs(marks) do
         if g.markers[i] and s.marker then t:SetColorTexture(rgba(s.marker)) end
@@ -239,17 +339,17 @@ end
 --- Set the numbers. Recomputes the geometry, repaints the fill and bonus colors, redraws.
 function Methods:SetValues(v)
     self.values = v
-    self.geom = Bar.Compute(v)
+    self.geom = Bar.Compute(v, self.style and self.style.template)
     local s = self.style
     local fillColor = v.color or s.fill
     if fillColor ~= self.fillColor then
         self.fillColor = fillColor
-        paintFill(self.fill, fillColor)
+        paintFill(self.fill, fillColor, s)
     end
     local bonusColor = v.bonusKind == "temp" and s.bonusTemp or s.bonusPerm
     if bonusColor ~= self.bonusColor then
         self.bonusColor = bonusColor
-        paintFill(self.bonus, bonusColor)
+        paintFill(self.bonus, bonusColor, s)
     end
     self.text:SetText(self.geom.text)
     self.text:SetShown(s.showText)
@@ -277,6 +377,7 @@ end
 --- The OnUpdate runs only while a timer does, and is disarmed when it is cleared or runs out.
 function Methods:SetTimer(expires)
     self.expires = tonumber(expires)
+    if self.style and self.style.showTimer == false then self.expires = nil end
     if not self.expires or self.expires <= GetTime() then
         self.expires = nil
         self.timer:SetText("")
@@ -299,8 +400,12 @@ end
 
 local function paintText(bar, s)
     local S = NS.Skin
-    local size = S.HudFontSize(s.fontSize or 11)
-    if S.IsEnabled() then S.HudFont(bar.text, { size = size, flags = S.FontFlags(S.FROM_SKIN) }) end
+    local f = s.font or {}
+    local size = S.HudFontSize(s.fontSize or 11, f.fromSkin)
+    if S.IsEnabled() then
+        S.HudFont(bar.text, { size = size, face = f.face, flags = S.FontFlags(f.flags or S.FROM_SKIN),
+                              shadow = f.shadow, shadowFromSkin = f.shadowFromSkin })
+    end
     if s.text then bar.text:SetTextColor(rgba(s.text)) end
     if s.timer then bar.timer:SetTextColor(rgba(s.timer)) end
 end
@@ -313,7 +418,7 @@ function Methods:ApplyStyle(style)
     self.style = s
     self:SetHeight(s.height or 14)
     if s.bg then self.bg:SetColorTexture(rgba(s.bg)) end
-    Bar.PaintEdges(self.edges, s.border)
+    Bar.PaintBorder(self, s)
     if s.spark then self.spark:SetColorTexture(rgba(s.spark)) end
     placeText(self, s.textAnchor or "CENTER")
     paintText(self, s)

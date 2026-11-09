@@ -26,6 +26,25 @@ Total.
 - schema: the minimap row says SHOWN while LibDBIcon's stored key says hidden (launcher-§3)
 - schema: the reset-all veto keeps the minimap row and every profile row out of the walk
 
+### test_options.lua (16)
+
+- test_options_every_bar_style_key_has_row
+- options: every display default outside bars and layout has a row too
+- options: the pages register in the mockup's order, General first and Profiles last
+- options: a look row applies live through LAYOUT_CHANGED and reaches the window's bars
+- options: a reset of a whole page sends one LAYOUT_CHANGED, not one per row
+- options: a hidden skill has a row that un-hides it
+- options: the per-block rows go through NS.Blocks (detach, dock, collapse, order)
+- options: a hidden block leaves the window and the detached frames
+- options: the waypoint method preference decides the provider
+- options: the unverified mark follows its row
+- options: the bar text template and the timer and marker switches reach the bar
+- options: the flat color mode draws the Bar color, or the skin's while its companion is on
+- options: the Bars page draws a live preview bar from NS.Bar, restyled by a write
+- options: every new page renders on its first show without raising
+- options: the journal's length and filter, and the stat display mode, are honored
+- options: the library-absent load keeps every hand-written row; the composers' rows are the gap
+
 ### test_database.lua (3)
 
 - database: the defaults stamp 0 and the runner raises it to the code's target
@@ -413,6 +432,7 @@ Total.
 |-------|------:|
 | test_loadorder.lua | 6 |
 | test_schema.lua | 6 |
+| test_options.lua | 16 |
 | test_database.lua | 3 |
 | test_bus.lua | 3 |
 | test_slash.lua | 6 |
@@ -450,4 +470,4 @@ Total.
 | test_skin_switch.lua | 13 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **284** |
+| **Total** | **300** |

@@ -163,7 +163,7 @@ local function layout()
         fillCard(c, t, state.key, i)
         c:Show()
         y = y + CARD_H + 6
-        unverified = unverified or t.verified == false
+        unverified = unverified or NS.Waypoints.UnverifiedMark(t) ~= ""
     end
     frame.warning:ClearAllPoints()
     frame.warning:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -y)

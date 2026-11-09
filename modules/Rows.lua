@@ -87,10 +87,10 @@ end
 
 --- The fill color for a row in the profile's color mode: by category (the player's colors, or the
 --- skin's with `colors.fromSkin`), by progress, by skill-up likelihood (gray / green / yellow /
---- orange against the cap) or flat.
+--- orange against the cap) or flat (the Bar color, through its skin and class-color companions).
 function R.FillColor(e, isStat)
     local mode = bars().colorMode
-    if mode == "flat" then return NS.Bar.Color("sm.barFill") end
+    if mode == "flat" then return NS.Bar.Swatch("barColor", "sm.barFill", "useClassColorBar") end
     local p = isStat and (tonumber(e.pct) or 0) / 100 or ((e.max or 0) > 0 and e.rank / e.max or 0)
     if mode == "progress" then return ladder(PROGRESS, p) end
     if mode == "likelihood" and not isStat then return ladder(LIKELIHOOD, p) end
@@ -157,7 +157,13 @@ function Row:SetSkill(e)
     self.bar:SetTimer(expires)
 end
 
---- Draw a stat entry (StatData's model entry).
+local function statDisplay()
+    local s = (NS.db and NS.db.profile.stats) or NS.defaults.profile.stats
+    return s.display or "both"
+end
+
+--- Draw a stat entry (StatData's model entry) as stats.display says: the bar and its value, the
+--- bar alone, or the value alone in the bar's place.
 function Row:SetStat(e)
     self.kind, self.entry = "stat", e
     self.name:SetText(e.label)
@@ -165,10 +171,18 @@ function Row:SetStat(e)
     local color = R.FillColor(e, true)
     paintIcon(self, color)
     setLearnedLook(self, true)
+    local mode = statDisplay()
+    self.bar:SetTimer(nil)
+    if mode == "text" then
+        self.bar:Hide()
+        self.where:SetText(e.display or "")
+        self.where:Show()
+        return
+    end
     local v = R.StatValues(e)
     v.color = color
+    if mode == "bar" then v.text = "" end
     self.bar:SetValues(v)
-    self.bar:SetTimer(nil)
 end
 
 --- The alternate-row stripe (list.stripe), or the plain row.

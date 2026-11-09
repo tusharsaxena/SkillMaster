@@ -97,6 +97,7 @@ Kit.run{
     suites = {
         "test_loadorder",
         "test_schema",
+        "test_options",
         "test_database",
         "test_bus",
         "test_slash",

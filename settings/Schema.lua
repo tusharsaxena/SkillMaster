@@ -238,7 +238,10 @@ function NS.ResetProfileCounted(db)
     end)
 end
 
-local VALID_PAGES = { general = true, profiles = true }
+local VALID_PAGES = {
+    general = true, layout = true, bars = true, skills = true, stats = true, broker = true,
+    alerts = true, journal = true, trainers = true, profiles = true,
+}
 local function defaultsRoot(parts, row)
     if row.page == "profiles" or type(row.get) == "function" then return nil end
     if parts[1] == "global" then return NS.defaults.global, 2 end

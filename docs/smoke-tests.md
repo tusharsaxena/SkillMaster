@@ -71,6 +71,22 @@ passed (clients-§6, testing). Each check names what to do and what you should s
   has Master controls, Skin and Keybindings tabs; Profiles works.
 - **SM-CFG-2** Uncheck Minimap button: the button hides, and Reset all settings does not bring it back.
 
+## Settings pages (T5.1)
+
+- **SM-OPT-1** Open Bars: the live preview reads Fishing 107 +25 / 150 with 4:12. Drag Bar height
+  and change Color mode to Flat with Use the skin's color off: the preview and the open window
+  restyle at once.
+- **SM-OPT-2** Bars > Bar > Border: turn Use the skin's border off, pick a non-Solid style and a
+  thickness of 3: every bar's edge changes. Bars > Text: turn Use the skin's font off, pick a font.
+- **SM-OPT-3** Layout > Block order: drag Weapon Skills to the top; the window reorders. Layout >
+  Blocks: turn off Dock in the window for one block, it pops out; turn it back on in combat and it
+  docks after combat.
+- **SM-OPT-4** Hide a skill from its row menu, then Skills > Professions (or Weapons and other):
+  untick its Hide row and the row comes back.
+- **SM-OPT-5** Trainers and Waypoints: Waypoint method Chat only, click an unlearned row's Go: only
+  the chat line, no TomTom arrow. Turn Mark unverified trainers off: no "(unverified)".
+- **SM-OPT-6** Each page's Defaults button restores the page; the window repaints once.
+
 ## Disabled
 
 - **SM-OFF-1** `/skm disable`: the window hides, `/skm toggle` answers one disabled line, the key

@@ -75,8 +75,7 @@ end
 
 local function trainerText(t)
     local text = ("%s, %s"):format(t.name, NS.Rows.Place(t))
-    if t.verified == false then text = text .. " " .. L["(unverified)"] end
-    return text
+    return text .. NS.Waypoints.UnverifiedMark(t)
 end
 
 local function rankLines(out, e)
@@ -103,6 +102,11 @@ local function skinBreakpoint(rank)
 end
 
 local HELPERS = {}
+
+-- The Skills page's Gathering and fishing hints row (skills.helperHint).
+local function helpersOn()
+    return not (NS.GetSetting and NS.db and NS.GetSetting("skills.helperHint") == false)
+end
 
 function HELPERS.skinning(out, e)
     local H = NS.SkillHelpers
@@ -156,7 +160,7 @@ local function skillLines(e)
     sessionLines(out, e)
     rankLines(out, e)
     if e.category == "weapon" or e.key == "defense" then weaponLines(out, e) end
-    if HELPERS[e.key] then HELPERS[e.key](out, e) end
+    if HELPERS[e.key] and helpersOn() then HELPERS[e.key](out, e) end
     hint(out, "skill", e)
     return out
 end

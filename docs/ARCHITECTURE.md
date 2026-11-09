@@ -70,12 +70,13 @@ Journal's `profile.journal.point` follows the same rule with `modules/Journal.lu
 is the same kind: its one owner is `modules/Alerts.lua`, whose toast descriptor's `setPosition` (a
 test-mode drag, or the toast's `ResetPosition`) is its only writer.
 
-`profile.layout.blocks[id]` (T3.2) is named non-setting state for `docked`, `order`, `collapsed`
-and `point`: `modules/Blocks.lua` owns it, and its writers are `NS.Blocks:Detach` / `:Dock` /
-`:SetCollapsed` (the header and band controls) and, for `point` alone, `savePoint` in
-`modules/Detached.lua` (a detached frame's `OnDragStop`). `scale` and `locked` are read today and
-get their schema rows with the Layout page (T5.1), as do the `bars.*` look and `skills.hidden` /
-`stats.hidden` (written by the row menu, T3.3).
+`profile.layout.blocks[id].point` (T3.2) is named non-setting state: its one writer is `savePoint`
+in `modules/Detached.lua` (a detached frame's `OnDragStop`). `docked`, `order` and `collapsed` are
+`modules/Blocks.lua`'s and have schema rows on the Layout page (T5.1) that write through it:
+`NS.Blocks:Detach` / `:Dock` / `:SetCollapsed` / `:SetOrder`, and `:Move` from the Block order drag
+list, so a row, a header click and `/skm set` take one path. `shown`, `scale` and `locked` are plain
+rows. `skills.hidden` / `stats.hidden` are sets written by the row menu (T3.3) and by the Skills and
+Stats pages' Hide rows (get / set: false clears the entry).
 
 No structural registry exists yet.
 
@@ -92,7 +93,7 @@ strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDAT
 | `SKILL_UP` | `Ka0s_SkillMaster_SkillUp` | `modules/SkillData.lua` (T2.1) | key, old, new | blocks (session gains), broker flash, alerts, session log |
 | `STATS_UPDATED` | `Ka0s_SkillMaster_StatsUpdated` | `modules/StatData.lua` (T2.3) | the stats model | stat blocks, broker |
 | `BONUSES_UPDATED` | `Ka0s_SkillMaster_BonusesUpdated` | `modules/Bonuses.lua` (T2.2) | none | bars, tooltips, broker |
-| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse); the skin owner's look-change hook | none | `modules/Blocks.lua`, which repaints the window and the detached frames; the Journal |
+| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse, move); the skin owner's look-change hook; `NS.ApplyLook` (every display row's write, `settings/OptionsSetup.lua`) | none | `modules/Blocks.lua`, which repaints the window and the detached frames; the Journal; the Bars page's preview |
 | `SIM_TICK` | `Ka0s_SkillMaster_SimTicked` | the simulator (T5.2) | the step's name | displays under simulation |
 
 ## Slash Commands
@@ -153,8 +154,11 @@ a crafting row opens the main window scrolled to it rather than casting (design 
   dock, the row menu's Hide).
 - An overlay is placed when its row is laid out, shown, scrolled or dragged; while the window is
   being dragged it lags its row until the drop (a re-sync on `OnDragStop`).
-- The optional one-line gathering hint under a row (`skills.helperHint`, design §12 item 4) is not
-  drawn yet; the helpers are tooltip lines.
+- The gathering and fishing helpers are tooltip lines, switched by `skills.helperHint` (Skills >
+  General > Gathering and fishing hints); no one-line hint is drawn under a row (design §12 item 4).
+- Not on the Bars page: a fill direction (the mockup's Left to right) and a per-element font for
+  the window, block headers, tooltips and toasts, which follow the skin and the Skin tab. The
+  Layout page has no column count and no frame strata row (design §6.6).
 - Test mode marks the window but still shows the live models: the sample character (the preview
   fixture) arrives in T5.2 through `NS.Blocks.source`.
 - The launcher menu has no *Journal* entry yet (design §6.8): `LibKa0s-Launcher-1.0` minor 9 builds
