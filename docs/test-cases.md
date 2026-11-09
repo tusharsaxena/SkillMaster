@@ -210,7 +210,75 @@ Total.
 - trainer popup: the faction's trainers, the selection and the waypoint button
 - test_waypoints_fallback_order: TomTom, then the native pin, then chat
 
-### test_surface_parity.lua (10)
+### test_sessionlog.lua (5)
+
+- test_sessionlog_ring_cap: the log keeps the newest 500 skill-ups in db.char.log
+- test_sessionlog_eta: (max - rank) / the skill's own rate over this session's gains
+- sessionlog: Gains counts points this session, per skill too; Rate is points an hour
+- sessionlog: a SKILL_UP on the bus lands in the log with the zone
+- sessionlog: a malformed skill-up is refused, never stored
+
+### test_alts.lua (4)
+
+- test_alts_snapshot_two_word_name: the key is realm-key, then the whole two-word name
+- alts: a half-loaded (empty) model keeps the skills the last snapshot had
+- alts: List puts this character first, then by name; Forget drops one
+- alts: a burst of SKILLS_UPDATED is one debounced snapshot; PLAYER_LOGOUT snapshots at once
+
+### test_journal.lua (10)
+
+- journal: /skm journal toggles it, through the one toggle handler
+- journal: the chrome is the shared one: the title, the wrapped close control, the window tier
+- journal: the tabs switch panels: Session Log first, then Alts
+- journal: the log lists skill-ups newest first, with the session's gains, and Clear empties it
+- journal: a SKILLS_UPDATED repaints an open log
+- journal: the alts grid shows a character per row and a mini bar per skill it has
+- journal: right-click on a character asks before forgetting it
+- journal: an unlocked drag saves the drop point; Reset position forgets it
+- journal: the stand-down hides it
+- journal: durations and ETAs read as the mockup writes them
+
+### test_alerts.lua (11)
+
+- test_alerts_cap_once: reaching the cap toasts once with the next trainer, and says it in chat
+- alerts: the cap alert comes back for the next cap, never twice for one
+- alerts: no cap alert below the cap, at the top rank, or when switched off
+- test_alerts_weapon_gap_threshold: a weapon skill weaponGap or more below its cap toasts
+- alerts: the weapon-gap toast shows once per skill per session, and not when switched off
+- alerts: a level-up raising a weapon cap checks every weapon; the first model checks none
+- alerts: the bus delivers SKILL_UP to the alerts
+- alerts: clicking the cap toast sets a waypoint when Waypoints exists, else prints directions
+- alerts: the real toast draws the cap payload with the mockup's lines
+- alerts: the stand-down clears the toast; a profile reload refreshes it
+- alerts: the defaults carry every alerts key
+
+### test_template.lua (3)
+
+- test_template_tokens: every token of design §6.7 renders from the context
+- test_template_tokens: no pin falls back to the last skill-up, then to the lowest profession
+- test_template_unknown_token_empty: unknown tokens and missing data render empty
+
+### test_broker.lua (9)
+
+- broker: four data sources, separate from the launcher object
+- broker: each feed renders its default template
+- broker: the weapons feed follows the main hand's weapon class
+- test_broker_flash_reverts: a skill-up flashes its feeds, then the template comes back
+- broker: the All tooltip lists every category with mini bars, bonuses and gains
+- broker: the Weapons tooltip is the weapon skills plus Defense; Stats is the four groups
+- broker: clicks follow design §6.5 and never touch a secure frame
+- broker: a crafting row without ShowAndScrollTo still opens the main window
+- broker: stood down, every feed reads Off and its tooltip says so; standing up re-renders
+
+### test_seams.lua (5)
+
+- test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
+- test_seam_broker_unlearned_row_opens_trainer_popup: the popup gets the skill key, not a table
+- test_seam_alert_click_sets_waypoint: a cap toast's click goes through the real NS.Waypoints
+- test_seam_mini_bars_are_the_bar_widget: the broker tooltip draws NS.Bar's mini style (the Journal's: test_journal)
+- test_seam_title_bar_journal_button: the main window's journal mark toggles the Journal
+
+### test_surface_parity.lua (11)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
 - parity: the DebugLog stub carries the whole live surface
@@ -220,6 +288,7 @@ Total.
 - parity: the Lifecycle stub carries the whole live surface
 - parity: the Bus stub carries the library's whole surface
 - parity: the Schema stub carries the library's lib-level surface, and its instance a live one's
+- parity: the Toast instance stub carries a live instance's whole surface
 - parity: the Perf, Pool and Widgets stubs carry every member the addon reaches
 - parity: the degraded load completes: options, slash and launcher answer without raising
 
@@ -314,7 +383,7 @@ Total.
 - skin values: no typed value outside the kit's categories and the host's rows
 - skin values: the check is falsifiable, a planted value of each shape is reported
 
-### test_skin_switch.lua (9)
+### test_skin_switch.lua (11)
 
 - skin switch: the check is falsifiable, a surface that redraws a literal is reported
 - skin switch: the main window changes
@@ -323,6 +392,8 @@ Total.
 - skin switch: a detached block changes with the Scope ignored
 - skin switch: the trainer popup changes
 - skin switch: the trainer popup changes with the Scope ignored
+- skin switch: the alert toast changes
+- skin switch: the alert toast changes with the Scope ignored
 - skin switch: the debug console changes
 - skin switch: the debug console changes with the Scope ignored
 
@@ -355,7 +426,14 @@ Total.
 | test_bar.lua | 10 |
 | test_blocks.lua | 9 |
 | test_interact.lua | 9 |
-| test_surface_parity.lua | 10 |
+| test_sessionlog.lua | 5 |
+| test_alts.lua | 4 |
+| test_journal.lua | 10 |
+| test_alerts.lua | 11 |
+| test_template.lua | 3 |
+| test_broker.lua | 9 |
+| test_seams.lua | 5 |
+| test_surface_parity.lua | 11 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
 | test_diagnostics.lua | 2 |
@@ -365,7 +443,7 @@ Total.
 | test_layout_cap.lua | 13 |
 | test_lizard_sighted.lua | 8 |
 | test_skin_values.lua | 3 |
-| test_skin_switch.lua | 9 |
+| test_skin_switch.lua | 11 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **230** |
+| **Total** | **280** |

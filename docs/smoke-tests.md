@@ -54,6 +54,15 @@ passed (clients-§6, testing). Each check names what to do and what you should s
   name, this character first, with mini bars per skill; Professions / Weapons / Other filter the
   columns. Right-click the other character, confirm, and it is gone.
 
+## Integration (M3 + M4)
+
+- **SM-SEAM-1** Collapse the Primary block and scroll the window to the top. Hover the All feed and
+  click Leatherworking in its tooltip: the window opens, Primary expands and the body scrolls to
+  the row. Click an unlearned weapon in the Weapons feed: the trainer popup opens on that skill.
+- **SM-SEAM-2** The broker tooltip's and the Journal's mini bars match the window's bar colors;
+  switch skins and reopen both: they follow. Click the cap toast with TomTom loaded: an arrow.
+- **SM-SEAM-3** Click the main window's journal mark: the Journal opens; again: it closes.
+
 ## Launcher and settings
 
 - **SM-LDB-1** The minimap button shows the logo. Left-click opens the settings; right-click shows

@@ -17,9 +17,8 @@ local L = NS.L
 local LAYERS = NS.Constants.LAYERS
 
 local MAIN_HAND = 16
-local NAME_W, VALUE_W, BAR_H, MIN_W = 128, 124, 7, 380
+local NAME_W, VALUE_W, MIN_W = 128, 124, 380   -- the bar's height is profile.bars.miniHeight
 local HIDE_POLL = 0.1          -- seconds between the tooltip's leave checks
-local WHITE = "Interface\\Buttons\\WHITE8X8"
 
 B.FEEDS = {
     { id = "all",         name = "SkillMaster_All",         label = L["Skill Master: All"] },
@@ -214,67 +213,36 @@ if B.target then
 end
 
 -- ---------------------------------------------------------------------------------------------
--- The mini bar: ONE local function draws it (a later integration may swap in the shared bar)
+-- The mini bar: the shared bar widget (NS.Bar, "mini" style) on a tooltip line
 -- ---------------------------------------------------------------------------------------------
 
-local barPool = NS.Pool.New()
+local barPool = NS.Bar.NewPool()
 local barsDrawn = 0
-
-local function statusBar(parent, level)
-    local sb = CreateFrame("StatusBar", nil, parent)
-    sb:SetAllPoints(parent)
-    sb:SetStatusBarTexture(WHITE)
-    sb:SetMinMaxValues(0, 1)
-    sb:SetFrameLevel(parent:GetFrameLevel() + level)
-    return sb
-end
-
-local function newBar()
-    local bar = CreateFrame("Frame", nil, UIParent)
-    bar.edge = bar:CreateTexture(nil, "BACKGROUND")
-    bar.edge:SetPoint("TOPLEFT", bar, "TOPLEFT", -1, 1)
-    bar.edge:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 1, -1)
-    bar.edge:SetTexture(WHITE)
-    bar.bg = bar:CreateTexture(nil, "BORDER")
-    bar.bg:SetAllPoints(bar)
-    bar.bg:SetTexture(WHITE)
-    bar.bonus = statusBar(bar, 1)
-    bar.fill = statusBar(bar, 2)
-    return bar
-end
 
 local function lineRegion(tip, n)
     local name = tip.GetName and tip:GetName()
     return name and _G[name .. "TextLeft" .. n] or nil
 end
 
---- Draw one mini bar on tooltip line `n`: fill = pct, bonus segment past it (clamped to the end).
---- spec = { pct, bonusPct, fill = token | {r,g,b}, bonus = token }
-local function drawMiniBar(tip, n, spec)
+--- Draw one mini bar on tooltip line `n` from NS.Bar values ({ value, max, bonus, bonusKind,
+--- color, ... }: NS.Rows.SkillValues / StatValues). The bar clamps the bonus to its end.
+local function drawMiniBar(tip, n, values)
     local line = lineRegion(tip, n)
     if not line then return false end
-    local bar = NS.Pool.Acquire(barPool, newBar)
-    bar:SetParent(tip)
+    local bar = NS.Bar.Acquire(barPool, tip, "mini")
     bar:SetFrameLevel(tip:GetFrameLevel() + LAYERS.LEVEL.OVERLAY)
     bar:ClearAllPoints()
     bar:SetPoint("LEFT", line, "LEFT", NAME_W, 0)
     bar:SetPoint("RIGHT", tip, "RIGHT", -VALUE_W, 0)
-    bar:SetHeight(BAR_H)
-    bar.edge:SetVertexColor(NS.Skin.Color("bar.border"))
-    bar.bg:SetVertexColor(NS.Skin.Color("sm.barBg"))
-    local pct = math.max(0, math.min(1, spec.pct or 0))
-    bar.fill:SetValue(pct)
-    bar.bonus:SetValue(math.min(1, pct + math.max(0, spec.bonusPct or 0)))
-    local f = spec.fill
-    if type(f) == "table" then bar.fill:SetStatusBarColor(f[1], f[2], f[3], f[4] or 1)
-    else bar.fill:SetStatusBarColor(NS.Skin.Color(f or "sm.barFill")) end
-    bar.bonus:SetStatusBarColor(NS.Skin.Color(spec.bonus or "sm.bonusPerm"))
-    bar:Show()
+    bar:SetValues(values)
     barsDrawn = barsDrawn + 1
     return true
 end
 
 function B.BarsDrawn() return barsDrawn end
+
+--- The mini bars on the open tooltip (NS.Bar widgets; the suites read them).
+function B.Bars() return barPool.active or {} end
 
 -- ---------------------------------------------------------------------------------------------
 -- Row hit areas: plain buttons over the tooltip's lines, so a row can be clicked (never secure)
@@ -304,7 +272,7 @@ local function addHit(tip, row)
 end
 
 local function releaseAll()
-    NS.Pool.ReleaseAll(barPool)
+    NS.Bar.ReleaseAll(barPool)
     NS.Pool.ReleaseAll(hitPool)
 end
 
@@ -317,19 +285,11 @@ local GROUP_TITLES = {
     base = L["Base"], spell = L["Spell"], defense = L["Defense"], utility = L["Utility"],
 }
 
-local function categoryColor(cat)
-    local colors = setting("broker.categoryColors", nil)
-    return type(colors) == "table" and colors[cat] or nil
-end
-
-local function bonusToken(key)
-    local Bon = NS.Bonuses
-    if not (Bon and type(Bon.Breakdown) == "function") then return "sm.bonusPerm" end
-    local ok, out = pcall(Bon.Breakdown, Bon, key)
-    for _, s in ipairs(ok and out and out.sources or {}) do
-        if s.kind == "temp" then return "sm.bonusTemp" end
-    end
-    return "sm.bonusPerm"
+--- A skill's bar values, and the token its bonus number is colored in (temp or permanent).
+local function skillBar(e)
+    local values = NS.Rows.SkillValues(e)
+    values.color = NS.Rows.FillColor(e)
+    return values, values.bonusKind == "temp" and "sm.bonusTemp" or "sm.bonusPerm"
 end
 
 local function skillValue(e, bonus)
@@ -349,13 +309,10 @@ local function nameColor(e, highlightBelowCap)
 end
 
 local function addSkillRow(tip, e, opts)
-    local bonus = (tonumber(e.modifier) or 0) ~= 0 and bonusToken(e.key) or "sm.bonusPerm"
+    local values, bonus = skillBar(e)
     tip:AddDoubleLine(colored(nameColor(e, opts.belowCap), e.name or e.key), skillValue(e, bonus))
     local n = tip:NumLines()
-    if e.learned and (e.max or 0) > 0 then
-        drawMiniBar(tip, n, { pct = e.rank / e.max, bonusPct = (tonumber(e.modifier) or 0) / e.max,
-                              fill = categoryColor(e.category), bonus = bonus })
-    end
+    if e.learned and (e.max or 0) > 0 then drawMiniBar(tip, n, values) end
     return { line = n, kind = "skill", key = e.key }
 end
 
@@ -411,7 +368,9 @@ local function fillStats(tip, rows)
         for _, e in ipairs(list) do
             tip:AddDoubleLine(colored("gtip.body", e.label or e.key), colored("gtip.value", e.display or ""))
             local n = tip:NumLines()
-            drawMiniBar(tip, n, { pct = (e.pct or 0) / 100, fill = "sm.barFill" })
+            local values = NS.Rows.StatValues(e)
+            values.color = NS.Rows.FillColor(e, true)
+            drawMiniBar(tip, n, values)
             rows[#rows + 1] = { line = n, kind = "stat", key = e.key }
         end
     end
@@ -458,7 +417,7 @@ end
 local function showInWindow(key)
     local W = mainWindow()
     if not W then return end
-    if type(W.ShowAndScrollTo) == "function" then return W:ShowAndScrollTo(key) end
+    if type(W.ShowAndScrollTo) == "function" then return W.ShowAndScrollTo(key) end
     if type(W.Show) == "function" then return W.Show() end
 end
 
@@ -470,7 +429,7 @@ local function openSkillRow(key)
     local e = model and model.byKey[key]
     if e and not e.learned then
         local popup = NS.TrainerPopup
-        if type(popup) == "table" and type(popup.Show) == "function" then return popup:Show(key) end
+        if type(popup) == "table" and type(popup.Show) == "function" then return popup.Show(key) end
         return showInWindow(key)
     end
     local cat = NS.SkillCatalog[key]

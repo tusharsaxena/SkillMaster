@@ -389,6 +389,43 @@ function W.Toggle()
     return W.Show()
 end
 
+--- The docked skill block that shows skill `key`, or nil (detached, hidden or not a skill).
+local function dockedBlockOf(key)
+    local skills = NS.Blocks.Data()
+    for _, id in ipairs(NS.Blocks.Docked()) do
+        for _, r in ipairs(NS.Blocks.Entries(id, skills, nil)) do
+            if r.kind == "skill" and r.entry.key == key then return id end
+        end
+    end
+    return nil
+end
+
+local function rowFor(key)
+    for _, row in ipairs(W.Rows()) do
+        if row.kind == "skill" and row.entry and row.entry.key == key then return row end
+    end
+    return nil
+end
+
+--- Show the window scrolled so skill `key`'s row is in view: the broker's crafting rows (design
+--- §6.5), which never cast. A collapsed block holding it is expanded first (queued in combat, as
+--- every collapse is). A row in a detached block, or none, still shows the window. Answers whether
+--- the row was brought into view.
+function W.ShowAndScrollTo(key)
+    local id = dockedBlockOf(key)
+    if id and NS.Blocks.Settings(id).collapsed then NS.Blocks:SetCollapsed(id, false) end
+    if not (W.IsShown() or W.Show()) then return false end
+    W.Render()
+    local row = rowFor(key)
+    if not row then return false end
+    local offset = math.max(0, (row.layY or 0) - NS.Blocks.HEADER_H)   -- its block's header stays in view
+    local range = tonumber(frame.scroll:GetVerticalScrollRange())
+    if range then offset = math.min(offset, math.max(range, 0)) end
+    frame.scroll:SetVerticalScroll(offset)
+    if NS.SecureOverlay then NS.SecureOverlay:Sync() end   -- the overlays follow the scroll
+    return true
+end
+
 --- Re-read state after a mode or data change.
 function W.Refresh()
     if W.IsShown() then W.Render() end

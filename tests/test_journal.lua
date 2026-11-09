@@ -106,7 +106,9 @@ test("journal: the alts grid shows a character per row and a mini bar per skill 
         if key == "leatherworking" then lw = ember.cells[c] else mining = ember.cells[c] end
     end
     assertEqual(lw.value:GetText(), "146/150")
-    assertTrue(lw.fill:IsShown() and lw.bg:IsShown(), "a mini bar for a skill it has")
+    assertTrue(lw.bar:IsShown(), "a mini bar for a skill it has")
+    assertTrue(math.abs(lw.bar.geom.fill - 146 / 150) < 1e-9, "the shared bar widget draws it (NS.Bar)")
+    assertTrue(lw.bar.style.key == "mini" and not lw.bar.style.showText, "the mini style: no text")
     assertTrue(mining.dash:IsShown() and not mining.value:IsShown(), "a dash for one it has not")
     J.SelectFilter("weapons")
     assertEqual(#p.cols, 1, "Weapons shows Bows")

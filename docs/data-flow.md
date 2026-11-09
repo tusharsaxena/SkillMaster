@@ -69,3 +69,17 @@ The stand-down shows "Off" on every feed; the stand-up re-renders.
   current state.
 
 The README's `## How the window works` is the player-facing version of this page.
+
+## The seams between the display and the M4 surfaces
+
+- A broker crafting row calls `NS.MainWindow.ShowAndScrollTo(key)`: a collapsed docked block holding
+  it is expanded (through `NS.Blocks:SetCollapsed`, queued in combat), the window is shown and
+  rendered, and the body scrolls to the row's laid-out top (`row.layY`) less one header. A row in a
+  detached block, or an unknown key, still shows the window. An unlearned broker row opens
+  `NS.TrainerPopup.Show(key)`. Neither path touches a secure frame (design §6.5).
+- A left-click on a cap toast hands its trainer to `NS.Waypoints:Set`: TomTom, then the native user
+  waypoint, then the directions in chat; a trainer without coordinates always goes to chat.
+- The broker tooltip and the Journal's alt grid draw `NS.Bar` in its `mini` style: the broker from
+  `NS.Rows.SkillValues` / `StatValues` with `NS.Rows.FillColor`, the Journal from the snapshot's rank,
+  cap and category. Both follow `profile.bars` (the colors, `miniHeight`) as the window's rows do.
+- The main window's journal mark calls `NS.Journal.Toggle`.

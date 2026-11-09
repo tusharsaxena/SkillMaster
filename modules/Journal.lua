@@ -73,15 +73,13 @@ local function skillName(key)
     return (tostring(key):gsub("^other:", ""))
 end
 
--- ── the mini bar: the one local draw function (integration may switch it to the bar widget) ──
+-- ── the mini bar: the shared bar widget (NS.Bar, "mini" style), colored as the main window's ──
 
-local function drawMiniBar(cell, rank, most)
-    local pct = (most and most > 0) and clamp(rank / most, 0, 1) or 0
-    NS.Skin.BarTexture(cell.bg, NS.Skin.Color("sm.barBg"))
-    NS.Skin.BarTexture(cell.fill, NS.Skin.Color("sm.barFill"))
-    cell.fill:SetWidth(max(cell.barW * pct, 1))
-    cell.fill:SetShown(pct > 0)
-    cell.bg:Show()
+local function drawMiniBar(cell, s)
+    local e = { category = s.category or "other", rank = s.rank or 0, max = s.max or 0 }
+    cell.bar:ApplyStyle(NS.Bar.ResolveStyle("mini"))   -- a skin or profile change since the last draw
+    cell.bar:SetValues({ value = e.rank, max = e.max, color = NS.Rows.FillColor(e) })
+    cell.bar:Show()
 end
 
 -- ── geometry ─────────────────────────────────────────────────────────────────────────────────
@@ -319,12 +317,10 @@ local function newCell(row, c)
     local cell = { barW = COL_W - 16 }
     cell.value = text(row, "body")
     cell.value:SetPoint("TOPLEFT", row, "TOPLEFT", x, -5)
-    cell.bg = row:CreateTexture(nil, "ARTWORK")
-    cell.bg:SetPoint("TOPLEFT", row, "TOPLEFT", x, -20)
-    cell.bg:SetSize(cell.barW, 5)
-    cell.fill = row:CreateTexture(nil, "OVERLAY")
-    cell.fill:SetPoint("LEFT", cell.bg, "LEFT", 0, 0)
-    cell.fill:SetHeight(5)
+    cell.bar = NS.Bar.Create(row, "mini")
+    cell.bar:SetPoint("TOPLEFT", row, "TOPLEFT", x, -20)
+    cell.bar:SetWidth(cell.barW)
+    cell.bar:Hide()
     cell.dash = text(row, "disabled")
     cell.dash:SetPoint("TOPLEFT", row, "TOPLEFT", x, -10)
     cell.dash:SetText(DASH)
@@ -366,12 +362,11 @@ local function bindCell(cell, key, skills)
     cell.value:SetShown(s ~= nil)
     cell.dash:SetShown(key ~= nil and s == nil)
     if not s then
-        cell.bg:Hide()
-        cell.fill:Hide()
+        cell.bar:Hide()
         return
     end
     cell.value:SetText(("%d/%d"):format(s.rank or 0, s.max or 0))
-    drawMiniBar(cell, s.rank or 0, s.max or 0)
+    drawMiniBar(cell, s)
 end
 
 local function altSubtitle(item)

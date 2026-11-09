@@ -16,10 +16,12 @@ Defense, level-tied skill caps and weapon-master trainers do not exist on Retail
 professions are a different system, so the addon's core has nothing to show there. The TOC carries
 `## Interface: 16001` with `## AllowLoadGameType: camelot` and `## ExcludeLoadGameType: standard`.
 
-v0.1.0 is the born-compliant skeleton: the Ace3 substrate, the LibKa0s setup files (one descriptor
-and one degradation stub each), the main window with its test mode and key binding, skins, the
-settings panel, the launcher and the diagnostics dump. The data modules and the bars arrive in the
-plan's milestones 2 to 5.
+v0.1.0 began as the born-compliant skeleton (the Ace3 substrate, the LibKa0s setup files, one
+descriptor and one degradation stub each, the window, skins, the settings panel, the launcher and
+the diagnostics dump). Milestone 2 added the data layer, milestone 3 the display (the bar widget,
+the blocks and rows, the detached frames, the crafting overlays, the row tooltip, the trainer popup
+and waypoints) and milestone 4 the broker feeds, the alerts, the session log, the alt overview and
+the Journal. The settings pages for the new state and test mode's sample data arrive in milestone 5.
 
 Pure data modules (`SkillData`, `Bonuses`, `StatData`, `Trainers`, `Helpers`, `SessionLog`, `Alts`)
 will read the client API and publish bus messages; display modules consume only messages and
@@ -34,10 +36,14 @@ Env, Core, Skin, Bus, Pool, Widgets, Lifecycle, Perf, DebugLog, Launcher), the A
 (`core/SkillMaster.lua`) and the store (`core/Database.lua`); `core/Compat.lua` is the compat family (the skill-list shims);
 `defaults/Profile.lua` is the defaults tree and `defaults/*_Forever.lua` the data tables (the skill
 catalog, the class weapon lists, trainers, ranks, gathering, fishing, racials, stat definitions);
-`modules/` holds the main window, the `/skm probe` report, the skills model (`SkillData`), the
-bonus breakdown (`Bonuses`), the stats model (`StatData`), the trainer lookups (`Trainers`), the
-skill helpers (`NS.SkillHelpers`, `modules/Helpers.lua`), the alerts (`NS.Alerts`, the rank-cap and
-weapon-gap toasts) and the diagnostics sections;
+`modules/` holds the display (the bar widget `NS.Bar`, the title-bar controls `NS.Chrome`, the
+blocks `NS.Blocks`, the rows `NS.Rows`, the detached frames, the main window, the secure crafting
+overlays, the click map `NS.Interact`, the row tooltip, the trainer popup and `NS.Waypoints`), the
+`/skm probe` report, the skills model (`SkillData`), the bonus breakdown (`Bonuses`), the stats
+model (`StatData`), the trainer lookups (`Trainers`), the skill helpers (`NS.SkillHelpers`,
+`modules/Helpers.lua`), the session log (`NS.SessionLog`), the alt snapshots (`NS.Alts`), the
+Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), the broker feeds
+(`NS.Template`, `NS.Broker`) and the diagnostics sections;
 `settings/` holds the schema,
 the slash table and the settings pages.
 
@@ -77,16 +83,16 @@ No structural registry exists yet.
 
 Six messages, each declared once in `core/Bus.lua` as `NS.MSG.<KEY>` through LibKa0s-Bus-1.0's
 strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDATED` and `SKILL_UP`,
-`Bonuses` sends `BONUSES_UPDATED` and `StatData` sends `STATS_UPDATED`; the other senders arrive
-with their modules.
+`Bonuses` sends `BONUSES_UPDATED`, `StatData` sends `STATS_UPDATED` and `Blocks` sends
+`LAYOUT_CHANGED`; `SIM_TICK`'s sender arrives with the simulator (T5.2).
 
 | Constant | Wire name | Sender | Payload | Consumers |
 |---|---|---|---|---|
-| `SKILLS_UPDATED` | `Ka0s_SkillMaster_SkillsUpdated` | `modules/SkillData.lua` (T2.1) | the skills model | blocks, broker, alerts, alts |
-| `SKILL_UP` | `Ka0s_SkillMaster_SkillUp` | `modules/SkillData.lua` (T2.1) | key, old, new | broker flash, alerts, session log |
+| `SKILLS_UPDATED` | `Ka0s_SkillMaster_SkillsUpdated` | `modules/SkillData.lua` (T2.1) | the skills model | blocks, broker, alerts, alts, Journal |
+| `SKILL_UP` | `Ka0s_SkillMaster_SkillUp` | `modules/SkillData.lua` (T2.1) | key, old, new | blocks (session gains), broker flash, alerts, session log |
 | `STATS_UPDATED` | `Ka0s_SkillMaster_StatsUpdated` | `modules/StatData.lua` (T2.3) | the stats model | stat blocks, broker |
-| `BONUSES_UPDATED` | `Ka0s_SkillMaster_BonusesUpdated` | `modules/Bonuses.lua` (T2.2) | none | bars, tooltips |
-| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse); the skin owner's look-change hook | none | `modules/Blocks.lua`, which repaints the window and the detached frames |
+| `BONUSES_UPDATED` | `Ka0s_SkillMaster_BonusesUpdated` | `modules/Bonuses.lua` (T2.2) | none | bars, tooltips, broker |
+| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse); the skin owner's look-change hook | none | `modules/Blocks.lua`, which repaints the window and the detached frames; the Journal |
 | `SIM_TICK` | `Ka0s_SkillMaster_SimTicked` | the simulator (T5.2) | the step's name | displays under simulation |
 
 ## Slash Commands
@@ -108,12 +114,14 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | `PLAYER_LEVEL_UP` | `NS.SkillData:Enable` | debounced `SkillData:Scan`, with the new level as the weapon-cap floor (5 x level) | the list can still answer the old cap |
 | `UNIT_INVENTORY_CHANGED`, `UNIT_AURA` | `NS.Bonuses.RegisterRuntime` (from `NS.RegisterRuntime`) | `addon:OnBonusesUnitChanged`: player only, debounced `Bonuses.Refresh` (0.2 s), which re-reads only the part the event touched (an aura change never re-reads the 19 item tooltips); a 1 s ticker while a temp bonus naming a skill is live | gear, lures and buffs change the breakdown |
 | `UNIT_STATS`, `UNIT_ATTACK_POWER`, `UNIT_RANGED_ATTACK_POWER`, `UNIT_RESISTANCES`, `UNIT_DAMAGE`, `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
-
 | `PLAYER_LOGOUT` | `modules/Alts.lua` at load, on its own bus target | `Alts:Snapshot` | the last snapshot of the session |
 
 The bus subscribers on their own targets: `modules/SessionLog.lua` hears `SKILL_UP` (one log entry,
 with the zone); `modules/Alts.lua` hears `SKILLS_UPDATED` (one snapshot 2 s after a burst);
-`modules/Journal.lua` hears `SKILLS_UPDATED` and `LAYOUT_CHANGED` (a repaint while shown).
+`modules/Journal.lua` hears `SKILLS_UPDATED` and `LAYOUT_CHANGED` (a repaint while shown);
+`modules/Alerts.lua` hears `SKILL_UP` and `SKILLS_UPDATED` (the cap and weapon-gap checks);
+`modules/Broker.lua` hears `SKILLS_UPDATED`, `SKILL_UP`, `STATS_UPDATED` and `BONUSES_UPDATED`
+(the feed texts and the flash).
 
 Every registration goes through `NS.SafeRegisterEvent` (events-frames-taint-§1); a refused name
 lands in `NS.rejectedEvents`, which the `[Init]` summary and the diagnostics report print. The stand-
@@ -152,7 +160,9 @@ a crafting row opens the main window scrolled to it rather than casting (design 
 - The launcher menu has no *Journal* entry yet (design §6.8): `LibKa0s-Launcher-1.0` minor 9 builds
   only its fixed entries (Enabled, Locked, Test mode, Sim mode, Show window, Open settings), takes
   no extra entry from the descriptor, and launcher-§2 forbids a host menu. It needs a library seam;
-  until then the Journal opens from `/skm journal` and the main window's title-bar button.
+  until then the Journal opens from `/skm journal` and the main window's title-bar journal mark.
+- Broker displays that only call a data object's `OnTooltipShow` show no feed tooltip: the feeds
+  supply `OnEnter` / `OnLeave` (their rows are clickable), not `OnTooltipShow`.
 - The Alts grid shows five skill columns at a time; Shift + mouse wheel pages through the rest.
 - Sim mode (the launcher entry and the Master-controls checkbox) arrives with the simulator in T5.2.
 - Every client API the data modules will use is assumed until `/skm probe` confirms it

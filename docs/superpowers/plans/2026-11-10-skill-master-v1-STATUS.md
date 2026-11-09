@@ -15,12 +15,12 @@ Plan: `2026-11-10-skill-master-v1.md`. Update a row in the same commit that fini
 | 2.2 Bonuses | done | 091a728, merged in f4444bc; built on `modifier`; lure tooltip wording a guess until the probe |
 | 2.3 StatData | done | 7c09297, merged in b81aa9f; events on its own bus target, `test_disabled` step 6 fires on every target |
 | 2.4 Trainers/Helpers | done | 450ccd3, merged in 077956f; helpers published as `NS.SkillHelpers` (`NS.Helpers` is the options library); plan's fist-weapon trainer corrected to Buliwyf Stonehand / Ilyenia Moonfire |
-| 3.1 Bar | todo | |
-| 3.2 Blocks/windows | todo | |
-| 3.3 Interactions | todo | |
-| 4.1 Broker | todo | |
-| 4.2 Alerts | todo | |
-| 4.3 Log/Alts/Journal | todo | |
+| 3.1 Bar | done | 46d4c3a, merged in 792c776; `NS.Bar` styles row/compact/tooltip/mini, bonus clamped at the end; not yet run in the client |
+| 3.2 Blocks/windows | done | bfbefdc, merged in 792c776; the M1 window extended in place; layout/bars/skills/stats state has no settings rows until 5.1 |
+| 3.3 Interactions | done | fe7dc00, merged in 792c776; overlays on UIParent at absolute coordinates; overlay geometry and the Forever API shapes unverified in game |
+| 4.1 Broker | done | 6539729, merged in d257a6f; integration: mini bars on `NS.Bar`, `broker.categoryColors` dropped for `bars.colors`, crafting row -> `MainWindow.ShowAndScrollTo`; no launcher Journal entry (Launcher minor 9 has no hook) |
+| 4.2 Alerts | done | fa0bc74, merged in 547fc27; cap-toast click -> real `NS.Waypoints:Set` (seam test); no settings rows until 5.1 |
+| 4.3 Log/Alts/Journal | done | e6cf6c4, merged in e72d438; Alts keyed by `db.keys` (realm + full name), not `UnitFullName`; mini bars on `NS.Bar`; title-bar journal mark wired |
 | 5.1 Options | todo | |
 | 5.2 Test/Sim | todo | |
 | 5.3 Locales/bindings/diag | todo | |
@@ -30,4 +30,5 @@ Plan: `2026-11-10-skill-master-v1.md`. Update a row in the same commit that fini
 ## Branches / worktrees created by this run (for cleanup)
 - SkillMaster: `feat/2026-11-10-skill-master-v1`
 - dev-copilot: `feat/2026-11-10-single-client-forever` (worktree `#Worktrees/dev-copilot-forever-only`, pushed)
+- SkillMaster M3/M4 worktrees `#Worktrees/skm-m3/display`, `skm-m4/{broker,alerts,journal}` and branches `m3/display`, `m4/*`: removed after the M3+M4 integration
 - WowAddonStandards: branch `feat/2026-11-10-single-client-forever` (local + origin), worktree `#Worktrees/WowAddonStandards-forever-only`

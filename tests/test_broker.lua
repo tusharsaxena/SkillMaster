@@ -151,7 +151,7 @@ test("broker: clicks follow design §6.5 and never touch a secure frame", functi
     local calls = {}
     local saved = { W.Toggle, W.ShowAndScrollTo, M.ToggleCharacter }
     W.Toggle = function() calls[#calls + 1] = "toggle" end
-    W.ShowAndScrollTo = function(self, key) calls[#calls + 1] = (self == W and "scroll:" or "BAD:") .. key end
+    W.ShowAndScrollTo = function(key) calls[#calls + 1] = (type(key) == "string" and "scroll:" .. key or "BAD") end
     M.ToggleCharacter = function(tab) calls[#calls + 1] = "char:" .. tab end
     M.__ldbObjects.SkillMaster_All.OnClick(nil, "LeftButton")
     B.OpenRow({ kind = "skill", key = "cooking" })
