@@ -27,6 +27,17 @@ model with nothing synthesized. Each pass sends `SKILL_UP(key, old, new)` for ev
 rose, then `SKILLS_UPDATED(model)`. Stand-up rescans; stand-down cancels the pending scan with every
 other timer.
 
+## Alerts (T4.2)
+
+`modules/Alerts.lua` listens on its own bus target. `SKILL_UP(key)` reads the new entry: a
+profession at its cap whose `NS.Trainers:NextRank` answers a rank toasts once per skill and cap
+(`cap:<key>:<max>`) and prints one chat line naming the first trainer; a weapon skill
+`alerts.weaponGap` (25) or more below `max(max, 5 x level)` toasts once per skill per session
+(`weapon:<key>`). `SKILLS_UPDATED(model)` checks every weapon whose cap rose since the previous model
+(a level-up); the first model only records the caps. A left-click on a cap toast hands its trainer
+to `NS.Waypoints:Set` when that module exists, else prints the directions. The stand-down clears
+the toast; a profile reload re-reads its position.
+
 ## What runs in v0.1.0
 
 - `OnInitialize` builds the store, runs migrations, applies the skin, registers the slash commands

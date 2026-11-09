@@ -26,6 +26,13 @@ SkillMasterDB
       font = "", texture = "", outline = "hud",
       pickerSeen = false,
     }
+    alerts = {                   -- modules/Alerts.lua (T4.2); the rows arrive with T5.1's Alerts page
+      cap = true,                -- rank-cap toast + chat line
+      weapon = true,             -- weapon-gap toast
+      weaponGap = 25,            -- points below the weapon cap (5 x level) that count as behind
+      sound = false,             -- the toast's sound
+      point = false,             -- toast drop point, written only by modules/Alerts.lua
+    }
 ```
 
 Session-only rows (never stored): `state.debugConsole` (the console checkbox) and `state.testMode`.
@@ -35,7 +42,8 @@ The Minimap button row's path is `global.minimap.shown`; its get/set invert onto
 
 Every row goes through `NS.SetByPath` (`settings/Schema.lua`). The named non-setting state and its
 writers: `profile.window.point`, owned by `modules/MainWindow.lua` (`savePoint` on drag stop,
-`W.ResetPosition`); `global.minimap.minimapPos`, LibDBIcon's own.
+`W.ResetPosition`); `profile.alerts.point`, owned by `modules/Alerts.lua` (the toast's
+`setPosition`); `global.minimap.minimapPos`, LibDBIcon's own.
 
 ## Migrations
 

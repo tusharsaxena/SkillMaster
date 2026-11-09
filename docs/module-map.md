@@ -39,6 +39,7 @@ position says so beside its TOC line (toc-file-§5).
 | `modules/Bonuses.lua` | `NS.Bonuses`: a skill's modifier broken into racial, item, enchant, buff and Other sources; `BONUSES_UPDATED` | defines `NS.addon:OnBonusesUnitChanged` at load, so after `core/SkillMaster.lua`; reads SkillData at call time |
 | `modules/Diagnostics.lua` | the diagnostics report's sections | read at run time |
 | `modules/StatData.lua` | `NS.StatData`: the stats model over `NS.STAT_DEFS`, `STATS_UPDATED`, the speed ticker | registers its events on its own bus target at load |
+| `modules/Alerts.lua` | `NS.Alerts`: the rank-cap and weapon-gap toasts (LibKa0s-Toast-1.0), the cap's chat line, the click-to-waypoint | subscribes to `SKILL_UP` / `SKILLS_UPDATED` on its own bus target at load; reads SkillData, Trainers and the settings at call time |
 | `settings/Schema.lua` | the schema and the single write seam (LibKa0s-Schema-1.0) | before Slash, OptionsSetup and the pages |
 | `settings/Slash.lua` | `NS.COMMANDS` and the dispatcher (LibKa0s-Slash-1.0) | before the landing spec reads it |
 | `settings/OptionsSetup.lua` | the panel descriptor, `NS.Helpers` (LibKa0s-Options-1.0) | before every page file |

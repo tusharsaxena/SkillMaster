@@ -103,6 +103,9 @@ modules\Bonuses.lua
 modules\Diagnostics.lua
 # Conventional: registers its events on a tracked bus target at FILE SCOPE (after core\Bus.lua).
 modules\StatData.lua
+# T4.2: subscribes to SKILL_UP / SKILLS_UPDATED on its own bus target at FILE SCOPE (after core\Bus.lua);
+# reads NS.SkillData, NS.Trainers and the settings at CALL time.
+modules\Alerts.lua
 
 # Settings (last -- depend on everything else being initialized)
 # LOAD-BEARING: NS.Schema, NS.SetByPath and NS.SchemaRuntime, read at FILE SCOPE by the three files below.

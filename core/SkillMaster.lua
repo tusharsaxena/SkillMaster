@@ -57,6 +57,7 @@ end
 function NS.StandDown()
     NS.State.testMode = false
     if NS.MainWindow then NS.MainWindow.StandDown() end
+    if NS.Alerts then NS.Alerts.StandDown() end   -- T4.2: no toast stays up or waits
     NS.HideSkinPicker()
     addon:UnregisterAllEvents()
     addon:CancelAllTimers()
@@ -80,6 +81,7 @@ local function reloadProfile()
     NS.SyncEnabledHold()
     NS.ApplySkinChoice()
     if NS.MainWindow then NS.MainWindow.ApplySettings() end
+    if NS.Alerts then NS.Alerts.Refresh() end   -- T4.2: the toast's position from the new profile
     if NS.Helpers and NS.Helpers.RefreshAllPanels then NS.Helpers.RefreshAllPanels() end
     NS.MaybeShowSkinPicker()
 end

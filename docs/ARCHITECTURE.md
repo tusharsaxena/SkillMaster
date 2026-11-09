@@ -36,7 +36,8 @@ Env, Core, Skin, Bus, Pool, Widgets, Lifecycle, Perf, DebugLog, Launcher), the A
 catalog, the class weapon lists, trainers, ranks, gathering, fishing, racials, stat definitions);
 `modules/` holds the main window, the `/skm probe` report, the skills model (`SkillData`), the
 bonus breakdown (`Bonuses`), the stats model (`StatData`), the trainer lookups (`Trainers`), the
-skill helpers (`NS.SkillHelpers`, `modules/Helpers.lua`) and the diagnostics sections;
+skill helpers (`NS.SkillHelpers`, `modules/Helpers.lua`), the alerts (`NS.Alerts`, the rank-cap and
+weapon-gap toasts) and the diagnostics sections;
 `settings/` holds the schema,
 the slash table and the settings pages.
 
@@ -55,7 +56,9 @@ installation's rows under `SkillMasterDB.global`. Every row, default and migrati
 
 Named non-setting state (architecture-§5): `profile.window.point`, the main window's drop point, is
 geometry only a drag sets. Its one owner is `modules/MainWindow.lua`; its writers are `savePoint`
-(on `OnDragStop`) and `W.ResetPosition` (the Master-controls Reset position button). LibDBIcon also
+(on `OnDragStop`) and `W.ResetPosition` (the Master-controls Reset position button). `profile.alerts.point`, the alert
+toasts' drop point, is the same kind: its one owner is `modules/Alerts.lua`, whose toast descriptor's
+`setPosition` (a test-mode drag, or the toast's `ResetPosition`) is its only writer. LibDBIcon also
 writes its own `minimapPos` into `global.minimap`, the table the Minimap button row shares.
 
 No structural registry exists yet.

@@ -173,7 +173,21 @@ Total.
 - statdata: another unit's event schedules nothing
 - statdata: the speed ticker runs only while a speed display asks for it
 
-### test_surface_parity.lua (10)
+### test_alerts.lua (11)
+
+- test_alerts_cap_once: reaching the cap toasts once with the next trainer, and says it in chat
+- alerts: the cap alert comes back for the next cap, never twice for one
+- alerts: no cap alert below the cap, at the top rank, or when switched off
+- test_alerts_weapon_gap_threshold: a weapon skill weaponGap or more below its cap toasts
+- alerts: the weapon-gap toast shows once per skill per session, and not when switched off
+- alerts: a level-up raising a weapon cap checks every weapon; the first model checks none
+- alerts: the bus delivers SKILL_UP to the alerts
+- alerts: clicking the cap toast sets a waypoint when Waypoints exists, else prints directions
+- alerts: the real toast draws the cap payload with the mockup's lines
+- alerts: the stand-down clears the toast; a profile reload refreshes it
+- alerts: the defaults carry every alerts key
+
+### test_surface_parity.lua (11)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
 - parity: the DebugLog stub carries the whole live surface
@@ -183,6 +197,7 @@ Total.
 - parity: the Lifecycle stub carries the whole live surface
 - parity: the Bus stub carries the library's whole surface
 - parity: the Schema stub carries the library's lib-level surface, and its instance a live one's
+- parity: the Toast instance stub carries a live instance's whole surface
 - parity: the Perf, Pool and Widgets stubs carry every member the addon reaches
 - parity: the degraded load completes: options, slash and launcher answer without raising
 
@@ -277,11 +292,13 @@ Total.
 - skin values: no typed value outside the kit's categories and the host's rows
 - skin values: the check is falsifiable, a planted value of each shape is reported
 
-### test_skin_switch.lua (5)
+### test_skin_switch.lua (7)
 
 - skin switch: the check is falsifiable, a surface that redraws a literal is reported
 - skin switch: the main window changes
 - skin switch: the main window changes with the Scope ignored
+- skin switch: the alert toast changes
+- skin switch: the alert toast changes with the Scope ignored
 - skin switch: the debug console changes
 - skin switch: the debug console changes with the Scope ignored
 
@@ -311,7 +328,8 @@ Total.
 | test_helpers.lua | 8 |
 | test_bonuses.lua | 14 |
 | test_statdata.lua | 14 |
-| test_surface_parity.lua | 10 |
+| test_alerts.lua | 11 |
+| test_surface_parity.lua | 11 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
 | test_diagnostics.lua | 2 |
@@ -321,7 +339,7 @@ Total.
 | test_layout_cap.lua | 13 |
 | test_lizard_sighted.lua | 8 |
 | test_skin_values.lua | 3 |
-| test_skin_switch.lua | 5 |
+| test_skin_switch.lua | 7 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **198** |
+| **Total** | **212** |
