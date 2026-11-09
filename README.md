@@ -3,7 +3,7 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-119%2F119_passing-green)
+![Tests](https://img.shields.io/badge/Tests-126%2F126_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
@@ -18,6 +18,8 @@ Type `/skm toggle` to open or close the Skill Master window, or bind a key to it
 Test mode fills the window with sample data so you can try a layout before your character has the skills to show. Turn it on with `/skm test`, from the minimap button's right-click menu, or with the Test mode box under General → Master controls. A band across the top of the window says you are looking at sample data, and entering combat ends test mode on its own.
 
 `/skm skin` opens the skin picker. While it is open the window shows in test mode, so you can watch each skin as you pick it; the eye button turns that preview on and off. Press Apply to keep the skin you picked. Closing the picker without applying puts everything back the way it was.
+
+Once, when you have a moment, type `/skm probe` and send the text it shows to the author. It lists how this game client reports your skills and stats, which is still being mapped out for WoW Forever, and it changes nothing.
 
 The minimap button opens the settings on a left-click and a menu on a right-click: turn the addon on or off, lock the window, switch test mode, and show or hide the window. `/skm disable` turns the whole addon off until you type `/skm enable`.
 

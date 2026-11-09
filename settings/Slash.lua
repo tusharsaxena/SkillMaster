@@ -38,6 +38,8 @@ NS.COMMANDS = {
     {"lock",        L["Lock the window in place"],                function() setAndEcho("locked", true) end},
     {"unlock",      L["Unlock the window so it can be dragged"],  function() setAndEcho("locked", false) end},
     {"test",        L["Turn test mode on or off"],                function() NS.ToggleTestMode() end},
+    {"probe",       L["Report the client's skill and stat API as JSON, to send to the author"],
+                                                                  function() NS.Probe.Verb() end},
     {"enable",      L["Turn the addon on"],                       function() setAndEcho("enabled", true) end},
     {"disable",     L["Turn the addon off \226\128\148 `/skm enable` turns it back on"],
                                                                   function() setAndEcho("enabled", false) end},

@@ -33,6 +33,12 @@ passed (clients-§6, testing). Each check names what to do and what you should s
 - **SM-OFF-1** `/skm disable`: the window hides, `/skm toggle` answers one disabled line, the key
   binding does nothing, the right-click menu grays all but Enabled. `/skm enable` restores it.
 
+## Probe
+
+- **SM-PROBE-1** `/skm probe`: a copy window opens with a JSON report, `skillLines` holding every
+  skill (a collapsed header in the Skills tab is collapsed again afterwards). Copy it and send it to
+  the author; it settles the assumed rows in `docs/midnight-quirks.md`.
+
 ## Skins and diagnostics
 
 - **SM-SKIN-1** `/skm skin`: pick Ka0s Default, Apply. The window and the debug console change look.

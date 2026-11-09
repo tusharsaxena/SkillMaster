@@ -32,7 +32,8 @@ Every file, its responsibility and why the TOC orders it as it does: [module-map
 In short: `core/` holds the identity, the constants, the one setup file per LibKa0s major (Media,
 Env, Core, Skin, Bus, Pool, Widgets, Lifecycle, Perf, DebugLog, Launcher), the AceAddon entry
 (`core/SkillMaster.lua`) and the store (`core/Database.lua`); `defaults/Profile.lua` is the defaults
-tree; `modules/` holds the main window and the diagnostics sections; `settings/` holds the schema,
+tree; `modules/` holds the main window, the `/skm probe` report and the diagnostics sections;
+`settings/` holds the schema,
 the slash table and the settings pages.
 
 ### Per-client features
@@ -73,7 +74,7 @@ modules.
 ## Slash Commands
 
 `/skm` and `/skillmaster`, one LibKa0s-Slash-1.0 dispatcher over `NS.COMMANDS` (`settings/Slash.lua`):
-`help`, `config`, `skin`, `show`, `hide`, `toggle`, `lock`, `unlock`, `test`, `enable`, `disable`,
+`help`, `config`, `skin`, `show`, `hide`, `toggle`, `lock`, `unlock`, `test`, `probe`, `enable`, `disable`,
 `list`, `get`, `set`, `reset`, `resetall`, `debug`, `diagnostics`, `perf`, `version`. The bare
 command opens the settings panel. While disabled, every verb but the library's live set refuses on
 one line. The table with each verb's handler and refusal: [slash-dispatch.md](slash-dispatch.md).
@@ -99,8 +100,9 @@ combat and re-anchored only out of combat, queued on `PLAYER_REGEN_ENABLED`.
 
 - The window has no content yet: the skill and stat bars arrive with milestones 2 and 3.
 - Sim mode (the launcher entry and the Master-controls checkbox) arrives with the simulator in T5.2.
-- Every client API the data modules will use is assumed from the 1.12 shape until `/skm probe`
-  confirms it ([midnight-quirks.md](midnight-quirks.md), the addon's own section).
+- Every client API the data modules will use is assumed until `/skm probe` confirms it
+  ([midnight-quirks.md](midnight-quirks.md), the addon's own section). The kit's Forever API set
+  already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.
 
 ## Documentation map
 
@@ -120,7 +122,7 @@ combat and re-anchored only out of combat, queued on `PLAYER_REGEN_ENABLED`.
 
 | Doc | Status | Trigger |
 |---|---|---|
-| `slash-dispatch.md` | Present | 20 commands in `NS.COMMANDS` |
+| `slash-dispatch.md` | Present | 21 commands in `NS.COMMANDS` |
 | `midnight-quirks.md` | Present | Always (client-quirks-§1); holds the vendored catalog and this addon's assumed-API table |
 | `debug.md` | Present | The diagnostics dump is a debug surface beyond the default console (debug-logging-§14) |
 | `profiles.md` | Present | The Profiles page ships in the options UI |

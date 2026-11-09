@@ -42,6 +42,11 @@ L["Toggle the debug console \226\128\148 `on`/`off` enable/disable logging"] = t
 L["Write the diagnostics report to the debug console"] = true
 L["Measure performance \226\128\148 try `/skm perf` for the workflow"] = true
 L["Print the addon version"] = true
+L["Report the client's skill and stat API as JSON, to send to the author"] = true
+
+-- The probe.
+L["Skill Master probe: copy this and send it to the author"] = true
+L["Probe report ready: press Ctrl+C to copy it."] = true
 
 -- Settings.
 L["Profiles"] = true

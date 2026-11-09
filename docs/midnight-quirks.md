@@ -272,5 +272,51 @@ Each needs an in-game probe, recorded with the build, before any section of this
 
 ## SkillMaster-specific quirks
 
-None recorded yet. The Forever API shapes the data modules assume are listed here as
-"assumed (1.12)" until `/skm probe` confirms them (plan Task 1.2).
+### The Forever API surface is assumed, not measured (open probe)
+
+WoW Forever's API is only partly known (LibKa0s#44). The data modules are built against the vanilla
+1.12 return shapes behind feature detection (design §12, item 1), and every shape they rely on is
+listed below as **assumed (1.12)** until the owner runs `/skm probe` in game and sends the JSON back.
+The probe (`modules/Probe.lua`) reports each row's presence under `apis`, the raw returns of every
+skill line under `skillLines` (and under `skillSource` which API it read them from), the localized
+header names under `headers` and the weapon-enchant returns under `enchant`. A `"<nil>"` in the report
+is a nil the client returned at that position; a table return is kept whole.
+
+**What the kit's Forever API set already says.** The testkit's generated name sets
+(`tests/_kit/client_globals_forever.lua`, Ketho/BlizzardInterfaceResources branch `forever`, sha
+`d1ee569`, 2026-10-21) list the skill list as **`C_SkillInfo.GetNumSkillLines`,
+`C_SkillInfo.GetSkillLineInfo`, `C_SkillInfo.GetSkillLineInfoByID`, `C_SkillInfo.ExpandSkillHeader`
+and `C_SkillInfo.CollapseSkillHeader`**, and the weapon enchant as **`C_Item.GetWeaponEnchantInfo`**,
+with none of the 1.12 bare globals (`GetSkillLineInfo`, `GetNumSkillLines`, `GetWeaponEnchantInfo`).
+The probe therefore reads `C_SkillInfo` and `C_Item` first and the 1.12 globals second. Whether
+`C_SkillInfo.GetSkillLineInfo` answers a table or the positional list, and its field names, is
+unknown until the probe runs. The same sets list `UnitResistance` on Forever and the stat readers
+below on both clients.
+
+- **Client:** Forever 1.60.1 (build 70790, interface 16001), *not measured* for any row below.
+- **Cost:** a wrong shape is a wrong bar shown as fact, the design's anti-goal.
+- **Do:** read each API behind a presence test; a stat the client cannot give is left out of the
+  defaults (clients-§3), never faked. Correct a row here, with the probe's build, when the JSON arrives.
+
+| API | Assumed shape | Status | Used by |
+|---|---|---|---|
+| `C_SkillInfo.GetNumSkillLines()` (1.12: `GetNumSkillLines()`) | number of lines, headers included, collapsed children excluded | listed by the kit's Forever set; shape assumed (1.12) | SkillData (T2.1) |
+| `C_SkillInfo.GetSkillLineInfo(i)` (1.12: `GetSkillLineInfo(i)`) | `name, isHeader, isExpanded, rank, tempPoints, modifier, maxRank, isAbandonable, stepCost, rankCost, minLevel, costType, description`, or a table with those fields | listed by the kit's Forever set; shape unknown | SkillData (T2.1) |
+| `C_SkillInfo.ExpandSkillHeader(i)` / `CollapseSkillHeader(i)` | open / close header `i`; children shift the indices below | listed by the kit's Forever set; behavior assumed (1.12) | SkillData, the probe |
+| Skill header names | `Class Skills`, `Professions`, `Secondary Skills`, `Weapon Skills`, `Armor Proficiencies`, `Languages` (enUS) | assumed (1.12) | SkillData's category map |
+| `C_Item.GetWeaponEnchantInfo()` (1.12: `GetWeaponEnchantInfo()`) | `hasMain, mainExpirationMs, mainCharges, hasOff, offExpirationMs, offCharges` | listed by the kit's Forever set; shape assumed (1.12) | Bonuses (lure timer, T2.2) |
+| `UnitResistance(unit, school)` | `base, total, bonus, minus` | listed by the kit's Forever set; shape assumed (1.12) | StatData (T2.3) |
+| `GetCritChance()`, `GetRangedCritChance()`, `GetDodgeChance()`, `GetParryChance()`, `GetBlockChance()` | a percentage | assumed (1.12) | StatData |
+| `GetHitModifier()` | hit % from gear | assumed (1.12) | StatData |
+| `GetSpellHitModifier()`, `GetSpellBonusDamage(school)`, `GetSpellCritChance(school)` | spell hit %, bonus damage, crit % | listed (inherited from live); shape assumed | StatData |
+| `GetCombatRating(id)` | a rating | listed (inherited from live); meaning on Forever unknown | StatData (left out unless it answers) |
+| `GetUnitSpeed(unit)` | `current, run, flight, swim` in yards/s (7 = 100%) | listed (inherited from live); shape assumed | StatData (run speed) |
+| `C_Map.GetBestMapForUnit`, `C_Map.SetUserWaypoint` | a uiMapID; a native map pin | listed (inherited from live); behavior unknown | Helpers, Waypoints (T2.4, T3.3) |
+| `CastSpellByName(name)` | protected from insecure code in combat | listed; protection unknown | the crafting rows' secure overlay (T3.3) |
+| `C_AddOns.IsAddOnLoaded("TomTom")` | true when TomTom is loaded; the bare `IsAddOnLoaded` is in neither set | listed | Waypoints (T3.3) |
+
+"Listed" means present in the kit's generated name set, which is best-effort for Forever (the set
+can list a name the client lacks); it is not a measurement. *Source:* this addon's design
+(`docs/superpowers/specs/2026-11-10-skill-master-design.md` §5.4) and the kit's
+`tests/_kit/client_globals_forever.lua`, read when the missing-globals gate flagged the probe's first
+draft for calling the bare `GetSkillLineInfo` (2026-11-10).

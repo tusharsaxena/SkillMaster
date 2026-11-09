@@ -12,6 +12,7 @@
 | `show` / `hide` / `toggle` | `NS.MainWindow.Show` / `Hide` / `Toggle` | refused |
 | `lock` / `unlock` | `NS.SetByPath("locked", ...)` then the stored echo | refused |
 | `test` | `NS.ToggleTestMode` | refused |
+| `probe` | `NS.Probe.Verb`: the report as JSON in a copy window | refused |
 | `enable` / `disable` | `NS.SetByPath("enabled", ...)` then the echo | answers |
 | `list` / `get` / `set` / `reset` | the library's schema CLI | answers |
 | `resetall` | the confirmation popup, then the profile reset | answers |

@@ -61,7 +61,7 @@ test("parity: the Perf, Pool and Widgets stubs carry every member the addon reac
         Perf    = { "on", "suspended", "Note", "OnCommand" },
         Pool    = { "New", "Acquire", "ReleaseAll", "Counts", "NewKeyed", "AcquireKeyed",
                     "ReleaseAllKeyed", "CountsKeyed" },
-        Widgets = { "TestStrip" },
+        Widgets = { "TestStrip", "CopyWindow" },
     }
     local problems = {}
     for seam, keys in pairs(reached) do

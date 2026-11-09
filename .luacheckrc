@@ -21,6 +21,12 @@ read_globals = {
   "C_AddOns",
   "debugprofilestop",            -- the perf bracket's clock (performance-§2)
   "Settings", "StaticPopup_Show", "YES", "NO",
+  -- the probe's reads (modules/Probe.lua): the skill list, the build, and every API it reports on
+  "GetBuildInfo", "GetLocale", "GetNumSkillLines", "GetSkillLineInfo", "ExpandSkillHeader",
+  "CollapseSkillHeader", "GetWeaponEnchantInfo", "IsAddOnLoaded", "C_Map", "GetUnitSpeed",
+  "GetSpellBonusDamage", "GetSpellCritChance", "GetHitModifier", "GetSpellHitModifier",
+  "GetCombatRating", "GetCritChance", "GetRangedCritChance", "GetDodgeChance", "GetParryChance",
+  "GetBlockChance", "UnitResistance", "CastSpellByName", "C_SkillInfo", "C_Item",
 }
 
 -- The harness global is declared here, not in read_globals, so addon source cannot reach it (lint).

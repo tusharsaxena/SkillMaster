@@ -76,6 +76,16 @@ Total.
 
 - perf: windowRender is noted while a capture is on, and nothing is noted while off
 
+### test_probe.lua (7)
+
+- probe: Run() answers the report's six keys
+- probe: skillLines holds the raw returns of every line, the collapsed ones included
+- probe: headers lists the localized header names
+- probe: apis maps every probed name to a boolean
+- probe: enchant carries the weapon enchant returns (a lure's time left)
+- probe: /skm probe shows the report as JSON in the copy window
+- probe: C_SkillInfo and C_Item are read first, a table-shaped line kept whole
+
 ### test_surface_parity.lua (10)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
@@ -208,6 +218,7 @@ Total.
 | test_keybinds.lua | 2 |
 | test_skinsetup.lua | 4 |
 | test_perf.lua | 1 |
+| test_probe.lua | 7 |
 | test_surface_parity.lua | 10 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
@@ -221,4 +232,4 @@ Total.
 | test_skin_switch.lua | 5 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **119** |
+| **Total** | **126** |
