@@ -16,14 +16,15 @@ local LAYERS = NS.Constants.LAYERS
 
 W.FRAME_NAME = "SkillMasterMainWindow"
 W.SCROLL_NAME = "SkillMasterMainScroll"
-local WIDTH, TITLE_H, SUMMARY_H, FOOTER_H, MIN_H, SCROLLBAR_W = 440, 28, 22, 22, 120, 16
+local TITLE_H, SUMMARY_H, FOOTER_H, MIN_H, SCROLLBAR_W = 28, 22, 22, 120, 16
 
 local frame          -- built on first show
 local headerPool, rowPool
 local headers = {}   -- [block id] = the header drawn this pass
 local lastSig        -- the row set the current layout was built for
 
-local function layoutSettings() return NS.db.profile.layout end
+local function layoutSettings() return (NS.db and NS.db.profile.layout) or NS.defaults.profile.layout end
+local function width() return tonumber(layoutSettings().width) or 440 end
 
 local function savePoint()
     local point, _, relPoint, x, y = frame:GetPoint(1)
@@ -147,7 +148,7 @@ local function buildBody()
     local scroll = CreateFrame("ScrollFrame", W.SCROLL_NAME, frame, "UIPanelScrollFrameTemplate")
     scroll:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CONTENT)
     local content = CreateFrame("Frame", nil, scroll)
-    content:SetWidth(WIDTH - 4 - SCROLLBAR_W)
+    content:SetWidth(width() - 4 - SCROLLBAR_W)
     content:SetHeight(1)
     scroll:SetScrollChild(content)
     scroll:HookScript("OnVerticalScroll", function()
@@ -193,7 +194,7 @@ end
 local function build()
     if frame then return frame end
     frame = CreateFrame("Frame", W.FRAME_NAME, UIParent, "BackdropTemplate")
-    frame:SetSize(WIDTH, MIN_H)
+    frame:SetSize(width(), MIN_H)
     frame:SetFrameStrata(LAYERS.STRATA.WINDOW)
     frame:SetToplevel(true)
     frame:SetClampedToScreen(true)
@@ -291,6 +292,7 @@ local function layOut(blocks)
         headers[b.id] = h
         y = y + NS.Blocks.HEADER_H
         if not b.collapsed then y = NS.Blocks.LayRows(b.entries, frame.content, rowPool, y, "row", 0) end
+        y = y + (tonumber(layoutSettings().blockGap) or 0)
     end
     frame.content:SetHeight(math.max(y, 1))
     return y
@@ -301,6 +303,8 @@ local function fit(top, y)
     frame.scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", 2, -(top + 1))
     frame.scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(2 + SCROLLBAR_W), FOOTER_H + 2)
     local maxH = layoutSettings().maxHeight or 560
+    frame:SetWidth(width())
+    frame.content:SetWidth(width() - 4 - SCROLLBAR_W)
     frame:SetHeight(math.max(MIN_H, math.min(top + y + FOOTER_H + 4, maxH)))
 end
 

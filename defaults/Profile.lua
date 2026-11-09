@@ -11,29 +11,34 @@ NS.defaults = {
         -- Drag-only geometry, no control sets it: written by modules/MainWindow.lua alone
         -- (architecture-§5's named-owner rule; docs/ARCHITECTURE.md names the writer).
         window = { point = false },
-        -- T3.2 the main window's body and the blocks (modules/Blocks.lua). `blocks[id]` is named
-        -- non-setting state for `docked`, `order`, `collapsed` and `point` (the header clicks and
-        -- the detached frames' drag write them); `scale` and `locked` get rows in T5.1.
+        -- T3.2 the main window's body and the blocks (modules/Blocks.lua). `blocks[id].point` is
+        -- named non-setting state (the detached frames' drag writes it); every other key has a row
+        -- on the Layout page (T5.1), and `docked`, `order` and `collapsed` write through NS.Blocks.
         layout = {
+            width     = 440,     -- the main window's width, px
             maxHeight = 560,     -- the window scrolls past this
+            blockGap  = 0,       -- px between two docked blocks
             summary   = true,    -- the strip under the title: level, session gains, next alert
             blocks = {
-                primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, locked = false },
-                secondary     = { docked = true, order = 2, collapsed = false, point = false, scale = 1, locked = false },
+                primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, locked = false, shown = true },
+                secondary     = { docked = true, order = 2, collapsed = false, point = false, scale = 1, locked = false, shown = true },
                 -- belowCapOnly: the detached compact preset shows only the equipped weapons and the
-                -- skills below their cap (Detached.dc.html); its row arrives with the Layout page.
-                weapon        = { docked = true, order = 3, collapsed = false, point = false, scale = 1, locked = false,
+                -- skills below their cap (Detached.dc.html; Layout > Blocks > Weapon skills).
+                weapon        = { docked = true, order = 3, collapsed = false, point = false, scale = 1, locked = false, shown = true,
                                   belowCapOnly = false },
-                other         = { docked = true, order = 4, collapsed = false, point = false, scale = 1, locked = false },
-                stats_base    = { docked = true, order = 5, collapsed = false, point = false, scale = 1, locked = false },
-                stats_spell   = { docked = true, order = 6, collapsed = true,  point = false, scale = 1, locked = false },
-                stats_defense = { docked = true, order = 7, collapsed = true,  point = false, scale = 1, locked = false },
-                stats_utility = { docked = true, order = 8, collapsed = false, point = false, scale = 1, locked = false },
+                other         = { docked = true, order = 4, collapsed = false, point = false, scale = 1, locked = false, shown = true },
+                stats_base    = { docked = true, order = 5, collapsed = false, point = false, scale = 1, locked = false, shown = true },
+                stats_spell   = { docked = true, order = 6, collapsed = true,  point = false, scale = 1, locked = false, shown = true },
+                stats_defense = { docked = true, order = 7, collapsed = true,  point = false, scale = 1, locked = false, shown = true },
+                stats_utility = { docked = true, order = 8, collapsed = false, point = false, scale = 1, locked = false, shown = true },
             },
         },
-        -- Rows a player hid from the row menu (T3.3), and whether unlearned rows show.
-        skills = { showUnlearned = true, hidden = {}, helperHint = false },
-        stats  = { hidden = {} },
+        -- Rows a player hid from the row menu (T3.3) or the Skills and Stats pages, whether unlearned
+        -- rows show, the gathering and fishing helper lines in a row's tooltip (helperTooltip) and
+        -- the optional one-line hint drawn under the row (helperHint, off by default: design §12.4).
+        skills = { showUnlearned = true, hidden = {}, helperTooltip = true, helperHint = false },
+        -- How a stat row draws: "both" (bar and value), "bar" (no value text) or "text" (no bar).
+        stats  = { hidden = {}, display = "both" },
         -- T3.1 the bar widget's look (modules/Bar.lua). The colors are the player's picks; with
         -- `colors.fromSkin` they give way to the skin's owner tokens (core/SkinSetup.lua). The
         -- defaults are the approved mockup's (docs/superpowers/specs/2026-11-10-skill-master-mockups).
@@ -45,10 +50,40 @@ NS.defaults = {
             rowHeight     = 20,          -- one skill or stat row
             fontSize      = 11,          -- the bar text, before the skin's HUD scale
             textAnchor    = "CENTER",    -- "LEFT" | "CENTER" | "RIGHT"
+            -- The bar text; tokens {rank} {bonus} {max} {pct} {left} (modules/Bar.lua Bar.Text).
+            textTemplate  = "{rank} {bonus} / {max}",
             spark         = true,        -- a thin line riding the end of the fill
             ticks         = true,        -- profession tier ticks (75 / 150 / 225)
-            border        = true,        -- a 1 px edge around each bar
+            markers       = true,        -- a stat's threshold markers (hit cap, resist cap)
+            timer         = true,        -- the temporary bonus's time left beside the bar
             colorMode     = "category",  -- "category" | "progress" | "likelihood" | "flat"
+            -- T5.1 the composed blocks (options-ui-§16): the fill (the flat color mode's color),
+            -- the background, the border and the text. Every `*FromSkin` companion starts on the
+            -- skin (skinning-§6): the stored pick waits for the player to turn it off.
+            barTexture          = "Ka0s Default",
+            barAlpha            = 1,
+            barColor            = { 0.27, 0.59, 0.90, 1 },
+            useClassColorBar    = false,
+            barTextureFromSkin  = true,
+            barColorFromSkin    = true,
+            bgColor             = { 0.04, 0.03, 0.02, 0.9 },
+            useClassColorBg     = false,
+            bgColorFromSkin     = true,
+            border              = true,        -- Show border
+            borderStyle         = "Solid",
+            borderSize          = 1,
+            borderColor         = { 0.24, 0.22, 0.20, 1 },
+            useClassColorBorder = false,
+            borderStyleFromSkin = true,
+            borderColorFromSkin = true,
+            font                = "Ka0s Prototype",
+            fontColor           = { 1, 1, 1, 1 },
+            useClassColorFont   = false,
+            fontFlags           = "@skin",
+            fontShadow          = false,
+            fontFromSkin        = true,
+            fontColorFromSkin   = true,
+            fontShadowFromSkin  = true,
             colors = {
                 fromSkin  = false,
                 primary   = { 0.357, 0.608, 0.878, 1 },
@@ -60,9 +95,16 @@ NS.defaults = {
                 bonusPerm = { 0.553, 0.722, 1, 1 },
             },
         },
-        -- The Journal window's drop point and size ({ w, h }, from its resize grip), the same rule:
-        -- written by modules/Journal.lua alone.
-        journal = { point = false, size = false },
+        -- The Journal window: its drop point and size ({ w, h }, from its resize grip; the same rule:
+        -- written by modules/Journal.lua alone), the session log's length per character and the Alts
+        -- tab's filter on open.
+        journal = { point = false, size = false, keep = 500, filter = "professions" },
+        -- T5.1 the Trainers and Waypoints page (modules/Waypoints.lua, modules/TrainerPopup.lua).
+        waypoints = {
+            method   = "auto",   -- "auto" (TomTom, else the map pin, else chat) | "tomtom" | "native" | "chat"
+            announce = true,     -- say in chat where a waypoint was set
+        },
+        trainers = { unverified = true },   -- mark trainer data not yet checked on WoW Forever
         skin = {
             source      = "ka0s",                     -- Ka0s skins, or EllesmereUI
             skin        = NS.DEFAULT_SKIN or "ka0s",  -- the library's per-client default: WoW Forever here

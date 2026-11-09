@@ -659,7 +659,13 @@ function J.IsShown() return frame ~= nil and frame:IsShown() == true end
 function J.Show()
     local refusal = NS.StoodDownRefusal()
     if refusal then NS.Print(refusal) return false end
-    build():Show()
+    local f = build()
+    if not f:IsShown() then
+        -- The Journal page's Alts filter on open (journal.filter); a chip click holds for the visit.
+        local pick = NS.GetSetting and NS.GetSetting("journal.filter")
+        if J.FILTERS[pick] then state.filter, state.colOffset = pick, 0 end
+    end
+    f:Show()
     J.Render()
     return true
 end

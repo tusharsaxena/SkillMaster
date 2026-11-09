@@ -26,12 +26,34 @@ local function nativeReady(t)
     return ok and true or false
 end
 
---- Which of the three a Set would use for `t`, without setting anything.
+local function setting(path, fallback)
+    local v = NS.GetSetting and NS.db and NS.GetSetting(path)
+    if v == nil then return fallback end
+    return v
+end
+
+--- Which of the three a Set would use for `t`, without setting anything. The preference
+--- (waypoints.method) narrows the order: "auto" is TomTom, the map pin, then chat; "tomtom" is
+--- the same; "native" skips TomTom; "chat" always prints.
 function Wp:Method(t)
-    if not (t and hasCoords(t)) then return "chat" end
-    if tomtomReady() then return "tomtom" end
+    local pref = setting("waypoints.method", "auto")
+    if pref == "chat" or not (t and hasCoords(t)) then return "chat" end
+    if pref ~= "native" and tomtomReady() then return "tomtom" end
     if nativeReady(t) then return "native" end
     return "chat"
+end
+
+--- The " (unverified)" mark for trainer data not checked on WoW Forever, unless the Trainers and
+--- Waypoints page turned it off (trainers.unverified); "" otherwise.
+function Wp.UnverifiedMark(t)
+    if t.verified == false and setting("trainers.unverified", true) ~= false then
+        return " " .. L["(unverified)"]
+    end
+    return ""
+end
+
+local function announce(line)
+    if setting("waypoints.announce", true) ~= false then NS.Print(line) end
 end
 
 --- "Buliwyf Stonehand: Ironforge, The Military Ward (62.2, 89.6)".
@@ -40,8 +62,7 @@ function Wp:Directions(t)
     if t.subzone and t.subzone ~= where then where = where .. ", " .. t.subzone end
     if hasCoords(t) then where = where .. (" (%.1f, %.1f)"):format(t.x, t.y) end
     local text = L["%s: %s"]:format(t.name, where)
-    if t.verified == false then text = text .. " " .. L["(unverified)"] end
-    return text
+    return text .. Wp.UnverifiedMark(t)
 end
 
 function Wp:Print(t) NS.Print(Wp:Directions(t)) end
@@ -65,11 +86,11 @@ end
 function Wp:Set(t)
     local method = Wp:Method(t)
     if method == "tomtom" and viaTomTom(t) then
-        NS.Print(L["Waypoint set (TomTom): %s"]:format(Wp:Directions(t)))
+        announce(L["Waypoint set (TomTom): %s"]:format(Wp:Directions(t)))
         return "tomtom"
     end
     if (method == "tomtom" or method == "native") and nativeReady(t) and viaNative(t) then
-        NS.Print(L["Map pin set: %s"]:format(Wp:Directions(t)))
+        announce(L["Map pin set: %s"]:format(Wp:Directions(t)))
         return "native"
     end
     Wp:Print(t)

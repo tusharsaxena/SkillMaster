@@ -15,6 +15,62 @@ end
 
 local lib = LibStub and LibStub("LibKa0s-Options-1.0", true)
 
+-- ---------------------------------------------------------------------------------------------
+-- The live apply (T5.1): every display row's onChange. One LAYOUT_CHANGED per write repaints the
+-- window, the detached blocks, the journal and the Bars page's preview (modules/Blocks.lua); a
+-- bulk reset (a page's Defaults, Reset all settings) coalesces into one, on the next frame.
+-- ---------------------------------------------------------------------------------------------
+local pending = false
+
+local function sendLayout()
+    pending = false
+    if NS.bus and NS.MSG then NS.bus:SendMessage(NS.MSG.LAYOUT_CHANGED) end
+end
+
+function NS.ApplyLook()
+    -- Stood down, nothing is on screen and nothing may stay armed (slash-commands-§7); the stand-up
+    -- repaints from the stored values.
+    if NS.IsStoodDown and NS.IsStoodDown() then return end
+    local S = NS.SchemaRuntime
+    if not (S and S.InBulk and S.InBulk()) then return sendLayout() end
+    if pending then return end
+    pending = true
+    if NS.addon and NS.addon.ScheduleTimer then NS.addon:ScheduleTimer(sendLayout, 0) else sendLayout() end
+end
+
+--- Stamp `onChange` (default NS.ApplyLook) on every row of `rows` that has none; answers `rows`.
+function NS.Live(rows, onChange)
+    for _, row in ipairs(rows) do
+        if row.onChange == nil then row.onChange = onChange or NS.ApplyLook end
+    end
+    return rows
+end
+
+--- A schema page: a canvas subcategory drawn as a tab strip over its rows' groups (options-ui-§13),
+--- its Defaults button restoring the page. `spec` = { tabs, header, beforeRender, defaultsTooltip }:
+--- `tabs` the host tabs (RenderTabbedSchema's opts.tabs), `header` a PageHeader spec drawn above the
+--- strip, `beforeRender(ctx)` run before the first widget of a render (a reorder list's Cancel).
+function NS.RegisterSchemaPage(key, title, spec)
+    spec = spec or {}
+    NS.RegisterOptionsPage(key, title, function(mainCategory)
+        local H = NS.Helpers
+        local ctx = H.CreatePanel("SkillMaster" .. key:gsub("^%l", string.upper) .. "Panel", title, {
+            pageKey         = key,
+            defaultsButton  = true,
+            defaultsTooltip = spec.defaultsTooltip
+                or NS.L["Restore every setting on this page to its default, on this profile."],
+        })
+        ctx.panel.defaultsOnClick = function() H.RestoreDefaults(key, ctx) end
+        H.SetRenderer(ctx, function(c)
+            if spec.beforeRender then spec.beforeRender(c) end
+            H.ClearScroll(c)
+            if spec.header then H.PageHeader(c, spec.header) end
+            H.RenderTabbedSchema(c, key, nil, nil, { tabs = spec.tabs })
+        end)
+        return Settings.RegisterCanvasLayoutSubcategory(mainCategory, ctx.panel, title)
+    end)
+end
+
 local descriptor = {
     parentTitle   = NS.Constants.BRAND,
     mainPanelName = "SkillMasterMainPanel",
@@ -35,11 +91,13 @@ local descriptor = {
     bulkBegin    = NS.SchemaRuntime.BulkBegin,
     bulkEnd      = NS.SchemaRuntime.BulkEnd,
 
+    -- Colors are stored positionally, { r, g, b, a } (defaults/Profile.lua, NS.Bar reads c[1]..c[4]);
+    -- a keyed table is still read, so a hand-edited value draws.
     colorDecode = function(c)
         c = type(c) == "table" and c or {}
-        return c.r or 1, c.g or 1, c.b or 1, c.a or 1
+        return c[1] or c.r or 1, c[2] or c.g or 1, c[3] or c.b or 1, c[4] or c.a or 1
     end,
-    colorEncode = function(r, g, b, a) return { r = r, g = g, b = b, a = a or 1 } end,
+    colorEncode = function(r, g, b, a) return { r, g, b, a or 1 } end,
 
     -- The landing body is the library's (options-ui-§5); NS.LANDING is declared in General.lua.
     buildMain     = function(ctx) NS.Helpers.BuildLandingPage(ctx, NS.LANDING) end,

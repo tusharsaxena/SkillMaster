@@ -6,7 +6,8 @@ local _, NS = ...
 --
 -- NS.BLOCKS = { ids in default order }; NS.BlockDefs[id] = { id, title, source, filter }
 -- profile.layout.blocks[id] = { docked, order, collapsed, point, scale, locked }
--- NS.Blocks:Detach(id) / :Dock(id) / :SetCollapsed(id, v) / :ToggleCollapsed(id)
+-- NS.Blocks:Detach(id) / :Dock(id) / :SetCollapsed(id, v) / :ToggleCollapsed(id) / :Move(from, to) /
+--   :SetOrder(id, n) / .Ordered() (every block, shown or not, in its order)
 -- NS.Blocks.Docked() / .Undocked() / .Entries(id) / .Meta(id, entries) / .Settings(id)
 -- NS.Blocks.source: nil for the live models, or fn() -> skills, stats (test mode's preview, T5.2;
 --   the suites' fixtures).
@@ -55,8 +56,15 @@ local function pick(docked)
     local out = {}
     for _, id in ipairs(NS.BLOCKS) do
         local s = B.Settings(id)
-        if s and (s.docked ~= false) == docked then out[#out + 1] = id end
+        if s and s.shown ~= false and (s.docked ~= false) == docked then out[#out + 1] = id end
     end
+    return byOrder(out)
+end
+
+--- Every block, shown or hidden, docked or not, in its order (the Layout page's drag list).
+function B.Ordered()
+    local out = {}
+    for i, id in ipairs(NS.BLOCKS) do out[i] = id end
     return byOrder(out)
 end
 
@@ -105,6 +113,29 @@ function B:SetCollapsed(id, collapsed)
         s.collapsed = collapsed and true or false
         B.Changed()
     end)
+end
+
+--- Move the block at position `from` of B.Ordered() to position `to`, renumbering every block
+--- 1..n (the Layout page's drag list). Sends LAYOUT_CHANGED.
+function B:Move(from, to)
+    local ids = B.Ordered()
+    local moved = table.remove(ids, from)
+    if not moved or from == to then return false end
+    table.insert(ids, math.max(1, math.min(to, #ids + 1)), moved)
+    for i, id in ipairs(ids) do B.Settings(id).order = i end
+    B.Changed()
+    return true
+end
+
+--- Give block `id` the order `n` (the CLI's and the reset's write of layout.blocks.<id>.order).
+--- Another block may share the number for a moment; ties sort by id.
+function B:SetOrder(id, n)
+    local s = B.Settings(id)
+    n = tonumber(n)
+    if not (s and n) then return false end
+    s.order = math.floor(n)
+    B.Changed()
+    return true
 end
 
 function B:ToggleCollapsed(id)

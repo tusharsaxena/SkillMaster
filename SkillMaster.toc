@@ -157,4 +157,13 @@ settings\Slash.lua
 settings\OptionsSetup.lua
 # LOAD-BEARING: General registers FIRST and Profiles LAST; page order IS registration order.
 settings\General.lua
+# T5.1 the display pages, in the sidebar's order (Skills.lua registers Skills, then Stats). Each reads
+# NS.Blocks, NS.SkillCatalog, NS.STAT_DEFS and NS.Template at FILE SCOPE, all loaded above.
+settings\Layout.lua
+settings\Bars.lua
+settings\Skills.lua
+settings\Broker.lua
+settings\Alerts.lua
+settings\Journal.lua
+settings\Trainers.lua
 settings\Profiles.lua
