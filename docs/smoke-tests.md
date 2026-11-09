@@ -18,7 +18,8 @@ passed (clients-§6, testing). Each check names what to do and what you should s
 - **SM-WIN-2** Drag it, `/reload`: it reopens where it was dropped. `/skm lock`: it no longer drags.
 - **SM-WIN-3** `/skm test`: an amber band says the skills shown are sample data. Enter combat: the
   band disappears and test mode is off.
-- **SM-WIN-4** Bind a key under Options → Keybindings → Ka0s Skill Master; it toggles the window.
+- **SM-WIN-4** Bind keys under Options → Keybindings → Ka0s Skill Master: *Toggle skills window* toggles
+  the window and *Toggle journal* toggles the Journal. `/skm disable`: each press refuses on one line.
 
 ## Display (M3)
 

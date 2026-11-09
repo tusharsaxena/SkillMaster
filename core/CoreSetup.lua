@@ -56,7 +56,7 @@ if not lib then
     NS.Print = function(...)
         if not announced then
             announced = true
-            print(NS.PREFIX, NS.LIBKA0S_MISSING .. "; running on reduced built-in fallbacks.")
+            print(NS.PREFIX, NS.L["%s; running on reduced built-in fallbacks."]:format(NS.LIBKA0S_MISSING))
         end
         local parts = {}
         for i = 1, select("#", ...) do parts[i] = NS.SafeToString((select(i, ...))) end

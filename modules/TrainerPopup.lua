@@ -115,7 +115,7 @@ local function buildActions()
     frame.waypoint = button(frame, L["Set waypoint"], setWaypoint, true)
     frame.print = button(frame, L["Print to chat"], printDirections, false)
     frame.footer = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    frame.footer:SetText(L["Waypoint order: TomTom \226\134\146 native map pin \226\134\146 chat directions"])
+    frame.footer:SetText(L["Waypoint order: TomTom, then a native map pin, then chat directions"])
     NS.Skin.Text(frame.footer, "muted")
 end
 

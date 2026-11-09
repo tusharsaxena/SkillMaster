@@ -20,13 +20,13 @@ local DEFAULT = "ka0s"
 NS.DEFAULT_SKIN = (Skin and type(Skin.DefaultSkin) == "function") and Skin:DefaultSkin() or DEFAULT
 
 NS.SKIN_SOURCE_OPTIONS = {
-    { value = "ka0s", text = "Ka0s skins" },
+    { value = "ka0s", text = NS.L["Ka0s skins"] },
     { value = "eui",  text = "EllesmereUI" },
 }
 NS.SKIN_OUTLINE_OPTIONS = {
-    { value = "all", text = "All text" },
-    { value = "hud", text = "HUD text only" },
-    { value = "off", text = "Off" },
+    { value = "all", text = NS.L["All text"] },
+    { value = "hud", text = NS.L["HUD text only"] },
+    { value = "off", text = NS.L["Off"] },
 }
 NS.SKIN_OPTIONS = {}
 if Skin and type(Skin.Skins) == "function" then
@@ -34,7 +34,7 @@ if Skin and type(Skin.Skins) == "function" then
         NS.SKIN_OPTIONS[#NS.SKIN_OPTIONS + 1] = { value = def.key, text = def.label or def.key }
     end
 end
-if #NS.SKIN_OPTIONS == 0 then NS.SKIN_OPTIONS[1] = { value = DEFAULT, text = "Ka0s Default" } end
+if #NS.SKIN_OPTIONS == 0 then NS.SKIN_OPTIONS[1] = { value = DEFAULT, text = NS.L["Ka0s Default"] } end
 
 -- This addon's own tokens. The skill bars (T3.1) read them; each follows a library token so every
 -- skin dresses them without knowing this addon.
@@ -220,7 +220,7 @@ function NS.SkinPaintAceTree(container)
     return Skin:PaintAceTree(addonName, container)
 end
 
-local RELOAD_LINE = "Reload your interface (/reload) to finish changing the skin."
+local RELOAD_LINE = NS.L["Reload your interface (/reload) to finish changing the skin."]
 local KNOWN = {}
 for _, opt in ipairs(NS.SKIN_OPTIONS) do KNOWN[opt.value] = true end
 

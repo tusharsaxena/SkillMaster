@@ -60,10 +60,23 @@ Total.
 - launcher: the object is the brand, the 128 px logo, registered once OnEnable runs
 - launcher: left-click opens the settings panel through the same opener as /skm config
 
-### test_keybinds.lua (2)
+### test_keybinds.lua (4)
 
-- keybinds: Bindings.xml is one CLICK line in this addon's category, no header, no default
+- keybinds: Bindings.xml is two CLICK lines in this addon's category, no header, no default
 - keybinds: the bound button runs the window's one toggle handler
+- keybinds: the Journal button runs the Journal's one toggle handler
+- keybinds: a Journal press while stood down refuses on the toggle verb's line
+
+### test_locale.lua (8)
+
+- locale: the enUS files are the TOC's, the base first, before every other locale
+- locale: NS.L answers the key on a miss, and every entry answers a string, never `true`
+- locale: every routed literal has an enUS entry
+- locale: every enUS key is read by the addon's own files (localization-§3, no dead key)
+- locale: no key is written twice in the enUS files
+- locale: the lexer is falsifiable, a routed literal and a dead key are both seen
+- locale: each stub is gated on its own locale, silent elsewhere, and a subset of enUS
+- locale: the stub gate is falsifiable, an ungated chunk writes on every client
 
 ### test_skinsetup.lua (4)
 
@@ -272,21 +285,6 @@ Total.
 - broker: a crafting row without ShowAndScrollTo still opens the main window
 - broker: stood down, every feed reads Off and its tooltip says so; standing up re-renders
 
-### test_polish.lua (12)
-
-- broker: the leave poll hides GameTooltip only while the feed still owns it
-- broker: the footer reads as the mockup; a right-click opens the Broker settings page
-- helpers: the equipped weapon skills read the main hand, off hand and ranged slots
-- detached: the weapon block marks the equipped weapon; the compact filter keeps equipped + below-cap
-- detached: an equipment change redraws a shown weapon block
-- rows: the gathering hint is off by default and reads NS.SkillHelpers when on
-- rows: a hinted row is one line taller and shows its hint; the setting off hides it
-- secure overlay: raising the window re-levels its overlays above the rows (out of combat only)
-- secure overlay: a row click raises too; a detached frame's mouse-down re-levels its overlays
-- secure overlay: a dragged window's overlays come down for the drag and back at the drop
-- journal: a grip drag lays out at most once per frame and redraws once, after the release
-- journal: the saved size is restored, clamped to the minimum; locked refuses the grip
-
 ### test_seams.lua (5)
 
 - test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
@@ -327,10 +325,16 @@ Total.
 - disabled 9: re-enabling restores the registration set from current state
 - disabled 10: releasing ONE hold does not resurrect an addon the other holds down
 
-### test_diagnostics.lua (2)
+### test_diagnostics.lua (8)
 
-- diagnostics: the report carries this addon's five sections and raises in none
+- diagnostics: the report carries this addon's nine sections and raises in none
 - diagnostics: stood down, the state section says so and reads nothing else
+- diagnostics: the section list is identity, settings, state, skin, the four domain sections, rejected
+- diagnostics: model counts the skills by category and learned state, the stats and the stores
+- diagnostics: probe summarizes the skill API and the probed globals without expanding a header
+- diagnostics: bonuses lists each skill's modifier and the cached sources, collecting none
+- diagnostics: bonuses says so when nothing is cached yet
+- diagnostics: layout prints the window and every block's stored state, detached ones flagged
 
 ### test_diagnostics_contract.lua (9)
 
@@ -433,7 +437,8 @@ Total.
 | test_slash.lua | 6 |
 | test_mainwindow.lua | 5 |
 | test_launcher.lua | 2 |
-| test_keybinds.lua | 2 |
+| test_keybinds.lua | 4 |
+| test_locale.lua | 8 |
 | test_skinsetup.lua | 4 |
 | test_perf.lua | 1 |
 | test_probe.lua | 7 |
@@ -451,12 +456,11 @@ Total.
 | test_alerts.lua | 11 |
 | test_template.lua | 3 |
 | test_broker.lua | 9 |
-| test_polish.lua | 12 |
 | test_seams.lua | 5 |
 | test_surface_parity.lua | 11 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
-| test_diagnostics.lua | 2 |
+| test_diagnostics.lua | 8 |
 | test_diagnostics_contract.lua | 8 |
 | test_eol.lua | 2 |
 | test_prose.lua | 15 |
@@ -466,4 +470,4 @@ Total.
 | test_skin_switch.lua | 13 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **296** |
+| **Total** | **300** |

@@ -89,7 +89,7 @@ end
 local HINTS = {}
 
 function HINTS.skinning(e)
-    return L["Skinning %d \226\134\146 mobs up to Lv %d"]:format(e.rank, NS.SkillHelpers.SkinnableLevel(e.rank))
+    return L["Skinning %d: mobs up to Lv %d"]:format(e.rank, NS.SkillHelpers.SkinnableLevel(e.rank))
 end
 
 local function nodeHint(e)

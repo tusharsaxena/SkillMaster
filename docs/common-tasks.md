@@ -23,7 +23,11 @@
 ## Add a locale string
 
 - Add `L["The English text"] = true` to `locales/enUS.lua` and use `L["The English text"]` at the call
-  site. The key is the English string, in US spelling (localization-§5).
+  site. The key is the English string, in US spelling (localization-§5). Write each key once, and
+  delete it when its last reader goes: `test_locale` fails on a missing, a repeated or an unread key.
+- A translation goes in `locales/<locale>.lua` (stubs for deDE, esES, esMX, frFR, itIT, koKR, ptBR,
+  ruRU, zhCN, zhTW), below that file's `GetLocale()` gate, keyed by the enUS string, with the same
+  format directives in the same order.
 
 ## Add a perf bucket
 

@@ -273,7 +273,7 @@ function W.SummaryParts(skills)
     local class = type(UnitClass) == "function" and UnitClass("player") or ""
     local who = L["Lv %d \194\183 %s %s"]:format(level or 0, race or "", class or "")
     local gains = NS.Blocks.SessionGains()
-    local gainText = gains > 0 and L["\226\150\178 +%d this session"]:format(gains) or ""
+    local gainText = gains > 0 and L["+%d this session"]:format(gains) or ""
     return who, gainText, NS.Blocks.NextAlert(skills) or ""
 end
 
@@ -447,17 +447,32 @@ function W.ResetPosition()
     if frame then applyPoint() end
 end
 
--- The Show window key binding (launcher-§6). The button name is permanent: the client stores the
--- player's key against it, so a rename unbinds every player's key.
+-- The key bindings (launcher-§6), in Bindings.xml order: Show window first, then the Journal. The
+-- button names are permanent: the client stores the player's key against them, so a rename unbinds
+-- every player's key. Each is plain (no secure template), hidden, one toggle per press, and its click
+-- runs that window's one toggle handler, which refuses while stood down exactly as its verb does.
 W.TOGGLE_BUTTON = "SkillMasterToggleWindow"
-do
-    local button = CreateFrame("Button", W.TOGGLE_BUTTON, UIParent)   -- plain, not a secure template
-    button:RegisterForClicks("AnyDown")                               -- one press, one toggle
-    button:SetScript("OnClick", function() W.Toggle() end)            -- the handler itself
+W.JOURNAL_BUTTON = "SkillMasterToggleJournal"
+
+local function bindingButton(name, onClick)
+    local button = CreateFrame("Button", name, UIParent)   -- plain, not a secure template
+    button:RegisterForClicks("AnyDown")                     -- one press, one toggle
+    button:SetScript("OnClick", onClick)                    -- the handler itself
     button:Hide()
-    W.__toggleButton = button   -- the binding suite drives it by reference
+    return button
+end
+
+do
+    -- the binding suites drive them by reference
+    W.__toggleButton = bindingButton(W.TOGGLE_BUTTON, function() W.Toggle() end)
+    W.__journalButton = bindingButton(W.JOURNAL_BUTTON, function() NS.Journal.Toggle() end)
     BINDING_HEADER_SKILLMASTER = NS.Constants.BRAND
-    local command = ("CLICK %s:LeftButton"):format(W.TOGGLE_BUTTON)
-    rawset(_G, "BINDING_NAME_" .. command, L["Toggle the Skill Master window"])
-    NS.BINDINGS = { { command = command, tooltip = L["Shows or hides the Skill Master window."] } }
+    local window = ("CLICK %s:LeftButton"):format(W.TOGGLE_BUTTON)
+    local journal = ("CLICK %s:LeftButton"):format(W.JOURNAL_BUTTON)
+    rawset(_G, "BINDING_NAME_" .. window, L["Toggle skills window"])
+    rawset(_G, "BINDING_NAME_" .. journal, L["Toggle journal"])
+    NS.BINDINGS = {
+        { command = window,  tooltip = L["Shows or hides the Skill Master window."] },
+        { command = journal, tooltip = L["Shows or hides the Journal: the session log and your alts."] },
+    }
 end

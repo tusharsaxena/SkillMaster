@@ -10,7 +10,7 @@ local lib = LibStub and LibStub("LibKa0s-DebugLog-1.0", true)
 if not lib then
     -- Degrade, never error: every member the addon calls. SetEnabled still flips OUR flag and says
     -- so; what is lost is the window, said once. No formatter, no color code.
-    local missing = NS.LIBKA0S_MISSING .. ", so the debug console window is unavailable."
+    local missing = NS.L["%s, so the debug console window is unavailable."]:format(NS.LIBKA0S_MISSING)
     local said = false
     local function sayOnce()
         if said then return end
@@ -39,7 +39,7 @@ if not lib then
         SetEnabled      = function(_, on)
             on = not not on
             NS.State.debug = on
-            NS.Print("debug logging " .. (on and "ON" or "OFF"))
+            NS.Print(on and NS.L["debug logging ON"] or NS.L["debug logging OFF"])
             if on then sayOnce() end
         end,
         RefreshHeader   = noop,
@@ -60,7 +60,7 @@ if not lib then
         end,
         ConsoleCheckbox = function()
             return {
-                label   = "Debug console",
+                label   = NS.L["Debug console"],
                 tooltip = missing,
                 get     = function() return false end,
                 set     = sayOnce,

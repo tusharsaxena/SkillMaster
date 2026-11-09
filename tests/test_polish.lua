@@ -216,7 +216,7 @@ test("rows: the gathering hint is off by default and reads NS.SkillHelpers when 
         assertFalse(NS.db.profile.skills.helperHint, "off by default")
         assertEqual(R.HelperHint(skills.byKey.skinning), nil, "no hint while off")
         NS.db.profile.skills.helperHint = true
-        assertEqual(R.HelperHint(skills.byKey.skinning), "Skinning 122 \226\134\146 mobs up to Lv 24")
+        assertEqual(R.HelperHint(skills.byKey.skinning), "Skinning 122: mobs up to Lv 24")
         local mining = R.HelperHint(skills.byKey.mining)
         assertTrue(mining ~= nil and mining:find("75", 1, true) ~= nil, tostring(mining))
         M.GetZoneText = function() return "Loch Modan" end
@@ -245,7 +245,7 @@ test("rows: a hinted row is one line taller and shows its hint; the setting off 
         row = R.Acquire(pool, M.UIParent, "row")
         row:SetSkill(skills.byKey.skinning)
         assertTrue(row.hint:IsShown(), "the hint shows")
-        assertEqual(row.hint:GetText(), "Skinning 122 \226\134\146 mobs up to Lv 24")
+        assertEqual(row.hint:GetText(), "Skinning 122: mobs up to Lv 24")
         assertEqual(row:GetHeight(), h + R.HINT_H, "one hint line taller")
         row:SetSkill(skills.byKey.guns)
         assertFalse(row.hint:IsShown(), "no hint on a weapon row")
