@@ -1,0 +1,89 @@
+## Interface: 16001
+## AllowLoadGameType: camelot
+## ExcludeLoadGameType: standard
+## Title: Ka0s Skill Master
+## Notes: Weapon skills, professions and character stats as customizable bars, for WoW Forever.
+## Author: add1kted2ka0s
+## Version: 0.1.0
+## IconTexture: Interface\AddOns\SkillMaster\media\logos\skillmaster.logo.128.tga
+## SavedVariables: SkillMasterDB, SkillMasterPerfDB
+## OptionalDeps: Ace3, LibStub, CallbackHandler-1.0, LibSharedMedia-3.0, LibDataBroker-1.1, LibDBIcon-1.0, EllesmereUI
+## DefaultState: enabled
+## Category-enUS: UI
+## X-License: MIT
+## X-Standard: https://github.com/tusharsaxena/WowAddonStandards
+# X-Curse-Project-ID: not published on CurseForge yet
+
+# Libraries (must load first) -- vendored in libs/
+libs\LibStub\LibStub.lua
+libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+libs\AceAddon-3.0\AceAddon-3.0.lua
+libs\AceEvent-3.0\AceEvent-3.0.lua
+libs\AceTimer-3.0\AceTimer-3.0.lua
+libs\AceDB-3.0\AceDB-3.0.lua
+libs\AceDBOptions-3.0\AceDBOptions-3.0.lua
+libs\AceConsole-3.0\AceConsole-3.0.lua
+libs\AceGUI-3.0\AceGUI-3.0.xml
+# LOAD-BEARING: after AceGUI. AceConfigDialog resolves AceGUI-3.0 at file load (settings\Profiles.lua).
+libs\AceConfig-3.0\AceConfig-3.0.xml
+# ONE line: the .xml is itself the file list (library-stack-§7). After Ace3.
+libs\LibKa0s\LibKa0s.xml
+libs\LibSharedMedia-3.0\lib.xml
+# The launcher's two libraries (launcher-§1); conventional, resolved at Register time.
+libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+libs\LibDBIcon-1.0\lib.xml
+
+# Locales
+# LOAD-BEARING: creates NS.L, which core\DebugLogSetup.lua and every settings\ file read at FILE SCOPE.
+locales\enUS.lua
+
+# Core -- dependency-correct order (layout-§1)
+# LOAD-BEARING: NS.name, NS.version, NS.PREFIX and NS.LIBKA0S_MISSING, read by every file below.
+core\Namespace.lua
+# LOAD-BEARING: NS.MediaFont, which core\Constants.lua resolves FONT_MONO from at FILE SCOPE.
+core\MediaSetup.lua
+# LOAD-BEARING: NS.Constants (the brand, the logos, LAYERS), read at FILE SCOPE by the setup files below.
+core\Constants.lua
+core\State.lua
+core\EnvSetup.lua
+# LOAD-BEARING: NS.Print / NS.Util.print and the SafeRegister family; before everything that prints.
+core\CoreSetup.lua
+# LOAD-BEARING: RegisterOwner at FILE SCOPE; NS.DEFAULT_SKIN is read by defaults\Profile.lua and the
+# skin option lists by settings\General.lua, both at FILE SCOPE.
+core\SkinSetup.lua
+# LOAD-BEARING: NS.MSG and NS.bus; the catalog must exist before any module subscribes at load.
+core\Bus.lua
+core\PoolSetup.lua
+# LOAD-BEARING: NS.Widgets, captured at FILE SCOPE by modules\MainWindow.lua's chrome build path.
+core\WidgetsSetup.lua
+# LOAD-BEARING: NS.Lifecycle, which core\PerfSetup.lua hands LibKa0s-Perf-1.0 at FILE SCOPE.
+core\LifecycleSetup.lua
+# LOAD-BEARING: NS.Perf, a FILE-SCOPE upvalue in modules\MainWindow.lua.
+core\PerfSetup.lua
+# LOAD-BEARING: after Constants (FONT_MONO), State (the flag) and CoreSetup (the printer); before any NS.Debug call.
+core\DebugLogSetup.lua
+# LOAD-BEARING: NewAddon(NS, ...) and the NS.Print reclaim at FILE SCOPE, so it follows core\CoreSetup.lua.
+core\SkillMaster.lua
+core\Database.lua
+# Conventional: builds the launcher object at load; Register() runs from OnEnable.
+core\LauncherSetup.lua
+
+# Defaults (the only place a default is written -- savedvariables-§2)
+defaults\Profile.lua
+
+# Modules -- each reaches the others at CALL time
+# Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
+modules\MainWindow.lua
+# Conventional: the DebugLog descriptor asks for its sections at RUN time.
+modules\Diagnostics.lua
+
+# Settings (last -- depend on everything else being initialized)
+# LOAD-BEARING: NS.Schema, NS.SetByPath and NS.SchemaRuntime, read at FILE SCOPE by the three files below.
+settings\Schema.lua
+# LOAD-BEARING: NS.Slash, read by settings\General.lua's landing spec; NS.COMMANDS by the launcher at call time.
+settings\Slash.lua
+# LOAD-BEARING: NS.Helpers and NS.RegisterOptionsPage, called at FILE SCOPE by every page below.
+settings\OptionsSetup.lua
+# LOAD-BEARING: General registers FIRST and Profiles LAST; page order IS registration order.
+settings\General.lua
+settings\Profiles.lua

@@ -1,0 +1,15 @@
+package-as: SkillMaster
+
+# Libraries are vendored in libs/ and committed -- NO externals: block (packaging, library-stack-§3).
+
+ignore:
+  - .luacheckrc
+  - .pkgmeta         # dev-only: this file configures the packager; it is not part of the package
+  - .gitignore
+  - .gitattributes   # dev-only: the repo's line-ending policy (line-endings)
+  - docs             # holds docs/audits/, docs/reviews/ and docs/revendor/ too -- all dev-only
+  - tests
+  - media/logos/*.png   # the editable logo source (layout-§4): committed, never loadable, never shipped
+  - media/logos/*.jpg   # a .jpg render of the logo, for the project page; same reason
+  - _dev
+  - "*.bak"
