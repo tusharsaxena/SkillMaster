@@ -305,6 +305,10 @@ below on both clients.
 | `C_SkillInfo.ExpandSkillHeader(i)` / `CollapseSkillHeader(i)` | open / close header `i`; children shift the indices below | listed by the kit's Forever set; behavior assumed (1.12) | SkillData, the probe |
 | Skill header names | `Class Skills`, `Professions`, `Secondary Skills`, `Weapon Skills`, `Armor Proficiencies`, `Languages` (enUS) | assumed (1.12) | SkillData's category map |
 | `C_Item.GetWeaponEnchantInfo()` (1.12: `GetWeaponEnchantInfo()`) | `hasMain, mainExpirationMs, mainCharges, hasOff, offExpirationMs, offCharges` | listed by the kit's Forever set; shape assumed (1.12) | Bonuses (lure timer, T2.2) |
+| `C_TooltipInfo.GetInventoryItem("player", slot)` (fallback: a hidden `GameTooltip` and `SetInventoryItem`) | `{ lines = { { leftText }, ... } }` | listed (inherited from live); shape assumed | Bonuses (item and enchant scan, T2.2) |
+| Item and lure tooltip text | `Equip: Increased <Skill> +N.`, `+N <Skill>`, and a lure as `<Name> (+N <Skill> Skill) (M min)` on the main hand (enUS) | assumed (1.12); the lure line's wording is a guess until the probe | Bonuses' locale patterns |
+| `C_UnitAuras.GetBuffDataByIndex` + `C_TooltipInfo.GetUnitBuffByAuraInstanceID` | aura data with `name`, `auraInstanceID`, `expirationTime` (GetTime seconds, 0 = none); tooltip lines as above | listed (inherited from live); shape assumed | Bonuses (skill buffs) |
+| Racial weapon bonuses in `modifier` | the +5 racials are part of the skill line's modifier | assumed (1.12) | Bonuses (a racial the modifier lacks shows as a negative Other) |
 | `UnitResistance(unit, school)` | `base, total, bonus, minus` | listed by the kit's Forever set; shape assumed (1.12) | StatData (T2.3) |
 | `GetCritChance()`, `GetRangedCritChance()`, `GetDodgeChance()`, `GetParryChance()`, `GetBlockChance()` | a percentage | assumed (1.12) | StatData |
 | `GetHitModifier()` | hit % from gear | assumed (1.12) | StatData |

@@ -31,6 +31,8 @@ read_globals = {
   "UnitClass", "UnitLevel", "GetTime",
   -- T2.4: the trainer lookups and helpers read the player's faction, race, level and zone
   "UnitFactionGroup", "UnitRace", "GetZoneText",
+  -- T2.2 Bonuses (modules/Bonuses.lua): the clock, the race, tooltips and buffs
+  "C_TooltipInfo", "C_UnitAuras", "issecretvalue",
 }
 
 -- The harness global is declared here, not in read_globals, so addon source cannot reach it (lint).

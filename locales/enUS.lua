@@ -196,6 +196,19 @@ L["Plaguebloom"] = true
 L["Icecap"] = true
 L["Black Lotus"] = true
 -- END T2.4
+-- ── T2.2 Bonuses (modules/Bonuses.lua) ─────────────────────────────────────────────────────────
+-- Tooltip patterns: a translator replaces the value with the client's own wording, keeping the
+-- capture order (amount first in the first and third, name first in the second).
+L["%+(%d+) (.+)"] = true
+L["Increased (.+) %+(%d+)"] = true
+L["%+(%d+) (.-) Skill"] = true
+-- Source labels.
+L["%s racial"] = true
+L["Weapon enchant"] = true
+L["Item"] = true
+L["Buff"] = true
+L["Other"] = true
+-- ── end T2.2 ───────────────────────────────────────────────────────────────────────────────────
 
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.

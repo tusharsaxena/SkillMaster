@@ -81,6 +81,8 @@ defaults\Ranks_Forever.lua
 defaults\Trainers_Forever.lua
 defaults\Gathering_Forever.lua
 defaults\Fishing_Forever.lua
+# T2.2: NS.Racials_Forever, read by modules\Bonuses.lua at call time.
+defaults\Racials_Forever.lua
 
 # Modules -- each reaches the others at CALL time
 # Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
@@ -93,6 +95,8 @@ modules\SkillData.lua
 modules\Trainers.lua
 # Conventional: publishes NS.SkillHelpers (NS.Helpers is the options library, settings\OptionsSetup.lua).
 modules\Helpers.lua
+# T2.2: defines NS.addon:OnBonusesUnitChanged at FILE SCOPE, so it follows core\SkillMaster.lua; reads NS.SkillData at call time.
+modules\Bonuses.lua
 # Conventional: the DebugLog descriptor asks for its sections at RUN time.
 modules\Diagnostics.lua
 
