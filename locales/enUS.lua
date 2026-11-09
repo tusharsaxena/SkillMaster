@@ -56,6 +56,46 @@ L["Locks the Skill Master window in place."] = true
 L["Reset this profile to the addon's defaults? Everything you have configured in it is discarded \226\128\148 your other profiles are not affected."] = true
 L["All settings reset to defaults."] = true
 
+-- ---- BEGIN T2.3 (StatData): stat labels and marker labels (defaults/Stats_Forever.lua) ----
+L["Strength"] = true
+L["Agility"] = true
+L["Stamina"] = true
+L["Intellect"] = true
+L["Spirit"] = true
+L["Attack Power"] = true
+L["Ranged Attack Power"] = true
+L["Melee Crit"] = true
+L["Ranged Crit"] = true
+L["Melee Hit"] = true
+L["Ranged Hit"] = true
+L["Spell Damage"] = true
+L["Bonus Healing"] = true
+L["Spell Crit"] = true
+L["Spell Hit"] = true
+L["Mana Regen (per 5 s)"] = true
+L["Armor"] = true
+L["Defense"] = true
+L["Dodge"] = true
+L["Parry"] = true
+L["Block"] = true
+L["Fire Resistance"] = true
+L["Nature Resistance"] = true
+L["Frost Resistance"] = true
+L["Shadow Resistance"] = true
+L["Arcane Resistance"] = true
+L["Speed"] = true
+L["Run Speed"] = true
+L["Swim Speed"] = true
+L["Durability"] = true
+L["vs same level"] = true
+L["vs raid boss"] = true
+L["normal run speed"] = true
+L["resist cap"] = true
+L["cap"] = true
+L["crit immunity vs bosses"] = true
+L["repair"] = true
+-- ---- END T2.3 ----
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

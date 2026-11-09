@@ -33,3 +33,14 @@ read_globals = {
 files["tests/"] = {
   globals = { "_G.SKM_TEST" },
 }
+
+-- T2.3: StatData's feature-detected stat readers (modules/StatData.lua, S.APIS).
+files["modules/StatData.lua"] = {
+  read_globals = {
+    "UnitStat", "UnitAttackPower", "UnitRangedAttackPower", "GetCritChance", "GetRangedCritChance",
+    "GetHitModifier", "GetRangedHitModifier", "GetSpellHitModifier", "GetSpellCritChance",
+    "GetSpellBonusDamage", "GetSpellBonusHealing", "GetManaRegen", "UnitArmor", "UnitDefenseSkill",
+    "GetDodgeChance", "GetParryChance", "GetBlockChance", "UnitResistance", "GetUnitSpeed",
+    "GetInventoryItemDurability", "UnitLevel",
+  },
+}

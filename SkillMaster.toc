@@ -70,6 +70,8 @@ core\LauncherSetup.lua
 
 # Defaults (the only place a default is written -- savedvariables-§2)
 defaults\Profile.lua
+# Conventional: NS.STAT_DEFS, read by modules\StatData.lua at CALL time.
+defaults\Stats_Forever.lua
 
 # Modules -- each reaches the others at CALL time
 # Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
@@ -78,6 +80,8 @@ modules\MainWindow.lua
 modules\Probe.lua
 # Conventional: the DebugLog descriptor asks for its sections at RUN time.
 modules\Diagnostics.lua
+# Conventional: registers its events on a tracked bus target at FILE SCOPE (after core\Bus.lua).
+modules\StatData.lua
 
 # Settings (last -- depend on everything else being initialized)
 # LOAD-BEARING: NS.Schema, NS.SetByPath and NS.SchemaRuntime, read at FILE SCOPE by the three files below.

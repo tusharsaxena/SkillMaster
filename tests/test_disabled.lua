@@ -63,9 +63,14 @@ end)
 
 test("disabled 6: firing every baseline event writes nothing, says nothing, shows nothing", function()
     bringUp()
+    -- event -> every target registered for it: the addon object, and each data module's own
+    -- tracked bus target (modules/StatData.lua and the other data modules).
     local events = {}
     for _, r in ipairs(M.__registrations()) do
-        if r.kind ~= "message" then events[r.event] = true end
+        if r.kind ~= "message" then
+            events[r.event] = events[r.event] or {}
+            events[r.event][r.target] = true
+        end
     end
     assertTrue(events.PLAYER_REGEN_DISABLED, "the combat-entry event is in the baseline by name")
     disable()
@@ -76,10 +81,12 @@ test("disabled 6: firing every baseline event writes nothing, says nothing, show
     assertEqual(#M.__printed(), 0, "lines printed: " .. joined(M.__printed()))
     assertFalse(NS.MainWindow.IsShown(), "a frame was shown")
     -- Each fire must be shown to reach a handler, or the silence above is the harness's.
-    for event in pairs(events) do
-        local reached = M.__fireUnconditional(NS.addon, event)
+    for event, targets in pairs(events) do
+        local reached = 0
+        for target in pairs(targets) do reached = reached + M.__fireUnconditional(target, event) end
         assertTrue(reached >= 1, event .. " reached no handler, so step 6 proved nothing")
     end
+    assertEqual(#M.__printed(), 0, "lines printed by a handler fired after the stand-down")
     enable()
 end)
 

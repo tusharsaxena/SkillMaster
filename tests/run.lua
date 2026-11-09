@@ -85,6 +85,7 @@ Kit.run{
         "test_skinsetup",
         "test_perf",
         "test_probe",
+        "test_statdata",
         "test_surface_parity",
         "test_vendor_sync",
         -- slash-commands-§7: drives OnEnable and full disable/enable cycles on the shared
