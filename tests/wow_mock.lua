@@ -14,6 +14,10 @@ return function()
     M.UISpecialFrames = {}
     M.YES, M.NO = "Yes", "No"
     M.StaticPopupDialogs = {}
+    -- The player's race and faction, which every client answers: a render of a model with a racial
+    -- bonus (Guns, a Dwarf's) reads them, whichever suite published the model (suites swap these).
+    M.UnitRace = function() return "Human", "Human" end
+    M.UnitFactionGroup = function() return "Alliance", "Alliance" end
     M.__popups = {}
     M.StaticPopup_Show = function(name) M.__popups[#M.__popups + 1] = name end
     -- The TOC fields the addon reads through NS.Meta.

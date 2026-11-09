@@ -369,6 +369,27 @@ L["%s: %s"] = true
 L["Waypoint set (TomTom): %s"] = true
 L["Map pin set: %s"] = true
 
+-- ---- T4.1: the broker feeds (modules/Broker.lua) ----
+L["Skill Master: All"] = true
+L["Skill Master: Professions"] = true
+L["Skill Master: Weapons"] = true
+L["Skill Master: Stats"] = true
+L["Skill Master: All skills"] = true
+L["Skill Master: Weapon Skills"] = true
+L["+%d this session"] = true
+L["Off"] = true
+L["Not learned"] = true
+L["No stats to show yet."] = true
+L["Ka0s Skill Master is disabled."] = true
+L["Primary"] = true
+L["Secondary"] = true
+L["Weapon"] = true
+L["Base"] = true
+L["Spell"] = true
+L["Utility"] = true
+L["Click label: toggle window \194\183 Click row: open its window \194\183 Right-click: settings"] = true
+-- ---- END T4.1 ----
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

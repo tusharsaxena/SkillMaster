@@ -53,6 +53,8 @@ position says so beside its TOC line (toc-file-§5).
 | `modules/Alts.lua` | `NS.Alts`: each character's skills in `db.global.characters["<realm>-<name>"]` on `SKILLS_UPDATED` (debounced) and `PLAYER_LOGOUT`; `List`, `Forget` | subscribes on its own bus target at load; reads SkillData at call time |
 | `modules/Journal.lua` | the Journal window: Session Log and Alts tabs, `/skm journal` | reads SessionLog and Alts at call time; repaints on `SKILLS_UPDATED` / `LAYOUT_CHANGED` |
 | `modules/Alerts.lua` | `NS.Alerts`: the rank-cap and weapon-gap toasts (LibKa0s-Toast-1.0), the cap's chat line, the click-to-waypoint | subscribes to `SKILL_UP` / `SKILLS_UPDATED` on its own bus target at load; reads SkillData, Trainers and the settings at call time |
+| `modules/Template.lua` | `NS.Template.Render(tpl, ctx)`: the broker feed text tokens (`{pinned}`, `{gains}`, `{last}`, `{lowestProf}`, `{equippedWeapon}`, `{skill:<key>}`, `{stat:<key>}`, `{level}`); an unknown token renders empty | pure; read by Broker at call time |
+| `modules/Broker.lua` | `NS.Broker`: the four LibDataBroker data sources (`SkillMaster_All`, `_Professions`, `_Weapons`, `_Stats`), the skill-up flash, the GameTooltip with mini bars and clickable rows; never the launcher, never secure | builds its data objects and bus target at load (after Bus, Pool and the libraries) |
 | `settings/Schema.lua` | the schema and the single write seam (LibKa0s-Schema-1.0) | before Slash, OptionsSetup and the pages |
 | `settings/Slash.lua` | `NS.COMMANDS` and the dispatcher (LibKa0s-Slash-1.0) | before the landing spec reads it |
 | `settings/OptionsSetup.lua` | the panel descriptor, `NS.Helpers` (LibKa0s-Options-1.0) | before every page file |

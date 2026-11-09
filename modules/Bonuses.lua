@@ -72,7 +72,7 @@ local function linesOfScan(slot)
     tip:ClearLines()
     tip:SetInventoryItem("player", slot)
     local out, name = {}, tip:GetName()
-    for i = 1, tip:NumLines() do
+    for i = 1, tonumber(tip:NumLines()) or 0 do
         local fs = _G[name .. "TextLeft" .. i]
         local text = fs and fs:GetText()
         if type(text) == "string" and not isSecret(text) then out[#out + 1] = text end

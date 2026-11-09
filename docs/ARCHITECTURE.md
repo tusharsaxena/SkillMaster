@@ -134,7 +134,9 @@ events-frames-taint-§2) disarms every overlay so none stays mouse-live in comba
 `PLAYER_REGEN_ENABLED` replays the combat queue (`SecureOverlay:AfterCombat`: dock, detach and
 collapse wait there, Review Focus 3) and re-syncs. A crafting click in combat reaches the plain row
 and prints one line. Shift- and right-clicks pass through the overlay (`PostClick`) to the row's
-handlers. The broker's rows (T4.1) never use the overlays.
+handlers. The broker feeds (`modules/Broker.lua`, T4.1) are never secure: their tooltip rows are
+plain buttons parented to GameTooltip that open windows (the main window, the character frame), and
+a crafting row opens the main window scrolled to it rather than casting (design §6.5).
 
 ## Known Limitations
 
@@ -147,9 +149,10 @@ handlers. The broker's rows (T4.1) never use the overlays.
   drawn yet; the helpers are tooltip lines.
 - Test mode marks the window but still shows the live models: the sample character (the preview
   fixture) arrives in T5.2 through `NS.Blocks.source`.
-- The Journal opens from `/skm journal` only. The launcher menu's Journal entry (design §6.8)
-  needs an extra-entry hook LibKa0s-Launcher-1.0 v1.94.0 does not have; the main window's title-bar
-  button arrives with the title-bar strip (T3.2) and calls `NS.Journal.Toggle`.
+- The launcher menu has no *Journal* entry yet (design §6.8): `LibKa0s-Launcher-1.0` minor 9 builds
+  only its fixed entries (Enabled, Locked, Test mode, Sim mode, Show window, Open settings), takes
+  no extra entry from the descriptor, and launcher-§2 forbids a host menu. It needs a library seam;
+  until then the Journal opens from `/skm journal` and the main window's title-bar button.
 - The Alts grid shows five skill columns at a time; Shift + mouse wheel pages through the rest.
 - Sim mode (the launcher entry and the Master-controls checkbox) arrives with the simulator in T5.2.
 - Every client API the data modules will use is assumed until `/skm probe` confirms it

@@ -40,12 +40,13 @@ test("trainers: Horde fist weapons come from Sayoc in Orgrimmar only", function(
 end)
 
 test("trainers: For reads the player's faction and race when none is passed", function()
+    local savedFaction, savedRace = M.UnitFactionGroup, M.UnitRace
     M.UnitFactionGroup = function() return "Horde", "Horde" end
     M.UnitRace = function() return "Undead", "Scourge" end
     local list = NS.Trainers:For("polearms")
     assertEqual(list[1].name, "Archibald", names(list))
     assertEqual(#list, 1, names(list))
-    M.UnitFactionGroup, M.UnitRace = nil, nil
+    M.UnitFactionGroup, M.UnitRace = savedFaction, savedRace
 end)
 
 test("trainers: Neutral trainers are on both factions' lists", function()

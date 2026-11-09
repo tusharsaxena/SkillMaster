@@ -37,6 +37,8 @@ read_globals = {
   -- chat linking, the modifier keys and the waypoint providers (TomTom, the native user waypoint)
   "GameTooltip", "ToggleCharacter", "ChatEdit_InsertLink", "ChatFrame_OpenChat", "IsShiftKeyDown",
   "TomTom", "UiMapPoint", "C_SuperTrack",
+  -- T4.1 Broker (modules/Broker.lua): the main hand's weapon class
+  "GetInventoryItemLink", "GetItemInfoInstant",
 }
 
 -- T4.3: the session log's clock and zone, the alt snapshot's identity reads, the Journal's popup,
