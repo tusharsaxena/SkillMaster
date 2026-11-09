@@ -117,8 +117,12 @@ local DWARF_HUNTER = { class = "Hunter", classToken = "HUNTER", level = 22 }
 
 local function liveTimers()
     local out = {}
-    -- The pending queue; each case empties it first, so nothing in it was taken back.
-    for _, t in ipairs(M.__timers) do out[#out + 1] = t end
+    -- The pending queue; each case empties it first, so nothing in it was taken back. Only the
+    -- scan's own debounce counts: other modules hear the same events (StatData takes
+    -- PLAYER_LEVEL_UP on its own 0.2 s throttle).
+    for _, t in ipairs(M.__timers) do
+        if math.abs((t.delay or 0) - NS.SkillData.DEBOUNCE) < 1e-9 then out[#out + 1] = t end
+    end
     return out
 end
 
