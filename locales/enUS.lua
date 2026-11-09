@@ -56,6 +56,53 @@ L["Locks the Skill Master window in place."] = true
 L["Reset this profile to the addon's defaults? Everything you have configured in it is discarded \226\128\148 your other profiles are not affected."] = true
 L["All settings reset to defaults."] = true
 
+-- ---- T2.1: the skill catalog (defaults/SkillCatalog_Forever.lua) ----------------------------
+-- Skill-line names and Skills-tab headers: a translation here is what NS.SkillNameToKey matches
+-- on a non-enUS client, so each value MUST be the client's own spelling of the line.
+L["Alchemy"] = true
+L["Blacksmithing"] = true
+L["Enchanting"] = true
+L["Engineering"] = true
+L["Herbalism"] = true
+L["Leatherworking"] = true
+L["Mining"] = true
+L["Skinning"] = true
+L["Tailoring"] = true
+L["Cooking"] = true
+L["First Aid"] = true
+L["Fishing"] = true
+L["Axes"] = true
+L["Two-Handed Axes"] = true
+L["Bows"] = true
+L["Crossbows"] = true
+L["Daggers"] = true
+L["Fist Weapons"] = true
+L["Guns"] = true
+L["Maces"] = true
+L["Two-Handed Maces"] = true
+L["Polearms"] = true
+L["Staves"] = true
+L["Swords"] = true
+L["Two-Handed Swords"] = true
+L["Thrown"] = true
+L["Unarmed"] = true
+L["Wands"] = true
+L["Defense"] = true
+L["Lockpicking"] = true
+L["Riding"] = true
+L["Horse Riding"] = true
+L["Ram Riding"] = true
+L["Wolf Riding"] = true
+L["Tiger Riding"] = true
+L["Raptor Riding"] = true
+L["Mechanostrider Piloting"] = true
+L["Undead Horsemanship"] = true
+L["Kodo Riding"] = true
+L["Class Skills"] = true
+L["Armor Proficiencies"] = true
+L["Languages"] = true
+-- ---- end T2.1 --------------------------------------------------------------------------------
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

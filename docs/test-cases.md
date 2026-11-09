@@ -86,6 +86,31 @@ Total.
 - probe: /skm probe shows the report as JSON in the copy window
 - probe: C_SkillInfo and C_Item are read first, a table-shaped line kept whole
 
+### test_skilldata.lua (22)
+
+- skillcatalog: every vanilla profession, the 16 weapon lines, Defense, Lockpicking and Riding
+- skillcatalog: kinds, tiers and the window each row opens
+- skillcatalog: the localized-name map answers each enUS name and the racial riding names
+- skillcatalog: both data tables record a source and stay unverified until the smoke pass
+- classweapons: every class lists only catalog keys
+- compat: SkillLineInfo normalizes the table shape
+- compat: SkillLineInfo normalizes the multi shape
+- compat: SkillLineInfo normalizes the global shape
+- compat: no skill-list API at all answers 0 lines and nil, never an error
+- skilldata: classifies categories (Leatherworking, Fishing + lure, Guns + racial, Defense)
+- skilldata: armor, languages and class spell lines are left out (design §3)
+- skilldata: an empty or half-loaded list gives empty-state rows and no error
+- skilldata: the model exists before the first scan, empty
+- skilldata: collapsed headers are expanded for the scan and restored after it
+- skilldata: an unknown (localized) name lands in Other, never an error
+- skilldata: a rank rising 80 -> 81 sends SKILL_UP("bows", 80, 81) once
+- skilldata: the first scan sends no SKILL_UP
+- skilldata: unlearned weapon and riding rows are synthesized for a Dwarf Hunter
+- skilldata: the 1.12 global shape scans the same model
+- skilldata: the three events are debounced into one scan 0.1 s later
+- skilldata: PLAYER_LEVEL_UP lifts the weapon cap to 5 x the new level before the list catches up
+- skilldata: the scan's own header toggles do not schedule another scan
+
 ### test_surface_parity.lua (10)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
@@ -219,6 +244,7 @@ Total.
 | test_skinsetup.lua | 4 |
 | test_perf.lua | 1 |
 | test_probe.lua | 7 |
+| test_skilldata.lua | 22 |
 | test_surface_parity.lua | 10 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
@@ -232,4 +258,4 @@ Total.
 | test_skin_switch.lua | 5 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **126** |
+| **Total** | **148** |

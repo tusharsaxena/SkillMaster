@@ -14,6 +14,19 @@ UNIT_* stat events    StatData (T2.3)    STATS_UPDATED              alerts, sess
 - Data modules debounce their events (0.1 s) and publish one message per pass.
 - Every message name is a constant in `core/Bus.lua`; each subscriber registers on its own bus target.
 
+## SkillData (T2.1)
+
+`SKILL_LINES_CHANGED`, `CHAT_MSG_SKILL` and `PLAYER_LEVEL_UP` each ask for one scan 0.1 s later; a
+burst is one scan. The scan opens every collapsed header through `NS.Compat`, reads every line,
+closes the headers it opened (bottom up) and ignores the `SKILL_LINES_CHANGED` its own toggles cause
+for 0.2 s. Each line is classified by `NS.SkillNameToKey` (the catalog's names through `NS.L`); an
+unknown name lands in Other as `other:<name>`, and a line under Class Skills, Armor Proficiencies or
+Languages that the catalog does not name is left out. Unlearned weapon and Riding rows the class can
+train follow the learned ones in catalog order. An empty list (not yet loaded at login) is an empty
+model with nothing synthesized. Each pass sends `SKILL_UP(key, old, new)` for every learned rank that
+rose, then `SKILLS_UPDATED(model)`. Stand-up rescans; stand-down cancels the pending scan with every
+other timer.
+
 ## What runs in v0.1.0
 
 - `OnInitialize` builds the store, runs migrations, applies the skin, registers the slash commands

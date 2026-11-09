@@ -40,6 +40,8 @@ locales\enUS.lua
 # Core -- dependency-correct order (layout-§1)
 # LOAD-BEARING: NS.name, NS.version, NS.PREFIX and NS.LIBKA0S_MISSING, read by every file below.
 core\Namespace.lua
+# Conventional: NS.Compat, the compat family's root; its shims are reached at CALL time.
+core\Compat.lua
 # LOAD-BEARING: NS.MediaFont, which core\Constants.lua resolves FONT_MONO from at FILE SCOPE.
 core\MediaSetup.lua
 # LOAD-BEARING: NS.Constants (the brand, the logos, LAYERS), read at FILE SCOPE by the setup files below.
@@ -70,12 +72,17 @@ core\LauncherSetup.lua
 
 # Defaults (the only place a default is written -- savedvariables-§2)
 defaults\Profile.lua
+# LOAD-BEARING: NS.SkillCatalog and NS.ClassWeapons_Forever, read at FILE SCOPE by modules\SkillData.lua.
+defaults\SkillCatalog_Forever.lua
+defaults\ClassWeapons_Forever.lua
 
 # Modules -- each reaches the others at CALL time
 # Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
 modules\MainWindow.lua
 # Conventional: `/skm probe`; reads core\ members only at FILE SCOPE (NS.Widgets, NS.Constants).
 modules\Probe.lua
+# Conventional: builds NS.SkillNameToKey from the catalog and NS.L at FILE SCOPE (both load earlier).
+modules\SkillData.lua
 # Conventional: the DebugLog descriptor asks for its sections at RUN time.
 modules\Diagnostics.lua
 
