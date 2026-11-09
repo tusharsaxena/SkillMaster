@@ -8,7 +8,7 @@ Plan: `2026-11-10-skill-master-v1.md`. Update a row in the same commit that fini
 | Design + mockup | done | dd75fbf; approved by owner 2026-11-10 |
 | Plan | done | this commit |
 | 0.1 Standards: Forever value | done | WowAddonStandards 3d6855f on `feat/2026-11-10-single-client-forever` (pushed, not merged); v2.105.0, clients-§9; renumber at merge if another branch takes v2.105.0 |
-| 0.2 dev-copilot value check | done | dev-copilot 3f93791 on `feat/2026-11-10-single-client-forever` (pushed, not merged): `Forever` value, 2.9.0 |
+| 0.2 dev-copilot value check | done | dev-copilot 3f93791 + c7133ca on `feat/2026-11-10-single-client-forever` (pushed, not merged): `Forever` value, 2.9.0 |
 | 1.1 Scaffold | todo | |
 | 1.2 Probe | todo | |
 | 2.1 SkillData | todo | |
