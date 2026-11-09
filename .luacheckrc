@@ -29,6 +29,8 @@ read_globals = {
   "GetBlockChance", "UnitResistance", "CastSpellByName", "C_SkillInfo", "C_Item",
   -- the skill model (modules/SkillData.lua): the class, the level and the debounce clock
   "UnitClass", "UnitLevel", "GetTime",
+  -- T2.4: the trainer lookups and helpers read the player's faction, race, level and zone
+  "UnitFactionGroup", "UnitRace", "GetZoneText",
 }
 
 -- The harness global is declared here, not in read_globals, so addon source cannot reach it (lint).

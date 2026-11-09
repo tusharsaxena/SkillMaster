@@ -75,6 +75,12 @@ defaults\Profile.lua
 # LOAD-BEARING: NS.SkillCatalog and NS.ClassWeapons_Forever, read at FILE SCOPE by modules\SkillData.lua.
 defaults\SkillCatalog_Forever.lua
 defaults\ClassWeapons_Forever.lua
+# T2.4: the trainer, rank, gathering and fishing tables; read by modules\Trainers.lua and
+# modules\Helpers.lua at CALL time, and through NS.L at FILE SCOPE (after locales\enUS.lua).
+defaults\Ranks_Forever.lua
+defaults\Trainers_Forever.lua
+defaults\Gathering_Forever.lua
+defaults\Fishing_Forever.lua
 
 # Modules -- each reaches the others at CALL time
 # Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
@@ -83,6 +89,10 @@ modules\MainWindow.lua
 modules\Probe.lua
 # Conventional: builds NS.SkillNameToKey from the catalog and NS.L at FILE SCOPE (both load earlier).
 modules\SkillData.lua
+# Conventional: pure lookups over the defaults\*_Forever.lua tables, read at CALL time (T2.4).
+modules\Trainers.lua
+# Conventional: publishes NS.SkillHelpers (NS.Helpers is the options library, settings\OptionsSetup.lua).
+modules\Helpers.lua
 # Conventional: the DebugLog descriptor asks for its sections at RUN time.
 modules\Diagnostics.lua
 

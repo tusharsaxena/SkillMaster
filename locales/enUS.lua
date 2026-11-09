@@ -102,6 +102,100 @@ L["Class Skills"] = true
 L["Armor Proficiencies"] = true
 L["Languages"] = true
 -- ---- end T2.1 --------------------------------------------------------------------------------
+-- BEGIN T2.4 (Trainers, Ranks, Gathering, Fishing) -- merged by the integrator.
+-- Profession and riding rank names (defaults/Ranks_Forever.lua).
+L["Apprentice"] = true
+L["Journeyman"] = true
+L["Expert"] = true
+L["Artisan"] = true
+-- Zone names the fishing table matches GetZoneText against (defaults/Fishing_Forever.lua).
+L["Elwynn Forest"] = true
+L["Dun Morogh"] = true
+L["Teldrassil"] = true
+L["Durotar"] = true
+L["Mulgore"] = true
+L["Tirisfal Glades"] = true
+L["Stormwind City"] = true
+L["Ironforge"] = true
+L["Darnassus"] = true
+L["Orgrimmar"] = true
+L["Thunder Bluff"] = true
+L["Undercity"] = true
+L["Westfall"] = true
+L["Loch Modan"] = true
+L["Darkshore"] = true
+L["The Barrens"] = true
+L["Silverpine Forest"] = true
+L["Redridge Mountains"] = true
+L["Duskwood"] = true
+L["Wetlands"] = true
+L["Ashenvale"] = true
+L["Stonetalon Mountains"] = true
+L["Hillsbrad Foothills"] = true
+L["Stranglethorn Vale"] = true
+L["Arathi Highlands"] = true
+L["Alterac Mountains"] = true
+L["Desolace"] = true
+L["Dustwallow Marsh"] = true
+L["Swamp of Sorrows"] = true
+L["Thousand Needles"] = true
+L["Feralas"] = true
+L["Tanaris"] = true
+L["Azshara"] = true
+L["The Hinterlands"] = true
+L["Western Plaguelands"] = true
+L["Felwood"] = true
+L["Un'Goro Crater"] = true
+L["Moonglade"] = true
+L["Eastern Plaguelands"] = true
+L["Winterspring"] = true
+L["Silithus"] = true
+L["Deadwind Pass"] = true
+L["Burning Steppes"] = true
+-- Mining nodes (defaults/Gathering_Forever.lua).
+L["Copper Vein"] = true
+L["Tin Vein"] = true
+L["Incendicite Mineral Vein"] = true
+L["Silver Vein"] = true
+L["Lesser Bloodstone Deposit"] = true
+L["Iron Deposit"] = true
+L["Indurium Mineral Vein"] = true
+L["Gold Vein"] = true
+L["Mithril Deposit"] = true
+L["Truesilver Deposit"] = true
+L["Dark Iron Deposit"] = true
+L["Small Thorium Vein"] = true
+L["Rich Thorium Vein"] = true
+-- Herbs (defaults/Gathering_Forever.lua).
+L["Peacebloom"] = true
+L["Silverleaf"] = true
+L["Earthroot"] = true
+L["Mageroyal"] = true
+L["Briarthorn"] = true
+L["Stranglekelp"] = true
+L["Bruiseweed"] = true
+L["Wild Steelbloom"] = true
+L["Grave Moss"] = true
+L["Kingsblood"] = true
+L["Liferoot"] = true
+L["Fadeleaf"] = true
+L["Goldthorn"] = true
+L["Khadgar's Whisker"] = true
+L["Wintersbite"] = true
+L["Firebloom"] = true
+L["Purple Lotus"] = true
+L["Arthas' Tears"] = true
+L["Sungrass"] = true
+L["Blindweed"] = true
+L["Ghost Mushroom"] = true
+L["Gromsblood"] = true
+L["Golden Sansam"] = true
+L["Dreamfoil"] = true
+L["Mountain Silversage"] = true
+L["Plaguebloom"] = true
+L["Icecap"] = true
+L["Black Lotus"] = true
+-- END T2.4
 
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
