@@ -9,7 +9,8 @@ position says so beside its TOC line (toc-file-§5).
 |---|---|---|
 | `locales/enUS.lua` | `NS.L` with its key-is-the-string fallback | creates `NS.L`, read at load by DebugLogSetup and every settings file |
 | `core/Namespace.lua` | folder name, version fallback, `[SM]` chat tag, library-missing sentence | first: every file reads it |
-| `core/Compat.lua` | `NS.Compat`: the skill-list shims, one normalized line record from either return shape ([compat-layer.md](compat-layer.md)) | conventional: reached at call time |
+| `core/Compat.lua` | `NS.Compat`: the skill-list shims, one normalized line record from either return shape, and the player, enchant, tooltip and speed reads the simulator answers ([compat-layer.md](compat-layer.md)) | conventional: reached at call time |
+| `core/SimSetup.lua` | `NS.SimSeam` (LibKa0s-Sim-1.0's seam over `NS.Compat`, the header toggle guarded), or the reference stub | straight after Compat: wraps every member at load |
 | `core/MediaSetup.lua` | `NS.Icon`, `NS.MediaFont`, `RegisterLSM` (LibKa0s-Media-1.0) | before Constants, which resolves `FONT_MONO` from it |
 | `core/Constants.lua` | brand, logo paths, monospace face, minimap path, `LAYERS` | read at load by the setup files below |
 | `core/State.lua` | session-only state: the debug flag, test mode | conventional |
@@ -31,6 +32,7 @@ position says so beside its TOC line (toc-file-§5).
 | `defaults/Ranks_Forever.lua`, `Trainers_Forever.lua`, `Gathering_Forever.lua`, `Fishing_Forever.lua` | the rank ladders, trainer records, gathering needs and fishing zones (all `verified = false`) | read at call time by Trainers and SkillHelpers; through `NS.L` at load |
 | `defaults/Racials_Forever.lua` | `NS.Racials_Forever.byRace`: the +5 racial weapon skills | read at call time by Bonuses |
 | `defaults/Stats_Forever.lua` | `NS.STAT_DEFS`: the 30 stats, their groups, references and markers | read at call time by StatData |
+| `defaults/Preview_Forever.lua` | `NS.Preview_Forever`: test mode's sample character, Ember Ironsong, a level-22 Dwarf Hunter (the mockups'): skill lines, temp bonuses, stats, a session log and three alts | read at call time by Preview and the simulator |
 | `modules/Bar.lua` | `NS.Bar`: the data bar (base, bonus segment clamped at the end, tier ticks, threshold markers, spark, text, expiry timer), its resolved style and its pool | conventional: reads the skin, the pool and the profile at call time |
 | `modules/Chrome.lua` | `NS.Chrome`: the title-bar and header icon controls (catalog marks, a glyph fallback) | conventional |
 | `modules/Rows.lua` | `NS.Rows`: one skill or stat row (initials icon, name, bar, timer; the unlearned variant with its trainer line and Go button), its pool and the pure helpers (values, colors, trainer line, money) | conventional |
@@ -55,6 +57,8 @@ position says so beside its TOC line (toc-file-§5).
 | `modules/Alerts.lua` | `NS.Alerts`: the rank-cap and weapon-gap toasts (LibKa0s-Toast-1.0), the cap's chat line, the click-to-waypoint (`NS.Waypoints:Set`) | subscribes to `SKILL_UP` / `SKILLS_UPDATED` on its own bus target at load; reads SkillData, Trainers and the settings at call time |
 | `modules/Template.lua` | `NS.Template.Render(tpl, ctx)`: the broker feed text tokens (`{pinned}`, `{gains}`, `{last}`, `{lowestProf}`, `{equippedWeapon}`, `{skill:<key>}`, `{stat:<key>}`, `{level}`); an unknown token renders empty | pure; read by Broker at call time |
 | `modules/Broker.lua` | `NS.Broker`: the four LibDataBroker data sources (`SkillMaster_All`, `_Professions`, `_Weapons`, `_Stats`), the skill-up flash, the GameTooltip with `NS.Bar` mini bars and clickable rows (a crafting row calls `NS.MainWindow.ShowAndScrollTo`, an unlearned one `NS.TrainerPopup.Show`); never the launcher, never secure | builds its data objects and bus target at load (after Bus, Pool and the libraries) |
+| `modules/Preview.lua` | `NS.Preview`: test mode's data swap. Builds the sample's models through `SkillData.Build`, `StatData.Build` and `Bonuses.Compute`, sets `NS.Blocks.source`, `NS.Bonuses.source` and `NS.Broker.source`, and answers `Log()`, `Alts()`, `Skill(key)` and `Character()` for the Journal, the row tooltip and the summary line | conventional: reads its fixture and the data modules at call time |
+| `modules/Simulator.lua` | `NS.Sim` (LibKa0s-Sim-1.0's instance, or the stub), `NS.SimHost`: the simulated world and its providers, `deliver`, the fishing-trip scenario, the refusals, the session-only stores and the restoring stop; `NS.IsSimMode` / `NS.ToggleSim` for the launcher and the checkbox | after every module it delivers to; `Sim:New` and the providers at load |
 | `settings/Schema.lua` | the schema and the single write seam (LibKa0s-Schema-1.0) | before Slash, OptionsSetup and the pages |
 | `settings/Slash.lua` | `NS.COMMANDS` and the dispatcher (LibKa0s-Slash-1.0) | before the landing spec reads it |
 | `settings/OptionsSetup.lua` | the panel descriptor, `NS.Helpers` (LibKa0s-Options-1.0) | before every page file |

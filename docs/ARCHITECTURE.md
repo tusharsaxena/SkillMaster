@@ -21,7 +21,8 @@ descriptor and one degradation stub each, the window, skins, the settings panel,
 the diagnostics dump). Milestone 2 added the data layer, milestone 3 the display (the bar widget,
 the blocks and rows, the detached frames, the crafting overlays, the row tooltip, the trainer popup
 and waypoints) and milestone 4 the broker feeds, the alerts, the session log, the alt overview and
-the Journal. The settings pages for the new state and test mode's sample data arrive in milestone 5.
+the Journal. Milestone 5 adds test mode's sample character (`modules/Preview.lua` over
+`defaults/Preview_Forever.lua`) and the simulator (`modules/Simulator.lua` on LibKa0s-Sim-1.0).
 
 Pure data modules (`SkillData`, `Bonuses`, `StatData`, `Trainers`, `Helpers`, `SessionLog`, `Alts`)
 will read the client API and publish bus messages; display modules consume only messages and
@@ -33,7 +34,8 @@ models, so test mode, the simulator and the headless harness drive them the same
 Every file, its responsibility and why the TOC orders it as it does: [module-map.md](module-map.md).
 In short: `core/` holds the identity, the constants, the one setup file per LibKa0s major (Media,
 Env, Core, Skin, Bus, Pool, Widgets, Lifecycle, Perf, DebugLog, Launcher), the AceAddon entry
-(`core/SkillMaster.lua`) and the store (`core/Database.lua`); `core/Compat.lua` is the compat family (the skill-list shims);
+(`core/SkillMaster.lua`) and the store (`core/Database.lua`); `core/Compat.lua` is the compat family (the skill-list shims and the reads the simulator answers),
+wrapped at load by the simulator's seam (`core/SimSetup.lua`);
 `defaults/Profile.lua` is the defaults tree and `defaults/*_Forever.lua` the data tables (the skill
 catalog, the class weapon lists, trainers, ranks, gathering, fishing, racials, stat definitions);
 `modules/` holds the display (the bar widget `NS.Bar`, the title-bar controls `NS.Chrome`, the
@@ -43,7 +45,8 @@ overlays, the click map `NS.Interact`, the row tooltip, the trainer popup and `N
 model (`StatData`), the trainer lookups (`Trainers`), the skill helpers (`NS.SkillHelpers`,
 `modules/Helpers.lua`), the session log (`NS.SessionLog`), the alt snapshots (`NS.Alts`), the
 Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), the broker feeds
-(`NS.Template`, `NS.Broker`) and the diagnostics sections;
+(`NS.Template`, `NS.Broker`), test mode's data swap (`NS.Preview`), the simulator (`NS.Sim`,
+`NS.SimHost`) and the diagnostics sections;
 `settings/` holds the schema,
 the slash table and the settings pages.
 
@@ -84,7 +87,7 @@ No structural registry exists yet.
 Six messages, each declared once in `core/Bus.lua` as `NS.MSG.<KEY>` through LibKa0s-Bus-1.0's
 strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDATED` and `SKILL_UP`,
 `Bonuses` sends `BONUSES_UPDATED`, `StatData` sends `STATS_UPDATED` and `Blocks` sends
-`LAYOUT_CHANGED`; `SIM_TICK`'s sender arrives with the simulator (T5.2).
+`LAYOUT_CHANGED`; the simulator (`modules/Simulator.lua`) sends `SIM_TICK` after each step.
 
 | Constant | Wire name | Sender | Payload | Consumers |
 |---|---|---|---|---|
@@ -93,12 +96,12 @@ strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDAT
 | `STATS_UPDATED` | `Ka0s_SkillMaster_StatsUpdated` | `modules/StatData.lua` (T2.3) | the stats model | stat blocks, broker |
 | `BONUSES_UPDATED` | `Ka0s_SkillMaster_BonusesUpdated` | `modules/Bonuses.lua` (T2.2) | none | bars, tooltips, broker |
 | `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse); the skin owner's look-change hook | none | `modules/Blocks.lua`, which repaints the window and the detached frames; the Journal |
-| `SIM_TICK` | `Ka0s_SkillMaster_SimTicked` | the simulator (T5.2) | the step's name | displays under simulation |
+| `SIM_TICK` | `Ka0s_SkillMaster_SimTicked` | `modules/Simulator.lua` (T5.2), after each step | the step's kind | none yet (published for displays under simulation) |
 
 ## Slash Commands
 
 `/skm` and `/skillmaster`, one LibKa0s-Slash-1.0 dispatcher over `NS.COMMANDS` (`settings/Slash.lua`):
-`help`, `config`, `skin`, `show`, `hide`, `toggle`, `journal`, `lock`, `unlock`, `test`, `probe`, `enable`, `disable`,
+`help`, `config`, `skin`, `show`, `hide`, `toggle`, `journal`, `lock`, `unlock`, `test`, `sim`, `probe`, `enable`, `disable`,
 `list`, `get`, `set`, `reset`, `resetall`, `debug`, `diagnostics`, `perf`, `version`. The bare
 command opens the settings panel. While disabled, every verb but the library's live set refuses on
 one line. The table with each verb's handler and refusal: [slash-dispatch.md](slash-dispatch.md).
@@ -107,7 +110,7 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 
 | Event | Registered by | Handler | Why |
 |---|---|---|---|
-| `PLAYER_REGEN_DISABLED` | `NS.RegisterRuntime` (`core/SkillMaster.lua`) | `addon:OnEnterCombat` | combat ends test mode (preview-mode) |
+| `PLAYER_REGEN_DISABLED` | `NS.RegisterRuntime` (`core/SkillMaster.lua`) | `addon:OnEnterCombat` | combat ends test mode and a running simulation (preview-mode) |
 | `PLAYER_REGEN_DISABLED`, `PLAYER_REGEN_ENABLED` | `modules/SecureOverlay.lua` at load, on its own bus target | disarm every crafting overlay at the combat-start edge; after combat run the queued layout work, then re-sync the overlays | Taint Notes below |
 | `SKILL_LINES_CHANGED` | `NS.SkillData:Enable` (from `NS.RegisterRuntime`) | debounced `SkillData:Scan` (0.1 s) | the skill list changed; the echo of the scan's own header toggles is ignored for 0.2 s |
 | `CHAT_MSG_SKILL` | `NS.SkillData:Enable` | debounced `SkillData:Scan` | a skill-up line |
@@ -155,8 +158,6 @@ a crafting row opens the main window scrolled to it rather than casting (design 
   being dragged it lags its row until the drop (a re-sync on `OnDragStop`).
 - The optional one-line gathering hint under a row (`skills.helperHint`, design §12 item 4) is not
   drawn yet; the helpers are tooltip lines.
-- Test mode marks the window but still shows the live models: the sample character (the preview
-  fixture) arrives in T5.2 through `NS.Blocks.source`.
 - The launcher menu has no *Journal* entry yet (design §6.8): `LibKa0s-Launcher-1.0` minor 9 builds
   only its fixed entries (Enabled, Locked, Test mode, Sim mode, Show window, Open settings), takes
   no extra entry from the descriptor, and launcher-§2 forbids a host menu. It needs a library seam;
@@ -164,7 +165,13 @@ a crafting row opens the main window scrolled to it rather than casting (design 
 - Broker displays that only call a data object's `OnTooltipShow` show no feed tooltip: the feeds
   supply `OnEnter` / `OnLeave` (their rows are clickable), not `OnTooltipShow`.
 - The Alts grid shows five skill columns at a time; Shift + mouse wheel pages through the rest.
-- Sim mode (the launcher entry and the Master-controls checkbox) arrives with the simulator in T5.2.
+- The simulator plays one scenario (a fishing trip: six skill-ups, a lure on and off, a mount up
+  and down) on test mode's sample character. Only the reads the simulated character needs go
+  through the seam: the skill list, the player's level, class and race, the weapon enchant, the
+  main hand's tooltip and the speed. The other stats, the buffs and the zone stay live during a
+  session.
+- Test mode's lure timer counts from when test mode turned on and is redrawn on the next repaint,
+  not every second (the live ticker follows only live temp bonuses).
 - Every client API the data modules will use is assumed until `/skm probe` confirms it
   ([midnight-quirks.md](midnight-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.
@@ -187,7 +194,7 @@ a crafting row opens the main window scrolled to it rather than casting (design 
 
 | Doc | Status | Trigger |
 |---|---|---|
-| `slash-dispatch.md` | Present | 22 commands in `NS.COMMANDS` |
+| `slash-dispatch.md` | Present | 23 commands in `NS.COMMANDS` |
 | `midnight-quirks.md` | Present | Always (client-quirks-§1); holds the vendored catalog and this addon's assumed-API table |
 | `debug.md` | Present | The diagnostics dump is a debug surface beyond the default console (debug-logging-§14) |
 | `profiles.md` | Present | The Profiles page ships in the options UI |

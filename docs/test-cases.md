@@ -272,6 +272,30 @@ Total.
 - broker: a crafting row without ShowAndScrollTo still opens the main window
 - broker: stood down, every feed reads Off and its tooltip says so; standing up re-renders
 
+### test_preview.lua (6)
+
+- preview: test mode draws the sample Dwarf Hunter in every block
+- preview: the bonuses are the sample's: the Dwarf racial on Guns, the lure's timer on Fishing
+- preview: the broker, the summary line and the row tooltip read the sample
+- preview: the Journal's session log and alts are the sample's
+- preview: test mode off restores the live data in every source
+- preview: combat ends test mode and puts the live data back
+
+### test_sim.lua (12)
+
+- sim: the seam wraps every Compat member, and nothing escapes it (H2)
+- sim: the Sim and seam stubs carry the live surfaces (H9)
+- sim: a library-absent load takes the stubs, and the verb names the missing major
+- sim: the refusals, each leaving Sim mode unticked (H5)
+- sim: test mode refuses while a simulation runs (the two are exclusive)
+- test_sim_skill_up_drives_flash: a sim skill-up makes the broker flash and the session log record it
+- sim: the lure goes on and off, and the mount changes the speed
+- sim: a whole session saves nothing, and the stop restores the live state (H4)
+- sim: the stand-down stops a running session first
+- sim: the verb, the launcher entry and the checkbox are one handler
+- sim: combat stops a running session
+- sim: the window shows the simulation strip while a session runs
+
 ### test_seams.lua (5)
 
 - test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
@@ -436,6 +460,8 @@ Total.
 | test_alerts.lua | 11 |
 | test_template.lua | 3 |
 | test_broker.lua | 9 |
+| test_preview.lua | 6 |
+| test_sim.lua | 12 |
 | test_seams.lua | 5 |
 | test_surface_parity.lua | 11 |
 | test_vendor_sync.lua | 3 |
@@ -450,4 +476,4 @@ Total.
 | test_skin_switch.lua | 13 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **284** |
+| **Total** | **302** |

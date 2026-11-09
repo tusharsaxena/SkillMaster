@@ -41,7 +41,8 @@ S.APIS = {
     GetParryChance             = function() return GetParryChance end,
     GetBlockChance             = function() return GetBlockChance end,
     UnitResistance             = function() return UnitResistance end,
-    GetUnitSpeed               = function() return GetUnitSpeed end,
+    -- Through NS.Compat (T5.2): the simulator's seam answers the speed while a session runs.
+    GetUnitSpeed               = function() return type(GetUnitSpeed) == "function" and NS.Compat.UnitSpeed or nil end,
     GetInventoryItemDurability = function() return GetInventoryItemDurability end,
 }
 
@@ -169,14 +170,18 @@ local function finish(e, ref)
     e.fmt = nil
 end
 
+local function entryOf(def, ctx, value, raw)
+    return { key = def.key, label = def.label, value = value, raw = raw, fmt = def.fmt,
+             markers = liveMarkers(def, ctx), refSpec = def.ref }
+end
+
 --- One def -> an unfinished entry, or nil when its API is absent or answers nothing.
 local function read(def, ctx)
     local fn, calc = resolve(def.api), S.CALC[def.calc or "first"]
     if not (fn and calc) then return nil end
     local ok, value, raw = pcall(calc, fn, def, ctx)
     if not ok or not num(value) then return nil end
-    return { key = def.key, label = def.label, value = value, raw = raw, fmt = def.fmt,
-             markers = liveMarkers(def, ctx), refSpec = def.ref }
+    return entryOf(def, ctx, value, raw)
 end
 
 --- The highest value among a group's "maxInGroup" entries.
@@ -209,12 +214,12 @@ local function context()
     return { level = level or 1 }
 end
 
---- Read every stat the client can give. Answers the model and keeps it for Model() / Get().
-function S:Scan()
-    local ctx, model, index = context(), {}, {}
+--- The model and its key index from `pick(def) -> unfinished entry|nil`, over every def in order.
+local function assemble(ctx, pick)
+    local model, index = {}, {}
     for _, group in ipairs(S.GROUPS) do model[group] = {} end
     for _, def in ipairs(NS.STAT_DEFS or {}) do
-        local e = model[def.group] and read(def, ctx)
+        local e = model[def.group] and pick(def)
         if e then
             local list = model[def.group]
             list[#list + 1] = e
@@ -222,8 +227,26 @@ function S:Scan()
         end
     end
     for _, group in ipairs(S.GROUPS) do finishGroup(model[group], ctx) end
-    self.model, self.index = model, index
-    return model
+    return model, index
+end
+
+--- Read every stat the client can give. Answers the model and keeps it for Model() / Get().
+function S:Scan()
+    local ctx = context()
+    self.model, self.index = assemble(ctx, function(def) return read(def, ctx) end)
+    return self.model
+end
+
+--- A model from `values[key]` (a number, or { value, raw }) for a character at `level`, through
+--- the same references, markers and display as Scan. Pure: test mode's sample character.
+function S.Build(values, level)
+    local ctx = { level = tonumber(level) or 1 }
+    return assemble(ctx, function(def)
+        local v = values[def.key]
+        if type(v) == "table" and num(v[1]) then return entryOf(def, ctx, v[1], v[2]) end
+        if num(v) then return entryOf(def, ctx, v) end
+        return nil
+    end)
 end
 
 function S:Model() return self.model end

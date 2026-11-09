@@ -7,6 +7,7 @@ local _, NS = ...
 -- THE KEY (client-quirks-§5): "<realm>-<name>" from AceDB 40's db.keys, which is the ruleset
 -- ("PvP") and the character's WHOLE two-word name ("Traxex Silentshot") on Forever. The store never
 -- derives them again: UnitName's second return is the surname there, not a realm.
+-- A.View(list): a read-only stand-in with List / Forget over `list` (test mode's sample alts).
 
 NS.Alts = {}
 local A = NS.Alts
@@ -46,6 +47,9 @@ end
 --- Write this character's record now. Answers the record, or nil without a key.
 --- @param t number|nil epoch seconds (now)
 function A:Snapshot(t)
+    -- A simulated character is never snapshotted: nothing a simulation does writes to
+    -- SavedVariables (preview-mode, H4).
+    if NS.Sim and NS.Sim:IsActive() then return nil end
     local key, chars = A:Key(), store()
     if not (key and chars) then return nil end
     local rec = chars[key] or {}
@@ -76,6 +80,15 @@ function A:List()
     return out
 end
 
+--- A read-only stand-in over `list` ({ key, record, isCurrent }, in display order): test mode's
+--- sample alts (modules/Preview.lua). Forget refuses, because there is nothing stored to drop.
+function A.View(list)
+    return {
+        List   = function() return list end,
+        Forget = function() return false end,
+    }
+end
+
 --- Drop a character's record. Answers true when there was one.
 function A:Forget(key)
     local chars = store()
@@ -91,6 +104,7 @@ local pending
 --- One snapshot A.DEBOUNCE from now, unless one is waiting. A stand-down cancels every timer, so a
 --- handle that no longer has time left is a dropped one, not a waiting one.
 function A:RequestSnapshot()
+    if NS.Sim and NS.Sim:IsActive() then return end   -- a simulated pass asks for nothing (H4)
     if pending and NS.addon:TimeLeft(pending) > 0 then return end
     pending = NS.addon:ScheduleTimer(function()
         pending = nil

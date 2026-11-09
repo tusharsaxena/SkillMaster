@@ -42,6 +42,9 @@ locales\enUS.lua
 core\Namespace.lua
 # Conventional: NS.Compat, the compat family's root; its shims are reached at CALL time.
 core\Compat.lua
+# LOAD-BEARING: wraps every NS.Compat member at load (LibKa0s-Sim-1.0's seam). It must load straight
+# after the Compat files and before any file that reads a Compat member.
+core\SimSetup.lua
 # LOAD-BEARING: NS.MediaFont, which core\Constants.lua resolves FONT_MONO from at FILE SCOPE.
 core\MediaSetup.lua
 # LOAD-BEARING: NS.Constants (the brand, the logos, LAYERS), read at FILE SCOPE by the setup files below.
@@ -85,6 +88,9 @@ defaults\Fishing_Forever.lua
 defaults\Racials_Forever.lua
 # Conventional: NS.STAT_DEFS, read by modules\StatData.lua at CALL time.
 defaults\Stats_Forever.lua
+# Conventional: NS.Preview_Forever, test mode's sample character, read by modules\Preview.lua and
+# modules\Simulator.lua at CALL time.
+defaults\Preview_Forever.lua
 
 # Modules -- each reaches the others at CALL time
 # Conventional: NS.Bar, the data bar (T3.1); reads NS.Skin, NS.Pool and the profile at CALL time.
@@ -135,6 +141,11 @@ modules\Template.lua
 # T4.1: the four broker data feeds; creates its LibDataBroker objects and bus target at FILE SCOPE
 # (after core\Bus.lua, core\PoolSetup.lua and the # Libraries block); reads NS.StatData.GROUPS at call time.
 modules\Broker.lua
+# T5.2: test mode's data swap; builds its models through SkillData, StatData and Bonuses at CALL time.
+modules\Preview.lua
+# T5.2: the simulator. LOAD-BEARING: after every module whose handler it delivers to and after
+# core\SimSetup.lua (the seam it binds); Sim:New and the providers run at FILE SCOPE.
+modules\Simulator.lua
 
 # Settings (last -- depend on everything else being initialized)
 # LOAD-BEARING: NS.Schema, NS.SetByPath and NS.SchemaRuntime, read at FILE SCOPE by the three files below.

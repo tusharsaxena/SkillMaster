@@ -124,16 +124,17 @@ local function classify(name, header)
     return SD.UNKNOWN_PREFIX .. name, nil
 end
 
---- The weapon cap is 5 x level; after PLAYER_LEVEL_UP the list can still answer the old one.
-local function capFloor(cat)
+--- The weapon cap is 5 x level; after PLAYER_LEVEL_UP the list can still answer the old one, so the
+--- level is the larger of the client's and the event's (ctx.level).
+local function capFloor(cat, ctx)
     if not (cat and (cat.kind == "weapon" or cat.kind == "defense")) then return 0 end
-    return 5 * math.max(UnitLevel("player") or 0, levelHint or 0)
+    return 5 * (ctx.level or 0)
 end
 
-local function learnedEntry(key, cat, r)
+local function learnedEntry(key, cat, r, ctx)
     return {
         key = key, name = r.name, category = cat and cat.category or "other", kind = cat and cat.kind,
-        rank = r.rank, max = math.max(r.max, capFloor(cat)), tempPoints = r.tempPoints,
+        rank = r.rank, max = math.max(r.max, capFloor(cat, ctx)), tempPoints = r.tempPoints,
         modifier = r.modifier, learned = true,
     }
 end
@@ -144,24 +145,24 @@ local function unlearnedEntry(key, cat)
 end
 
 --- One row per key: two lines on one key (a second racial riding line) keep the higher rank.
-local function addLearned(m, lines)
+local function addLearned(m, lines, ctx)
     for _, line in ipairs(lines) do
         local key, cat = classify(line.rec.name, line.header)
         local had = key and m.byKey[key]
         if key and not had then
-            local e = learnedEntry(key, cat, line.rec)
+            local e = learnedEntry(key, cat, line.rec, ctx)
             m.byKey[key] = e
             local list = m.order[e.category]
             list[#list + 1] = key
         elseif had and line.rec.rank > had.rank then
-            m.byKey[key] = learnedEntry(key, cat, line.rec)
+            m.byKey[key] = learnedEntry(key, cat, line.rec, ctx)
         end
     end
 end
 
 --- The rows the class can train and the character has not learned, in catalog order.
-local function addUnlearned(m)
-    local _, classFile = UnitClass("player")
+local function addUnlearned(m, ctx)
+    local classFile = ctx.classFile
     local keys = classFile and NS.ClassWeapons_Forever[classFile]
     if not keys then return end
     local missing = {}
@@ -195,13 +196,26 @@ end
 --- Read the list, build the model, publish it. An empty (not yet loaded) list is an empty model:
 --- nothing is synthesized from it (Review Focus 1).
 --- @return table the model
-function SD:Scan()
+--- The model for `lines` ({ rec, header } in list order) of a `ctx.classFile` character at
+--- `ctx.level`. Pure: Scan feeds it the client's list, test mode its sample character's.
+function SD.Build(lines, ctx)
     local m = emptyModel()
-    local lines = readLines()
     if #lines > 0 then
-        addLearned(m, lines)
-        addUnlearned(m)
+        addLearned(m, lines, ctx)
+        addUnlearned(m, ctx)
     end
+    return m
+end
+
+--- The class and level the live scan builds with, read through NS.Compat (the simulator's seam).
+local function liveContext()
+    local _, classFile = Compat.PlayerClass()
+    return { classFile = classFile, level = math.max(Compat.PlayerLevel(), levelHint or 0) }
+end
+
+function SD:Scan()
+    local lines = readLines()
+    local m = SD.Build(lines, liveContext())
     local old = model
     model = m
     for _, up in ipairs(skillUps(old, m)) do NS.bus:SendMessage(NS.MSG.SKILL_UP, up[1], up[2], up[3]) end
@@ -237,6 +251,24 @@ local HANDLERS = {
         SD:RequestScan()
     end,
 }
+
+--- Deliver one game event to the handler its registration names (the simulator's `deliver`).
+--- Answers how many handlers ran.
+function SD.OnEvent(event, ...)
+    local fn = HANDLERS[event]
+    if not fn then return 0 end
+    fn(event, ...)
+    return 1
+end
+
+--- Put `m` in place as the model with no message (the simulator: a session starts from an empty
+--- model so its first pass sends no SKILL_UP, and the stop puts the live one back). Answers the
+--- model it replaced.
+function SD:Adopt(m)
+    local was = model
+    model = type(m) == "table" and m or emptyModel()
+    return was
+end
 
 function SD:RegisterEvents()
     for _, event in ipairs(SD.EVENTS) do

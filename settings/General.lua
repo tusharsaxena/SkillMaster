@@ -47,6 +47,10 @@ local masterRows, masterTail = H.MasterControls({
     debugConsolePath = DEBUG_CONSOLE_PATH,
     minimapPath      = C.MINIMAP_PATH,
     testModePath     = TEST_MODE_PATH,
+    -- The simulator's pair, the same the launcher descriptor carries (options-ui-§15): the
+    -- composer draws a session-only Sim mode row beside Test mode.
+    isSimMode        = function() return NS.IsSimMode() end,
+    toggleSim        = function() NS.ToggleSim() end,
     omit             = { visibility = true },
     defaults         = { enabled = P.enabled, scale = P.scale, alpha = P.alpha, locked = P.locked },
     notes            = {

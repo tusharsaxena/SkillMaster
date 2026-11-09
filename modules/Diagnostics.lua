@@ -33,6 +33,15 @@ local function skin(out)
     out:add(TAG, "stored=%s:%s applied=%s:%s", source, key, appliedSource, appliedKey)
 end
 
+-- The simulator (preview-mode, H8): the session, the step and the seam.
+local function sim(out)
+    local st = NS.Sim:Status()
+    out:add(TAG, "sim active=%s panel=%s scenario=%s step=%s/%s events=%s", st.active == true,
+        NS.Sim:IsPanelShown(), st.scenario or "-", st.pos or 0, st.total or 0, st.events or 0)
+    out:add(TAG, "sim seam keys=%s unwrapped=%s", #NS.SimSeam:Keys(), #NS.SimSeam:Unwrapped())
+    out:add(TAG, "preview data=%s", NS.Preview.IsOn())
+end
+
 local function rejected(out)
     out:list(TAG, "rejected events", NS.rejectedEvents)
 end
@@ -43,6 +52,7 @@ function NS.Diagnostics.Sections()
         { "settings", settings },
         { "state",    state },
         { "skin",     skin },
+        { "sim",      sim },
         { "rejected", rejected },
     }
 end

@@ -6,7 +6,8 @@ LibKa0s-DebugLog-1.0's console (`core/DebugLogSetup.lua`). `/skm debug` toggles 
 `/skm debug on` and `/skm debug off` turn logging on and off. The flag is session-only
 (`NS.State.debug`, off at every login and `/reload`, never saved) and independent of the window, so a
 bug can be reproduced with the console closed and read afterwards. Lines are tag-first:
-`[Set]` (the write seam), `[Test]` (test mode), `[Migrate]`, `[Bus]`, plus the library's own `[Cmd]`,
+`[Set]` (the write seam), `[Test]` (test mode and its sample data), `[Sim]` (the simulator and its
+seam), `[Migrate]`, `[Bus]`, plus the library's own `[Cmd]`,
 `[Cfg]`, `[Launcher]` and `[Lifecycle]` lines.
 
 ## The diagnostics report
@@ -31,6 +32,7 @@ section. This addon writes the sections, in `modules/Diagnostics.lua`:
 | `settings` | every setting that differs from its default, plus `enabled`, `skin.source`, `skin.skin` always |
 | `state` | whether the window is shown and test mode is on; or "stood down: runtime state released" |
 | `skin` | the skin engine's minor, the stored and the applied choice |
+| `sim` | the simulation's state (active, step panel, scenario, step, events), the seam's wrapped and unwrapped counts, whether test mode's sample data is on |
 | `rejected` | the events `SafeRegisterEvent` refused this session |
 
 The report reads state only. It registers no event, takes no hold, starts no timer, calls no

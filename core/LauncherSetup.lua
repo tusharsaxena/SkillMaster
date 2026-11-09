@@ -57,6 +57,8 @@ NS.Launcher = lib:New({
     toggleLock     = function() runVerb(NS.GetSetting("locked") and "unlock" or "lock") end,
     isTestMode     = function() return NS.IsTestMode() end,
     toggleTestMode = function() runVerb("test") end,
+    isSimMode      = function() return NS.IsSimMode() end,
+    toggleSim      = function() NS.ToggleSim() end,
     isWindowShown  = function() return NS.MainWindow.IsShown() end,
     toggleWindow   = function() NS.MainWindow.Toggle() end,
 

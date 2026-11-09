@@ -40,6 +40,8 @@ NS.COMMANDS = {
     {"lock",        L["Lock the window in place"],                function() setAndEcho("locked", true) end},
     {"unlock",      L["Unlock the window so it can be dragged"],  function() setAndEcho("locked", false) end},
     {"test",        L["Turn test mode on or off"],                function() NS.ToggleTestMode() end},
+    {"sim",         L["Run the simulator: scripted skill-ups, a lure and a speed change \226\128\148 `/skm sim` shows the steps"],
+                                                                  function(rest) NS.Sim:RunVerb(rest or "") end},
     {"probe",       L["Report the client's skill and stat API as JSON, to send to the author"],
                                                                   function() NS.Probe.Verb() end},
     {"enable",      L["Turn the addon on"],                       function() setAndEcho("enabled", true) end},

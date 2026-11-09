@@ -120,6 +120,8 @@ Kit.run{
         "test_alerts",
         "test_template",
         "test_broker",
+        "test_preview",
+        "test_sim",
         "test_seams",
         "test_surface_parity",
         "test_vendor_sync",

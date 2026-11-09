@@ -390,6 +390,42 @@ L["Utility"] = true
 L["Click label: toggle window \194\183 Click row: open its window \194\183 Right-click: settings"] = true
 -- ---- END T4.1 ----
 
+-- ---- T5.2: test mode and the simulator ----
+L["Test mode cannot start while a simulation runs."] = true
+L["Simulation"] = true
+L["Simulation: a sample character plays scripted events."] = true
+L["Run the simulator: scripted skill-ups, a lure and a speed change \226\128\148 `/skm sim` shows the steps"] = true
+L["A simulation cannot start while test mode is on."] = true
+L["A simulation cannot start in combat."] = true
+L["A simulation cannot start in an instance."] = true
+L["A simulation cannot start in a group."] = true
+L["A fishing trip: skill-ups, a lure and a mount"] = true
+L["Simulation stopped: Skill Master was disabled."] = true
+L["Simulation stopped: combat started."] = true
+L["Simulation stopped: the profile changed."] = true
+L["Simulation started (%s): a sample character plays scripted events. Nothing is saved."] = true
+L["Skill Master - Simulation"] = true
+L["Skill-up: %s"] = true
+L["Fishing lure on"] = true
+L["Fishing lure off"] = true
+L["Mount up: speed 160%"] = true
+L["Dismount: speed 100%"] = true
+L["Your skill in %s has increased to %d."] = true
+L["Strong Fishing Pole"] = true
+L["Shiny Bauble (+25 Fishing Skill)"] = true
+L["Forgetting a character waits until the simulation stops."] = true
+-- The sample character's words (defaults/Preview_Forever.lua), localized when its models are built.
+L["Defenses"] = true
+L["Shiny Bauble"] = true
+L["Dwarf"] = true
+L["Human"] = true
+L["Gnome"] = true
+L["Hunter"] = true
+L["Warrior"] = true
+L["Mage"] = true
+L["Paladin"] = true
+-- ---- END T5.2 ----
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

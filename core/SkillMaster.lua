@@ -12,12 +12,13 @@ NS.Print = NS.Util.print   -- the reclaim: the same object every settings file c
 -- ---------------------------------------------------------------------------------------------
 -- Test mode (preview-mode): session-only, on until turned off, ended by combat. Three surfaces,
 -- one handler: the `test` verb, the launcher's Test mode entry and the Master-controls checkbox.
+-- On, every display draws the sample character (modules/Preview.lua); off, the live data again.
 -- ---------------------------------------------------------------------------------------------
 
 function NS.IsTestMode() return NS.State.testMode == true end
 
---- Flip test mode. Refuses while stood down (the one refusal helper) and refuses to START in
---- combat. Answers the new state.
+--- Flip test mode. Refuses while stood down (the one refusal helper), and refuses to START in
+--- combat or while a simulation runs (the two modes are exclusive, H5). Answers the new state.
 function NS.ToggleTestMode()
     local refusal = NS.StoodDownRefusal()
     if refusal then NS.Print(refusal) return NS.IsTestMode() end
@@ -26,18 +27,26 @@ function NS.ToggleTestMode()
         NS.Debug("Test", "start refused (in combat)")
         return false
     end
+    if not NS.IsTestMode() and NS.Sim and NS.Sim:IsActive() then
+        NS.Print(NS.L["Test mode cannot start while a simulation runs."])
+        NS.Debug("Test", "start refused (simulation running)")
+        return false
+    end
     NS.State.testMode = not NS.IsTestMode()
     NS.Debug("Test", "test mode %s", NS.State.testMode and "on" or "off")
+    if NS.Preview then NS.Preview.Apply(NS.State.testMode) end
     if NS.MainWindow then NS.MainWindow.Refresh() end
     if NS.Helpers and NS.Helpers.RefreshScalars then NS.Helpers.RefreshScalars() end
     return NS.State.testMode
 end
 
---- Combat ends test mode (preview-mode).
+--- Combat ends test mode (preview-mode) and a running simulation.
 function addon:OnEnterCombat()
+    if NS.Sim and NS.Sim:IsActive() then NS.Sim:Stop("combat") end
     if not NS.IsTestMode() then return end
     NS.State.testMode = false
     NS.Debug("Test", "test mode ended by combat")
+    if NS.Preview then NS.Preview.Apply(false) end
     if NS.MainWindow then NS.MainWindow.Refresh() end
 end
 
@@ -55,7 +64,10 @@ end
 --- Disabled means not running: frames hidden, every event and message unregistered, every timer
 --- canceled. The latch logs the edge; nothing here logs one of its own.
 function NS.StandDown()
+    -- The simulation stops FIRST (H6), so its cleanup runs before anything below tears down.
+    if NS.Sim then NS.Sim:Stop("standDown") NS.Sim:HidePanel() end
     NS.State.testMode = false
+    if NS.Preview then NS.Preview.Apply(false) end
     if NS.MainWindow then NS.MainWindow.StandDown() end
     if NS.Detached then NS.Detached.StandDown() end
     if NS.SecureOverlay then NS.SecureOverlay:StandDown() end
@@ -84,6 +96,7 @@ end
 -- ---------------------------------------------------------------------------------------------
 
 local function reloadProfile()
+    if NS.Sim and NS.Sim:IsActive() then NS.Sim:Stop("profile") end
     NS.HideSkinPicker()
     NS:RunMigrations()
     NS.SyncEnabledHold()

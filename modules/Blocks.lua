@@ -311,7 +311,7 @@ end
 --- Skill points gained this session: the session log's count when it is loaded (T4.3), else the
 --- SKILL_UP messages this module has counted since login.
 function B.SessionGains()
-    local log = NS.SessionLog
+    local log = NS.Preview and NS.Preview.Log() or NS.SessionLog
     local g = log and log.Gains and log:Gains()
     if type(g) == "number" then return g end
     if type(g) == "table" then return #g end

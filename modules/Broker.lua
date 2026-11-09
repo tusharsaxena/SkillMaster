@@ -10,6 +10,10 @@ local addonName, NS = ...
 --
 -- Consumes SKILLS_UPDATED, SKILL_UP, STATS_UPDATED and BONUSES_UPDATED on its own bus target. The
 -- one client read is the main-hand weapon class for {equippedWeapon}, feature-detected.
+--
+-- B.source: nil for the models the bus handed over, or fn() -> { model, statsModel, statIndex,
+-- gains = { total, byKey }, last } (test mode's sample character, modules/Preview.lua, T5.2). The
+-- bus keeps feeding the live state underneath, so turning test mode off shows it again at once.
 
 NS.Broker = {}
 local B = NS.Broker
@@ -60,6 +64,31 @@ function B.ResetSession()
     flashTimer = nil
 end
 
+local function copyGains(g)
+    local byKey = {}
+    for k, v in pairs(g.byKey) do byKey[k] = v end
+    return { total = g.total, byKey = byKey }
+end
+
+--- This session's gains and last skill-up, as a copy (the simulator takes it at start).
+function B.SessionState() return { gains = copyGains(gains), last = last } end
+
+--- Put a SessionState() back and end any flash (the simulator's stop).
+function B.RestoreSessionState(st)
+    if type(st) ~= "table" or type(st.gains) ~= "table" then return end
+    gains, last, flash = copyGains(st.gains), st.last, {}
+    if flashTimer then NS.addon:CancelTimer(flashTimer) end
+    flashTimer = nil
+    B.Refresh()
+end
+
+--- What the feeds draw: B.source's answer while one is set, else the live state.
+local function view()
+    local v = B.source and B.source()
+    if type(v) == "table" then return v end
+    return { model = model, statsModel = statsModel, statIndex = statIndex, gains = gains, last = last }
+end
+
 local function setting(path, fallback)
     local v = NS.GetSetting and NS.db and NS.GetSetting(path)
     if v == nil then return fallback end
@@ -102,10 +131,11 @@ local function pinnedKey()
 end
 
 function B.Context()
+    local v = view()
     return {
-        skills = model, stat = statIndex, gains = gains.total, last = last,
+        skills = v.model, stat = v.statIndex, gains = v.gains.total, last = v.last,
         pinned = pinnedKey(), mainHand = B.MainHandSkill(),
-        level = type(UnitLevel) == "function" and UnitLevel("player") or nil,
+        level = NS.Preview.Character().level,
     }
 end
 
@@ -162,7 +192,7 @@ end
 
 --- Flash "^ <name> <new>" on the skill's feeds for profile.broker.flashSeconds.
 function B.Flash(key, new)
-    local e = model and model.byKey[key]
+    local e = model and model.byKey[key]   -- the live model: a flash is always a live skill-up
     local cat = NS.SkillCatalog[key]
     local group = (cat and cat.kind == "defense") and "defense" or (e and e.category) or "other"
     local text = flashText(e and e.name or key, new)
@@ -297,7 +327,7 @@ local function skillValue(e, bonus)
     local text = ("%d/%d"):format(e.rank or 0, e.max or 0)
     local mod = tonumber(e.modifier) or 0
     if mod ~= 0 then text = text .. " " .. colored(bonus, (mod > 0 and "+" or "") .. mod) end
-    local g = gains.byKey[e.key]
+    local g = view().gains.byKey[e.key]
     if g and g > 0 then text = text .. "  " .. colored("sem.good", "+" .. g) end
     return text
 end
@@ -321,9 +351,9 @@ local function addTitle(tip, text)
 end
 
 local function addSkillGroup(tip, rows, title, keys, opts)
-    local any = false
+    local any, m = false, view().model
     for _, key in ipairs(keys) do
-        local e = model.byKey[key]
+        local e = m.byKey[key]
         if e and (opts.filter == nil or opts.filter(e)) then
             if not any then addTitle(tip, title) any = true end
             rows[#rows + 1] = addSkillRow(tip, e, opts)
@@ -343,27 +373,29 @@ local function isDefense(e)
 end
 
 local function fillSkills(tip, id, rows)
-    if not model then
+    local m = view().model
+    if not m then
         tip:AddLine(colored("gtip.muted", L["No skills to show yet."]))
         return
     end
     local opts = { belowCap = id == "weapons" }
     for _, section in ipairs(SKILL_SECTIONS[id]) do
         if section == "defense" then
-            addSkillGroup(tip, rows, L["Other"], model.order.other, { belowCap = true, filter = isDefense })
+            addSkillGroup(tip, rows, L["Other"], m.order.other, { belowCap = true, filter = isDefense })
         else
-            addSkillGroup(tip, rows, GROUP_TITLES[section], model.order[section] or {}, opts)
+            addSkillGroup(tip, rows, GROUP_TITLES[section], m.order[section] or {}, opts)
         end
     end
 end
 
 local function fillStats(tip, rows)
-    if not statsModel then
+    local sm = view().statsModel
+    if not sm then
         tip:AddLine(colored("gtip.muted", L["No stats to show yet."]))
         return
     end
     for _, group in ipairs(NS.StatData.GROUPS) do
-        local list = statsModel[group] or {}
+        local list = sm[group] or {}
         if #list > 0 then addTitle(tip, GROUP_TITLES[group]) end
         for _, e in ipairs(list) do
             tip:AddDoubleLine(colored("gtip.body", e.label or e.key), colored("gtip.value", e.display or ""))
@@ -389,7 +421,7 @@ function B.FillTooltip(id, tip)
     local rows = {}
     if tip.SetMinimumWidth then tip:SetMinimumWidth(MIN_W) end
     tip:AddDoubleLine(colored("gtip.title", TITLES[id] or NS.Constants.BRAND),
-        colored("gtip.muted", L["+%d this session"]:format(gains.total)))
+        colored("gtip.muted", L["+%d this session"]:format(view().gains.total)))
     if NS.IsStoodDown() then
         tip:AddLine(colored("gtip.muted", L["Ka0s Skill Master is disabled."]))
         return rows
@@ -426,7 +458,8 @@ local function openCharacter(tab)
 end
 
 local function openSkillRow(key)
-    local e = model and model.byKey[key]
+    local m = view().model
+    local e = m and m.byKey[key]
     if e and not e.learned then
         local popup = NS.TrainerPopup
         if type(popup) == "table" and type(popup.Show) == "function" then return popup.Show(key) end

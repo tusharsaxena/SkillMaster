@@ -58,6 +58,26 @@ the All feed and the skill's own feed for `profile.broker.flashSeconds` (one Ace
 the next skill-up). The only client read is the main hand's weapon class, for `{equippedWeapon}`.
 The stand-down shows "Off" on every feed; the stand-up re-renders.
 
+## Test mode and the simulator (T5.2)
+
+Test mode swaps every source for the sample character (`modules/Preview.lua` over
+`defaults/Preview_Forever.lua`): the models are built by the live pipelines from the fixture
+(`SkillData.Build` from its skill lines, `StatData.Build` from its stat values, `Bonuses.Compute`
+with its lure as a candidate), and the displays read them through `NS.Blocks.source`,
+`NS.Bonuses.source`, `NS.Broker.source` and `NS.Preview.Log()` / `.Alts()` / `.Skill()` /
+`.Character()`. The live modules keep running underneath; turning test mode off (or combat, or the
+stand-down) clears every source and repaints.
+
+The simulator feeds the engine instead. `core/SimSetup.lua` wraps `NS.Compat`; while a session runs,
+`modules/Simulator.lua` answers the skill list, the player and the main hand from its world (the
+sample character), and each step fires the client's event into the module that registered it:
+`CHAT_MSG_SKILL` into SkillData (a scan, then `SKILL_UP`: the broker flash, the session log, the
+alerts), `UNIT_INVENTORY_CHANGED` and `SKILL_LINES_CHANGED` for the lure, `UNIT_AURA` and the speed
+ticker's read for the mount, then `SIM_TICK`. The session starts from an empty skills model (no
+`SKILL_UP` for the jump to the sample), logs into a session-only list and takes no alt snapshot;
+the stop puts the live model, the alerts' and the broker's session state and the live log back and
+repaints once.
+
 ## What runs in v0.1.0
 
 - `OnInitialize` builds the store, runs migrations, applies the skin, registers the slash commands

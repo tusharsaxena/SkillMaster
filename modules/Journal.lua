@@ -6,7 +6,8 @@ local _, NS = ...
 --
 -- standalone-windows: a plain frame, toplevel in the window tier, Escape closes it, the close
 -- control through NS.MakeCloseButton, the drop point saved by its one writer (savePoint, below).
--- A display: it reads NS.SessionLog and NS.Alts and repaints on SKILLS_UPDATED and LAYOUT_CHANGED.
+-- A display: it reads NS.SessionLog and NS.Alts through NS.Preview.Log() / .Alts() (test mode's
+-- sample while it is on, T5.2) and repaints on SKILLS_UPDATED and LAYOUT_CHANGED.
 
 NS.Journal = {}
 local J = NS.Journal
@@ -65,7 +66,7 @@ function J.FormatETA(sec)
 end
 
 local function skillName(key)
-    local e = NS.SkillData and NS.SkillData:Get(key)
+    local e = NS.Preview.Skill(key)
     if e and e.name then return e.name end
     local cat = NS.SkillCatalog and NS.SkillCatalog[key]
     if cat then return L[cat.name] end
@@ -177,7 +178,7 @@ end
 
 local function renderLogRows(p)
     Pool.ReleaseAll(p.pool)
-    local log = NS.SessionLog:Entries()
+    local log = NS.Preview.Log():Entries()
     local n = #log
     state.logOffset = clamp(state.logOffset, 0, max(n - J.LOG_ROWS, 0))
     local shown, first = 0, n - state.logOffset
@@ -191,10 +192,11 @@ end
 
 --- This session's skills with an ETA, soonest first.
 function J.EtaRows()
-    local _, byKey = NS.SessionLog:Gains()
+    local log = NS.Preview.Log()
+    local _, byKey = log:Gains()
     local out = {}
     for key in pairs(byKey) do
-        local sec = NS.SessionLog:ETA(key)
+        local sec = log:ETA(key)
         if sec and sec > 0 then out[#out + 1] = { key = key, sec = sec } end
     end
     table.sort(out, function(a, b)
@@ -205,7 +207,7 @@ function J.EtaRows()
 end
 
 local function renderSide(p)
-    local SL, now = NS.SessionLog, time()
+    local SL, now = NS.Preview.Log(), time()
     local span = now - SL:SessionStart()
     local total = SL:Gains()
     p.session.title:SetText(L["This session \194\183 %s"]:format(J.FormatDuration(span)))
@@ -391,7 +393,7 @@ local function bindAltRow(p, row, item, cols, i)
 end
 
 local function renderAlts(p)
-    local list = NS.Alts:List()
+    local list = NS.Preview.Alts():List()
     local cols, names = J.AltColumns(list, state.filter)
     state.colOffset = clamp(state.colOffset, 0, max(#cols - J.MAX_COLS, 0))
     state.altOffset = clamp(state.altOffset, 0, max(#list - J.ALT_ROWS, 0))
@@ -554,12 +556,12 @@ function J.SelectedTab() return state.tab end
 function J.SelectedFilter() return state.filter end
 
 function J.NewSession()
-    NS.SessionLog:NewSession()
+    NS.Preview.Log():NewSession()
     J.Render()
 end
 
 function J.ClearLog()
-    NS.SessionLog:Clear()
+    NS.Preview.Log():Clear()
     state.logOffset = 0
     J.Render()
 end
@@ -572,7 +574,7 @@ StaticPopupDialogs.SKILLMASTER_FORGET_ALT = {
     whileDead    = true,
     hideOnEscape = true,
     OnAccept     = function(_, key)
-        NS.Alts:Forget(key)
+        NS.Preview.Alts():Forget(key)
         J.Render()
     end,
 }
@@ -580,6 +582,10 @@ StaticPopupDialogs.SKILLMASTER_FORGET_ALT = {
 --- Ask before forgetting a character (the Alts grid's right-click).
 function J.ConfirmForget(key, name)
     if not key then return end
+    if NS.Sim:IsActive() then   -- a destructive act waits for the simulation to end (H5)
+        NS.Print(L["Forgetting a character waits until the simulation stops."])
+        return
+    end
     StaticPopup_Show("SKILLMASTER_FORGET_ALT", name or key, nil, key)
 end
 

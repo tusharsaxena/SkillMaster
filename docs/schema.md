@@ -43,7 +43,10 @@ SkillMasterDB
     }
 ```
 
-Session-only rows (never stored): `state.debugConsole` (the console checkbox) and `state.testMode`.
+Session-only rows (never stored): `state.debugConsole` (the console checkbox), `state.testMode` and
+`state.sim` (the Sim mode checkbox, T5.2). Nothing a simulation does is stored: its session log is a
+session-only list (`NS.SessionLog:Override`), alt snapshots stand aside while it runs, and the step
+panel's position is the library's memory, never a key here (preview-mode, H4 and H10).
 The Minimap button row's path is `global.minimap.shown`; its get/set invert onto `global.minimap.hide`.
 
 ## Writers

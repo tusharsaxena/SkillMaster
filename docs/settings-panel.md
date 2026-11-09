@@ -29,6 +29,7 @@ Composed by `H.MasterControls` with General visibility omitted (the window is op
 | Debug console | `state.debugConsole` (session) |
 | Minimap button | `global.minimap.shown` (inverts onto `global.minimap.hide`) |
 | Test mode | `state.testMode` (session) |
+| Sim mode | `state.sim` (session; composed from `NS.IsSimMode` / `NS.ToggleSim`) |
 | Reset position | button: `NS.MainWindow.ResetPosition` |
 | Reset all settings | button: the confirmation, then the profile reset |
 
@@ -42,8 +43,9 @@ The library's Appearance tab over `skin.source`, `skin.skin`, `skin.ignorePanel`
 The library's Keybindings tab over `NS.BINDINGS`: Toggle the Skill Master window. Keys stay the
 client's and are never stored in a profile (options-ui-§20).
 
-The launcher's right-click menu lists Enabled, Locked, Test mode and Show window; Show window shares
-its handler with `/skm toggle` and the key binding.
+The launcher's right-click menu lists Enabled, Locked, Test mode, Sim mode and Show window; Show window
+shares its handler with `/skm toggle` and the key binding, and Sim mode its handler (`NS.ToggleSim`)
+with the Master-controls Sim mode box and the bare `/skm sim`.
 
 ## Profiles
 

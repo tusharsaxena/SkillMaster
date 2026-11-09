@@ -4,7 +4,9 @@ local _, NS = ...
 -- lure) read off their tooltips, and skill buffs. Whatever is left is one "Other" entry, never a
 -- guessed source, so the sources always add up to the modifier.
 --
--- Reads the skill model through NS.SkillData:Get(key) (T2.1) at call time. Publishes
+-- Reads the skill model through NS.SkillData:Get(key) (T2.1) at call time, and every client read the
+-- simulator answers through NS.Compat at call time (T5.2). B.source: nil for the live reads, or
+-- fn(key) -> breakdown (test mode's sample character, modules/Preview.lua). Publishes
 -- BONUSES_UPDATED, debounced, on UNIT_INVENTORY_CHANGED and UNIT_AURA for the player, and once a
 -- second from a ticker that runs only while a temp bonus is live.
 
@@ -38,9 +40,7 @@ local function now() return GetTime() end
 --- Seconds since GetTime() when the main-hand temp enchant runs out, or nil when there is none.
 --- Assumed shape (1.12): hasMain, mainExpirationMs, ... (docs/midnight-quirks.md).
 local function mainEnchantExpiry()
-    local fn = (C_Item and C_Item.GetWeaponEnchantInfo) or GetWeaponEnchantInfo
-    if type(fn) ~= "function" then return nil end
-    local hasMain, ms = fn()
+    local hasMain, ms = NS.Compat.WeaponEnchantInfo()
     if not hasMain then return nil end
     return now() + (tonumber(ms) or 0) / 1000
 end
@@ -82,8 +82,8 @@ end
 
 --- The tooltip lines of an equipped slot, C_TooltipInfo first.
 function B.ItemLines(slot)
-    local get = C_TooltipInfo and C_TooltipInfo.GetInventoryItem
-    if type(get) == "function" then return linesOfData(get("player", slot)) end
+    local data, has = NS.Compat.InventoryTooltipData(slot)
+    if has then return linesOfData(data) end
     return linesOfScan(slot)
 end
 
@@ -225,8 +225,7 @@ end
 -- The breakdown.
 -- ---------------------------------------------------------------------------------------------
 
-local function racial(key)
-    local race, raceFile = UnitRace("player")
+local function racial(key, race, raceFile)
     local byRace = NS.Racials_Forever and NS.Racials_Forever.byRace
     local amount = byRace and raceFile and byRace[raceFile] and byRace[raceFile][key]
     if not amount then return nil end
@@ -244,19 +243,18 @@ local function skillEntry(key)
     return SD:Get(key)
 end
 
---- The skill's modifier and where it comes from.
---- @return table { total = n, sources = { { label, amount, kind = "temp"|"perm",
----   expires = <GetTime seconds>|nil, source = "racial"|"item"|"enchant"|"buff"|"other" } } }
-function B:Breakdown(key)
-    local e = skillEntry(key)
+--- The breakdown of one model entry against `cands` (the parsed candidates) for a character of
+--- `race` / `raceFile`. Pure: Breakdown feeds it the live reads, test mode its sample character.
+function B.Compute(e, cands, race, raceFile)
     local modifier = e and e.learned ~= false and tonumber(e.modifier) or 0
     local out = { total = modifier, sources = {} }
     if modifier == 0 or type(e.name) ~= "string" then return out end
+    local key = e.key
     local sources, attributed = out.sources, 0
-    local r = racial(key)
+    local r = racial(key, race, raceFile)
     if r then sources[1], attributed = r, r.amount end
     local name = norm(e.name)
-    for _, c in ipairs(candidates()) do
+    for _, c in ipairs(cands) do
         if c.name == name then
             sources[#sources + 1] = sourceOf(c)
             attributed = attributed + c.amount
@@ -269,6 +267,19 @@ function B:Breakdown(key)
     end
     return out
 end
+
+--- The skill's modifier and where it comes from: B.source's answer while one is set (test mode's
+--- sample character, modules/Preview.lua), else the live reads.
+--- @return table { total = n, sources = { { label, amount, kind = "temp"|"perm",
+---   expires = <GetTime seconds>|nil, source = "racial"|"item"|"enchant"|"buff"|"other" } } }
+function B:Breakdown(key)
+    if B.source then return B.source(key) end
+    local race, raceFile = NS.Compat.PlayerRace()
+    return B.Compute(skillEntry(key), candidates(), race, raceFile)
+end
+
+--- A model entry's name, normalized as a candidate's is (test mode builds its candidates with it).
+function B.Norm(name) return norm(name) end
 
 -- ---------------------------------------------------------------------------------------------
 -- Refresh: the events, the debounce and the temp-bonus ticker. Every timer is the addon's own
