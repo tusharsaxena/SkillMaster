@@ -56,6 +56,20 @@ L["Locks the Skill Master window in place."] = true
 L["Reset this profile to the addon's defaults? Everything you have configured in it is discarded \226\128\148 your other profiles are not affected."] = true
 L["All settings reset to defaults."] = true
 
+-- ── T2.2 Bonuses (modules/Bonuses.lua) ─────────────────────────────────────────────────────────
+-- Tooltip patterns: a translator replaces the value with the client's own wording, keeping the
+-- capture order (amount first in the first and third, name first in the second).
+L["%+(%d+) (.+)"] = true
+L["Increased (.+) %+(%d+)"] = true
+L["%+(%d+) (.-) Skill"] = true
+-- Source labels.
+L["%s racial"] = true
+L["Weapon enchant"] = true
+L["Item"] = true
+L["Buff"] = true
+L["Other"] = true
+-- ── end T2.2 ───────────────────────────────────────────────────────────────────────────────────
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

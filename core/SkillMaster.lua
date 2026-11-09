@@ -48,6 +48,7 @@ end
 --- Every game-event registration the running addon holds, made from CURRENT state.
 function NS.RegisterRuntime()
     NS.SafeRegisterEvent(addon, "PLAYER_REGEN_DISABLED", "OnEnterCombat", NS.rejectedEvents)
+    if NS.Bonuses then NS.Bonuses.RegisterRuntime(addon) end   -- T2.2
 end
 
 --- Disabled means not running: frames hidden, every event and message unregistered, every timer

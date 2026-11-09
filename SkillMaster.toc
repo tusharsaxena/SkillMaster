@@ -70,12 +70,16 @@ core\LauncherSetup.lua
 
 # Defaults (the only place a default is written -- savedvariables-§2)
 defaults\Profile.lua
+# T2.2: NS.Racials_Forever, read by modules\Bonuses.lua at call time.
+defaults\Racials_Forever.lua
 
 # Modules -- each reaches the others at CALL time
 # Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
 modules\MainWindow.lua
 # Conventional: `/skm probe`; reads core\ members only at FILE SCOPE (NS.Widgets, NS.Constants).
 modules\Probe.lua
+# T2.2: defines NS.addon:OnBonusesUnitChanged at FILE SCOPE, so it follows core\SkillMaster.lua; reads NS.SkillData at call time.
+modules\Bonuses.lua
 # Conventional: the DebugLog descriptor asks for its sections at RUN time.
 modules\Diagnostics.lua
 

@@ -27,6 +27,8 @@ read_globals = {
   "GetSpellBonusDamage", "GetSpellCritChance", "GetHitModifier", "GetSpellHitModifier",
   "GetCombatRating", "GetCritChance", "GetRangedCritChance", "GetDodgeChance", "GetParryChance",
   "GetBlockChance", "UnitResistance", "CastSpellByName", "C_SkillInfo", "C_Item",
+  -- T2.2 Bonuses (modules/Bonuses.lua): the clock, the race, tooltips and buffs
+  "GetTime", "UnitRace", "C_TooltipInfo", "C_UnitAuras", "issecretvalue",
 }
 
 -- The harness global is declared here, not in read_globals, so addon source cannot reach it (lint).
