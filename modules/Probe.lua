@@ -88,7 +88,9 @@ end
 local function headerOf(api, i)
     local first, isHeader, isExpanded = api.info(i)
     if type(first) == "table" then
-        return first.skillName or first.name, first.isHeader, first.isExpanded
+        local open = first.isExpanded
+        if first.isCollapsed ~= nil then open = not first.isCollapsed end   -- WoW Forever's field
+        return first.name or first.skillName, first.isHeader, open
     end
     return first, isHeader, isExpanded
 end

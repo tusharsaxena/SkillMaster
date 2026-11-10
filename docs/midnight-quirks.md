@@ -293,7 +293,28 @@ The probe therefore reads `C_SkillInfo` and `C_Item` first and the 1.12 globals 
 unknown until the probe runs. The same sets list `UnitResistance` on Forever and the stat readers
 below on both clients.
 
-- **Client:** Forever 1.60.1 (build 70790, interface 16001), *not measured* for any row below.
+- **Client:** Forever 1.60.1 (build 70790, interface 16001), *not measured* for any row below, except
+  the rows marked **measured**: the owner's `/sm probe` on build 70862 (2026-11-10, enUS, a Night Elf
+  Hunter), and two in-game errors the same day.
+- **Measured findings (build 70862).**
+  - The skill list is `C_SkillInfo` only. None of the 1.12 globals exist.
+  - `C_SkillInfo.GetSkillLineInfo(i)` answers one table with the fields `name`, `isHeader`, `isCollapsed`
+    (not `isExpanded`), `rank`, `maxRank`, `modifier`, `tempPoints`, `skillID`, `parentSkillLineID`,
+    `skillLineCategoryID`, `description`, `isAbandonable`, `stepCost`, `rankCost`, `minLevel` and
+    `costType`. The retail-style names (`skillRank`, `skillMaxRank`, ...) are absent, and reading them
+    showed every bar as 0 / 0.
+  - Each profession and secondary skill is listed twice: the vanilla line (Leatherworking 165) and a child
+    line (2945, `parentSkillLineID` 165), in either order. SkillData folds the child into the parent's row
+    by its parent ID.
+  - Every skill-line ID the probe listed matches the catalog's vanilla ID.
+  - The enUS header names are as assumed.
+  - `C_Item.GetWeaponEnchantInfo(weaponSlot)` needs a slot (`Enum.WeaponSlot` = `MainHand 0`, `OffHand 1`,
+    `Ranged 2`), errors on 16 and without one, and answers one array of records: `hasEnchant`,
+    `timeLeft`, `charges`, `enchantID`, `enchantIconID` and `enchantType`.
+  - `UnitStat` can answer **secret numbers**, at least inside an AceTimer callback. StatData keeps the
+    last plain value, marked stale, and rescans on `PLAYER_REGEN_ENABLED`.
+  - `C_UnitAuras.GetBuffDataByIndex` can **raise** "Auras cannot be accessed when secret while tainted".
+    Bonuses pcalls it and keeps the last full buff list.
 - **Cost:** a wrong shape is a wrong bar shown as fact, the design's anti-goal.
 - **Do:** read each API behind a presence test; a stat the client cannot give is left out of the
   defaults (clients-§3), never faked. Correct a row here, with the probe's build, when the JSON arrives.
@@ -301,13 +322,13 @@ below on both clients.
 | API | Assumed shape | Status | Used by |
 |---|---|---|---|
 | `C_SkillInfo.GetNumSkillLines()` (1.12: `GetNumSkillLines()`) | number of lines, headers included, collapsed children excluded | listed by the kit's Forever set; shape assumed (1.12) | SkillData (T2.1) |
-| `C_SkillInfo.GetSkillLineInfo(i)` (1.12: `GetSkillLineInfo(i)`) | `name, isHeader, isExpanded, rank, tempPoints, modifier, maxRank, isAbandonable, stepCost, rankCost, minLevel, costType, description`, or a table with those fields | listed by the kit's Forever set; shape unknown | SkillData (T2.1) |
-| `C_SkillInfo.ExpandSkillHeader(i)` / `CollapseSkillHeader(i)` | open / close header `i`; children shift the indices below | listed by the kit's Forever set; behavior assumed (1.12) | SkillData, the probe |
-| Skill header names | `Class Skills`, `Professions`, `Secondary Skills`, `Weapon Skills`, `Armor Proficiencies`, `Languages` (enUS) | assumed (1.12) | SkillData's category map |
-| `C_Item.GetWeaponEnchantInfo()` (1.12: `GetWeaponEnchantInfo()`) | `hasMain, mainExpirationMs, mainCharges, hasOff, offExpirationMs, offCharges` | listed by the kit's Forever set; shape assumed (1.12) | Bonuses (lure timer, T2.2) |
+| `C_SkillInfo.GetSkillLineInfo(i)` | one table: `name, isHeader, isCollapsed, rank, maxRank, modifier, tempPoints, skillID, parentSkillLineID, ...` | **measured** (build 70862) | SkillData (T2.1) |
+| `C_SkillInfo.ExpandSkillHeader(i)` / `CollapseSkillHeader(i)` | open / close header `i`; children shift the indices below | present (build 70862); behavior assumed (1.12) | SkillData, the probe |
+| Skill header names | `Class Skills`, `Professions`, `Secondary Skills`, `Weapon Skills`, `Armor Proficiencies`, `Languages` (enUS) | **measured** (build 70862, enUS) | SkillData's category map |
+| `C_Item.GetWeaponEnchantInfo(weaponSlot)` | `weaponSlot` is `Enum.WeaponSlot.MainHand` (0); answers `{ { hasEnchant, timeLeft, charges, enchantID, enchantIconID, enchantType }, ... }` | **measured** (build 70862); `timeLeft`'s unit not yet seen non-zero | Bonuses (lure timer, T2.2) |
 | `C_TooltipInfo.GetInventoryItem("player", slot)` (fallback: a hidden `GameTooltip` and `SetInventoryItem`) | `{ lines = { { leftText }, ... } }` | listed (inherited from live); shape assumed | Bonuses (item and enchant scan, T2.2) |
 | Item and lure tooltip text | `Equip: Increased <Skill> +N.`, `+N <Skill>`, and a lure as `<Name> (+N <Skill> Skill) (M min)` on the main hand (enUS) | assumed (1.12); the lure line's wording is a guess until the probe | Bonuses' locale patterns |
-| `C_UnitAuras.GetBuffDataByIndex` + `C_TooltipInfo.GetUnitBuffByAuraInstanceID` | aura data with `name`, `auraInstanceID`, `expirationTime` (GetTime seconds, 0 = none); tooltip lines as above | listed (inherited from live); shape assumed | Bonuses (skill buffs) |
+| `C_UnitAuras.GetBuffDataByIndex` + `C_TooltipInfo.GetUnitBuffByAuraInstanceID` | aura data with `name`, `auraInstanceID`, `expirationTime` (GetTime seconds, 0 = none); tooltip lines as above | shape assumed; the read **measured** to raise when auras are secret (build 70862) | Bonuses (skill buffs) |
 | Racial weapon bonuses in `modifier` | the +5 racials are part of the skill line's modifier | assumed (1.12) | Bonuses (a racial the modifier lacks shows as a negative Other) |
 | `UnitResistance(unit, school)` | `base, total, bonus, minus` | listed by the kit's Forever set; shape assumed (1.12) | StatData (T2.3) |
 | `GetCritChance()`, `GetRangedCritChance()`, `GetDodgeChance()`, `GetParryChance()`, `GetBlockChance()` | a percentage | assumed (1.12) | StatData |
@@ -315,9 +336,9 @@ below on both clients.
 | `GetSpellHitModifier()`, `GetSpellBonusDamage(school)`, `GetSpellCritChance(school)` | spell hit %, bonus damage, crit % | listed (inherited from live); shape assumed | StatData |
 | `GetCombatRating(id)` | a rating | listed (inherited from live); meaning on Forever unknown | StatData (left out unless it answers) |
 | `GetUnitSpeed(unit)` | `current, run, flight, swim` in yards/s (7 = 100%) | listed (inherited from live); shape assumed | StatData (run speed) |
-| `C_SkillInfo.GetSkillLineInfo(i)`'s `skillLineID` (or `skillID`) field | the line's SkillLine.dbc ID, matched before the localized name | field name assumed; the kit's Forever set lists `GetSkillLineInfoByID`, so the struct likely carries one | SkillData (M6, localization-§4) |
+| `C_SkillInfo.GetSkillLineInfo(i)`'s `skillLineID` (or `skillID`) field | the line's SkillLine.dbc ID, matched before the localized name | **measured** (build 70862): `skillID`, plus `parentSkillLineID` on a profession's child line | SkillData (M6, localization-§4) |
 | `C_Spell.GetSpellName(spellID)` (fallback: `GetSpellInfo(spellID)`) | the spell's localized name | listed (inherited from live); the catalog's `openSpellID`s (vanilla Apprentice ranks) unverified | SecureOverlay (the crafting cast) |
-| `UnitStat(unit, i)`, `UnitAttackPower(unit)`, `UnitRangedAttackPower(unit)` | `base, effective, pos, neg`; `base, pos, neg` | assumed (1.12) | StatData (T2.3) |
+| `UnitStat(unit, i)`, `UnitAttackPower(unit)`, `UnitRangedAttackPower(unit)` | `base, effective, pos, neg`; `base, pos, neg` | assumed (1.12); `UnitStat` **measured** to answer secret numbers in an AceTimer callback | StatData (T2.3) |
 | `UnitArmor(unit)` | `base, effective, armor, pos, neg`; mitigation derived from the effective armor and the level, capped at 75% | assumed (1.12) | StatData (T2.3) |
 | `UnitDefenseSkill(unit)` | `base, modifier` (the kit's Forever set lists it; neither set lists `UnitDefense`) | listed by the kit's Forever set; shape assumed | StatData (T2.3) |
 | `GetRangedHitModifier()`, `GetSpellBonusHealing()` | ranged hit % from gear; bonus healing | `GetRangedHitModifier` listed by the kit's Forever set only; shapes assumed | StatData (T2.3) |

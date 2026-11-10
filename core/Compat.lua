@@ -41,19 +41,29 @@ local function skillApi()
     return nil
 end
 
---- The modern struct (skillName, isHeader, isExpanded, skillRank, numTempPoints, skillModifier,
---- skillMaxRank, ...) as the one record shape.
+--- Whether a struct's header is open: WoW Forever answers isCollapsed (measured), other builds
+--- isExpanded.
+local function expandedOf(t)
+    if t.isCollapsed ~= nil then return not t.isCollapsed end
+    return t.isExpanded and true or false
+end
+
+--- The C_SkillInfo struct as the one record shape. Measured on WoW Forever 1.60.1 (build 70862,
+--- `/sm probe` 2026-11-10): name, isHeader, isCollapsed, rank, maxRank, modifier, tempPoints,
+--- skillID, parentSkillLineID. The retail-style names (skillName, skillRank, ...) stay as fallbacks.
 local function fromStruct(t)
     return {
-        name       = t.skillName or t.name,
+        name       = t.name or t.skillName,
         isHeader   = t.isHeader and true or false,
-        isExpanded = t.isExpanded and true or false,
-        rank       = t.skillRank or 0,
-        tempPoints = t.numTempPoints or 0,
-        modifier   = t.skillModifier or 0,
-        max        = t.skillMaxRank or 0,
-        -- The struct's ID, under whichever name the client uses (assumed until `/sm probe`).
-        skillLineID = tonumber(t.skillLineID or t.skillID),
+        isExpanded = expandedOf(t),
+        rank       = tonumber(t.rank or t.skillRank) or 0,
+        tempPoints = tonumber(t.tempPoints or t.numTempPoints) or 0,
+        modifier   = tonumber(t.modifier or t.skillModifier) or 0,
+        max        = tonumber(t.maxRank or t.skillMaxRank) or 0,
+        skillLineID = tonumber(t.skillID or t.skillLineID),
+        -- Forever lists a profession twice: the vanilla line and a child line (Leatherworking 165 and
+        -- 2945, whose parentSkillLineID is 165). The parent ID maps the child to the same skill.
+        parentSkillLineID = tonumber(t.parentSkillLineID),
     }
 end
 

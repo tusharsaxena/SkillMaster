@@ -41,8 +41,22 @@ local function struct(v)
              numTempPoints = l[3] or 0, skillModifier = l[4] or 0, skillMaxRank = l[5] }
 end
 
+-- WoW Forever 1.60.1's struct, field for field as `/sm probe` showed it (build 70862, 2026-11-10).
+-- A line may carry { ..., [6] = skillID, [7] = parentSkillLineID }.
+local function foreverStruct(v)
+    if v.header then
+        return { name = v.header.name, isHeader = true, isCollapsed = not v.header.expanded, rank = 0,
+                 maxRank = 0, modifier = 0, tempPoints = 0, skillID = 0, parentSkillLineID = 0 }
+    end
+    local l = v.line
+    return { name = l[1], isHeader = false, isCollapsed = false, rank = l[2], tempPoints = l[3] or 0,
+             modifier = l[4] or 0, maxRank = l[5], skillID = l[6] or 0, parentSkillLineID = l[7] or 0 }
+end
+
+local READERS = { table = struct, forever = foreverStruct }
+
 local function api(spec, shape, probe)
-    local reader = shape == "table" and struct or positional
+    local reader = READERS[shape] or positional
     local function toggle(open)
         return function(i)
             local v = visible(spec)[i]
@@ -461,5 +475,42 @@ test("compat: the 1.12 positional reader asks the client once per line", functio
         local r = NS.Compat.SkillLineInfo(2)
         assertEqual(r and r.name, "Marksmanship")
         assertEqual(calls, 1)
+    end, DWARF_HUNTER)
+end)
+
+-- The probe's own records: Forever's field names (rank, maxRank, modifier, isCollapsed), and each
+-- profession listed twice, the child line (parentSkillLineID = the vanilla ID) sometimes first.
+test("skills: WoW Forever's struct reads its real ranks, and a profession's child line is one row", function()
+    local spec = {
+        { name = "Professions", expanded = true, lines = {
+            { "Leatherworking", 121, 0, 0, 150, 2945, 165 }, { "Leatherworking", 121, 0, 0, 150, 165, 0 },
+            { "Skinning", 130, 0, 0, 150, 393, 0 }, { "Skinning", 130, 0, 0, 150, 2947, 393 },
+        } },
+        { name = "Weapon Skills", expanded = false, lines = {
+            { "Bows", 80, 0, 0, 110, 45, 0 }, { "Guns", 110, 0, 3, 110, 46, 0 },
+        } },
+    }
+    withSkills(spec, "forever", function(probe)
+        local m = NS.SkillData:Scan()
+        local lw, sk = m.byKey.leatherworking, m.byKey.skinning
+        assertEqual(lw.rank, 121); assertEqual(lw.max, 150)
+        assertEqual(sk.rank, 130)
+        local n = 0
+        for _, key in ipairs(m.order.primary or m.order[lw.category]) do if key == "leatherworking" then n = n + 1 end end
+        assertEqual(n, 1, "the child line folds into the profession's row")
+        assertEqual(m.byKey.bows.rank, 80, "a collapsed (isCollapsed) header was opened and read")
+        assertEqual(m.byKey.guns.modifier, 3)
+        assertTrue(probe.toggles >= 2, "opened and closed again")
+        assertFalse(spec[2].expanded, "left collapsed as the player had it")
+    end, DWARF_HUNTER)
+end)
+
+test("skills: a child line with an unknown name still maps through its parent skill-line ID", function()
+    local spec = { { name = "Professions", expanded = true, lines = {
+        { "Lederverarbeitung", 75, 0, 0, 150, 2945, 165 } } } }
+    withSkills(spec, "forever", function()
+        local m = NS.SkillData:Scan()
+        assertTrue(m.byKey.leatherworking ~= nil, "parentSkillLineID 165 is Leatherworking")
+        assertEqual(m.byKey.leatherworking.rank, 75)
     end, DWARF_HUNTER)
 end)

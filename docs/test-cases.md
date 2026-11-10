@@ -122,7 +122,7 @@ Total.
 - probe: a slot-taking C_Item.GetWeaponEnchantInfo does not error, and each try is recorded
 - compat: WeaponEnchantInfo passes a slot and normalizes Forever's table to the 1.12 shape
 
-### test_skilldata.lua (24)
+### test_skilldata.lua (26)
 
 - skillcatalog: every vanilla profession, the 16 weapon lines, Defense, Lockpicking and Riding
 - skillcatalog: kinds, tiers and the window each row opens
@@ -148,6 +148,8 @@ Total.
 - skilldata: the scan's own header toggles do not schedule another scan
 - skilldata: two racial riding lines are one Riding row at the higher rank
 - compat: the 1.12 positional reader asks the client once per line
+- skills: WoW Forever's struct reads its real ranks, and a profession's child line is one row
+- skills: a child line with an unknown name still maps through its parent skill-line ID
 
 ### test_trainers.lua (12)
 
@@ -571,7 +573,7 @@ Total.
 | test_skinsetup.lua | 5 |
 | test_perf.lua | 2 |
 | test_probe.lua | 9 |
-| test_skilldata.lua | 24 |
+| test_skilldata.lua | 26 |
 | test_trainers.lua | 12 |
 | test_helpers.lua | 8 |
 | test_bonuses.lua | 16 |
@@ -606,4 +608,4 @@ Total.
 | test_skin_switch.lua | 18 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **404** |
+| **Total** | **406** |

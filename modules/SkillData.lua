@@ -130,8 +130,9 @@ end
 
 --- key and catalog entry for a line; nil when the line is left out. The skill-line ID first, when
 --- the client's record carries one; the localized name otherwise (the 1.12 list has no ID).
-local function classify(name, header, id)
-    local key = (id and NS.SkillLineIDToKey[id]) or NS.SkillNameToKey[name]
+local function classify(name, header, id, parentID)
+    local key = (id and NS.SkillLineIDToKey[id]) or (parentID and NS.SkillLineIDToKey[parentID])
+        or NS.SkillNameToKey[name]
     if key then return key, NS.SkillCatalog[key] end
     if header and EXCLUDED[header] then return nil end
     return SD.UNKNOWN_PREFIX .. name, nil
@@ -160,7 +161,8 @@ end
 --- One row per key: two lines on one key (a second racial riding line) keep the higher rank.
 local function addLearned(m, lines, ctx)
     for _, line in ipairs(lines) do
-        local key, cat = classify(line.rec.name, line.header, line.rec.skillLineID)
+        local key, cat = classify(line.rec.name, line.header, line.rec.skillLineID,
+            line.rec.parentSkillLineID)
         local had = key and m.byKey[key]
         if key and not had then
             local e = learnedEntry(key, cat, line.rec, ctx)
