@@ -125,3 +125,44 @@ test("tooltip bar: a row tooltip with no bar line leaves no bar from the last on
     end)
 end)
 
+-- ---------------------------------------------------------------------------------------------
+-- FB-10: the border is off by default; a skin's real style follows its companion
+-- ---------------------------------------------------------------------------------------------
+
+test("bar border: off by default in the profile and on its schema row", function()
+    assertFalse(NS.defaults.profile.bars.border, "defaults/Profile.lua")
+    local row
+    for _, r in ipairs(NS.Schema) do if r.path == "bars.border" then row = r end end
+    assertTrue(row ~= nil, "the Show border row")
+    assertFalse(row.default, "the Show border row's default agrees")
+    withWindow(function()
+        assertEqual(NS.Bar.ResolveStyle("row").border, nil, "no border color resolved")
+        local bar = windowRow("leatherworking").bar
+        for _, e in ipairs(bar.edges) do assertFalse(e:IsShown(), "a window bar draws no edge") end
+    end)
+end)
+
+test("bar border: off under the default skin's None; a real skin style wins only while its companion is on", function()
+    -- skinning-§6: a skin's None defers to Show border; a real style wins while the companion is
+    -- on, and the companion off hands Show border back. red under: Off ignored under None, or the
+    -- companion off still drawing the skin's edge.
+    withWindow(function()
+        assertEqual(NS.Bar.ResolveStyle("row").border, nil, "the shipped skin (None): Show border off is off")
+    end)
+    local S = NS.Skin
+    local prev = rawget(S, "BarBorder")
+    local follows
+    rawset(S, "BarBorder", function(style, show, size, fromSkin)
+        follows = fromSkin
+        if fromSkin then return "Blizzard Tooltip", true, 2 end
+        return style, show, size
+    end)
+    local ok, err = pcall(withWindow, function()
+        assertTrue(NS.Bar.ResolveStyle("row").border ~= nil, "a skin stating a real style wins (skinning-§6)")
+        assertTrue(follows, "the companion is on by default")
+        set("bars.borderStyleFromSkin", false)
+        assertEqual(NS.Bar.ResolveStyle("row").border, nil, "the companion off: Show border off is off")
+    end)
+    rawset(S, "BarBorder", prev)
+    if not ok then error(err, 0) end
+end)

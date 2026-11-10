@@ -123,8 +123,11 @@ the checks below that cover each item:
   untick its Hide row and the row comes back.
 - **SM-OPT-5** Trainers and Waypoints: Waypoint method Chat only, click an unlearned row's Go: only
   the chat line, no TomTom arrow. Turn Mark unverified trainers off: no "(unverified)".
+- **SM-OPT-6** A fresh profile: no bar draws a border (Show border is off by default under WoW
+  Forever's skin). Set Bars > Tooltip bar height to 12, hover a Defense or Other row, then hover the
+  broker feed without the row tooltip closing first: no purple bar or blob over the feed's tooltip.
 - **SM-OPT-6** Each page's Defaults button restores the page; the window repaints once.
-- **SM-OPT-7** (M5 integration) Right-click a broker feed: the Broker settings page opens, not
+- **SM-OPT-6** (M5 integration) Right-click a broker feed: the Broker settings page opens, not
   the landing page. Skills > General: tick Hint under the row and the Skinning, Mining, Herbalism and
   Fishing rows gain their hint line at once; untick Gathering and fishing hints and the tooltips lose
   their helper lines while the row hint stays. Detach Weapon Skills, then Layout > Blocks > Weapon

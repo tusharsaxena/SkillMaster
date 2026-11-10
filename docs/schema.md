@@ -49,8 +49,11 @@ SkillMasterDB
       textTemplate = "{rank} {bonus} / {max}", spark, ticks, markers, timer, colorMode,
       barTexture, barAlpha, barColor, useClassColorBar, barTextureFromSkin, barColorFromSkin,
       bgColor, useClassColorBg, bgColorFromSkin,
-      border, borderStyle, borderSize, borderColor, useClassColorBorder, borderStyleFromSkin,
-      borderColorFromSkin,
+      border = false,            -- Show border: off by default from feedback round 2 (FB-10); no
+                                 -- migration, as AceDB stripped a stored true (the old default)
+      borderStyle, borderSize, borderColor, useClassColorBorder, borderStyleFromSkin,
+      borderColorFromSkin,       -- a skin's real bar border style wins while the style companion
+                                 -- is on (skinning-§6); under None, Show border decides
       font, fontColor, useClassColorFont, fontFlags = "@skin", fontShadow, fontFromSkin,
       fontColorFromSkin, fontShadowFromSkin,   -- every *FromSkin defaults true
       colors = { fromSkin = true, primary, secondary, weapon, other, stats, bonusTemp, bonusPerm },

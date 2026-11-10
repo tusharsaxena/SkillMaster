@@ -80,7 +80,9 @@ NS.defaults = {
             bgColor             = { 0.04, 0.03, 0.02, 0.9 },
             useClassColorBg     = false,
             bgColorFromSkin     = true,
-            border              = true,        -- Show border
+            -- Show border: off by default (feedback round 2, FB-10). No migration: AceDB strips a
+            -- stored value equal to the old default (true), so no profile can carry it as a choice.
+            border              = false,
             borderStyle         = "Solid",
             borderSize          = 1,
             borderColor         = { 0.24, 0.22, 0.20, 1 },
