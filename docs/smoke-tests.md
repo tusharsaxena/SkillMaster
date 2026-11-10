@@ -101,9 +101,9 @@ the checks below that cover each item:
 
 ## Integration (M3 + M4)
 
-- **SM-SEAM-1** Collapse the Primary block and scroll the window to the top. Hover the All feed and
+- **SM-SEAM-1** Collapse the Primary block and scroll the window to the top. Hover the Skill Master feed and
   click Leatherworking in its tooltip: the window opens, Primary expands and the body scrolls to
-  the row. Click an unlearned weapon in the Weapons feed: the trainer popup opens on that skill.
+  the row. Click an unlearned weapon in the feed tooltip's Weapon section: the trainer popup opens on that skill.
 - **SM-SEAM-2** The broker tooltip's and the Journal's mini bars match the window's bar colors;
   switch skins and reopen both: they follow. Click the cap toast with TomTom loaded: an arrow.
 - **SM-SEAM-3** Click the main window's journal mark: the Journal opens; again: it closes.
@@ -172,7 +172,7 @@ the checks below that cover each item:
 - **SM-OPT-11** Bars > Colors: with Use the skin's colors on (the default) the bars show the
   mockup's category colors; turn it off and change the Weapon skills swatch: the weapon bars take it.
 - **SM-OPT-12** During a simulation (`/sm sim`, start the trip), right-click a row: Pin to the
-  broker feed is grayed out and does nothing. With test mode on, the All feed starts `Fishing 107+25/150`
+  broker feed is grayed out and does nothing. With test mode on, the feed starts `Fishing 107+25/150`
   and a `{equippedWeapon}` template reads `Guns 105+5/110`, whatever your own pin and weapon.
 
 ## Disabled
@@ -182,7 +182,7 @@ the checks below that cover each item:
 
 ## Test mode and the simulator
 
-- **SM-TEST-1** `/sm test`: the window, a detached block, the broker feeds and the Journal all show
+- **SM-TEST-1** `/sm test`: the window, a detached block, the broker feed and the Journal all show
   Ember Ironsong, the level-22 Dwarf Hunter (Leatherworking 146/150, Fishing 107 +25 with a lure
   timer near 4:12, Guns 105 +5, Fist Weapons, Polearms, Thrown and Riding unlearned), the summary
   reads "Ember Ironsong · Lv 22 · Dwarf Hunter" behind the Hunter icon and the strip says the data is sample data. `/sm test` again: your

@@ -75,7 +75,7 @@ The backlog lives on GitHub: please file bugs and ideas at https://github.com/tu
 
 | Version | Date | Highlights |
 |---|---|---|
-| 1.0.0 | Unreleased | - Every weapon skill, profession, Defense, Lockpicking and Riding as bars, with your stats beside them<br>- Bonus segments with timers, and tooltips that break each bonus down<br>- Trainer directions and waypoints for unlearned skills and the next rank<br>- Blocks you can collapse, reorder, detach, and lay out in one or two columns<br>- Four broker feeds, cap and weapon alerts, the Journal and an alt overview<br>- Settings for every part of the look, skins, test mode and a sim mode<br>- Two key bindings and the minimap button |
+| 1.0.0 | Unreleased | - Every weapon skill, profession, Defense, Lockpicking and Riding as bars, with your stats beside them<br>- Bonus segments with timers, and tooltips that break each bonus down<br>- Trainer directions and waypoints for unlearned skills and the next rank<br>- Blocks you can collapse, reorder, detach, and lay out in one or two columns<br>- One broker feed, cap and weapon alerts, the Journal and an alt overview<br>- Settings for every part of the look, skins, test mode and a sim mode<br>- Two key bindings and the minimap button |
 
 ## Credits
 
