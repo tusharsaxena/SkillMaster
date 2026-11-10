@@ -618,6 +618,11 @@ L["Say where in chat"] = true
 L["Print a chat line naming the trainer when a waypoint is set."] = true
 L["Mark unverified trainers"] = true
 L["Flag trainer data not yet checked on WoW Forever, in tooltips, the trainer popup and chat."] = true
+-- Feedback round 2, FB-11: the trainer popup's name color (settings/Trainers.lua).
+L["Trainer popup"] = true
+L["Trainer name color"] = true
+L["The trainer's name in the trainer popup. Not read while Use the skin's color is on."] = true
+L["Draw the trainer's name in the skin's accent. Trainer name color is not read while this is on."] = true
 L["Trainers and Waypoints"] = true
 L["Restore every Trainers and Waypoints setting on this profile to its default."] = true
 L["Restore every setting on this page to its default, on this profile."] = true

@@ -14,6 +14,7 @@
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
+local assertNear = T.assertNear
 
 local function set(path, value)
     local ok, err = NS.SetByPath(path, value)
@@ -165,4 +166,61 @@ test("bar border: off under the default skin's None; a real skin style wins only
     end)
     rawset(S, "BarBorder", prev)
     if not ok then error(err, 0) end
+end)
+
+-- ---------------------------------------------------------------------------------------------
+-- FB-11: the trainer's name color
+-- ---------------------------------------------------------------------------------------------
+
+local function nameColor()
+    local P = NS.TrainerPopup
+    P.Show("fistWeapons")
+    local list = P.Trainers()
+    assertTrue(#list > 0, "the popup lists trainers")
+    local card = P.Cards()[1]
+    assertEqual(card.name:GetText(), list[1].name, "the first card names its trainer")
+    return M.__paint(card.name).textColor, M.__paint(card.where).textColor
+end
+
+test("trainer popup: the trainer's name wears the skin's accent by default, apart from the other text", function()
+    withWindow(function()
+        local name, where = nameColor()
+        local accent = NS.Bar.Color("text.accent")
+        assertTrue(accent ~= nil, "the skin answers an accent")
+        for i = 1, 3 do assertNear(name[i], accent[i], 1e-6, "the name's channel " .. i) end
+        local same = true
+        for i = 1, 3 do same = same and math.abs(name[i] - where[i]) < 1e-6 end
+        assertFalse(same, "the name stands apart from the place line")
+        NS.TrainerPopup.Hide()
+    end)
+end)
+
+test("trainer popup: the name's swatch draws once Use the skin's color is off, the class color through its companion", function()
+    withWindow(function()
+        set("trainers.nameColorFromSkin", false)
+        set("trainers.nameColor", { 0.1, 0.8, 0.3, 0.9 })
+        local name = nameColor()
+        assertNear(name[1], 0.1, 1e-6, "red")
+        assertNear(name[2], 0.8, 1e-6, "green")
+        assertNear(name[4], 0.9, 1e-6, "the stored alpha")
+        set("trainers.useClassColorName", true)
+        local r = M.LibStub("LibKa0s-Core-1.0").ClassColor("player") or 0.1
+        assertNear(nameColor()[1], r, 1e-6, "the class color")
+        assertNear(nameColor()[4], 0.9, 1e-6, "the stored alpha still applies")
+        set("trainers.nameColorFromSkin", true)
+        local accent = NS.Bar.Color("text.accent")
+        assertNear(nameColor()[1], accent[1], 1e-6, "back on the skin's accent")
+        NS.TrainerPopup.Hide()
+    end)
+end)
+
+test("trainer popup: a changed name color reaches an open popup at once", function()
+    withWindow(function()
+        nameColor()
+        set("trainers.nameColorFromSkin", false)
+        set("trainers.nameColor", { 0.2, 0.3, 0.4, 1 })
+        local c = M.__paint(NS.TrainerPopup.Cards()[1].name).textColor
+        assertNear(c[3], 0.4, 1e-6, "the open popup repainted")
+        NS.TrainerPopup.Hide()
+    end)
 end)

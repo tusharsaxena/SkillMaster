@@ -14,7 +14,7 @@ login; each page body builds on its first show.
 | Broker | Feeds | Each feed's text template (a presets dropdown plus Custom) and the skill-up flash |
 | Alerts | Alerts | The rank-cap and weapon-gap alerts, the gap, the sound |
 | Journal | Journal | Skill-ups kept per character, the Alts tab's filter on open |
-| Trainers and Waypoints | Trainers and waypoints | The waypoint method, the chat line, the unverified mark |
+| Trainers and Waypoints | Trainers and waypoints | The waypoint method, the chat line, the unverified mark; the trainer popup's Trainer name color with Use class color and Use the skin's color (on by default: the skin's accent) |
 | Profiles | none | AceDB profiles: switch, copy, reset, delete |
 
 Every page but General and Profiles is declared through `NS.RegisterSchemaPage(key, title, spec)`
