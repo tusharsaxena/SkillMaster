@@ -9,7 +9,7 @@ local _, NS = ...
 -- profile.layout.blocks.weapon.belowCapOnly only the equipped weapons and the skills below their
 -- cap are shown. An equipment change redraws it.
 --
--- NS.Detached.Refresh() / .RefreshValues() / .StandDown() / .Frame(id) / .Rows(id) / .Render(id)
+-- NS.Detached.Refresh(anchor) / .RefreshValues() / .StandDown() / .Frame(id) / .Rows(id) / .Render(id)
 -- NS.Detached.Entries(id) -> the entries a detached frame draws
 
 NS.Detached = {}
@@ -157,14 +157,16 @@ function D.Render(id)
 end
 
 --- Show every detached block's frame and hide every docked block's. Nothing shows while stood down.
-function D.Refresh()
+--- `anchor == false` (a data repaint) leaves a frame already on screen where it is, so a frame the
+--- player is dragging is not re-anchored; a layout change, a first show and the default re-anchor.
+function D.Refresh(anchor)
     local down = NS.IsStoodDown and NS.IsStoodDown()
     for _, id in ipairs(NS.BLOCKS) do
         local s = settings(id)
         local f = frames[id]
         if s.docked == false and not down then
             f = f or build(id)
-            applyPoint(f)
+            if anchor ~= false or not f:IsShown() then applyPoint(f) end
             f:Show()
             D.Render(id)
         elseif f then

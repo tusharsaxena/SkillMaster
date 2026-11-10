@@ -288,7 +288,7 @@ end
 --- this on show and hide). Answers whether the ticker runs.
 function S:WatchSpeed(on)
     if on and not pending(self.ticker) then
-        self.ticker = NS.addon:ScheduleRepeatingTimer(function() S:Request() end, S.SPEED_TICK)
+        self.ticker = NS.addon:ScheduleRepeatingTimer(function() S:SpeedTick() end, S.SPEED_TICK)
     elseif not on and self.ticker then
         NS.addon:CancelTimer(self.ticker)
         self.ticker = nil
@@ -297,6 +297,17 @@ function S:WatchSpeed(on)
 end
 
 function S:IsWatchingSpeed() return pending(self.ticker) end
+
+--- One tick: read the speed alone, and ask for a rescan only when it moved (review F-003), so a
+--- standing character costs one call every 0.5 s rather than a full stat pass.
+function S:SpeedTick()
+    local current, run = NS.Compat.UnitSpeed("player")
+    local sig = tostring(current) .. "/" .. tostring(run)
+    if sig == self.lastSpeed then return false end
+    self.lastSpeed = sig
+    self:Request()
+    return true
+end
 
 -- A tracked bus target: the stand-down takes these registrations down and the stand-up replays
 -- them (LibKa0s-Bus-1.0); the timers live on the addon object, which the stand-down cancels.

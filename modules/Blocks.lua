@@ -418,7 +418,7 @@ end
 local function repaint()
     if NS.IsStoodDown and NS.IsStoodDown() then return end
     if NS.MainWindow then NS.MainWindow.Refresh() end
-    if NS.Detached then NS.Detached.Refresh() end
+    if NS.Detached then NS.Detached.Refresh(false) end   -- data only: no frame is re-anchored
 end
 
 -- A layout change (a dock, a collapse, a hidden row) or a skin switch: a full layout even when the

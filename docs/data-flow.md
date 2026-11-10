@@ -16,6 +16,9 @@ UNIT_* stat events    StatData (T2.3)    STATS_UPDATED              alerts, sess
 - One display reads an event itself: the detached weapon block (`modules/Detached.lua`) hears
   `PLAYER_EQUIPMENT_CHANGED` on its own bus target and, while shown, re-renders its equipped-only
   list and re-syncs the overlays.
+- While a utility-stat display is on screen, StatData reads the speed alone every 0.5 s and asks
+  for a full stat pass only when it moved. A data message repaints a shown detached frame in place;
+  only a layout change re-anchors it.
 
 ## SkillData (T2.1)
 

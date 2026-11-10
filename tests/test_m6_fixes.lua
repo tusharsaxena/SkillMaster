@@ -159,3 +159,43 @@ test("F-001: a crafting overlay casts the open spell by the name its spell ID re
     assertEqual(mining, "Smelting", "no name for the ID: the locale key's")
     assertEqual(NS.SecureOverlay.SpellFor({ kind = "skill", entry = { key = "guns", learned = true } }), nil)
 end)
+
+test("F-003: a data repaint keeps a shown detached frame where it is (a drag is not re-anchored)", function()
+    -- red under: Blocks' STATS_UPDATED / SKILLS_UPDATED repaint calling NS.Detached.Refresh() with
+    -- applyPoint on every shown frame
+    B:Detach("stats_base")
+    local f = NS.Detached.Frame("stats_base")
+    assertTrue(f and f:IsShown(), "detached and shown")
+    local cleared = 0
+    local real = f.ClearAllPoints
+    f.ClearAllPoints = function(self, ...) cleared = cleared + 1 return real(self, ...) end
+    local ok, err = pcall(function()
+        NS.bus:SendMessage(NS.MSG.STATS_UPDATED, NS.StatData:Scan())
+        NS.bus:SendMessage(NS.MSG.SKILLS_UPDATED, NS.SkillData:Model())
+    end)
+    f.ClearAllPoints = real
+    B:Dock("stats_base")
+    if not ok then error(err, 0) end
+    assertEqual(cleared, 0, "a data message re-anchored the detached frame")
+end)
+
+test("F-003: the speed ticker rescans only when the speed changed", function()
+    -- red under: S:WatchSpeed's ticker calling S:Request() on every tick
+    local SD = NS.StatData
+    local realReq, realSpeed, asked = SD.Request, NS.Compat.UnitSpeed, 0
+    local speed = 7
+    SD.Request = function() asked = asked + 1 end
+    NS.Compat.UnitSpeed = function() return speed, 7, 7, 4.7 end
+    local ok, err = pcall(function()
+        SD:SpeedTick()
+        asked = 0
+        SD:SpeedTick()
+        SD:SpeedTick()
+        assertEqual(asked, 0, "an unchanged speed asks for no rescan")
+        speed = 14
+        SD:SpeedTick()
+        assertEqual(asked, 1, "a changed speed asks for one")
+    end)
+    SD.Request, NS.Compat.UnitSpeed = realReq, realSpeed
+    if not ok then error(err, 0) end
+end)
