@@ -318,3 +318,32 @@ case("bars live: the spark hides when switched off and shows when on", function(
     set("bars.spark", true)
     each(bars, function(b, name) assertTrue(b.spark:IsShown(), name .. ": the spark is back") end)
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- The panel's own sliders
+-- ---------------------------------------------------------------------------------------------
+
+test("bars live: every Bars page slider commits while it moves, so a mouse wheel turn is written", function()
+    -- red under: a release-only slider (AceGUI's OnMouseWheel fires OnValueChanged and no OnMouseUp).
+    for _, row in ipairs(NS.SchemaForPage("bars")) do
+        if row.type == "number" then assertEqual(row.commitOn, "change", row.path .. " commits live") end
+    end
+    local AG = M.LibStub("AceGUI-3.0")
+    local panel = M.__subcategories["Bars"]
+    panel:Show()
+    panel:__fire("OnShow")
+    local slider
+    for i = #AG.__created, 1, -1 do
+        local w = AG.__created[i]
+        if w.type == "Slider" and w.labelText == NS.L["Bar height (px)"] then slider = w break end
+    end
+    assertTrue(slider ~= nil, "the Bar height slider is drawn")
+    slider:__fire("OnValueChanged", 21)   -- a wheel notch, or a drag frame
+    M.__fireTimers()
+    assertEqual(NS.GetSetting("bars.height"), 21, "stored without a release")
+    assertEqual(NS.OptionsPreview.bar.style.height, 21, "and the preview restyled")
+    NS.Helpers.RestoreDefaults("bars")
+    panel:Hide()
+    panel:__fire("OnHide")
+    M.__fireTimers()
+end)
