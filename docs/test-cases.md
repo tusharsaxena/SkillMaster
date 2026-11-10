@@ -104,9 +104,10 @@ Total.
 - skin: the picker's preview is the test mode (skinning-§10)
 - skin: /skm skin opens the library's picker
 
-### test_perf.lua (1)
+### test_perf.lua (2)
 
 - perf: windowRender is noted while a capture is on, and nothing is noted while off
+- perf: every event-path bucket (detachedRender, skillScan, statScan, bonusRefresh) is reached
 
 ### test_probe.lua (7)
 
@@ -387,6 +388,27 @@ Total.
 - client pin: the suite runs as WoW Forever whatever KA0S_KIT_CLIENT says or omits (clients-§9)
 - client pin: an unset variable pins Forever, forever is accepted, retail is refused
 
+### test_m6_fixes.lua (18)
+
+- SM-01: a header-click collapse is stored through NS.SetByPath and sends one LAYOUT_CHANGED
+- SM-01: the dock buttons (detach, dock) are stored through NS.SetByPath
+- SM-01: a drag move renumbers every changed block through the seam with one LAYOUT_CHANGED
+- SM-01: the row menu's Hide is stored through NS.SetByPath
+- F-002: a hidden skill the catalog does not know is shown again by the Skills page Defaults
+- F-012: standing up re-reads the stats and the bonuses, so no simulated value outlives a disable
+- F-001: a skill line is matched on its skill-line ID, so a German client's lines land on their rows
+- F-001: the adapter carries the struct's skill-line ID
+- F-001: a crafting overlay casts the open spell by the name its spell ID resolves to
+- F-003: a data repaint keeps a shown detached frame where it is (a drag is not re-anchored)
+- F-003: the speed ticker rescans only when the speed changed
+- F-004: every UNIT_* event is registered for the player alone, so a raid's auras never reach Lua
+- F-011: the stat caps follow the level NS.Compat answers (the simulated character's in a session)
+- F-005: Clear log asks first, and only an accept clears the stored history
+- F-014: a log row from another day shows its date as well as its time
+- F-015: switching to a profile with a lower cap does not trim the stored log; lowering the setting does
+- F-010: on a library-absent load the stand-down still takes every bus target's events down
+- F-016: the Master controls' Enable row names the brand
+
 ### test_surface_parity.lua (11)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
@@ -415,7 +437,7 @@ Total.
 - disabled 5: every frame that was on screen is hidden, and Show refuses
 - disabled 6: firing every baseline event writes nothing, says nothing, shows nothing
 - disabled 7: every live verb answers, and each feature verb refuses on one line
-- disabled 8: the launcher's left-click and the key binding while disabled
+- disabled 8: the launcher's clicks and the key bindings while disabled
 - disabled 9: re-enabling restores the registration set from current state
 - disabled 10: releasing ONE hold does not resurrect an addon the other holds down
 
@@ -498,7 +520,7 @@ Total.
 - skin values: no typed value outside the kit's categories and the host's rows
 - skin values: the check is falsifiable, a planted value of each shape is reported
 
-### test_skin_switch.lua (13)
+### test_skin_switch.lua (18)
 
 - skin switch: the check is falsifiable, a surface that redraws a literal is reported
 - skin switch: the main window changes
@@ -511,6 +533,11 @@ Total.
 - skin switch: the trainer popup changes with the Scope ignored
 - skin switch: the alert toast changes
 - skin switch: the alert toast changes with the Scope ignored
+- skin switch: the row tooltip's bar changes
+- skin switch: the row tooltip's bar changes with the Scope ignored
+- skin switch: the broker feed tooltip's mini bars changes
+- skin switch: the broker feed tooltip's mini bars changes with the Scope ignored
+- skin switch: the Bars page preview changes
 - skin switch: the debug console changes
 - skin switch: the debug console changes with the Scope ignored
 
@@ -535,7 +562,7 @@ Total.
 | test_keybinds.lua | 4 |
 | test_locale.lua | 8 |
 | test_skinsetup.lua | 4 |
-| test_perf.lua | 1 |
+| test_perf.lua | 2 |
 | test_probe.lua | 7 |
 | test_skilldata.lua | 24 |
 | test_trainers.lua | 12 |
@@ -558,6 +585,7 @@ Total.
 | test_m5_seams.lua | 7 |
 | test_m5_review.lua | 6 |
 | test_m5_leftovers.lua | 14 |
+| test_m6_fixes.lua | 18 |
 | test_surface_parity.lua | 11 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
@@ -568,7 +596,7 @@ Total.
 | test_layout_cap.lua | 13 |
 | test_lizard_sighted.lua | 8 |
 | test_skin_values.lua | 3 |
-| test_skin_switch.lua | 13 |
+| test_skin_switch.lua | 18 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **373** |
+| **Total** | **397** |
