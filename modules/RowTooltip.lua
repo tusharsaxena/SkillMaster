@@ -232,7 +232,10 @@ local function placeBar(row, n)
         b:SetPoint("LEFT", anchor, "LEFT", 0, 0)
         b:SetWidth(200)
     end
-    if row.kind == "stat" then b:SetValues(NS.Rows.StatValues(row.entry)) else b:SetValues((NS.Rows.SkillValues(row.entry))) end
+    local stat = row.kind == "stat"
+    local v = stat and NS.Rows.StatValues(row.entry) or (NS.Rows.SkillValues(row.entry))
+    v.color = NS.Rows.FillColor(row.entry, stat)   -- the row's own fill: Color mode, the palette, Bar > Fill
+    b:SetValues(v)
     b:Show()
 end
 

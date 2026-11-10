@@ -428,6 +428,11 @@ local function relayout()
     if NS.IsStoodDown and NS.IsStoodDown() then return end
     if NS.MainWindow then NS.MainWindow.Refresh(true) end
     if NS.Detached then NS.Detached.Refresh() end
+    -- The in-game check that a look write reached the bars (/sm debug): the bar height drawn now.
+    if NS.State.debug then
+        NS.Debug("Set", "relayout: %d window rows restyled, bar height %s",
+            NS.MainWindow and #NS.MainWindow.Rows() or 0, tostring(NS.Bar.ResolveStyle("row").height))
+    end
 end
 
 local function revalue()

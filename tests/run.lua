@@ -143,6 +143,7 @@ Kit.run{
         "test_bonuses",
         "test_statdata",
         "test_bar",
+        "test_bars_live",
         "test_blocks",
         "test_interact",
         "test_sessionlog",

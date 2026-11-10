@@ -146,6 +146,13 @@ add(rows, {
     mark("spark", L["Spark"], L["A thin line riding the end of the fill."]),
 })
 
+-- Every slider on the page commits while it moves (throttled by the library), not only on release:
+-- the preview pinned above the strip is the point of the page, and AceGUI's mouse wheel fires no
+-- release at all, so a wheel-turned height was never written.
+for _, r in ipairs(rows) do
+    if r.type == "number" and r.commitOn == nil then r.commitOn = "change" end
+end
+
 NS.RegisterSchemaRows(NS.Live(rows))
 
 -- ---------------------------------------------------------------------------------------------

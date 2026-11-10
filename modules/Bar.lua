@@ -315,7 +315,7 @@ function Methods:Layout()
     self.spark:ClearAllPoints()
     self.spark:SetPoint("TOP", self, "TOP" .. side, x, 0)
     self.spark:SetPoint("BOTTOM", self, "BOTTOM" .. side, x, 0)
-    self.spark:SetShown(self.style.spark ~= nil and fillW >= 1 and g.fill < 1)
+    self.spark:SetShown(self.style.spark and fillW >= 1 and g.fill < 1 or false)   -- false: Spark off
     self:LayoutMarks(self.tickTextures, g.ticks, w, function(t) return t end)
     self:LayoutMarks(self.markerTextures, g.markers, w, function(m) return m.at end)
 end
@@ -424,10 +424,14 @@ local function paintText(bar, s)
     if s.timer then bar.timer:SetTextColor(rgba(s.timer)) end
 end
 
---- Apply a resolved style (Bar.ResolveStyle, or a partial table over the current one).
+--- Apply a resolved style (Bar.ResolveStyle, or a partial table over the current one). A resolved
+--- style (it carries `key`) REPLACES the current one: its absent fields mean "none" (no border, the
+--- skin's texture), and a merge would keep the last style's border or texture in their place.
 function Methods:ApplyStyle(style)
     local s = {}
-    for k, v in pairs(self.style or {}) do s[k] = v end
+    if not (style and style.key) then
+        for k, v in pairs(self.style or {}) do s[k] = v end
+    end
     for k, v in pairs(style or {}) do s[k] = v end
     self.style = s
     self:SetHeight(s.height or 14)
