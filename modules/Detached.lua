@@ -15,6 +15,7 @@ local _, NS = ...
 NS.Detached = {}
 local D = NS.Detached
 local LAYERS = NS.Constants.LAYERS
+local Perf = NS.Perf
 
 D.WIDTH, D.TITLE_H, D.PAD = 300, 22, 4
 D.STYLE = "compact"
@@ -143,6 +144,7 @@ end
 function D.Render(id)
     local f = frames[id]
     if not f then return end
+    local t0 = Perf.on and debugprofilestop()
     NS.Rows.ReleaseAll(f.rowPool)
     local collapsed = settings(id).collapsed
     NS.Chrome.SetIcon(f.collapse, collapsed and "chevron-right" or "chevron-down",
@@ -154,6 +156,7 @@ function D.Render(id)
     f.body:SetHeight(math.max(y, 1))
     f:SetHeight(D.TITLE_H + y + D.PAD)
     f:SetMovable(not isLocked(id))
+    if t0 then Perf.Note("detachedRender", debugprofilestop() - t0) end
 end
 
 --- Show every detached block's frame and hide every docked block's. Nothing shows while stood down.

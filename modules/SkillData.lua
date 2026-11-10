@@ -15,6 +15,7 @@ NS.SkillData = {}
 local SD = NS.SkillData
 local L = NS.L
 local Compat = NS.Compat
+local Perf = NS.Perf
 
 SD.CATEGORIES = { "primary", "secondary", "weapon", "other" }
 SD.EVENTS = { "SKILL_LINES_CHANGED", "CHAT_MSG_SKILL", "PLAYER_LEVEL_UP" }
@@ -226,8 +227,10 @@ local function liveContext()
 end
 
 function SD:Scan()
+    local t0 = Perf.on and debugprofilestop()
     local lines = readLines()
     local m = SD.Build(lines, liveContext())
+    if t0 then Perf.Note("skillScan", debugprofilestop() - t0) end
     local old = model
     model = m
     for _, up in ipairs(skillUps(old, m)) do NS.bus:SendMessage(NS.MSG.SKILL_UP, up[1], up[2], up[3]) end

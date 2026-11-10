@@ -28,7 +28,12 @@ NS.Perf = lib:New({
     -- Declared in report order. Each is reached by a real bracket (tests/test_perf.lua):
     buckets = {
         { key = "windowRender" },   -- modules/MainWindow.lua Render, one pass over the window body
+        { key = "detachedRender" }, -- modules/Detached.lua Render, one detached block's rows
+        { key = "skillScan" },      -- modules/SkillData.lua Scan: read the list, build the model
+        { key = "statScan" },       -- modules/StatData.lua Scan: read every stat
+        { key = "bonusRefresh" },   -- modules/Bonuses.lua Refresh: invalidate, the live-temp check
     },
+    -- Each bracket closes before its module sends its message, so no bucket runs inside another.
     -- The stand-down latch: a capture holds `perf`, which is the same teardown as `disabled`.
     lifecycle = NS.Lifecycle,
     log = function(line)

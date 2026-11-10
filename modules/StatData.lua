@@ -10,6 +10,7 @@ local _, NS = ...
 
 NS.StatData = {}
 local S = NS.StatData
+local Perf = NS.Perf
 
 local floor, max, min, huge = math.floor, math.max, math.min, math.huge
 
@@ -237,8 +238,10 @@ end
 
 --- Read every stat the client can give. Answers the model and keeps it for Model() / Get().
 function S:Scan()
+    local t0 = Perf.on and debugprofilestop()
     local ctx = context()
     self.model, self.index = assemble(ctx, function(def) return read(def, ctx) end)
+    if t0 then Perf.Note("statScan", debugprofilestop() - t0) end
     return self.model
 end
 

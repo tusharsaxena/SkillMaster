@@ -7,6 +7,15 @@ The harness is LibKa0s-Perf-1.0 (`core/PerfSetup.lua`), with captures in `SkillM
 | Bucket | Bracketed in | Measures |
 |---|---|---|
 | `windowRender` | `modules/MainWindow.lua` `W.Render` | one pass over the window body |
+| `detachedRender` | `modules/Detached.lua` `D.Render` | one detached block's rows |
+| `skillScan` | `modules/SkillData.lua` `SD:Scan` | reading the skill list and building the model, before its messages |
+| `statScan` | `modules/StatData.lua` `S:Scan` | reading every stat (the throttled flush, a speed change) |
+| `bonusRefresh` | `modules/Bonuses.lua` `B.Refresh` | the invalidate and live-temp check, before `BONUSES_UPDATED` |
+
+Each bracket closes before its module sends its message, so the displays the message repaints are
+measured by their own buckets and no bucket is declared `within` another. `statScan` can run inside
+`windowRender` on a cold start (the window asks for a model before the first flush); the capture
+reports that nesting as observed.
 
 Each is reached by a real bracket of the gated shape (performance-§2), and `tests/test_perf.lua`
 holds every declared bucket to being reached and to noting nothing while capture is off:
@@ -17,7 +26,9 @@ local t0 = Perf.on and debugprofilestop()
 if t0 then Perf.Note("windowRender", debugprofilestop() - t0) end
 ```
 
-The data modules (T2.x) and the bars (T3.x) add their own buckets as they land.
+The offline scenarios (`tests/perf.lua`, outside the gate) time each bucket's path plus the window
+with capture off and on; `api/iter` counts the client's global functions (and `C_*` members) called
+per iteration, frame methods excluded.
 
 ## Capture
 

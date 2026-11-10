@@ -13,6 +13,7 @@ local _, NS = ...
 NS.Bonuses = {}
 local B = NS.Bonuses
 local L = NS.L
+local Perf = NS.Perf
 
 B.MAIN_HAND = 16          -- INVSLOT_MAINHAND, which the Forever set does not list
 B.SLOTS     = 19          -- equipped slots 1 (head) .. 19 (tabard)
@@ -294,6 +295,7 @@ end
 --- Re-read what the debounced events touched (everything when called directly), publish, and keep
 --- the ticker running exactly while a temp bonus lives.
 function B.Refresh()
+    local t0 = Perf.on and debugprofilestop()
     local part = B.__dirty
     B.__pending, B.__dirty = nil, nil
     B.Invalidate(part ~= "all" and part or nil)
@@ -303,6 +305,7 @@ function B.Refresh()
     elseif not live then
         stopTicker()
     end
+    if t0 then Perf.Note("bonusRefresh", debugprofilestop() - t0) end
     NS.bus:SendMessage(NS.MSG.BONUSES_UPDATED)
 end
 

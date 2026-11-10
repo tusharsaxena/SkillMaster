@@ -28,14 +28,31 @@ NS.db.profile.skin.pickerSeen = true
 NS.addon:OnEnable()
 NS.MainWindow.Show()
 
+-- api/iter: calls of the client's global functions (and C_* namespace members) per iteration,
+-- counted by wrapping each one the mocks publish. Frame methods are not counted.
+local apiCalls = 0
+local function counted(fn) return function(...) apiCalls = apiCalls + 1 return fn(...) end end
+for k, v in pairs(mocks) do
+    if type(k) == "string" and k:sub(1, 2) ~= "__" and k ~= "LibStub" then
+        if type(v) == "function" then
+            mocks[k] = counted(v)
+        elseif type(v) == "table" and k:sub(1, 2) == "C_" then
+            for m, f in pairs(v) do if type(f) == "function" then v[m] = counted(f) end end
+        end
+    end
+end
+
 local function measure(name, iters, fn)
     collectgarbage("collect")
     local kb0, t0 = collectgarbage("count"), os.clock()
+    apiCalls = 0
     for _ = 1, iters do fn() end
     local ms = (os.clock() - t0) * 1000 / iters
     local bytes = math.max(0, (collectgarbage("count") - kb0) * 1024 / iters)
-    return { name = name, iters = iters, ms = ms, api = 0, bytes = bytes }
+    return { name = name, iters = iters, ms = ms, api = apiCalls / iters, bytes = bytes }
 end
+
+NS.Blocks:Detach("other")   -- one detached block for the detached scenario
 
 local rows = {
     -- The window body with capture off: the gated bracket must cost one boolean test.
@@ -44,6 +61,12 @@ local rows = {
     measure("windowRenderOn", 1000, function() NS.Perf.on = true; NS.MainWindow.Render() end),
     -- A settings read through the seam, the shape every per-pass read takes.
     measure("settingsRead", 10000, function() return NS.GetSetting("scale") end),
+    -- The event paths (performance-§2's buckets): a bonus refresh, a stat pass, a skill scan, and
+    -- one detached block's rows.
+    measure("bonusRefresh", 1000, function() NS.Bonuses.Refresh() end),
+    measure("statScan", 1000, function() NS.StatData:Scan() end),
+    measure("skillScan", 1000, function() NS.SkillData:Scan() end),
+    measure("detachedRender", 1000, function() NS.Detached.Render("other") end),
 }
 NS.Perf.on = false
 
