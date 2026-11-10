@@ -86,6 +86,33 @@ Kit.skinSwitch = {
                 title = "Leatherworking 150 / 150", detail = "Train Expert (Lv 20)" })
             return NS.Alerts.toast:Frame()
         end, reset = function() NS.Alerts.toast:Clear() end },
+        -- A tooltip is drawn when it shows, so its repaint is the next show (`paint`).
+        { name = "the row tooltip's bar", build = function()
+            NS.MainWindow.Show()
+            local row = NS.MainWindow.Rows()[1]
+            NS.RowTooltip.Show(row)
+            return NS.RowTooltip.Bar()
+        end, paint = function()
+            NS.RowTooltip.Show(NS.MainWindow.Rows()[1])
+        end, reset = function()
+            mocks.GameTooltip:Hide()
+            NS.MainWindow.Hide()
+        end },
+        { name = "the broker feed tooltip's mini bars", build = function()
+            NS.Preview.Apply(true)   -- the sample character: learned skills to draw bars for
+            NS.Broker.OnEnter("all", mocks.UIParent)
+            return mocks.GameTooltip   -- its lines and the pooled mini bars parented to it
+        end, paint = function()
+            NS.Broker.OnEnter("all", mocks.UIParent)
+        end, reset = function()
+            mocks.GameTooltip:Hide()
+            NS.Preview.Apply(false)
+        end },
+        { name = "the Bars page preview", scope = "panel", build = function()
+            local f = mocks.CreateFrame("Frame", nil, mocks.UIParent)
+            NS.OptionsPreview.Build(nil, f)
+            return f
+        end },
         { name = "the debug console", build = function()
             NS.DebugLog:Show()
             return NS.DebugLog._frameForTest

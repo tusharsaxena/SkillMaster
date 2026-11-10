@@ -190,6 +190,7 @@ local function buildPreview(_, frame)
     Preview.bar = frame.skmPreview.bar
     Preview.Refresh()
 end
+Preview.Build = buildPreview   -- the skin-switch test builds the preview on a frame of its own
 
 if NS.NewBusTarget then
     Preview.events = NS.NewBusTarget()

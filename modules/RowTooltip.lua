@@ -225,6 +225,7 @@ end
 
 local function placeBar(row, n)
     local b = ensureBar()
+    b:ApplyStyle(Bar.ResolveStyle("tooltip"))   -- each show, so a skin switch since the last one lands
     local anchor = _G["GameTooltipTextLeft" .. n]
     b:ClearAllPoints()
     if anchor then
