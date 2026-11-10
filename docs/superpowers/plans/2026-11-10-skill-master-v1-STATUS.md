@@ -24,7 +24,9 @@ Plan: `2026-11-10-skill-master-v1.md`. Update a row in the same commit that fini
 | 5.1 Options | done | 71df5f5, merged in b9fddca; 193 schema rows (160 library-absent); integration: `skills.helperHint` (under-row hint, off) split from the new `skills.helperTooltip` (tooltip helpers, on), rows for both and for `layout.blocks.weapon.belowCapOnly`, `journal.size` named drag state, broker right-click opens the Broker page (seam suite `test_m5_seams`); open: `bars.colors.fromSkin` default false vs skinning-§6; no fill direction/columns/strata rows; not run in the client |
 | 5.2 Test/Sim | done | f7625d9, merged in f767d92; SessionLog constructor keeps the `journal.keep` cap; diagnostics `sim` section after the domain sections, `state` carries `simMode`; not run in the client |
 | 5.3 Locales/bindings/diag | done | 1d23d09, merged in bbcd089; M5 polish (c0779cc) merged first in 5537d01; integration routed the Skin rows, the settings stubs and the sim line through `L`; open: the second (Journal) binding needs owner sign-off (launcher-§6), 22 font-unsafe glyphs remain, stub locale set chosen by the agent |
-| 6.x Docs/battery/audit/review | todo | |
+| M5 leftovers | done | c52a8ba HUD colors follow the skin by default (sm.cat.* / sm.bonus* owner tokens; no FollowOnce, born on v1.94.0); 18b4376 fill direction, window/detached strata, columns; b7912d4 no pin in a simulation, sample broker tokens in test mode; 5f0f628 17 font-unsafe glyphs replaced + glyph guard test; ecd6515 Forever profile pinned in-repo (`tests/client_pin.lua`); Bindings.xml checked against launcher-§6, compliant (Show window first, one category, no header) |
+| 6.1 Docs | done | 6f07dc9; README 1.0.0 row (TOC stays 0.1.0 until the bump), ARCHITECTURE ten sections, smoke design §9 table |
+| 6.2-6.6 Battery/audit/review | todo | |
 | 7.x Merge + cleanup | blocked on owner go | |
 
 ## Branches / worktrees created by this run (for cleanup)
