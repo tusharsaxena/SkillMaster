@@ -9,7 +9,8 @@ NS.SCHEMA_VERSION = 2
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
 --- default "both" is a player's choice (savedvariables-§1: AceDB copies a default into the stored
 --- table, so presence proves nothing); "both" is the new key's default too, so it is dropped. A
---- `bars.rowDisplay` already stored wins. A fresh profile carries neither key and passes through.
+--- `bars.rowDisplay` already stored as "bar" or "text" wins (the active profile carries the copied
+--- default "both", which is not a choice). A fresh profile carries neither key and passes through.
 local function rowDisplayFromStats(_, profile)
     local stats = type(profile) == "table" and profile.stats
     if type(stats) ~= "table" or stats.display == nil then return end
@@ -17,7 +18,9 @@ local function rowDisplayFromStats(_, profile)
     stats.display = nil
     if mode ~= "bar" and mode ~= "text" then return end
     if type(profile.bars) ~= "table" then profile.bars = {} end
-    if profile.bars.rowDisplay == nil then profile.bars.rowDisplay = mode end
+    -- The active profile already holds the copied default "both"; only another stored value wins.
+    local kept = profile.bars.rowDisplay
+    if kept == nil or kept == "both" then profile.bars.rowDisplay = mode end
 end
 
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets

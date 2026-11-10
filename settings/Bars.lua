@@ -58,7 +58,7 @@ local classColor = { source = "player" }
 add(rows, H.BarGroup({
     prefix = "bars.", page = PAGE, group = BAR, subgroup = L["Fill"], fromSkin = true,
     classColor = classColor,
-    tooltips = { barColor = L["The fill color while Color mode (Colors) is Flat."] },
+    tooltips = { barColor = L["The fill color while Color mode (Colors) is Flat. Not read while Use the skin's color is on."] },
     defaults = { barTexture = P.barTexture, barAlpha = P.barAlpha, barColor = P.barColor,
                  useClassColorBar = P.useClassColorBar, barTextureFromSkin = P.barTextureFromSkin },
     extra = { fromSkin("bars.barColorFromSkin", L["Use the skin's color"], L["Bar color"]) },
@@ -68,6 +68,7 @@ add(rows, H.ColorPair({
     prefix = "bars.", page = PAGE, group = BAR, subgroup = L["Background"],
     key = "bgColor", companionKey = "useClassColorBg", label = L["Background color"],
     classColor = classColor,
+    tooltips = { bgColor = L["The color behind the fill. Not read while Use the skin's color is on."] },
     defaults = { bgColor = P.bgColor, useClassColorBg = P.useClassColorBg },
     extra = { fromSkin("bars.bgColorFromSkin", L["Use the skin's color"], L["Background color"]) },
 }))
@@ -75,6 +76,7 @@ add(rows, H.ColorPair({
 add(rows, H.BorderGroup({
     prefix = "bars.", page = PAGE, group = BAR, subgroup = L["Border"], show = true, fromSkin = "bar",
     classColor = classColor, keys = { borderShow = "border" },
+    tooltips = { borderColor = L["The border's color. Not read while Use the skin's color is on."] },
     defaults = { borderShow = P.border, borderStyle = P.borderStyle, borderSize = P.borderSize,
                  borderColor = P.borderColor, useClassColorBorder = P.useClassColorBorder,
                  borderStyleFromSkin = P.borderStyleFromSkin },
@@ -114,7 +116,7 @@ add(rows, {
 -- Text: content first (options-ui-§16, U-10d), then the font block. Rows show (bars.rowDisplay,
 -- feedback round 1 FB-3) is one setting for skill and stat rows alike. The bar text is a presets
 -- dropdown, each preset named by what it draws for the preview's Fishing 107 +25 / 150, plus
--- "Custom..." and its box (NS.TemplateRows, feedback round 1 FB-2).
+-- "Custom" and its box (NS.TemplateRows, feedback round 1 FB-2).
 local CONTENT = L["Content"]
 rows[#rows + 1] = row({
     path = "bars.rowDisplay", group = TEXT, subgroup = CONTENT, type = "string", default = P.rowDisplay,
@@ -130,7 +132,7 @@ end
 add(rows, NS.TemplateRows({
     path = "bars.textTemplate", presetPath = "bars.textPreset", page = PAGE, group = TEXT, subgroup = CONTENT,
     default = P.textTemplate, label = L["Bar text"],
-    desc = L["What a skill's bar says, shown here for 107 +25 / 150. Custom... writes your own. A stat's bar shows its value."],
+    desc = L["What a skill's bar says, shown here for 107 +25 / 150. Custom writes your own. A stat's bar shows its value."],
     boxDesc = L["Tokens: {rank}, {bonus} (+25), {max}, {pct} (percent of the cap) and {left} (points to the cap). Press Enter to apply."],
     presets = {
         barPreset(P.textTemplate),
@@ -150,6 +152,7 @@ rows[#rows + 1] = row({
 add(rows, H.FontGroup({
     prefix = "bars.", page = PAGE, group = TEXT, subgroup = L["Font"], fromSkin = true, flagsFromSkin = true,
     classColor = classColor,
+    tooltips = { fontColor = L["The bar text's color. Not read while Use the skin's color is on."] },
     defaults = { font = P.font, fontSize = P.fontSize, fontColor = P.fontColor,
                  useClassColorFont = P.useClassColorFont, fontFlags = P.fontFlags,
                  fontShadow = P.fontShadow, fontFromSkin = P.fontFromSkin },

@@ -57,7 +57,7 @@ Total.
 - templates: the page's Defaults lets go of Custom and restores the shipped template
 - templates: the bar text's presets are named by what they draw for 107 +25 / 150
 
-### test_row_display.lua (7)
+### test_row_display.lua (8)
 
 - rows show: one setting on the Bars page's Text tab, and stats.display is gone
 - rows show: Bar and value draws a skill row's bar and its text, and a stat row's
@@ -66,6 +66,7 @@ Total.
 - rows show: an unlearned skill keeps its trainer line in every mode
 - rows show: the broker tooltip's skill and stat lines honor it
 - rows show: schemaVersion 2 moves a stored stats.display once, in every stored profile
+- rows show: schemaVersion 2 moves the active profile's stats.display past the copied default
 
 ### test_database.lua (3)
 
@@ -250,7 +251,7 @@ Total.
 - bar: the resolved style reads the profile and the skin's tokens
 - bar: the pool hands bars back in order and clears their timers on release
 
-### test_bars_live.lua (17)
+### test_bars_live.lua (18)
 
 - bars live: the bar height reaches the window's rows and the preview, the detached height the blocks
 - bars live: the row height reaches every window row
@@ -265,6 +266,7 @@ Total.
 - bars live: the bar text template and position reach the drawn text
 - bars live: the font color and size draw once their companions are off
 - bars live: rank tier ticks hide and come back
+- bars live: a tier tick draws above the fill, so a tick the rank has passed still shows
 - bars live: threshold markers hide on a stat's bar and come back
 - bars live: the expiry timer hides at once and comes back
 - bars live: the spark hides when switched off and shows when on
@@ -606,7 +608,7 @@ Total.
 | test_schema.lua | 6 |
 | test_options.lua | 16 |
 | test_template_rows.lua | 9 |
-| test_row_display.lua | 7 |
+| test_row_display.lua | 8 |
 | test_database.lua | 3 |
 | test_bus.lua | 3 |
 | test_slash.lua | 6 |
@@ -623,7 +625,7 @@ Total.
 | test_bonuses.lua | 16 |
 | test_statdata.lua | 16 |
 | test_bar.lua | 10 |
-| test_bars_live.lua | 17 |
+| test_bars_live.lua | 18 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 10 |
 | test_sessionlog.lua | 5 |
@@ -653,4 +655,4 @@ Total.
 | test_skin_switch.lua | 18 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **439** |
+| **Total** | **441** |

@@ -106,6 +106,7 @@ local function reloadProfile()
     if NS.Sim and NS.Sim:IsActive() then NS.Sim:Stop("profile") end
     NS.HideSkinPicker()
     NS:RunMigrations()
+    if NS.ForgetCustomTemplates then NS.ForgetCustomTemplates() end   -- a Custom pick was the old profile's
     NS.SyncEnabledHold()
     NS.ApplySkinChoice()
     if NS.MainWindow then NS.MainWindow.ApplySettings() end

@@ -8,10 +8,10 @@ login; each page body builds on its first show.
 | Ka0s Skill Master (landing) | none | The logo, the tagline and the slash command list |
 | General | Master controls, Skin, Keybindings | Master controls, the skin, the key binding |
 | Layout | Window, Blocks, Block order | The window's width, maximum height, block spacing, summary strip, column count (one or two) and frame strata, and the detached blocks' strata; per block show, dock, collapse, lock and scale; the weapon block's compact filter (equipped and below cap only); the block order, dragged |
-| Bars | Bar, Colors, Text, Marks | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom...) and position; ticks, markers, timer and spark. A live preview bar is pinned above the strip |
+| Bars | Bar, Colors, Text, Marks | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom) and position; ticks, markers, timer and spark. A live preview bar is pinned above the strip |
 | Skills | General, Professions, Weapons and other | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default), one Hide row per catalog skill |
 | Stats | One tab per stat group | One Hide row per stat |
-| Broker | Feeds | Each feed's text template (a presets dropdown plus Custom...) and the skill-up flash |
+| Broker | Feeds | Each feed's text template (a presets dropdown plus Custom) and the skill-up flash |
 | Alerts | Alerts | The rank-cap and weapon-gap alerts, the gap, the sound |
 | Journal | Journal | Skill-ups kept per character, the Alts tab's filter on open |
 | Trainers and Waypoints | Trainers and waypoints | The waypoint method, the chat line, the unverified mark |
@@ -30,7 +30,7 @@ and write through `get` / `set`, and an undrawn whole-set row per kind (`skills.
 
 The text templates (`bars.textTemplate`, `broker.templates.<feed>`) are two rows each, built by
 `NS.TemplateRows` (`settings/OptionsSetup.lua`): a session-only presets dropdown
-(`bars.textPreset`, `broker.presets.<feed>`) whose last choice is *Custom...*, and the stored
+(`bars.textPreset`, `broker.presets.<feed>`) whose last choice is *Custom*, and the stored
 template itself as an EditBox (`dialogControl = "EditBox"`), drawn only while the dropdown reads
 Custom (`shownWhen`). The dropdown reads the preset the stored string matches, else Custom; a
 preset writes its template through `NS.SetByPath`; Custom writes nothing and shows the box, which

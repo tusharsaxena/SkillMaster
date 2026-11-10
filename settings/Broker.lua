@@ -2,7 +2,7 @@ local _, NS = ...
 -- settings/Broker.lua — the Broker page (design §6.7): each data feed's text template and the
 -- skill-up flash. A write repaints the feeds at once (NS.Broker.Refresh).
 --
--- Each template is a presets dropdown plus "Custom...", which shows a text box taking the tokens
+-- Each template is a presets dropdown plus "Custom", which shows a text box taking the tokens
 -- (NS.TemplateRows, settings/OptionsSetup.lua). A preset whose text carries a word goes through L;
 -- the shipped defaults (defaults/Profile.lua) are matched as they are stored.
 local L = NS.L
@@ -51,7 +51,7 @@ local function template(id, label)
     return NS.TemplateRows({
         path = "broker.templates." .. id, presetPath = "broker.presets." .. id, page = PAGE, group = FEEDS,
         subgroup = L["Text"], default = P.templates[id], label = label, presets = PRESETS[id],
-        desc = L["What this feed shows on your broker display. Custom... writes your own."],
+        desc = L["What this feed shows on your broker display. Custom writes your own."],
         boxDesc = L["This feed's own text. Tokens: %s. Press Enter to apply."]:format(TOKENS),
     })
 end

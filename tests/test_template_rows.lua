@@ -88,7 +88,7 @@ test("templates: the Broker page renders with no empty-dropdown line, one dropdo
         local dd = widgets(from, "Dropdown", label)
         assertEqual(#dd, 1, label .. ": one presets dropdown")
         assertTrue(next(dd[1].list) ~= nil, label .. ": the dropdown lists its presets")
-        assertTrue(dd[1].list[CUSTOM] ~= nil, label .. ": and Custom...")
+        assertTrue(dd[1].list[CUSTOM] ~= nil, label .. ": and Custom")
     end
     assertEqual(#widgets(from, "EditBox", "Custom text"), 0, "a preset shows no text box")
     hidePage(panel)
@@ -181,6 +181,6 @@ test("templates: the bar text's presets are named by what they draw for 107 +25 
     assertEqual(texts["{rank} / {max}"], "107 / 150")
     assertEqual(texts["{rank} {bonus} / {max} ({pct}%)"], "107 +25 / 150 (71%)")
     assertEqual(texts["{left} to go"], "43 to go")
-    assertTrue(texts[CUSTOM] ~= nil, "and Custom...")
+    assertTrue(texts[CUSTOM] ~= nil, "and Custom")
     assertEqual(rowFor("bars.textTemplate").dialogControl, "EditBox", "the box is the stored row")
 end)

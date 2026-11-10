@@ -176,3 +176,16 @@ test("rows show: schemaVersion 2 moves a stored stats.display once, in every sto
         p[k] = nil
     end
 end)
+
+-- The verifier's case: AceDB copies the default "both" into the ACTIVE profile's stored table, so a
+-- step that moved only into an absent key would skip it and drop the player's choice.
+test("rows show: schemaVersion 2 moves the active profile's stats.display past the copied default", function()
+    local p = NS.db.profile
+    p.stats.display = "text"
+    assertEqual(p.bars.rowDisplay, "both", "the copied default is present before the step")
+    NS.db.global.schemaVersion = 1
+    NS:RunMigrations()
+    assertEqual(p.bars.rowDisplay, "text", "the active profile's choice moved")
+    assertTrue(p.stats.display == nil, "the old key goes")
+    p.bars.rowDisplay = "both"
+end)

@@ -47,7 +47,7 @@ function NS.Live(rows, onChange)
 end
 
 -- ---------------------------------------------------------------------------------------------
--- A text template as a presets dropdown plus "Custom..." (feedback round 1, FB-2). A template row
+-- A text template as a presets dropdown plus "Custom" (feedback round 1, FB-2). A template row
 -- used to be a bare `type = "string"` row, which the library draws as a dropdown with nothing in it
 -- (LibKa0s Options' EMPTY_DROPDOWN). Two rows now stand for one stored template:
 --
@@ -74,7 +74,7 @@ end
 local function presetPicker(spec)
     local values = {}
     for i, p in ipairs(spec.presets) do values[i] = { value = p.value, text = p.text } end
-    values[#values + 1] = { value = NS.CUSTOM_PRESET, text = NS.L["Custom..."] }
+    values[#values + 1] = { value = NS.CUSTOM_PRESET, text = NS.L["Custom"] }
     return {
         path = spec.presetPath, page = spec.page, group = spec.group, subgroup = spec.subgroup,
         type = "string", sessionOnly = true, wide = true, values = values,
