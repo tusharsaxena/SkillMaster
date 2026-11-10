@@ -32,22 +32,23 @@ archaeology, for the same reason a skip is never a pass (`automated-tests-§4`).
 
 | Run | Commit | Tree | Version | Lint w/e | Files | Tests | Perf | NLOC | Funcs | Avg NLOC | Avg CCN | Max CCN | CCN warn | Verdict |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| [`20261110-063942`](20261110-063942/) | `21b1936` | clean | 0.1.0 | 0/0 | 122 | 397/1/398 | pass | 14708 | 2141 | 5.8 | 2.4 | 15 | 0 | **green** |
 | [`20261110-025504`](20261110-025504/) | `9a66b14` | clean | 0.1.0 → 0.1.0 | 0/0 | 43 | 119/1/120 | pass | 2363 | 449 | 4.0 | 1.9 | 10 | 0 | **green** |
 
 ## Test suite
 
-**120 cases** — 119 passed, 0 failed, 1 skipped. The generated inventory
-[`20261110-025504/test-cases.md`](20261110-025504/test-cases.md) is the authority on which cases existed at this run;
+**398 cases** — 397 passed, 0 failed, 1 skipped. The generated inventory
+[`20261110-063942/test-cases.md`](20261110-063942/test-cases.md) is the authority on which cases existed at this run;
 `docs/test-cases.md` is that same list at HEAD.
 
-This is the first recorded run, so there is no trend to read yet.
+Moved **120 → 398** since the previous run.
 
 **1 case(s) reported a `skip`.** A skip is counted in the total and never in `passed`, and at
 the release gate it is NOT EVALUATED rather than passed (`automated-tests-§3`).
 
 ## Lint
 
-**0 warnings / 0 errors over 43 files** (`luacheck .`).
+**0 warnings / 0 errors over 122 files** (`luacheck .`).
 
 Read that figure with its scope attached: `.luacheckrc` excludes 6 path(s) from it — `libs/`, `docs/audits/`, `docs/reviews/`, `docs/revendor/`, `_dev/`, `tests/_kit/` —
 so nothing under them is in the count above. A `0/0` that never moves is partly a statement about
@@ -56,21 +57,25 @@ to whoever thinks to open `.luacheckrc`.
 
 ## Perf
 
-**3 scenarios** from `tests/perf.lua`; the measurements are in
-[`20261110-025504/perf.json`](20261110-025504/perf.json).
+**7 scenarios** from `tests/perf.lua`; the measurements are in
+[`20261110-063942/perf.json`](20261110-063942/perf.json).
 
 | `scenario` | `iters` | `ms/iter` | `api/iter` | `bytes/iter` |
 |---|---|---|---|---|
-| `windowRenderOff` | 1000 | 0.00022 | 0.0 | 0.0 |
-| `windowRenderOn` | 1000 | 0.00052 | 0.0 | 0.3 |
-| `settingsRead` | 10000 | 0.00047 | 0.0 | 0.0 |
+| `windowRenderOff` | 1000 | 0.04115 | 27.0 | 4072.0 |
+| `windowRenderOn` | 1000 | 0.03946 | 29.0 | 4072.3 |
+| `settingsRead` | 10000 | 0.00046 | 0.0 | 0.0 |
+| `bonusRefresh` | 1000 | 0.04595 | 6.0 | 9437.4 |
+| `statScan` | 1000 | 0.01018 | 3.0 | 744.3 |
+| `skillScan` | 1000 | 0.07618 | 44.0 | 7156.5 |
+| `detachedRender` | 1000 | 0.00814 | 4.0 | 520.1 |
 
 `perf` never fails a run and never blocks a commit — it is recorded, read and compared, not
 thresholded (`performance-§9`). It does gate the **tag** (`automated-tests-§3`).
 
 ## Complexity watch list
 
-Current as of [`20261110-025504`](20261110-025504/) — **this run's measurement, not its diff.** Max CCN **10** across 449
+Current as of [`20261110-063942`](20261110-063942/) — **this run's measurement, not its diff.** Max CCN **15** across 2141
 functions, **0** of them warned on; 0 file(s) in the 1000–1500 band and 0 over the 1500 cap
 (`layout-§1`).
 
