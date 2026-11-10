@@ -82,7 +82,7 @@ NS.SkillCatalog = {
 
 -- The skill-line IDs (SkillLine.dbc, vanilla) and the open spells' IDs (the Apprentice rank: any
 -- rank's ID answers the rank-free localized name, which casts the highest rank known). Unverified on
--- WoW Forever until `/skm probe` (docs/midnight-quirks.md).
+-- WoW Forever until `/sm probe` (docs/midnight-quirks.md).
 local SKILL_LINE_IDS = {
     alchemy = 171, blacksmithing = 164, enchanting = 333, engineering = 202, herbalism = 182,
     leatherworking = 165, mining = 186, skinning = 393, tailoring = 197,

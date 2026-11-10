@@ -1,7 +1,7 @@
 local _, NS = ...
 -- settings/Skills.lua — the Skills and Stats pages (design §6.6): what the skill and stat rows show,
 -- and one Hide row per catalog skill and per stat, so a row hidden from the row menu (T3.3) can be
--- shown again here or with `/skm set skills.hidden.<key> false`.
+-- shown again here or with `/sm set skills.hidden.<key> false`.
 --
 -- The hide rows are generated from NS.SkillCatalog and NS.STAT_DEFS at load. `skills.hidden` and
 -- `stats.hidden` are sets ({ [key] = true }), so each row reads and writes its entry through get /
@@ -35,7 +35,7 @@ local function hideRow(page, kind, key, name, group, subgroup)
     }
 end
 
---- The whole set's row (review F-002): not drawn, but the page's Defaults, `/skm reset` and the
+--- The whole set's row (review F-002): not drawn, but the page's Defaults, `/sm reset` and the
 --- row menu reach it, so a key with no row of its own (an "other:" skill the catalog does not
 --- know) is a settings write that the page's Defaults undoes.
 local function setRow(page, kind, group)

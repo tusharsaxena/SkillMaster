@@ -70,8 +70,8 @@ The library's Keybindings tab over `NS.BINDINGS`: Toggle skills window and Toggl
 client's and are never stored in a profile (options-ui-§20).
 
 The launcher's right-click menu lists Enabled, Locked, Test mode, Sim mode and Show window; Show window
-shares its handler with `/skm toggle` and the key binding, and Sim mode its handler (`NS.ToggleSim`)
-with the Master-controls Sim mode box and the bare `/skm sim`.
+shares its handler with `/sm toggle` and the key binding, and Sim mode its handler (`NS.ToggleSim`)
+with the Master-controls Sim mode box and the bare `/sm sim`.
 
 ## Layout
 

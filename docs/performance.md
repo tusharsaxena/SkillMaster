@@ -32,7 +32,7 @@ per iteration, frame methods excluded.
 
 ## Capture
 
-`/skm perf` prints the workflow. A capture holds the latch's `perf` hold: the addon stands down
+`/sm perf` prints the workflow. A capture holds the latch's `perf` hold: the addon stands down
 through the same teardown as `disabled`, with no `/reload`, and feature verbs answer "Not available
 during a performance capture." until it ends.
 

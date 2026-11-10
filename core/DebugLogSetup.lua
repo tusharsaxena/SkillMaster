@@ -19,7 +19,7 @@ if not lib then
     end
     local noop = function() end
     local function diagnosticsAbsent()
-        NS.Print(NS.L["%s is unavailable: the LibKa0s library did not load."]:format("/skm diagnostics"))
+        NS.Print(NS.L["%s is unavailable: the LibKa0s library did not load."]:format("/sm diagnostics"))
         return 0
     end
     NS.DebugLog = {
@@ -79,7 +79,7 @@ NS.DebugLog = lib:New({
     addonName = addonName,   -- the FOLDER the console's close / copy / clear marks are drawn from
     title     = NS.Constants.BRAND,
     font      = NS.Constants.FONT_MONO,
-    slash     = "/skm",
+    slash     = "/sm",
 
     -- The flag stays the addon's, session-only (debug-logging-§5).
     isEnabled  = function() return NS.State.debug == true end,

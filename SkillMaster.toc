@@ -130,7 +130,7 @@ modules\TrainerPopup.lua
 modules\Waypoints.lua
 # Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
 modules\MainWindow.lua
-# Conventional: `/skm probe`; reads core\ members only at FILE SCOPE (NS.Widgets, NS.Constants).
+# Conventional: `/sm probe`; reads core\ members only at FILE SCOPE (NS.Widgets, NS.Constants).
 modules\Probe.lua
 # Conventional: builds NS.SkillNameToKey from the catalog and NS.L at FILE SCOPE (both load earlier).
 modules\SkillData.lua

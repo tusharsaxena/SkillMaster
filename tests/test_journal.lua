@@ -1,5 +1,5 @@
 -- tests/test_journal.lua — the Journal window (design §6.4): its standalone-window chrome, the two
--- tabs, the session log list and side cards, the alts grid with its mini bars, and `/skm journal`.
+-- tabs, the session log list and side cards, the alts grid with its mini bars, and `/sm journal`.
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -15,7 +15,7 @@ local function activeRows(p)
     return out
 end
 
-test("journal: /skm journal toggles it, through the one toggle handler", function()
+test("journal: /sm journal toggles it, through the one toggle handler", function()
     J.Hide()
     NS.Slash:OnSlash("journal")
     assertTrue(J.IsShown(), "shown")

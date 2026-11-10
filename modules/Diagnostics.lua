@@ -1,5 +1,5 @@
 local addonName, NS = ...
--- modules/Diagnostics.lua — this addon's sections of `/skm diagnostics` (debug-logging-§14). The
+-- modules/Diagnostics.lua — this addon's sections of `/sm diagnostics` (debug-logging-§14). The
 -- library writes the markers, the identity header, a pcall per section and the cap. The domain
 -- sections (model, probe, bonuses, layout) read the live models, the caches and the stored layout,
 -- and `sim` the simulator and test mode's sample data (state carries both mode flags); none scans,

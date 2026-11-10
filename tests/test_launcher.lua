@@ -13,7 +13,7 @@ test("launcher: the object is the brand, the 128 px logo, registered once OnEnab
     assertEqual(obj.type, "launcher")
 end)
 
-test("launcher: left-click opens the settings panel through the same opener as /skm config", function()
+test("launcher: left-click opens the settings panel through the same opener as /sm config", function()
     local real, opened = NS.OpenOptionsPanel, 0
     NS.OpenOptionsPanel = function() opened = opened + 1 end
     NS.Launcher:Object().OnClick(nil, "LeftButton")

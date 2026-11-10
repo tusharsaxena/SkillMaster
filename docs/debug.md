@@ -2,8 +2,8 @@
 
 ## The console
 
-LibKa0s-DebugLog-1.0's console (`core/DebugLogSetup.lua`). `/skm debug` toggles the window;
-`/skm debug on` and `/skm debug off` turn logging on and off. The flag is session-only
+LibKa0s-DebugLog-1.0's console (`core/DebugLogSetup.lua`). `/sm debug` toggles the window;
+`/sm debug on` and `/sm debug off` turn logging on and off. The flag is session-only
 (`NS.State.debug`, off at every login and `/reload`, never saved) and independent of the window, so a
 bug can be reproduced with the console closed and read afterwards. Lines are tag-first:
 `[Set]` (the write seam), `[Test]` (test mode and its sample data), `[Sim]` (the simulator and its
@@ -12,7 +12,7 @@ seam), `[Migrate]`, `[Bus]`, plus the library's own `[Cmd]`,
 
 ## The diagnostics report
 
-Two forms and no third: `/skm diagnostics` and `/skm debug diagnostics`, plus the console title bar's
+Two forms and no third: `/sm diagnostics` and `/sm debug diagnostics`, plus the console title bar's
 Diagnostics link. All three run `NS.DebugLog:RunDiagnostics()`.
 
 - It runs while the addon is disabled.

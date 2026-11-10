@@ -31,7 +31,7 @@ never through a captured local, and `tests/test_sim.lua` asserts `seam:Unwrapped
 
 The kit's Forever API set (`tests/_kit/client_globals_forever.lua`) lists the skill list as
 `C_SkillInfo.*` and none of the 1.12 globals. That set is best-effort, not a measurement, so the
-1.12 rung is not dead code under compat's dead-fallback-rung rule until `/skm probe` answers
+1.12 rung is not dead code under compat's dead-fallback-rung rule until `/sm probe` answers
 (`docs/midnight-quirks.md`, the addon's assumed-API table). When the probe confirms which API the
 client carries, delete the rung it rules out.
 

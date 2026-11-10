@@ -24,7 +24,7 @@ NS.Perf = lib:New({
     name      = addonName,
     addonName = addonName,
     title     = NS.Constants.BRAND,
-    slash     = "/skm",
+    slash     = "/sm",
     version   = NS.version,
     sv        = addonName .. "PerfDB",
     -- Declared in report order. Each is reached by a real bracket (tests/test_perf.lua):

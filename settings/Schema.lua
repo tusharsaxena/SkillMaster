@@ -9,7 +9,7 @@ NS.Schema = NS.Schema or {}
 local BRAND = NS.Constants.BRAND
 
 -- The degradation stub (options-ui-§1, route (a)): the library table's surface and an instance
--- that still reads and writes the profile, so `/skm enable` lands on a library-absent load.
+-- that still reads and writes the profile, so `/sm enable` lands on a library-absent load.
 local function HostSchemaStub()
     local stubLib = {}
     local function copy(v)

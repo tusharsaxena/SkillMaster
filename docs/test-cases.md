@@ -61,10 +61,10 @@ Total.
 
 - slash: every entry is a positional triple
 - slash: the reserved verbs are all present, `skin` directly after `config`
-- slash: /skm lock and /skm unlock write `locked` through the seam and echo it
-- slash: /skm test flips test mode, and again turns it off
+- slash: /sm lock and /sm unlock write `locked` through the seam and echo it
+- slash: /sm test flips test mode, and again turns it off
 - slash: the stub's one library string is pinned to the live major
-- slash: on a library-absent load, /skm enable still lands through writeThrough
+- slash: on a library-absent load, /sm enable still lands through writeThrough
 
 ### test_mainwindow.lua (5)
 
@@ -77,7 +77,7 @@ Total.
 ### test_launcher.lua (2)
 
 - launcher: the object is the brand, the 128 px logo, registered once OnEnable runs
-- launcher: left-click opens the settings panel through the same opener as /skm config
+- launcher: left-click opens the settings panel through the same opener as /sm config
 
 ### test_keybinds.lua (4)
 
@@ -102,7 +102,7 @@ Total.
 - skin: this addon is a registered owner wearing its stored choice
 - skin: writing the skin row applies it through the owner
 - skin: the picker's preview is the test mode (skinning-§10)
-- skin: /skm skin opens the library's picker
+- skin: /sm skin opens the library's picker
 
 ### test_perf.lua (2)
 
@@ -116,7 +116,7 @@ Total.
 - probe: headers lists the localized header names
 - probe: apis maps every probed name to a boolean
 - probe: enchant carries the weapon enchant returns (a lure's time left)
-- probe: /skm probe shows the report as JSON in the copy window
+- probe: /sm probe shows the report as JSON in the copy window
 - probe: C_SkillInfo and C_Item are read first, a table-shaped line kept whole
 
 ### test_skilldata.lua (24)
@@ -262,7 +262,7 @@ Total.
 
 ### test_journal.lua (10)
 
-- journal: /skm journal toggles it, through the one toggle handler
+- journal: /sm journal toggles it, through the one toggle handler
 - journal: the chrome is the shared one: the title, the wrapped close control, the window tier
 - journal: the tabs switch panels: Session Log first, then Alts
 - journal: the log lists skill-ups newest first, with the session's gains, and Clear empties it

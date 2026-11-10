@@ -28,7 +28,7 @@ at the first row not `done`.
 - Client: WoW Forever only. `## Interface: 16001`, one number, plus the Forever load-gating line from the
   standards branch (M0). No `IsRetail()` branch, no Retail seed list, no `WOW_PROJECT_*` read outside LibKa0s.
 - Title `Ka0s Skill Master`, folder/addon name `SkillMaster`, author `add1kted2ka0s`, MIT, `## X-Standard`
-  line, SavedVariables `SkillMasterDB, SkillMasterPerfDB`, slash `/skm` + `/skillmaster`.
+  line, SavedVariables `SkillMasterDB, SkillMasterPerfDB`, slash `/sm` + `/skillmaster`.
 - The standard (WowAddonStandards, **at the M0 branch**) wins over this plan on layout, file names and
   conventions. Read `NEW_ADDON.md` and `standards/NEW_ADDON_CONTEXT.md` from the M0 worktree into a temp
   directory, never into the repo.
@@ -113,7 +113,7 @@ then `<tmp>/LibKa0s → libs/LibKa0s/`, `<tmp>/testkit → tests/_kit/`. Prune i
 - [ ] Step 4: Run `KA0S_KIT_CLIENT=forever lua tests/run.lua` → all kit tests pass; luacheck 0/0.
 - [ ] Step 5: Commit `M1: scaffold Ka0s Skill Master (born compliant, Forever-only)`.
 
-### Task 1.2: `/skm probe`
+### Task 1.2: `/sm probe`
 
 **Files:** Create `modules/Probe.lua`, `tests/test_probe.lua`; add the `probe` row to `NS.COMMANDS`.
 
@@ -128,7 +128,7 @@ LibKa0s copy box as JSON.
   `C_Map.GetBestMapForUnit`, `CastSpellByName`, `IsAddOnLoaded("TomTom")`), `enchant` (weapon enchant returns).
 - [ ] Step 2: Run → FAIL. Step 3: implement. Step 4: Run → PASS.
 - [ ] Step 5: Create `docs/client-quirks.md` listing every assumed API shape as "assumed (1.12)" until the
-  probe confirms it. Commit. **Push** (M1 done) and ask the owner to run `/skm probe` when convenient. Never wait for it.
+  probe confirms it. Commit. **Push** (M1 done) and ask the owner to run `/sm probe` when convenient. Never wait for it.
 
 ## Milestone 2 — Data layer (parallel tasks, disjoint files)
 

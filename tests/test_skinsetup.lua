@@ -27,7 +27,7 @@ test("skin: the picker's preview is the test mode (skinning-§10)", function()
     assertTrue(not NS.IsTestMode(), "exit turns it off")
 end)
 
-test("skin: /skm skin opens the library's picker", function()
+test("skin: /sm skin opens the library's picker", function()
     local real, seen = NS.Helpers.SkinVerb, nil
     NS.Helpers.SkinVerb = function(spec) seen = spec return {}, nil end
     NS.Slash:OnSlash("skin")

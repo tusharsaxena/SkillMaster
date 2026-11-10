@@ -102,7 +102,7 @@ headless test harness.
 
 ### 5.4 Forever API probe (first implementation step)
 The Forever client's API surface is only partly known (LibKa0s#44). Before the data modules are built, a
-`/skm probe` verb dumps a JSON report the owner runs once in game. It covers the exact return shape of
+`/sm probe` verb dumps a JSON report the owner runs once in game. It covers the exact return shape of
 `GetSkillLineInfo` (temp points, modifier), what `GetWeaponEnchantInfo` returns while a lure is applied, the
 presence of `GetUnitSpeed`, `GetSpellBonusDamage`, `GetSpellCritChance`, `GetHitModifier`, `GetCombatRating`,
 `C_Map.SetUserWaypoint`, `C_Map.GetBestMapForUnit`, `CastSpellByName` protection, and the localized skill header
@@ -143,7 +143,7 @@ text value or both, and can be hidden.
 ### 6.4 Journal window (call)
 A second window with two tabs. *Session Log* lists skill-ups with timestamps, rate and ETA, and can be cleared.
 *Alts* is a grid of characters × skills with mini bars, filterable by category. It opens from the main window
-title bar, the launcher menu or `/skm journal`.
+title bar, the launcher menu or `/sm journal`.
 
 ### 6.5 Click targets (call)
 | Row | Opens |
@@ -179,7 +179,7 @@ Left-click opens settings and right-click opens the menu: **Enabled · Locked ·
 window**. The menu also gets a *Journal* entry **(call)**. Show window gets a `CLICK` key binding (launcher-§6).
 
 ### 6.9 Slash (call)
-`/skm` (alias `/skillmaster`): `show`, `hide`, `toggle`, `journal`, `lock`, `unlock`, `test`, `sim`, `probe`,
+`/sm` (alias `/skillmaster`): `show`, `hide`, `toggle`, `journal`, `lock`, `unlock`, `test`, `sim`, `probe`,
 `reset`, `config`, plus the standard verbs.
 
 ## 7. Saved variables (call)

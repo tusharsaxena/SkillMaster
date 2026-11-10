@@ -16,7 +16,7 @@ local _, NS = ...
 -- every client read a simulated character needs (preview-mode, H1): a module reads them as
 -- `NS.Compat.Member(...)` at call time and never captures one in a local.
 -- The skill list (T2.1): the kit's Forever API set lists it as C_SkillInfo.* and not as the 1.12
--- globals, so C_SkillInfo is read first and the 1.12 globals second, until `/skm probe` settles
+-- globals, so C_SkillInfo is read first and the 1.12 globals second, until `/sm probe` settles
 -- which the client carries (docs/midnight-quirks.md, the assumed-API table). The bare
 -- GetSkillLineInfo rung stays because the Forever set is best-effort, not measured.
 --
@@ -52,7 +52,7 @@ local function fromStruct(t)
         tempPoints = t.numTempPoints or 0,
         modifier   = t.skillModifier or 0,
         max        = t.skillMaxRank or 0,
-        -- The struct's ID, under whichever name the client uses (assumed until `/skm probe`).
+        -- The struct's ID, under whichever name the client uses (assumed until `/sm probe`).
         skillLineID = tonumber(t.skillLineID or t.skillID),
     }
 end
@@ -124,7 +124,7 @@ end
 -- The weapon temp enchant. Measured in game on WoW Forever 1.60.1 (2026-11-10): the call is
 -- `local enchants = C_Item.GetWeaponEnchantInfo(weaponSlot)`. It takes a slot and errors without
 -- one, and it answers one value, not 1.12's positional list. Neither the slot's encoding nor the
--- record's fields are measured yet (`/skm probe` records both), so the shim tries the plausible slot
+-- record's fields are measured yet (`/sm probe` records both), so the shim tries the plausible slot
 -- arguments under pcall, remembers the first that does not error, and reads the record by any
 -- plausible field name. The 1.12 global keeps its own positional shape.
 

@@ -697,7 +697,7 @@ end
 
 function J.Hide() if frame then frame:Hide() end end
 
---- The one toggle handler: `/skm journal` (and, at integration, the title-bar and launcher entries).
+--- The one toggle handler: `/sm journal` (and, at integration, the title-bar and launcher entries).
 function J.Toggle()
     if J.IsShown() then J.Hide() return false end
     return J.Show()

@@ -32,12 +32,12 @@ the checks below that cover each item:
 
 ## Window
 
-- **SM-WIN-1** `/skm toggle` opens the window titled Skill Master; Escape and the close button hide it.
-- **SM-WIN-2** Drag it, `/reload`: it reopens where it was dropped. `/skm lock`: it no longer drags.
-- **SM-WIN-3** `/skm test`: an amber band says the skills shown are sample data. Enter combat: the
+- **SM-WIN-1** `/sm toggle` opens the window titled Skill Master; Escape and the close button hide it.
+- **SM-WIN-2** Drag it, `/reload`: it reopens where it was dropped. `/sm lock`: it no longer drags.
+- **SM-WIN-3** `/sm test`: an amber band says the skills shown are sample data. Enter combat: the
   band disappears and test mode is off.
 - **SM-WIN-4** Bind keys under Options → Keybindings → Ka0s Skill Master: *Toggle skills window* toggles
-  the window and *Toggle journal* toggles the Journal. `/skm disable`: each press refuses on one line.
+  the window and *Toggle journal* toggles the Journal. `/sm disable`: each press refuses on one line.
 
 ## Display (M3)
 
@@ -72,11 +72,11 @@ the checks below that cover each item:
   Skinning, Mining, Herbalism and Fishing rows carry one muted hint line under the bar.
 ## Journal
 
-- **SM-JRN-1** `/skm journal` opens "Skill Master · Journal" with Session Log and Alts tabs; Escape and
+- **SM-JRN-1** `/sm journal` opens "Skill Master · Journal" with Session Log and Alts tabs; Escape and
   the close mark close it; drag it, `/reload`, and it opens where it was dropped.
 - **SM-JRN-4** Drag the Journal's bottom-right grip continuously: the window follows the pointer
   without lag and never gets smaller than it opened; release: more log rows show. `/reload`: it
-  opens at the dragged size. Lock the window (`/skm lock`): the grip does nothing.
+  opens at the dragged size. Lock the window (`/sm lock`): the grip does nothing.
 - **SM-JRN-2** Gain a skill point: a row appears at the top of Session Log with the time, the skill,
   `old -> new` and the zone, and the session card counts it. A second gain of the same skill gives it
   an ETA. Clear log empties the list; New session sets the count back to +0.
@@ -146,49 +146,49 @@ the checks below that cover each item:
   strata does the same for a detached block.
 - **SM-OPT-11** Bars > Colors: with Use the skin's colors on (the default) the bars show the
   mockup's category colors; turn it off and change the Weapon skills swatch: the weapon bars take it.
-- **SM-OPT-12** During a simulation (`/skm sim`, start the trip), right-click a row: Pin to the
+- **SM-OPT-12** During a simulation (`/sm sim`, start the trip), right-click a row: Pin to the
   broker feed is grayed out and does nothing. With test mode on, the All feed starts `Fishing 107+25/150`
   and a `{equippedWeapon}` template reads `Guns 105+5/110`, whatever your own pin and weapon.
 
 ## Disabled
 
-- **SM-OFF-1** `/skm disable`: the window hides, `/skm toggle` answers one disabled line, the key
-  binding does nothing, the right-click menu grays all but Enabled. `/skm enable` restores it.
+- **SM-OFF-1** `/sm disable`: the window hides, `/sm toggle` answers one disabled line, the key
+  binding does nothing, the right-click menu grays all but Enabled. `/sm enable` restores it.
 
 ## Test mode and the simulator
 
-- **SM-TEST-1** `/skm test`: the window, a detached block, the broker feeds and the Journal all show
+- **SM-TEST-1** `/sm test`: the window, a detached block, the broker feeds and the Journal all show
   Ember Ironsong, the level-22 Dwarf Hunter (Leatherworking 146/150, Fishing 107 +25 with a lure
   timer near 4:12, Guns 105 +5, Fist Weapons, Polearms, Thrown and Riding unlearned), the summary
-  reads "Lv 22 · Dwarf Hunter" and the strip says the data is sample data. `/skm test` again: your
+  reads "Lv 22 · Dwarf Hunter" and the strip says the data is sample data. `/sm test` again: your
   own character everywhere.
 - **SM-SIM-1** Tick General → Master controls → Sim mode: the step panel opens beside the window and
   the box stays ticked. Start the fishing trip: every 3 s a step plays; a skill-up flashes the broker
   and adds a Journal line, the lure puts a teal segment on Fishing, the mount moves Run Speed to
   160%. The window shows the cyan simulation strip.
-- **SM-SIM-2** Untick Sim mode (or the launcher's Sim mode entry, or `/skm sim stop`): the session
+- **SM-SIM-2** Untick Sim mode (or the launcher's Sim mode entry, or `/sm sim stop`): the session
   ends, your own skills, Journal log and broker gains are back, and `/reload` shows nothing of the
-  session was saved. Entering combat or `/skm disable` ends a session too; test mode refuses while one
+  session was saved. Entering combat or `/sm disable` ends a session too; test mode refuses while one
   runs and the simulator refuses in test mode, combat, an instance or a group.
-- **SM-SIM-3** With test mode on, `/skm diagnostics`: the state line reads `testMode=true`, the model
+- **SM-SIM-3** With test mode on, `/sm diagnostics`: the state line reads `testMode=true`, the model
   section `preview source=on` and the sim section `preview data=true`; during a simulation the state
   line reads `simMode=true` and the sim section names the scenario and its step.
 
 
 ## Probe
 
-- **SM-PROBE-1** `/skm probe`: a copy window opens with a JSON report, `skillLines` holding every
+- **SM-PROBE-1** `/sm probe`: a copy window opens with a JSON report, `skillLines` holding every
   skill (a collapsed header in the Skills tab is collapsed again afterwards). Copy it and send it to
   the author; it settles the assumed rows in `docs/midnight-quirks.md`.
 
 ## Skins and diagnostics
 
-- **SM-SKIN-1** `/skm skin`: pick Ka0s Default, Apply. The window and the debug console change look.
-- **SM-SKIN-2** `/skm skin` once per shipped skin (every entry of the picker, WoW Forever included),
+- **SM-SKIN-1** `/sm skin`: pick Ka0s Default, Apply. The window and the debug console change look.
+- **SM-SKIN-2** `/sm skin` once per shipped skin (every entry of the picker, WoW Forever included),
   Apply each: the window, a detached block, the Journal, the trainer popup, an alert toast and the
   broker tooltip all restyle, and every character on them draws (no empty boxes in the legend, the
   block headers' fallback marks, the Journal's `old -> new` or the stat tooltip's marker lines). The
   category colors stay told apart (Primary blue, Secondary green, Weapon orange, Other violet) and
   the lure's teal and the racial's blue bonus segments keep their own colors.
-- **SM-DIAG-1** `/skm diagnostics`: the report appears in the debug console with the ten sections
+- **SM-DIAG-1** `/sm diagnostics`: the report appears in the debug console with the ten sections
   (identity, settings, state, skin, model, probe, bonuses, layout, sim, rejected).

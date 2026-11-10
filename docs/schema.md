@@ -23,10 +23,10 @@ SkillMasterDB
     log = {}                     -- the session log's ring (modules/SessionLog.lua): the newest 500
                                  -- { t, key, old, new, zone }, oldest first
   profiles.<name>
-    enabled = true               -- Enable Ka0s Skill Master; /skm enable, /skm disable
+    enabled = true               -- Enable Ka0s Skill Master; /sm enable, /sm disable
     scale   = 1                  -- Master scale (0.5 .. 2)
     alpha   = 1                  -- Master opacity (0 .. 1)
-    locked  = false              -- Lock frame; /skm lock, /skm unlock
+    locked  = false              -- Lock frame; /sm lock, /sm unlock
     window  = { point = false }  -- drop point, written only by modules/MainWindow.lua
     skin = {
       source = "ka0s", skin = <library default: WoW Forever>,

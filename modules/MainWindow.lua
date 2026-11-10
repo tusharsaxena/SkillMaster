@@ -477,7 +477,7 @@ function W.Hide()
     if NS.SecureOverlay then NS.SecureOverlay:Sync() end   -- OnHide does too; an Escape reaches only that
 end
 
---- The ONE toggle handler: `/skm toggle`, the launcher's Show window entry and the key binding.
+--- The ONE toggle handler: `/sm toggle`, the launcher's Show window entry and the key binding.
 function W.Toggle()
     if W.IsShown() then W.Hide() return false end
     return W.Show()

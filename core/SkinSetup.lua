@@ -160,7 +160,7 @@ function NS.RunSkinVerb()
         why = "absent"
     end
     if win == nil and why == "absent" then
-        NS.Print(NS.L["%s is unavailable: the LibKa0s library did not load."]:format("/skm skin"))
+        NS.Print(NS.L["%s is unavailable: the LibKa0s library did not load."]:format("/sm skin"))
     end
     return win, why
 end

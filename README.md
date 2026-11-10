@@ -15,21 +15,21 @@ Skill Master puts every skill your character has into one window of bars you can
 - Four broker feeds for Titan Panel and the like, alerts when a profession caps or a weapon falls behind, a Journal with this session's skill-ups and an overview of your alts.
 - Every part of the look is a setting: bar sizes, fill direction, colors, border, font, text, one or two columns, frame layering, and skins.
 
-You set it up in the game's Settings → AddOns → Ka0s Skill Master, or with `/skm`.
+You set it up in the game's Settings → AddOns → Ka0s Skill Master, or with `/sm`.
 
 ## Usage
 
-Type `/skm toggle` to open or close the window, or bind a key to it. The game's Options → Keybindings → Ka0s Skill Master has two keys, *Toggle skills window* and *Toggle journal*, and the General page's Keybindings tab in this addon's settings sets the same two. The window remembers where you dropped it. `/skm lock` stops it from moving and `/skm unlock` lets you drag it again; the close button or Escape puts it away.
+Type `/sm toggle` to open or close the window, or bind a key to it. The game's Options → Keybindings → Ka0s Skill Master has two keys, *Toggle skills window* and *Toggle journal*, and the General page's Keybindings tab in this addon's settings sets the same two. The window remembers where you dropped it. `/sm lock` stops it from moving and `/sm unlock` lets you drag it again; the close button or Escape puts it away.
 
 Each block has a header. Click it to collapse the block, or use the mark on its right to pull the block out into a frame of its own that you can place anywhere; the same mark on the frame docks it again. Hover a row for the details. Click a profession to open its window (out of combat), click a weapon or Defense for the Skills tab, and click an unlearned skill to see its trainers and set a waypoint. Shift-click puts the skill into chat. Right-click gives you the row menu, where you can pin a skill to the broker feed or hide the row.
 
-Test mode fills everything with a sample character, a level 22 Dwarf Hunter, so you can try a layout before your own character has the skills to show it. Turn it on with `/skm test`, from the minimap button's right-click menu, or with the Test mode box under General → Master controls; a band across the window says you are looking at sample data, and combat ends it. Sim mode plays a short fishing trip on the same character: a skill-up every few seconds, a lure going on and off, a mount changing your speed. Start it with `/skm sim` or the Sim mode box, and stopping it puts your own character back. Neither saves anything.
+Test mode fills everything with a sample character, a level 22 Dwarf Hunter, so you can try a layout before your own character has the skills to show it. Turn it on with `/sm test`, from the minimap button's right-click menu, or with the Test mode box under General → Master controls; a band across the window says you are looking at sample data, and combat ends it. Sim mode plays a short fishing trip on the same character: a skill-up every few seconds, a lure going on and off, a mount changing your speed. Start it with `/sm sim` or the Sim mode box, and stopping it puts your own character back. Neither saves anything.
 
-`/skm skin` opens the skin picker. While it is open the window shows in test mode so you can see each skin as you pick it, and the eye button turns that preview off and on. Press Apply to keep the skin. Closing the picker without applying puts everything back the way it was.
+`/sm skin` opens the skin picker. While it is open the window shows in test mode so you can see each skin as you pick it, and the eye button turns that preview off and on. Press Apply to keep the skin. Closing the picker without applying puts everything back the way it was.
 
-`/skm journal` (or the journal mark in the window's title bar) opens the Journal: this session's skill-ups with an estimate of when the next one lands, and your other characters' skills side by side. The minimap button opens the settings on a left-click and a menu on a right-click. `/skm disable` turns the whole addon off until you type `/skm enable`. Once, when you have a moment, type `/skm probe` and send the text it shows to the author; it describes how WoW Forever reports your skills and changes nothing.
+`/sm journal` (or the journal mark in the window's title bar) opens the Journal: this session's skill-ups with an estimate of when the next one lands, and your other characters' skills side by side. The minimap button opens the settings on a left-click and a menu on a right-click. `/sm disable` turns the whole addon off until you type `/sm enable`. Once, when you have a moment, type `/sm probe` and send the text it shows to the author; it describes how WoW Forever reports your skills and changes nothing.
 
-Everything else lives under Settings → AddOns → Ka0s Skill Master, and `/skm help` (or `/skillmaster help`) lists every command.
+Everything else lives under Settings → AddOns → Ka0s Skill Master, and `/sm help` (or `/skillmaster help`) lists every command.
 
 ## How the bars work
 
@@ -52,18 +52,18 @@ Everything else lives under Settings → AddOns → Ka0s Skill Master, and `/skm
 
 | Symptom | Fix |
 |---|---|
-| The window doesn't move when I drag it | It is locked. Type `/skm unlock`. |
+| The window doesn't move when I drag it | It is locked. Type `/sm unlock`. |
 | Clicking a profession does nothing | You are in combat. Professions open from the window once combat ends. |
-| `/skm toggle` says the addon is disabled | Type `/skm enable`. |
-| The window shows a Dwarf Hunter's skills | Test mode is on. Type `/skm test` to turn it off. |
+| `/sm toggle` says the addon is disabled | Type `/sm enable`. |
+| The window shows a Dwarf Hunter's skills | Test mode is on. Type `/sm test` to turn it off. |
 | The window sits behind my bags or another window | Raise it under Layout → Window strata. |
 | Something looks wrong and I want to report it | Follow [Reporting a bug](#reporting-a-bug) below. |
 
 ## Reporting a bug
 
-- Type `/skm debug on` and reproduce the bug.
-- Type `/skm diagnostics`.
-- If the debug window isn't open, open it with `/skm debug`. Press **Copy**, copy the entire output, and include it with your bug report.
+- Type `/sm debug on` and reproduce the bug.
+- Type `/sm diagnostics`.
+- If the debug window isn't open, open it with `/sm debug`. Press **Copy**, copy the entire output, and include it with your bug report.
 
 The report is added after the debug trace in the same window, so one copy carries both.
 

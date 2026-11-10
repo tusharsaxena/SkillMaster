@@ -1,6 +1,6 @@
 # Slash dispatch — Ka0s Skill Master
 
-`/skm` and `/skillmaster` reach one LibKa0s-Slash-1.0 dispatcher over `NS.COMMANDS`
+`/sm` and `/skillmaster` reach one LibKa0s-Slash-1.0 dispatcher over `NS.COMMANDS`
 (`settings/Slash.lua`). The bare command opens the settings panel; `options` is an alias of
 `config`. The dispatcher's own refusals are `[Cmd]` lines in the debug console.
 

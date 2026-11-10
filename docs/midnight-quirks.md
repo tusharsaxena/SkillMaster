@@ -276,7 +276,7 @@ Each needs an in-game probe, recorded with the build, before any section of this
 
 WoW Forever's API is only partly known (LibKa0s#44). The data modules are built against the vanilla
 1.12 return shapes behind feature detection (design §12, item 1), and every shape they rely on is
-listed below as **assumed (1.12)** until the owner runs `/skm probe` in game and sends the JSON back.
+listed below as **assumed (1.12)** until the owner runs `/sm probe` in game and sends the JSON back.
 The probe (`modules/Probe.lua`) reports each row's presence under `apis`, the raw returns of every
 skill line under `skillLines` (and under `skillSource` which API it read them from), the localized
 header names under `headers` and the weapon-enchant returns under `enchant`. A `"<nil>"` in the report

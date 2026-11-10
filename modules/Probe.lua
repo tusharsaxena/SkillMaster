@@ -1,5 +1,5 @@
 local addonName, NS = ...
--- modules/Probe.lua — `/skm probe`: a one-shot report of the WoW Forever API shapes the data
+-- modules/Probe.lua — `/sm probe`: a one-shot report of the WoW Forever API shapes the data
 -- modules depend on (design §5.4). The owner runs it once in game and sends the JSON back; it
 -- corrects the "assumed (1.12)" rows in docs/midnight-quirks.md.
 --
@@ -209,7 +209,7 @@ P.__copy = NS.Widgets.CopyWindow({
 function P.Verb()
     local encode = NS.PerfEncodeJSON   -- through core/PerfSetup.lua (library-stack-§7)
     if not (encode and P.__copy) then
-        NS.Print(L["%s is unavailable: the LibKa0s library did not load."]:format("/skm probe"))
+        NS.Print(L["%s is unavailable: the LibKa0s library did not load."]:format("/sm probe"))
         return nil
     end
     local json = encode(P.Run())

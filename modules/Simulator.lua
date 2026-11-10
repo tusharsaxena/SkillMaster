@@ -12,7 +12,7 @@ local addonName, NS = ...
 -- (NS.SessionLog:Override), alt snapshots stand aside while a session runs, and the stop puts the
 -- skills model, the alerts' and the broker's session state back as they were.
 --
--- Three surfaces, one handler (preview-mode, options-ui-§15, launcher-§2): `/skm sim …`, the
+-- Three surfaces, one handler (preview-mode, options-ui-§15, launcher-§2): `/sm sim …`, the
 -- launcher's Sim mode entry and the Master-controls Sim mode checkbox, the last two through
 -- NS.IsSimMode / NS.ToggleSim. NS.Sim is the library instance (or the reference stub); this file's
 -- own fields are on NS.SimHost (C.4).
@@ -306,7 +306,7 @@ end
 --- The descriptor (LibKa0s-Sim-1.0, `Sim:New(d)`).
 function H.Descriptor()
     return {
-        name = addonName, seam = NS.SimSeam, slash = "/skm sim",
+        name = addonName, seam = NS.SimSeam, slash = "/sm sim",
         deliver = H.Deliver,
         isStoodDown = function() return NS.IsStoodDown() end,
         scenarios = { names = { H.SCENARIO }, defs = { [H.SCENARIO] = {
@@ -370,7 +370,7 @@ function NS.IsSimMode() return NS.Sim:IsPanelShown() or NS.Sim:IsActive() end
 --- Whether a session is running (the window's simulation strip reads this).
 function NS.IsSimRunning() return NS.Sim:IsActive() end
 
---- The one toggle: on, what the bare `/skm sim` does (the status, the usage and the step panel);
+--- The one toggle: on, what the bare `/sm sim` does (the status, the usage and the step panel);
 --- off, stop a running session and hide the panel.
 function NS.ToggleSim()
     if NS.IsSimMode() then

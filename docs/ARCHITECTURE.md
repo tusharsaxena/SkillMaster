@@ -44,7 +44,7 @@ catalog, the class weapon lists, trainers, ranks, gathering, fishing, racials, s
 `modules/` holds the display (the bar widget `NS.Bar`, the title-bar controls `NS.Chrome`, the
 blocks `NS.Blocks`, the rows `NS.Rows`, the detached frames, the main window, the secure crafting
 overlays, the click map `NS.Interact`, the row tooltip, the trainer popup and `NS.Waypoints`), the
-`/skm probe` report, the skills model (`SkillData`), the bonus breakdown (`Bonuses`), the stats
+`/sm probe` report, the skills model (`SkillData`), the bonus breakdown (`Bonuses`), the stats
 model (`StatData`), the trainer lookups (`Trainers`), the skill helpers (`NS.SkillHelpers`,
 `modules/Helpers.lua`), the session log (`NS.SessionLog`), the alt snapshots (`NS.Alts`), the
 Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), the broker feeds
@@ -92,7 +92,7 @@ in `modules/Detached.lua` (a detached frame's `OnDragStop`). `docked`, `order` a
 settings like any other, with schema rows on the Layout page (T5.1), and every actor writes them
 through `NS.SetByPath` (architecture-§5): the block header and the detached frame's buttons
 (`NS.Blocks:Detach` / `:Dock` / `:SetCollapsed`), the Block order drag list (`:Move`, every changed
-`order` inside one bulk bracket, one `LAYOUT_CHANGED`) and `/skm set`. The `docked` and `collapsed`
+`order` inside one bulk bracket, one `LAYOUT_CHANGED`) and `/sm set`. The `docked` and `collapsed`
 rows' `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`) stores the value and waits out combat;
 `order` stores plainly, its `onChange` `NS.Blocks.OrderChanged`. The seam logs each write
 (debug-logging-§10). `shown`, `scale` and `locked` are plain rows. `skills.hidden` /
@@ -130,7 +130,7 @@ strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDAT
 
 ## Slash Commands
 
-`/skm` and `/skillmaster`, one LibKa0s-Slash-1.0 dispatcher over `NS.COMMANDS` (`settings/Slash.lua`):
+`/sm` and `/skillmaster`, one LibKa0s-Slash-1.0 dispatcher over `NS.COMMANDS` (`settings/Slash.lua`):
 `help`, `config`, `skin`, `show`, `hide`, `toggle`, `journal`, `lock`, `unlock`, `test`, `sim`, `probe`, `enable`, `disable`,
 `list`, `get`, `set`, `reset`, `resetall`, `debug`, `diagnostics`, `perf`, `version`. The bare
 command opens the settings panel. While disabled, every verb but the library's live set refuses on
@@ -202,7 +202,7 @@ a crafting row opens the main window scrolled to it rather than casting (design 
 - The launcher menu has no *Journal* entry yet (design §6.8): `LibKa0s-Launcher-1.0` minor 9 builds
   only its fixed entries (Enabled, Locked, Test mode, Sim mode, Show window, Open settings), takes
   no extra entry from the descriptor, and launcher-§2 forbids a host menu. It needs a library seam;
-  until then the Journal opens from `/skm journal` and the main window's title-bar journal mark.
+  until then the Journal opens from `/sm journal` and the main window's title-bar journal mark.
 - Broker displays that only call a data object's `OnTooltipShow` show no feed tooltip: the feeds
   supply `OnEnter` / `OnLeave` (their rows are clickable), not `OnTooltipShow`.
 - The Alts grid shows five skill columns at a time; Shift + mouse wheel pages through the rest.
@@ -217,7 +217,7 @@ a crafting row opens the main window scrolled to it rather than casting (design 
   client's record carries one; a positional (1.12-shaped) record has none, and its lines and the
   excluded headers are matched on the locale's strings, which only enUS ships today. Such a client
   sorts its lines into Other until the locale files are translated (Documented deviations).
-- Every client API the data modules use is assumed until `/skm probe` confirms it
+- Every client API the data modules use is assumed until `/sm probe` confirms it
   ([midnight-quirks.md](midnight-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.
 
@@ -274,7 +274,7 @@ and its status ledger) and `docs/investigations/`. Only `docs/superpowers/` and
 
 | Rule | What differs | Why | Decided | Re-check trigger |
 |---|---|---|---|---|
-| localization-§4 | Three things still match on a localized name, through the locale keys (`NS.L`): a skill line whose record carries no skill-line ID (the 1.12 positional list), the three excluded Skills-tab headers (Class Skills, Armor Proficiencies, Languages) and the crafting spell when `NS.Compat.SpellName` answers nothing for its ID. Every record that carries an ID is matched on it first (`NS.SkillLineIDToKey`), and the crafting cast uses the name its spell ID resolves to. | The client hands no ID for a 1.12-shaped line or for a header, so the locale key is the only route; enUS ships the strings, the other locale files are stubs, so a non-enUS client on the positional shape sorts its lines into Other until they are translated (Known Limitations). | 2026-11-10, M6 review F-001 | `/skm probe` shows whether Forever's struct carries a skill-line ID (then only the headers remain), or the locale files gain the skill-line and header strings |
+| localization-§4 | Three things still match on a localized name, through the locale keys (`NS.L`): a skill line whose record carries no skill-line ID (the 1.12 positional list), the three excluded Skills-tab headers (Class Skills, Armor Proficiencies, Languages) and the crafting spell when `NS.Compat.SpellName` answers nothing for its ID. Every record that carries an ID is matched on it first (`NS.SkillLineIDToKey`), and the crafting cast uses the name its spell ID resolves to. | The client hands no ID for a 1.12-shaped line or for a header, so the locale key is the only route; enUS ships the strings, the other locale files are stubs, so a non-enUS client on the positional shape sorts its lines into Other until they are translated (Known Limitations). | 2026-11-10, M6 review F-001 | `/sm probe` shows whether Forever's struct carries a skill-line ID (then only the headers remain), or the locale files gain the skill-line and header strings |
 
 ### Files over the 1500-line cap
 

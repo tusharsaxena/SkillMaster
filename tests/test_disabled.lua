@@ -170,14 +170,14 @@ test("disabled 7: every live verb answers, and each feature verb refuses on one 
         local out = M.__printed()
         if verb == "help" then
             -- help prints the whole index while disabled (the library heads it with the notice).
-            assertTrue(#out > 2, "/skm help prints the index while disabled: " .. joined(out))
+            assertTrue(#out > 2, "/sm help prints the index while disabled: " .. joined(out))
         elseif LIVE[verb] then
             for _, line in ipairs(out) do
-                assertFalse(line:find(refusal, 1, true) ~= nil, "/skm " .. verb .. " refused: " .. line)
+                assertFalse(line:find(refusal, 1, true) ~= nil, "/sm " .. verb .. " refused: " .. line)
             end
         else
-            assertEqual(#out, 1, "/skm " .. verb .. " refuses on ONE line: " .. joined(out))
-            assertTrue(out[1]:find(refusal, 1, true) ~= nil, "/skm " .. verb .. ": " .. tostring(out[1]))
+            assertEqual(#out, 1, "/sm " .. verb .. " refuses on ONE line: " .. joined(out))
+            assertTrue(out[1]:find(refusal, 1, true) ~= nil, "/sm " .. verb .. ": " .. tostring(out[1]))
         end
     end
     -- The reserved verbs' other forms: `debug diagnostics` answers as `diagnostics` does.
@@ -186,16 +186,16 @@ test("disabled 7: every live verb answers, and each feature verb refuses on one 
         M.__resetPrinted()
         NS.Slash:OnSlash(line)
         local out = M.__printed()
-        assertTrue(#out >= 1, "/skm " .. line .. " printed nothing while disabled")
+        assertTrue(#out >= 1, "/sm " .. line .. " printed nothing while disabled")
         for _, l in ipairs(out) do
-            assertFalse(l:find(refusal, 1, true) ~= nil, "/skm " .. line .. " refused: " .. l)
+            assertFalse(l:find(refusal, 1, true) ~= nil, "/sm " .. line .. " refused: " .. l)
         end
     end
     NS.DebugLog:Hide()
     disable()
     opened = 0
     NS.Slash:OnSlash("")
-    assertEqual(opened, 1, "a bare /skm opens the settings panel while disabled")
+    assertEqual(opened, 1, "a bare /sm opens the settings panel while disabled")
     NS.OpenOptionsPanel = realOpen
     enable()
     -- Under the perf hold alone, a feature verb answers the capture line, never the disabled one.

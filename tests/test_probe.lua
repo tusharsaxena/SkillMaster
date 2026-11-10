@@ -1,4 +1,4 @@
--- tests/test_probe.lua — `/skm probe`: the Forever API report the owner runs once in game
+-- tests/test_probe.lua — `/sm probe`: the Forever API report the owner runs once in game
 -- (design §5.4, plan Task 1.2).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
@@ -82,7 +82,7 @@ test("probe: enchant carries the weapon enchant returns (a lure's time left)", f
     assertEqual(r.enchant[2], 252000)
 end)
 
-test("probe: /skm probe shows the report as JSON in the copy window", function()
+test("probe: /sm probe shows the report as JSON in the copy window", function()
     installSkills()
     local shown
     local realCopy = NS.Probe.__copy
