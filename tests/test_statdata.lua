@@ -266,3 +266,33 @@ test("statdata: the speed ticker runs only while a speed display asks for it", f
     restore()
     assertEqual(got, after, "no tick after the watch ends")
 end)
+
+-- WoW Forever 1.60.1, measured in game 2026-11-10: UnitStat answered secret numbers inside an AceTimer
+-- callback, and groupMax's comparison raised "attempt to compare field 'value' (a secret number value)".
+test("stats: a secret read never raises and keeps the stat's last plain value, marked stale", function()
+    local Kit = T.kit
+    scan()   -- a plain scan first: Strength 48
+    local restoreSecret = Kit.installSecretValue()
+    local apis = fixture()
+    apis.UnitStat = function(_, i) local v = PRIMARIES[i] return Kit.secret(v - 5), Kit.secret(v), 5, 0 end
+    apis.GetCritChance = function() return Kit.secret(9) end
+    local ok, model = pcall(function() return scan(apis) end)
+    restoreSecret()
+    assertTrue(ok, "a secret answer must not raise: " .. tostring(model))
+    local str = entry(model, "base", "strength") or entry(model, "primary", "strength")
+    for _, g in pairs(model) do for _, e in ipairs(g) do if e.key == "strength" then str = e end end end
+    assertTrue(str ~= nil, "Strength kept from the last plain scan")
+    assertEqual(str.value, 48); assertTrue(str.stale, "marked stale")
+    assertTrue(NS.StatData.sawSecret, "the scan notes it met a secret")
+    -- the next plain scan reads fresh values again
+    local fresh = scan()
+    for _, g in pairs(fresh) do for _, e in ipairs(g) do
+        if e.key == "strength" then assertEqual(e.stale, nil); assertEqual(e.value, 48) end
+    end end
+end)
+
+test("stats: leaving combat asks for a rescan (PLAYER_REGEN_ENABLED)", function()
+    local found = false
+    for _, ev in ipairs(NS.StatData.EVENTS) do if ev == "PLAYER_REGEN_ENABLED" then found = true end end
+    assertTrue(found)
+end)

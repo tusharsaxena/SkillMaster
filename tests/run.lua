@@ -40,6 +40,7 @@ Kit.setSurfaceSource{
 
 _G.SKM_TEST = Kit.expose{
     NS = NS, mocks = mocks, Loader = Loader,
+    kit = Kit,   -- the secret-value simulator (Kit.secret, Kit.installSecretValue)
     loadedAddonFiles = ADDON_FILES,
     loadedLibFiles   = LIB_FILES,
 }

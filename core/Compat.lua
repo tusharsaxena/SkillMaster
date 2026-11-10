@@ -148,9 +148,13 @@ local EXPIRY_KEYS = { "expiration", "expirationTime", "expirationMs", "timeRemai
 local CHARGE_KEYS = { "charges", "numCharges", "count" }
 local ID_KEYS     = { "enchantID", "enchantId", "id", "spellID" }
 
+local function isSecret(v) return type(issecretvalue) == "function" and issecretvalue(v) and true or false end
+
+--- The first of `keys` the record carries plainly; a secret field reads as absent.
 local function firstField(rec, keys)
     for _, k in ipairs(keys) do
-        if rec[k] ~= nil then return rec[k], k end
+        local v = rec[k]
+        if v ~= nil and not isSecret(v) then return v, k end
     end
     return nil
 end
@@ -167,6 +171,7 @@ end
 --- One enchant record (or an array of them, or the 1.12 positional list) in the 1.12 shape.
 --- @return boolean|nil hasMain, number|nil msLeft, number|nil charges, number|nil enchantID
 function Compat.NormalizeEnchant(first, ...)
+    if isSecret(first) then return nil end
     if type(first) ~= "table" then return first, ... end   -- positional (1.12 / an older build)
     local rec = first[1] ~= nil and first[1] or first
     if type(rec) ~= "table" or next(rec) == nil then return false end

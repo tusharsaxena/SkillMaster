@@ -333,3 +333,44 @@ test("bonuses: a temp '+N' line that names no skill starts no ticker", function(
         assertTrue(ticker == nil, "no skill bonus is live: no 1 s ticker")
     end)
 end)
+
+-- WoW Forever 1.60.1, measured in game 2026-11-10: GetBuffDataByIndex raised "Auras cannot be accessed
+-- when secret while tainted by 'SkillMaster'" from the ticker.
+test("bonuses: a blocked aura read never raises and keeps the last buffs read in full", function()
+    local w = {
+        race = { "Gnome", "Gnome" }, now = 50,
+        skills = { fishing = entry("fishing", "Fishing", 120, 150, 10) },
+        buffs = { { name = "Fisherman's Focus", auraInstanceID = 9, expirationTime = 650 } },
+        buffLines = { [9] = { "Fisherman's Focus", "Increased Fishing +10." } },
+    }
+    withWorld(w, function()
+        assertEqual(#NS.Bonuses:Breakdown("fishing").sources, 1, "plain read first")
+        M.C_UnitAuras = { GetBuffDataByIndex = function()
+            error("GetBuffDataByIndex(): Auras cannot be accessed when secret while tainted by 'SkillMaster'")
+        end }
+        NS.Bonuses.Invalidate("buffs")
+        local ok, b = pcall(NS.Bonuses.Breakdown, NS.Bonuses, "fishing")
+        assertTrue(ok, "must not raise: " .. tostring(b))
+        assertEqual(b.sources[1].source, "buff", "the last full buff list stands in")
+        assertTrue(NS.Bonuses.buffsBlocked, "notes the read was blocked")
+        local ok2, live = pcall(NS.Bonuses.HasLiveTemp)
+        assertTrue(ok2, tostring(live))
+    end)
+end)
+
+test("bonuses: an aura with a secret field is treated as a blocked read", function()
+    local Kit = T.kit
+    local restore = Kit.installSecretValue()
+    local ok, err = pcall(withWorld, {
+        race = { "Gnome", "Gnome" }, now = 50,
+        skills = { fishing = entry("fishing", "Fishing", 120, 150, 10) },
+        buffs = { { name = "Fisherman's Focus", auraInstanceID = 9, expirationTime = Kit.secret(650) } },
+        buffLines = { [9] = { "Fisherman's Focus", "Increased Fishing +10." } },
+    }, function()
+        local b = NS.Bonuses:Breakdown("fishing")
+        assertTrue(NS.Bonuses.buffsBlocked)
+        for _, s in ipairs(b.sources) do assertTrue(s.source ~= "buff" or s.expires ~= nil) end
+    end)
+    restore()
+    assertTrue(ok, tostring(err))
+end)

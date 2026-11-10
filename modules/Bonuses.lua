@@ -88,18 +88,32 @@ function B.ItemLines(slot)
     return linesOfScan(slot)
 end
 
---- The player's buffs as { label, expires, lines }; empty when the aura readers are absent.
+--- One aura record as { label, expires, lines }, or nil when any field it needs is secret.
+local function buffOf(aura, tip)
+    local name, expiry, id = aura.name, aura.expirationTime, aura.auraInstanceID
+    if isSecret(name) or isSecret(expiry) or isSecret(id) then return nil end
+    local ok, data = pcall(tip, "player", id)
+    if not ok then return nil end
+    local expires = tonumber(expiry)
+    return { label = name, expires = (expires and expires > 0) and expires or nil, lines = linesOfData(data) }
+end
+
+--- The player's buffs as { label, expires, lines }; empty when the aura readers are absent. On WoW
+--- Forever GetBuffDataByIndex raises "Auras cannot be accessed when secret while tainted" (measured
+--- 2026-11-10), so each read is pcalled: a blocked read answers nil, and the caller keeps the last
+--- list it read in full.
 local function buffs()
     local get = C_UnitAuras and C_UnitAuras.GetBuffDataByIndex
     local tip = C_TooltipInfo and C_TooltipInfo.GetUnitBuffByAuraInstanceID
     local out = {}
     if type(get) ~= "function" or type(tip) ~= "function" then return out end
     for i = 1, B.MAX_BUFFS do
-        local aura = get("player", i)
+        local ok, aura = pcall(get, "player", i)
+        if not ok or isSecret(aura) then return nil end
         if not aura then break end
-        local expires = tonumber(aura.expirationTime)
-        out[#out + 1] = { label = aura.name, expires = (expires and expires > 0) and expires or nil,
-                          lines = linesOfData(tip("player", aura.auraInstanceID)) }
+        local buff = buffOf(aura, tip)
+        if not buff then return nil end
+        out[#out + 1] = buff
     end
     return out
 end
@@ -155,8 +169,17 @@ local function parseSlot(list, slot, enchantExpires, pats)
     end
 end
 
+--- The buffs to parse: a fresh full read, else the last full one (a read blocked in combat).
+local function readableBuffs()
+    local list = buffs()
+    if list then B.__lastBuffs = list return list end
+    B.buffsBlocked = true
+    return B.__lastBuffs or {}
+end
+
 local function parseBuffs(list, pats)
-    for _, aura in ipairs(buffs()) do
+    B.buffsBlocked = false
+    for _, aura in ipairs(readableBuffs()) do
         for _, text in ipairs(aura.lines) do
             local amount, name = match(text, pats.line)
             addCandidate(list, amount, name, { label = aura.label or L["Buff"], kind = "temp",
@@ -338,5 +361,13 @@ function NS.addon:OnBonusesUnitChanged(event, unit)
 end
 
 local function onUnit(event, unit) NS.addon:OnBonusesUnitChanged(event, unit) end
+
+-- Leaving combat: a buff read blocked as secret in combat can be read again (WoW Forever).
+B.events = NS.NewBusTarget()
+if B.events then
+    NS.SafeRegisterEvents(B.events, { "PLAYER_REGEN_ENABLED" }, function()
+        if not NS.IsStoodDown() and B.buffsBlocked then B.Schedule("buffs") end
+    end, NS.rejectedEvents)
+end
 NS.UnitEvents.Register("UNIT_INVENTORY_CHANGED", onUnit)
 NS.UnitEvents.Register("UNIT_AURA", onUnit)

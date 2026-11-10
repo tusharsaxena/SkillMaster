@@ -54,7 +54,17 @@ local function resolve(name)
     return nil
 end
 
-local function num(v) if type(v) == "number" then return v end return nil end
+-- WoW Forever answers some stat reads as secret numbers while the addon's code is tainted (measured
+-- 2026-11-10: UnitStat inside an AceTimer callback). A secret cannot be compared or added, so num()
+-- turns one away like a non-number and notes it; read() then keeps the stat's last plain value.
+local secretSeen = false
+local function isSecret(v) return type(issecretvalue) == "function" and issecretvalue(v) and true or false end
+
+local function num(v)
+    if isSecret(v) then secretSeen = true return nil end
+    if type(v) == "number" then return v end
+    return nil
+end
 
 -- ── calcs: an API's returns -> value[, raw] ─────────────────────────────────────────────────────
 
@@ -176,13 +186,34 @@ local function entryOf(def, ctx, value, raw)
              markers = liveMarkers(def, ctx), refSpec = def.ref }
 end
 
---- One def -> an unfinished entry, or nil when its API is absent or answers nothing.
+-- The last plain { value, raw } per stat key, for a read the client answered secret.
+S.__last = {}
+
+--- A secret read: the stat's last plain value marked stale, or nil before any plain read.
+local function lastPlain(def, ctx)
+    local last = S.__last[def.key]
+    if not last then return nil end
+    local e = entryOf(def, ctx, last[1], last[2])
+    e.stale = true
+    return e
+end
+
+--- One def -> an unfinished entry, or nil when its API is absent or answers nothing. A secret
+--- answer keeps the last plain value (stale) until a later scan reads it plain again.
 local function read(def, ctx)
     local fn, calc = resolve(def.api), S.CALC[def.calc or "first"]
     if not (fn and calc) then return nil end
+    secretSeen = false
     local ok, value, raw = pcall(calc, fn, def, ctx)
-    if not ok or not num(value) then return nil end
-    return entryOf(def, ctx, value, raw)
+    if ok and num(value) and not isSecret(raw) then
+        S.__last[def.key] = { value, raw }
+        return entryOf(def, ctx, value, raw)
+    end
+    if secretSeen or isSecret(value) or isSecret(raw) then
+        S.sawSecret = true
+        return lastPlain(def, ctx)
+    end
+    return nil
 end
 
 --- The highest value among a group's "maxInGroup" entries.
@@ -240,6 +271,7 @@ end
 function S:Scan()
     local t0 = Perf.on and debugprofilestop()
     local ctx = context()
+    self.sawSecret = false
     self.model, self.index = assemble(ctx, function(def) return read(def, ctx) end)
     if t0 then Perf.Note("statScan", debugprofilestop() - t0) end
     return self.model
@@ -268,6 +300,8 @@ S.EVENTS = {
     -- Not in the plan's list but load-bearing: the references follow the level, and the first
     -- model is built on entering the world.
     "PLAYER_LEVEL_UP", "PLAYER_ENTERING_WORLD",
+    -- Leaving combat: a read answered secret in combat is plain again (WoW Forever, 2026-11-10).
+    "PLAYER_REGEN_ENABLED",
 }
 
 local function pending(handle)
@@ -310,6 +344,7 @@ function S:IsWatchingSpeed() return pending(self.ticker) end
 --- standing character costs one call every 0.5 s rather than a full stat pass.
 function S:SpeedTick()
     local current, run = NS.Compat.UnitSpeed("player")
+    if isSecret(current) or isSecret(run) then return false end
     local sig = tostring(current) .. "/" .. tostring(run)
     if sig == self.lastSpeed then return false end
     self.lastSpeed = sig
