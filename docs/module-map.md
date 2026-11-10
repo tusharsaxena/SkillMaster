@@ -63,7 +63,7 @@ position says so beside its TOC line (toc-file-§5).
 | `modules/Simulator.lua` | `NS.Sim` (LibKa0s-Sim-1.0's instance, or the stub), `NS.SimHost`: the simulated world and its providers, `deliver`, the fishing-trip scenario, the refusals, the session-only stores and the restoring stop; `NS.IsSimMode` / `NS.ToggleSim` for the launcher and the checkbox | after every module it delivers to; `Sim:New` and the providers at load |
 | `settings/Schema.lua` | the schema and the single write seam (LibKa0s-Schema-1.0) | before Slash, OptionsSetup and the pages |
 | `settings/Slash.lua` | `NS.COMMANDS` and the dispatcher (LibKa0s-Slash-1.0) | before the landing spec reads it |
-| `settings/OptionsSetup.lua` | the panel descriptor, `NS.Helpers` (LibKa0s-Options-1.0) | before every page file |
+| `settings/OptionsSetup.lua` | the panel descriptor, `NS.Helpers` (LibKa0s-Options-1.0), `NS.Live`, `NS.TemplateRows` (a template's presets dropdown and its Custom box) | before every page file |
 | `settings/General.lua` | landing spec, Master controls, Skin and Keybindings tabs | first page registered |
 | `settings/Layout.lua` | the Layout page: window, per-block rows, the Block order drag list (`NS.OptionsBlockOrder`) | after General |
 | `settings/Bars.lua` | the Bars page and its live preview bar (`NS.OptionsPreview`) | after Layout |
