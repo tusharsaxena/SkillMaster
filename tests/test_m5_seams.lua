@@ -54,7 +54,7 @@ test("m5 seam: the broker's right-click opens the registered Broker page through
     assertTrue(M.__subcategories[NS.L["Broker"]] ~= nil, "and registered its subcategory")
     local real, opened = M.Settings.OpenToCategory, 0
     M.Settings.OpenToCategory = function() opened = opened + 1 end
-    local ok, result = pcall(M.__ldbObjects.SkillMaster_All.OnClick, nil, "RightButton")
+    local ok, result = pcall(M.__ldbObjects["Skill Master"].OnClick, nil, "RightButton")
     M.Settings.OpenToCategory = real
     assertTrue(ok, tostring(result))
     assertEqual(opened, 1, "one open, through the real NS.Helpers.OpenOptionsPanel")

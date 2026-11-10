@@ -22,7 +22,7 @@ local function hideRow(page, kind, key, name, group, subgroup)
     return {
         path = kind .. ".hidden." .. key, page = page, group = group, subgroup = subgroup, type = "bool",
         default = false, label = L["Hide %s"]:format(name),
-        desc = L["Leave this row out of the window, the detached blocks and the feeds. The row menu's Hide sets it too."],
+        desc = L["Leave this row out of the window and the detached blocks. The row menu's Hide sets it too. The feed's tooltip has its own, on the Broker page."],
         get = function()
             local set = hiddenSet(kind)
             return set ~= nil and set[key] == true
@@ -78,6 +78,9 @@ table.sort(keys, function(a, b)
     if (ca.order or 0) ~= (cb.order or 0) then return (ca.order or 0) < (cb.order or 0) end
     return a < b
 end)
+-- The catalog in the pages' order (category, then catalog order): the Broker page's tooltip Hide
+-- rows walk it too (settings/Broker.lua, loaded after this file).
+NS.SortedSkillKeys = keys
 skillRows[#skillRows + 1] = setRow("skills", "skills", SK_GENERAL)
 for _, key in ipairs(keys) do
     local c = NS.SkillCatalog[key]

@@ -145,14 +145,19 @@ NS.defaults = {
             sound     = false,  -- play the toast's sound as each alert shows
             point     = false,  -- the toast stack's drop point, in UIParent's units
         },
-        -- The broker data feeds (modules/Broker.lua, design §6.7). Tokens: modules/Template.lua.
+        -- The one broker data feed, "Skill Master" (modules/Broker.lua, design §6.7; feedback round
+        -- 2, FB-12). Tokens: modules/Template.lua. schemaVersion 3 carried a stored
+        -- `broker.templates.all` here and dropped the other three feeds' templates (core/Database.lua).
         broker = {
-            flashSeconds = 5,   -- how long "^ Bows 81" replaces a feed's text after a skill-up
-            templates = {
-                all         = "{pinned} \194\183 +{gains}",
-                professions = "{lowestProf}",
-                weapons     = "{equippedWeapon}",
-                stats       = "{stat:crit} crit \194\183 {stat:speed}",
+            flashSeconds = 5,   -- how long "^ Bows 81" replaces the feed's text after a skill-up
+            template     = "{pinned} \194\183 +{gains}",
+            -- The feed's tooltip: its sections, the rows it leaves out (sets of keys, apart from the
+            -- main window's skills.hidden / stats.hidden) and whether it wears the skin (FB-13).
+            tooltip = {
+                skin     = true,
+                sections = { primary = true, secondary = true, weapon = true, other = true, stats = false },
+                hiddenSkills = {},
+                hiddenStats  = {},
             },
         },
     },

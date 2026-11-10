@@ -99,13 +99,21 @@ test("tooltip bar: hidden once GameTooltip is cleared for another owner, never c
         local tip = M.GameTooltip
         rawset(tip, "SetOwner", function(self) self:__fire("OnTooltipCleared") end)
         local ok, err = pcall(function()
+            -- Apply skin to the tooltip off (FB-13): the feed draws on the shared GameTooltip.
+            NS.SetByPath("broker.tooltip.skin", false)
             NS.RowTooltip.Show(windowRow("leatherworking"))
             local bar = NS.RowTooltip.Bar()
             tip:Show()
             assertTrue(bar:IsShown(), "the row tooltip draws its bar")
-            NS.Broker.OnEnter("all", M.UIParent)   -- the feed's cell takes the shown tooltip
+            NS.Broker.OnEnter(M.UIParent)   -- the feed's cell takes the shown tooltip
             assertFalse(bar:IsShown(), "the row tooltip's bar went with its content")
+            NS.Broker.HideTooltip()
+            -- On (the default): the feed draws on its own frame, never under the row tooltip's bar.
+            NS.SetByPath("broker.tooltip.skin", true)
+            assertTrue(NS.Broker.Tip() ~= tip, "the skinned feed has its own tooltip frame")
         end)
+        NS.Broker.HideTooltip()
+        NS.SetByPath("broker.tooltip.skin", true)
         rawset(tip, "SetOwner", nil)
         if not ok then error(err, 0) end
     end)

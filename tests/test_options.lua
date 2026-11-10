@@ -229,7 +229,7 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- Trainers page's name color pair).
     local NS2 = loadDegraded()
     local full, degraded = #NS.Schema, #NS2.Schema
-    assertEqual(full, 207, "the full schema")
-    assertEqual(degraded, 171, "the library-absent schema")
+    assertEqual(full, 270, "the full schema")
+    assertEqual(degraded, 234, "the library-absent schema")
     assertEqual(full - degraded, 36, "Master controls (8, Sim mode among them), the Bars blocks (25) and the trainer name color (3)")
 end)

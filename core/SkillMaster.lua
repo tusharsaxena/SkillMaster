@@ -81,7 +81,7 @@ function NS.StandDown()
     NS.UnitEvents.StandDown()
     addon:CancelAllTimers()
     NS.BusStandDown()
-    if NS.Broker then NS.Broker.Refresh() end   -- the feeds read "Off" (T4.1)
+    if NS.Broker then NS.Broker.Refresh() end   -- the feed reads "Off" (T4.1)
 end
 
 --- Rebuild from current state.
@@ -114,7 +114,7 @@ local function reloadProfile()
     -- values-only pass keeps the old profile's bar styles while the row set is unchanged), and the
     -- Bars page's preview and the Journal restyle on the same message.
     if NS.Blocks then NS.Blocks.Changed() end
-    if NS.Broker then NS.Broker.Refresh() end   -- the feeds' templates are per profile
+    if NS.Broker then NS.Broker.Refresh() end   -- the feed's template is per profile
     if NS.Alerts then NS.Alerts.Refresh() end   -- T4.2: the toast's position from the new profile
     if NS.Journal then NS.Journal.ApplyGeometry() end   -- its drop point and size are per profile
     if NS.Helpers and NS.Helpers.RefreshAllPanels then NS.Helpers.RefreshAllPanels() end
