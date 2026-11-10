@@ -26,7 +26,7 @@ read_globals = {
   "CollapseSkillHeader", "GetWeaponEnchantInfo", "IsAddOnLoaded", "C_Map", "GetUnitSpeed",
   "GetSpellBonusDamage", "GetSpellCritChance", "GetHitModifier", "GetSpellHitModifier",
   "GetCombatRating", "GetCritChance", "GetRangedCritChance", "GetDodgeChance", "GetParryChance",
-  "GetBlockChance", "UnitResistance", "CastSpellByName", "C_SkillInfo", "C_Item",
+  "GetBlockChance", "UnitResistance", "CastSpellByName", "C_SkillInfo", "C_Item", "Enum", "INVSLOT_MAINHAND",
   -- the skill model (modules/SkillData.lua): the class, the level and the debounce clock
   "UnitClass", "UnitLevel", "GetTime",
   -- T2.4: the trainer lookups and helpers read the player's faction, race, level and zone

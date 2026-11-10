@@ -120,3 +120,51 @@ test("probe: C_SkillInfo and C_Item are read first, a table-shaped line kept who
     assertEqual(r.enchant[2], 9000, "C_Item.GetWeaponEnchantInfo is read first")
     assertTrue(r.apis["C_SkillInfo.GetSkillLineInfo"] == true, "reported present")
 end)
+
+-- WoW Forever 1.60.1, measured in game 2026-11-10: `local enchants = C_Item.GetWeaponEnchantInfo(weaponSlot)`
+-- errors when called without a slot ("bad argument #1 ... Usage: ..."), and answers one table.
+local function foreverEnchant(record)
+    return function(slot)
+        if slot == nil then
+            error("bad argument #1 to '?' (Usage: local enchants = C_Item.GetWeaponEnchantInfo(weaponSlot))")
+        end
+        return record
+    end
+end
+
+test("probe: a slot-taking C_Item.GetWeaponEnchantInfo does not error, and each try is recorded", function()
+    installSkills()
+    local realItem, realGlobal = M.C_Item, M.GetWeaponEnchantInfo
+    M.GetWeaponEnchantInfo = nil
+    M.C_Item = { GetWeaponEnchantInfo = foreverEnchant({ { enchantID = 263, expiration = 252000 } }) }
+    local ok, r = pcall(NS.Probe.Run)
+    M.C_Item, M.GetWeaponEnchantInfo = realItem, realGlobal
+    assertTrue(ok, "Run() must not raise: " .. tostring(r))
+    assertTrue(#r.enchantTries >= 1, "every slot argument tried is recorded")
+    assertTrue(r.enchantTries[1].ok, "the first candidate slot is accepted")
+    assertEqual(r.enchant[1][1].enchantID, 263, "the raw table return is kept whole")
+end)
+
+test("compat: WeaponEnchantInfo passes a slot and normalizes Forever's table to the 1.12 shape", function()
+    local realItem, realGlobal = M.C_Item, M.GetWeaponEnchantInfo
+    M.GetWeaponEnchantInfo = nil
+    NS.Compat.__enchantSlot = nil
+    M.C_Item = { GetWeaponEnchantInfo = foreverEnchant({ { enchantID = 263, expiration = 252000, charges = 0 } }) }
+    local ok, has, ms, charges, id = pcall(NS.Compat.WeaponEnchantInfo)
+    assertTrue(ok, "must not raise: " .. tostring(has))
+    assertEqual(has, true); assertEqual(ms, 252000); assertEqual(charges, 0); assertEqual(id, 263)
+    -- seconds rather than ms, and a keyed record rather than an array
+    M.C_Item = { GetWeaponEnchantInfo = foreverEnchant({ expirationTime = 600 }) }
+    has, ms = NS.Compat.WeaponEnchantInfo()
+    assertEqual(has, true); assertEqual(ms, 600000, "a seconds value is read as seconds")
+    -- no enchant: an empty list
+    M.C_Item = { GetWeaponEnchantInfo = foreverEnchant({}) }
+    assertEqual(NS.Compat.WeaponEnchantInfo(), false, "an empty answer is no enchant")
+    -- every slot errors: nil, never a raise
+    M.C_Item = { GetWeaponEnchantInfo = function() error("nope") end }
+    NS.Compat.__enchantSlot = nil
+    local ok2, v = pcall(NS.Compat.WeaponEnchantInfo)
+    assertTrue(ok2, "never raises"); assertEqual(v, nil)
+    M.C_Item, M.GetWeaponEnchantInfo = realItem, realGlobal
+    NS.Compat.__enchantSlot = nil
+end)

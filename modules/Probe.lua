@@ -132,14 +132,34 @@ local function readSkills(report)
 end
 
 --- The weapon enchant's raw returns: C_Item's (the kit's Forever API set) first, then the global.
-local function readEnchant()
-    local fn = (C_Item and C_Item.GetWeaponEnchantInfo) or GetWeaponEnchantInfo
-    if type(fn) ~= "function" then return {} end
-    return pack(fn())
+--- On WoW Forever the C_Item call takes a weapon slot and errors without one (measured 2026-11-10),
+--- so each candidate slot is tried under pcall and recorded: the argument, whether it errored, and
+--- the raw returns or the error text. `enchant` stays the first call that worked, for the old reader.
+local function readEnchant(report)
+    local cItem = C_Item and C_Item.GetWeaponEnchantInfo
+    if type(cItem) == "function" then
+        report.enchantSlotEnum = type(Enum) == "table" and Enum.WeaponSlot or P.NIL
+        for _, slot in ipairs(NS.Compat.WeaponSlotCandidates()) do
+            local r = pack(pcall(cItem, slot))
+            local entry = { slot = slot, ok = r[1] and true or false }
+            if r[1] then
+                entry.returns = { unpack(r, 2) }
+                if report.enchant[1] == nil then report.enchant = entry.returns end
+            else
+                entry.error = tostring(r[2])
+            end
+            report.enchantTries[#report.enchantTries + 1] = entry
+        end
+        return
+    end
+    if type(GetWeaponEnchantInfo) == "function" then
+        local r = pack(pcall(GetWeaponEnchantInfo))
+        if r[1] then report.enchant = { unpack(r, 2) } end
+    end
 end
 
 --- Build the report. Every value comes from the client; nothing is interpreted.
---- @return table { client, build, skillLines, headers, apis, enchant }
+--- @return table { client, build, skillLines, headers, apis, enchant, enchantTries, enchantSlotEnum }
 function P.Run()
     local version, build, date, interface = GetBuildInfo()
     local report = {
@@ -151,11 +171,12 @@ function P.Run()
         headers    = {},
         apis       = {},
         enchant    = {},
+        enchantTries = {},   -- one { slot, ok, returns | error } per slot argument tried
     }
     readSkills(report)
     for _, api in ipairs(P.APIS) do report.apis[api[1]] = type(api[2]()) == "function" end
     report.apis[TOMTOM] = addonLoaded("TomTom")
-    report.enchant = readEnchant()
+    readEnchant(report)
     NS.Debug("Probe", "%d skill lines, %d headers", #report.skillLines, #report.headers)
     return report
 end
