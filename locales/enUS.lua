@@ -469,6 +469,8 @@ L["The bonus segment of a temporary bonus: a lure, a buff."] = true
 L["Permanent bonus"] = true
 L["The bonus segment of a permanent bonus: a racial, an item."] = true
 L["Content"] = true
+L["Rows show"] = true
+L["What every skill and stat row draws, in the window, the detached blocks and the broker tooltips: the bar and its value, the bar alone, or the value alone in the bar's place."] = true
 L["Bar text"] = true
 L["What a skill's bar says, shown here for 107 +25 / 150. Custom... writes your own. A stat's bar shows its value."] = true
 L["Tokens: {rank}, {bonus} (+25), {max}, {pct} (percent of the cap) and {left} (points to the cap). Press Enter to apply."] = true
@@ -556,8 +558,6 @@ L["Restore every Skills setting on this profile to its default. Every hidden ski
 L["Base and combat"] = true
 L["Spell and regen"] = true
 L["Defense and resists"] = true
-L["Stat rows show"] = true
-L["A stat row's bar and its value, the bar alone, or the value alone."] = true
 L["Bar and value"] = true
 L["Bar only"] = true
 L["Value only"] = true

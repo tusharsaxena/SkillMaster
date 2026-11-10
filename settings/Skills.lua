@@ -1,13 +1,13 @@
 local _, NS = ...
--- settings/Skills.lua — the Skills and Stats pages (design §6.6): what the skill and stat rows show,
--- and one Hide row per catalog skill and per stat, so a row hidden from the row menu (T3.3) can be
+-- settings/Skills.lua — the Skills and Stats pages (design §6.6): the skill rows' switches, and one
+-- Hide row per catalog skill and per stat (how either kind of row draws is the Bars page's Rows show), so a row hidden from the row menu (T3.3) can be
 -- shown again here or with `/sm set skills.hidden.<key> false`.
 --
 -- The hide rows are generated from NS.SkillCatalog and NS.STAT_DEFS at load. `skills.hidden` and
 -- `stats.hidden` are sets ({ [key] = true }), so each row reads and writes its entry through get /
 -- set: false clears the entry rather than storing it.
 local L = NS.L
-local PS, PT = NS.defaults.profile.skills, NS.defaults.profile.stats
+local PS = NS.defaults.profile.skills
 
 -- ---------------------------------------------------------------------------------------------
 -- The hide rows
@@ -97,14 +97,8 @@ local GROUP_TAB = {
     base = L["Base and combat"], spell = L["Spell and regen"],
     defense = L["Defense and resists"], utility = L["Utility"],
 }
-local statRows = NS.Live({
-    { path = "stats.display", page = "stats", group = ST_GENERAL, type = "string", default = PT.display,
-      label = L["Stat rows show"],
-      desc = L["A stat row's bar and its value, the bar alone, or the value alone."],
-      values = { { value = "both", text = L["Bar and value"] }, { value = "bar", text = L["Bar only"] },
-                 { value = "text", text = L["Value only"] } } },
-})
-statRows[#statRows + 1] = setRow("stats", "stats", ST_GENERAL)
+-- How a stat row draws is the Bars page's Rows show (bars.rowDisplay), shared with skill rows.
+local statRows = { setRow("stats", "stats", ST_GENERAL) }
 for _, def in ipairs(NS.STAT_DEFS) do
     statRows[#statRows + 1] = hideRow("stats", "stats", def.key, def.label, GROUP_TAB[def.group] or GROUP_TAB.utility)
 end

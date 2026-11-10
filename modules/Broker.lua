@@ -324,11 +324,17 @@ local function nameColor(e, highlightBelowCap)
     return "gtip.body"
 end
 
+-- A line honors Rows show (bars.rowDisplay) as the window's rows do: Bar only leaves the value
+-- column empty, Value only draws no mini bar. An unlearned skill's "Not learned" is no value.
+local function showsBar() return NS.Rows.Display() ~= "text" end
+local function showsValue() return NS.Rows.Display() ~= "bar" end
+
 local function addSkillRow(tip, e, opts)
     local values, bonus = skillBar(e)
-    tip:AddDoubleLine(colored(nameColor(e, opts.belowCap), e.name or e.key), skillValue(e, bonus))
+    local value = (showsValue() or not e.learned) and skillValue(e, bonus) or ""
+    tip:AddDoubleLine(colored(nameColor(e, opts.belowCap), e.name or e.key), value)
     local n = tip:NumLines()
-    if e.learned and (e.max or 0) > 0 then drawMiniBar(tip, n, values) end
+    if e.learned and (e.max or 0) > 0 and showsBar() then drawMiniBar(tip, n, values) end
     return { line = n, kind = "skill", key = e.key }
 end
 
@@ -384,11 +390,14 @@ local function fillStats(tip, rows)
         local list = sm[group] or {}
         if #list > 0 then addTitle(tip, GROUP_TITLES[group]) end
         for _, e in ipairs(list) do
-            tip:AddDoubleLine(colored("gtip.body", e.label or e.key), colored("gtip.value", e.display or ""))
+            local value = showsValue() and colored("gtip.value", e.display or "") or ""
+            tip:AddDoubleLine(colored("gtip.body", e.label or e.key), value)
             local n = tip:NumLines()
-            local values = NS.Rows.StatValues(e)
-            values.color = NS.Rows.FillColor(e, true)
-            drawMiniBar(tip, n, values)
+            if showsBar() then
+                local values = NS.Rows.StatValues(e)
+                values.color = NS.Rows.FillColor(e, true)
+                drawMiniBar(tip, n, values)
+            end
             rows[#rows + 1] = { line = n, kind = "stat", key = e.key }
         end
     end

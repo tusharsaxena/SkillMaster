@@ -42,8 +42,9 @@ NS.defaults = {
         -- rows show, the gathering and fishing helper lines in a row's tooltip (helperTooltip) and
         -- the optional one-line hint drawn under the row (helperHint, off by default: design §12.4).
         skills = { showUnlearned = true, hidden = {}, helperTooltip = true, helperHint = false },
-        -- How a stat row draws: "both" (bar and value), "bar" (no value text) or "text" (no bar).
-        stats  = { hidden = {}, display = "both" },
+        -- Stat rows the player hid. How a row draws is bars.rowDisplay, for skills and stats alike
+        -- (schemaVersion 2 moved a stored stats.display there: core/Database.lua).
+        stats  = { hidden = {} },
         -- T3.1 the bar widget's look (modules/Bar.lua). The colors are the player's picks; while
         -- `colors.fromSkin` is on (the default, skinning-§6) the skin's owner tokens draw instead
         -- (core/SkinSetup.lua, sm.cat.* and sm.bonus*). Both carry the approved mockup's colors
@@ -57,6 +58,9 @@ NS.defaults = {
             fontSize      = 11,          -- the bar text, before the skin's HUD scale
             textAnchor    = "CENTER",    -- "LEFT" | "CENTER" | "RIGHT"
             fillDirection = "LEFT",      -- the edge the fill grows from: "LEFT" (left to right) | "RIGHT"
+            -- What every skill and stat row draws: "both" (bar and value), "bar" (no value text)
+            -- or "text" (the value alone, no bar). The Bars page's Rows show.
+            rowDisplay    = "both",
             -- The bar text; tokens {rank} {bonus} {max} {pct} {left} (modules/Bar.lua Bar.Text).
             textTemplate  = "{rank} {bonus} / {max}",
             spark         = true,        -- a thin line riding the end of the fill

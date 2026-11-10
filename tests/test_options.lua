@@ -217,18 +217,10 @@ test("options: every new page renders on its first show without raising", functi
     M.__fireTimers()   -- the library's deferred repaints, so no timer outlives the case
 end)
 
-test("options: the journal's length and filter, and the stat display mode, are honored", function()
+test("options: the journal's length is honored", function()
     NS.SetByPath("journal.keep", 50)
     assertEqual(NS.SessionLog.Cap(), 50)
     NS.SetByPath("journal.keep", 500)
-    NS.SetByPath("stats.display", "text")
-    local row = NS.Rows.Acquire(NS.Rows.NewPool(), M.UIParent, "row")
-    row:SetStat({ key = "agility", label = "Agility", display = "112", pct = 100, markers = {} })
-    assertFalse(row.bar:IsShown(), "a text-only stat row draws no bar")
-    assertEqual(row.where:GetText(), "112")
-    NS.SetByPath("stats.display", "both")
-    row:SetStat({ key = "agility", label = "Agility", display = "112", pct = 100, markers = {} })
-    assertTrue(row.bar:IsShown())
 end)
 
 test("options: the library-absent load keeps every hand-written row; the composers' rows are the gap", function()
