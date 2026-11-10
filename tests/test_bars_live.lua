@@ -210,6 +210,18 @@ case("bars live: the flat Bar color draws once Color mode is Flat and its compan
     each(bars, function(b, name) assertNear(rgbaOf(b.fill)[1], r, 1e-6, name .. ": the class color") end)
 end)
 
+case("bars live: the row tooltip's bar wears the row's own fill, so Color mode and the palette reach it", function()
+    -- red under: a tooltip bar handed values with no color, drawn in the skin's flat fill whatever
+    -- Color mode, the palette or Bar > Fill say.
+    set("bars.colorMode", "flat")
+    set("bars.barColorFromSkin", false)
+    set("bars.barColor", { 0.3, 0.6, 0.9, 1 })
+    NS.RowTooltip.Show(windowRow("leatherworking"))
+    local c = rgbaOf(NS.RowTooltip.Bar().fill)
+    assertNear(c[1], 0.3, 1e-6, "the tooltip bar's flat color")
+    M.GameTooltip:Hide()
+end)
+
 -- ---------------------------------------------------------------------------------------------
 -- Background and border
 -- ---------------------------------------------------------------------------------------------
