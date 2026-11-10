@@ -19,6 +19,11 @@ NS.defaults = {
             maxHeight = 560,     -- the window scrolls past this
             blockGap  = 0,       -- px between two docked blocks
             summary   = true,    -- the strip under the title: level, session gains, next alert
+            columns   = 1,       -- the window's body: 1 or 2 columns of docked blocks, each `width` wide
+            -- The player's strata (frame-layering-§1: BACKGROUND, LOW, MEDIUM or HIGH): the main
+            -- window's, and every detached block's. The crafting overlays take their host's.
+            strata         = "MEDIUM",
+            detachedStrata = "MEDIUM",
             blocks = {
                 primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, locked = false, shown = true },
                 secondary     = { docked = true, order = 2, collapsed = false, point = false, scale = 1, locked = false, shown = true },
@@ -51,6 +56,7 @@ NS.defaults = {
             rowHeight     = 20,          -- one skill or stat row
             fontSize      = 11,          -- the bar text, before the skin's HUD scale
             textAnchor    = "CENTER",    -- "LEFT" | "CENTER" | "RIGHT"
+            fillDirection = "LEFT",      -- the edge the fill grows from: "LEFT" (left to right) | "RIGHT"
             -- The bar text; tokens {rank} {bonus} {max} {pct} {left} (modules/Bar.lua Bar.Text).
             textTemplate  = "{rank} {bonus} / {max}",
             spark         = true,        -- a thin line riding the end of the fill

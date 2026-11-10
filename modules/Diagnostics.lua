@@ -117,8 +117,10 @@ end
 
 local function layout(out)
     local p = NS.db.profile
-    out:add(TAG, "layout window scale=%s alpha=%s locked=%s point=%s maxHeight=%s summary=%s",
-        p.scale, p.alpha, p.locked, p.window.point and "set" or "default", p.layout.maxHeight, p.layout.summary)
+    out:add(TAG, "layout window scale=%s alpha=%s locked=%s point=%s maxHeight=%s summary=%s columns=%s strata=%s",
+        p.scale, p.alpha, p.locked, p.window.point and "set" or "default", p.layout.maxHeight, p.layout.summary,
+        p.layout.columns, p.layout.strata)
+    out:add(TAG, "layout detached strata=%s", p.layout.detachedStrata)
     for _, id in ipairs(NS.BLOCKS) do
         local b = NS.Blocks.Settings(id)
         out:add(TAG, "block %s docked=%s order=%s collapsed=%s scale=%s locked=%s point=%s frame=%s", id,

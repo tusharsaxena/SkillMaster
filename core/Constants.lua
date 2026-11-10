@@ -24,18 +24,25 @@ C.MINIMAP_PATH = "global.minimap.shown"
 
 -- The layers table (frame-layering-§5). Every SetFrameStrata / SetFrameLevel in this addon reads it.
 -- This addon's stack, bottom to top (frame-layering-§1 tiers):
---   T1 HUD     a detached block (modules/Detached.lua), MEDIUM; its band controls at + CHROME, its
---              rows at + CONTENT
---   T4 window  the main window (modules/MainWindow.lua), MEDIUM, toplevel, clamped; its title bar,
+--   T1 HUD     a detached block (modules/Detached.lua), MEDIUM by default, the player's pick of
+--              STRATA_CHOICES (layout.detachedStrata); its band controls at + CHROME, its rows at
+--              + CONTENT
+--   T4 window  the main window (modules/MainWindow.lua), MEDIUM by default, the player's pick of
+--              STRATA_CHOICES (layout.strata), toplevel, clamped; its title bar,
 --              test strip and close control are levels over the window's own (+ OVERLAY, + CHROME);
 --              its scrolled body + CONTENT; the crafting rows' secure overlays (modules/SecureOverlay.lua,
 --              parented to UIParent, at their host's strata) + SECURE over the host, under its chrome
---   T4 window  the trainer popup (modules/TrainerPopup.lua), HIGH: opened from the MEDIUM window, so
---              one strata above it, toplevel, clamped, closed with it
+--   T4 window  the trainer popup (modules/TrainerPopup.lua), HIGH: opened from the window or a
+--              detached block, so one strata above the higher of the two (STRATA_ABOVE, never under
+--              HIGH: DIALOG over a High pick), toplevel, clamped, closed with the window
 -- Library- and Blizzard-owned tiers this addon relies on (frame-layering-§6): the debug console
 -- and perf panel DIALOG, toplevel; the copy window FULLSCREEN; menus (the row menu,
 -- LibKa0s-Widgets-1.0 ContextMenu) FULLSCREEN_DIALOG; the Settings panel HIGH; GameTooltip TOOLTIP.
 C.LAYERS = {
     STRATA = { WINDOW = "MEDIUM", HUD = "MEDIUM", WINDOW_READ = "HIGH" },
     LEVEL  = { CONTENT = 2, OVERLAY = 4, SECURE = 8, CHROME = 10 },
+    -- A player-chosen strata offers these four only (frame-layering-§1, player-chosen strata).
+    STRATA_CHOICES = { "BACKGROUND", "LOW", "MEDIUM", "HIGH" },
+    -- The strata one above each choice: where a popup opened from it sits (frame-layering-§1).
+    STRATA_ABOVE = { BACKGROUND = "LOW", LOW = "MEDIUM", MEDIUM = "HIGH", HIGH = "DIALOG" },
 }

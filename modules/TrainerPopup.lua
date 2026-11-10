@@ -122,7 +122,7 @@ end
 local function build()
     if frame then return frame end
     frame = CreateFrame("Frame", P.FRAME_NAME, UIParent, "BackdropTemplate")
-    frame:SetFrameStrata(LAYERS.STRATA.WINDOW_READ)
+    frame:SetFrameStrata(LAYERS.STRATA.WINDOW_READ)   -- Show sets P.Strata() at each open
     frame:SetToplevel(true)
     frame:SetClampedToScreen(true)
     frame:SetWidth(WIDTH)
@@ -211,8 +211,26 @@ local function resolve(key)
 end
 
 --- Open the popup on skill `key`.
+local RANK = {}
+for i, s in ipairs(LAYERS.STRATA_CHOICES) do RANK[s] = i end
+
+--- The popup's strata: one above the higher of its two openers' (the window and a detached block,
+--- each a player's pick), never under WINDOW_READ, so it opens over whichever it came from
+--- (frame-layering-§1: a frame opened from another sits at least one strata above it).
+function P.Strata()
+    local stored = (NS.db and NS.db.profile.layout) or NS.defaults.profile.layout
+    local top = stored.strata
+    if (RANK[stored.detachedStrata] or 0) > (RANK[top] or 0) then top = stored.detachedStrata end
+    local above = LAYERS.STRATA_ABOVE[top]
+    if not above or (RANK[above] and RANK[above] < RANK[LAYERS.STRATA.WINDOW_READ]) then
+        return LAYERS.STRATA.WINDOW_READ
+    end
+    return above
+end
+
 function P.Show(key)
     build()
+    frame:SetFrameStrata(P.Strata())   -- at each open: the openers' strata are the player's
     local list, title, intro = resolve(key)
     state.key, state.list, state.selected = key, list, 1
     frame.title:SetText(title)

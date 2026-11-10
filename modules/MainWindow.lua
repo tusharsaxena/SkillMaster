@@ -23,8 +23,20 @@ local headerPool, rowPool
 local headers = {}   -- [block id] = the header drawn this pass
 local lastSig        -- the row set the current layout was built for
 
+local COLUMN_GAP = 6   -- px between two columns of blocks
+
 local function layoutSettings() return (NS.db and NS.db.profile.layout) or NS.defaults.profile.layout end
-local function width() return tonumber(layoutSettings().width) or 440 end
+local function columns() return tonumber(layoutSettings().columns) == 2 and 2 or 1 end
+local function columnWidth() return (tonumber(layoutSettings().width) or 440) - 4 - SCROLLBAR_W end
+
+--- The scrolled body's width: Layout > Columns columns, each Window width's body wide.
+function W.ContentWidth()
+    local n = columns()
+    return n * columnWidth() + (n - 1) * COLUMN_GAP
+end
+
+--- The window's width: the body, its scroll bar and its edges.
+local function width() return W.ContentWidth() + 4 + SCROLLBAR_W end
 
 local function savePoint()
     local point, _, relPoint, x, y = frame:GetPoint(1)
@@ -148,9 +160,17 @@ local function buildBody()
     local scroll = CreateFrame("ScrollFrame", W.SCROLL_NAME, frame, "UIPanelScrollFrameTemplate")
     scroll:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CONTENT)
     local content = CreateFrame("Frame", nil, scroll)
-    content:SetWidth(width() - 4 - SCROLLBAR_W)
+    content:SetWidth(W.ContentWidth())
     content:SetHeight(1)
     scroll:SetScrollChild(content)
+    -- One host per column; every header and row of a block is parented to its column's. A column
+    -- draws nothing and takes no mouse, so the two need no level band (frame-layering-§3, siblings).
+    frame.columns = {}
+    for i = 1, 2 do
+        local col = CreateFrame("Frame", nil, content)
+        col:SetHeight(1)
+        frame.columns[i] = col
+    end
     scroll:HookScript("OnVerticalScroll", function()
         if NS.SecureOverlay then NS.SecureOverlay:Sync() end
     end)
@@ -203,7 +223,7 @@ local function build()
     if frame then return frame end
     frame = CreateFrame("Frame", W.FRAME_NAME, UIParent, "BackdropTemplate")
     frame:SetSize(width(), MIN_H)
-    frame:SetFrameStrata(LAYERS.STRATA.WINDOW)
+    frame:SetFrameStrata(LAYERS.STRATA.WINDOW)   -- ApplySettings then takes the player's (layout.strata)
     frame:SetToplevel(true)
     frame:SetClampedToScreen(true)
     frame:EnableMouse(true)
@@ -285,22 +305,50 @@ function W.SummaryParts(skills)
     return who, gainText, NS.Blocks.NextAlert(skills) or ""
 end
 
+--- Anchor the column hosts across the body: `n` columns of `colW`, the rest hidden.
+local function placeColumns(n, colW)
+    for i, col in ipairs(frame.columns) do
+        col:ClearAllPoints()
+        col:SetPoint("TOPLEFT", frame.content, "TOPLEFT", (i - 1) * (colW + COLUMN_GAP), 0)
+        col:SetWidth(colW)
+        col:SetShown(i <= n)
+    end
+end
+
+--- The column a block goes in: the shorter one so far, the first on a tie, so the order reads
+--- left to right, top to bottom and the two stay near one height.
+local function shortest(heights)
+    local best = 1
+    for i = 2, #heights do if heights[i] < heights[best] then best = i end end
+    return best
+end
+
+local function layBlock(b, host, y)
+    local h = NS.Blocks.AcquireHeader(headerPool, host)
+    h:ClearAllPoints()
+    h:SetPoint("TOPLEFT", host, "TOPLEFT", 0, -y)
+    h:SetPoint("TOPRIGHT", host, "TOPRIGHT", 0, -y)
+    h:SetBlock(b.id, b.meta, b.collapsed, true)
+    headers[b.id] = h
+    y = y + NS.Blocks.HEADER_H
+    if not b.collapsed then y = NS.Blocks.LayRows(b.entries, host, rowPool, y, "row", 0) end
+    return y + (tonumber(layoutSettings().blockGap) or 0)
+end
+
 local function layOut(blocks)
     NS.Blocks.ReleaseHeaders(headerPool)
     NS.Rows.ReleaseAll(rowPool)
     for k in pairs(headers) do headers[k] = nil end
-    local y = 0
+    local n = columns()
+    placeColumns(n, columnWidth())
+    local heights = {}
+    for i = 1, n do heights[i] = 0 end
     for _, b in ipairs(blocks) do
-        local h = NS.Blocks.AcquireHeader(headerPool, frame.content)
-        h:ClearAllPoints()
-        h:SetPoint("TOPLEFT", frame.content, "TOPLEFT", 0, -y)
-        h:SetPoint("TOPRIGHT", frame.content, "TOPRIGHT", 0, -y)
-        h:SetBlock(b.id, b.meta, b.collapsed, true)
-        headers[b.id] = h
-        y = y + NS.Blocks.HEADER_H
-        if not b.collapsed then y = NS.Blocks.LayRows(b.entries, frame.content, rowPool, y, "row", 0) end
-        y = y + (tonumber(layoutSettings().blockGap) or 0)
+        local i = shortest(heights)
+        heights[i] = layBlock(b, frame.columns[i], heights[i])
     end
+    local y = math.max(unpack(heights))
+    for i = 1, n do frame.columns[i]:SetHeight(math.max(heights[i], 1)) end
     frame.content:SetHeight(math.max(y, 1))
     return y
 end
@@ -311,7 +359,7 @@ local function fit(top, y)
     frame.scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(2 + SCROLLBAR_W), FOOTER_H + 2)
     local maxH = layoutSettings().maxHeight or 560
     frame:SetWidth(width())
-    frame.content:SetWidth(width() - 4 - SCROLLBAR_W)
+    frame.content:SetWidth(W.ContentWidth())
     frame:SetHeight(math.max(MIN_H, math.min(top + y + FOOTER_H + 4, maxH)))
 end
 
@@ -370,9 +418,18 @@ function W.Rows() return rowPool and rowPool.active or {} end
 --- The header drawn for block `id` this pass, or nil.
 function W.HeaderFor(id) return headers[id] end
 
---- Re-apply the stored scale, opacity, lock and position.
+--- The window's strata: the player's pick (Layout > Window strata), one of STRATA_CHOICES.
+function W.Strata()
+    local s = layoutSettings().strata
+    for _, v in ipairs(LAYERS.STRATA_CHOICES) do if v == s then return s end end
+    return LAYERS.STRATA.WINDOW
+end
+
+--- Re-apply the stored strata, scale, opacity, lock and position. The crafting overlays take the
+--- new strata on the sync at the end (modules/SecureOverlay.lua reads the host's at each arm).
 function W.ApplySettings()
     if not (frame and NS.db) then return end
+    frame:SetFrameStrata(W.Strata())
     frame:SetScale(NS.GetSetting("scale") or 1)
     frame:SetAlpha(NS.GetSetting("alpha") or 1)
     local locked = NS.GetSetting("locked")

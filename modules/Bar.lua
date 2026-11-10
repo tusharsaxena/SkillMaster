@@ -120,6 +120,7 @@ function Bar.ResolveStyle(styleKey)
         texture = p.barTextureFromSkin == false and media("statusbar", p.barTexture) or nil,
         alpha = tonumber(p.barAlpha) or 1,
         font = font(p), fontSize = p.fontSize, textAnchor = p.textAnchor or "CENTER",
+        reverse = p.fillDirection == "RIGHT",   -- fills from the right edge (Bars > Fill direction)
         template = p.textTemplate,
         showText = styleKey ~= "mini" and styleKey ~= "tooltip", showTicks = p.ticks ~= false,
         showMarkers = p.markers ~= false, showTimer = p.timer ~= false,
@@ -286,35 +287,48 @@ end
 
 local Methods = {}
 
---- Place the fill, the bonus, the spark, the ticks and the markers from `geom` on the current width.
---- Cheap: anchors and widths only (standalone-windows, Resizing).
+--- The edge the fill grows from and the sign of an x offset along it: LEFT, +1 by default; RIGHT,
+--- -1 while the style fills right to left.
+local function origin(bar)
+    if bar.style and bar.style.reverse then return "RIGHT", -1 end
+    return "LEFT", 1
+end
+
+--- Place the fill, the bonus, the spark, the ticks and the markers from `geom` on the current width,
+--- from the style's edge. Cheap: anchors and widths only (standalone-windows, Resizing).
 function Methods:Layout()
     local g, w = self.geom, self:GetWidth()
     w = (type(w) == "number" and w or 0) - 2 * EDGE
+    local side, sgn = origin(self)
     local fillW, bonusW = max(0, w * g.fill), max(0, w * g.bonus)
+    self.fill:ClearAllPoints()
+    self.fill:SetPoint("TOP" .. side, self, "TOP" .. side, sgn * EDGE, -EDGE)
+    self.fill:SetPoint("BOTTOM" .. side, self, "BOTTOM" .. side, sgn * EDGE, EDGE)
     self.fill:SetWidth(max(fillW, 0.01))
     self.fill:SetShown(fillW >= 0.5)
+    local x = sgn * (EDGE + fillW)
     self.bonus:ClearAllPoints()
-    self.bonus:SetPoint("TOPLEFT", self, "TOPLEFT", EDGE + fillW, -EDGE)
-    self.bonus:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", EDGE + fillW, EDGE)
+    self.bonus:SetPoint("TOP" .. side, self, "TOP" .. side, x, -EDGE)
+    self.bonus:SetPoint("BOTTOM" .. side, self, "BOTTOM" .. side, x, EDGE)
     self.bonus:SetWidth(max(bonusW, 0.01))
     self.bonus:SetShown(bonusW >= 0.5)
     self.spark:ClearAllPoints()
-    self.spark:SetPoint("TOP", self, "TOPLEFT", EDGE + fillW, 0)
-    self.spark:SetPoint("BOTTOM", self, "BOTTOMLEFT", EDGE + fillW, 0)
+    self.spark:SetPoint("TOP", self, "TOP" .. side, x, 0)
+    self.spark:SetPoint("BOTTOM", self, "BOTTOM" .. side, x, 0)
     self.spark:SetShown(self.style.spark ~= nil and fillW >= 1 and g.fill < 1)
     self:LayoutMarks(self.tickTextures, g.ticks, w, function(t) return t end)
     self:LayoutMarks(self.markerTextures, g.markers, w, function(m) return m.at end)
 end
 
 function Methods:LayoutMarks(list, marks, w, at)
+    local side, sgn = origin(self)
     for i, t in ipairs(list) do
         local m = marks[i]
         if m then
-            local x = EDGE + min(w * at(m), max(w - 1, 0))
+            local x = sgn * (EDGE + min(w * at(m), max(w - 1, 0)))
             t:ClearAllPoints()
-            t:SetPoint("TOPLEFT", self, "TOPLEFT", x, 0)
-            t:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", x, 0)
+            t:SetPoint("TOP" .. side, self, "TOP" .. side, x, 0)
+            t:SetPoint("BOTTOM" .. side, self, "BOTTOM" .. side, x, 0)
         end
         t:SetShown(m ~= nil)
     end
@@ -429,9 +443,7 @@ end
 local function buildRegions(bar)
     bar.bg = bar:CreateTexture(nil, "BACKGROUND")
     bar.bg:SetAllPoints(bar)
-    bar.fill = bar:CreateTexture(nil, "ARTWORK", nil, 1)
-    bar.fill:SetPoint("TOPLEFT", bar, "TOPLEFT", EDGE, -EDGE)
-    bar.fill:SetPoint("BOTTOMLEFT", bar, "BOTTOMLEFT", EDGE, EDGE)
+    bar.fill = bar:CreateTexture(nil, "ARTWORK", nil, 1)   -- anchored by Layout, from the style's edge
     bar.bonus = bar:CreateTexture(nil, "ARTWORK", nil, 2)
     bar.spark = bar:CreateTexture(nil, "OVERLAY")
     bar.spark:SetWidth(1)

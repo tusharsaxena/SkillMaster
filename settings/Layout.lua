@@ -30,7 +30,33 @@ local rows = NS.Live({
     row({ path = "layout.summary", group = WINDOW, type = "bool", default = P.summary,
           label = L["Show summary strip"],
           desc = L["The line under the title: your level, this session's skill-ups and the next rank to train."] }),
+    row({ path = "layout.columns", group = WINDOW, type = "number", default = P.columns,
+          values = { { value = 1, text = L["One column"] }, { value = 2, text = L["Two columns"] } },
+          label = L["Columns"],
+          desc = L["Lay the docked blocks in one column, or in two side by side. Each column is Window width wide."] }),
 })
+
+-- The player's strata (frame-layering-§1): four values, and the library's one tooltip over them.
+local STRATA = NS.Constants.LAYERS.STRATA_CHOICES
+local STRATA_TEXT = { BACKGROUND = L["Background"], LOW = L["Low"], MEDIUM = L["Medium"], HIGH = L["High"] }
+local strataValues = {}
+for i, s in ipairs(STRATA) do strataValues[i] = { value = s, text = STRATA_TEXT[s] } end
+local function strataDesc(what)
+    local tip = H.StrataTooltip and H.StrataTooltip(STRATA) or ""
+    return tip ~= "" and (what .. " " .. tip) or what
+end
+-- The window's own apply re-reads every stored look and re-syncs the crafting overlays.
+local function applyWindow()
+    if NS.MainWindow then NS.MainWindow.ApplySettings() end
+    NS.ApplyLook()
+end
+rows[#rows + 1] = row({ path = "layout.strata", group = WINDOW, type = "string", default = P.strata,
+    values = strataValues, label = L["Window strata"], onChange = applyWindow,
+    desc = strataDesc(L["The Skill Master window's layer."]) })
+rows[#rows + 1] = row({ path = "layout.detachedStrata", group = WINDOW, type = "string", default = P.detachedStrata,
+    values = strataValues, label = L["Detached block strata"],
+    desc = strataDesc(L["The layer every detached block's frame draws in."]) })
+NS.Live(rows)
 
 local B = NS.Blocks
 

@@ -48,6 +48,9 @@ local rows = {
         L["Height of the bar inside a row's tooltip."], 4, 20),
     px("bars.miniHeight", BAR, SIZE, L["Mini bar height (px)"],
         L["Height of the small bars in the Journal's Alts tab and the broker tooltips."], 3, 16),
+    row({ path = "bars.fillDirection", group = BAR, subgroup = L["Fill"], type = "string", default = P.fillDirection,
+          label = L["Fill direction"], desc = L["The edge every bar fills from."],
+          values = { { value = "LEFT", text = L["Left to right"] }, { value = "RIGHT", text = L["Right to left"] } } }),
 }
 
 local classColor = { source = "player" }

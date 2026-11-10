@@ -31,6 +31,13 @@ end
 
 local function settings(id) return NS.Blocks.Settings(id) end
 
+--- A detached block's strata: the player's pick, one of STRATA_CHOICES, else the HUD tier's.
+function D.Strata()
+    local layout = (NS.db and NS.db.profile.layout) or NS.defaults.profile.layout
+    for _, v in ipairs(LAYERS.STRATA_CHOICES) do if v == layout.detachedStrata then return v end end
+    return LAYERS.STRATA.HUD
+end
+
 local function isLocked(id)
     return NS.GetSetting("locked") or settings(id).locked == true
 end
@@ -53,6 +60,9 @@ local function applyPoint(f)
         f:SetPoint("TOPLEFT", UIParent, "CENTER", 240, 200 - 24 * step)
     end
     f:SetScale(settings(f.id).scale or 1)
+    -- The player's strata for every detached block (Layout > Detached block strata); the crafting
+    -- overlays take it on the sync Refresh ends with.
+    f:SetFrameStrata(D.Strata())
 end
 
 local function onDragStart(self)
