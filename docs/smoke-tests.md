@@ -179,7 +179,7 @@ the checks below that cover each item:
 
 - **SM-PROBE-1** `/sm probe`: a copy window opens with a JSON report, `skillLines` holding every
   skill (a collapsed header in the Skills tab is collapsed again afterwards). Copy it and send it to
-  the author; it settles the assumed rows in `docs/midnight-quirks.md`.
+  the author; it settles the assumed rows in `docs/forever-quirks.md`.
 
 ## Skins and diagnostics
 

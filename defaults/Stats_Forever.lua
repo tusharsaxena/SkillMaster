@@ -15,7 +15,7 @@ local _, NS = ...
 --   markers { { value = number | named ref, label, minLevel? } }; a marker below minLevel is dropped.
 --   fmt     "int" | "pct" (one decimal) | "pct0" (whole percent) | "armor" (raw armor + mitigation).
 --
--- Every row is unverified until the owner's smoke pass on Forever (docs/midnight-quirks.md, the
+-- Every row is unverified until the owner's smoke pass on Forever (docs/forever-quirks.md, the
 -- assumed-API table): the shapes are vanilla 1.12's.
 
 local L = NS.L

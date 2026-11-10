@@ -1,5 +1,5 @@
 -- tests/test_alts.lua — Alts: each character's skills snapshotted into db.global.characters, keyed by
--- the character's whole two-word Forever name (client-quirks-§5), on SKILLS_UPDATED and at logout.
+-- the character's whole two-word Forever name (forever-quirks-§4), on SKILLS_UPDATED and at logout.
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse

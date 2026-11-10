@@ -15,7 +15,7 @@ SkillMasterDB
     schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (2)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
-                                 -- AceDB 40's db.keys: "PvP-Traxex Silentshot" (client-quirks-§5);
+                                 -- AceDB 40's db.keys: "PvP-Traxex Silentshot" (forever-quirks-§4);
                                  -- each { name, class, className, race, faction, level, updated,
                                  -- skills = { [key] = { name, category, rank, max } } }
   char.<db.keys.char>

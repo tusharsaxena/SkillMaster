@@ -17,7 +17,7 @@ local _, NS = ...
 -- `NS.Compat.Member(...)` at call time and never captures one in a local.
 -- The skill list (T2.1): the kit's Forever API set lists it as C_SkillInfo.* and not as the 1.12
 -- globals, so C_SkillInfo is read first and the 1.12 globals second, until `/sm probe` settles
--- which the client carries (docs/midnight-quirks.md, the assumed-API table). The bare
+-- which the client carries (docs/forever-quirks.md, the assumed-API table). The bare
 -- GetSkillLineInfo rung stays because the Forever set is best-effort, not measured.
 --
 -- modules/Probe.lua reads the same APIs raw on purpose: its job is the unnormalized return.

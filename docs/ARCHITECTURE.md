@@ -218,7 +218,7 @@ a crafting row opens the main window scrolled to it rather than casting (design 
   excluded headers are matched on the locale's strings, which only enUS ships today. Such a client
   sorts its lines into Other until the locale files are translated (Documented deviations).
 - Every client API the data modules use is assumed until `/sm probe` confirms it
-  ([midnight-quirks.md](midnight-quirks.md), the addon's own section). The kit's Forever API set
+  ([forever-quirks.md](forever-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.
 
 ## Documentation map
@@ -240,7 +240,8 @@ a crafting row opens the main window scrolled to it rather than casting (design 
 | Doc | Status | Trigger |
 |---|---|---|
 | `slash-dispatch.md` | Present | `NS.COMMANDS` carries eight or more commands (23 as measured on 2026-11-10) |
-| `midnight-quirks.md` | Present | Always (client-quirks-§1); holds the vendored catalog and this addon's assumed-API table |
+| `forever-quirks.md` | Present | Clients includes Forever (forever-quirks-§1); holds the vendored Forever catalog and this addon's assumed-API table |
+| `midnight-quirks.md` | Not applicable | Clients is `Forever`; the Retail catalog is carried only where Clients includes Retail (client-quirks-§1) |
 | `debug.md` | Present | The diagnostics dump is a debug surface beyond the default console (debug-logging-§14) |
 | `profiles.md` | Present | The Profiles page ships in the options UI |
 | `perf-analysis/README.md` | Present | The performance harness is wired (`core/PerfSetup.lua`) |

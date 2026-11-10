@@ -4,7 +4,7 @@ local _, NS = ...
 --
 -- record = { name, class, className, race, level, faction, updated, skills = { [key] = { name,
 --   category, rank, max } } }, learned rows only.
--- THE KEY (client-quirks-§5): "<realm>-<name>" from AceDB 40's db.keys, which is the ruleset
+-- THE KEY (forever-quirks-§4): "<realm>-<name>" from AceDB 40's db.keys, which is the ruleset
 -- ("PvP") and the character's WHOLE two-word name ("Traxex Silentshot") on Forever. The store never
 -- derives them again: UnitName's second return is the surname there, not a realm.
 -- A.View(list): a read-only stand-in with List / Forget over `list` (test mode's sample alts).

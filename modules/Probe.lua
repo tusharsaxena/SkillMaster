@@ -1,7 +1,7 @@
 local addonName, NS = ...
 -- modules/Probe.lua — `/sm probe`: a one-shot report of the WoW Forever API shapes the data
 -- modules depend on (design §5.4). The owner runs it once in game and sends the JSON back; it
--- corrects the "assumed (1.12)" rows in docs/midnight-quirks.md.
+-- corrects the "assumed (1.12)" rows in docs/forever-quirks.md.
 --
 -- Read-only apart from one restored change: a collapsed header in the stock Skills tab hides its
 -- lines from GetSkillLineInfo, so the probe expands it, reads, and collapses it again.

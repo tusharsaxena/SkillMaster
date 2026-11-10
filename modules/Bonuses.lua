@@ -39,7 +39,7 @@ local function isSecret(v) return type(issecretvalue) == "function" and issecret
 local function now() return GetTime() end
 
 --- Seconds since GetTime() when the main-hand temp enchant runs out, or nil when there is none.
---- Assumed shape (1.12): hasMain, mainExpirationMs, ... (docs/midnight-quirks.md).
+--- Assumed shape (1.12): hasMain, mainExpirationMs, ... (docs/forever-quirks.md).
 local function mainEnchantExpiry()
     local hasMain, ms = NS.Compat.WeaponEnchantInfo()
     if not hasMain then return nil end

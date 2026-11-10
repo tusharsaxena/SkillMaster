@@ -29,7 +29,7 @@ Start here, then read the docs:
   wiring, taint notes, known limitations, documented deviations. What this addon actually is.
 - **`docs/testing.md`** — how to verify: the headless harness, lint, and the green commit gate.
 - Topic detail in `docs/` as needed (`scope.md`, `module-map.md`, `schema.md`, `settings-panel.md`,
-  `data-flow.md`, `common-tasks.md`, `debug.md`, `midnight-quirks.md`, `smoke-tests.md`, …).
+  `data-flow.md`, `common-tasks.md`, `debug.md`, `forever-quirks.md`, `smoke-tests.md`, …).
 
 **WoW Forever only** (roster Clients `Forever`, clients-§9): the suite runs under the Forever kit
 profile only (also pinned in-repo by `tests/client_pin.lua`, so a bare run is Forever too). Green gate before every commit: `KA0S_KIT_CLIENT=forever lua tests/run.lua` and
