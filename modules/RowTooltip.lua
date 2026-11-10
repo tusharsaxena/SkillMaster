@@ -207,10 +207,21 @@ local tipBar
 
 function RT.Bar() return tipBar end
 
+local function hideBar()
+    if tipBar then tipBar:Hide() end
+end
+
+--- The one tooltip bar, on GameTooltip. It goes with the tooltip's CONTENT, not only with the
+--- tooltip: SetOwner on a shown GameTooltip clears it (OnTooltipCleared) without hiding it, and a
+--- bar hidden by OnHide alone stayed on screen over whatever the tooltip showed next, the broker
+--- feed's rows among them (feedback round 2, FB-9).
 local function ensureBar()
     if tipBar then return tipBar end
     tipBar = Bar.Create(GameTooltip, "tooltip")
-    GameTooltip:HookScript("OnHide", function() tipBar:Hide() end)
+    GameTooltip:HookScript("OnHide", hideBar)
+    if GameTooltip.HasScript and GameTooltip:HasScript("OnTooltipCleared") then
+        GameTooltip:HookScript("OnTooltipCleared", hideBar)
+    end
     return tipBar
 end
 
@@ -242,6 +253,7 @@ end
 --- Show `row`'s tooltip.
 function RT.Show(row)
     if not (GameTooltip and row.entry) then return end
+    hideBar()   -- shown again below only when this row's lines ask for it
     GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
     local n = 0
     local barAt
