@@ -101,10 +101,14 @@ the checks below that cover each item:
 
 - **SM-LDB-1** The minimap button shows the logo. Left-click opens the settings; right-click shows
   Enabled, Locked, Test mode, Sim mode, Show window. Hovering shows the status tooltip.
-- **SM-LDB-2** In a broker display (Titan Panel, ChocolateBar or Bazooka), add the four Skill Master
-  feeds: All, Professions, Weapons and Stats each show their template's text. Gain a skill point:
-  All and that skill's feed read `^ <skill> <new>` for five seconds, with the up chevron. Hover each
-  feed: its tooltip lists the rows with mini bars.
+- **SM-LDB-2** In a broker display (Titan Panel, ChocolateBar or Bazooka), add the one Skill Master
+  feed ("Skill Master"; no All, Professions, Weapons or Stats feed is offered): it shows its
+  template's text. Gain a skill point: the feed reads `^ <skill> <new>` for five seconds, with the
+  up chevron. Hover it: the tooltip lists Primary, Secondary, Weapon and Other with mini bars, no
+  Stats; it wears the skin (backdrop, border, fonts). Broker > Tooltip: turn Stats on and Weapon
+  off, hover again: stats show, weapons do not. Tooltip skills: hide Cooking; the tooltip leaves it
+  out and the main window still shows it. Turn *Apply skin to the tooltip* off: the plain tooltip;
+  hover a unit or item afterwards, its GameTooltip is the game's own look.
 - **SM-CFG-1** Settings → AddOns → Ka0s Skill Master: the landing page lists the slash commands; General
   has Master controls, Skin and Keybindings tabs; Profiles works.
 - **SM-CFG-2** Uncheck Minimap button: the button hides, and Reset all settings does not bring it back.

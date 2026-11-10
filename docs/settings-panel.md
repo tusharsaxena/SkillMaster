@@ -11,7 +11,7 @@ login; each page body builds on its first show.
 | Bars | Bar, Colors, Text, Marks | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom) and position; ticks, markers, timer and spark. A live preview bar is pinned above the strip |
 | Skills | General, Professions, Weapons and other | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default), one Hide row per catalog skill |
 | Stats | One tab per stat group | One Hide row per stat |
-| Broker | Feeds | Each feed's text template (a presets dropdown plus Custom) and the skill-up flash |
+| Broker | Feed, Tooltip, Tooltip skills, Tooltip stats | The feed's text template (a presets dropdown plus Custom) and the skill-up flash; Apply skin to the tooltip and the five section switches; one tooltip Hide row per catalog skill and per stat |
 | Alerts | Alerts | The rank-cap and weapon-gap alerts, the gap, the sound |
 | Journal | Journal | Skill-ups kept per character, the Alts tab's filter on open |
 | Trainers and Waypoints | Trainers and waypoints | The waypoint method, the chat line, the unverified mark |
@@ -28,9 +28,9 @@ them through `NS.SetByPath`; the Hide rows (`skills.hidden.<key>`, `stats.hidden
 and write through `get` / `set`, and an undrawn whole-set row per kind (`skills.hidden`,
 `stats.hidden`, type `set`) lets the page's Defaults clear a key with no row of its own.
 
-The text templates (`bars.textTemplate`, `broker.templates.<feed>`) are two rows each, built by
+The text templates (`bars.textTemplate`, `broker.template`) are two rows each, built by
 `NS.TemplateRows` (`settings/OptionsSetup.lua`): a session-only presets dropdown
-(`bars.textPreset`, `broker.presets.<feed>`) whose last choice is *Custom*, and the stored
+(`bars.textPreset`, `broker.preset`) whose last choice is *Custom*, and the stored
 template itself as an EditBox (`dialogControl = "EditBox"`), drawn only while the dropdown reads
 Custom (`shownWhen`). The dropdown reads the preset the stored string matches, else Custom; a
 preset writes its template through `NS.SetByPath`; Custom writes nothing and shows the box, which
@@ -105,8 +105,22 @@ learned skills below their cap, redrawn on the write's `LAYOUT_CHANGED`. The Jou
 
 ## Broker
 
-The feeds' right-click opens this page by its key (`NS.Broker.SETTINGS_PAGE = "broker"`, through
+The feed's right-click opens this page by its key (`NS.Broker.SETTINGS_PAGE = "broker"`, through
 `NS.Helpers.OpenOptionsPanel`); with the library absent it opens the main settings panel.
+
+- **Feed**: *Text*, the one template (`broker.template`; the presets cover skills and stats alike:
+  pinned skill and gains, pinned skill, lowest profession and gains, last skill-up and gains,
+  equipped weapon and Defense, pinned skill and crit, crit and speed), and *Skill-up flash*
+  (`broker.flashSeconds`).
+- **Tooltip**: *Look*, *Apply skin to the tooltip* (`broker.tooltip.skin`, on): the tooltip is the
+  feed's own frame in the skin's backdrop, border and fonts; off, the game's plain GameTooltip.
+  The switch takes a shown tooltip down. *Sections*: one switch per section
+  (`broker.tooltip.sections.<primary|secondary|weapon|other|stats>`), Stats off by default.
+- **Tooltip skills** and **Tooltip stats**: one *Hide <name>* row per catalog skill
+  (`broker.tooltip.hiddenSkills.<key>`, by category) and per stat (`broker.tooltip.hiddenStats.<key>`,
+  by group). These sets are the tooltip's own: the Skills and Stats pages' Hide rows
+  (`skills.hidden`, `stats.hidden`) govern the window and the detached blocks, and neither reaches
+  the other. Each kind has an undrawn whole-set row (`type = "set"`) for the page's Defaults.
 
 ## Bars
 

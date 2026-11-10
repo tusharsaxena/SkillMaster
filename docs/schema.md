@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (2)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (3)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "PvP-Traxex Silentshot" (forever-quirks-§4);
@@ -60,7 +60,16 @@ SkillMasterDB
                helperTooltip = true,   -- the gathering and fishing lines in a row's tooltip
                helperHint = false }    -- the one-line hint under the row (design §12 item 4)
     stats  = { hidden = { [key] = true } }   -- how a row draws is bars.rowDisplay (schemaVersion 2)
-    broker = { flashSeconds = 5, templates = { all, professions, weapons, stats } }
+    broker = {                   -- the one "Skill Master" feed (modules/Broker.lua; FB-12, schemaVersion 3)
+      flashSeconds = 5,
+      template = "{pinned} · +{gains}",   -- the feed's text (presets + Custom)
+      tooltip = {
+        skin = true,             -- Apply skin to the tooltip (FB-13): the feed's own skinned frame
+        sections = { primary = true, secondary = true, weapon = true, other = true, stats = false },
+        hiddenSkills = { [key] = true },   -- left out of the tooltip only, apart from skills.hidden
+        hiddenStats  = { [key] = true },   -- left out of the tooltip only, apart from stats.hidden
+      },
+    }
     journal = { point = false, size = false, keep = 500, filter = "professions" }
                                  -- point and size ({ w, h }, the resize grip): drag state, written
                                  -- only by modules/Journal.lua; keep and filter: the Journal page
@@ -77,8 +86,8 @@ SkillMasterDB
 
 Session-only rows (never stored): `state.debugConsole` (the console checkbox), `state.testMode` and
 `state.sim` (the Sim mode checkbox, T5.2), and the template presets dropdowns `bars.textPreset` and
-`broker.presets.<feed>`, which read the preset the stored template matches and write it to
-`bars.textTemplate` / `broker.templates.<feed>` (docs/settings-panel.md). Nothing a simulation does is stored: its session log is a
+`broker.preset`, which read the preset the stored template matches and write it to
+`bars.textTemplate` / `broker.template` (docs/settings-panel.md). Nothing a simulation does is stored: its session log is a
 session-only list (`NS.SessionLog:Override`), alt snapshots stand aside while it runs, and the step
 panel's position is the library's memory, never a key here (preview-mode, H4 and H10).
 The Minimap button row's path is `global.minimap.shown`; its get/set invert onto `global.minimap.hide`.
@@ -101,6 +110,7 @@ LibDBIcon's own.
 |---|---|---|
 | 0 → 1 | pre-versioning | nothing to reshape; the stamp itself |
 | 1 → 2 | `rowDisplayFromStats`, per profile | moves a stored `stats.display` of `"bar"` or `"text"` onto `bars.rowDisplay` (unless one is already stored) and drops `stats.display`; `"both"`, the default of both keys, moves nothing |
+| 2 → 3 | `oneBrokerFeed`, per profile | one broker feed (FB-12): a stored `broker.templates.all` becomes `broker.template` (unless one other than the default is already stored), and `broker.templates` goes with the Professions, Weapons and Stats feeds' templates; a profile with no `broker.templates` passes through |
 
 No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
 companion defaulting on, so no stored profile predates the companions and none has to be moved

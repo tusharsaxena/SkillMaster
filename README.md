@@ -12,7 +12,7 @@ Skill Master puts every skill your character has into one window of bars you can
 - Skills in four groups (Primary, Secondary, Weapon, Other) and stats in four more, each a block you can collapse, reorder, or pop out into its own frame.
 - Hover tooltips with the bonus breakdown, the next rank and its trainer, how far a weapon is behind its cap, and gathering and fishing hints.
 - Click a profession to open it, an unlearned skill for its trainers and a waypoint (TomTom, a map pin, or directions in chat).
-- Four broker feeds for Titan Panel and the like, alerts when a profession caps or a weapon falls behind, a Journal with this session's skill-ups and an overview of your alts.
+- A broker feed for Titan Panel and the like, its tooltip showing the skills and stats you pick, alerts when a profession caps or a weapon falls behind, a Journal with this session's skill-ups and an overview of your alts.
 - Every part of the look is a setting: bar sizes, fill direction, colors, border, font, text, one or two columns, frame layering, and skins.
 
 You set it up in the game's Settings → AddOns → Ka0s Skill Master, or with `/sm`.

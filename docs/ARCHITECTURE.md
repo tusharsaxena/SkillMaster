@@ -6,7 +6,7 @@ Documentation map lists; this file keeps a summary and one link per topic.
 ## Overview
 
 Ka0s Skill Master shows a vanilla-era character's weapon skills, professions, Defense, Lockpicking,
-Riding and character stats as skinnable data bars, with bonuses, trainer directions, broker feeds,
+Riding and character stats as skinnable data bars, with bonuses, trainer directions, a broker feed,
 alerts, a session log, an alt overview and gathering helpers. The design is
 `docs/superpowers/specs/2026-11-10-skill-master-design.md`; the build plan and its status ledger are
 under `docs/superpowers/plans/`.
@@ -20,7 +20,7 @@ The build (TOC `0.1.0` until the release bump; the README's Version History carr
 row) holds the whole v1 design: the Ace3 substrate and one LibKa0s setup file per major, each with
 its degradation stub; the data layer (skills, bonuses, stats, trainers, helpers); the display (the
 bar widget, the blocks and rows in one or two columns, the detached frames, the crafting overlays,
-the row tooltip, the trainer popup and waypoints); the broker feeds, the alerts, the session log,
+the row tooltip, the trainer popup and waypoints); the broker feed, the alerts, the session log,
 the alt overview and the Journal; the settings pages for every display setting; test mode's sample
 character (`modules/Preview.lua` over `defaults/Preview_Forever.lua`) and the simulator
 (`modules/Simulator.lua` on LibKa0s-Sim-1.0); skins; the launcher, two key bindings and the
@@ -47,7 +47,7 @@ overlays, the click map `NS.Interact`, the row tooltip, the trainer popup and `N
 `/sm probe` report, the skills model (`SkillData`), the bonus breakdown (`Bonuses`), the stats
 model (`StatData`), the trainer lookups (`Trainers`), the skill helpers (`NS.SkillHelpers`,
 `modules/Helpers.lua`), the session log (`NS.SessionLog`), the alt snapshots (`NS.Alts`), the
-Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), the broker feeds
+Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), the broker feed
 (`NS.Template`, `NS.Broker`), test mode's data swap (`NS.Preview`), the simulator (`NS.Sim`,
 `NS.SimHost`) and the diagnostics sections;
 `settings/` holds the schema,
@@ -64,7 +64,7 @@ the default skin, is the library's (skinning-§2).
 |---|---|---|
 | Skill and stat bars, blocks, detached frames, columns | not listed | yes |
 | Bonuses, trainers, waypoints, gathering and fishing helpers | not listed | yes |
-| Broker feeds, alerts, session log, alts, Journal | not listed | yes |
+| Broker feed, alerts, session log, alts, Journal | not listed | yes |
 | Settings pages, skins, test mode, simulator, launcher, key bindings, diagnostics | not listed | yes |
 
 "Not listed": the TOC's load-gating pair keeps the addon out of Retail's AddOns list.
@@ -181,8 +181,8 @@ events-frames-taint-§2) disarms every overlay so none stays mouse-live in comba
 `PLAYER_REGEN_ENABLED` replays the combat queue (`SecureOverlay:AfterCombat`: dock, detach and
 collapse wait there, Review Focus 3) and re-syncs. A crafting click in combat reaches the plain row
 and prints one line. Shift- and right-clicks pass through the overlay (`PostClick`) to the row's
-handlers. The broker feeds (`modules/Broker.lua`, T4.1) are never secure: their tooltip rows are
-plain buttons parented to GameTooltip that open windows (the main window, the character frame), and
+handlers. The broker feed (`modules/Broker.lua`, T4.1) is never secure: its tooltip rows are
+plain buttons parented to the tooltip frame (its own, or GameTooltip with the skin off) that open windows (the main window, the character frame), and
 a crafting row opens the main window scrolled to it rather than casting (design §6.5).
 
 ## Known Limitations
@@ -203,8 +203,8 @@ a crafting row opens the main window scrolled to it rather than casting (design 
   only its fixed entries (Enabled, Locked, Test mode, Sim mode, Show window, Open settings), takes
   no extra entry from the descriptor, and launcher-§2 forbids a host menu. It needs a library seam;
   until then the Journal opens from `/sm journal` and the main window's title-bar journal mark.
-- Broker displays that only call a data object's `OnTooltipShow` show no feed tooltip: the feeds
-  supply `OnEnter` / `OnLeave` (their rows are clickable), not `OnTooltipShow`.
+- Broker displays that only call a data object's `OnTooltipShow` show no feed tooltip: the feed
+  supplies `OnEnter` / `OnLeave` (its rows are clickable), not `OnTooltipShow`.
 - The Alts grid shows five skill columns at a time; Shift + mouse wheel pages through the rest.
 - The simulator plays one scenario (a fishing trip: six skill-ups, a lure on and off, a mount up
   and down) on test mode's sample character. Only the reads the simulated character needs go

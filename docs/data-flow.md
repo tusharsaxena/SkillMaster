@@ -5,7 +5,7 @@ The pipeline the addon is built around (design §5.3), and how much of it exists
 ```
 game events ──► data modules ──► bus messages ──► displays
 SKILL_LINES_CHANGED   SkillData (T2.1)   SKILLS_UPDATED, SKILL_UP   blocks, rows, bars (T3.x)
-CHAT_MSG_SKILL        Bonuses (T2.2)     BONUSES_UPDATED            broker feeds (T4.1)
+CHAT_MSG_SKILL        Bonuses (T2.2)     BONUSES_UPDATED            broker feed (T4.1)
 UNIT_* stat events    StatData (T2.3)    STATS_UPDATED              alerts, session log, alts (T4.x)
 ```
 
@@ -59,14 +59,17 @@ the toast; a profile reload re-reads its position.
 ## Broker (T4.1)
 
 `modules/Broker.lua` keeps the last `SKILLS_UPDATED` and `STATS_UPDATED` models, counts the
-session's gains from `SKILL_UP`, and re-renders each feed's template (`profile.broker.templates`)
-on every message; an unchanged text is not re-assigned. A `SKILL_UP` flashes "^ <name> <new>" on
-the All feed and the skill's own feed for `profile.broker.flashSeconds` (one AceTimer, restarted by
-the next skill-up). The only client read is the main hand's weapon class, for `{equippedWeapon}`;
+session's gains from `SKILL_UP`, and re-renders the one feed's template (`profile.broker.template`)
+on every message; an unchanged text is not re-assigned. Any `SKILL_UP` flashes "^ <name> <new>" on
+the feed for `profile.broker.flashSeconds` (one AceTimer, restarted by the next skill-up). The
+tooltip is filled on hover from the same models: the sections `profile.broker.tooltip.sections`
+switches on, less the keys in `broker.tooltip.hiddenSkills` / `hiddenStats` (never the window's
+`skills.hidden` / `stats.hidden`), drawn on the feed's own skinned frame or, with
+`broker.tooltip.skin` off, the shared GameTooltip. The only client read is the main hand's weapon class, for `{equippedWeapon}`;
 in test mode the context's `{pinned}` and `{equippedWeapon}` are the sample's own (`NS.Preview`'s
 broker source carries `pinned` and `mainHand`), so a sample feed reads neither `db.char.pinned` nor
 the live gear.
-The stand-down shows "Off" on every feed; the stand-up re-renders.
+The stand-down shows "Off" on the feed; the stand-up re-renders.
 
 ## Test mode and the simulator (T5.2)
 
