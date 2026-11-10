@@ -29,7 +29,7 @@ Plan: `2026-11-10-skill-master-v1.md`. Update a row in the same commit that fini
 | 6.2 Automated-test bundle | done | af4bc94, bundle `docs/automated-tests/20261110-063942` measured 21b1936 on the Forever profile: green, lint 0/0 (122 files), 397 passed + 1 skip of 398, 7 perf scenarios, max CCN 15 (`Bar.PaintBorder`), 0 warnings, 0 blind/crashed |
 | 6.3 Standards audit | done | bundle 4b72a98 (docs/audits/2026-11-10, v2.105.0 at 3d6855f); MUST fixes: SM-01/01a/01b + SM-02 eaa47c4, SM-03 62e5c0f, SM-05 eaa47c4; SHOULD: SM-04 eaa47c4, SM-06 cbfe5cb, SM-09 1a52d35, SM-12 c6ef3d0; open: SM-07 screenshots (before publish), SM-08 plan topic name (owner), SM-10/11 at the release bump |
 | 6.4 WoW review | done | bundle 4b72a98 (docs/reviews/2026-11-10); F-001 e3303bc (+ localization-§4 deviation row), F-002 eaa47c4, F-003 91f4261, F-004/F-011 1a52d35, F-005/F-014/F-015 5ca1fd2, F-006/F-007/F-012 eaa47c4, F-008 cbfe5cb, F-010/F-013/F-016 c6ef3d0; open: F-009 (overlay under the Journal, needs the client) |
-| 6.5-6.6 LibKa0s issue, push, report | todo | |
+| 6.5-6.6 LibKa0s issue, push, report | done | LibKa0s #80 (bar widget), #81 (launcher extra entries); all three branches pushed; owner report 2026-11-10 |
 | 7.x Merge + cleanup | blocked on owner go | |
 
 ## Branches / worktrees created by this run (for cleanup)
