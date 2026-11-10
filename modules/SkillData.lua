@@ -36,6 +36,17 @@ local function buildNameMap()
 end
 NS.SkillNameToKey = buildNameMap()
 
+--- The same keys by skill-line ID, matched first: an ID reads the same on every client.
+local function buildIdMap()
+    local map = {}
+    for key, e in pairs(NS.SkillCatalog) do
+        if e.skillLineID then map[e.skillLineID] = key end
+        for _, id in ipairs(e.aliasIDs or {}) do map[id] = key end
+    end
+    return map
+end
+NS.SkillLineIDToKey = buildIdMap()
+
 local EXCLUDED = {}
 for _, header in ipairs(NS.SkillExcludedHeaders) do EXCLUDED[L[header]] = true end
 
@@ -116,9 +127,10 @@ end
 -- Building the model
 -- ---------------------------------------------------------------------------------------------
 
---- key and catalog entry for a line; nil when the line is left out.
-local function classify(name, header)
-    local key = NS.SkillNameToKey[name]
+--- key and catalog entry for a line; nil when the line is left out. The skill-line ID first, when
+--- the client's record carries one; the localized name otherwise (the 1.12 list has no ID).
+local function classify(name, header, id)
+    local key = (id and NS.SkillLineIDToKey[id]) or NS.SkillNameToKey[name]
     if key then return key, NS.SkillCatalog[key] end
     if header and EXCLUDED[header] then return nil end
     return SD.UNKNOWN_PREFIX .. name, nil
@@ -147,7 +159,7 @@ end
 --- One row per key: two lines on one key (a second racial riding line) keep the higher rank.
 local function addLearned(m, lines, ctx)
     for _, line in ipairs(lines) do
-        local key, cat = classify(line.rec.name, line.header)
+        local key, cat = classify(line.rec.name, line.header, line.rec.skillLineID)
         local had = key and m.byKey[key]
         if key and not had then
             local e = learnedEntry(key, cat, line.rec, ctx)

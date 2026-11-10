@@ -111,5 +111,51 @@ test("F-012: standing up re-reads the stats and the bonuses, so no simulated val
     if not ok then error(err, 0) end
     assertTrue(asked >= 1, "the stats are re-read on stand-up")
     assertTrue(refreshed >= 1, "the bonuses are re-read on stand-up")
-    assertTrue(M ~= nil)
+end)
+
+-- F-001 (localization-§4): a deDE client answers German names; the IDs still match.
+local function deLine(name, id, rank, max, header)
+    return { rec = { name = name, skillLineID = id, isHeader = false, rank = rank, tempPoints = 0, modifier = 0,
+                     max = max }, header = header }
+end
+
+test("F-001: a skill line is matched on its skill-line ID, so a German client's lines land on their rows", function()
+    -- red under: SkillData classifying on the localized name alone (Angeln lands in Other as other:Angeln)
+    local m = NS.SkillData.Build({
+        deLine("Angeln", 356, 107, 150, "Sekundäre Fertigkeiten"),
+        deLine("Lederverarbeitung", 165, 146, 150, "Berufe"),
+        deLine("Schusswaffen", 46, 105, 110, "Waffenfertigkeiten"),
+        deLine("Widderreiten", 152, 75, 75, "Sekundäre Fertigkeiten"),
+    }, { classFile = "HUNTER", level = 22 })
+    assertTrue(m.byKey.fishing ~= nil and m.byKey.fishing.rank == 107, "Angeln is Fishing")
+    assertEqual(m.byKey.leatherworking and m.byKey.leatherworking.category, "primary", "a profession is primary")
+    assertTrue(m.byKey.guns ~= nil and m.byKey.guns.learned, "a learned weapon is not shown as Not learned")
+    assertTrue(m.byKey.riding ~= nil, "a racial riding line is the one Riding row")
+    assertEqual(m.byKey["other:Angeln"], nil, "nothing lands in Other")
+    assertEqual(#m.order.other, 1, "Other holds Riding only")
+end)
+
+test("F-001: the adapter carries the struct's skill-line ID", function()
+    local saved = M.C_SkillInfo
+    M.C_SkillInfo = {
+        GetNumSkillLines = function() return 1 end,
+        GetSkillLineInfo = function() return { skillName = "Angeln", skillLineID = 356, skillRank = 1, skillMaxRank = 75 } end,
+    }
+    local r = NS.Compat.SkillLineInfo(1)
+    M.C_SkillInfo = saved
+    assertEqual(r.skillLineID, 356)
+end)
+
+test("F-001: a crafting overlay casts the open spell by the name its spell ID resolves to", function()
+    -- red under: SecureOverlay's spellFor reading L[cat.openSpell] (the enUS name) before the ID
+    local saved = M.C_Spell
+    local ids = {}
+    M.C_Spell = { GetSpellName = function(id) ids[#ids + 1] = id return id == 2259 and "Alchimie" or nil end }
+    local spell = NS.SecureOverlay.SpellFor({ kind = "skill", entry = { key = "alchemy", learned = true } })
+    local mining = NS.SecureOverlay.SpellFor({ kind = "skill", entry = { key = "mining", learned = true } })
+    M.C_Spell = saved
+    assertEqual(spell, "Alchimie", "the localized name from the ID")
+    assertEqual(ids[1], 2259, "asked by ID")
+    assertEqual(mining, "Smelting", "no name for the ID: the locale key's")
+    assertEqual(NS.SecureOverlay.SpellFor({ kind = "skill", entry = { key = "guns", learned = true } }), nil)
 end)

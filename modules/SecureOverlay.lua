@@ -55,12 +55,16 @@ function SO:AfterCombat(key, fn)
 end
 
 --- The open spell of a row that gets an overlay: a learned profession whose window opens by a cast.
+--- The name its spell ID resolves to on this client (localization-§4), else the locale key's.
 local function spellFor(row)
     local e = row.kind == "skill" and row.entry
     if not (e and e.learned ~= false) then return nil end
     local cat = NS.SkillCatalog[e.key]
-    return cat and cat.openSpell and L[cat.openSpell] or nil
+    if not (cat and cat.openSpell) then return nil end
+    local name = cat.openSpellID and NS.Compat.SpellName(cat.openSpellID)
+    return name or L[cat.openSpell]
 end
+SO.SpellFor = spellFor   -- the suites read it
 
 local function postClick(self, button, down)
     if down or not self.row then return end

@@ -208,6 +208,10 @@ a crafting row opens the main window scrolled to it rather than casting (design 
   session.
 - Test mode's lure timer counts from when test mode turned on and is redrawn on the next repaint,
   not every second (the live ticker follows only live temp bonuses).
+- On a client that is not enUS, the skill lines are matched on their skill-line ID when the
+  client's record carries one; a positional (1.12-shaped) record has none, and its lines and the
+  excluded headers are matched on the locale's strings, which only enUS ships today. Such a client
+  sorts its lines into Other until the locale files are translated (Documented deviations).
 - Every client API the data modules use is assumed until `/skm probe` confirms it
   ([midnight-quirks.md](midnight-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.
@@ -235,7 +239,7 @@ a crafting row opens the main window scrolled to it rather than casting (design 
 | `debug.md` | Present | The diagnostics dump is a debug surface beyond the default console (debug-logging-§14) |
 | `profiles.md` | Present | The Profiles page ships in the options UI |
 | `perf-analysis/README.md` | Present | The performance harness is wired (`core/PerfSetup.lua`) |
-| `compat-layer.md` | Present | `core/Compat.lua` publishes three or more addon-specific shims (9 as measured on 2026-11-10: the skill list, the player, the weapon enchant, the item tooltip, the unit speed) |
+| `compat-layer.md` | Present | `core/Compat.lua` publishes three or more addon-specific shims (10 as measured on 2026-11-10: the skill list, the player, the weapon enchant, the item tooltip, the unit speed, the spell name) |
 | `message-bus.md` | Not applicable | More than ten messages (six as measured on 2026-11-10) |
 | `known-limitations.md` | Not applicable | Known Limitations is under 60 lines |
 | `taint.md` | Not applicable | Taint Notes is under 60 lines |
@@ -263,7 +267,9 @@ and its status ledger) and `docs/investigations/`. Only `docs/superpowers/` and
 
 ## Documented deviations
 
-None.
+| Rule | What differs | Why | Decided | Re-check trigger |
+|---|---|---|---|---|
+| localization-§4 | Three things still match on a localized name, through the locale keys (`NS.L`): a skill line whose record carries no skill-line ID (the 1.12 positional list), the three excluded Skills-tab headers (Class Skills, Armor Proficiencies, Languages) and the crafting spell when `NS.Compat.SpellName` answers nothing for its ID. Every record that carries an ID is matched on it first (`NS.SkillLineIDToKey`), and the crafting cast uses the name its spell ID resolves to. | The client hands no ID for a 1.12-shaped line or for a header, so the locale key is the only route; enUS ships the strings, the other locale files are stubs, so a non-enUS client on the positional shape sorts its lines into Other until they are translated (Known Limitations). | 2026-11-10, M6 review F-001 | `/skm probe` shows whether Forever's struct carries a skill-line ID (then only the headers remain), or the locale files gain the skill-line and header strings |
 
 ### Files over the 1500-line cap
 

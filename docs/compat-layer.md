@@ -20,6 +20,7 @@ unnormalized return shape the owner sends back, so it is the one reader outside 
 | `Compat.WeaponEnchantInfo()` | `C_Item.GetWeaponEnchantInfo` → `GetWeaponEnchantInfo` | The temp-enchant returns (`hasMain, mainExpirationMs, ...`); `nil` without either |
 | `Compat.InventoryTooltipData(slot)` | `C_TooltipInfo.GetInventoryItem("player", slot)` | The data table and `true`, or `nil, false` without the API (the caller scans a tooltip) |
 | `Compat.UnitSpeed(unit)` | `GetUnitSpeed` | current, run, flight, swim in yards/s; `nil` without the API |
+| `Compat.SpellName(spellID)` | `C_Spell.GetSpellName`, then `GetSpellInfo` | the spell's localized name (the crafting overlay's cast, localization-§4); `nil` for an unknown ID or without either API |
 
 The last six (T5.2) exist for the simulator (preview-mode, H1): `core/SimSetup.lua` wraps the whole
 table at load with LibKa0s-Sim-1.0's seam, and `modules/Simulator.lua` answers each one from its

@@ -11,6 +11,7 @@ local _, NS = ...
 --   Compat.WeaponEnchantInfo()             the weapon temp-enchant returns (C_Item first)
 --   Compat.InventoryTooltipData(slot)      C_TooltipInfo.GetInventoryItem's data, and whether it ran
 --   Compat.UnitSpeed(unit)                 GetUnitSpeed's returns (current, run, flight, swim)
+--   Compat.SpellName(spellID)              the spell's localized name (C_Spell first), or nil
 -- The last six (T5.2) exist so the simulator's seam (core/SimSetup.lua, LibKa0s-Sim-1.0) can answer
 -- every client read a simulated character needs (preview-mode, H1): a module reads them as
 -- `NS.Compat.Member(...)` at call time and never captures one in a local.
@@ -51,6 +52,8 @@ local function fromStruct(t)
         tempPoints = t.numTempPoints or 0,
         modifier   = t.skillModifier or 0,
         max        = t.skillMaxRank or 0,
+        -- The struct's ID, under whichever name the client uses (assumed until `/skm probe`).
+        skillLineID = tonumber(t.skillLineID or t.skillID),
     }
 end
 
@@ -132,6 +135,15 @@ function Compat.InventoryTooltipData(slot)
     local get = C_TooltipInfo and C_TooltipInfo.GetInventoryItem
     if type(get) ~= "function" then return nil, false end
     return get("player", slot), true
+end
+
+--- A spell's localized name from its ID (localization-§4: IDs flow to names), C_Spell first.
+--- @return string|nil the name, nil for an unknown ID or without either API
+function Compat.SpellName(spellID)
+    local CS = C_Spell
+    if type(CS) == "table" and type(CS.GetSpellName) == "function" then return CS.GetSpellName(spellID) end
+    if type(GetSpellInfo) == "function" then return (GetSpellInfo(spellID)) end
+    return nil
 end
 
 --- GetUnitSpeed(unit): current, run, flight, swim (yards/s); nil without the API.

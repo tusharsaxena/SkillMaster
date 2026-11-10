@@ -39,6 +39,8 @@ read_globals = {
   "TomTom", "UiMapPoint", "C_SuperTrack",
   -- T4.1 Broker (modules/Broker.lua): the main hand's weapon class
   "GetInventoryItemLink", "GetItemInfoInstant",
+  -- M6: a spell's localized name from its ID (core/Compat.lua SpellName, localization-§4)
+  "C_Spell", "GetSpellInfo",
 }
 
 -- T4.3: the session log's clock and zone, the alt snapshot's identity reads, the Journal's popup,
