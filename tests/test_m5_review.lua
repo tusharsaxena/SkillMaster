@@ -125,6 +125,7 @@ test("bars preview: the fill is the Fishing row's own color, and a palette or mo
     assertTrue(preview ~= nil, "the preview bar exists after the first show")
     local P = NS.defaults.profile.bars
     assertTrue(sameColor(preview.fillColor, P.colors.secondary), "By category: Fishing's secondary color")
+    NS.SetByPath("bars.colors.fromSkin", false)
     NS.SetByPath("bars.colors.secondary", { 1, 0, 0, 1 })
     assertTrue(sameColor(preview.fillColor, { 1, 0, 0 }), "a palette edit repaints the preview")
     NS.SetByPath("bars.colorMode", "flat")
@@ -133,6 +134,7 @@ test("bars preview: the fill is the Fishing row's own color, and a palette or mo
     NS.SetByPath("bars.barColorFromSkin", P.barColorFromSkin)
     NS.SetByPath("bars.colorMode", P.colorMode)
     NS.SetByPath("bars.colors.secondary", P.colors.secondary)
+    NS.SetByPath("bars.colors.fromSkin", P.colors.fromSkin)
     panel:Hide()
     panel:__fire("OnHide")
     M.__fireTimers()

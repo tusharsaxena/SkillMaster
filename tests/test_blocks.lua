@@ -164,10 +164,10 @@ test("rows: the color modes", function()
     local e = skill("leatherworking", "Leatherworking", "primary", 146, 150)
     local bars = NS.db.profile.bars
     bars.colorMode = "category"
+    bars.colors.fromSkin = false
     assertEqual(R.FillColor(e), bars.colors.primary)
     bars.colors.fromSkin = true
-    assertEqual(R.FillColor(e), NS.Bar.Color("sm.barFill"), "a category color that follows the skin")
-    bars.colors.fromSkin = false
+    assertEqual(R.FillColor(e), NS.Bar.Color("sm.cat.primary"), "a category color that follows the skin")
     bars.colorMode = "progress"
     assertTrue(type(R.FillColor(e)) == "table")
     bars.colorMode = "likelihood"

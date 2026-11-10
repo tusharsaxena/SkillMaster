@@ -39,9 +39,10 @@ NS.defaults = {
         skills = { showUnlearned = true, hidden = {}, helperTooltip = true, helperHint = false },
         -- How a stat row draws: "both" (bar and value), "bar" (no value text) or "text" (no bar).
         stats  = { hidden = {}, display = "both" },
-        -- T3.1 the bar widget's look (modules/Bar.lua). The colors are the player's picks; with
-        -- `colors.fromSkin` they give way to the skin's owner tokens (core/SkinSetup.lua). The
-        -- defaults are the approved mockup's (docs/superpowers/specs/2026-11-10-skill-master-mockups).
+        -- T3.1 the bar widget's look (modules/Bar.lua). The colors are the player's picks; while
+        -- `colors.fromSkin` is on (the default, skinning-§6) the skin's owner tokens draw instead
+        -- (core/SkinSetup.lua, sm.cat.* and sm.bonus*). Both carry the approved mockup's colors
+        -- (docs/superpowers/specs/2026-11-10-skill-master-mockups).
         bars = {
             height        = 14,          -- a row's bar, px
             compactHeight = 11,          -- a detached block's compact bar
@@ -85,7 +86,7 @@ NS.defaults = {
             fontColorFromSkin   = true,
             fontShadowFromSkin  = true,
             colors = {
-                fromSkin  = false,
+                fromSkin  = true,
                 primary   = { 0.357, 0.608, 0.878, 1 },
                 secondary = { 0.373, 0.702, 0.427, 1 },
                 weapon    = { 0.851, 0.569, 0.247, 1 },

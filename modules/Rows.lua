@@ -128,8 +128,8 @@ local function ladder(steps, p)
     return NS.Bar.Color("sm.barFill")
 end
 
---- The fill color for a row in the profile's color mode: by category (the player's colors, or the
---- skin's with `colors.fromSkin`), by progress, by skill-up likelihood (gray / green / yellow /
+--- The fill color for a row in the profile's color mode: by category (the skin's sm.cat.<category>
+--- token while `colors.fromSkin` is on, else the player's color), by progress, by skill-up likelihood (gray / green / yellow /
 --- orange against the cap) or flat (the Bar color, through its skin and class-color companions).
 function R.FillColor(e, isStat)
     local mode = bars().colorMode
@@ -137,7 +137,8 @@ function R.FillColor(e, isStat)
     local p = isStat and (tonumber(e.pct) or 0) / 100 or ((e.max or 0) > 0 and e.rank / e.max or 0)
     if mode == "progress" then return ladder(PROGRESS, p) end
     if mode == "likelihood" and not isStat then return ladder(LIKELIHOOD, p) end
-    return NS.Bar.PlayerColor(isStat and "stats" or (e.category or "other"), "sm.barFill")
+    local cat = isStat and "stats" or (e.category or "other")
+    return NS.Bar.PlayerColor(cat, "sm.cat." .. cat)
 end
 
 --- The bar's values for a skill entry, and the earliest temp expiry (or nil). The bonus is the

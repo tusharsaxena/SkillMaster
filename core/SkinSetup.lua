@@ -41,11 +41,20 @@ if #NS.SKIN_OPTIONS == 0 then NS.SKIN_OPTIONS[1] = { value = DEFAULT, text = NS.
 NS.SKIN_OWNER_TOKENS = {
     ["sm.barFill"]   = { default = { 0.27, 0.59, 0.90, 1 }, follow = "bar.fill" },
     ["sm.barBg"]     = { default = { 0.19, 0.20, 0.25, 0.9 }, follow = "bar.bg" },
-    ["sm.bonusTemp"] = { default = { 0.95, 0.75, 0.20, 1 }, follow = "sem.warn" },
-    ["sm.bonusPerm"] = { default = { 0.35, 0.75, 0.43, 1 }, follow = "sem.good" },
+    -- The category and bonus colors while Bars > Colors follows the skin (bars.colors.fromSkin,
+    -- on by default, skinning-§6). Each is the approved mockup's color and follows no library
+    -- token, so the categories stay apart under every skin; a skin may still state its own through
+    -- the token's `skins`. The player's picks (defaults/Profile.lua, bars.colors) draw while the
+    -- companion is off.
+    ["sm.cat.primary"]   = { default = { 0.357, 0.608, 0.878, 1 } },   -- #5b9be0
+    ["sm.cat.secondary"] = { default = { 0.373, 0.702, 0.427, 1 } },   -- #5fb36d
+    ["sm.cat.weapon"]    = { default = { 0.851, 0.569, 0.247, 1 } },   -- #d9913f
+    ["sm.cat.other"]     = { default = { 0.627, 0.549, 0.878, 1 } },   -- #a08ce0
+    ["sm.cat.stats"]     = { default = { 0.788, 0.627, 0.478, 1 } },   -- #c9a07a
+    ["sm.bonusTemp"]     = { default = { 0.498, 0.847, 0.769, 1 } },   -- #7fd8c4
+    ["sm.bonusPerm"]     = { default = { 0.553, 0.722, 1, 1 } },       -- #8db8ff
     -- T3.1 the bar's edges, tier ticks, threshold markers, spark and text; the row's timer, icon
-    -- well and the unlearned row's muted line. The category and bonus colors a player picks live
-    -- in the profile (defaults/Profile.lua, bars.colors); these are what every skin draws.
+    -- well and the unlearned row's muted line: what every skin draws.
     ["sm.barBorder"] = { default = { 0.24, 0.22, 0.20, 1 }, follow = "bar.border" },
     ["sm.tick"]      = { default = { 1, 1, 1, 0.45 }, follow = "chart.marker" },
     ["sm.marker"]    = { default = { 0.95, 0.70, 0.24, 1 }, follow = "hud.label" },
