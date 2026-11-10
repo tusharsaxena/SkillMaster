@@ -80,10 +80,18 @@ local function trainerOf(e)
     return nr and nr.trainers[1]
 end
 
+--- Hide through the seam (architecture-§5): the key's own row when the catalog has one, else the
+--- whole set's row (settings/Skills.lua), so an unknown "other:" key is still a settings write
+--- that the page's Defaults undoes.
 local function hideRow(row)
     local kind = row.kind == "stat" and "stats" or "skills"
-    NS.db.profile[kind].hidden[row.entry.key] = true
-    NS.Blocks.Changed()
+    local key = row.entry.key
+    local p = kind .. ".hidden." .. key
+    if NS.FindSchemaRow(p) then return NS.SetByPath(p, true) end
+    local set = {}
+    for k, v in pairs(NS.db.profile[kind].hidden or {}) do set[k] = v end
+    set[key] = true
+    return NS.SetByPath(kind .. ".hidden", set)
 end
 
 --- The row menu's rows (a ContextMenu row list; `value` names each for the suites).

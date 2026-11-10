@@ -86,56 +86,100 @@ local function whenSafe(key, fn)
     return true
 end
 
+--- The rows' own writes (settings/Layout.lua's `set`): every actor reaches them through NS.SetByPath
+--- (architecture-§5), so the seam logs each one (debug-logging-§10). A dock or a collapse waits out
+--- combat, as it moves rows the crafting overlays are synced over.
+-- What the last stored dock or collapse did: true ran now, false waits for the end of combat.
+local lastRan = true
+
+function B.StoreDocked(id, docked)
+    local s = B.Settings(id)
+    if not s then return false end
+    lastRan = whenSafe("dock:" .. id, function()
+        s.docked = docked and true or false
+        B.Changed()
+    end)
+    return lastRan
+end
+
+function B.StoreCollapsed(id, collapsed)
+    local s = B.Settings(id)
+    if not s then return false end
+    lastRan = whenSafe("collapse:" .. id, function()
+        s.collapsed = collapsed and true or false
+        B.Changed()
+    end)
+    return lastRan
+end
+
+local function path(id, key) return ("layout.blocks.%s.%s"):format(id, key) end
+
+--- Write through the seam; answers false on a refusal or a write that waits for the end of combat.
+local function seam(p, v)
+    local set = NS.SetByPath
+    if not set then return false end
+    lastRan = true
+    return set(p, v) == true and lastRan ~= false
+end
+
 --- Pop block `id` out of the window into its own frame. Persisted; sends LAYOUT_CHANGED.
 function B:Detach(id)
     local s = B.Settings(id)
     if not s or s.docked == false then return false end
-    return whenSafe("dock:" .. id, function()
-        s.docked = false
-        B.Changed()
-    end)
+    return seam(path(id, "docked"), false)
 end
 
 --- Put block `id` back into the window at its old place in the order.
 function B:Dock(id)
     local s = B.Settings(id)
     if not s or s.docked ~= false then return false end
-    return whenSafe("dock:" .. id, function()
-        s.docked = true
-        B.Changed()
-    end)
+    return seam(path(id, "docked"), true)
 end
 
 function B:SetCollapsed(id, collapsed)
-    local s = B.Settings(id)
-    if not s then return false end
-    return whenSafe("collapse:" .. id, function()
-        s.collapsed = collapsed and true or false
-        B.Changed()
-    end)
+    if not B.Settings(id) then return false end
+    return seam(path(id, "collapsed"), collapsed and true or false)
+end
+
+-- While B:Move renumbers, the order rows' onChange stays quiet: one drag, one LAYOUT_CHANGED.
+local moving = false
+
+--- The order rows' onChange (settings/Layout.lua).
+function B.OrderChanged()
+    if not moving then B.Changed() end
 end
 
 --- Move the block at position `from` of B.Ordered() to position `to`, renumbering every block
---- 1..n (the Layout page's drag list). Sends LAYOUT_CHANGED.
+--- 1..n (the Layout page's drag list), each changed `order` through the seam in one bracket. Sends
+--- one LAYOUT_CHANGED.
 function B:Move(from, to)
     local ids = B.Ordered()
     local moved = table.remove(ids, from)
     if not moved or from == to then return false end
     table.insert(ids, math.max(1, math.min(to, #ids + 1)), moved)
-    for i, id in ipairs(ids) do B.Settings(id).order = i end
+    local entries = {}
+    for i, id in ipairs(ids) do
+        if B.Settings(id).order ~= i then entries[#entries + 1] = { path = path(id, "order"), value = i } end
+    end
+    local S = NS.SchemaRuntime
+    moving = true
+    local function write() for _, e in ipairs(entries) do seam(e.path, e.value) end end
+    -- One bracket, so the seam logs the drag as one bulk line (debug-logging-§10).
+    local ok, err = pcall(function()
+        if S and S.BulkRun then S.BulkRun("reorder", "layout.blocks", write) else write() end
+    end)
+    moving = false
+    if not ok then error(err, 0) end
     B.Changed()
     return true
 end
 
---- Give block `id` the order `n` (the CLI's and the reset's write of layout.blocks.<id>.order).
+--- Give block `id` the order `n` (through the seam: the CLI's write of layout.blocks.<id>.order).
 --- Another block may share the number for a moment; ties sort by id.
 function B:SetOrder(id, n)
-    local s = B.Settings(id)
     n = tonumber(n)
-    if not (s and n) then return false end
-    s.order = math.floor(n)
-    B.Changed()
-    return true
+    if not (B.Settings(id) and n) then return false end
+    return seam(path(id, "order"), math.floor(n))
 end
 
 function B:ToggleCollapsed(id)

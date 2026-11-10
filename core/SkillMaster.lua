@@ -86,6 +86,11 @@ end
 function NS.StandUp()
     NS.BusStandUp()
     NS.RegisterRuntime()
+    -- A setting written while stood down was stored but not applied (NS.ApplyLook returns early),
+    -- and a simulation's stand-down cleanup skips its re-read: both come back from current state.
+    if NS.MainWindow then NS.MainWindow.ApplySettings() end
+    if NS.Bonuses then NS.Bonuses.Refresh() end
+    if NS.StatData then NS.StatData:Request() end
     if NS.MainWindow then NS.MainWindow.Refresh() end
     if NS.Detached then NS.Detached.Refresh() end
     if NS.Broker then NS.Broker.Refresh() end

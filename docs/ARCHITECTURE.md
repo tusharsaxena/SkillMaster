@@ -89,11 +89,16 @@ test-mode drag, or the toast's `ResetPosition`) is its only writer.
 
 `profile.layout.blocks[id].point` (T3.2) is named non-setting state: its one writer is `savePoint`
 in `modules/Detached.lua` (a detached frame's `OnDragStop`). `docked`, `order` and `collapsed` are
-`modules/Blocks.lua`'s and have schema rows on the Layout page (T5.1) that write through it:
-`NS.Blocks:Detach` / `:Dock` / `:SetCollapsed` / `:SetOrder`, and `:Move` from the Block order drag
-list, so a row, a header click and `/skm set` take one path. `shown`, `scale` and `locked` are plain
-rows. `skills.hidden` / `stats.hidden` are sets written by the row menu (T3.3) and by the Skills and
-Stats pages' Hide rows (get / set: false clears the entry).
+settings like any other, with schema rows on the Layout page (T5.1), and every actor writes them
+through `NS.SetByPath` (architecture-§5): the block header and the detached frame's buttons
+(`NS.Blocks:Detach` / `:Dock` / `:SetCollapsed`), the Block order drag list (`:Move`, every changed
+`order` inside one bulk bracket, one `LAYOUT_CHANGED`) and `/skm set`. The `docked` and `collapsed`
+rows' `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`) stores the value and waits out combat;
+`order` stores plainly, its `onChange` `NS.Blocks.OrderChanged`. The seam logs each write
+(debug-logging-§10). `shown`, `scale` and `locked` are plain rows. `skills.hidden` /
+`stats.hidden` are sets: one Hide row per catalog skill and per stat (get / set: false clears the
+entry), and one undrawn row per whole set (type `set`, default `{}`), which the row menu's Hide
+writes for a key with no row of its own (an `other:` skill) and the page's Defaults resets.
 
 `char.pinned`, the skill the broker's `{pinned}` shows, is named non-setting state: its one writer
 is the row menu's Pin (`I.MenuRows` in `modules/Interact.lua`), disabled while test mode or a
@@ -142,6 +147,7 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | `PLAYER_LEVEL_UP` | `NS.SkillData:Enable` | debounced `SkillData:Scan`, with the new level as the weapon-cap floor (5 x level) | the list can still answer the old cap |
 | `UNIT_INVENTORY_CHANGED`, `UNIT_AURA` | `NS.Bonuses.RegisterRuntime` (from `NS.RegisterRuntime`) | `addon:OnBonusesUnitChanged`: player only, debounced `Bonuses.Refresh` (0.2 s), which re-reads only the part the event touched (an aura change never re-reads the 19 item tooltips); a 1 s ticker while a temp bonus naming a skill is live | gear, lures and buffs change the breakdown |
 | `UNIT_STATS`, `UNIT_ATTACK_POWER`, `UNIT_RANGED_ATTACK_POWER`, `UNIT_RESISTANCES`, `UNIT_DAMAGE`, `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
+| `PLAYER_EQUIPMENT_CHANGED` | `modules/Detached.lua` at load, on its own bus target | `onEquipmentChanged`: re-render the detached weapon block and re-sync the overlays while it is shown | a weapon swap changes the weapon block's equipped-only list |
 | `PLAYER_LOGOUT` | `modules/Alts.lua` at load, on its own bus target | `Alts:Snapshot` | the last snapshot of the session |
 
 The bus subscribers on their own targets: `modules/SessionLog.lua` hears `SKILL_UP` (one log entry,
@@ -224,13 +230,13 @@ a crafting row opens the main window scrolled to it rather than casting (design 
 
 | Doc | Status | Trigger |
 |---|---|---|
-| `slash-dispatch.md` | Present | 23 commands in `NS.COMMANDS` |
+| `slash-dispatch.md` | Present | `NS.COMMANDS` carries eight or more commands (23 as measured on 2026-11-10) |
 | `midnight-quirks.md` | Present | Always (client-quirks-§1); holds the vendored catalog and this addon's assumed-API table |
 | `debug.md` | Present | The diagnostics dump is a debug surface beyond the default console (debug-logging-§14) |
 | `profiles.md` | Present | The Profiles page ships in the options UI |
 | `perf-analysis/README.md` | Present | The performance harness is wired (`core/PerfSetup.lua`) |
-| `compat-layer.md` | Present | `core/Compat.lua` publishes three addon-specific shims (the skill list, T2.1) |
-| `message-bus.md` | Not applicable | Six messages, not more than ten |
+| `compat-layer.md` | Present | `core/Compat.lua` publishes three or more addon-specific shims (9 as measured on 2026-11-10: the skill list, the player, the weapon enchant, the item tooltip, the unit speed) |
+| `message-bus.md` | Not applicable | More than ten messages (six as measured on 2026-11-10) |
 | `known-limitations.md` | Not applicable | Known Limitations is under 60 lines |
 | `taint.md` | Not applicable | Taint Notes is under 60 lines |
 

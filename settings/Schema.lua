@@ -242,6 +242,8 @@ local VALID_PAGES = {
     general = true, layout = true, bars = true, skills = true, stats = true, broker = true,
     alerts = true, journal = true, trainers = true, profiles = true,
 }
+-- The library's four value types, plus `set` ({ [key] = true }): the hidden-row sets' whole-set rows.
+local ROW_TYPES = { bool = true, number = true, string = true, color = true, set = true }
 local function defaultsRoot(parts, row)
     if row.page == "profiles" or type(row.get) == "function" then return nil end
     if parts[1] == "global" then return NS.defaults.global, 2 end
@@ -250,5 +252,5 @@ end
 
 --- Every path resolves against the defaults tree; answers the error count.
 function NS.ValidateSchema()
-    return S.Validate({ pages = VALID_PAGES, defaultsRoot = defaultsRoot })
+    return S.Validate({ pages = VALID_PAGES, types = ROW_TYPES, defaultsRoot = defaultsRoot })
 end

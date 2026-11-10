@@ -35,6 +35,17 @@ local function hideRow(page, kind, key, name, group, subgroup)
     }
 end
 
+--- The whole set's row (review F-002): not drawn, but the page's Defaults, `/skm reset` and the
+--- row menu reach it, so a key with no row of its own (an "other:" skill the catalog does not
+--- know) is a settings write that the page's Defaults undoes.
+local function setRow(page, kind, group)
+    return {
+        path = kind .. ".hidden", page = page, group = group, type = "set", default = {}, skipRender = true,
+        label = L["Hidden rows"], desc = L["Every row hidden from the row menu, as a set of keys."],
+        onChange = NS.ApplyLook,
+    }
+end
+
 -- ---------------------------------------------------------------------------------------------
 -- Skills
 -- ---------------------------------------------------------------------------------------------
@@ -67,6 +78,7 @@ table.sort(keys, function(a, b)
     if (ca.order or 0) ~= (cb.order or 0) then return (ca.order or 0) < (cb.order or 0) end
     return a < b
 end)
+skillRows[#skillRows + 1] = setRow("skills", "skills", SK_GENERAL)
 for _, key in ipairs(keys) do
     local c = NS.SkillCatalog[key]
     local tab = CATEGORY_TAB[c.category] or CATEGORY_TAB.other
@@ -92,6 +104,7 @@ local statRows = NS.Live({
       values = { { value = "both", text = L["Bar and value"] }, { value = "bar", text = L["Bar only"] },
                  { value = "text", text = L["Value only"] } } },
 })
+statRows[#statRows + 1] = setRow("stats", "stats", ST_GENERAL)
 for _, def in ipairs(NS.STAT_DEFS) do
     statRows[#statRows + 1] = hideRow("stats", "stats", def.key, def.label, GROUP_TAB[def.group] or GROUP_TAB.utility)
 end

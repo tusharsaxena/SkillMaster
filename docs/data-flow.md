@@ -13,6 +13,9 @@ UNIT_* stat events    StatData (T2.3)    STATS_UPDATED              alerts, sess
   simulator and the headless suite drive them identically.
 - Data modules debounce their events (0.1 s) and publish one message per pass.
 - Every message name is a constant in `core/Bus.lua`; each subscriber registers on its own bus target.
+- One display reads an event itself: the detached weapon block (`modules/Detached.lua`) hears
+  `PLAYER_EQUIPMENT_CHANGED` on its own bus target and, while shown, re-renders its equipped-only
+  list and re-syncs the overlays.
 
 ## SkillData (T2.1)
 

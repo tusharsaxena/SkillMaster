@@ -21,9 +21,12 @@ Every page but General and Profiles is declared through `NS.RegisterSchemaPage(k
 (`settings/OptionsSetup.lua`): a canvas subcategory drawn by `H.RenderTabbedSchema`, its Defaults
 button restoring the page. Every display row's `onChange` is `NS.ApplyLook`, which sends one
 `LAYOUT_CHANGED` per write (one per bulk reset, on the next frame), so the window, the detached
-blocks, the Journal and the Bars preview restyle at once. Rows over `NS.Blocks`' own state
-(`layout.blocks.<id>.docked`, `.collapsed`, `.order`) and the Hide rows (`skills.hidden.<key>`,
-`stats.hidden.<key>`, sets) read and write through `get` / `set`.
+blocks, the Journal and the Bars preview restyle at once. The block rows `layout.blocks.<id>.docked`
+and `.collapsed` store through their `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`, which wait
+out combat), and every other actor (the header, the detached frame's buttons, the drag list) writes
+them through `NS.SetByPath`; the Hide rows (`skills.hidden.<key>`, `stats.hidden.<key>`, sets) read
+and write through `get` / `set`, and an undrawn whole-set row per kind (`skills.hidden`,
+`stats.hidden`, type `set`) lets the page's Defaults clear a key with no row of its own.
 
 What follows the skin: every composed block on the Bars page carries its `*FromSkin` companion,
 default on (skinning-§6), and so does the palette (`bars.colors.fromSkin`, *Use the skin's colors*):

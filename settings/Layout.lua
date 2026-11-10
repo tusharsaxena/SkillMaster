@@ -3,10 +3,11 @@ local addonName, NS = ...
 -- one subsection per block (show, dock, collapse, lock, scale) and the block order, dragged through
 -- LibKa0s-Widgets-1.0's ReorderList (options-ui-§18).
 --
--- `layout.blocks.<id>.docked`, `.collapsed` and `.order` are NS.Blocks' state (docs/ARCHITECTURE.md):
--- their rows read and write through NS.Blocks (Dock / Detach / SetCollapsed / SetOrder), so a row,
--- the block's own header and `/skm set` take one path, and a dock in combat waits as the header's
--- does. `.point` stays drag-only geometry and has no row.
+-- `layout.blocks.<id>.docked`, `.collapsed` and `.order` are written only through NS.SetByPath
+-- (architecture-§5): the block header, the detached frame's buttons, the drag list and `/skm set`
+-- all call the seam, and the rows' `set` (NS.Blocks.StoreDocked / StoreCollapsed, which wait out
+-- combat) or plain store (order, its onChange NS.Blocks.OrderChanged) does the rest. `.point`
+-- stays drag-only geometry and has no row.
 local H = NS.Helpers
 local L = NS.L
 local P = NS.defaults.profile.layout
@@ -72,11 +73,11 @@ local function blockRows(id)
               label = L["Dock in the window"],
               desc = L["Off pops the block out into a frame of its own, as its header's detach button does."],
               get = function() return s().docked ~= false end,
-              set = function(v) if v then B:Dock(id) else B:Detach(id) end end }),
+              set = function(v) B.StoreDocked(id, v) end }),
         row({ path = base .. "collapsed", group = BLOCKS, subgroup = d.title, type = "bool", default = def.collapsed,
               label = L["Collapse"], desc = L["Show the block's header only, as a click on it does."],
               get = function() return s().collapsed == true end,
-              set = function(v) B:SetCollapsed(id, v) end }),
+              set = function(v) B.StoreCollapsed(id, v) end }),
         row({ path = base .. "locked", group = BLOCKS, subgroup = d.title, type = "bool", default = def.locked,
               label = L["Lock this block"], desc = L["Stop the detached frame from being dragged."],
               onChange = NS.ApplyLook }),
@@ -86,8 +87,8 @@ local function blockRows(id)
         row({ path = base .. "order", group = ORDER, type = "number", default = def.order, skipRender = true,
               min = 1, max = #NS.BLOCKS, step = 1, label = L["Position: %s"]:format(d.title),
               desc = L["The block's place in the window, 1 at the top. Drag it on Layout > Block order."],
-              get = function() return s().order end,
-              set = function(v) B:SetOrder(id, v) end }),
+              normalize = function(v) v = tonumber(v) return v and math.floor(v) or nil end,
+              onChange = B.OrderChanged }),
     }
 end
 
