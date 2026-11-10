@@ -4,6 +4,7 @@
 
 local Kit        = dofile("tests/_kit/framework.lua")
 local Loader     = dofile("tests/_kit/loader.lua")
+dofile("tests/client_pin.lua")(Loader)   -- Forever-only: every run is the Forever profile (clients-§9)
 local buildMocks = dofile("tests/wow_mock.lua")
 
 local mocks = buildMocks()

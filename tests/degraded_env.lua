@@ -2,6 +2,7 @@
 -- libs/LibKa0s file left out, so each setup file takes its degradation stub (testing-§8).
 return function()
     local Loader     = dofile("tests/_kit/loader.lua")
+    dofile("tests/client_pin.lua")(Loader)   -- Forever-only (clients-§9)
     local buildMocks = dofile("tests/wow_mock.lua")
     Loader.addonName = "SkillMaster"
     local mocks2, NS2 = buildMocks(), {}

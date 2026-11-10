@@ -271,3 +271,35 @@ test("glyphs: the guard is falsifiable, a planted arrow is caught", function()
     local hits = T.scanGlyphSource('local s = "a \\226\\134\\146 b"\n', "planted.lua", {})
     assertTrue(#hits == 1 and hits[1].cp == 0x2192, "the planted U+2192 is found")
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- 6. The suite is pinned to the Forever profile, with or without KA0S_KIT_CLIENT
+-- ---------------------------------------------------------------------------------------------
+
+test("client pin: the suite runs as WoW Forever whatever KA0S_KIT_CLIENT says or omits (clients-§9)", function()
+    -- red under: a bare `lua tests/run.lua` (and so a bare run-automated-tests.sh) on the kit's
+    -- default Retail profile, which tests a client this Forever-only addon does not ship on.
+    assertEqual(T.Loader.MockClient.current(), "forever", "the kit's active profile")
+    assertEqual(M.WOW_PROJECT_ID, 18, "WOW_PROJECT_ID")
+    assertEqual(M.WOW_PROJECT_CAMELOT, 18, "WOW_PROJECT_CAMELOT")
+    assertEqual(select(4, M.GetBuildInfo()), 16001, "the interface number")
+end)
+
+test("client pin: an unset variable pins Forever, forever is accepted, retail is refused", function()
+    local pin = dofile("tests/client_pin.lua")
+    local function fakeLoader()
+        local applied
+        return { MockClient = { apply = function(_, name) applied = name return name end } },
+               function() return applied end
+    end
+    local L1, got1 = fakeLoader()
+    pin(L1, function() return nil end)
+    L1.MockClient.apply({})
+    assertEqual(got1(), "forever", "unset: Forever")
+    local L2, got2 = fakeLoader()
+    pin(L2, function() return "forever" end)
+    L2.MockClient.apply({})
+    assertEqual(got2(), "forever", "forever: Forever")
+    local ok = pcall(pin, (fakeLoader()), function() return "retail" end)
+    assertTrue(not ok, "retail raises: this addon has no Retail profile to run")
+end)
