@@ -39,7 +39,7 @@ J.MIN_W, J.MIN_H = WIDTH, HEIGHT
 J.LOG_ROWS = floor((HEIGHT - LOG_CHROME_H) / ROW_H)
 J.ALT_ROWS = floor((HEIGHT - ALT_CHROME_H) / ALT_ROW_H)
 local COL_W = floor((WIDTH - PAD * 2 - CHAR_W) / J.MAX_COLS)
-local ARROW = " \226\134\146 "
+local ARROW = " -> "   -- ASCII: every shipped skin face draws it (the old U+2192 was a box in some)
 local DASH = "\226\128\148"
 local CAT_RANK = { primary = 1, secondary = 2, weapon = 3, other = 4 }
 

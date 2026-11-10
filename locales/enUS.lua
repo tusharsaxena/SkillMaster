@@ -306,7 +306,8 @@ L["Lock or unlock the window"] = true
 L["Open the journal"] = true
 L["temp bonus"] = true
 L["permanent bonus"] = true
-L["\226\148\130 rank tier \194\183 \226\150\143 threshold"] = true
+L["rank tier"] = true
+L["threshold"] = true
 L["Lv %d \194\183 %s %s"] = true
 
 -- The interactions: the click map, the row menu, the row tooltip, the trainer popup, the waypoints (T3.3).

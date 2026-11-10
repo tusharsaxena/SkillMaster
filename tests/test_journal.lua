@@ -59,7 +59,7 @@ test("journal: the log lists skill-ups newest first, with the session's gains, a
     local rows = activeRows(p)
     assertEqual(#rows, 2)
     assertEqual(rows[1].entry.key, "fishing", "newest first")
-    assertEqual(rows[1].cols[3]:GetText(), "106 \226\134\146 107")
+    assertEqual(rows[1].cols[3]:GetText(), "106 -> 107")
     assertEqual(rows[1].cols[4]:GetText(), "Loch Modan")
     assertEqual(p.session.value:GetText(), "+2")
     assertFalse(p.empty:IsShown(), "no empty state with entries")

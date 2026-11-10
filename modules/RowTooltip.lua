@@ -175,7 +175,7 @@ local function statLines(e)
     out[#out + 1] = { bar = true }
     local pct = tostring(e.display or ""):find("%%") and "%" or ""
     for _, m in ipairs(e.markers or {}) do
-        line(out, ("\226\150\143 %s%s %s"):format(tostring(m.value or ""), pct, m.label or ""), nil, "muted")
+        line(out, ("\194\183 %s%s %s"):format(tostring(m.value or ""), pct, m.label or ""), nil, "muted")
     end
     if e.ref then line(out, L["Scale: vs %s"]:format(tostring(e.ref) .. pct), nil, "muted") end
     hint(out, "stat", e)

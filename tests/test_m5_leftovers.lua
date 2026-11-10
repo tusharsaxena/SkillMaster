@@ -254,3 +254,20 @@ test("test mode: the broker's {pinned} and {equippedWeapon} are the sample chara
     assertEqual(live.pinned, "riding", "off, the live pin again")
     assertEqual(live.mainHand, "maces", "and the live main hand")
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- 5. Every display string draws in every shipped skin face
+-- ---------------------------------------------------------------------------------------------
+
+test("glyphs: no display string carries a character a shipped skin face cannot draw", function()
+    -- red under: the legend's box-drawing marks, the chevron and detach fallbacks, the Journal's
+    -- arrow and the equipped weapon's triangle marker (U+2502, U+258F, U+25B8, U+25BE, U+2197,
+    -- U+2212, U+2192). The scan reads every string literal of modules/, settings/ and locales/
+    -- (and core/, defaults/), escapes decoded, outside comments and debug-log calls.
+    T.assertDisplayGlyphs{ label = "SkillMaster", include = { "modules/", "settings/", "locales/", "core/", "defaults/" } }
+end)
+
+test("glyphs: the guard is falsifiable, a planted arrow is caught", function()
+    local hits = T.scanGlyphSource('local s = "a \\226\\134\\146 b"\n', "planted.lua", {})
+    assertTrue(#hits == 1 and hits[1].cp == 0x2192, "the planted U+2192 is found")
+end)

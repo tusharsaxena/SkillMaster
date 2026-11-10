@@ -103,9 +103,9 @@ local function buildBand(f)
     f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     f.title:SetText(NS.BlockDefs[f.id].title)
     NS.Skin.Text(f.title, "heading")
-    f.dock = NS.Chrome.IconButton(f, "fullscreen-exit", "\226\136\146", function() NS.Blocks:Dock(f.id) end,
+    f.dock = NS.Chrome.IconButton(f, "fullscreen-exit", "-", function() NS.Blocks:Dock(f.id) end,
         NS.L["Dock this block in the main window"])
-    f.collapse = NS.Chrome.IconButton(f, "chevron-down", "\226\150\190", function() NS.Blocks:ToggleCollapsed(f.id) end)
+    f.collapse = NS.Chrome.IconButton(f, "chevron-down", "v", function() NS.Blocks:ToggleCollapsed(f.id) end)
     f.dock:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.collapse:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     NS.Skin.Header(f, { title = f.title, align = "LEFT", right = { f.dock, f.collapse } })
@@ -146,7 +146,7 @@ function D.Render(id)
     NS.Rows.ReleaseAll(f.rowPool)
     local collapsed = settings(id).collapsed
     NS.Chrome.SetIcon(f.collapse, collapsed and "chevron-right" or "chevron-down",
-        collapsed and "\226\150\184" or "\226\150\190")
+        collapsed and ">" or "v")
     local y = 0
     if not collapsed then
         y = NS.Blocks.LayRows(D.Entries(id), f.body, f.rowPool, 0, D.STYLE, D.PAD)

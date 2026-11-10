@@ -167,10 +167,10 @@ test("detached: the weapon block marks the equipped weapon; the compact filter k
         local rows = D.Rows("weapon")
         assertEqual(keysOf(rows), "guns,daggers,twoHandedAxes,staves,fistWeapons", "the filter is off by default")
         local guns = rowIn(rows, "guns")
-        assertEqual(guns.name:GetText(), "\226\150\184 Guns", "the equipped weapon carries the marker")
+        assertEqual(guns.name:GetText(), "> Guns", "the equipped weapon carries the marker")
         assertEqual(rowIn(rows, "daggers").name:GetText(), "Daggers")
         D.RefreshValues()
-        assertEqual(guns.name:GetText(), "\226\150\184 Guns", "kept through a values-only refresh")
+        assertEqual(guns.name:GetText(), "> Guns", "kept through a values-only refresh")
 
         NS.db.profile.layout.blocks.weapon.belowCapOnly = true
         D.Refresh()
@@ -199,7 +199,7 @@ test("detached: an equipment change redraws a shown weapon block", function()
     withWorld(function()
         NS.db.profile.layout.blocks.weapon.docked = false
         D.Refresh()
-        assertEqual(rowIn(D.Rows("weapon"), "guns").name:GetText(), "\226\150\184 Guns")
+        assertEqual(rowIn(D.Rows("weapon"), "guns").name:GetText(), "> Guns")
         M.GetInventoryItemLink = function() return nil end
         M.__fireEvent("PLAYER_EQUIPMENT_CHANGED", 18)
         assertEqual(rowIn(D.Rows("weapon"), "guns").name:GetText(), "Guns")

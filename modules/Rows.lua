@@ -22,7 +22,7 @@ local floor = math.floor
 R.PAD, R.ICON, R.NAME_W, R.GO_W = 6, 16, 118, 38
 R.DIM = 0.8   -- an unlearned row's alpha (the mockup's)
 R.HINT_H = 12 -- the gathering hint's line under a row
-R.MARK = "\226\150\184 "   -- the equipped weapon's marker (Detached.dc.html)
+R.MARK = "> "   -- the equipped weapon's marker (Detached.dc.html), ASCII so every skin face draws it
 
 -- ---------------------------------------------------------------------------------------------
 -- Pure helpers

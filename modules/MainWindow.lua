@@ -134,6 +134,20 @@ local function paintLegend()
     end
 end
 
+--- A legend mark: a thin line drawn as the bar draws it (a tick 1 px, a marker 2 px) in the bar's
+--- own color, then its label, laid right to left from `anchor`. Drawn, never typed: no face has to
+--- carry a glyph for it (skinning-§4).
+local function legendMark(parent, colorKey, w, label, anchor)
+    local fs = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    if anchor then fs:SetPoint("RIGHT", anchor, "LEFT", -10, 0) else fs:SetPoint("RIGHT", parent, "RIGHT", -10, 0) end
+    fs:SetText(label)
+    NS.Skin.Text(fs, "muted")
+    local t = parent:CreateTexture(nil, "ARTWORK")
+    t:SetSize(w, 10)
+    t:SetPoint("RIGHT", fs, "LEFT", -4, 0)
+    return { tex = t, key = colorKey }, fs, t
+end
+
 local function buildLegend()
     local f = CreateFrame("Frame", nil, frame)
     f:SetHeight(FOOTER_H)
@@ -141,11 +155,10 @@ local function buildLegend()
     f:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -1, 1)
     local t1, fs1 = swatch(f, "bonusTemp", L["temp bonus"])
     local t2, fs2 = swatch(f, "bonusPerm", L["permanent bonus"], fs1)
-    f.swatches = { { tex = t1, key = "bonusTemp" }, { tex = t2, key = "bonusPerm" } }
-    f.marks = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    f.marks:SetPoint("RIGHT", f, "RIGHT", -10, 0)
-    f.marks:SetText(L["\226\148\130 rank tier \194\183 \226\150\143 threshold"])
-    NS.Skin.Text(f.marks, "muted")
+    local marker, fs3, tex3 = legendMark(f, "marker", 2, L["threshold"])
+    local tick, fs4 = legendMark(f, "tick", 1, L["rank tier"], tex3)
+    f.swatches = { { tex = t1, key = "bonusTemp" }, { tex = t2, key = "bonusPerm" }, marker, tick }
+    f.marks = { fs4, fs3 }
     f.rule = f:CreateTexture(nil, "BORDER")
     f.rule:SetPoint("TOPLEFT", f, "TOPLEFT", 0, 0)
     f.rule:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, 0)
