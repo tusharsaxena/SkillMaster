@@ -13,11 +13,11 @@ position says so beside its TOC line (toc-file-§5).
 | `core/Compat.lua` | `NS.Compat`: the skill-list shims, one normalized line record from either return shape, and the player, enchant, tooltip and speed reads the simulator answers ([compat-layer.md](compat-layer.md)) | conventional: reached at call time |
 | `core/SimSetup.lua` | `NS.SimSeam` (LibKa0s-Sim-1.0's seam over `NS.Compat`, the header toggle guarded), or the reference stub | straight after Compat: wraps every member at load |
 | `core/MediaSetup.lua` | `NS.Icon`, `NS.MediaFont`, `RegisterLSM` (LibKa0s-Media-1.0) | before Constants, which resolves `FONT_MONO` from it |
-| `core/Constants.lua` | brand, logo paths, monospace face, minimap path, `LAYERS` | read at load by the setup files below |
+| `core/Constants.lua` | brand, logo paths, monospace face, minimap path, `LAYERS` (with the player's strata choices and the strata above each) | read at load by the setup files below |
 | `core/State.lua` | session-only state: the debug flag, test mode | conventional |
 | `core/EnvSetup.lua` | `NS.Meta`, `NS.Version` (LibKa0s-Env-1.0) | conventional |
 | `core/CoreSetup.lua` | `NS.Print`, SafeRegister family, window chrome, the `MakeCloseButton` wrapper (LibKa0s-Core-1.0) | before everything that prints |
-| `core/SkinSetup.lua` | the skin owner, `NS.Skin`, the stored choice, the picker, the `skin` verb (LibKa0s-Skin-1.0) | registers at load; `NS.DEFAULT_SKIN` read by defaults |
+| `core/SkinSetup.lua` | the skin owner and its tokens (the bar parts, the `sm.cat.*` category and `sm.bonus*` bonus colors), `NS.Skin`, the stored choice, the picker, the `skin` verb (LibKa0s-Skin-1.0) | registers at load; `NS.DEFAULT_SKIN` read by defaults |
 | `core/Bus.lua` | `NS.MSG`, the bus record and targets (LibKa0s-Bus-1.0) | before any subscriber |
 | `core/PoolSetup.lua` | `NS.Pool` (LibKa0s-Pool-1.0), for the rows and bars to come | conventional |
 | `core/WidgetsSetup.lua` | `NS.Widgets` (LibKa0s-Widgets-1.0): the test strip | before the window |
@@ -44,7 +44,7 @@ position says so beside its TOC line (toc-file-§5).
 | `modules/RowTooltip.lua` | `NS.RowTooltip`: the row tooltip's lines (numbers, bar, bonuses with timers, session, next rank, cap gap, gathering and fishing helpers, stat markers, click hints) on GameTooltip | conventional |
 | `modules/TrainerPopup.lua` | `NS.TrainerPopup`: the trainers for the faction, one card each, the waypoint and print actions | conventional |
 | `modules/Waypoints.lua` | `NS.Waypoints`: TomTom, else the native user waypoint, else chat directions | conventional |
-| `modules/MainWindow.lua` | the main window: title band (lock, journal, settings, close), summary strip, docked blocks in a scrolled body, bonus legend, test strip, toggle, `ShowAndScrollTo(key)` (the broker's crafting rows), the two key binding buttons (window, Journal); the journal mark calls `NS.Journal.Toggle` | publishes `NS.BINDINGS` for the General page |
+| `modules/MainWindow.lua` | the main window: title band (lock, journal, settings, close), summary strip, docked blocks in one or two columns of a scrolled body, the player's strata, bonus legend (the tick and marker drawn as lines), test strip, toggle, `ShowAndScrollTo(key)` (the broker's crafting rows), the two key binding buttons (window, Journal); the journal mark calls `NS.Journal.Toggle` | publishes `NS.BINDINGS` for the General page |
 | `modules/Probe.lua` | `/skm probe`: the Forever API report as JSON in a copy window; `Summary()`, its read-only half for the diagnostics | reads only core members at load |
 | `modules/SkillData.lua` | the skills model: scan, classify, synthesize unlearned rows, `SKILLS_UPDATED` / `SKILL_UP`; builds `NS.SkillNameToKey` | after the catalog and the locale, read at load |
 | `modules/Trainers.lua` | `NS.Trainers`: `For(key, faction?, race?)` and `NextRank(...)` over the trainer and rank tables | reads the defaults at call time |

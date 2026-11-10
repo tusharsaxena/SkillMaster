@@ -3,51 +3,60 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-359%2F359_passing-green)
+![Tests](https://img.shields.io/badge/Tests-373%2F373_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
-Skill Master turns your character's skill list into a window of bars you can style: every weapon skill, your primary and secondary professions, Defense, Lockpicking and Riding, with your character stats beside them. It is in early development. This release has the window, the settings panel, the minimap button and skins; the skill and stat bars arrive in later releases.
+Skill Master puts every skill your character has into one window of bars you can style: each weapon skill, your primary and secondary professions, Defense, Lockpicking and Riding, with your character stats beside them. A bar shows your rank against its cap, and anything raising it (a racial, an item, a fishing lure, a buff) as its own colored segment with a timer when it runs out. Unlearned skills tell you where to train them.
+
+- Skills in four groups (Primary, Secondary, Weapon, Other) and stats in four more, each a block you can collapse, reorder, or pop out into its own frame.
+- Hover tooltips with the bonus breakdown, the next rank and its trainer, how far a weapon is behind its cap, and gathering and fishing hints.
+- Click a profession to open it, an unlearned skill for its trainers and a waypoint (TomTom, a map pin, or directions in chat).
+- Four broker feeds for Titan Panel and the like, alerts when a profession caps or a weapon falls behind, a Journal with this session's skill-ups and an overview of your alts.
+- Every part of the look is a setting: bar sizes, fill direction, colors, border, font, text, one or two columns, frame layering, and skins.
 
 You set it up in the game's Settings → AddOns → Ka0s Skill Master, or with `/skm`.
 
 ## Usage
 
-Type `/skm toggle` to open or close the Skill Master window, or bind a key to it (*Toggle skills window*; *Toggle journal* opens the Journal the same way). You can set those keys in two places: the game's Options → Keybindings → Ka0s Skill Master, and the General page's Keybindings tab in this addon's settings. The window remembers where you dropped it. `/skm lock` stops it from moving, `/skm unlock` lets you drag it again, and the window's close button or Escape puts it away.
+Type `/skm toggle` to open or close the window, or bind a key to it. The game's Options → Keybindings → Ka0s Skill Master has two keys, *Toggle skills window* and *Toggle journal*, and the General page's Keybindings tab in this addon's settings sets the same two. The window remembers where you dropped it. `/skm lock` stops it from moving and `/skm unlock` lets you drag it again; the close button or Escape puts it away.
 
-Test mode fills the window with sample data so you can try a layout before your character has the skills to show. Turn it on with `/skm test`, from the minimap button's right-click menu, or with the Test mode box under General → Master controls. A band across the top of the window says you are looking at sample data, and entering combat ends test mode on its own.
+Each block has a header. Click it to collapse the block, or use the mark on its right to pull the block out into a frame of its own that you can place anywhere; the same mark on the frame docks it again. Hover a row for the details. Click a profession to open its window (out of combat), click a weapon or Defense for the Skills tab, and click an unlearned skill to see its trainers and set a waypoint. Shift-click puts the skill into chat. Right-click gives you the row menu, where you can pin a skill to the broker feed or hide the row.
 
-Sim mode plays a short scripted session on the same sample character, so you can watch the bars move, the broker flash and the Journal fill without leveling anything: a skill-up every 3 seconds, a fishing lure going on and off, and a mount changing your speed. Start it with `/skm sim`, the Sim mode box next to Test mode, or the minimap menu. Nothing it does is saved, and stopping it puts your own character back.
+Test mode fills everything with a sample character, a level 22 Dwarf Hunter, so you can try a layout before your own character has the skills to show it. Turn it on with `/skm test`, from the minimap button's right-click menu, or with the Test mode box under General → Master controls; a band across the window says you are looking at sample data, and combat ends it. Sim mode plays a short fishing trip on the same character: a skill-up every few seconds, a lure going on and off, a mount changing your speed. Start it with `/skm sim` or the Sim mode box, and stopping it puts your own character back. Neither saves anything.
 
-`/skm skin` opens the skin picker. While it is open the window shows in test mode, so you can watch each skin as you pick it; the eye button turns that preview on and off. Press Apply to keep the skin you picked. Closing the picker without applying puts everything back the way it was.
+`/skm skin` opens the skin picker. While it is open the window shows in test mode so you can see each skin as you pick it, and the eye button turns that preview off and on. Press Apply to keep the skin. Closing the picker without applying puts everything back the way it was.
 
-Once, when you have a moment, type `/skm probe` and send the text it shows to the author. It lists how this game client reports your skills and stats, which is still being mapped out for WoW Forever, and it changes nothing.
-
-The minimap button opens the settings on a left-click and a menu on a right-click: turn the addon on or off, lock the window, switch test mode or sim mode, and show or hide the window. `/skm disable` turns the whole addon off until you type `/skm enable`.
+`/skm journal` (or the journal mark in the window's title bar) opens the Journal: this session's skill-ups with an estimate of when the next one lands, and your other characters' skills side by side. The minimap button opens the settings on a left-click and a menu on a right-click. `/skm disable` turns the whole addon off until you type `/skm enable`. Once, when you have a moment, type `/skm probe` and send the text it shows to the author; it describes how WoW Forever reports your skills and changes nothing.
 
 Everything else lives under Settings → AddOns → Ka0s Skill Master, and `/skm help` (or `/skillmaster help`) lists every command.
 
-## How the window works
+## How the bars work
 
-Skill Master reads your skills and stats from the game only when they change, never on a timer. Each skill goes into one of four groups (Primary, Secondary, Weapon and Other) and becomes a bar showing its rank, its cap and any bonus on top. Until those bars land in a later release, the window shows an empty state, or sample data in test mode.
-
-The look comes from the skin you picked. Turning the addon off stops all of it: nothing runs and nothing is shown until you turn it back on.
+- Skill Master reads your skills and stats from the game when they change, never on a timer. The only thing that ticks is a bonus timer you can see.
+- Each skill lands in its group and gets its cap: a profession's rank cap, or five times your level for a weapon skill.
+- The bonus on top is split into where it comes from: your race, an item, a weapon enchant such as a lure, or a buff. Anything it can't place shows as Other rather than a guess.
+- Stats are drawn against a sensible scale for your level, with marks at the caps that matter (hit, resistances, crit immunity).
+- The colors come from your skin unless you turn that off and pick your own. Each group keeps its own color either way.
 
 ## FAQ
 
 | Question | Answer |
 |---|---|
 | Does it work on Retail? | No. The game doesn't list it on Retail at all, because the skills it shows don't exist there. |
-| Why is the window empty? | This early release only has the window itself. The skill and stat bars come in a later version. Test mode shows you the layout in the meantime. |
-| Where are my settings stored? | In your own profile, so each character can share or keep its own layout. |
+| Why does a trainer say "unverified"? | Trainer spots and some thresholds come from the classic data and haven't all been checked on WoW Forever yet. You can hide the mark on the Trainers and Waypoints page. |
+| Can I see my alts' skills? | Yes. Log each character in once and the Journal's Alts tab shows them all. |
+| Where are my settings stored? | In your own profile, so characters can share a layout or keep their own. |
 
 ## Troubleshooting
 
 | Symptom | Fix |
 |---|---|
 | The window doesn't move when I drag it | It is locked. Type `/skm unlock`. |
+| Clicking a profession does nothing | You are in combat. Professions open from the window once combat ends. |
 | `/skm toggle` says the addon is disabled | Type `/skm enable`. |
-| The window shows sample skills | Test mode is on. Type `/skm test` to turn it off. |
+| The window shows a Dwarf Hunter's skills | Test mode is on. Type `/skm test` to turn it off. |
+| The window sits behind my bags or another window | Raise it under Layout → Window strata. |
 | Something looks wrong and I want to report it | Follow [Reporting a bug](#reporting-a-bug) below. |
 
 ## Reporting a bug
@@ -66,7 +75,7 @@ The backlog lives on GitHub: please file bugs and ideas at https://github.com/tu
 
 | Version | Date | Highlights |
 |---|---|---|
-| 0.1.0 | Unreleased | - First build: the Skill Master window, test mode, skins, the settings panel, the minimap button and the key binding |
+| 1.0.0 | Unreleased | - Every weapon skill, profession, Defense, Lockpicking and Riding as bars, with your stats beside them<br>- Bonus segments with timers, and tooltips that break each bonus down<br>- Trainer directions and waypoints for unlearned skills and the next rank<br>- Blocks you can collapse, reorder, detach, and lay out in one or two columns<br>- Four broker feeds, cap and weapon alerts, the Journal and an alt overview<br>- Settings for every part of the look, skins, test mode and a sim mode<br>- Two key bindings and the minimap button |
 
 ## Credits
 

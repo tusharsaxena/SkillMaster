@@ -16,18 +16,21 @@ Defense, level-tied skill caps and weapon-master trainers do not exist on Retail
 professions are a different system, so the addon's core has nothing to show there. The TOC carries
 `## Interface: 16001` with `## AllowLoadGameType: camelot` and `## ExcludeLoadGameType: standard`.
 
-v0.1.0 began as the born-compliant skeleton (the Ace3 substrate, the LibKa0s setup files, one
-descriptor and one degradation stub each, the window, skins, the settings panel, the launcher and
-the diagnostics dump). Milestone 2 added the data layer, milestone 3 the display (the bar widget,
-the blocks and rows, the detached frames, the crafting overlays, the row tooltip, the trainer popup
-and waypoints) and milestone 4 the broker feeds, the alerts, the session log, the alt overview and
-the Journal. Milestone 5 adds test mode's sample character (`modules/Preview.lua` over
-`defaults/Preview_Forever.lua`) and the simulator (`modules/Simulator.lua` on LibKa0s-Sim-1.0).
+The build (TOC `0.1.0` until the release bump; the README's Version History carries the 1.0.0
+row) holds the whole v1 design: the Ace3 substrate and one LibKa0s setup file per major, each with
+its degradation stub; the data layer (skills, bonuses, stats, trainers, helpers); the display (the
+bar widget, the blocks and rows in one or two columns, the detached frames, the crafting overlays,
+the row tooltip, the trainer popup and waypoints); the broker feeds, the alerts, the session log,
+the alt overview and the Journal; the settings pages for every display setting; test mode's sample
+character (`modules/Preview.lua` over `defaults/Preview_Forever.lua`) and the simulator
+(`modules/Simulator.lua` on LibKa0s-Sim-1.0); skins; the launcher, two key bindings and the
+diagnostics dump.
 
 Pure data modules (`SkillData`, `Bonuses`, `StatData`, `Trainers`, `Helpers`, `SessionLog`, `Alts`)
-will read the client API and publish bus messages; display modules consume only messages and
-models, so test mode, the simulator and the headless harness drive them the same way
-([data-flow.md](data-flow.md)).
+read the client API through `NS.Compat` and publish bus messages; display modules consume only
+messages and models, so test mode, the simulator and the headless harness drive them the same way
+([data-flow.md](data-flow.md)). Strata and levels come from one table, `NS.Constants.LAYERS`
+(`core/Constants.lua`, frame-layering-§5).
 
 ## Module Map
 
@@ -54,7 +57,17 @@ the slash table and the settings pages.
 
 All features serve WoW Forever; the addon is Forever-only by owner decision. Its core (weapon
 skills, Defense, level-tied caps, weapon masters) does not exist on Retail (clients-§4, clients-§9).
-No feature carries a `clients` declaration.
+No feature carries a `clients` declaration, and no code reads the client: the one per-client answer,
+the default skin, is the library's (skinning-§2).
+
+| Feature | Retail | WoW Forever |
+|---|---|---|
+| Skill and stat bars, blocks, detached frames, columns | not listed | yes |
+| Bonuses, trainers, waypoints, gathering and fishing helpers | not listed | yes |
+| Broker feeds, alerts, session log, alts, Journal | not listed | yes |
+| Settings pages, skins, test mode, simulator, launcher, key bindings, diagnostics | not listed | yes |
+
+"Not listed": the TOC's load-gating pair keeps the addon out of Retail's AddOns list.
 
 ## Settings Schema
 
@@ -82,7 +95,17 @@ list, so a row, a header click and `/skm set` take one path. `shown`, `scale` an
 rows. `skills.hidden` / `stats.hidden` are sets written by the row menu (T3.3) and by the Skills and
 Stats pages' Hide rows (get / set: false clears the entry).
 
-No structural registry exists yet.
+`char.pinned`, the skill the broker's `{pinned}` shows, is named non-setting state: its one writer
+is the row menu's Pin (`I.MenuRows` in `modules/Interact.lua`), disabled while test mode or a
+simulation runs so a sample skill never lands in it.
+
+HUD colors follow the skin (skinning-§6): every `*FromSkin` companion, the palette's
+`bars.colors.fromSkin` included, defaults true; while the palette follows, the categories and
+bonuses draw the owner tokens `sm.cat.*` and `sm.bonus*` (`core/SkinSetup.lua`). No
+`Skin.FollowOnce` step: the addon was born on LibKa0s v1.94.0 with the companions on, so no stored
+profile predates them ([schema.md](schema.md)).
+
+No structural registry exists.
 
 ## Message Bus
 
@@ -161,9 +184,10 @@ a crafting row opens the main window scrolled to it rather than casting (design 
 - The gathering and fishing helpers are tooltip lines, switched by `skills.helperTooltip` (Skills >
   General > Gathering and fishing hints), plus the optional one-line hint under the row,
   `skills.helperHint` (Skills > General > Hint under the row, off by default; design §12 item 4).
-- Not on the Bars page: a fill direction (the mockup's Left to right) and a per-element font for
-  the window, block headers, tooltips and toasts, which follow the skin and the Skin tab. The
-  Layout page has no column count and no frame strata row (design §6.6).
+- No per-element font for the window, block headers, tooltips and toasts: they follow the skin and
+  the Skin tab's overrides. Only the bars have their own font block.
+- Two columns place each docked block in the shorter column so far, so the block order reads down
+  the columns by height rather than strictly left to right.
 - The launcher menu has no *Journal* entry yet (design §6.8): `LibKa0s-Launcher-1.0` minor 9 builds
   only its fixed entries (Enabled, Locked, Test mode, Sim mode, Show window, Open settings), takes
   no extra entry from the descriptor, and launcher-§2 forbids a host menu. It needs a library seam;
@@ -178,7 +202,7 @@ a crafting row opens the main window scrolled to it rather than casting (design 
   session.
 - Test mode's lure timer counts from when test mode turned on and is redrawn on the next repaint,
   not every second (the live ticker follows only live temp bonuses).
-- Every client API the data modules will use is assumed until `/skm probe` confirms it
+- Every client API the data modules use is assumed until `/skm probe` confirms it
   ([midnight-quirks.md](midnight-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.
 

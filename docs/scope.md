@@ -13,8 +13,10 @@ Skill Master shows a WoW Forever character's skills and stats as bars the player
 - trainer directions for unlearned skills and the next rank, with a TomTom, map-pin or chat waypoint;
 - four LibDataBroker feeds, alerts, a session log with ETA, an alt overview and gathering helpers.
 
-v0.1.0 ships the skeleton those features plug into: the window, test mode, skins, settings, the
-launcher and the key binding.
+Each piece of the window is a setting: bar sizes, fill direction, colors (the skin's or the
+player's), the border and the font, block order, docking, one or two columns, and the window's and
+the detached blocks' frame strata. Test mode shows a sample character and the simulator plays a
+scripted session on it.
 
 ## What it deliberately does not do
 

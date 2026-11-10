@@ -32,7 +32,7 @@ Start here, then read the docs:
   `data-flow.md`, `common-tasks.md`, `debug.md`, `midnight-quirks.md`, `smoke-tests.md`, …).
 
 **WoW Forever only** (roster Clients `Forever`, clients-§9): the suite runs under the Forever kit
-profile only. Green gate before every commit: `KA0S_KIT_CLIENT=forever lua tests/run.lua` and
+profile only (also pinned in-repo by `tests/client_pin.lua`, so a bare run is Forever too). Green gate before every commit: `KA0S_KIT_CLIENT=forever lua tests/run.lua` and
 `~/.claude/dev-copilot/bin/ka0s-bounded luacheck .` (0/0). The kit bounds the suite on load;
 `luacheck` loads no kit, so it runs through the bounded runner (testing-§15). Never
 auto-stage/commit/push and never bump the version without an explicit instruction.

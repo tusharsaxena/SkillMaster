@@ -35,7 +35,7 @@ section. This addon writes the sections, in `modules/Diagnostics.lua`:
 | `model` | the live skill model's counts (total, learned, unlearned, rows per category), the stat count, the session log's entries and gains, the alts, whether test mode's preview source is on; stood down, a note that the last scan is kept |
 | `probe` | the probe's read-only half: the skill-list API (`C_SkillInfo`, `global` or `none`) and its visible line count, how many probed globals are present, TomTom, and the missing ones (capped) |
 | `bonuses` | each learned skill with a modifier as `key=+N (temp N)`, then the bonus cache as it stands (sources, items, buffs, whether the temp ticker runs) and each cached source; "bonus cache empty" before the first collect |
-| `layout` | the window's stored scale, opacity, lock, point, max height and summary strip; each block's docked, order, collapsed, scale, lock, point and detached-frame state; the docked order and the detached blocks |
+| `layout` | the window's stored scale, opacity, lock, point, max height, summary strip, column count and strata, and the detached blocks' strata; each block's docked, order, collapsed, scale, lock, point and detached-frame state; the docked order and the detached blocks |
 | `sim` | the simulation's state (active, step panel, scenario, step, events), the seam's wrapped and unwrapped counts, whether test mode's sample data is on |
 | `rejected` | the events `SafeRegisterEvent` refused this session |
 

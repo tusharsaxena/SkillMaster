@@ -28,5 +28,5 @@ during a performance capture." until it ends.
 ## Budget
 
 The design's anti-goal: nothing polls per frame except visible expiry timers; skills update on
-skill events, stats on throttled unit events. v0.1.0 registers one event (`PLAYER_REGEN_DISABLED`).
+skill events, stats on throttled unit events (ARCHITECTURE.md, Event Subscriptions).
 In-game captures live in [perf-analysis/README.md](perf-analysis/README.md); none has been taken.

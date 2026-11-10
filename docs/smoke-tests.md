@@ -1,7 +1,25 @@
 # Smoke tests — Ka0s Skill Master
 
 In-game checks on **WoW Forever** (client 1.60.1). The owner runs them; an agent never marks one
-passed (clients-§6, testing). Each check names what to do and what you should see.
+passed (clients-§6, testing). Each check names what to do and what you should see. Every check
+runs on WoW Forever, the one client this addon ships on, except SM-LOAD-2, the not-listed-on-Retail
+check (clients-§9).
+
+## Design §9 coverage
+
+The design's in-game checklist (`docs/superpowers/specs/2026-11-10-skill-master-design.md` §9) and
+the checks below that cover each item:
+
+| Design §9 item | Checks |
+|---|---|
+| The probe | SM-PROBE-1 |
+| Each category | SM-DISP-1, SM-TEST-1 |
+| The lure timer | SM-DISP-2, SM-SIM-1 |
+| Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8 |
+| TomTom on and off | SM-DISP-7, SM-OPT-5, SM-SEAM-2 |
+| Each skin | SM-SKIN-1, SM-SKIN-2 |
+| Detach and dock | SM-DISP-3, SM-OPT-3 |
+| Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4 |
 
 ## Load
 
@@ -41,17 +59,17 @@ passed (clients-§6, testing). Each check names what to do and what you should s
 - **SM-DISP-6** In combat, click a crafting row: nothing opens and one line says why; no "action
   blocked" error. Detach a block in combat: it moves only when combat ends. Escape the window in
   combat: no error, and no invisible button is left where the rows were after combat.
+- **SM-DISP-7** An unlearned weapon row reads `Not learned · <trainer>, <city> · 10s`. Its Go button
+  (or a click) opens the trainer popup: the faction's weapon masters, the unverified warning. Set
+  waypoint with TomTom loaded (a TomTom arrow), without it (a map pin), and Print to chat.
 - **SM-DISP-8** Open the window and the Journal over it, then click the window: it comes to the
   front and a crafting row still opens its profession (the overlay was re-leveled above the rows).
   Drag the window by its title: no invisible button is left at the old place, and at the drop
   clicking Leatherworking opens it.
 - **SM-DISP-9** Detach the Weapon block: the equipped weapon (a Dwarf Hunter's Guns) reads
-  `▸ Guns` in gold. With `layout.blocks.weapon.belowCapOnly` on, only the equipped weapon and the
+  `> Guns` in gold. With `layout.blocks.weapon.belowCapOnly` on, only the equipped weapon and the
   skills below their cap show; swap weapons and the marker follows. With `skills.helperHint` on, the
   Skinning, Mining, Herbalism and Fishing rows carry one muted hint line under the bar.
-- **SM-DISP-7** An unlearned weapon row reads `Not learned · <trainer>, <city> · 10s`. Its Go button
-  (or a click) opens the trainer popup: the faction's weapon masters, the unverified warning. Set
-  waypoint with TomTom loaded (a TomTom arrow), without it (a map pin), and Print to chat.
 ## Journal
 
 - **SM-JRN-1** `/skm journal` opens "Skill Master · Journal" with Session Log and Alts tabs; Escape and
@@ -60,7 +78,7 @@ passed (clients-§6, testing). Each check names what to do and what you should s
   without lag and never gets smaller than it opened; release: more log rows show. `/reload`: it
   opens at the dragged size. Lock the window (`/skm lock`): the grip does nothing.
 - **SM-JRN-2** Gain a skill point: a row appears at the top of Session Log with the time, the skill,
-  `old → new` and the zone, and the session card counts it. A second gain of the same skill gives it
+  `old -> new` and the zone, and the session card counts it. A second gain of the same skill gives it
   an ETA. Clear log empties the list; New session sets the count back to +0.
 - **SM-JRN-3** Log in a second character, then back: Alts lists both, each under its whole two-word
   name, this character first, with mini bars per skill; Professions / Weapons / Other filter the
@@ -83,6 +101,10 @@ passed (clients-§6, testing). Each check names what to do and what you should s
 
 - **SM-LDB-1** The minimap button shows the logo. Left-click opens the settings; right-click shows
   Enabled, Locked, Test mode, Sim mode, Show window. Hovering shows the status tooltip.
+- **SM-LDB-2** In a broker display (Titan Panel, ChocolateBar or Bazooka), add the four Skill Master
+  feeds: All, Professions, Weapons and Stats each show their template's text. Gain a skill point:
+  All and that skill's feed read `^ <skill> <new>` for five seconds, with the up chevron. Hover each
+  feed: its tooltip lists the rows with mini bars.
 - **SM-CFG-1** Settings → AddOns → Ka0s Skill Master: the landing page lists the slash commands; General
   has Master controls, Skin and Keybindings tabs; Profiles works.
 - **SM-CFG-2** Uncheck Minimap button: the button hides, and Reset all settings does not bring it back.
@@ -107,6 +129,26 @@ passed (clients-§6, testing). Each check names what to do and what you should s
   Fishing rows gain their hint line at once; untick Gathering and fishing hints and the tooltips lose
   their helper lines while the row hint stays. Detach Weapon Skills, then Layout > Blocks > Weapon
   skills > Equipped and below cap only: the detached frame drops the capped, unequipped weapons.
+
+## Settings closing M5
+
+- **SM-OPT-8** Bars > Bar > Fill > Fill direction: Right to left. Every bar (the window, a detached
+  block, a row tooltip, the Journal's Alts and a broker tooltip) fills from its right edge, the bonus
+  segment running on to its left and the spark at the fill's left end; tier ticks and markers sit
+  mirrored. Left to right puts them back.
+- **SM-OPT-9** Layout > Window > Columns: Two columns. The window doubles in width and the docked
+  blocks fill two columns side by side; detach and dock a block and the columns re-balance. Back to
+  One column: one column, the old width.
+- **SM-OPT-10** Layout > Window > Window strata: Low. Open a bag or the character frame over the
+  window: it covers the window. High: the window draws over them. With High set, click an unlearned
+  row's Go: the trainer popup still opens over the window. With the window at Low, click
+  Leatherworking: it still opens (the crafting overlay follows the window's strata). Detached block
+  strata does the same for a detached block.
+- **SM-OPT-11** Bars > Colors: with Use the skin's colors on (the default) the bars show the
+  mockup's category colors; turn it off and change the Weapon skills swatch: the weapon bars take it.
+- **SM-OPT-12** During a simulation (`/skm sim`, start the trip), right-click a row: Pin to the
+  broker feed is grayed out and does nothing. With test mode on, the All feed starts `Fishing 107+25/150`
+  and a `{equippedWeapon}` template reads `Guns 105+5/110`, whatever your own pin and weapon.
 
 ## Disabled
 
@@ -142,4 +184,11 @@ passed (clients-§6, testing). Each check names what to do and what you should s
 ## Skins and diagnostics
 
 - **SM-SKIN-1** `/skm skin`: pick Ka0s Default, Apply. The window and the debug console change look.
-- **SM-DIAG-1** `/skm diagnostics`: the report appears in the debug console with the six sections.
+- **SM-SKIN-2** `/skm skin` once per shipped skin (every entry of the picker, WoW Forever included),
+  Apply each: the window, a detached block, the Journal, the trainer popup, an alert toast and the
+  broker tooltip all restyle, and every character on them draws (no empty boxes in the legend, the
+  block headers' fallback marks, the Journal's `old -> new` or the stat tooltip's marker lines). The
+  category colors stay told apart (Primary blue, Secondary green, Weapon orange, Other violet) and
+  the lure's teal and the racial's blue bonus segments keep their own colors.
+- **SM-DIAG-1** `/skm diagnostics`: the report appears in the debug console with the ten sections
+  (identity, settings, state, skin, model, probe, bonuses, layout, sim, rejected).

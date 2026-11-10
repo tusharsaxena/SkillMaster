@@ -7,8 +7,8 @@ login; each page body builds on its first show.
 |---|---|---|
 | Ka0s Skill Master (landing) | none | The logo, the tagline and the slash command list |
 | General | Master controls, Skin, Keybindings | Master controls, the skin, the key binding |
-| Layout | Window, Blocks, Block order | The window's width, maximum height, block spacing and summary strip; per block show, dock, collapse, lock and scale; the weapon block's compact filter (equipped and below cap only); the block order, dragged |
-| Bars | Bar, Colors, Text, Marks | The bar heights; the composed fill, background, border and font blocks; the color mode and palette; the bar text template and position; ticks, markers, timer and spark. A live preview bar is pinned above the strip |
+| Layout | Window, Blocks, Block order | The window's width, maximum height, block spacing, summary strip, column count (one or two) and frame strata, and the detached blocks' strata; per block show, dock, collapse, lock and scale; the weapon block's compact filter (equipped and below cap only); the block order, dragged |
+| Bars | Bar, Colors, Text, Marks | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; the bar text template and position; ticks, markers, timer and spark. A live preview bar is pinned above the strip |
 | Skills | General, Professions, Weapons and other | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default), one Hide row per catalog skill |
 | Stats | General, then one tab per stat group | How a stat row draws, one Hide row per stat |
 | Broker | Feeds | Each feed's text template and the skill-up flash |
@@ -26,7 +26,9 @@ blocks, the Journal and the Bars preview restyle at once. Rows over `NS.Blocks`'
 `stats.hidden.<key>`, sets) read and write through `get` / `set`.
 
 What follows the skin: every composed block on the Bars page carries its `*FromSkin` companion,
-default on (skinning-§6). The window, block headers, tooltips, toasts, the Journal and the trainer
+default on (skinning-§6), and so does the palette (`bars.colors.fromSkin`, *Use the skin's colors*):
+while it is on the category and bonus colors are the skin's owner tokens `sm.cat.*` and
+`sm.bonus*`, which keep the mockup's colors apart under every skin. The window, block headers, tooltips, toasts, the Journal and the trainer
 popup take their fonts, colors, textures and borders from the skin and the Skin tab's font,
 texture and outline overrides; they have no per-element rows.
 
@@ -70,6 +72,14 @@ with the Master-controls Sim mode box and the bare `/skm sim`.
 
 ## Layout
 
+The Window tab's last rows: *Columns* (`layout.columns`, One column / Two columns: the docked blocks
+fill two columns, each Window width wide, the shorter column first), *Window strata*
+(`layout.strata`) and *Detached block strata* (`layout.detachedStrata`). The two strata rows offer
+Background, Low, Medium and High (`NS.Constants.LAYERS.STRATA_CHOICES`, frame-layering-§1) and
+their tooltip is the library's `O.StrataTooltip`; the window's row applies through
+`NS.MainWindow.ApplySettings`, the crafting overlays take the host's strata on the sync that
+follows, and the trainer popup opens one strata above the higher of the two.
+
 The Block order tab is a host tab keyed by its group (the rows `layout.blocks.<id>.order` are
 `skipRender`): one row per block in `NS.Blocks.Ordered()`, dragged through LibKa0s-Widgets-1.0's
 `ReorderList` (options-ui-§18); a drop calls `NS.Blocks:Move(from, to)`. The controller is
@@ -86,6 +96,10 @@ The feeds' right-click opens this page by its key (`NS.Broker.SETTINGS_PAGE = "b
 `NS.Helpers.OpenOptionsPanel`); with the library absent it opens the main settings panel.
 
 ## Bars
+
+The Bar tab's Fill subsection opens with *Fill direction* (`bars.fillDirection`, Left to right /
+Right to left): every bar, in the window, the detached blocks, the tooltips, the Journal and the
+broker, anchors its fill, bonus, spark, ticks and markers from that edge.
 
 The preview is `NS.OptionsPreview`: an `NS.Bar` in the page's `H.PageHeader` frame drawing the
 mockup's Fishing 107 +25 / 150 with a lure's 4:12 (drawn still, no OnUpdate), restyled on every

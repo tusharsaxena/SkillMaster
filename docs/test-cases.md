@@ -370,6 +370,23 @@ Total.
 - bars preview: the fill is the Fishing row's own color, and a palette or mode edit reaches it
 - test mode: a sample row's menu cannot pin the sample skill into the character's store
 
+### test_m5_leftovers.lua (14)
+
+- skin colors: every HUD color companion defaults on, in the defaults and on its row
+- skin colors: the category and bonus owner tokens carry the mockup's colors
+- skin colors: following the skin, each category fills in its own token, not one shared fill
+- settings: fill direction, both strata and the column count each have a live row
+- settings: a strata row's tooltip is the library's, over the row's own values (frame-layering-§1)
+- fill direction: right to left anchors the fill, the bonus and the spark on the bar's right edge
+- strata: the window and a detached block take their rows' strata live; overlays sit in the host's
+- columns: two columns lay the docked blocks side by side in a window twice as wide
+- sim: a row's menu cannot pin while a simulation runs, and can again after it
+- test mode: the broker's {pinned} and {equippedWeapon} are the sample character's
+- glyphs: no display string carries a character a shipped skin face cannot draw
+- glyphs: the guard is falsifiable, a planted arrow is caught
+- client pin: the suite runs as WoW Forever whatever KA0S_KIT_CLIENT says or omits (clients-§9)
+- client pin: an unset variable pins Forever, forever is accepted, retail is refused
+
 ### test_surface_parity.lua (11)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
@@ -540,6 +557,7 @@ Total.
 | test_seams.lua | 5 |
 | test_m5_seams.lua | 7 |
 | test_m5_review.lua | 6 |
+| test_m5_leftovers.lua | 14 |
 | test_surface_parity.lua | 11 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
@@ -553,4 +571,4 @@ Total.
 | test_skin_switch.lua | 13 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **359** |
+| **Total** | **373** |

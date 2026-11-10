@@ -19,6 +19,7 @@ SkillMasterDB
                                  -- each { name, class, className, race, faction, level, updated,
                                  -- skills = { [key] = { name, category, rank, max } } }
   char.<db.keys.char>
+    pinned = false               -- the skill key the broker's {pinned} shows (the row menu's Pin)
     log = {}                     -- the session log's ring (modules/SessionLog.lua): the newest 500
                                  -- { t, key, old, new, zone }, oldest first
   profiles.<name>
@@ -35,12 +36,15 @@ SkillMasterDB
     }
     layout = {                   -- the Layout page (T5.1)
       width = 440, maxHeight = 560, blockGap = 0, summary = true,
+      columns = 1,               -- 1 | 2 columns of docked blocks, each `width` wide
+      strata = "MEDIUM", detachedStrata = "MEDIUM",   -- BACKGROUND | LOW | MEDIUM | HIGH
       blocks.<id> = { shown = true, docked = true, order = n, collapsed, scale = 1, locked = false,
                       point = false }   -- point: drag-only, written only by modules/Detached.lua
       blocks.weapon.belowCapOnly = false   -- the detached compact preset's filter (M5 polish)
     }
     bars = {                     -- the Bars page (T5.1); defaults/Profile.lua comments each key
       height, compactHeight, tooltipHeight, miniHeight, rowHeight, fontSize, textAnchor,
+      fillDirection = "LEFT",    -- "LEFT" (left to right) | "RIGHT" (right to left)
       textTemplate = "{rank} {bonus} / {max}", spark, ticks, markers, timer, colorMode,
       barTexture, barAlpha, barColor, useClassColorBar, barTextureFromSkin, barColorFromSkin,
       bgColor, useClassColorBg, bgColorFromSkin,
@@ -48,7 +52,8 @@ SkillMasterDB
       borderColorFromSkin,
       font, fontColor, useClassColorFont, fontFlags = "@skin", fontShadow, fontFromSkin,
       fontColorFromSkin, fontShadowFromSkin,   -- every *FromSkin defaults true
-      colors = { fromSkin = false, primary, secondary, weapon, other, stats, bonusTemp, bonusPerm },
+      colors = { fromSkin = true, primary, secondary, weapon, other, stats, bonusTemp, bonusPerm },
+                                 -- fromSkin on: the skin's sm.cat.* / sm.bonus* owner tokens draw
     }                            -- colors are positional { r, g, b, a }
     skills = { showUnlearned = true, hidden = { [key] = true },
                helperTooltip = true,   -- the gathering and fishing lines in a row's tooltip
@@ -83,13 +88,20 @@ writers: `profile.window.point`, owned by `modules/MainWindow.lua` (`savePoint` 
 `modules/Journal.lua` (`savePoint` on drag stop and `J.ResetPosition`; `saveSize` on the resize
 grip's release); `global.characters`, owned by `modules/Alts.lua` (`Snapshot`, `Forget`);
 `char.log`, owned by `modules/SessionLog.lua` (`Add`, `Clear`); `profile.alerts.point`, owned by
-`modules/Alerts.lua` (the toast's `setPosition`); `global.minimap.minimapPos`, LibDBIcon's own.
+`modules/Alerts.lua` (the toast's `setPosition`); `char.pinned`, owned by `modules/Interact.lua`
+(the row menu's Pin, refused while test mode or a simulation runs); `global.minimap.minimapPos`,
+LibDBIcon's own.
 
 ## Migrations
 
 | Version | Step | What it does |
 |---|---|---|
 | 0 → 1 | pre-versioning | nothing to reshape; the stamp itself |
+
+No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
+companion defaulting on, so no stored profile predates the companions and none has to be moved
+onto them (NEW_ADDON_CONTEXT item 24b). A companion added later that changes an existing default
+would owe the step.
 
 A new step is appended to `STEPS` in `core/Database.lua` with `to = N`, and `NS.SCHEMA_VERSION` is
 raised to `N` in the same change. A profile-scoped step sets `perProfile = true`.

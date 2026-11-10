@@ -56,7 +56,10 @@ the toast; a profile reload re-reads its position.
 session's gains from `SKILL_UP`, and re-renders each feed's template (`profile.broker.templates`)
 on every message; an unchanged text is not re-assigned. A `SKILL_UP` flashes "^ <name> <new>" on
 the All feed and the skill's own feed for `profile.broker.flashSeconds` (one AceTimer, restarted by
-the next skill-up). The only client read is the main hand's weapon class, for `{equippedWeapon}`.
+the next skill-up). The only client read is the main hand's weapon class, for `{equippedWeapon}`;
+in test mode the context's `{pinned}` and `{equippedWeapon}` are the sample's own (`NS.Preview`'s
+broker source carries `pinned` and `mainHand`), so a sample feed reads neither `db.char.pinned` nor
+the live gear.
 The stand-down shows "Off" on every feed; the stand-up re-renders.
 
 ## Test mode and the simulator (T5.2)
@@ -79,13 +82,16 @@ ticker's read for the mount, then `SIM_TICK`. The session starts from an empty s
 the stop puts the live model, the alerts' and the broker's session state and the live log back and
 repaints once.
 
-## What runs in v0.1.0
+## The lifecycle
 
 - `OnInitialize` builds the store, runs migrations, applies the skin, registers the slash commands
   and the settings category.
-- `OnEnable` registers the launcher, moves the `disabled` hold to match `enabled`, registers
-  `PLAYER_REGEN_DISABLED` (combat ends test mode) and shows the first-run skin picker once per profile.
-- The window renders its empty state, or its test-mode strip, on show and on every mode change.
+- `OnEnable` registers the launcher, moves the `disabled` hold to match `enabled`, registers the
+  runtime events (Event Subscriptions in [ARCHITECTURE.md](ARCHITECTURE.md)) and shows the first-run
+  skin picker once per profile.
+- The window lays its docked blocks into one or two columns (`layout.columns`, the shorter column
+  first) on every layout change and redraws values in place otherwise; a strata, scale or opacity
+  write applies at once (`MainWindow.ApplySettings`) and re-syncs the crafting overlays.
 - `enabled = false` (or a perf capture) stands the addon down through the one latch: the window
   hides, every event is unregistered and every timer canceled; standing up re-registers from
   current state.
@@ -103,5 +109,8 @@ The README's `## How the window works` is the player-facing version of this page
   waypoint, then the directions in chat; a trainer without coordinates always goes to chat.
 - The broker tooltip and the Journal's alt grid draw `NS.Bar` in its `mini` style: the broker from
   `NS.Rows.SkillValues` / `StatValues` with `NS.Rows.FillColor`, the Journal from the snapshot's rank,
-  cap and category. Both follow `profile.bars` (the colors, `miniHeight`) as the window's rows do.
+  cap and category. Both follow `profile.bars` (the colors, `miniHeight`, the fill direction) as the
+  window's rows do. While `bars.colors.fromSkin` is on (the default) a category fills in the skin's
+  `sm.cat.<category>` owner token and a bonus in `sm.bonusTemp` / `sm.bonusPerm`, each the mockup's
+  color under every skin unless the skin states its own (`core/SkinSetup.lua`).
 - The main window's journal mark calls `NS.Journal.Toggle`.
