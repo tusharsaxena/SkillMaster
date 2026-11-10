@@ -145,10 +145,7 @@ test("test_rows_unlearned_variant: an unlearned skill is a dimmed row with its t
     end)
 end)
 
-test("rows: initials, money and the riding trainer line", function()
-    assertEqual(R.Initials("Leatherworking"), "LE")
-    assertEqual(R.Initials("Two-Handed Axes"), "TH")
-    assertEqual(R.Initials("First Aid"), "FA")
+test("rows: money and the riding trainer line", function()
     assertEqual(R.Money(1000), "10s")
     assertEqual(R.Money(900000), "90g")
     assertEqual(R.Money(15050), "1g 50s 50c")

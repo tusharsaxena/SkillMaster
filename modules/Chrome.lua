@@ -4,7 +4,9 @@ local addonName, NS = ...
 -- fallback rung) and the hover tooltip line they carry.
 --
 -- NS.Chrome.IconButton(parent, icon, glyph, onClick, tip) -> button   (button.icon or button.glyph)
--- NS.Chrome.SetIcon(button, icon, glyph)                               swap the mark (lock / unlock)
+-- NS.Chrome.SetIcon(button, icon, glyph, turned)                       swap the mark (lock / unlock);
+--                                                                      `turned` draws it rotated 180
+--                                                                      degrees (the attach mark)
 -- NS.Chrome.MakeResizable(frame, spec) -> grip                         the one resize helper
 
 NS.Chrome = {}
@@ -35,8 +37,14 @@ local function onLeave(self)
     hideTip(self)
 end
 
+-- The texture coordinates (left, right, top, bottom): upright, and turned 180 degrees (both axes
+-- flipped). The attach mark is the detach mark turned: its arrow points to the bottom left, out of
+-- the box's cutout there (owner feedback round 2, FB-15).
+C.UPRIGHT, C.TURNED = { 0, 1, 0, 1 }, { 1, 0, 1, 0 }
+
 --- Draw `icon` (a declared catalog name) on the button, or `glyph` where the art does not resolve.
-function C.SetIcon(b, icon, glyph)
+--- `turned` draws the mark rotated 180 degrees; a pooled button set upright again is reset.
+function C.SetIcon(b, icon, glyph, turned)
     local path = icon and NS.Icon(icon)
     if path then
         if not b.icon then
@@ -45,6 +53,7 @@ function C.SetIcon(b, icon, glyph)
             b.icon:SetSize(C.ART, C.ART)
         end
         b.icon:SetTexture(path)
+        b.icon:SetTexCoord(unpack(turned and C.TURNED or C.UPRIGHT))
         NS.Skin.Mark(b.icon)
         if b.glyph then b.glyph:Hide() end
         return

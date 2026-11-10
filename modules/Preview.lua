@@ -152,16 +152,17 @@ function P.Skill(key)
     return NS.SkillData and NS.SkillData:Get(key) or nil
 end
 
---- { level, race, class } of the character the displays draw. Live reads go through NS.Compat, so
---- a running simulation answers them too.
+--- { level, race, class, name, classFile } of the character the displays draw. Live reads go
+--- through NS.Compat, so a running simulation answers them too.
 function P.Character()
     if data then
         local c = data.character
-        return { level = c.level, race = L[c.race], class = L[c.class] }
+        return { level = c.level, race = L[c.race], class = L[c.class], name = c.name, classFile = c.classFile }
     end
     local race = NS.Compat.PlayerRace()
-    local class = NS.Compat.PlayerClass()
-    return { level = NS.Compat.PlayerLevel(), race = race or "", class = class or "" }
+    local class, classFile = NS.Compat.PlayerClass()
+    return { level = NS.Compat.PlayerLevel(), race = race or "", class = class or "",
+             name = NS.Compat.PlayerName() or "", classFile = classFile }
 end
 
 -- ── the switch ───────────────────────────────────────────────────────────────────────────────

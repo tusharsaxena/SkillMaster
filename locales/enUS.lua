@@ -312,6 +312,9 @@ L["permanent bonus"] = true
 L["rank tier"] = true
 L["threshold"] = true
 L["Lv %d \194\183 %s %s"] = true
+L["\194\183 %s"] = true
+L["Expand all blocks"] = true
+L["Collapse all blocks"] = true
 
 -- The interactions: the click map, the row menu, the row tooltip, the trainer popup, the waypoints (T3.3).
 L["Profession windows open from Skill Master out of combat."] = true

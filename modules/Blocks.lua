@@ -6,8 +6,8 @@ local _, NS = ...
 --
 -- NS.BLOCKS = { ids in default order }; NS.BlockDefs[id] = { id, title, source, filter }
 -- profile.layout.blocks[id] = { docked, order, collapsed, point, scale, locked }
--- NS.Blocks:Detach(id) / :Dock(id) / :SetCollapsed(id, v) / :ToggleCollapsed(id) / :Move(from, to) /
---   :SetOrder(id, n) / .Ordered() (every block, shown or not, in its order)
+-- NS.Blocks:Detach(id) / :Dock(id) / :SetCollapsed(id, v) / :ToggleCollapsed(id) / :SetAllCollapsed(v) /
+--   :Move(from, to) / :SetOrder(id, n) / .Ordered() (every block, shown or not, in its order)
 -- NS.Blocks.Docked() / .Undocked() / .Entries(id) / .Meta(id, entries) / .Settings(id)
 -- NS.Blocks.source: nil for the live models, or fn() -> skills, stats (test mode's preview, T5.2;
 --   the suites' fixtures).
@@ -73,7 +73,11 @@ function B.Docked() return pick(true) end
 --- The detached blocks.
 function B.Undocked() return pick(false) end
 
+-- While B:SetAllCollapsed writes, the collapses stay quiet: one click, one LAYOUT_CHANGED.
+local bulk = false
+
 function B.Changed()
+    if bulk then return end
     if NS.bus and NS.MSG then NS.bus:SendMessage(NS.MSG.LAYOUT_CHANGED) end
 end
 
@@ -182,6 +186,30 @@ function B:SetOrder(id, n)
     return seam(path(id, "order"), math.floor(n))
 end
 
+--- Collapse (true) or expand (false) every docked block, each through the seam as its chevron's
+--- write is (the main window's Collapse all and Expand all, FB-16). A detached block keeps its own
+--- state: its frame has its own chevron. One bracket, one LAYOUT_CHANGED; in combat each write
+--- waits for the end of combat, as a chevron's does. Answers how many blocks it changed.
+function B:SetAllCollapsed(collapsed)
+    collapsed = collapsed and true or false
+    local ids = {}
+    for _, id in ipairs(B.Docked()) do
+        if (B.Settings(id).collapsed and true or false) ~= collapsed then ids[#ids + 1] = id end
+    end
+    if #ids == 0 then return 0 end
+    local S = NS.SchemaRuntime
+    local function write() for _, id in ipairs(ids) do B:SetCollapsed(id, collapsed) end end
+    bulk = true
+    local ok, err = pcall(function()
+        if S and S.BulkRun then S.BulkRun(collapsed and "collapse" or "expand", "layout.blocks", write)
+        else write() end
+    end)
+    bulk = false
+    if not ok then error(err, 0) end
+    B.Changed()
+    return #ids
+end
+
 function B:ToggleCollapsed(id)
     local s = B.Settings(id)
     return s and B:SetCollapsed(id, not s.collapsed)
@@ -278,7 +306,8 @@ function Header:SetBlock(id, meta, collapsed, docked)
     self.meta:SetText(meta or "")
     NS.Chrome.SetIcon(self.chevron, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")
-    NS.Chrome.SetIcon(self.detach, docked and "external-link" or "fullscreen-exit", docked and "+" or "-")
+    -- Detach is the external-link mark; dock (attach) is the same mark turned 180 degrees.
+    NS.Chrome.SetIcon(self.detach, "external-link", docked and "+" or "-", not docked)
     self.detach.tip = docked and L["Detach this block into its own frame"] or L["Dock this block in the main window"]
     self.docked = docked
 end

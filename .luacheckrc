@@ -41,6 +41,9 @@ read_globals = {
   "GetInventoryItemLink", "GetItemInfoInstant",
   -- M6: a spell's localized name from its ID (core/Compat.lua SpellName, localization-§4)
   "C_Spell", "GetSpellInfo",
+  -- FB-14 / FB-17: a profession's spell icon, the player's name and the class icon's two sources
+  -- (core/Compat.lua SpellTexture, PlayerName, ClassIcon); the name's class color (MainWindow)
+  "GetSpellTexture", "UnitName", "C_Texture", "CLASS_ICON_TCOORDS", "RAID_CLASS_COLORS",
 }
 
 -- T4.3: the session log's clock and zone, the alt snapshot's identity reads, the Journal's popup,
