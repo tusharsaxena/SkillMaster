@@ -7,7 +7,7 @@ local _, NS = ...
 -- row:SetSkill(entry), row:SetStat(entry), row:SetStripe(index), row.entry, row.kind ("skill"|"stat")
 -- Pure helpers the tooltip, the broker and the journal reuse: SkillValues(entry), FillColor(entry),
 -- StatValues(entry), UnlearnedText(entry), TrainerFor(entry), Place(trainer), Money(copper),
--- Initials(name), HelperHint(entry).
+-- Initials(name), HelperHint(entry), Display() (Rows show: "both" | "bar" | "text", bars.rowDisplay).
 -- row.marked (set before SetSkill, cleared on release): the equipped weapon's "> " marker.
 -- The optional gathering hint (profile.skills.helperHint, design §12 item 4) is one muted line
 -- under a Skinning, Mining, Herbalism or Fishing row, read from NS.SkillHelpers; the row grows by
@@ -192,7 +192,23 @@ local function setHint(row, text)
     row:SetHeight((row.baseH or bars().rowHeight or 20) + (text and R.HINT_H or 0))
 end
 
---- Draw a skill entry (SkillData's model entry).
+--- What every skill and stat row draws (bars.rowDisplay, the Bars page's Rows show): "both" (the
+--- bar and its value), "bar" (the bar, no text) or "text" (the value alone, in the bar's place).
+function R.Display()
+    local mode = bars().rowDisplay
+    if mode == nil then return "both" end
+    return mode
+end
+
+--- The value alone, in the bar's place (Rows show: Value only): the bar hidden with its timer.
+local function showValueOnly(row, text)
+    row.bar:SetTimer(nil)
+    row.bar:Hide()
+    row.where:SetText(text or "")
+    row.where:Show()
+end
+
+--- Draw a skill entry (SkillData's model entry) as Rows show says.
 function Row:SetSkill(e)
     self.kind, self.entry = "skill", e
     setName(self, e.name, self.marked)
@@ -208,18 +224,18 @@ function Row:SetSkill(e)
     end
     setLearnedLook(self, true)
     local v, expires = R.SkillValues(e)
+    local mode = R.Display()
+    if mode == "text" then
+        return showValueOnly(self, NS.Bar.Text(v.value or 0, v.bonus, v.max or 0, bars().textTemplate))
+    end
     v.color = color
+    if mode == "bar" then v.text = "" end
     self.bar:SetValues(v)
     self.bar:SetTimer(expires)
 end
 
-local function statDisplay()
-    local s = (NS.db and NS.db.profile.stats) or NS.defaults.profile.stats
-    return s.display or "both"
-end
-
---- Draw a stat entry (StatData's model entry) as stats.display says: the bar and its value, the
---- bar alone, or the value alone in the bar's place.
+--- Draw a stat entry (StatData's model entry) as Rows show says: the bar and its value, the bar
+--- alone, or the value alone in the bar's place.
 function Row:SetStat(e)
     self.kind, self.entry = "stat", e
     setName(self, e.label, false)
@@ -228,14 +244,9 @@ function Row:SetStat(e)
     local color = R.FillColor(e, true)
     paintIcon(self, color)
     setLearnedLook(self, true)
-    local mode = statDisplay()
+    local mode = R.Display()
     self.bar:SetTimer(nil)
-    if mode == "text" then
-        self.bar:Hide()
-        self.where:SetText(e.display or "")
-        self.where:Show()
-        return
-    end
+    if mode == "text" then return showValueOnly(self, e.display) end
     local v = R.StatValues(e)
     v.color = color
     if mode == "bar" then v.text = "" end

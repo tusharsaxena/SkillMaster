@@ -217,18 +217,10 @@ test("options: every new page renders on its first show without raising", functi
     M.__fireTimers()   -- the library's deferred repaints, so no timer outlives the case
 end)
 
-test("options: the journal's length and filter, and the stat display mode, are honored", function()
+test("options: the journal's length is honored", function()
     NS.SetByPath("journal.keep", 50)
     assertEqual(NS.SessionLog.Cap(), 50)
     NS.SetByPath("journal.keep", 500)
-    NS.SetByPath("stats.display", "text")
-    local row = NS.Rows.Acquire(NS.Rows.NewPool(), M.UIParent, "row")
-    row:SetStat({ key = "agility", label = "Agility", display = "112", pct = 100, markers = {} })
-    assertFalse(row.bar:IsShown(), "a text-only stat row draws no bar")
-    assertEqual(row.where:GetText(), "112")
-    NS.SetByPath("stats.display", "both")
-    row:SetStat({ key = "agility", label = "Agility", display = "112", pct = 100, markers = {} })
-    assertTrue(row.bar:IsShown())
 end)
 
 test("options: the library-absent load keeps every hand-written row; the composers' rows are the gap", function()
@@ -236,7 +228,7 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- composers (Master controls, and the Bars page's bar, background, border and font blocks).
     local NS2 = loadDegraded()
     local full, degraded = #NS.Schema, #NS2.Schema
-    assertEqual(full, 199, "the full schema")
-    assertEqual(degraded, 166, "the library-absent schema")
+    assertEqual(full, 204, "the full schema")
+    assertEqual(degraded, 171, "the library-absent schema")
     assertEqual(full - degraded, 33, "Master controls (8, Sim mode among them) and the Bars blocks (25)")
 end)

@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (1)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (2)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "PvP-Traxex Silentshot" (client-quirks-§5);
@@ -45,6 +45,7 @@ SkillMasterDB
     bars = {                     -- the Bars page (T5.1); defaults/Profile.lua comments each key
       height, compactHeight, tooltipHeight, miniHeight, rowHeight, fontSize, textAnchor,
       fillDirection = "LEFT",    -- "LEFT" (left to right) | "RIGHT" (right to left)
+      rowDisplay = "both",       -- Rows show, skill and stat rows alike: "both" | "bar" | "text"
       textTemplate = "{rank} {bonus} / {max}", spark, ticks, markers, timer, colorMode,
       barTexture, barAlpha, barColor, useClassColorBar, barTextureFromSkin, barColorFromSkin,
       bgColor, useClassColorBg, bgColorFromSkin,
@@ -58,7 +59,7 @@ SkillMasterDB
     skills = { showUnlearned = true, hidden = { [key] = true },
                helperTooltip = true,   -- the gathering and fishing lines in a row's tooltip
                helperHint = false }    -- the one-line hint under the row (design §12 item 4)
-    stats  = { display = "both", hidden = { [key] = true } }   -- display: "both" | "bar" | "text"
+    stats  = { hidden = { [key] = true } }   -- how a row draws is bars.rowDisplay (schemaVersion 2)
     broker = { flashSeconds = 5, templates = { all, professions, weapons, stats } }
     journal = { point = false, size = false, keep = 500, filter = "professions" }
                                  -- point and size ({ w, h }, the resize grip): drag state, written
@@ -75,7 +76,9 @@ SkillMasterDB
 ```
 
 Session-only rows (never stored): `state.debugConsole` (the console checkbox), `state.testMode` and
-`state.sim` (the Sim mode checkbox, T5.2). Nothing a simulation does is stored: its session log is a
+`state.sim` (the Sim mode checkbox, T5.2), and the template presets dropdowns `bars.textPreset` and
+`broker.presets.<feed>`, which read the preset the stored template matches and write it to
+`bars.textTemplate` / `broker.templates.<feed>` (docs/settings-panel.md). Nothing a simulation does is stored: its session log is a
 session-only list (`NS.SessionLog:Override`), alt snapshots stand aside while it runs, and the step
 panel's position is the library's memory, never a key here (preview-mode, H4 and H10).
 The Minimap button row's path is `global.minimap.shown`; its get/set invert onto `global.minimap.hide`.
@@ -97,6 +100,7 @@ LibDBIcon's own.
 | Version | Step | What it does |
 |---|---|---|
 | 0 → 1 | pre-versioning | nothing to reshape; the stamp itself |
+| 1 → 2 | `rowDisplayFromStats`, per profile | moves a stored `stats.display` of `"bar"` or `"text"` onto `bars.rowDisplay` (unless one is already stored) and drops `stats.display`; `"both"`, the default of both keys, moves nothing |
 
 No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
 companion defaulting on, so no stored profile predates the companions and none has to be moved

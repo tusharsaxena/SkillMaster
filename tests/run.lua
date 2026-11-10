@@ -127,6 +127,8 @@ Kit.run{
         "test_loadorder",
         "test_schema",
         "test_options",
+        "test_template_rows",
+        "test_row_display",
         "test_database",
         "test_bus",
         "test_slash",

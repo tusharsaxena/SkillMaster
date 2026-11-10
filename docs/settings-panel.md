@@ -8,10 +8,10 @@ login; each page body builds on its first show.
 | Ka0s Skill Master (landing) | none | The logo, the tagline and the slash command list |
 | General | Master controls, Skin, Keybindings | Master controls, the skin, the key binding |
 | Layout | Window, Blocks, Block order | The window's width, maximum height, block spacing, summary strip, column count (one or two) and frame strata, and the detached blocks' strata; per block show, dock, collapse, lock and scale; the weapon block's compact filter (equipped and below cap only); the block order, dragged |
-| Bars | Bar, Colors, Text, Marks | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; the bar text template and position; ticks, markers, timer and spark. A live preview bar is pinned above the strip |
+| Bars | Bar, Colors, Text, Marks | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom...) and position; ticks, markers, timer and spark. A live preview bar is pinned above the strip |
 | Skills | General, Professions, Weapons and other | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default), one Hide row per catalog skill |
-| Stats | General, then one tab per stat group | How a stat row draws, one Hide row per stat |
-| Broker | Feeds | Each feed's text template and the skill-up flash |
+| Stats | One tab per stat group | One Hide row per stat |
+| Broker | Feeds | Each feed's text template (a presets dropdown plus Custom...) and the skill-up flash |
 | Alerts | Alerts | The rank-cap and weapon-gap alerts, the gap, the sound |
 | Journal | Journal | Skill-ups kept per character, the Alts tab's filter on open |
 | Trainers and Waypoints | Trainers and waypoints | The waypoint method, the chat line, the unverified mark |
@@ -27,6 +27,16 @@ out combat), and every other actor (the header, the detached frame's buttons, th
 them through `NS.SetByPath`; the Hide rows (`skills.hidden.<key>`, `stats.hidden.<key>`, sets) read
 and write through `get` / `set`, and an undrawn whole-set row per kind (`skills.hidden`,
 `stats.hidden`, type `set`) lets the page's Defaults clear a key with no row of its own.
+
+The text templates (`bars.textTemplate`, `broker.templates.<feed>`) are two rows each, built by
+`NS.TemplateRows` (`settings/OptionsSetup.lua`): a session-only presets dropdown
+(`bars.textPreset`, `broker.presets.<feed>`) whose last choice is *Custom...*, and the stored
+template itself as an EditBox (`dialogControl = "EditBox"`), drawn only while the dropdown reads
+Custom (`shownWhen`). The dropdown reads the preset the stored string matches, else Custom; a
+preset writes its template through `NS.SetByPath`; Custom writes nothing and shows the box, which
+commits on Enter. The stored value is the template string, so a string matching no preset reads as
+Custom with its text in the box. No string row may be drawn without `values` or a `dialogControl`
+(LibKa0s's empty-dropdown line; `tests/test_template_rows.lua` holds the whole schema to it).
 
 What follows the skin: every composed block on the Bars page carries its `*FromSkin` companion,
 default on (skinning-§6), and so does the palette (`bars.colors.fromSkin`, *Use the skin's colors*):
@@ -103,6 +113,14 @@ The feeds' right-click opens this page by its key (`NS.Broker.SETTINGS_PAGE = "b
 The Bar tab's Fill subsection opens with *Fill direction* (`bars.fillDirection`, Left to right /
 Right to left): every bar, in the window, the detached blocks, the tooltips, the Journal and the
 broker, anchors its fill, bonus, spark, ticks and markers from that edge.
+
+The Text tab's Content subsection opens with *Rows show* (`bars.rowDisplay`: Bar and value / Bar
+only / Value only), one setting for skill rows and stat rows alike. The window's rows and the
+detached blocks' (both laid by `NS.Blocks.LayRows` through `NS.Rows`) and the broker tooltip's lines
+honor it: Bar only drops the value text (an unlearned skill keeps its *Not learned*), Value only
+draws the value in the bar's place, a skill's shaped by the bar text template. The row tooltip's
+bar and the Journal's Alts mini bars are not rows and always draw. It replaced the Stats page's
+`stats.display` (schemaVersion 2, [schema.md](schema.md)).
 
 The preview is `NS.OptionsPreview`: an `NS.Bar` in the page's `H.PageHeader` frame drawing the
 mockup's Fishing 107 +25 / 150 with a lure's 4:12 (drawn still, no OnUpdate), restyled on every

@@ -111,13 +111,36 @@ add(rows, {
     swatch("bonusPerm", L["Permanent bonus"], L["The bonus segment of a permanent bonus: a racial, an item."]),
 })
 
--- Text: content first (options-ui-§16, U-10d), then the font block.
+-- Text: content first (options-ui-§16, U-10d), then the font block. Rows show (bars.rowDisplay,
+-- feedback round 1 FB-3) is one setting for skill and stat rows alike. The bar text is a presets
+-- dropdown, each preset named by what it draws for the preview's Fishing 107 +25 / 150, plus
+-- "Custom..." and its box (NS.TemplateRows, feedback round 1 FB-2).
 local CONTENT = L["Content"]
 rows[#rows + 1] = row({
-    path = "bars.textTemplate", group = TEXT, subgroup = CONTENT, type = "string", wide = true,
-    default = P.textTemplate, label = L["Bar text"],
-    desc = L["What a skill's bar says. Tokens: {rank}, {bonus} (+25), {max}, {pct} (percent of the cap) and {left} (points to the cap). A stat's bar shows its value."],
+    path = "bars.rowDisplay", group = TEXT, subgroup = CONTENT, type = "string", default = P.rowDisplay,
+    label = L["Rows show"],
+    desc = L["What every skill and stat row draws, in the window, the detached blocks and the broker tooltips: the bar and its value, the bar alone, or the value alone in the bar's place."],
+    values = { { value = "both", text = L["Bar and value"] }, { value = "bar", text = L["Bar only"] },
+               { value = "text", text = L["Value only"] } },
 })
+
+local function barPreset(value)
+    return { value = value, text = NS.Bar.Text(107, 25, 150, value) }
+end
+add(rows, NS.TemplateRows({
+    path = "bars.textTemplate", presetPath = "bars.textPreset", page = PAGE, group = TEXT, subgroup = CONTENT,
+    default = P.textTemplate, label = L["Bar text"],
+    desc = L["What a skill's bar says, shown here for 107 +25 / 150. Custom... writes your own. A stat's bar shows its value."],
+    boxDesc = L["Tokens: {rank}, {bonus} (+25), {max}, {pct} (percent of the cap) and {left} (points to the cap). Press Enter to apply."],
+    presets = {
+        barPreset(P.textTemplate),
+        barPreset("{rank} / {max}"),
+        barPreset("{rank} {bonus} / {max} ({pct}%)"),
+        barPreset("{pct}%"),
+        barPreset(L["{left} to go"]),
+        barPreset("{rank}"),
+    },
+}))
 rows[#rows + 1] = row({
     path = "bars.textAnchor", group = TEXT, subgroup = CONTENT, type = "string", default = P.textAnchor,
     label = L["Text position"], desc = L["Where the text sits on the bar."],
