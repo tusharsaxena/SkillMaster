@@ -42,8 +42,30 @@ Total.
 - options: the flat color mode draws the Bar color, or the skin's while its companion is on
 - options: the Bars page draws a live preview bar from NS.Bar, restyled by a write
 - options: every new page renders on its first show without raising
-- options: the journal's length and filter, and the stat display mode, are honored
+- options: the journal's length is honored
 - options: the library-absent load keeps every hand-written row; the composers' rows are the gap
+
+### test_template_rows.lua (9)
+
+- templates: no string row in the whole schema renders as an empty dropdown
+- templates: the Broker page renders with no empty-dropdown line, one dropdown per feed
+- templates: every template row's default is one of its presets
+- templates: picking a preset writes its template
+- templates: Custom keeps the text, and the box edits it
+- templates: a stored string matching no preset reads as Custom, its text in the box
+- templates: choosing Custom in the dropdown reveals the box; a preset hides it again
+- templates: the page's Defaults lets go of Custom and restores the shipped template
+- templates: the bar text's presets are named by what they draw for 107 +25 / 150
+
+### test_row_display.lua (7)
+
+- rows show: one setting on the Bars page's Text tab, and stats.display is gone
+- rows show: Bar and value draws a skill row's bar and its text, and a stat row's
+- rows show: Bar only draws the bar with no text, for skills and stats
+- rows show: Value only draws the value in the bar's place, for skills and stats
+- rows show: an unlearned skill keeps its trainer line in every mode
+- rows show: the broker tooltip's skill and stat lines honor it
+- rows show: schemaVersion 2 moves a stored stats.display once, in every stored profile
 
 ### test_database.lua (3)
 
@@ -227,6 +249,26 @@ Total.
 - bar: a timer that runs out clears itself
 - bar: the resolved style reads the profile and the skin's tokens
 - bar: the pool hands bars back in order and clears their timers on release
+
+### test_bars_live.lua (17)
+
+- bars live: the bar height reaches the window's rows and the preview, the detached height the blocks
+- bars live: the row height reaches every window row
+- bars live: the tooltip and mini heights reach the row tooltip and the broker tooltip
+- bars live: fill direction anchors the fill on the right edge, and back
+- bars live: bar opacity scales the drawn fill's alpha
+- bars live: the bar texture draws once its skin companion is off, and the skin's again once on
+- bars live: the flat Bar color draws once Color mode is Flat and its companion is off
+- bars live: the row tooltip's bar wears the row's own fill, so Color mode and the palette reach it
+- bars live: the background color draws once its companion is off
+- bars live: turning the border off hides the drawn edges, and on shows them again
+- bars live: the bar text template and position reach the drawn text
+- bars live: the font color and size draw once their companions are off
+- bars live: rank tier ticks hide and come back
+- bars live: threshold markers hide on a stat's bar and come back
+- bars live: the expiry timer hides at once and comes back
+- bars live: the spark hides when switched off and shows when on
+- bars live: every Bars page slider commits while it moves, so a mouse wheel turn is written
 
 ### test_blocks.lua (10)
 
@@ -563,6 +605,8 @@ Total.
 | test_loadorder.lua | 6 |
 | test_schema.lua | 6 |
 | test_options.lua | 16 |
+| test_template_rows.lua | 9 |
+| test_row_display.lua | 7 |
 | test_database.lua | 3 |
 | test_bus.lua | 3 |
 | test_slash.lua | 6 |
@@ -579,6 +623,7 @@ Total.
 | test_bonuses.lua | 16 |
 | test_statdata.lua | 16 |
 | test_bar.lua | 10 |
+| test_bars_live.lua | 17 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 10 |
 | test_sessionlog.lua | 5 |
@@ -608,4 +653,4 @@ Total.
 | test_skin_switch.lua | 18 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **406** |
+| **Total** | **439** |
