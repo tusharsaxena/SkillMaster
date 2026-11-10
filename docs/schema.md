@@ -30,7 +30,7 @@ SkillMasterDB
     window  = { point = false }  -- drop point, written only by modules/MainWindow.lua
     skin = {
       source = "ka0s", skin = <library default: WoW Forever>,
-      ignorePanel = false, ignoreFonts = false,
+      ignorePanel = true, ignoreFonts = false,
       font = "", texture = "", outline = "hud",
       pickerSeen = false,
     }

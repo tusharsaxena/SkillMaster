@@ -97,19 +97,20 @@ Total.
 - locale: each stub is gated on its own locale, silent elsewhere, and a subset of enUS
 - locale: the stub gate is falsifiable, an ungated chunk writes on every client
 
-### test_skinsetup.lua (4)
+### test_skinsetup.lua (5)
 
 - skin: this addon is a registered owner wearing its stored choice
 - skin: writing the skin row applies it through the owner
 - skin: the picker's preview is the test mode (skinning-§10)
 - skin: /sm skin opens the library's picker
+- skin: Ignore settings panel defaults to on, Ignore fonts to off (skinning-§3)
 
 ### test_perf.lua (2)
 
 - perf: windowRender is noted while a capture is on, and nothing is noted while off
 - perf: every event-path bucket (detachedRender, skillScan, statScan, bonusRefresh) is reached
 
-### test_probe.lua (7)
+### test_probe.lua (9)
 
 - probe: Run() answers the report's six keys
 - probe: skillLines holds the raw returns of every line, the collapsed ones included
@@ -118,6 +119,8 @@ Total.
 - probe: enchant carries the weapon enchant returns (a lure's time left)
 - probe: /sm probe shows the report as JSON in the copy window
 - probe: C_SkillInfo and C_Item are read first, a table-shaped line kept whole
+- probe: a slot-taking C_Item.GetWeaponEnchantInfo does not error, and each try is recorded
+- compat: WeaponEnchantInfo passes a slot and normalizes Forever's table to the 1.12 shape
 
 ### test_skilldata.lua (24)
 
@@ -561,9 +564,9 @@ Total.
 | test_launcher.lua | 2 |
 | test_keybinds.lua | 4 |
 | test_locale.lua | 8 |
-| test_skinsetup.lua | 4 |
+| test_skinsetup.lua | 5 |
 | test_perf.lua | 2 |
-| test_probe.lua | 7 |
+| test_probe.lua | 9 |
 | test_skilldata.lua | 24 |
 | test_trainers.lua | 12 |
 | test_helpers.lua | 8 |
@@ -599,4 +602,4 @@ Total.
 | test_skin_switch.lua | 18 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **397** |
+| **Total** | **400** |

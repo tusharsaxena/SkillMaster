@@ -34,3 +34,10 @@ test("skin: /sm skin opens the library's picker", function()
     NS.Helpers.SkinVerb = real
     assertTrue(seen ~= nil and seen.owner == "SkillMaster", "the verb handed the library this owner's spec")
 end)
+
+-- skinning-§3 (owner ruling of 2026-10-30): the Scope's *Ignore settings panel* defaults to on in
+-- every profile, so the settings panel keeps the client's look until the player clears it.
+test("skin: Ignore settings panel defaults to on, Ignore fonts to off (skinning-§3)", function()
+    assertEqual(NS.defaults.profile.skin.ignorePanel, true, "defaults: ignorePanel")
+    assertEqual(NS.defaults.profile.skin.ignoreFonts, false, "defaults: ignoreFonts")
+end)
