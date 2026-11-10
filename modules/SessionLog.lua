@@ -29,6 +29,9 @@ local function liveEntry(key) return NS.SkillData and NS.SkillData:Get(key) end
 local function newLog(store, start, entryOf)
     local SL = { CAP = CAP, WINDOW = WINDOW, Cap = cap }
     local sessionStart = start
+    -- What the log held when this session first wrote to it: a profile switch to a lower
+    -- journal.keep never trims below it (review F-015); only the setting's own write does (Trim).
+    local floor
 
     --- Record one skill-up. Answers the stored entry, or nil for a malformed one.
     --- @param key string the skill's key   @param old number   @param new number
@@ -38,11 +41,24 @@ local function newLog(store, start, entryOf)
         local log = store()
         if not log then return nil end
         local e = { t = tonumber(t) or time(), key = key, old = tonumber(old) or (new - 1), new = new, zone = zone }
+        floor = floor or #log
         log[#log + 1] = e
-        local keep = cap()
+        local keep = math.max(cap(), floor)
         while #log > keep do table.remove(log, 1) end
         return e
     end
+
+    --- Trim to the newest `n` (the journal.keep row's onChange: the player lowered it).
+    function SL:Trim(n)
+        local log = store()
+        n = tonumber(n)
+        if not (log and n) then return end
+        while #log > n do table.remove(log, 1) end
+        floor = math.min(floor or #log, #log)
+    end
+
+    --- Forget the floor (a profile reload, the suites): the next write takes it again.
+    function SL:ResetFloor() floor = nil end
 
     --- Every stored entry, oldest first (the live table: read, never write).
     function SL:Entries() return store() or {} end

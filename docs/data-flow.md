@@ -37,7 +37,7 @@ other timer.
 
 `SKILL_UP(key, old, new)` adds one `{ t, key, old, new, zone }` to `db.char.log`, a ring of the
 newest `journal.keep` (500 by default; the Journal page, T5.1), or, while a simulation runs, to a
-session-only list (`SessionLog:Override`, T5.2) that the same cap trims. A session starts at login and again on the Journal's New session; `Gains` sums this
+session-only list (`SessionLog:Override`, T5.2) that the same cap trims. A profile switch to a lower cap never trims what the log held when the session first wrote to it; lowering *Skill-ups to keep* itself trims at once. *Clear log* asks first, as *Forget* does, and a row from another day shows its date. A session starts at login and again on the Journal's New session; `Gains` sums this
 session's points (`GainsFor(key)` one skill's), `Rate(window, now, key)` is points an hour over the
 last `window` seconds of it (one skill's with `key`: the row tooltip's "This session" line), and
 `ETA(key)` is `(max - rank)` over the rate that skill's own gains this session set (nil under two

@@ -229,3 +229,55 @@ test("F-011: the stat caps follow the level NS.Compat answers (the simulated cha
     NS.Compat.PlayerLevel, M.UnitLevel = real, realUL
     if not ok then error(err, 0) end
 end)
+
+test("F-005: Clear log asks first, and only an accept clears the stored history", function()
+    -- red under: the Clear log button calling J.ClearLog() directly
+    local J = NS.Journal
+    NS.db.char.log = { { t = 1, key = "fishing", old = 1, new = 2 } }
+    J.Show()
+    J.SelectTab("log")
+    M.__popups = {}
+    local clear = J.Frame().logPanel.clear
+    clear:GetScript("OnClick")(clear, "LeftButton")
+    assertEqual(M.__popups[1], "SKILLMASTER_CLEAR_LOG", "a confirmation")
+    assertEqual(#NS.db.char.log, 1, "nothing cleared before the accept")
+    M.StaticPopupDialogs.SKILLMASTER_CLEAR_LOG.OnAccept()
+    assertEqual(#NS.db.char.log, 0, "cleared on accept")
+    J.Hide()
+end)
+
+test("F-014: a log row from another day shows its date as well as its time", function()
+    -- red under: bindLogRow formatting every row as date("%H:%M")
+    local J = NS.Journal
+    local now = (M.time or os.time)()
+    NS.db.char.log = { { t = now - 3 * 86400, key = "fishing", old = 1, new = 2 }, { t = now, key = "fishing", old = 2, new = 3 } }
+    J.Show()
+    J.SelectTab("log")
+    local texts = {}
+    for _, row in ipairs(J.Frame().logPanel.pool.active) do texts[#texts + 1] = row.cols[1]:GetText() end
+    J.Hide()
+    NS.db.char.log = {}
+    local today, old = os.date("%H:%M", now), os.date(NS.L["%m/%d %H:%M"], now - 3 * 86400)
+    assertTrue(texts[1] == old or texts[2] == old, "the older row carries its date: " .. table.concat(texts, ", "))
+    assertTrue(texts[1] == today or texts[2] == today, "today's row its time alone")
+end)
+
+test("F-015: switching to a profile with a lower cap does not trim the stored log; lowering the setting does", function()
+    -- red under: SessionLog:Add trimming the log to journal.keep whatever the log held before
+    local SL = NS.SessionLog
+    local log = {}
+    for i = 1, 120 do log[i] = { t = i, key = "fishing", old = i, new = i + 1 } end
+    NS.db.char.log = log
+    SL:ResetFloor()
+    local realGet = NS.GetSetting
+    NS.GetSetting = function(path) if path == "journal.keep" then return 50 end return realGet(path) end
+    local ok, err = pcall(function() SL:Add("fishing", 121, 122, 121) end)
+    NS.GetSetting = realGet
+    if not ok then error(err, 0) end
+    assertEqual(#NS.db.char.log, 120, "the history held before is kept (oldest dropped for the new one)")
+    NS.SetByPath("journal.keep", 50)
+    assertEqual(#NS.db.char.log, 50, "the player's own lower setting trims")
+    NS.SetByPath("journal.keep", NS.defaults.profile.journal.keep)
+    NS.db.char.log = {}
+    SL:ResetFloor()
+end)

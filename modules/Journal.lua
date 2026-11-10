@@ -184,7 +184,9 @@ local function bindLogRow(p, row, e, i)
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", p.header, "BOTTOMLEFT", 0, -(i - 1) * ROW_H)
     row:SetPoint("TOPRIGHT", p.header, "BOTTOMRIGHT", 0, -(i - 1) * ROW_H)
-    row.cols[1]:SetText(date("%H:%M", e.t))
+    -- Today's rows show the time; a row from another day its date too (the log spans days).
+    local sameDay = date("%x", e.t) == date("%x")
+    row.cols[1]:SetText(date(sameDay and "%H:%M" or L["%m/%d %H:%M"], e.t))
     row.cols[2]:SetText(skillName(e.key))
     row.cols[3]:SetText(tostring(e.old) .. ARROW .. tostring(e.new))
     row.cols[4]:SetText(e.zone or "")
@@ -280,7 +282,7 @@ end
 local function buildLogButtons(p)
     p.newSession = makeButton(p, L["New session"], function() J.NewSession() end)
     p.newSession:SetPoint("TOPLEFT", p.eta, "BOTTOMLEFT", 0, -10)
-    p.clear = makeButton(p, L["Clear log"], function() J.ClearLog() end)
+    p.clear = makeButton(p, L["Clear log"], function() J.ConfirmClear() end)
     p.clear:SetPoint("TOPRIGHT", p.eta, "BOTTOMRIGHT", 0, -10)
 end
 
@@ -633,6 +635,23 @@ function J.ClearLog()
     NS.Preview.Log():Clear()
     state.logOffset = 0
     J.Render()
+end
+
+StaticPopupDialogs.SKILLMASTER_CLEAR_LOG = {
+    text         = L["Clear this character's skill-up log? Every entry is removed."],
+    button1      = YES,
+    button2      = NO,
+    timeout      = 0,
+    whileDead    = true,
+    hideOnEscape = true,
+    OnAccept     = function() J.ClearLog() end,
+}
+
+--- Ask before clearing the stored log (review F-005), as Forget does. A simulation's or test
+--- mode's log is session-only sample data, so it clears at once.
+function J.ConfirmClear()
+    if NS.Sim:IsActive() or NS.Preview.IsOn() then return J.ClearLog() end
+    StaticPopup_Show("SKILLMASTER_CLEAR_LOG")
 end
 
 StaticPopupDialogs.SKILLMASTER_FORGET_ALT = {

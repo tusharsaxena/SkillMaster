@@ -64,6 +64,7 @@ test("journal: the log lists skill-ups newest first, with the session's gains, a
     assertEqual(p.session.value:GetText(), "+2")
     assertFalse(p.empty:IsShown(), "no empty state with entries")
     p.clear:GetScript("OnClick")(p.clear)
+    M.StaticPopupDialogs.SKILLMASTER_CLEAR_LOG.OnAccept()   -- the confirmation (review F-005)
     assertEqual(#SL:Entries(), 0, "Clear log cleared the store")
     assertEqual(#activeRows(p), 0, "and the list")
     assertTrue(p.empty:IsShown(), "the empty state shows")
