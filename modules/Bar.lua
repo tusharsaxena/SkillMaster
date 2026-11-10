@@ -77,9 +77,12 @@ end
 Bar.Media = media
 
 --- What the border draws: show, style, size, through the skin's bar border while its companion is
---- on (S.BarBorder), else the stored three.
+--- on (S.BarBorder), else the stored three. skinning-§6: a skin that states a real bar border style
+--- wins over Show border while the companion is on, and the host never gates the stored toggle
+--- ahead of the call (nor after it). Under a skin's None (Ka0s Default, WoW Forever) Show border
+--- off is off; under a real style the companion off hands it back (feedback round 2, FB-10).
 local function border(p)
-    local show, style, size = p.border ~= false, p.borderStyle or "Solid", tonumber(p.borderSize) or 1
+    local show, style, size = p.border == true, p.borderStyle or "Solid", tonumber(p.borderSize) or 1
     local S = NS.Skin
     if S.IsEnabled() and S.BarBorder then
         local st, sh, sz = S.BarBorder(style, show, size, p.borderStyleFromSkin ~= false)

@@ -24,6 +24,8 @@ function P.Frame() return frame end
 function P.IsShown() return frame ~= nil and frame:IsShown() == true end
 function P.Trainers() return state.list end
 function P.Selected() return state.list[state.selected] end
+--- The cards on show, in order (the suites read them).
+function P.Cards() return cardPool and cardPool.active or {} end
 
 local function skillName(key)
     local cat = NS.SkillCatalog[key]
@@ -56,7 +58,6 @@ local function buildCard(parent)
     c:SetHeight(CARD_H)
     c.name = c:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     c.name:SetPoint("TOPLEFT", c, "TOPLEFT", 8, -6)
-    NS.Skin.Text(c.name, "body")
     c.cost = c:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     c.cost:SetPoint("TOPRIGHT", c, "TOPRIGHT", -8, -7)
     NS.Skin.Text(c.cost, "accent")
@@ -73,9 +74,32 @@ local function buildCard(parent)
     return c
 end
 
+local function trainersProfile()
+    return (NS.db and NS.db.profile.trainers) or NS.defaults.profile.trainers
+end
+
+--- The trainer's name in its own color (feedback round 2, FB-11): the skin's accent, recorded so a
+--- skin switch repaints it, while "Use the skin's color" is on; else the swatch through its
+--- class-color companion, its alpha always applying (options-ui-§17). The skin's Text keeps the
+--- name's font either way; a skin switch's LAYOUT_CHANGED repaints the swatch over it.
+local function paintName(fs)
+    NS.Skin.Text(fs, "accent")
+    local p = trainersProfile()
+    if p.nameColorFromSkin ~= false or type(p.nameColor) ~= "table" then
+        if not NS.Skin.IsEnabled() then
+            local c = NS.Bar.Color("text.accent")
+            if c then fs:SetTextColor(c[1], c[2], c[3], c[4] or 1) end
+        end
+        return
+    end
+    local c = NS.Bar.WithClass(p.nameColor, p.useClassColorName)
+    fs:SetTextColor(c[1], c[2], c[3], c[4] or 1)
+end
+
 local function fillCard(c, t, key, i)
     c.index = i
     c.name:SetText(t.name)
+    paintName(c.name)
     local cost = t.costByKey and t.costByKey[key] or t.cost
     c.cost:SetText(cost and NS.Rows.Money(cost) or "")
     c.where:SetText(whereText(t))
@@ -250,4 +274,15 @@ end
 
 function P.Hide()
     if frame then frame:Hide() end
+end
+
+-- A changed name color (a Trainers-page row) or a skin switch reaches an open popup at once.
+local function repaintNames()
+    if not P.IsShown() then return end
+    for _, c in ipairs(P.Cards()) do paintName(c.name) end
+end
+
+if NS.NewBusTarget then
+    P.events = NS.NewBusTarget()
+    if P.events then P.events:RegisterMessage(NS.MSG.LAYOUT_CHANGED, repaintNames) end
 end

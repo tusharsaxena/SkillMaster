@@ -80,7 +80,9 @@ NS.defaults = {
             bgColor             = { 0.04, 0.03, 0.02, 0.9 },
             useClassColorBg     = false,
             bgColorFromSkin     = true,
-            border              = true,        -- Show border
+            -- Show border: off by default (feedback round 2, FB-10). No migration: AceDB strips a
+            -- stored value equal to the old default (true), so no profile can carry it as a choice.
+            border              = false,
             borderStyle         = "Solid",
             borderSize          = 1,
             borderColor         = { 0.24, 0.22, 0.20, 1 },
@@ -115,7 +117,15 @@ NS.defaults = {
             method   = "auto",   -- "auto" (TomTom, else the map pin, else chat) | "tomtom" | "native" | "chat"
             announce = true,     -- say in chat where a waypoint was set
         },
-        trainers = { unverified = true },   -- mark trainer data not yet checked on WoW Forever
+        trainers = {
+            unverified = true,   -- mark trainer data not yet checked on WoW Forever
+            -- The trainer popup's trainer name (feedback round 2, FB-11): the skin's accent while
+            -- nameColorFromSkin is on (the default, skinning-§6), else the swatch through its
+            -- class-color companion (options-ui-§17). The swatch starts on WoW Forever's tan accent.
+            nameColor         = { 0.788, 0.627, 0.478, 1 },
+            useClassColorName = false,
+            nameColorFromSkin = true,
+        },
         skin = {
             source      = "ka0s",                     -- Ka0s skins, or EllesmereUI
             skin        = NS.DEFAULT_SKIN or "ka0s",  -- the library's per-client default: WoW Forever here

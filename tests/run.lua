@@ -146,6 +146,7 @@ Kit.run{
         "test_statdata",
         "test_bar",
         "test_bars_live",
+        "test_bars_round2",
         "test_blocks",
         "test_interact",
         "test_sessionlog",
