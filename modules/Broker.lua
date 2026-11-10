@@ -1,8 +1,14 @@
 local addonName, NS = ...
--- modules/Broker.lua — the four broker data feeds (design §6.7, plan Task 4.1): SkillMaster_All,
--- SkillMaster_Professions, SkillMaster_Weapons and SkillMaster_Stats, each a LibDataBroker-1.1
--- "data source" whose text is a template (modules/Template.lua), flashed on a skill-up, with a
--- GameTooltip of mini bars and clickable rows (design §6.5).
+-- modules/Broker.lua — the one broker data feed, "Skill Master" (design §6.7, plan Task 4.1;
+-- feedback round 2, FB-12): a LibDataBroker-1.1 "data source" whose text is a template
+-- (modules/Template.lua), flashed on a skill-up, with a tooltip of mini bars and clickable rows
+-- (design §6.5) in five sections: Primary, Secondary, Weapon, Other and Stats. Each section has its
+-- own switch and each skill and stat its own tooltip Hide (profile.broker.tooltip), apart from the
+-- main window's skills.hidden / stats.hidden.
+--
+-- The tooltip (FB-13): with "Apply skin to the tooltip" on (broker.tooltip.skin, the default) it is
+-- this file's own GameTooltip-template frame, painted with the skin's window shell and fonts; off,
+-- it is the shared GameTooltip exactly as before. The shared GameTooltip is never painted.
 --
 -- These are NOT the launcher: core/LauncherSetup.lua's one "launcher" object stays the only click
 -- and menu implementation for the addon (launcher-§1). Nothing here is secure: a feed row never
@@ -23,22 +29,20 @@ local LAYERS = NS.Constants.LAYERS
 local MAIN_HAND = 16
 local NAME_W, VALUE_W, MIN_W = 128, 124, 380   -- the bar's height is profile.bars.miniHeight
 local HIDE_POLL = 0.1          -- seconds between the tooltip's leave checks
+local DOT = " \194\183 "
 
-B.FEEDS = {
-    { id = "all",         name = "SkillMaster_All",         label = L["Skill Master: All"] },
-    { id = "professions", name = "SkillMaster_Professions", label = L["Skill Master: Professions"] },
-    { id = "weapons",     name = "SkillMaster_Weapons",     label = L["Skill Master: Weapons"] },
-    { id = "stats",       name = "SkillMaster_Stats",       label = L["Skill Master: Stats"] },
-}
+-- The feed's LibDataBroker name (a key display addons store placements under, so never localized;
+-- the launcher object is the addon's folder name, "SkillMaster") and the label a display draws.
+B.NAME = "Skill Master"
+B.LABEL = L["Skill Master"]
 
--- Which feeds flash for a skill-up in each category (the All feed flashes for every one).
-local FLASH_FEEDS = {
-    primary = { "all", "professions" }, secondary = { "all", "professions" },
-    weapon = { "all", "weapons" }, other = { "all" },
-}
-FLASH_FEEDS.defense = { "all", "weapons" }
+-- The tooltip's sections, in order; each one's switch is broker.tooltip.sections.<id>.
+B.SECTIONS = { "primary", "secondary", "weapon", "other", "stats" }
 
--- The settings page a feed's right-click opens (the Broker page's registration key). The library
+-- The owned tooltip frame's global name (its TextLeftN lines are found by it, as GameTooltip's are).
+B.TIP_NAME = "SkillMasterBrokerTooltip"
+
+-- The settings page the feed's right-click opens (the Broker page's registration key). The library
 -- opens the main panel when no page of that key is built.
 B.SETTINGS_PAGE = "broker"
 
@@ -49,13 +53,13 @@ B.SETTINGS_PAGE = "broker"
 local model, statIndex, statsModel
 local gains = { total = 0, byKey = {} }
 local last
-local flash, flashTimer = {}, nil
-local objects, texts = {}, {}
+local flash, flashTimer = nil, nil
+local object, rendered
 
 --- Back to a fresh session (the suites call this between cases).
 function B.ResetSession()
     gains = { total = 0, byKey = {} }
-    last, flash = nil, {}
+    last, flash = nil, nil
     if flashTimer then NS.addon:CancelTimer(flashTimer) end
     flashTimer = nil
 end
@@ -72,13 +76,13 @@ function B.SessionState() return { gains = copyGains(gains), last = last } end
 --- Put a SessionState() back and end any flash (the simulator's stop).
 function B.RestoreSessionState(st)
     if type(st) ~= "table" or type(st.gains) ~= "table" then return end
-    gains, last, flash = copyGains(st.gains), st.last, {}
+    gains, last, flash = copyGains(st.gains), st.last, nil
     if flashTimer then NS.addon:CancelTimer(flashTimer) end
     flashTimer = nil
     B.Refresh()
 end
 
---- What the feeds draw: B.source's answer while one is set (and true), else the live state.
+--- What the feed draws: B.source's answer while one is set (and true), else the live state.
 local function view()
     local v = B.source and B.source()
     if type(v) == "table" then return v, true end
@@ -93,10 +97,37 @@ end
 
 function B.FlashSeconds() return tonumber(setting("broker.flashSeconds", 5)) or 5 end
 
-local function template(id)
-    local t = setting("broker.templates." .. id, nil)
+local function template()
+    local t = setting("broker.template", nil)
     return type(t) == "string" and t or ""
 end
+
+-- ---------------------------------------------------------------------------------------------
+-- What the tooltip shows: the sections' switches and its own Hide sets (never the window's)
+-- ---------------------------------------------------------------------------------------------
+
+local function tooltipStore()
+    local p = NS.db and NS.db.profile
+    local b = type(p) == "table" and p.broker
+    return type(b) == "table" and type(b.tooltip) == "table" and b.tooltip or nil
+end
+
+--- Whether section `id` (B.SECTIONS) is drawn in the tooltip.
+function B.SectionShown(id)
+    local v = setting("broker.tooltip.sections." .. id, nil)
+    if v == nil then return NS.defaults.profile.broker.tooltip.sections[id] == true end
+    return v == true
+end
+
+--- Whether the tooltip leaves out the skill (`kind` "skill") or stat ("stat") `key`.
+function B.HiddenInTooltip(kind, key)
+    local store = tooltipStore()
+    local set = store and store[kind == "stat" and "hiddenStats" or "hiddenSkills"]
+    return type(set) == "table" and set[key] == true
+end
+
+--- Whether the tooltip wears the skin (broker.tooltip.skin).
+function B.Skinned() return setting("broker.tooltip.skin", true) ~= false end
 
 -- ---------------------------------------------------------------------------------------------
 -- The template context
@@ -145,44 +176,39 @@ local function flashText(name, new)
     return colored("sem.good", ("%s %s %d"):format(mark, name, new))
 end
 
-local function feedText(feed, ctx)
+local function feedText(ctx)
     if NS.IsStoodDown() then return L["Off"] end
-    if flash[feed.id] then return flash[feed.id] end
-    local text = NS.Template.Render(template(feed.id), ctx)
-    if text:gsub("[%s%p]", "") == "" then return feed.label end   -- never a blank cell
-    return text
+    if flash then return flash end
+    local out = NS.Template.Render(template(), ctx)
+    if out:gsub("[%s%p]", "") == "" then return B.LABEL end   -- never a blank cell
+    return out
 end
 
---- Re-render every feed's text; an unchanged text is not re-assigned (each write is a display
+--- Re-render the feed's text; an unchanged text is not re-assigned (each write is a display
 --- callback).
 function B.Refresh()
-    if NS.IsStoodDown() then flash = {} end
-    local ctx = B.Context()
-    for _, feed in ipairs(B.FEEDS) do
-        local text = feedText(feed, ctx)
-        if texts[feed.id] ~= text then
-            texts[feed.id] = text
-            if objects[feed.id] then objects[feed.id].text = text end
-        end
+    if NS.IsStoodDown() then flash = nil end
+    local new = feedText(B.Context())
+    if rendered ~= new then
+        rendered = new
+        if object then object.text = new end
     end
 end
 
-function B.Text(id) return texts[id] end
-function B.Object(id) return objects[id] end
+--- The feed's text now, and its LibDataBroker object (nil without the library).
+function B.Text() return rendered end
+function B.Object() return object end
 
 local function endFlash()
     flashTimer = nil
-    flash = {}
+    flash = nil
     B.Refresh()
 end
 
---- Flash "^ <name> <new>" on the skill's feeds for profile.broker.flashSeconds.
+--- Flash "^ <name> <new>" on the feed for profile.broker.flashSeconds.
 function B.Flash(key, new)
     local e = model and model.byKey[key]   -- the live model: a flash is always a live skill-up
-    local cat = NS.SkillCatalog[key]
-    local group = (cat and cat.kind == "defense") and "defense" or (e and e.category) or "other"
-    local text = flashText(e and e.name or key, new)
-    for _, id in ipairs(FLASH_FEEDS[group] or FLASH_FEEDS.other) do flash[id] = text end
+    flash = flashText(e and e.name or key, new)
     if flashTimer then NS.addon:CancelTimer(flashTimer) end
     flashTimer = NS.addon:ScheduleTimer(endFlash, B.FlashSeconds())
     B.Refresh()
@@ -329,99 +355,106 @@ end
 local function showsBar() return NS.Rows.Display() ~= "text" end
 local function showsValue() return NS.Rows.Display() ~= "bar" end
 
-local function addSkillRow(tip, e, opts)
-    local values, bonus = skillBar(e)
-    local value = (showsValue() or not e.learned) and skillValue(e, bonus) or ""
-    tip:AddDoubleLine(colored(nameColor(e, opts.belowCap), e.name or e.key), value)
-    local n = tip:NumLines()
-    if e.learned and (e.max or 0) > 0 and showsBar() then drawMiniBar(tip, n, values) end
-    return { line = n, kind = "skill", key = e.key }
-end
-
-local function addTitle(tip, text)
-    tip:AddLine(colored("text.accent", text:upper()))
-end
-
-local function addSkillGroup(tip, rows, title, keys, opts)
-    local any, m = false, view().model
-    for _, key in ipairs(keys) do
-        local e = m.byKey[key]
-        if e and (opts.filter == nil or opts.filter(e)) then
-            if not any then addTitle(tip, title) any = true end
-            rows[#rows + 1] = addSkillRow(tip, e, opts)
-        end
-    end
-end
-
-local SKILL_SECTIONS = {
-    all = { "primary", "secondary", "weapon", "other" },
-    professions = { "primary", "secondary" },
-    weapons = { "weapon", "defense" },
-}
-
 local function isDefense(e)
     local cat = NS.SkillCatalog[e.key]
     return cat ~= nil and cat.kind == "defense"
 end
 
-local function fillSkills(tip, id, rows)
-    local m = view().model
-    if not m then
-        tip:AddLine(colored("gtip.muted", L["No skills to show yet."]))
-        return
-    end
-    local opts = { belowCap = id == "weapons" }
-    for _, section in ipairs(SKILL_SECTIONS[id]) do
-        if section == "defense" then
-            addSkillGroup(tip, rows, L["Other"], m.order.other, { belowCap = true, filter = isDefense })
-        else
-            addSkillGroup(tip, rows, GROUP_TITLES[section], m.order[section] or {}, opts)
+-- A weapon skill, and Defense, below its cap draws its name in the warning color (the old Weapons
+-- feed's highlight).
+local function belowCapHighlight(section, e)
+    return section == "weapon" or isDefense(e)
+end
+
+local function addSkillRow(tip, e, section)
+    local values, bonus = skillBar(e)
+    local value = (showsValue() or not e.learned) and skillValue(e, bonus) or ""
+    tip:AddDoubleLine(colored(nameColor(e, belowCapHighlight(section, e)), e.name or e.key), value)
+    local n = tip:NumLines()
+    if e.learned and (e.max or 0) > 0 and showsBar() then drawMiniBar(tip, n, values) end
+    return { line = n, kind = "skill", key = e.key }
+end
+
+local function addTitle(tip, title)
+    tip:AddLine(colored("text.accent", title:upper()))
+end
+
+local function addSkillSection(tip, rows, section, m)
+    local any = false
+    for _, key in ipairs(m.order[section] or {}) do
+        local e = m.byKey[key]
+        if e and not B.HiddenInTooltip("skill", key) then
+            if not any then addTitle(tip, GROUP_TITLES[section]) any = true end
+            rows[#rows + 1] = addSkillRow(tip, e, section)
         end
     end
 end
 
-local function fillStats(tip, rows)
+local function addStatRow(tip, e)
+    local value = showsValue() and colored("gtip.value", e.display or "") or ""
+    tip:AddDoubleLine(colored("gtip.body", e.label or e.key), value)
+    local n = tip:NumLines()
+    if showsBar() then
+        local values = NS.Rows.StatValues(e)
+        values.color = NS.Rows.FillColor(e, true)
+        drawMiniBar(tip, n, values)
+    end
+    return { line = n, kind = "stat", key = e.key }
+end
+
+local function addStatsSection(tip, rows)
     local sm = view().statsModel
     if not sm then
         tip:AddLine(colored("gtip.muted", L["No stats to show yet."]))
         return
     end
     for _, group in ipairs(NS.StatData.GROUPS) do
-        local list = sm[group] or {}
-        if #list > 0 then addTitle(tip, GROUP_TITLES[group]) end
-        for _, e in ipairs(list) do
-            local value = showsValue() and colored("gtip.value", e.display or "") or ""
-            tip:AddDoubleLine(colored("gtip.body", e.label or e.key), value)
-            local n = tip:NumLines()
-            if showsBar() then
-                local values = NS.Rows.StatValues(e)
-                values.color = NS.Rows.FillColor(e, true)
-                drawMiniBar(tip, n, values)
+        local any = false
+        for _, e in ipairs(sm[group] or {}) do
+            if not B.HiddenInTooltip("stat", e.key) then
+                if not any then addTitle(tip, L["Stats"] .. DOT .. GROUP_TITLES[group]) any = true end
+                rows[#rows + 1] = addStatRow(tip, e)
             end
-            rows[#rows + 1] = { line = n, kind = "stat", key = e.key }
         end
     end
 end
 
-local TITLES = {
-    all = L["Skill Master: All skills"], professions = L["Skill Master: Professions"],
-    weapons = L["Skill Master: Weapon Skills"], stats = L["Skill Master: Stats"],
-}
+-- One shown section. Answers whether the no-model line has been written (once for the four skill
+-- sections, before the first test-mode or live model lands).
+local function fillSection(tip, rows, section, m, told)
+    if section == "stats" then
+        addStatsSection(tip, rows)
+        return told
+    end
+    if m then
+        addSkillSection(tip, rows, section, m)
+        return told
+    end
+    if not told then tip:AddLine(colored("gtip.muted", L["No skills to show yet."])) end
+    return true
+end
 
---- Fill `tip` (GameTooltip, or a stand-in) for feed `id`. Answers the clickable rows,
---- each { line, kind = "skill" | "stat", key }.
-function B.FillTooltip(id, tip)
+local function fillSections(tip, rows)
+    local m, told = view().model, false
+    for _, section in ipairs(B.SECTIONS) do
+        if B.SectionShown(section) then told = fillSection(tip, rows, section, m, told) end
+    end
+end
+
+--- Fill `tip` (the feed's tooltip, or a stand-in) with the shown sections. Answers the clickable
+--- rows, each { line, kind = "skill" | "stat", key }.
+function B.FillTooltip(tip)
     releaseAll()
     barsDrawn = 0
     local rows = {}
     if tip.SetMinimumWidth then tip:SetMinimumWidth(MIN_W) end
-    tip:AddDoubleLine(colored("gtip.title", TITLES[id] or NS.Constants.BRAND),
+    tip:AddDoubleLine(colored("gtip.title", B.LABEL),
         colored("gtip.muted", L["+%d this session"]:format(view().gains.total)))
     if NS.IsStoodDown() then
         tip:AddLine(colored("gtip.muted", L["Ka0s Skill Master is disabled."]))
         return rows
     end
-    if id == "stats" then fillStats(tip, rows) else fillSkills(tip, id, rows) end
+    fillSections(tip, rows)
     tip:AddLine(colored("gtip.footer", L["Click label: toggle window \194\183 Click row: open its window \194\183 Right-click: feed options"]))
     return rows
 end
@@ -490,21 +523,73 @@ function B.OnClick(_, button)
 end
 
 -- ---------------------------------------------------------------------------------------------
--- Showing and hiding GameTooltip: it stays while the pointer is on the cell or the tooltip
+-- The tooltip frame (FB-13): the shared GameTooltip as it is, or this file's own, skinned
 -- ---------------------------------------------------------------------------------------------
 
-local hooked, owner, poll = false, nil, nil
+local ownTip   -- made on the first skinned show
+
+local function skinnedTip()
+    if not ownTip then
+        ownTip = CreateFrame("GameTooltip", B.TIP_NAME, UIParent, "GameTooltipTemplate")
+    end
+    return ownTip
+end
+
+--- The frame the tooltip draws on now: the feed's own skinned frame while broker.tooltip.skin is
+--- on, else the shared GameTooltip.
+function B.Tip()
+    if B.Skinned() then return skinnedTip() end
+    return GameTooltip
+end
+
+--- The feed's own tooltip frame, or nil before the first skinned show (the suites read it).
+function B.OwnTip() return ownTip end
+
+-- The tooltip's line font strings, found by the frame's global name as the client names them.
+local function eachLine(tip, fn)
+    local name = tip.GetName and tip:GetName()
+    local count = tonumber(tip.NumLines and tip:NumLines()) or 0
+    if not name then return end
+    for n = 1, count do
+        fn(n, _G[name .. "TextLeft" .. n], _G[name .. "TextRight" .. n])
+    end
+end
+
+--- Paint the owned frame from the active skin: the window shell (backdrop and border, no title
+--- band) and every line's font, the title line in the title face. Run after Show, since a
+--- tooltip's OnShow lays the template's own backdrop again.
+local function paintTip(tip)
+    local S = NS.Skin
+    S.Shell(tip, { noTopBar = true })
+    eachLine(tip, function(n, left, right)
+        if left then S.Text(left, n == 1 and "title" or "body") end
+        if right then S.Text(right, "body") end
+    end)
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- Showing and hiding the tooltip: it stays while the pointer is on the cell or the tooltip
+-- ---------------------------------------------------------------------------------------------
+
+local hooked, owner, poll, current = {}, nil, nil, nil
 
 local function stopPoll()
     if poll then NS.addon:CancelTimer(poll) end
     poll = nil
 end
 
+-- The shared GameTooltip hides and clears for every frame that uses it: only the feed's own show
+-- lets its bars and hit areas go.
 local function hookTooltip(tip)
-    if hooked then return end
-    hooked = true
-    tip:HookScript("OnHide", function() releaseAll() owner = nil stopPoll() end)
-    if tip.HasScript and tip:HasScript("OnTooltipCleared") then tip:HookScript("OnTooltipCleared", releaseAll) end
+    if hooked[tip] then return end
+    hooked[tip] = true
+    tip:HookScript("OnHide", function()
+        if current ~= tip then return end
+        releaseAll() owner = nil current = nil stopPoll()
+    end)
+    if tip.HasScript and tip:HasScript("OnTooltipCleared") then
+        tip:HookScript("OnTooltipCleared", function() if current == tip then releaseAll() end end)
+    end
 end
 
 local function anchor(tip, frame)
@@ -515,14 +600,28 @@ local function anchor(tip, frame)
     if top then tip:SetPoint("TOP", frame, "BOTTOM", 0, -2) else tip:SetPoint("BOTTOM", frame, "TOP", 0, 2) end
 end
 
-function B.OnEnter(id, frame)
-    local tip = GameTooltip
+--- Take the feed's tooltip down, whichever frame it is on (the skin switch's write).
+function B.HideTooltip()
     stopPoll()
+    local tip = current
+    if tip and tip:IsShown() then tip:Hide() end
+    releaseAll()
+    owner, current = nil, nil
+end
+
+function B.OnEnter(frame)
+    local tip = B.Tip()
+    stopPoll()
+    if current and current ~= tip then B.HideTooltip() end
     hookTooltip(tip)
     anchor(tip, frame)
-    owner = frame
-    local rows = B.FillTooltip(id, tip)
+    owner, current = frame, tip
+    local rows = B.FillTooltip(tip)
     tip:Show()
+    if tip == ownTip then
+        paintTip(tip)
+        tip:Show()   -- a shown tooltip lays itself out again for the skin's fonts
+    end
     for _, row in ipairs(rows) do addHit(tip, row) end
 end
 
@@ -531,16 +630,18 @@ local function stillHovered(tip)
     return owner ~= nil and owner.IsMouseOver ~= nil and owner:IsMouseOver()
 end
 
---- Whether GameTooltip is still the feed's: another frame may have taken it since (SetOwner).
+--- Whether the tooltip is still the feed's: another frame may have taken the shared GameTooltip
+--- since (SetOwner).
 local function ownsTip(tip)
-    if owner == nil then return false end
+    if owner == nil or current ~= tip then return false end
     if type(tip.GetOwner) ~= "function" then return true end
     return tip:GetOwner() == owner
 end
 
 function B.OnLeave()
-    local tip = GameTooltip
+    local tip = current
     stopPoll()
+    if not tip then return end
     poll = NS.addon:ScheduleRepeatingTimer(function()
         local mine = ownsTip(tip)
         if mine and tip:IsShown() and stillHovered(tip) then return end
@@ -551,23 +652,20 @@ function B.OnLeave()
 end
 
 -- ---------------------------------------------------------------------------------------------
--- The data objects, built at load (LibDataBroker-1.1 loads in the TOC's # Libraries block)
+-- The data object, built at load (LibDataBroker-1.1 loads in the TOC's # Libraries block)
 -- ---------------------------------------------------------------------------------------------
 
 local LDB = LibStub and LibStub("LibDataBroker-1.1", true)
 if LDB then
-    for _, feed in ipairs(B.FEEDS) do
-        local id = feed.id
-        objects[id] = LDB:NewDataObject(feed.name, {
-            type  = "data source",
-            label = feed.label,
-            text  = feed.label,
-            icon  = NS.Constants.LOGO_ICON_PATH,
-            OnClick = B.OnClick,
-            OnEnter = function(frame) B.OnEnter(id, frame) end,
-            OnLeave = function() B.OnLeave() end,
-        })
-    end
+    object = LDB:NewDataObject(B.NAME, {
+        type  = "data source",
+        label = B.LABEL,
+        text  = B.LABEL,
+        icon  = NS.Constants.LOGO_ICON_PATH,
+        OnClick = B.OnClick,
+        OnEnter = function(frame) B.OnEnter(frame) end,
+        OnLeave = function() B.OnLeave() end,
+    })
 else
-    NS.Debug("Broker", "%s: LibDataBroker-1.1 absent, no data feeds", addonName)
+    NS.Debug("Broker", "%s: LibDataBroker-1.1 absent, no data feed", addonName)
 end

@@ -151,7 +151,7 @@ case("bars live: the tooltip and mini heights reach the row tooltip and the brok
     assertEqual(NS.RowTooltip.Bar().style.height, 15, "the row tooltip's bar")
     M.GameTooltip:Hide()
     set("bars.miniHeight", 12)
-    NS.Broker.FillTooltip("all", recordingTip())
+    NS.Broker.FillTooltip(recordingTip())
     local mini = NS.Broker.Bars()
     assertTrue(#mini > 0, "the broker tooltip drew mini bars")
     for _, b in ipairs(mini) do assertEqual(b.style.height, 12, "a broker mini bar") end

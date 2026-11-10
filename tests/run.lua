@@ -52,6 +52,10 @@ Kit.diagnostics = {
     console     = function() return NS.DebugLog end,
     setDebug    = function(on) NS.State.debug = on and true or false end,
     setDisabled = function(off) NS.SetByPath("enabled", not off) end,
+    -- A report runs past 300 lines (its Settings section walks every schema row), so the cases'
+    -- reports together reach the console's 3000-line cap, and the compaction past it drops the
+    -- begin markers the cases count. Each case starts on an empty console.
+    reset       = function() NS.DebugLog:Clear() end,
 }
 
 -- The typed-value gate (skinning-§1): nothing this addon draws needs an allow row yet.
@@ -99,14 +103,16 @@ Kit.skinSwitch = {
             mocks.GameTooltip:Hide()
             NS.MainWindow.Hide()
         end },
-        { name = "the broker feed tooltip's mini bars", build = function()
+        -- The feed's own tooltip frame (broker.tooltip.skin, on by default): its shell, its lines
+        -- and the pooled mini bars parented to it. The shared GameTooltip is never painted.
+        { name = "the broker feed tooltip", build = function()
             NS.Preview.Apply(true)   -- the sample character: learned skills to draw bars for
-            NS.Broker.OnEnter("all", mocks.UIParent)
-            return mocks.GameTooltip   -- its lines and the pooled mini bars parented to it
+            NS.Broker.OnEnter(mocks.UIParent)
+            return NS.Broker.Tip()
         end, paint = function()
-            NS.Broker.OnEnter("all", mocks.UIParent)
+            NS.Broker.OnEnter(mocks.UIParent)
         end, reset = function()
-            mocks.GameTooltip:Hide()
+            NS.Broker.HideTooltip()
             NS.Preview.Apply(false)
         end },
         { name = "the Bars page preview", scope = "panel", build = function()

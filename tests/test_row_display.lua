@@ -130,18 +130,24 @@ test("rows show: the broker tooltip's skill and stat lines honor it", function()
     local B = NS.Broker
     local want = { both = { bars = 1, value = true }, bar = { bars = 1, value = false },
                    text = { bars = 0, value = true } }
+    -- One section at a time, so the bar count is that line's: Secondary (Fishing), then Stats.
+    local sections = NS.db.profile.broker.tooltip.sections
+    local saved = {}
+    for _, id in ipairs(B.SECTIONS) do saved[id] = sections[id] end
     for _, mode in ipairs({ "both", "bar", "text" }) do
         NS.SetByPath("bars.rowDisplay", mode)
-        for _, feed in ipairs({ "professions", "stats" }) do
+        for _, section in ipairs({ "secondary", "stats" }) do
+            for _, id in ipairs(B.SECTIONS) do sections[id] = id == section end
             local tip = recordingTip()
-            B.FillTooltip(feed, tip)
-            local name = feed == "stats" and "Agility" or "Fishing"
+            B.FillTooltip(tip)
+            local name = section == "stats" and "Agility" or "Fishing"
             local value = valueOf(tip, name)
-            assertEqual(B.BarsDrawn(), want[mode].bars, mode .. " " .. feed .. ": mini bars")
-            assertEqual(value ~= nil and value ~= "", want[mode].value, mode .. " " .. feed .. ": value "
+            assertEqual(B.BarsDrawn(), want[mode].bars, mode .. " " .. section .. ": mini bars")
+            assertEqual(value ~= nil and value ~= "", want[mode].value, mode .. " " .. section .. ": value "
                 .. tostring(value))
         end
     end
+    for _, id in ipairs(B.SECTIONS) do sections[id] = saved[id] end
     NS.SetByPath("bars.rowDisplay", NS.defaults.profile.bars.rowDisplay)
 end)
 
@@ -158,7 +164,7 @@ test("rows show: schemaVersion 2 moves a stored stats.display once, in every sto
     sv.profiles["RowsShow-Fresh"] = {}
     NS.db.global.schemaVersion = 1
     NS:RunMigrations()
-    assertEqual(NS.db.global.schemaVersion, 2)
+    assertEqual(NS.db.global.schemaVersion, NS.SCHEMA_VERSION, "the runner reaches the code's target")
     local p = sv.profiles
     assertEqual(p["RowsShow-Text"].bars.rowDisplay, "text", "a non-active profile is reached")
     assertTrue(p["RowsShow-Text"].stats.display == nil, "the old key goes")

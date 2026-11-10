@@ -6,7 +6,7 @@ local _, NS = ...
 -- classification, references, markers and bonus attribution.
 --
 -- The swap: NS.Blocks.source (the window and the detached frames), NS.Bonuses.source (the bars'
--- bonus segments, the row tooltip's Bonuses), NS.Broker.source (the four feeds and their tooltips),
+-- bonus segments, the row tooltip's Bonuses), NS.Broker.source (the feed and its tooltip),
 -- and the readers below, which the Journal, the row tooltip, the summary strip and the broker ask
 -- at call time: P.Log() (the session log), P.Alts() (the alt grid), P.Skill(key) and
 -- P.Character() (the "Lv 22 · Dwarf Hunter" line and every level read a display makes). Apply(false)

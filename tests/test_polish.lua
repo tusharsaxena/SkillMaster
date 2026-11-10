@@ -90,8 +90,9 @@ test("broker: the leave poll hides GameTooltip only while the feed still owns it
     rawset(tip, "IsMouseOver", function() return false end)
     cell.IsMouseOver = function() return false end
     M.__fireTimers()
+    NS.SetByPath("broker.tooltip.skin", false)   -- the plain tooltip is the shared GameTooltip
 
-    B.OnEnter("all", cell)
+    B.OnEnter(cell)
     assertTrue(tip:IsShown(), "the feed's tooltip shows")
     B.OnLeave()
     tip:SetOwner(other, "ANCHOR_RIGHT")   -- another addon takes GameTooltip before the poll runs
@@ -100,7 +101,7 @@ test("broker: the leave poll hides GameTooltip only while the feed still owns it
     M.__fireTimers()
     assertTrue(tip:IsShown(), "a tooltip another frame owns is left alone")
 
-    B.OnEnter("all", cell)
+    B.OnEnter(cell)
     B.OnLeave()
     M.__now = M.__now + 1
     M.__fireTimers()
@@ -110,6 +111,7 @@ test("broker: the leave poll hides GameTooltip only while the feed still owns it
     rawset(tip, "SetOwner", savedSet)
     rawset(tip, "IsMouseOver", savedOver)
     tip:Hide()
+    NS.SetByPath("broker.tooltip.skin", NS.defaults.profile.broker.tooltip.skin)
 end)
 
 -- ---------------------------------------------------------------------------------------------
@@ -122,7 +124,7 @@ test("broker: the footer reads as the mockup; a right-click opens the Broker set
     function tip:AddLine(t) lines[#lines + 1] = t end
     function tip:AddDoubleLine(l) lines[#lines + 1] = l end
     function tip:NumLines() return #lines end
-    B.FillTooltip("stats", tip)
+    B.FillTooltip(tip)
     local footer = lines[#lines]
     assertTrue(footer:find("Click label: toggle window \194\183 Click row: open its window \194\183 Right-click: feed options",
         1, true) ~= nil, footer)
@@ -131,15 +133,15 @@ test("broker: the footer reads as the mockup; a right-click opens the Broker set
     local savedOpen, savedNS = H.OpenOptionsPanel, NS.OpenOptionsPanel
     rawset(H, "OpenOptionsPanel", function(page) opened[#opened + 1] = tostring(page) return true end)
     NS.OpenOptionsPanel = function() opened[#opened + 1] = "main" end
-    M.__ldbObjects.SkillMaster_All.OnClick(nil, "RightButton")
+    M.__ldbObjects["Skill Master"].OnClick(nil, "RightButton")
     assertEqual(table.concat(opened, ","), "broker", "the Broker page, by its page key")
 
     -- No page opener (the library absent): the main panel; no opener at all: nothing, no error.
     rawset(H, "OpenOptionsPanel", nil)
-    M.__ldbObjects.SkillMaster_All.OnClick(nil, "RightButton")
+    M.__ldbObjects["Skill Master"].OnClick(nil, "RightButton")
     assertEqual(table.concat(opened, ","), "broker,main")
     NS.OpenOptionsPanel = nil
-    M.__ldbObjects.SkillMaster_All.OnClick(nil, "RightButton")
+    M.__ldbObjects["Skill Master"].OnClick(nil, "RightButton")
     rawset(H, "OpenOptionsPanel", savedOpen)
     NS.OpenOptionsPanel = savedNS
     assertEqual(B.SETTINGS_PAGE, "broker")

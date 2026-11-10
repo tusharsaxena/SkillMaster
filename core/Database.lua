@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 2
+NS.SCHEMA_VERSION = 3
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -23,11 +23,27 @@ local function rowDisplayFromStats(_, profile)
     if kept == nil or kept == "both" then profile.bars.rowDisplay = mode end
 end
 
+--- 2 -> 3 (feedback round 2, FB-12): one broker feed. A stored `broker.templates.all` becomes
+--- `broker.template`, and the whole `broker.templates` table goes with the Professions, Weapons and
+--- Stats feeds' templates. A `broker.template` already stored as something other than the default
+--- wins (the active profile carries the copied default, which is not a choice). A profile with no
+--- `broker.templates` passes through. `broker.presets.*` were session-only and never stored.
+local function oneBrokerFeed(_, profile)
+    local broker = type(profile) == "table" and profile.broker
+    if type(broker) ~= "table" or broker.templates == nil then return end
+    local old = type(broker.templates) == "table" and broker.templates.all or nil
+    broker.templates = nil
+    if type(old) ~= "string" then return end
+    local kept = broker.template
+    if kept == nil or kept == NS.defaults.profile.broker.template then broker.template = old end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile.
 local STEPS = {
     { to = 1, run = function() end },   -- 0 -> 1: pre-versioning, a no-op
     { to = 2, run = rowDisplayFromStats, perProfile = true },
+    { to = 3, run = oneBrokerFeed, perProfile = true },
 }
 
 function NS:InitDB()
