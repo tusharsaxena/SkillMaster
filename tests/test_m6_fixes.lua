@@ -199,3 +199,33 @@ test("F-003: the speed ticker rescans only when the speed changed", function()
     SD.Request, NS.Compat.UnitSpeed = realReq, realSpeed
     if not ok then error(err, 0) end
 end)
+
+test("F-004: every UNIT_* event is registered for the player alone, so a raid's auras never reach Lua", function()
+    -- red under: Bonuses or StatData registering UNIT_AURA / UNIT_STATS / ... with RegisterEvent
+    -- (every unit's change dispatched and thrown away in the handler)
+    NS.SetByPath("enabled", true)
+    local seen = {}
+    for _, r in ipairs(M.__registrations()) do
+        if r.kind ~= "message" and tostring(r.event):sub(1, 5) == "UNIT_" then
+            seen[r.event] = true
+            assertEqual(r.unit, "player", r.event .. " is registered for every unit")
+        end
+    end
+    for _, ev in ipairs({ "UNIT_AURA", "UNIT_INVENTORY_CHANGED", "UNIT_STATS", "UNIT_ATTACK_POWER",
+                          "UNIT_RANGED_ATTACK_POWER", "UNIT_RESISTANCES", "UNIT_DAMAGE" }) do
+        assertTrue(seen[ev], ev .. " is registered")
+    end
+end)
+
+test("F-011: the stat caps follow the level NS.Compat answers (the simulated character's in a session)", function()
+    -- red under: StatData's context() reading UnitLevel("player") past the simulator's seam
+    local real = NS.Compat.PlayerLevel
+    NS.Compat.PlayerLevel = function() return 7 end
+    local realUL = M.UnitLevel
+    M.UnitLevel = function() return 60 end
+    local ok, err = pcall(function()
+        assertEqual(NS.StatData.LevelOf(), 7, "the scan's level is the seam's, not UnitLevel's 60")
+    end)
+    NS.Compat.PlayerLevel, M.UnitLevel = real, realUL
+    if not ok then error(err, 0) end
+end)

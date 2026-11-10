@@ -145,8 +145,9 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | `SKILL_LINES_CHANGED` | `NS.SkillData:Enable` (from `NS.RegisterRuntime`) | debounced `SkillData:Scan` (0.1 s) | the skill list changed; the echo of the scan's own header toggles is ignored for 0.2 s |
 | `CHAT_MSG_SKILL` | `NS.SkillData:Enable` | debounced `SkillData:Scan` | a skill-up line |
 | `PLAYER_LEVEL_UP` | `NS.SkillData:Enable` | debounced `SkillData:Scan`, with the new level as the weapon-cap floor (5 x level) | the list can still answer the old cap |
-| `UNIT_INVENTORY_CHANGED`, `UNIT_AURA` | `NS.Bonuses.RegisterRuntime` (from `NS.RegisterRuntime`) | `addon:OnBonusesUnitChanged`: player only, debounced `Bonuses.Refresh` (0.2 s), which re-reads only the part the event touched (an aura change never re-reads the 19 item tooltips); a 1 s ticker while a temp bonus naming a skill is live | gear, lures and buffs change the breakdown |
-| `UNIT_STATS`, `UNIT_ATTACK_POWER`, `UNIT_RANGED_ATTACK_POWER`, `UNIT_RESISTANCES`, `UNIT_DAMAGE`, `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
+| `UNIT_INVENTORY_CHANGED`, `UNIT_AURA` | `NS.UnitEvents` (`core/UnitEventsSetup.lua`), `RegisterUnitEvent` for `"player"` on its one frame, stood up from `NS.RegisterRuntime` | `addon:OnBonusesUnitChanged`: player only, debounced `Bonuses.Refresh` (0.2 s), which re-reads only the part the event touched (an aura change never re-reads the 19 item tooltips); a 1 s ticker while a temp bonus naming a skill is live | gear, lures and buffs change the breakdown |
+| `UNIT_STATS`, `UNIT_ATTACK_POWER`, `UNIT_RANGED_ATTACK_POWER`, `UNIT_RESISTANCES`, `UNIT_DAMAGE` | `NS.UnitEvents`, for `"player"` (recorded by `modules/StatData.lua` at load) | `StatData:Request`: one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
+| `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
 | `PLAYER_EQUIPMENT_CHANGED` | `modules/Detached.lua` at load, on its own bus target | `onEquipmentChanged`: re-render the detached weapon block and re-sync the overlays while it is shown | a weapon swap changes the weapon block's equipped-only list |
 | `PLAYER_LOGOUT` | `modules/Alts.lua` at load, on its own bus target | `Alts:Snapshot` | the last snapshot of the session |
 
@@ -160,6 +161,10 @@ with the zone); `modules/Alts.lua` hears `SKILLS_UPDATED` (one snapshot 2 s afte
 Every registration goes through `NS.SafeRegisterEvent` (events-frames-taint-§1); a refused name
 lands in `NS.rejectedEvents`, which the `[Init]` summary and the diagnostics report print. The stand-
 down unregisters every event and cancels every timer; the stand-up re-registers from current state.
+The player's `UNIT_*` events sit on one private frame, `NS.UnitEvents` (`core/UnitEventsSetup.lua`),
+registered through `NS.SafeRegisterUnitEvent` for `"player"` so the client filters other units
+(events-frames-taint-§1's unit-filter carve-out); the frame has one dispatching `OnEvent`, and the
+latch's stand-down and stand-up are its only teardown and rebuild.
 
 ## Taint Notes
 

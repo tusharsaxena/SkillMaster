@@ -322,11 +322,10 @@ function B.Schedule(part)
     B.__pending = NS.addon:ScheduleTimer(B.Refresh, B.DEBOUNCE)
 end
 
---- The game events, on the addon object (NS.RegisterRuntime calls this from current state).
-function B.RegisterRuntime(addon)
+--- Reset and schedule the first read (NS.RegisterRuntime calls this from current state). The two
+--- UNIT_* events are the player's alone, on NS.UnitEvents' frame, which the same call stands up.
+function B.RegisterRuntime()
     B.__pending, B.__ticker, B.__dirty = nil, nil, nil
-    NS.SafeRegisterEvent(addon, "UNIT_INVENTORY_CHANGED", "OnBonusesUnitChanged", NS.rejectedEvents)
-    NS.SafeRegisterEvent(addon, "UNIT_AURA", "OnBonusesUnitChanged", NS.rejectedEvents)
     B.Schedule()
 end
 
@@ -334,3 +333,7 @@ function NS.addon:OnBonusesUnitChanged(event, unit)
     if unit ~= "player" or NS.IsStoodDown() then return end
     B.Schedule(event == "UNIT_AURA" and "buffs" or "items")
 end
+
+local function onUnit(event, unit) NS.addon:OnBonusesUnitChanged(event, unit) end
+NS.UnitEvents.Register("UNIT_INVENTORY_CHANGED", onUnit)
+NS.UnitEvents.Register("UNIT_AURA", onUnit)

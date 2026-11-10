@@ -50,6 +50,7 @@ locales\zhCN.lua
 locales\zhTW.lua
 
 # Core -- dependency-correct order (layout-§1)
+# Conventional unless marked LOAD-BEARING: an unmarked line reaches the others at CALL time.
 # LOAD-BEARING: NS.name, NS.version, NS.PREFIX and NS.LIBKA0S_MISSING, read by every file below.
 core\Namespace.lua
 # Conventional: NS.Compat, the compat family's root; its shims are reached at CALL time.
@@ -70,6 +71,9 @@ core\CoreSetup.lua
 core\SkinSetup.lua
 # LOAD-BEARING: NS.MSG and NS.bus; the catalog must exist before any module subscribes at load.
 core\Bus.lua
+# LOAD-BEARING: NS.UnitEvents, which modules\Bonuses.lua and modules\StatData.lua register with at
+# FILE SCOPE; after core\CoreSetup.lua (NS.SafeRegisterUnitEvent is read at CALL time).
+core\UnitEventsSetup.lua
 core\PoolSetup.lua
 # LOAD-BEARING: NS.Widgets, captured at FILE SCOPE by modules\MainWindow.lua's chrome build path.
 core\WidgetsSetup.lua

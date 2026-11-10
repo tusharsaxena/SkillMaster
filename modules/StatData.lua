@@ -209,9 +209,14 @@ end
 
 -- ── the scan ───────────────────────────────────────────────────────────────────────────────────
 
+--- The scan's level, through NS.Compat (the simulator's seam answers the sample character's).
+function S.LevelOf()
+    local level = num(NS.Compat.PlayerLevel())
+    return (level and level > 0) and level or 1
+end
+
 local function context()
-    local level = UnitLevel and num(UnitLevel("player")) or nil
-    return { level = level or 1 }
+    return { level = S.LevelOf() }
 end
 
 --- The model and its key index from `pick(def) -> unfinished entry|nil`, over every def in order.
@@ -311,5 +316,11 @@ end
 
 -- A tracked bus target: the stand-down takes these registrations down and the stand-up replays
 -- them (LibKa0s-Bus-1.0); the timers live on the addon object, which the stand-down cancels.
+-- The UNIT_* events are the player's alone, on NS.UnitEvents' frame (registered for "player" on
+-- stand-up); the rest on the bus target.
 S.events = NS.NewBusTarget()
-if S.events then NS.SafeRegisterEvents(S.events, S.EVENTS, onEvent, NS.rejectedEvents) end
+local plain = {}
+for _, event in ipairs(S.EVENTS) do
+    if event:sub(1, 5) == "UNIT_" then NS.UnitEvents.Register(event, onEvent) else plain[#plain + 1] = event end
+end
+if S.events then NS.SafeRegisterEvents(S.events, plain, onEvent, NS.rejectedEvents) end

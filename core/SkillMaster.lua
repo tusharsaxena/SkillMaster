@@ -58,7 +58,8 @@ end
 function NS.RegisterRuntime()
     NS.SafeRegisterEvent(addon, "PLAYER_REGEN_DISABLED", "OnEnterCombat", NS.rejectedEvents)
     if NS.SkillData then NS.SkillData:Enable() end
-    if NS.Bonuses then NS.Bonuses.RegisterRuntime(addon) end   -- T2.2
+    if NS.Bonuses then NS.Bonuses.RegisterRuntime() end   -- T2.2
+    NS.UnitEvents.StandUp()   -- the player's UNIT_* events (Bonuses, StatData), on one unit frame
 end
 
 --- Disabled means not running: frames hidden, every event and message unregistered, every timer
@@ -77,6 +78,7 @@ function NS.StandDown()
     if NS.Alerts then NS.Alerts.StandDown() end   -- T4.2: no toast stays up or waits
     NS.HideSkinPicker()
     addon:UnregisterAllEvents()
+    NS.UnitEvents.StandDown()
     addon:CancelAllTimers()
     NS.BusStandDown()
     if NS.Broker then NS.Broker.Refresh() end   -- the feeds read "Off" (T4.1)

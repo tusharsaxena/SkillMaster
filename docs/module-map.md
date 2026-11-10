@@ -19,6 +19,7 @@ position says so beside its TOC line (toc-file-§5).
 | `core/CoreSetup.lua` | `NS.Print`, SafeRegister family, window chrome, the `MakeCloseButton` wrapper (LibKa0s-Core-1.0) | before everything that prints |
 | `core/SkinSetup.lua` | the skin owner and its tokens (the bar parts, the `sm.cat.*` category and `sm.bonus*` bonus colors), `NS.Skin`, the stored choice, the picker, the `skin` verb (LibKa0s-Skin-1.0) | registers at load; `NS.DEFAULT_SKIN` read by defaults |
 | `core/Bus.lua` | `NS.MSG`, the bus record and targets (LibKa0s-Bus-1.0) | before any subscriber |
+| `core/UnitEventsSetup.lua` | `NS.UnitEvents`: the one frame that hears the player's `UNIT_*` events through `RegisterUnitEvent`; stood up from `NS.RegisterRuntime`, down from `NS.StandDown` | before `modules/Bonuses.lua` and `modules/StatData.lua`, which register with it at load |
 | `core/PoolSetup.lua` | `NS.Pool` (LibKa0s-Pool-1.0), for the rows and bars to come | conventional |
 | `core/WidgetsSetup.lua` | `NS.Widgets` (LibKa0s-Widgets-1.0): the test strip | before the window |
 | `core/LifecycleSetup.lua` | the stand-down latch, `NS.StoodDownRefusal` (LibKa0s-Lifecycle-1.0) | before PerfSetup, which hands it to Perf |
