@@ -104,8 +104,10 @@ local function buildBand(f)
     f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     f.title:SetText(NS.BlockDefs[f.id].title)
     NS.Skin.Text(f.title, "heading")
-    f.dock = NS.Chrome.IconButton(f, "fullscreen-exit", "-", function() NS.Blocks:Dock(f.id) end,
+    -- The attach mark: the header's detach mark (external-link) turned 180 degrees (FB-15).
+    f.dock = NS.Chrome.IconButton(f, "external-link", "-", function() NS.Blocks:Dock(f.id) end,
         NS.L["Dock this block in the main window"])
+    NS.Chrome.SetIcon(f.dock, "external-link", "-", true)
     f.collapse = NS.Chrome.IconButton(f, "chevron-down", "v", function() NS.Blocks:ToggleCollapsed(f.id) end)
     f.dock:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.collapse:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)

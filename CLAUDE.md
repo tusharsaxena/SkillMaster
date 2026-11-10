@@ -38,4 +38,4 @@ profile only (also pinned in-repo by `tests/client_pin.lua`, so a bare run is Fo
 auto-stage/commit/push and never bump the version without an explicit instruction.
 
 Bundles [LibKa0s](https://github.com/tusharsaxena/LibKa0s) v1.94.0 (MIT).
-LibKa0s icons: chevron-down, chevron-right, chevron-up, clear, close, confirm, copy, document, external-link, fullscreen-exit, info, lock, map-marker, move, reset, settings, unlock, volume-high.
+LibKa0s icons: chevron-down, chevron-right, chevron-up, clear, close, confirm, copy, document, external-link, fullscreen-enter, fullscreen-exit, info, lock, map-marker, move, reset, settings, unlock, volume-high.

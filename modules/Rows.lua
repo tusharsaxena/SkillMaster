@@ -1,13 +1,15 @@
 local _, NS = ...
--- modules/Rows.lua — one skill or stat row (design §6.2/§6.3, plan Task 3.2): an initials icon in the
--- row's color, the name, the bar (NS.Bar) and its timer column, and the unlearned variant (dimmed,
--- "Not learned · <trainer>, <city> · <cost>" and a Go button). Pooled (NS.Pool, ordered).
+-- modules/Rows.lua — one skill or stat row (design §6.2/§6.3, plan Task 3.2): an in-game icon in a
+-- thin border of the row's color (FB-14), the name, the bar (NS.Bar) and its timer column, and the
+-- unlearned variant (dimmed, its icon gray, "Not learned · <trainer>, <city> · <cost>" and a Go
+-- button). Pooled (NS.Pool, ordered).
 --
 -- NS.Rows.NewPool() / Acquire(pool, parent, styleKey) / ReleaseAll(pool)
 -- row:SetSkill(entry), row:SetStat(entry), row:SetStripe(index), row.entry, row.kind ("skill"|"stat")
 -- Pure helpers the tooltip, the broker and the journal reuse: SkillValues(entry), FillColor(entry),
 -- StatValues(entry), UnlearnedText(entry), TrainerFor(entry), Place(trainer), Money(copper),
--- Initials(name), HelperHint(entry), Display() (Rows show: "both" | "bar" | "text", bars.rowDisplay).
+-- HelperHint(entry), Display() (Rows show: "both" | "bar" | "text", bars.rowDisplay),
+-- Icon(kind, key) (the row's in-game icon texture; the alert toast draws it too).
 -- row.marked (set before SetSkill, cleared on release): the equipped weapon's "> " marker.
 -- The optional gathering hint (profile.skills.helperHint, design §12 item 4) is one muted line
 -- under a Skinning, Mining, Herbalism or Fishing row, read from NS.SkillHelpers; the row grows by
@@ -28,12 +30,32 @@ R.MARK = "> "   -- the equipped weapon's marker (Detached.dc.html), ASCII so eve
 -- Pure helpers
 -- ---------------------------------------------------------------------------------------------
 
---- Two letters for the icon well: the capitals of a multi-word name, else its first two letters.
-function R.Initials(name)
-    name = tostring(name or "")
-    local caps = name:gsub("[^%u]", "")
-    if #caps >= 2 then return caps:sub(1, 2) end
-    return name:sub(1, 2):upper()
+-- The standard icon trim: the 1.x icon art's baked-in border cut off (left, right, top, bottom).
+R.ICON_TRIM = { 0.07, 0.93, 0.07, 0.93 }
+
+local statIcons, statIconsFor   -- key -> icon, built once per NS.STAT_DEFS table
+
+local function statIcon(key)
+    local defs = NS.STAT_DEFS
+    if statIconsFor ~= defs then
+        statIcons, statIconsFor = {}, defs
+        for _, def in ipairs(defs or {}) do statIcons[def.key] = def.icon end
+    end
+    return statIcons[key]
+end
+
+--- The row's in-game icon (FB-14): a texture (a file ID or an Interface\Icons\ path), never a
+--- LibKa0s glyph. A skill line draws its spell's runtime texture first (a profession's, through
+--- NS.Compat.SpellTexture), else the catalog's static path; a stat its STAT_DEFS path; anything
+--- unknown (an "other:" line) the question mark.
+--- @param kind string "skill" | "stat"
+--- @param key string the entry's key
+function R.Icon(kind, key)
+    if kind == "stat" then return statIcon(key) or NS.SKILL_ICON_UNKNOWN end
+    local def = NS.SkillCatalog[key]
+    if not def then return NS.SKILL_ICON_UNKNOWN end
+    local tex = def.iconSpellID and NS.Compat.SpellTexture(def.iconSpellID)
+    return tex or def.icon or NS.SKILL_ICON_UNKNOWN
 end
 
 --- Copper as "1g 50s 50c", dropping the empty parts ("10s", "90g").
@@ -168,10 +190,13 @@ end
 
 local Row = {}
 
-local function paintIcon(row, color)
+--- The icon well: the entry's icon, gray while unlearned, inside a thin border of the row's color.
+local function paintIcon(row, color, kind, key, learned)
     local c = color or NS.Bar.Color("sm.barFill")
     NS.Bar.PaintEdges(row.iconEdges, c)
-    if c then row.initials:SetTextColor(c[1], c[2], c[3], c[4] or 1) end
+    row.icon:SetTexture(R.Icon(kind, key))
+    row.icon:SetTexCoord(unpack(R.ICON_TRIM))
+    row.icon:SetDesaturated(learned == false)
 end
 
 local function setLearnedLook(row, learned)
@@ -213,9 +238,8 @@ function Row:SetSkill(e)
     self.kind, self.entry = "skill", e
     setName(self, e.name, self.marked)
     setHint(self, R.HelperHint(e))
-    self.initials:SetText(R.Initials(e.name))
     local color = R.FillColor(e)
-    paintIcon(self, color)
+    paintIcon(self, color, "skill", e.key, e.learned)
     if e.learned == false then
         setLearnedLook(self, false)
         self.bar:SetTimer(nil)
@@ -240,9 +264,8 @@ function Row:SetStat(e)
     self.kind, self.entry = "stat", e
     setName(self, e.label, false)
     setHint(self, nil)
-    self.initials:SetText(R.Initials(e.label))
     local color = R.FillColor(e, true)
-    paintIcon(self, color)
+    paintIcon(self, color, "stat", e.key, true)
     setLearnedLook(self, true)
     local mode = R.Display()
     self.bar:SetTimer(nil)
@@ -291,8 +314,10 @@ local function buildIcon(row)
     bg:SetAllPoints(f)
     row.iconFrame, row.iconBg = f, bg
     row.iconEdges = NS.Bar.MakeEdges(f, "BORDER")
-    row.initials = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    row.initials:SetPoint("CENTER", f, "CENTER", 0, 0)
+    -- Inside the 1 px edges, so the row's color stays a thin border round the art.
+    row.icon = f:CreateTexture(nil, "ARTWORK")
+    row.icon:SetPoint("TOPLEFT", f, "TOPLEFT", 1, -1)
+    row.icon:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -1, 1)
 end
 
 local function buildText(row)

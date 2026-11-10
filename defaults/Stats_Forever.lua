@@ -14,6 +14,7 @@ local _, NS = ...
 --           "cap" (the highest marker), "skillCap" (5 x level) or "resistCap" (5 x (level + 3)).
 --   markers { { value = number | named ref, label, minLevel? } }; a marker below minLevel is dropped.
 --   fmt     "int" | "pct" (one decimal) | "pct0" (whole percent) | "armor" (raw armor + mitigation).
+--   icon    the row's in-game icon, an Interface\Icons\ path (set below from STAT_ICONS).
 --
 -- Every row is unverified until the owner's smoke pass on Forever (docs/forever-quirks.md, the
 -- assumed-API table): the shapes are vanilla 1.12's.
@@ -76,3 +77,26 @@ NS.STAT_DEFS = {
     { key = "durability", group = "utility", api = "GetInventoryItemDurability", calc = "durability", ref = 100, fmt = "pct0", label = L["Durability"],
       markers = { { value = 20, label = L["repair"] } } },
 }
+
+-- The rows' icons (owner feedback round 2, FB-14): the closest classic-era Interface\Icons\ texture
+-- per stat, never a LibKa0s glyph. Every name is from the 1.x icon set and UNVERIFIED until seen in
+-- game on WoW Forever.
+local STAT_ICONS = {
+    strength = "Spell_Nature_Strength", agility = "Spell_Holy_BlessingOfAgility",
+    stamina = "Spell_Holy_WordFortitude", intellect = "Spell_Holy_MagicalSentry",
+    spirit = "Spell_Holy_DivineSpirit", attackPower = "Ability_Warrior_BattleShout",
+    rangedAttackPower = "Ability_TrueShot", meleeCrit = "Ability_CriticalStrike",
+    rangedCrit = "INV_Ammo_Arrow_01", meleeHit = "Ability_MeleeDamage", rangedHit = "Ability_Hunter_SniperShot",
+    spellDamage = "Spell_Fire_FireBolt02", spellHealing = "Spell_Holy_FlashHeal",
+    spellCrit = "Spell_Fire_Fireball02", spellHit = "Spell_Holy_HolyBolt", manaRegen = "Spell_Nature_ManaRegenTotem",
+    armor = "Spell_Holy_DevotionAura", defense = "Ability_Defend", dodge = "Spell_Shadow_ShadowWard",
+    parry = "Ability_Parry", block = "INV_Shield_04",
+    fireResist = "Spell_Fire_FireArmor", natureResist = "Spell_Nature_ResistNature",
+    frostResist = "Spell_Frost_FrostWard", shadowResist = "Spell_Shadow_AntiShadow",
+    arcaneResist = "Spell_Nature_StarFall",
+    speed = "Ability_Rogue_Sprint", runSpeed = "Spell_Nature_Swiftness",
+    swimSpeed = "Spell_Frost_SummonWaterElemental", durability = "INV_Hammer_20",
+}
+for _, def in ipairs(NS.STAT_DEFS) do
+    def.icon = "Interface\\Icons\\" .. (STAT_ICONS[def.key] or "INV_Misc_QuestionMark")
+end

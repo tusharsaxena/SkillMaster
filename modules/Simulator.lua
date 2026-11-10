@@ -38,7 +38,7 @@ local function world() local s = session() return s and s.world or nil end
 --- The world a session starts from: the sample character, lure off, on foot.
 function H.NewWorld()
     local c = NS.Preview_Forever.character
-    local w = { lines = NS.Preview.SkillLines(), level = c.level, classFile = c.classFile,
+    local w = { lines = NS.Preview.SkillLines(), level = c.level, classFile = c.classFile, name = c.name,
                 className = L[c.class], raceFile = c.raceFile, raceName = L[c.race],
                 lure = nil, run = H.RUN_YARDS, swim = H.SWIM_YARDS }
     H.SetModifier(w, "fishing", 0)   -- the fixture's lure is the step's to put on
@@ -82,6 +82,11 @@ local PROVIDERS = {
         local w = world()
         if not w then return fallback() end
         return w.level
+    end,
+    PlayerName = function(fallback)
+        local w = world()
+        if not w then return fallback() end
+        return w.name
     end,
     PlayerClass = function(fallback)
         local w = world()

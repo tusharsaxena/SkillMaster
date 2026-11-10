@@ -162,12 +162,6 @@ end
 -- square and one line for the weapon gap. Colors are the skin's roles and tokens.
 -- ---------------------------------------------------------------------------------------------
 
-local function abbrev(name)
-    local a, b = (name or ""):match("^(%a)%a*[%s%-]+(%a)")
-    if a then return (a .. b):upper() end
-    return (name or "?"):sub(1, 2):upper()
-end
-
 local function colorCode(token)
     local r, g, b = NS.Skin.Color(token)
     if not r then return "", "" end
@@ -194,9 +188,11 @@ local function rows(frame)
     if frame.skmTitle then return end
     local icon = CreateFrame("Frame", nil, frame)
     NS.Skin.IconBorder(icon, { fromSkin = true })
-    icon.label = text(icon, "heading")
-    icon.label:SetPoint("CENTER")
-    icon.label:SetJustifyH("CENTER")
+    -- The skill's in-game icon (FB-14, the row's), inside the skin's icon border.
+    icon.art = icon:CreateTexture(nil, "ARTWORK")
+    icon.art:SetPoint("TOPLEFT", icon, "TOPLEFT", 1, -1)
+    icon.art:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -1, 1)
+    icon.art:SetTexCoord(unpack(NS.Rows.ICON_TRIM))
     frame.skmIcon = icon
     frame.skmTitle = text(frame, "heading", 13)
     frame.skmDetail = text(frame, "body")
@@ -231,7 +227,7 @@ function A.Build(frame, p)
     if type(p) ~= "table" then return false end
     rows(frame)
     frame.skmPayload = p
-    frame.skmIcon.label:SetText(abbrev(p.name))
+    frame.skmIcon.art:SetTexture(NS.Rows.Icon("skill", p.key))
     local size, padY = layout(frame, p)
     local cap = p.kind == "cap"
     if cap then

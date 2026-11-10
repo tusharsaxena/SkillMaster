@@ -1,6 +1,7 @@
 local addonName, NS = ...
 -- modules/MainWindow.lua — the Skill Master window (standalone-windows, design §6.1, mockup "Main"):
--- its chrome (title band with lock, journal, settings and close), the optional summary strip, the
+-- its chrome (title band with lock, Expand all and Collapse all, journal, settings and close), the
+-- optional summary strip (the character's class icon and name, then its level line), the
 -- docked blocks in a scrolled body (NS.Blocks headers and NS.Rows rows), the bonus legend, the
 -- test-mode strip, the drag-only position, the one toggle handler and the Show window key binding.
 --
@@ -17,6 +18,7 @@ local LAYERS = NS.Constants.LAYERS
 W.FRAME_NAME = "SkillMasterMainWindow"
 W.SCROLL_NAME = "SkillMasterMainScroll"
 local TITLE_H, SUMMARY_H, FOOTER_H, MIN_H, SCROLLBAR_W = 28, 22, 22, 120, 16
+W.CLASS_ICON = 14   -- the summary line's class icon, px
 
 local frame          -- built on first show
 local headerPool, rowPool
@@ -76,6 +78,8 @@ local function openJournal()
     if NS.Journal and NS.Journal.Toggle then NS.Journal.Toggle() end
 end
 local function openSettings() NS.OpenOptionsPanel() end
+local function collapseAll() NS.Blocks:SetAllCollapsed(true) end
+local function expandAll() NS.Blocks:SetAllCollapsed(false) end
 
 local function controlLevel(b)
     if b then b:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CHROME) end
@@ -86,18 +90,31 @@ local function buildTitleControls()
     frame.lockButton = NS.Chrome.IconButton(frame, "lock", "L", toggleLock, L["Lock or unlock the window"])
     frame.journalButton = NS.Chrome.IconButton(frame, "document", "J", openJournal, L["Open the journal"])
     frame.settingsButton = NS.Chrome.IconButton(frame, "settings", "S", openSettings, L["Open the settings panel"])
+    -- Expand all (outward arrows) and Collapse all (inward arrows), FB-16: on the lock's side, so
+    -- three controls stand each side of the centered title and it keeps the band's middle at the
+    -- narrowest Window width.
+    frame.expandAllButton = NS.Chrome.IconButton(frame, "fullscreen-enter", "+", expandAll, L["Expand all blocks"])
+    frame.collapseAllButton = NS.Chrome.IconButton(frame, "fullscreen-exit", "-", collapseAll,
+        L["Collapse all blocks"])
     -- Each by name: frame.close is nil without the Core library, and ipairs would stop at that hole.
     controlLevel(frame.close)
     controlLevel(frame.lockButton)
+    controlLevel(frame.expandAllButton)
+    controlLevel(frame.collapseAllButton)
     controlLevel(frame.journalButton)
     controlLevel(frame.settingsButton)
+    local left = { frame.lockButton, frame.expandAllButton, frame.collapseAllButton }
     local right = { frame.settingsButton, frame.journalButton }
     if frame.close then table.insert(right, 1, frame.close) end
-    NS.Skin.Header(frame, { title = frame.title, align = "CENTER", left = { frame.lockButton }, right = right })
+    NS.Skin.Header(frame, { title = frame.title, align = "CENTER", left = left, right = right })
     if not frame.lockButton:GetPoint(1) then   -- no skin library: the same strip, anchored by hand
         frame.title:SetPoint("TOP", frame, "TOP", 0, -7)
-        frame.lockButton:SetPoint("TOPLEFT", frame, "TOPLEFT", 6, -5)
         local prev
+        for _, b in ipairs(left) do
+            if prev then b:SetPoint("LEFT", prev, "RIGHT", 4, 0) else b:SetPoint("TOPLEFT", frame, "TOPLEFT", 6, -5) end
+            prev = b
+        end
+        prev = nil
         for _, b in ipairs(right) do
             if prev then b:SetPoint("RIGHT", prev, "LEFT", -4, 0) else b:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -6, -5) end
             prev = b
@@ -106,6 +123,11 @@ local function buildTitleControls()
 end
 
 local function buildSummary()
+    -- The character (FB-17): its class icon, its name in its class color, then the level line.
+    frame.summaryIcon = frame:CreateTexture(nil, "ARTWORK")
+    frame.summaryIcon:SetSize(W.CLASS_ICON, W.CLASS_ICON)
+    frame.summaryName = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    frame.summaryName:SetWordWrap(false)
     frame.summary = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.summaryGains = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.summaryAlert = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -298,10 +320,14 @@ end
 
 local function placeSummary(top)
     local show = layoutSettings().summary ~= false
-    for _, fs in ipairs({ frame.summary, frame.summaryGains, frame.summaryAlert, frame.summaryRule }) do fs:SetShown(show) end
-    if not show then return top end
-    frame.summary:ClearAllPoints()
-    frame.summary:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, -(top + 5))
+    local parts = { frame.summaryName, frame.summary, frame.summaryGains, frame.summaryAlert, frame.summaryRule }
+    for _, fs in ipairs(parts) do fs:SetShown(show) end
+    if not show then
+        frame.summaryIcon:Hide()
+        return top
+    end
+    frame.summaryIcon:ClearAllPoints()
+    frame.summaryIcon:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, -(top + 4))
     frame.summaryGains:ClearAllPoints()
     frame.summaryGains:SetPoint("LEFT", frame.summary, "RIGHT", 10, 0)
     frame.summaryAlert:ClearAllPoints()
@@ -320,6 +346,46 @@ function W.SummaryParts(skills)
     local gains = NS.Blocks.SessionGains()
     local gainText = gains > 0 and L["+%d this session"]:format(gains) or ""
     return who, gainText, NS.Blocks.NextAlert(skills) or ""
+end
+
+--- The character the summary line names (FB-17): { name, classFile, icon }, the icon NS.Compat's
+--- ClassIcon source ({ atlas } or { file, coords }) or nil. The sample character in test mode.
+function W.Identity()
+    local c = NS.Preview.Character()
+    return { name = c.name or "", classFile = c.classFile, icon = NS.Compat.ClassIcon(c.classFile) }
+end
+
+local function paintClassIcon(tex, spec)
+    if spec and spec.atlas then
+        tex:SetAtlas(spec.atlas)
+        tex:SetTexCoord(0, 1, 0, 1)
+    elseif spec then
+        tex:SetTexture(spec.file)
+        tex:SetTexCoord(unpack(spec.coords))
+    end
+end
+
+--- The class icon, the name in its class color, then `who` after a separator; each anchored
+--- after the one before, the icon's place closed up when the client offers no icon.
+local function drawIdentity(who)
+    local id = W.Identity()
+    local icon, name = frame.summaryIcon, frame.summaryName
+    paintClassIcon(icon, id.icon)
+    icon:SetShown(layoutSettings().summary ~= false and id.icon ~= nil)
+    name:SetText(id.name)
+    NS.Skin.Text(name, "body")
+    local cc = type(RAID_CLASS_COLORS) == "table" and id.classFile and RAID_CLASS_COLORS[id.classFile]
+    if cc then name:SetTextColor(cc.r, cc.g, cc.b) end
+    name:ClearAllPoints()
+    if id.icon then name:SetPoint("LEFT", icon, "RIGHT", 4, 0) else name:SetPoint("LEFT", icon, "LEFT", 0, 0) end
+    frame.summary:ClearAllPoints()
+    if id.name ~= "" then
+        frame.summary:SetPoint("LEFT", name, "RIGHT", 4, 0)
+        who = L["\194\183 %s"]:format(who)
+    else
+        frame.summary:SetPoint("LEFT", name, "LEFT", 0, 0)
+    end
+    frame.summary:SetText(who)
 end
 
 --- Anchor the column hosts across the body: `n` columns of `colW`, the rest hidden.
@@ -421,7 +487,7 @@ function W.Render()
     end
     frame.empty:SetShown(total == 0)
     local who, gains, alert = W.SummaryParts(skills)
-    frame.summary:SetText(who)
+    drawIdentity(who)
     frame.summaryGains:SetText(gains)
     frame.summaryAlert:SetText(alert)
     paintLegend()

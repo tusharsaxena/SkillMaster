@@ -260,6 +260,10 @@ below on both clients.
 | `GetCombatRating(id)` | a rating | listed (inherited from live); meaning on Forever unknown | StatData (left out unless it answers) |
 | `GetUnitSpeed(unit)` | `current, run, flight, swim` in yards/s (7 = 100%) | listed (inherited from live); shape assumed | StatData (run speed) |
 | `C_SkillInfo.GetSkillLineInfo(i)`'s `skillLineID` (or `skillID`) field | the line's SkillLine.dbc ID, matched before the localized name | **measured** (build 70862): `skillID`, plus `parentSkillLineID` on a profession's child line | SkillData (M6, localization-§4) |
+| `C_Spell.GetSpellTexture(spellID)` (fallback: `GetSpellTexture(spellID)`) | the spell's icon texture | listed (inherited from live); the catalog's `iconSpellID`s (vanilla) unverified | Rows (a profession's icon, FB-14) |
+| `Interface\Icons\<name>` icon paths | every 1.x icon persists in the modern client | assumed; each catalog `icon` and stat `icon` unverified until seen in game (SM-DISP-10) | Rows, Alerts (FB-14) |
+| `C_Texture.GetAtlasInfo("classicon-<class>")`, `CLASS_ICON_TCOORDS` | the atlas answers a table where the client has it; else the class sheet's `{ l, r, t, b }` per class file | assumed; which source Forever carries is not measured (SM-DISP-13) | MainWindow summary line (FB-17) |
+| `UnitName("player")` | the player's name | assumed | MainWindow summary line (FB-17) |
 | `C_Spell.GetSpellName(spellID)` (fallback: `GetSpellInfo(spellID)`) | the spell's localized name | listed (inherited from live); the catalog's `openSpellID`s (vanilla Apprentice ranks) unverified | SecureOverlay (the crafting cast) |
 | `UnitStat(unit, i)`, `UnitAttackPower(unit)`, `UnitRangedAttackPower(unit)` | `base, effective, pos, neg`; `base, pos, neg` | assumed (1.12); `UnitStat` **measured** to answer secret numbers in an AceTimer callback | StatData (T2.3) |
 | `UnitArmor(unit)` | `base, effective, armor, pos, neg`; mitigation derived from the effective armor and the level, capped at 75% | assumed (1.12) | StatData (T2.3) |

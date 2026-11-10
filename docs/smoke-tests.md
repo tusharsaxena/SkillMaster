@@ -18,7 +18,7 @@ the checks below that cover each item:
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8 |
 | TomTom on and off | SM-DISP-7, SM-OPT-5, SM-SEAM-2 |
 | Each skin | SM-SKIN-1, SM-SKIN-2 |
-| Detach and dock | SM-DISP-3, SM-OPT-3 |
+| Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
 | Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4 |
 
 ## Load
@@ -70,6 +70,21 @@ the checks below that cover each item:
   `> Guns` in gold. With `layout.blocks.weapon.belowCapOnly` on, only the equipped weapon and the
   skills below their cap show; swap weapons and the marker follows. With `skills.helperHint` on, the
   Skinning, Mining, Herbalism and Fishing rows carry one muted hint line under the bar.
+- **SM-DISP-10** (FB-14) Every row draws an in-game icon in a thin border of its color, never two
+  letters: each profession its own spell icon, each weapon line, Defense, Lockpicking, Riding and
+  each stat a fitting classic icon; an unlearned row's icon is gray; an alert toast draws the same
+  icon. A line Skill Master does not know shows the question mark. Note any icon that draws blank
+  or green: its catalog name is unverified (`defaults/SkillCatalog_Forever.lua`, `defaults/Stats_Forever.lua`).
+- **SM-DISP-11** (FB-15) A docked block's header shows the detach mark (a box, its arrow out of the
+  top right); a detached frame's dock control is the same mark turned round (the arrow into the
+  bottom left). Both tint on hover.
+- **SM-DISP-12** (FB-16) Beside the lock in the title band: Expand all (outward arrows) and Collapse
+  all (inward arrows), each with a tooltip. Collapse all folds every block in the window, `/reload`
+  keeps it, Expand all opens them; a detached block keeps its own state. At the narrowest Window
+  width (320) the title stays centered and clear of the controls.
+- **SM-DISP-13** (FB-17) The summary line opens with the class icon, then the character's name in
+  its class color, then `· Lv N · Race Class`. Note which icon source drew (the `classicon-<class>`
+  atlas, or the class sheet), or none.
 ## Journal
 
 - **SM-JRN-1** `/sm journal` opens "Skill Master · Journal" with Session Log and Alts tabs; Escape and
@@ -170,7 +185,7 @@ the checks below that cover each item:
 - **SM-TEST-1** `/sm test`: the window, a detached block, the broker feeds and the Journal all show
   Ember Ironsong, the level-22 Dwarf Hunter (Leatherworking 146/150, Fishing 107 +25 with a lure
   timer near 4:12, Guns 105 +5, Fist Weapons, Polearms, Thrown and Riding unlearned), the summary
-  reads "Lv 22 · Dwarf Hunter" and the strip says the data is sample data. `/sm test` again: your
+  reads "Ember Ironsong · Lv 22 · Dwarf Hunter" behind the Hunter icon and the strip says the data is sample data. `/sm test` again: your
   own character everywhere.
 - **SM-SIM-1** Tick General → Master controls → Sim mode: the step panel opens beside the window and
   the box stays ticked. Start the fishing trip: every 3 s a step plays; a skill-up flashes the broker

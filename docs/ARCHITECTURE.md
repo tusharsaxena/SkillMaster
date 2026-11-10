@@ -92,7 +92,9 @@ in `modules/Detached.lua` (a detached frame's `OnDragStop`). `docked`, `order` a
 settings like any other, with schema rows on the Layout page (T5.1), and every actor writes them
 through `NS.SetByPath` (architecture-§5): the block header and the detached frame's buttons
 (`NS.Blocks:Detach` / `:Dock` / `:SetCollapsed`), the Block order drag list (`:Move`, every changed
-`order` inside one bulk bracket, one `LAYOUT_CHANGED`) and `/sm set`. The `docked` and `collapsed`
+`order` inside one bulk bracket, one `LAYOUT_CHANGED`), the window's Expand all and Collapse all
+(`:SetAllCollapsed`, every docked block's `collapsed` inside one bulk bracket, one `LAYOUT_CHANGED`)
+and `/sm set`. The `docked` and `collapsed`
 rows' `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`) stores the value and waits out combat;
 `order` stores plainly, its `onChange` `NS.Blocks.OrderChanged`. The seam logs each write
 (debug-logging-§10). `shown`, `scale` and `locked` are plain rows. `skills.hidden` /
@@ -125,7 +127,7 @@ strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDAT
 | `SKILL_UP` | `Ka0s_SkillMaster_SkillUp` | `modules/SkillData.lua` (T2.1) | key, old, new | blocks (session gains), broker flash, alerts, session log |
 | `STATS_UPDATED` | `Ka0s_SkillMaster_StatsUpdated` | `modules/StatData.lua` (T2.3) | the stats model | stat blocks, broker |
 | `BONUSES_UPDATED` | `Ka0s_SkillMaster_BonusesUpdated` | `modules/Bonuses.lua` (T2.2) | none | bars, tooltips, broker |
-| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse, move); the skin owner's look-change hook; `NS.ApplyLook` (every display row's write, `settings/OptionsSetup.lua`) | none | `modules/Blocks.lua`, which repaints the window and the detached frames; the Journal; the Bars page's preview |
+| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse, collapse all, move); the skin owner's look-change hook; `NS.ApplyLook` (every display row's write, `settings/OptionsSetup.lua`) | none | `modules/Blocks.lua`, which repaints the window and the detached frames; the Journal; the Bars page's preview |
 | `SIM_TICK` | `Ka0s_SkillMaster_SimTicked` | `modules/Simulator.lua` (T5.2), after each step | the step's kind | none yet (published for displays under simulation) |
 
 ## Slash Commands

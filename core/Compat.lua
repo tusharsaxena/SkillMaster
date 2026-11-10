@@ -12,7 +12,10 @@ local _, NS = ...
 --   Compat.InventoryTooltipData(slot)      C_TooltipInfo.GetInventoryItem's data, and whether it ran
 --   Compat.UnitSpeed(unit)                 GetUnitSpeed's returns (current, run, flight, swim)
 --   Compat.SpellName(spellID)              the spell's localized name (C_Spell first), or nil
--- The last six (T5.2) exist so the simulator's seam (core/SimSetup.lua, LibKa0s-Sim-1.0) can answer
+--   Compat.SpellTexture(spellID)           the spell's icon texture (C_Spell first), or nil
+--   Compat.PlayerName()                    UnitName("player"), or nil
+--   Compat.ClassIcon(classFile)            { atlas } or { file, coords } for a class's icon, or nil
+-- PlayerLevel to SpellName (T5.2), and PlayerName (FB-17), exist so the simulator's seam (core/SimSetup.lua, LibKa0s-Sim-1.0) can answer
 -- every client read a simulated character needs (preview-mode, H1): a module reads them as
 -- `NS.Compat.Member(...)` at call time and never captures one in a local.
 -- The skill list (T2.1): the kit's Forever API set lists it as C_SkillInfo.* and not as the 1.12
@@ -236,6 +239,43 @@ function Compat.SpellName(spellID)
     local CS = C_Spell
     if type(CS) == "table" and type(CS.GetSpellName) == "function" then return CS.GetSpellName(spellID) end
     if type(GetSpellInfo) == "function" then return (GetSpellInfo(spellID)) end
+    return nil
+end
+
+--- A spell's icon texture (a file ID or a path) from its ID, C_Spell first (FB-14: a profession
+--- row draws its own spell's icon). nil for an unknown ID or without either API.
+function Compat.SpellTexture(spellID)
+    local CS = C_Spell
+    if type(CS) == "table" and type(CS.GetSpellTexture) == "function" then return CS.GetSpellTexture(spellID) end
+    if type(GetSpellTexture) == "function" then return GetSpellTexture(spellID) end
+    return nil
+end
+
+--- @return string|nil the player's name, nil without the API
+function Compat.PlayerName()
+    if type(UnitName) ~= "function" then return nil end
+    return (UnitName("player"))
+end
+
+-- The class sheet the 1.x character-create screen draws from, cut by CLASS_ICON_TCOORDS.
+Compat.CLASS_SHEET = "Interface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES"
+
+--- A class's icon (FB-17), feature-detected: the modern atlas `classicon-<class>` where the client
+--- carries it (C_Texture.GetAtlasInfo answers it), else the class sheet cut by CLASS_ICON_TCOORDS.
+--- Neither is measured on WoW Forever yet (docs/forever-quirks.md).
+--- @param classFile string|nil the class file token ("HUNTER")
+--- @return table|nil { atlas = name } or { file = path, coords = { l, r, t, b } }; nil for neither
+function Compat.ClassIcon(classFile)
+    if type(classFile) ~= "string" or classFile == "" then return nil end
+    local CT = C_Texture
+    local atlas = "classicon-" .. classFile:lower()
+    if type(CT) == "table" and type(CT.GetAtlasInfo) == "function" and CT.GetAtlasInfo(atlas) then
+        return { atlas = atlas }
+    end
+    local coords = type(CLASS_ICON_TCOORDS) == "table" and CLASS_ICON_TCOORDS[classFile]
+    if type(coords) == "table" then
+        return { file = Compat.CLASS_SHEET, coords = { coords[1], coords[2], coords[3], coords[4] } }
+    end
     return nil
 end
 
