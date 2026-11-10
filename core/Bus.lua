@@ -7,9 +7,12 @@ local addonName, NS = ...
 
 local Bus = LibStub and LibStub("LibKa0s-Bus-1.0", true)
 if not Bus then
-    -- Degrade, never error: an untracked target stub with the library table's surface.
+    -- Degrade, never error: a target stub with the library table's surface. It keeps its targets,
+    -- so the stand-down still takes every event and message down (slash-commands-§7, review
+    -- F-010); the degraded load re-registers nothing on stand-up (a /reload brings it back).
     Bus = {
         New = function(_, d)
+            local targets = {}
             return {
                 name = d and d.name,
                 NewTarget = function()
@@ -17,9 +20,16 @@ if not Bus then
                     if not AceEvent then return nil end
                     local t = {}
                     AceEvent:Embed(t)
+                    targets[#targets + 1] = t
                     return t
                 end,
-                StandDown = function() return 0 end,
+                StandDown = function()
+                    for _, t in ipairs(targets) do
+                        t:UnregisterAllEvents()
+                        t:UnregisterAllMessages()
+                    end
+                    return #targets
+                end,
                 StandUp   = function() return 0, {} end,
             }
         end,

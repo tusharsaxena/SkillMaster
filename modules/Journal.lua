@@ -393,7 +393,7 @@ end
 local function altSubtitle(item)
     local r = item.record
     local sub = L["Lv %d %s %s"]:format(r.level or 0, r.race or "", r.className or r.class or "")
-    if item.isCurrent then sub = sub .. " \194\183 " .. L["this character"] end
+    if item.isCurrent then sub = L["%s \194\183 this character"]:format(sub) end
     return sub
 end
 

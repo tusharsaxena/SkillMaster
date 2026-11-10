@@ -6,6 +6,8 @@ local addonName, NS = ...
 -- LOAD-BEARING: before any module that takes `local Perf = NS.Perf` as a load-time upvalue.
 
 local lib = LibStub and LibStub("LibKa0s-Perf-1.0", true)
+-- The library's JSON encoder for the probe's report (modules/Probe.lua); nil without the library.
+NS.PerfEncodeJSON = lib and lib.EncodeJSON or nil
 if not lib then
     NS.Perf = {
         on        = false,

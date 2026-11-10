@@ -14,6 +14,7 @@ L["Slash Commands"] = true
 
 -- The main window.
 L["Skill Master"] = true
+L["%s - %s"] = true
 L["No skills to show yet."] = true
 L["Test mode: the skills shown are sample data."] = true
 L["Test mode"] = true
@@ -46,7 +47,7 @@ L["Weapons"] = true
 L["Character"] = true
 L["No characters recorded yet."] = true
 L["Lv %d %s %s"] = true
-L["this character"] = true
+L["%s \194\183 this character"] = true
 L["Snapshots update on login, logout and every skill change. Right-click a character to forget it."] = true
 L["Forget %s? Their snapshot is removed until they log in again."] = true
 
@@ -279,7 +280,7 @@ L["crit immunity vs bosses"] = true
 L["repair"] = true
 -- ---- END T2.3 ----
 -- BEGIN T4.2 (Alerts) -- merged by the integrator.
-L["%s cap"] = true
+L["%s · %s cap"] = true
 L["Train %s (Lv %d): %s"] = true
 L["is %d below your cap. Glancing blows and misses are more likely."] = true
 L["Click to set waypoint · right-click to dismiss"] = true

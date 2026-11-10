@@ -74,7 +74,7 @@ end
 local function capPayload(e, nextRank)
     local rankName = rankNameAt(e.key, e.max)
     local title = ("%s %d / %d"):format(e.name, e.rank, e.max)
-    if rankName then title = title .. " · " .. L["%s cap"]:format(rankName) end
+    if rankName then title = L["%s · %s cap"]:format(title, rankName) end
     local trainer = nextRank.trainers and nextRank.trainers[1]
     return {
         kind = "cap", key = e.key, name = e.name, title = title, trainer = trainer,

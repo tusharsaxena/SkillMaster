@@ -186,12 +186,12 @@ P.__copy = NS.Widgets.CopyWindow({
 
 --- The `probe` verb: run the report and show it as JSON, ready to copy.
 function P.Verb()
-    local Perf = LibStub("LibKa0s-Perf-1.0", true)
-    if not (Perf and Perf.EncodeJSON and P.__copy) then
+    local encode = NS.PerfEncodeJSON   -- through core/PerfSetup.lua (library-stack-§7)
+    if not (encode and P.__copy) then
         NS.Print(L["%s is unavailable: the LibKa0s library did not load."]:format("/skm probe"))
         return nil
     end
-    local json = Perf.EncodeJSON(P.Run())
+    local json = encode(P.Run())
     P.__copy:Show(json)
     NS.Print(L["Probe report ready: press Ctrl+C to copy it."])
     return json

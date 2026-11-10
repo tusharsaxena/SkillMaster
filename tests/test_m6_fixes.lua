@@ -5,6 +5,7 @@ local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
 local B, I = NS.Blocks, NS.Interact
+local loadDegraded = dofile("tests/degraded_env.lua")
 
 --- Run `fn` with NS.SetByPath wrapped: answers the paths written, in order, and the LAYOUT_CHANGED
 --- count, both over the whole of `fn`.
@@ -280,4 +281,28 @@ test("F-015: switching to a profile with a lower cap does not trim the stored lo
     NS.SetByPath("journal.keep", NS.defaults.profile.journal.keep)
     NS.db.char.log = {}
     SL:ResetFloor()
+end)
+
+test("F-010: on a library-absent load the stand-down still takes every bus target's events down", function()
+    -- red under: the degraded Bus stub's StandDown returning 0 without touching its targets
+    local NS2, M2 = loadDegraded()
+    NS2.addon:OnInitialize()
+    NS2.db.profile.skin.pickerSeen = true
+    NS2.addon:OnEnable()
+    local before = 0
+    for _, r in ipairs(M2.__registrations()) do if r.target ~= NS2.addon then before = before + 1 end end
+    assertTrue(before > 0, "the data modules' targets registered something")
+    NS2.SetByPath("enabled", false)
+    local left = {}
+    for _, r in ipairs(M2.__registrations()) do left[#left + 1] = tostring(r.event) end
+    NS2.SetByPath("enabled", true)   -- the degraded loads share one store: leave it enabled
+    assertEqual(table.concat(left, ", "), "", "survivors of the degraded stand-down")
+end)
+
+test("F-016: the Master controls' Enable row names the brand", function()
+    -- red under: settings/General.lua passing the literal "Skill Master" as addonName
+    local found
+    for _, row in ipairs(NS.Schema) do if row.path == "enabled" then found = row end end
+    assertTrue(found ~= nil, "the Enable row")
+    assertEqual(found.label, "Enable " .. NS.Constants.BRAND)
 end)

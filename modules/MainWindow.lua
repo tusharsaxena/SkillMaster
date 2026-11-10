@@ -86,7 +86,11 @@ local function buildTitleControls()
     frame.lockButton = NS.Chrome.IconButton(frame, "lock", "L", toggleLock, L["Lock or unlock the window"])
     frame.journalButton = NS.Chrome.IconButton(frame, "document", "J", openJournal, L["Open the journal"])
     frame.settingsButton = NS.Chrome.IconButton(frame, "settings", "S", openSettings, L["Open the settings panel"])
-    for _, b in ipairs({ frame.close, frame.lockButton, frame.journalButton, frame.settingsButton }) do controlLevel(b) end
+    -- Each by name: frame.close is nil without the Core library, and ipairs would stop at that hole.
+    controlLevel(frame.close)
+    controlLevel(frame.lockButton)
+    controlLevel(frame.journalButton)
+    controlLevel(frame.settingsButton)
     local right = { frame.settingsButton, frame.journalButton }
     if frame.close then table.insert(right, 1, frame.close) end
     NS.Skin.Header(frame, { title = frame.title, align = "CENTER", left = { frame.lockButton }, right = right })
@@ -381,7 +385,7 @@ local function renderTitle(test, sim)
     if frame.simStrip then frame.simStrip:SetShown(sim and not test) end
     local word = (test and not frame.strip and L["Test mode"])
         or (sim and not frame.simStrip and L["Simulation"]) or nil
-    frame.title:SetText(word and (L["Skill Master"] .. " - " .. word) or L["Skill Master"])
+    frame.title:SetText(word and L["%s - %s"]:format(L["Skill Master"], word) or L["Skill Master"])
 end
 
 --- The marker state, part of the layout signature: a strip shown or hidden moves the body.
