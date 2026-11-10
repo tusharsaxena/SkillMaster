@@ -16,6 +16,7 @@ local _, NS = ...
 --   log        the session's skill-ups, newest first, each { ago = seconds before now, skill, old,
 --              new, zone }; `sessionAgo` is when the session began.
 --   alts       the other characters' snapshots, each skill { rank, max }.
+--   pinned, mainHand  catalog English names: the broker's {pinned} and {equippedWeapon} skills.
 --
 -- Kept current at every release (preview-mode): every display element the release adds appears
 -- here, and the data names Forever's content.
@@ -72,6 +73,10 @@ NS.Preview_Forever = {
 
     sessionAgo = 6720,   -- 1 h 52 m
     last = { skill = "Bows", new = 81 },
+    -- The broker's {pinned} and {equippedWeapon} in test mode (Broker.dc.html: "Fishing 107+25/150",
+    -- "Guns 105+5/110"): the sample's own, never this character's store or gear.
+    pinned   = "Fishing",
+    mainHand = "Guns",
     log = {
         { ago = 60,   skill = "Bows",            old = 80,  new = 81,  zone = "Loch Modan" },
         { ago = 240,  skill = "Fishing",         old = 106, new = 107, zone = "Loch Modan" },

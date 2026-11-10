@@ -194,3 +194,63 @@ test("columns: two columns lay the docked blocks side by side in a window twice 
     W.Hide()
     if not ok then error(err, 0) end
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- 3. A running simulation pins nothing
+-- ---------------------------------------------------------------------------------------------
+
+local function pinRow(key)
+    local row = { kind = "skill", entry = { key = key, name = key, category = "weapon", rank = 50, max = 110,
+                                            learned = true } }
+    for _, r in ipairs(NS.Interact.MenuRows(row)) do if r.value == "pin" then return r end end
+end
+
+test("sim: a row's menu cannot pin while a simulation runs, and can again after it", function()
+    -- red under: the pin guard reading test mode alone, so a simulated row writes db.char.pinned.
+    NS.db.char = NS.db.char or {}
+    local before = NS.db.char.pinned
+    assertTrue(NS.Sim:Start({ scenario = NS.SimHost.SCENARIO }) ~= false, "the simulation starts")
+    local ok, err = pcall(function()
+        local pin = pinRow("bows")
+        assertTrue(pin.disabled == true, "grayed out while the simulation runs")
+        pin.onClick("pin", pin)
+        assertEqual(NS.db.char.pinned, before, "and a click writes nothing")
+    end)
+    NS.Sim:Stop("stop")
+    if not ok then NS.db.char.pinned = before error(err, 0) end
+    local pin = pinRow("bows")
+    assertTrue(not pin.disabled, "live again once it stops")
+    pin.onClick("pin", pin)
+    assertEqual(NS.db.char.pinned, "bows", "a live pin writes")
+    NS.db.char.pinned = before
+end)
+
+-- ---------------------------------------------------------------------------------------------
+-- 4. Test mode's broker tokens read the sample character
+-- ---------------------------------------------------------------------------------------------
+
+test("test mode: the broker's {pinned} and {equippedWeapon} are the sample character's", function()
+    -- red under: B.Context reading db.char.pinned and the live main hand while test mode is on.
+    NS.db.char = NS.db.char or {}
+    local before = NS.db.char.pinned
+    NS.db.char.pinned = "riding"
+    local realSlot = NS.SkillHelpers.WeaponSkillInSlot
+    NS.SkillHelpers.WeaponSkillInSlot = function() return "maces" end
+    local ctx
+    local ok, err = pcall(function()
+        NS.ToggleTestMode()
+        ctx = NS.Broker.Context()
+        NS.ToggleTestMode()
+    end)
+    if NS.IsTestMode() then NS.ToggleTestMode() end
+    local live = NS.Broker.Context()
+    NS.SkillHelpers.WeaponSkillInSlot = realSlot
+    NS.db.char.pinned = before
+    if not ok then error(err, 0) end
+    assertEqual(ctx.pinned, "fishing", "the sample's pin (the mockup's Fishing)")
+    assertEqual(ctx.mainHand, "guns", "the sample's weapon (the mockup's Guns)")
+    assertTrue(tostring(NS.Template.Render("{equippedWeapon}", ctx)):find("^" .. NS.L["Guns"]) ~= nil,
+        "the token renders the sample's Guns")
+    assertEqual(live.pinned, "riding", "off, the live pin again")
+    assertEqual(live.mainHand, "maces", "and the live main hand")
+end)

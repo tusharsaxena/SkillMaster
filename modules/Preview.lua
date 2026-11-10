@@ -108,9 +108,13 @@ end
 local function buildBroker(d)
     local total, byKey = d.log:Gains()
     local last = fixture().last
+    local fx = fixture()
     return { model = d.skills, statsModel = d.stats, statIndex = d.statIndex,
              gains = { total = total, byKey = byKey },
-             last = last and { key = keyOf(last.skill), new = last.new } or nil }
+             last = last and { key = keyOf(last.skill), new = last.new } or nil,
+             -- {pinned} and {equippedWeapon}: the sample's, never this character's store or gear
+             pinned = fx.pinned and keyOf(fx.pinned) or nil,
+             mainHand = fx.mainHand and keyOf(fx.mainHand) or nil }
 end
 
 --- Build the whole sample once, its timers counted from now.

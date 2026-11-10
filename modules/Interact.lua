@@ -92,9 +92,10 @@ function I.MenuRows(row)
     local rows = { { title = true, label = e.name or e.label } }
     if row.kind == "skill" then
         local key = e.key
-        -- A test-mode row is the sample character's: pinning it would write the sample's skill into
-        -- this character's store (preview-mode: nothing of the live state is written).
-        local sample = NS.IsTestMode()
+        -- A test-mode or simulated row is the sample character's: pinning it would write the
+        -- sample's skill into this character's store (preview-mode: nothing of the live state is
+        -- written while either runs).
+        local sample = NS.IsTestMode() or (NS.IsSimRunning ~= nil and NS.IsSimRunning())
         rows[#rows + 1] = { value = "pin", label = L["Pin to the broker feed"], radio = true, disabled = sample,
             selected = function() return NS.db.char ~= nil and NS.db.char.pinned == key end,
             onClick = function()

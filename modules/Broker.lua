@@ -78,10 +78,10 @@ function B.RestoreSessionState(st)
     B.Refresh()
 end
 
---- What the feeds draw: B.source's answer while one is set, else the live state.
+--- What the feeds draw: B.source's answer while one is set (and true), else the live state.
 local function view()
     local v = B.source and B.source()
-    if type(v) == "table" then return v end
+    if type(v) == "table" then return v, true end
     return { model = model, statsModel = statsModel, statIndex = statIndex, gains = gains, last = last }
 end
 
@@ -113,11 +113,14 @@ local function pinnedKey()
     return type(key) == "string" and key or nil
 end
 
+--- The template context. While a source is set (test mode) the pin and the main hand are its own,
+--- so a sample feed never reads this character's store or gear.
 function B.Context()
-    local v = view()
+    local v, sourced = view()
     return {
         skills = v.model, stat = v.statIndex, gains = v.gains.total, last = v.last,
-        pinned = pinnedKey(), mainHand = B.MainHandSkill(),
+        pinned = sourced and v.pinned or pinnedKey(),
+        mainHand = sourced and v.mainHand or B.MainHandSkill(),
         level = NS.Preview.Character().level,
     }
 end
