@@ -48,7 +48,7 @@ Total.
 ### test_template_rows.lua (9)
 
 - templates: no string row in the whole schema renders as an empty dropdown
-- templates: the Broker page renders with no empty-dropdown line, one dropdown per feed
+- templates: the Broker page renders with no empty-dropdown line, one dropdown for the feed
 - templates: every template row's default is one of its presets
 - templates: picking a preset writes its template
 - templates: Custom keeps the text, and the box edits it
@@ -272,13 +272,24 @@ Total.
 - bars live: the spark hides when switched off and shows when on
 - bars live: every Bars page slider commits while it moves, so a mouse wheel turn is written
 
+### test_bars_round2.lua (8)
+
+- tooltip bar: every region it draws is painted and inside the bar at heights 4 to 20
+- tooltip bar: hidden once GameTooltip is cleared for another owner, never carried into the broker tooltip
+- tooltip bar: a row tooltip with no bar line leaves no bar from the last one
+- bar border: off by default in the profile and on its schema row
+- bar border: off under the default skin's None; a real skin style wins only while its companion is on
+- trainer popup: the trainer's name wears the skin's accent by default, apart from the other text
+- trainer popup: the name's swatch draws once Use the skin's color is off, the class color through its companion
+- trainer popup: a changed name color reaches an open popup at once
+
 ### test_blocks.lua (10)
 
 - blocks: the eight blocks, four skill categories then four stat groups
 - test_blocks_detach_dock_roundtrip: a block leaves the window, gets its own frame and comes back
 - blocks: a detached frame saves its drop point; locked refuses the drag
 - test_rows_unlearned_variant: an unlearned skill is a dimmed row with its trainer and a Go button
-- rows: initials, money and the riding trainer line
+- rows: money and the riding trainer line
 - rows: the color modes
 - test_mainwindow_collapsed_persisted: collapsing a block is stored, survives a re-render and the header toggles it
 - mainwindow: the title bar carries lock, journal, settings and close; the summary and legend show
@@ -346,17 +357,24 @@ Total.
 - test_template_tokens: no pin falls back to the last skill-up, then to the lowest profession
 - test_template_unknown_token_empty: unknown tokens and missing data render empty
 
-### test_broker.lua (9)
+### test_broker.lua (16)
 
-- broker: four data sources, separate from the launcher object
-- broker: each feed renders its default template
-- broker: the weapons feed follows the main hand's weapon class
-- test_broker_flash_reverts: a skill-up flashes its feeds, then the template comes back
-- broker: the All tooltip lists every category with mini bars, bonuses and gains
-- broker: the Weapons tooltip is the weapon skills plus Defense; Stats is the four groups
+- broker: one data source, "Skill Master", separate from the launcher object
+- broker: the feed renders its template
+- broker: {equippedWeapon} follows the main hand's weapon class
+- test_broker_flash_reverts: any skill-up flashes the feed, then the template comes back
+- broker: the tooltip's skill sections are on and Stats is off by default
+- broker: each section has its own switch
+- broker: a tooltip Hide leaves the main window alone, and the window's Hide leaves the tooltip
+- broker: the Broker page has a Hide row per catalog skill and per stat, apart from the window's
 - broker: clicks follow design §6.5 and never touch a secure frame
 - broker: a crafting row without ShowAndScrollTo still opens the main window
-- broker: stood down, every feed reads Off and its tooltip says so; standing up re-renders
+- broker: stood down, the feed reads Off and its tooltip says so; standing up re-renders
+- broker: the tooltip wears the skin by default, on its own frame, never on GameTooltip
+- broker: Apply skin off draws the plain GameTooltip, and takes the skinned one down
+- broker: GameTooltip keeps its state, and its hide never takes the skinned tooltip's bars
+- broker: schemaVersion 3 carries the All template and drops the other feeds' keys
+- broker: schemaVersion 3 moves the active profile's All template past the copied default
 
 ### test_polish.lua (12)
 
@@ -418,7 +436,7 @@ Total.
 ### test_m5_review.lua (6)
 
 - profile switch: the window's bars restyle from the new profile with the same row set
-- profile switch: the broker feeds re-read the new profile's templates
+- profile switch: the broker feed re-reads the new profile's template
 - profile switch: the Journal takes the new profile's drop point and size
 - profile reset: one LAYOUT_CHANGED reaches the look listeners (the Bars preview, the Journal)
 - bars preview: the fill is the Fishing row's own color, and a palette or mode edit reaches it
@@ -461,6 +479,19 @@ Total.
 - F-015: switching to a profile with a lower cap does not trim the stored log; lowering the setting does
 - F-010: on a library-absent load the stand-down still takes every bus target's events down
 - F-016: the Master controls' Enable row names the brand
+
+### test_fb2_chrome.lua (10)
+
+- fb14: every catalog skill and every stat carries an in-game icon path
+- fb14: a profession's icon is its spell's texture first, the catalog's path without one
+- fb14: Compat.SpellTexture reads C_Spell first, then the global, else nil
+- fb14: the row's icon is a trimmed texture, not two letters
+- fb15: the attach mark is the detach mark turned 180 degrees
+- fb16: Collapse all and Expand all drive every docked block's collapse
+- fb16: SetAllCollapsed leaves the detached blocks alone and answers how many it changed
+- fb17: the class icon's source: the atlas where the client has it, else the class sheet
+- fb17: test mode's summary line names the sample character with its class icon
+- fb17: live, the name is the player's through NS.Compat
 
 ### test_surface_parity.lua (11)
 
@@ -588,8 +619,8 @@ Total.
 - skin switch: the alert toast changes with the Scope ignored
 - skin switch: the row tooltip's bar changes
 - skin switch: the row tooltip's bar changes with the Scope ignored
-- skin switch: the broker feed tooltip's mini bars changes
-- skin switch: the broker feed tooltip's mini bars changes with the Scope ignored
+- skin switch: the broker feed tooltip changes
+- skin switch: the broker feed tooltip changes with the Scope ignored
 - skin switch: the Bars page preview changes
 - skin switch: the debug console changes
 - skin switch: the debug console changes with the Scope ignored
@@ -626,6 +657,7 @@ Total.
 | test_statdata.lua | 16 |
 | test_bar.lua | 10 |
 | test_bars_live.lua | 18 |
+| test_bars_round2.lua | 8 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 10 |
 | test_sessionlog.lua | 5 |
@@ -633,7 +665,7 @@ Total.
 | test_journal.lua | 10 |
 | test_alerts.lua | 11 |
 | test_template.lua | 3 |
-| test_broker.lua | 9 |
+| test_broker.lua | 16 |
 | test_polish.lua | 12 |
 | test_preview.lua | 6 |
 | test_sim.lua | 12 |
@@ -642,6 +674,7 @@ Total.
 | test_m5_review.lua | 6 |
 | test_m5_leftovers.lua | 14 |
 | test_m6_fixes.lua | 18 |
+| test_fb2_chrome.lua | 10 |
 | test_surface_parity.lua | 11 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
@@ -655,4 +688,4 @@ Total.
 | test_skin_switch.lua | 18 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **441** |
+| **Total** | **466** |
