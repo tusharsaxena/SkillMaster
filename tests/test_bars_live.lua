@@ -300,6 +300,26 @@ case("bars live: rank tier ticks hide and come back", function(bars)
     each(bars, function(b, name) assertTrue(shownCount(b.tickTextures) > 0, name .. ": the tick is back") end)
 end)
 
+case("bars live: a tier tick draws above the fill, so a tick the rank has passed still shows", function(bars)
+    -- red under: ticks made at ARTWORK sublevel 0, under the fill (ARTWORK 1): in the client the
+    -- fill painted over every tick below the rank (the preview's 75 at Fishing 107), so Rank tier
+    -- ticks looked inert. The mock does not composite, so the layers are compared.
+    local order = { BACKGROUND = 1, BORDER = 2, ARTWORK = 3, OVERLAY = 4, HIGHLIGHT = 5 }
+    local function above(t, under)
+        local tl, ts = t:GetDrawLayer()
+        local ul, us = under:GetDrawLayer()
+        if order[tl] ~= order[ul] then return (order[tl] or 0) > (order[ul] or 0) end
+        return (ts or 0) > (us or 0)
+    end
+    each(bars, function(b, name)
+        assertTrue(#b.tickTextures > 0, name .. ": a tick is drawn")
+        for _, t in ipairs(b.tickTextures) do
+            assertTrue(above(t, b.fill), name .. ": the tick is above the fill")
+            assertTrue(above(t, b.bonus), name .. ": and above the bonus segment")
+        end
+    end)
+end)
+
 case("bars live: threshold markers hide on a stat's bar and come back", function()
     local bar
     for _, row in ipairs(NS.MainWindow.Rows()) do

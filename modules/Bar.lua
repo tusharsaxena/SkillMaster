@@ -275,9 +275,9 @@ function Bar.PaintBorder(bar, s)
     end
 end
 
-local function textureList(bar, field, n, layer)
+local function textureList(bar, field, n, layer, sublevel)
     local list = bar[field]
-    while #list < n do list[#list + 1] = bar:CreateTexture(nil, layer) end
+    while #list < n do list[#list + 1] = bar:CreateTexture(nil, layer, nil, sublevel) end
     return list
 end
 
@@ -336,7 +336,9 @@ end
 
 function Methods:PaintMarks()
     local g, s = self.geom, self.style
-    local ticks = textureList(self, "tickTextures", #g.ticks, "ARTWORK")
+    -- Above the fill (ARTWORK 1) and the bonus (ARTWORK 2): a tier tick sits under the rank once the
+    -- skill has passed it, and at a lower sublevel the fill painted over it, so it never showed.
+    local ticks = textureList(self, "tickTextures", #g.ticks, "ARTWORK", 3)
     for i, t in ipairs(ticks) do
         if g.ticks[i] and s.tick then t:SetColorTexture(rgba(s.tick)) end
         t:SetWidth(1)
