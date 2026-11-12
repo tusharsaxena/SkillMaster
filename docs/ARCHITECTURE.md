@@ -103,6 +103,16 @@ rows' `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`) stores the value and wa
 entry), and one undrawn row per whole set (type `set`, default `{}`), which the row menu's Hide
 writes for a key with no row of its own (an `other:` skill) and the page's Defaults resets.
 
+`profile.layout.detached` (round 5, R5-7) is one style for every detached window, set on Layout >
+Detached windows. `NS.Detached.ApplyStyle(frame)` paints it on each render: the scale (the frame's
+own `ownScale` times the tab's), the opacity, the background (the skin's `S.Shell` fill while
+`bgFromSkin` is on, else the swatch on a BACKGROUND 2 fill of the frame's own, over the skin's
+gradient and art and under the band), the border (the skin's edge while `borderFromSkin` is on,
+`S.Shell` `noBorder` otherwise, the frame's own edges through `NS.Bar.PaintBorder`) and the title
+band (`noTopBar` and the frame's `bandParts` hidden for Never; for On hover a 0.1 s `OnUpdate` poll of
+`IsMouseOver` toggles both). `S.Shell` is re-called only when its opts change, and the skin's own
+repaint replays the recorded ones. A merged group's frame takes the same call.
+
 `char.pinned`, the skill the broker's `{pinned}` shows, is named non-setting state: its one writer
 is the row menu's Pin (`I.MenuRows` in `modules/Interact.lua`), disabled while test mode or a
 simulation runs so a sample skill never lands in it.

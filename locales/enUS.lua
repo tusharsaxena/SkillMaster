@@ -773,6 +773,24 @@ L["Skill up"] = true
 L["Skill up \194\183 %d skills"] = true
 L["Also %s"] = true
 
+-- Layout > Detached windows (round 5, R5-7).
+L["Detached windows"] = true
+L["Window scale"] = true
+L["Scale of every detached window. Multiplies each block's own Block scale (Blocks tab)."] = true
+L["Window opacity"] = true
+L["Opacity of every detached window, its rows and title band included."] = true
+L["Title band"] = true
+L["When a detached window shows its title band and its marks: always, only while the pointer is over the window, or never. With Never, a thin strip at the top stays the drag area; dock and collapse the block from the Blocks tab."] = true
+L["Always"] = true
+L["On hover"] = true
+L["Never"] = true
+L["The fill behind a detached window's rows. Not read while Use the skin's background is on."] = true
+L["Use the skin's background"] = true
+L["Fill every detached window as the skin fills its windows. Background color is not read while this is on."] = true
+L["The edge of a detached window. Not read while Use the skin's border is on."] = true
+L["Use the skin's border"] = true
+L["Edge every detached window as the skin edges its windows. Border style, thickness and color are not read while this is on."] = true
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

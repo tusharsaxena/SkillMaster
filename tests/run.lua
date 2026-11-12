@@ -153,6 +153,7 @@ Kit.run{
         "test_round2_icons",
         "test_round3",
         "test_round5",
+        "test_round5_style",
         "test_blocks",
         "test_interact",
         "test_sessionlog",

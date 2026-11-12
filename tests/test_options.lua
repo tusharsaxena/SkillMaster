@@ -223,11 +223,13 @@ end)
 
 test("options: the library-absent load keeps every hand-written row; the composers' rows are the gap", function()
     -- options-ui-§1: pin the full count, the degraded count and the delta, attributed to the
-    -- composers (Master controls, the Bars page's bar, background, border and font blocks, and the
-    -- Trainers page's name color pair).
+    -- composers (Master controls, the Bars page's bar, background, border and font blocks, the
+    -- Trainers page's name color pair, and Layout > Detached windows' background pair and border block).
     local NS2 = loadDegraded()
     local full, degraded = #NS.Schema, #NS2.Schema
-    assertEqual(full, 317, "the full schema (round 4: the Tooltips page's four rows, the skill-up alert's three)")
-    assertEqual(degraded, 273, "the library-absent schema")
-    assertEqual(full - degraded, 44, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8) and the trainer name color (3)")
+    -- Round 5 (R5-7): Layout > Detached windows, three hand-written rows (scale, opacity, title band)
+    -- and nine composed (the background pair and its skin companion, the border block and its).
+    assertEqual(full, 329, "the full schema (round 5: the Detached windows tab's twelve rows)")
+    assertEqual(degraded, 276, "the library-absent schema")
+    assertEqual(full - degraded, 53, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3) and the detached background and border (9)")
 end)

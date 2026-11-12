@@ -42,6 +42,13 @@ SkillMasterDB
       fitHeight = false,         -- off: the window stays maxHeight tall (owner feedback round 3)
       columns = 1,               -- 1 | 2 columns of docked blocks, each `width` wide
       strata = "MEDIUM", detachedStrata = "MEDIUM",   -- BACKGROUND | LOW | MEDIUM | HIGH
+      detached = {               -- Layout > Detached windows (round 5, R5-7): every detached window
+        scale = 1, alpha = 1,    -- scale multiplies blocks.<id>.scale
+        bgColor, useClassColorBg = false, bgFromSkin = true,
+        border = true, borderStyle = "Solid", borderSize = 1, borderColor, useClassColorBorder = false,
+        borderFromSkin = true,
+        titleBand = "always",    -- "always" | "hover" | "never"
+      },
       blocks.<id> = { shown = true, docked = true, order = n, collapsed, scale = 1, locked = false,
                       point = false,    -- point: drag-only, written only by modules/Detached.lua
                       sort = "name" }   -- "name" | "value" | "valueAsc" | "progress" (round 3)

@@ -1,7 +1,7 @@
 local _, NS = ...
 -- settings/Layout.lua — the Layout page (design §6.6): the main window's size and summary strip,
--- one subsection per block (show, dock, collapse, lock, scale) and the block order, dragged through
--- LibKa0s-Widgets-1.0's ReorderList (options-ui-§18).
+-- one subsection per block (show, dock, collapse, lock, scale), the detached windows' shared style
+-- (round 5) and the block order, dragged through LibKa0s-Widgets-1.0's ReorderList (options-ui-§18).
 --
 -- `layout.blocks.<id>.docked`, `.collapsed` and `.order` are written only through NS.SetByPath
 -- (architecture-§5): the block header, the detached frame's buttons, the drag list and `/sm set`
@@ -57,10 +57,71 @@ end
 rows[#rows + 1] = row({ path = "layout.strata", group = WINDOW, type = "string", default = P.strata,
     values = strataValues, label = L["Window strata"], onChange = applyWindow,
     desc = strataDesc(L["The Skill Master window's layer."]) })
-rows[#rows + 1] = row({ path = "layout.detachedStrata", group = WINDOW, type = "string", default = P.detachedStrata,
-    values = strataValues, label = L["Detached block strata"],
-    desc = strataDesc(L["The layer every detached block's frame draws in."]) })
 NS.Live(rows)
+
+-- ---------------------------------------------------------------------------------------------
+-- The Detached windows tab (round 5, R5-7): one style for every detached window, and for a merged
+-- group's window (modules/Detached.lua D.ApplyStyle). Every row's onChange is NS.ApplyLook: the
+-- LAYOUT_CHANGED it sends re-renders every open detached window. The background is a background
+-- swatch and its class companion (options-ui-§16: a group over a background is not a bar group), the
+-- border the composed border block; each takes a "Use the skin's ..." companion, on by default
+-- (skinning-§6). The strata row moved here from the Window tab (same path, nothing migrated).
+-- ---------------------------------------------------------------------------------------------
+local DETACHED = L["Detached windows"]
+local PD = P.detached
+local DWIN = L["Window"]
+local classColor = { source = "player" }
+local function detached(t)
+    t.group, t.subgroup = DETACHED, t.subgroup or DWIN
+    return row(t)
+end
+-- Appended after the Blocks rows, so the tab follows the Blocks tab.
+local detachedRows = {}
+local function add(list)
+    for _, r in ipairs(list) do detachedRows[#detachedRows + 1] = r end
+end
+
+add(NS.Live({
+    detached({ path = "layout.detached.scale", type = "number", default = PD.scale, min = 0.5, max = 2, step = 0.05,
+               label = L["Window scale"], commitOn = "change",
+               desc = L["Scale of every detached window. Multiplies each block's own Block scale (Blocks tab)."] }),
+    detached({ path = "layout.detached.alpha", type = "number", default = PD.alpha, min = 0, max = 1, step = 0.05,
+               label = L["Window opacity"], commitOn = "change",
+               desc = L["Opacity of every detached window, its rows and title band included."] }),
+    detached({ path = "layout.detached.titleBand", type = "string", default = PD.titleBand,
+               label = L["Title band"],
+               desc = L["When a detached window shows its title band and its marks: always, only while the pointer is over the window, or never. With Never, a thin strip at the top stays the drag area; dock and collapse the block from the Blocks tab."],
+               values = { { value = "always", text = L["Always"] }, { value = "hover", text = L["On hover"] },
+                          { value = "never", text = L["Never"] } } }),
+    detached({ path = "layout.detachedStrata", type = "string", default = P.detachedStrata,
+               values = strataValues, label = L["Detached block strata"],
+               desc = strataDesc(L["The layer every detached block's frame draws in."]) }),
+}))
+
+--- A "Use the skin's ..." companion for a composed block's `extra` (skinning-§6).
+local function fromSkin(path, label, desc)
+    return { path = path, page = PAGE, type = "bool", default = true, label = label, desc = desc }
+end
+
+add(NS.Live(H.ColorPair({
+    prefix = "layout.detached.", page = PAGE, group = DETACHED, subgroup = L["Background"],
+    key = "bgColor", companionKey = "useClassColorBg", label = L["Background color"],
+    classColor = classColor,
+    tooltips = { bgColor = L["The fill behind a detached window's rows. Not read while Use the skin's background is on."] },
+    defaults = { bgColor = PD.bgColor, useClassColorBg = PD.useClassColorBg },
+    extra = { fromSkin("layout.detached.bgFromSkin", L["Use the skin's background"],
+        L["Fill every detached window as the skin fills its windows. Background color is not read while this is on."]) },
+})))
+
+add(NS.Live(H.BorderGroup({
+    prefix = "layout.detached.", page = PAGE, group = DETACHED, subgroup = L["Border"], show = true,
+    classColor = classColor, keys = { borderShow = "border" },
+    tooltips = { borderColor = L["The edge of a detached window. Not read while Use the skin's border is on."] },
+    defaults = { borderShow = PD.border, borderStyle = PD.borderStyle, borderSize = PD.borderSize,
+                 borderColor = PD.borderColor, useClassColorBorder = PD.useClassColorBorder },
+    extra = { fromSkin("layout.detached.borderFromSkin", L["Use the skin's border"],
+        L["Edge every detached window as the skin edges its windows. Border style, thickness and color are not read while this is on."]) },
+})))
 
 local B = NS.Blocks
 local sortValues = {}
@@ -111,6 +172,7 @@ for _, id in ipairs(NS.BLOCKS) do
             onChange = NS.ApplyLook })
     end
 end
+for _, r in ipairs(detachedRows) do rows[#rows + 1] = r end
 NS.RegisterSchemaRows(rows)
 
 -- ---------------------------------------------------------------------------------------------

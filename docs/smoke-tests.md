@@ -128,6 +128,15 @@ the checks below that cover each item:
   action mark (the arrow into a bracket) draws as crisp as the main window's wherever the frame is
   dropped, the bracket's right stroke as bright as its left, nothing cut at the right edge. Bars >
   Row height 21: the marks still sit centered in their rows, crisp.
+- **SM-DISP-25** (round 5, R5-7) Detach two blocks, then Layout > Detached windows. Window scale 1.5:
+  both grow at once, a block with its own Block scale 0.8 to 1.2. Window opacity 0.5: both fade, rows
+  and band included. Background: turn off Use the skin's background and pick a red swatch: both
+  windows fill red, the title band still drawn over it; back on, the skin's fill. Border: turn off Use
+  the skin's border, thickness 3, a yellow swatch: a 3 px yellow edge on both; Show border off: no
+  edge. Title band On hover: the band, title and marks vanish, the rows stay where they were; point at
+  a window: its band returns and the window drags by it; point away: gone. Never: no band, the rows
+  move up, a thin strip at the top still drags the window. Detached block strata sits on this tab.
+  `/sm skin` to another skin: every pick above survives the repaint.
 - **SM-BRK-1** (round 3) With nothing pinned (a fresh character, or right-click a pinned row > Pin to
   the broker feed again to unpin), the feed reads `Professions and Skills`. Right-click a row in the
   LDB tooltip: the row menu (pin, waypoint, trainers, Hide in this tooltip); Hide removes it from the

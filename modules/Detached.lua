@@ -11,6 +11,7 @@ local _, NS = ...
 --
 -- NS.Detached.Refresh(anchor) / .RefreshValues() / .StandDown() / .Frame(id) / .Rows(id) / .Render(id)
 -- NS.Detached.Entries(id) -> the entries a detached frame draws
+-- NS.Detached.ApplyStyle(f) / .Style() / .TopHeight(f) -> the shared Detached windows style (R5-7)
 
 NS.Detached = {}
 local D = NS.Detached
@@ -63,7 +64,7 @@ local function applyPoint(f)
         for i, id in ipairs(NS.BLOCKS) do if id == f.id then step = i end end
         f:SetPoint("TOPLEFT", UIParent, "CENTER", 240, 200 - 24 * step)
     end
-    f:SetScale(settings(f.id).scale or 1)
+    -- The scale is the style's (D.ApplyStyle): the block's own times the Detached windows tab's.
     -- The player's strata for every detached block (Layout > Detached block strata); the crafting
     -- overlays take it on the sync Refresh ends with.
     f:SetFrameStrata(D.Strata())
@@ -142,6 +143,134 @@ function D.TitleHeight(f)
     return math.max(D.TITLE_H, h + math.abs(tonumber(y) or 0))
 end
 
+-- ---------------------------------------------------------------------------------------------
+-- The shared style (round 5, R5-7): Layout > Detached windows, one look for every detached window,
+-- profile.layout.detached. D.ApplyStyle(f) takes any window frame shaped as a block's is: `f.ownScale`
+-- (its own scale, multiplied by the tab's), `f.bandParts` (the title and the marks the title band
+-- shows and hides) and an optional `f.onBand(f, shown)` for a mark whose showing is its own (the
+-- restore mark). A merged group's frame calls it too.
+--
+--   background  the skin's window fill while bgFromSkin is on (S.Shell), else the swatch through its
+--               class companion on a fill of the frame's own, over the skin's and under the band
+--   border      off: none; borderFromSkin on: the skin's window edge (S.Shell); off: the style,
+--               thickness and swatch on edges of the frame's own, over its rows
+--   title band  always; hover: the band, its fill and its marks hidden until the pointer is over the
+--               window (polled, so a pointer on a row or a mark still counts), the body kept below the
+--               band so nothing jumps; never: no band, and a GRIP_H strip at the top stays the drag area
+-- ---------------------------------------------------------------------------------------------
+D.GRIP_H = 6           -- the drag strip a window keeps with Title band Never
+D.HOVER_POLL = 0.1     -- s between two hover checks while Title band is On hover
+D.TITLE_BANDS = { always = true, hover = true, never = true }
+
+--- The style a detached window draws with: profile.layout.detached (AceDB answers a missing key
+--- from its default), the defaults before the database. Each reader below falls back on its own.
+function D.Style()
+    local s = NS.db and NS.db.profile.layout and NS.db.profile.layout.detached
+    return type(s) == "table" and s or NS.defaults.profile.layout.detached
+end
+
+-- The background's swatch color while the skin's is not followed, else nil.
+local function bgColor(st)
+    if st.bgFromSkin ~= false or type(st.bgColor) ~= "table" then return nil end
+    return NS.Bar.WithClass(st.bgColor, st.useClassColorBg)
+end
+
+-- The window's own border while it is shown and the skin's is not followed, else nil.
+local function ownBorder(st)
+    if st.border == false or st.borderFromSkin ~= false then return nil end
+    local c = type(st.borderColor) == "table" and st.borderColor or NS.defaults.profile.layout.detached.borderColor
+    return { border = NS.Bar.WithClass(c, st.useClassColorBorder), borderStyle = st.borderStyle or "Solid",
+             borderSize = tonumber(st.borderSize) or 1 }
+end
+
+local function titleBand(st)
+    return D.TITLE_BANDS[st.titleBand] and st.titleBand or "always"
+end
+
+--- The opts the window's S.Shell was last painted with (the suites read them).
+function D.ShellOpts(f) return f and f.__shellOpts end
+
+-- S.Shell only when its opts change: the skin's own repaint replays the recorded ones.
+local function paintShell(f, noBorder, noTopBar)
+    local key = (noBorder and "b" or "-") .. (noTopBar and "t" or "-")
+    if f.__shellKey == key then return end
+    f.__shellKey = key
+    f.__shellOpts = { noBorder = noBorder or nil, noTopBar = noTopBar or nil }
+    NS.Skin.Shell(f, f.__shellOpts)
+end
+
+local function ensureLayers(f)
+    if f.styleBg then return end
+    -- BACKGROUND 2: over the backdrop's fill (0) and the skin's gradient and art (-7, -6), under the
+    -- band's fill (S.Shell's P.BAND_SUB, 3).
+    f.styleBg = f:CreateTexture(nil, "BACKGROUND", nil, 2)
+    f.styleBg:SetAllPoints(f)
+    f.styleBg:Hide()
+    f.styleEdge = CreateFrame("Frame", nil, f)
+    f.styleEdge:SetAllPoints(f)
+    f.styleEdge:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
+    f.styleEdge.edges = NS.Bar.MakeEdges(f.styleEdge, "OVERLAY")
+end
+
+local function bandShown(f, shown)
+    for _, part in ipairs(f.bandParts or {}) do part:SetShown(shown) end
+    if f.onBand then f.onBand(f, shown) end
+end
+
+-- The band as the pointer has it: shown while over the window, hidden otherwise.
+local function hover(f)
+    local over = f.IsMouseOver ~= nil and f:IsMouseOver() == true
+    if over == f.__bandShown then return end
+    f.__bandShown = over
+    bandShown(f, over)
+    paintShell(f, f.__noBorder, not over)
+end
+
+local function onHoverUpdate(f, elapsed)
+    f.__hoverT = (f.__hoverT or 0) + (elapsed or 0)
+    if f.__hoverT < D.HOVER_POLL then return end
+    f.__hoverT = 0
+    hover(f)
+end
+
+--- The height the window's title band takes at the top, by the style's Title band.
+function D.TopHeight(f)
+    if titleBand(D.Style()) == "never" then return D.GRIP_H end
+    return D.TitleHeight(f)
+end
+
+--- Paint window `f` in the shared style: scale, opacity, background, border and title band.
+function D.ApplyStyle(f)
+    if not f then return end
+    local st = D.Style()
+    ensureLayers(f)
+    f:SetScale((tonumber(f.ownScale) or 1) * (tonumber(st.scale) or 1))
+    f:SetAlpha(tonumber(st.alpha) or 1)
+    local bg = bgColor(st)
+    if bg then
+        f.styleBg:SetColorTexture(bg[1], bg[2], bg[3], bg[4] or 1)
+        f.styleBg:Show()
+    else
+        f.styleBg:Hide()
+    end
+    local own = ownBorder(st)
+    NS.Bar.PaintBorder(f.styleEdge, own or { border = nil, borderStyle = "Solid", borderSize = 1 })
+    -- The skin's edge only while the border is shown and follows it; the window's own edge otherwise.
+    f.__noBorder = st.border == false or st.borderFromSkin == false
+    local mode = titleBand(st)
+    f.__titleBand = mode
+    if mode == "hover" then
+        f:SetScript("OnUpdate", onHoverUpdate)
+        f.__bandShown = nil
+        hover(f)
+    else
+        f:SetScript("OnUpdate", nil)
+        f.__bandShown = mode == "always"
+        bandShown(f, f.__bandShown)
+        paintShell(f, f.__noBorder, mode ~= "always")
+    end
+end
+
 local function placeBody(f, top)
     f.body:ClearAllPoints()
     f.body:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -top)
@@ -166,6 +295,10 @@ local function build(id)
     f.rowPool = NS.Rows.NewPool()
     NS.Skin.Shell(f)
     buildBand(f)
+    f.bandParts = { f.title, f.dock, f.collapse, f.sort }
+    f.onBand = function(self, shown)
+        if shown then NS.Blocks.PaintRestore(self.restore, self.id) else self.restore:Hide() end
+    end
     frames[id] = f
     return f
 end
@@ -182,13 +315,14 @@ function D.Render(id)
     local mode = NS.Blocks.SortOf(id)
     NS.Chrome.SetIcon(f.sort, NS.Blocks.SORT_ICON[mode], "=")
     f.sort.tip = NS.L["Sorted: %s. Click for the next order."]:format(NS.Blocks.SORT_LABEL[mode])
-    NS.Blocks.PaintRestore(f.restore, id)
+    f.ownScale = settings(id).scale or 1
+    D.ApplyStyle(f)
     local y = 0
     if not collapsed then
         y = NS.Blocks.LayRows(D.Entries(id), f.body, f.rowPool, D.ROW_PAD, D.STYLE, D.PAD) + D.ROW_PAD
     end
     -- Read at each render: a skin switch can move the band (it re-renders through ApplyLook).
-    local top = D.TitleHeight(f)
+    local top = D.TopHeight(f)
     placeBody(f, top)
     f.body:SetHeight(math.max(y, 1))
     f:SetHeight(top + y + D.PAD)

@@ -29,6 +29,25 @@ NS.defaults = {
             -- window's, and every detached block's. The crafting overlays take their host's.
             strata         = "MEDIUM",
             detachedStrata = "MEDIUM",
+            -- Layout > Detached windows (round 5, R5-7): one style for every detached window
+            -- (modules/Detached.lua D.ApplyStyle). scale multiplies each block's own; alpha is the
+            -- whole window's; the background and the border follow the skin while their companions
+            -- are on (skinning-§6), else the swatches through their class companions; titleBand is
+            -- "always", "hover" (shown while the pointer is over the window) or "never".
+            detached = {
+                scale               = 1,
+                alpha               = 1,
+                bgColor             = { 0.05, 0.05, 0.06, 0.9 },
+                useClassColorBg     = false,
+                bgFromSkin          = true,
+                border              = true,
+                borderStyle         = "Solid",
+                borderSize          = 1,
+                borderColor         = { 0.24, 0.22, 0.20, 1 },
+                useClassColorBorder = false,
+                borderFromSkin      = true,
+                titleBand           = "always",
+            },
             -- sort: the block's row order (modules/Blocks.lua B.SORTS; owner feedback round 3).
             blocks = {
                 primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },

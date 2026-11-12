@@ -7,7 +7,7 @@ login; each page body builds on its first show.
 |---|---|---|
 | Ka0s Skill Master (landing) | none | The logo, the tagline and the slash command list |
 | General | Master controls, Skin, Keybindings | Master controls, the skin, the key binding |
-| Layout | Window, Blocks, Block order | The window's width, maximum height, block spacing, summary strip, column count (one or two) and frame strata, and the detached blocks' strata; per block show, dock, collapse, lock and scale; the weapon block's compact filter (equipped and below cap only); the block order, dragged |
+| Layout | Window, Blocks, Detached windows, Block order | The window's width, maximum height, block spacing, summary strip, column count (one or two) and frame strata; per block show, dock, collapse, lock and scale; the weapon block's compact filter (equipped and below cap only); every detached window's scale, opacity, title band, strata, background and border; the block order, dragged |
 | Bars | Bar, Colors, Text, Marks, Icons | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom) and position; Rank tier colors (each tier a darker shade of the category color, By category only), markers, timer and spark (off by default); the rows' icons (show, size, zoom, and the composed border on the icon family with Use the row's color). No preview bar: the open window restyles live (owner feedback round 4) |
 | Skills | General, Professions, Weapons and other | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default), one Hide row per catalog skill, drawn on the Professions and Weapons tabs as a boxed row (icon, name, an eye) |
 | Stats | One tab per stat group | One Hide row per stat |
@@ -87,12 +87,33 @@ with the Master-controls Sim mode box and the bare `/sm sim`.
 ## Layout
 
 The Window tab's last rows: *Columns* (`layout.columns`, One column / Two columns: the docked blocks
-fill two columns, each Window width wide, the shorter column first), *Window strata*
-(`layout.strata`) and *Detached block strata* (`layout.detachedStrata`). The two strata rows offer
+fill two columns, each Window width wide, the shorter column first) and *Window strata*
+(`layout.strata`); *Detached block strata* (`layout.detachedStrata`) is on the Detached windows tab
+(round 5, same path, nothing migrated). The two strata rows offer
 Background, Low, Medium and High (`NS.Constants.LAYERS.STRATA_CHOICES`, frame-layering-§1) and
 their tooltip is the library's `O.StrataTooltip`; the window's row applies through
 `NS.MainWindow.ApplySettings`, the crafting overlays sit one strata above the host's on the sync that
 follows, and the trainer popup opens one strata above the higher of the two.
+
+The Detached windows tab (round 5, R5-7) styles every detached window at once, and a merged group's
+window too (`NS.Detached.ApplyStyle(frame)`); every row's onChange is `NS.ApplyLook`, so the write's
+`LAYOUT_CHANGED` re-renders each open one. Its subsections:
+
+- *Window*: *Window scale* (`layout.detached.scale`, 0.5 to 2, multiplying each block's own *Block
+  scale*), *Window opacity* (`layout.detached.alpha`, 0 to 1, the whole window), *Title band*
+  (`layout.detached.titleBand`: Always; On hover, the band's fill, title and marks hidden until the
+  pointer is over the window, polled every 0.1 s so a pointer on a row or a mark counts, the body kept
+  below the band so nothing jumps and the window drags by it while shown; Never, no band, a 6 px strip
+  at the top kept as the drag area, docking and collapsing from the Blocks tab) and *Detached block
+  strata*.
+- *Background*: the composed color pair (`bgColor`, `useClassColorBg`, options-ui-§16's background
+  rule) and *Use the skin's background* (`bgFromSkin`, on by default, skinning-§6). On, the skin's
+  window fill (`S.Shell`); off, the swatch on a fill of the window's own, over the skin's and under
+  the band.
+- *Border*: the composed border block with its *Show border* toggle (`border`, `borderStyle`,
+  `borderSize`, `borderColor`, `useClassColorBorder`) and *Use the skin's border* (`borderFromSkin`,
+  on by default). On, the skin's window edge; off, the style, thickness and swatch on edges of the
+  window's own (`NS.Bar.PaintBorder`); Show border off draws neither.
 
 The Block order tab is a host tab keyed by its group (the rows `layout.blocks.<id>.order` are
 `skipRender`): one boxed row per block in `NS.Blocks.Ordered()` on `NS.OptionsList`
