@@ -152,10 +152,12 @@ the checks below that cover each item:
   lights Primary's right side; move it away: the strip goes. Release on the strip: one window of two
   columns, `Primary · Secondary`, Primary where it stood. Drag Weapons under the merged window's
   second column: the strip lights only that column's bottom; release: Weapons stacks under Secondary.
-  Drag Weapons near the top of the first column instead: it stacks above Primary. Drag the merged
+  Drag Weapons near the top of the first column instead: it stacks above Primary, and Primary's rows
+  stay where they stood (the window grows upward by the Weapons section only). Drag the merged
   window by its band onto another detached window's side: it merges whole. A release with no strip is
   a plain move. Lock frame on (or one section's own Lock): nothing drags. In combat, release on a
-  strip: the window moves, and merges once combat ends. `/reload`: the merged layout comes back.
+  strip: the window moves, and merges once combat ends; drop two different windows on two strips in
+  the same combat: both merges happen when it ends. `/reload`: the merged layout comes back.
 - **SM-DISP-28** (round 5, R5-6b: drag out) In a merged window of three sections, drag a section's
   sub-header: a ghost of it follows the pointer, edged green; release close by (inside about 128
   units): nothing changes. Drag it further: the edge turns red; release: the section is its own
@@ -219,7 +221,8 @@ the checks below that cover each item:
   `/sm skin` to another skin: both bands follow it.
 - **SM-JRN-8** (round 5, R5-2) The Journal's title bar carries a padlock left of its close mark, its
   tooltip "Lock or unlock the window". Click it: it closes, the main window's padlock closes too, and
-  neither the Journal nor the main window drags or resizes. `/sm unlock`: both padlocks open.
+  neither the Journal nor the main window drags or resizes. `/sm unlock`: both padlocks open. With
+  the Journal open, switch to a profile whose window is unlocked: the Journal's padlock opens.
 
 ## Integration (M3 + M4)
 

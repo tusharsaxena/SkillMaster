@@ -333,7 +333,7 @@ Total.
 - round3 click: a weapon row opens the Skills tab with its line selected
 - round3 click: Compat.OpenTradeSkill answers false without the call, and the call's own answer with it
 
-### test_round5.lua (10)
+### test_round5.lua (11)
 
 - round5 detached mark: a detached row's action mark snaps to the pixel grid, as the main window's
 - round5 detached mark: the mark sits a whole unit down its row at any row height
@@ -341,6 +341,7 @@ Total.
 - round5 table headers: the Log and Alts headers stand on a band of the block header's color with a rule
 - round5 table headers: a look change repaints both bands (the Journal re-renders on LAYOUT_CHANGED)
 - round5 journal lock: the title bar's lock mark beside the close control toggles the one locked setting
+- round5 journal lock: a profile switch repaints the Journal's mark from the new profile
 - round5 journal lock: /sm lock and /sm unlock repaint the Journal's mark
 - round5 test mode: /sm test shows the main window, the Journal and one sticky toast of each kind
 - round5 test mode: ending it takes the toasts down and puts the windows back as they were
@@ -358,7 +359,7 @@ Total.
 - round5 detached style: Title band On hover shows the band while the pointer is over the window
 - round5 detached style: a skin switch keeps the style
 
-### test_round5_groups.lua (22)
+### test_round5_groups.lua (28)
 
 - round5 groups model: two lone windows merged on a side make a group, left and right as columns
 - round5 groups model: top and bottom stack into the target's column
@@ -380,8 +381,36 @@ Total.
 - round5 groups: the merged window takes the Detached windows style
 - round5 groups: the band drags the window and its drop is the group's point; locked, it stays
 - round5 groups: a merge on the left keeps the target where it stood
+- round5 groups: a window dropped on a group's top raises the group by the dropped section, not the group
+- round5 groups: a section dragged onto a window's top raises the new group by that section
+- round5 groups: two merges dropped in one combat both happen when it ends
+- round5 groups style: the merged window's background and border follow the Detached windows tab
+- round5 groups style: Title band Never hides the merged band and keeps a drag strip
+- round5 groups style: Title band On hover shows the merged band while the pointer is over it
 - round5 groups: schemaVersion 6 normalizes a stored layout.groups and drops a malformed one
 - round5 groups: the diagnostics' layout section names each group and each block's
+
+### test_round5_snap.lua (19)
+
+- round5 snap: each of the four sides is found where the dragged window's facing edge meets it
+- round5 snap: the radius is SNAP_RADIUS, inclusive; one unit past it is no candidate
+- round5 snap: a side needs the two windows to overlap along the other axis
+- round5 snap: the nearest candidate wins, across targets and across one target's sides
+- round5 snap: a window is never its own target, by key or by a set
+- round5 snap: a top or bottom drop on a merged window stacks into the column under its center
+- round5 snap: a section inside DETACH_RADIUS holds, past it is out
+- round5 snap: a detached window dragged under another glows its bottom and merges there on the drop
+- round5 snap: the driver measures at most every THROTTLE seconds
+- round5 snap: a drop left of a window makes a second column, the target kept where it stood
+- round5 snap: a drop with no window near is a plain move
+- round5 snap: a merged window dragged by its band merges whole onto a detached window's side
+- round5 snap: a window dragged over its own group's frame is never merged into it
+- round5 snap: a section dragged inside the leeway holds, edged sem.good, and its release changes nothing
+- round5 snap: a section dragged past the leeway, edged sem.bad, splits off at its drop point
+- round5 snap: a section dragged out onto another window's side merges there
+- round5 snap: locked refuses every drag: a window's, a group's and a section's
+- round5 snap: in combat a drop still moves, and the merge it asks for waits for combat's end
+- round5 snap: a stand-down mid-drag drops the drag, the driver disarmed and the glow hidden
 
 ### test_blocks.lua (10)
 
@@ -789,9 +818,10 @@ Total.
 | test_round2_layout.lua | 8 |
 | test_round2_icons.lua | 11 |
 | test_round3.lua | 10 |
-| test_round5.lua | 10 |
+| test_round5.lua | 11 |
 | test_round5_style.lua | 9 |
-| test_round5_groups.lua | 22 |
+| test_round5_groups.lua | 28 |
+| test_round5_snap.lua | 19 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -822,4 +852,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **572** |
+| **Total** | **598** |

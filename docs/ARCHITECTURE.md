@@ -124,8 +124,12 @@ is `modules/Groups.lua` (`NS.Groups`): `Merge`, `Split`, `Unmerge`, `Leave` (cal
 detached, a repeat, an empty column and a group of fewer than two blocks go). The pure model
 (`NS.Groups.Model`) works on plain tables and is what the headless suite and the schemaVersion 6
 step drive. A grouped block's own frame hides and its rows draw in the merged window; its own
-`point` is kept for when it leaves. Merges, splits and unmerges wait out combat on
-`SecureOverlay:AfterCombat` as a dock does; Collapse all and Dock all write each block through the
+`point` is kept for when it leaves. A merge places the group so the target stays where it stood:
+measured before the model moves anything, a left merge moves the group left by the added columns
+and a top merge raises it by the dragged sections' drawn extent (each sub-header and its rows, a
+dragged group flattened into one column). Merges, splits and unmerges wait out combat on
+`SecureOverlay:AfterCombat` as a dock does, one queued merge per dragged window, so two drops in one
+combat both happen when it ends; Collapse all and Dock all write each block through the
 seam inside one bulk bracket (`NS.Blocks:SetCollapsedFor`, `:DockAll`). The merged window takes the
 Detached windows style through `NS.Detached.ApplyStyle`.
 

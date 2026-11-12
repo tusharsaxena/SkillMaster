@@ -52,10 +52,11 @@ Milestones: M1 = R5-1..R5-5 (small fixes), M2 = R5-7, M3 = R5-6.
 |---|---|---|
 | R5-3 | done | bd32857 |
 | R5-8 | done | issue #3 |
-| R5-9 | in progress | |
+| R5-9 | done (the mockup, approved by the owner) | |
 | R5-5 | done | 5f7ef03 |
 | R5-4 | done | 10dc682 |
 | R5-2 | done | a97ba33 |
 | R5-1 | done | 20beab6 |
 | R5-7 | done | da2299c |
 | R5-6 | done: R5-6a (model, persistence, merged window, split, menu) 9fec1a3 + 5217c4d; R5-6b (drag to merge, drag out: modules/GroupsSnap.lua) e445c62 + docs | e445c62 |
+| R5-review | done: the final review's fixes (a top merge's point, one combat queue entry per drop, the Journal's lock mark on a profile switch, the merged window's style pinned); inventory and badge | 4799b17 |
