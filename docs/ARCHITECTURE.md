@@ -43,7 +43,7 @@ wrapped at load by the simulator's seam (`core/SimSetup.lua`);
 `defaults/Profile.lua` is the defaults tree and `defaults/*_Forever.lua` the data tables (the skill
 catalog, the class weapon lists, trainers, ranks, gathering, fishing, racials, stat definitions);
 `modules/` holds the display (the bar widget `NS.Bar`, the title-bar controls `NS.Chrome`, the
-blocks `NS.Blocks`, the rows `NS.Rows`, the detached frames, the merged windows `NS.Groups`, the
+blocks `NS.Blocks`, the rows `NS.Rows`, the detached frames, the merged windows `NS.Groups` and their drags `NS.GroupsSnap`, the
 main window, the secure crafting
 overlays, the click map `NS.Interact`, the row tooltip, the trainer popup and `NS.Waypoints`), the
 `/sm probe` report, the skills model (`SkillData`), the bonus breakdown (`Bonuses`), the stats
@@ -128,6 +128,22 @@ step drive. A grouped block's own frame hides and its rows draw in the merged wi
 `SecureOverlay:AfterCombat` as a dock does; Collapse all and Dock all write each block through the
 seam inside one bulk bracket (`NS.Blocks:SetCollapsedFor`, `:DockAll`). The merged window takes the
 Detached windows style through `NS.Detached.ApplyStyle`.
+
+The drags that merge and split (round 5, R5-6b) are `modules/GroupsSnap.lua` (`NS.GroupsSnap`),
+after AuraMaster's container snapping. Its pure core, `Nearest(rect, targets, exclude)`, takes rects in
+UIParent units and answers the nearest target side: the dragged window's facing edge within
+`SNAP_RADIUS` (24) of a side, the two overlapping along the other axis, the window itself (or its own
+group) never a target, and for a top or bottom side the column under the dragged window's center.
+`Classify(dx, dy)` is the section drag's leeway: within `DETACH_RADIUS` (128) of its start it holds,
+past it it is out. The driver starts on a detached window's drag, a merged window's band or frame
+drag (`BeginWindow`) and a section sub-header's drag (`BeginSection`: a ghost of the sub-header
+follows the pointer, edged `sem.good` inside the leeway and `sem.bad` past it). One `OnUpdate`, armed
+only while a drag is on, re-measures at most every 0.05 s and shows a `sem.good` strip on the
+candidate side, a strata above the detached windows. The drop (`Drop`) calls `NS.Groups.Merge` on the
+candidate, or for a section past the leeway with no candidate `NS.Groups.Split` at the ghost's
+top-left; a window with no candidate just keeps its saved drop point. A lock refuses each drag at its
+start; in combat the frame still moves and the merge or split waits on `AfterCombat`. A stand-down
+mid-drag cancels it (`NS.Groups.StandDown`). Secret or unanswered geometry gives no candidate.
 
 `char.pinned`, the skill the broker's `{pinned}` shows, is named non-setting state: its one writer
 is the row menu's Pin (`I.MenuRows` in `modules/Interact.lua`), disabled while test mode or a
@@ -277,6 +293,14 @@ same tainted `OnShow` error (Known Limitations).
   client's record carries one; a positional (1.12-shaped) record has none, and its lines and the
   excluded headers are matched on the locale's strings, which only enUS ships today. Such a client
   sorts its lines into Other until the locale files are translated (Documented deviations).
+- A merged window's drags (round 5, R5-6b) measure frames' rects and the pointer in UIParent units;
+  a rect the client answers secret, or not at all, gives no merge candidate, so such a drop is a plain
+  move. A section's ghost and the side highlight sit one strata above the detached windows' strata
+  (`LAYERS.STRATA_ABOVE`). A section dragged from a merged window can merge onto another window, but
+  never onto its own group (dragged onto it, it splits at the drop or holds inside the leeway); moving a
+  section within its own group is the menu's and the split mark's work, then a fresh merge. A sub-header
+  dragged is assumed to swallow its click (the client fires no `OnClick` after an `OnDragStart`);
+  unverified in game.
 - Every client API the data modules use is assumed until `/sm probe` confirms it
   ([forever-quirks.md](forever-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.

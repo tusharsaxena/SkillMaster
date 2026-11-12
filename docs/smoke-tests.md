@@ -137,7 +137,7 @@ the checks below that cover each item:
   a window: its band returns and the window drags by it; point away: gone. Never: no band, the rows
   move up, a thin strip at the top still drags the window. Detached block strata sits on this tab.
   `/sm skin` to another skin: every pick above survives the repaint.
-- **SM-DISP-26** (round 5, R5-6: the merged window; needs R5-6b's drag to merge in game) Detach
+- **SM-DISP-26** (round 5, R5-6: the merged window) Detach
   Primary Professions and Secondary Skills and drag Secondary onto Primary's bottom edge: one window
   titled `Primary · Secondary`, each section under its own sub-header (chevron, title, sort mark, split mark); the band's two marks collapse / expand both
   sections and dock both. Right-click a sub-header: Split from the group, Unmerge all, Dock in the main
@@ -147,6 +147,22 @@ the checks below that cover each item:
   it stays. Hover a crafting profession's mark in the merged window and click: the profession opens.
   In combat a split waits and runs when combat ends. Layout > Detached windows: opacity and border
   reach the merged window too.
+- **SM-DISP-27** (round 5, R5-6b: drag to merge) Detach Primary, Secondary and Weapons, apart. Drag
+  Secondary until its left edge is near Primary's right edge, overlapping it vertically: a green strip
+  lights Primary's right side; move it away: the strip goes. Release on the strip: one window of two
+  columns, `Primary · Secondary`, Primary where it stood. Drag Weapons under the merged window's
+  second column: the strip lights only that column's bottom; release: Weapons stacks under Secondary.
+  Drag Weapons near the top of the first column instead: it stacks above Primary. Drag the merged
+  window by its band onto another detached window's side: it merges whole. A release with no strip is
+  a plain move. Lock frame on (or one section's own Lock): nothing drags. In combat, release on a
+  strip: the window moves, and merges once combat ends. `/reload`: the merged layout comes back.
+- **SM-DISP-28** (round 5, R5-6b: drag out) In a merged window of three sections, drag a section's
+  sub-header: a ghost of it follows the pointer, edged green; release close by (inside about 128
+  units): nothing changes. Drag it further: the edge turns red; release: the section is its own
+  detached window where the ghost was, the other two still merged. Drag the last but one out the same
+  way: the window left with one section is a plain detached window. Drag a section out past the leeway
+  and onto another detached window's side (the green strip lights): release merges it there. Lock
+  frame on: the sub-header does not drag. In combat the split waits for the end of combat.
 - **SM-BRK-1** (round 3) With nothing pinned (a fresh character, or right-click a pinned row > Pin to
   the broker feed again to unpin), the feed reads `Professions and Skills`. Right-click a row in the
   LDB tooltip: the row menu (pin, waypoint, trainers, Hide in this tooltip); Hide removes it from the

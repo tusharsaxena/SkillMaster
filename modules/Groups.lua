@@ -35,6 +35,8 @@ local addonName, NS = ...
 -- NS.Groups.Of(id) / .All() / .Columns(gid) / .Members(gid) / .Title(gid)
 -- NS.Groups.Refresh(anchor) / .Render(gid) / .RefreshValues() / .StandDown() / .Frame(gid) /
 --   .Rows(gid) / .Shown() / .Section(gid, id) / .MenuRows(gid, id) / .Menu(gid, id)
+-- The drag's reads (modules/GroupsSnap.lua): .UIRect(f) / .PointAt(x, y, scale) / .BlockScale(id) /
+--   .IsLocked(gid) / .SavePoint(f)
 
 NS.Groups = {}
 local G = NS.Groups
