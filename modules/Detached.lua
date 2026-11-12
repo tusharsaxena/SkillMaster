@@ -10,7 +10,8 @@ local _, NS = ...
 -- cap are shown. An equipment change redraws it.
 --
 -- NS.Detached.Refresh(anchor) / .RefreshValues() / .StandDown() / .Frame(id) / .Rows(id) / .Render(id)
--- NS.Detached.Entries(id) -> the entries a detached frame draws; .StorePoint(id, p) (a split's landing)
+-- NS.Detached.Entries(id) -> the entries a detached frame draws, and how many the header's filter
+--   took out (NS.Blocks.FilterOf, round 5, R5-10); .StorePoint(id, p) (a split's landing)
 -- NS.Detached.ApplyStyle(f) / .Style() / .TopHeight(f) -> the shared Detached windows style (R5-7)
 
 NS.Detached = {}
@@ -105,8 +106,8 @@ end
 --- The entries detached block `id` draws: the block's, the equipped weapons marked, and for the
 --- weapon block's compact filter only the equipped ones and the learned skills below their cap.
 function D.Entries(id)
-    local entries = NS.Blocks.Entries(id)
-    if id ~= "weapon" then return entries end
+    local entries, removed = NS.Blocks.Entries(id)
+    if id ~= "weapon" then return entries, removed end
     local equipped = NS.SkillHelpers.EquippedWeaponSkills()
     local filter = belowCapOnly(id)
     local out = {}
@@ -117,7 +118,34 @@ function D.Entries(id)
             out[#out + 1] = { kind = r.kind, entry = e, marked = on }
         end
     end
-    return out
+    return out, removed
+end
+
+--- Lay block `id`'s detached rows into `host` from `y`, or the muted line its emptied filter shows
+--- (`note`, a font string of the caller's). Answers the y under them. A merged section draws so too.
+function D.LayEntries(id, host, rowPool, y, note)
+    local entries, removed = D.Entries(id)
+    local text = NS.Blocks.FilterNote(entries, removed)
+    if note then
+        note:SetText(text or "")
+        note:SetShown(text ~= nil)
+    end
+    if text and note then
+        note:ClearAllPoints()
+        note:SetPoint("TOPLEFT", host, "TOPLEFT", 8, -(y + D.ROW_PAD))
+        note:SetPoint("TOPRIGHT", host, "TOPRIGHT", -8, -(y + D.ROW_PAD))
+        return y + D.ROW_PAD + NS.Blocks.NOTE_H
+    end
+    return NS.Blocks.LayRows(entries, host, rowPool, y + D.ROW_PAD, D.STYLE, D.PAD) + D.ROW_PAD
+end
+
+--- A muted line on `parent` for an emptied filter, hidden until D.LayEntries shows it.
+function D.NewNote(parent)
+    local note = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    note:SetJustifyH("LEFT")
+    NS.Skin.Text(note, "muted")
+    note:Hide()
+    return note
 end
 
 local function buildBand(f)
@@ -131,6 +159,11 @@ local function buildBand(f)
     f.collapse = NS.Chrome.IconButton(f, "chevron-down", "v", function() NS.Blocks:ToggleCollapsed(f.id) end)
     -- The block's sort mark, as on its header in the window (owner feedback round 3).
     f.sort = NS.Chrome.IconButton(f, "list", "=", function() NS.Blocks:CycleSort(f.id) end)
+    -- The block's filter mark, on a block that has a filter (the weapon block; round 5, R5-10).
+    if NS.Blocks.FILTERABLE[f.id] then
+        f.filter = NS.Chrome.IconButton(f, NS.Blocks.FILTER_ICON, "Y", function(b) NS.Blocks.FilterMenu(f.id, b) end)
+        f.filter:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
+    end
     -- The restore mark (owner feedback round 4), leftmost so its hiding leaves no gap.
     f.restore = NS.Chrome.IconButton(f, "eye", "o", function() NS.Blocks.RestoreHidden(f.id) end)
     f.restore:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
@@ -138,12 +171,16 @@ local function buildBand(f)
     f.dock:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.collapse:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.sort:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
-    NS.Skin.Header(f, { title = f.title, align = "LEFT", right = { f.dock, f.collapse, f.sort, f.restore } })
+    local right = { f.dock, f.collapse, f.sort }
+    if f.filter then right[#right + 1] = f.filter end
+    right[#right + 1] = f.restore
+    NS.Skin.Header(f, { title = f.title, align = "LEFT", right = right })
     if not f.dock:GetPoint(1) then
         f.dock:SetPoint("TOPRIGHT", f, "TOPRIGHT", -D.PAD, -2)
         f.collapse:SetPoint("RIGHT", f.dock, "LEFT", -2, 0)
         f.sort:SetPoint("RIGHT", f.collapse, "LEFT", -2, 0)
-        f.restore:SetPoint("RIGHT", f.sort, "LEFT", -2, 0)
+        if f.filter then f.filter:SetPoint("RIGHT", f.sort, "LEFT", -2, 0) end
+        f.restore:SetPoint("RIGHT", f.filter or f.sort, "LEFT", -2, 0)
         f.title:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -5)
     end
 end
@@ -311,7 +348,9 @@ local function build(id)
     f.rowPool = NS.Rows.NewPool()
     NS.Skin.Shell(f)
     buildBand(f)
+    f.note = D.NewNote(f.body)
     f.bandParts = { f.title, f.dock, f.collapse, f.sort }
+    if f.filter then f.bandParts[#f.bandParts + 1] = f.filter end
     f.onBand = function(self, shown)
         if shown then NS.Blocks.PaintRestore(self.restore, self.id) else self.restore:Hide() end
     end
@@ -331,12 +370,12 @@ function D.Render(id)
     local mode = NS.Blocks.SortOf(id)
     NS.Chrome.SetIcon(f.sort, NS.Blocks.SORT_ICON[mode], "=")
     f.sort.tip = NS.L["Sorted: %s. Click for the next order."]:format(NS.Blocks.SORT_LABEL[mode])
+    if f.filter then NS.Blocks.PaintFilter(f.filter, id) end
     f.ownScale = settings(id).scale or 1
     D.ApplyStyle(f)
     local y = 0
-    if not collapsed then
-        y = NS.Blocks.LayRows(D.Entries(id), f.body, f.rowPool, D.ROW_PAD, D.STYLE, D.PAD) + D.ROW_PAD
-    end
+    f.note:Hide()
+    if not collapsed then y = D.LayEntries(id, f.body, f.rowPool, 0, f.note) end
     -- Read at each render: a skin switch can move the band (it re-renders through ApplyLook).
     local top = D.TopHeight(f)
     placeBody(f, top)
@@ -397,6 +436,12 @@ end
 -- The equipped marker and the compact filter follow the equipment: a shown weapon block redraws.
 -- A tracked bus target, stood down with the addon (LibKa0s-Bus-1.0).
 local function onEquipmentChanged()
+    -- The header's Equipped filter (round 5, R5-10): the main window's docked block now, not after
+    -- the stats rescan's throttle.
+    local s = settings("weapon")
+    if s.docked ~= false and NS.Blocks.FilterOf("weapon") == "equipped" and NS.MainWindow then
+        NS.MainWindow.Refresh()
+    end
     local f = frames.weapon
     if f and f:IsShown() then
         D.Render("weapon")

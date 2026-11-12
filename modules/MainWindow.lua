@@ -315,11 +315,15 @@ end
 local function plan(skills, stats)
     local out, sig, total = {}, {}, 0
     for _, id in ipairs(NS.Blocks.Docked()) do
-        local entries = NS.Blocks.Entries(id, skills, stats)
-        if #entries > 0 then
+        local entries, removed = NS.Blocks.Entries(id, skills, stats)
+        -- A block its filter emptied keeps its header and a muted line (round 5, R5-10).
+        local note = NS.Blocks.FilterNote(entries, removed)
+        if #entries > 0 or note then
             local collapsed = NS.Blocks.Settings(id).collapsed and true or false
-            out[#out + 1] = { id = id, entries = entries, collapsed = collapsed, meta = NS.Blocks.Meta(id, entries) }
-            sig[#sig + 1] = id .. (collapsed and "-" or "+") .. NS.Blocks.SortOf(id)
+            out[#out + 1] = { id = id, entries = entries, collapsed = collapsed, meta = NS.Blocks.Meta(id, entries),
+                              note = note }
+            sig[#sig + 1] = id .. (collapsed and "-" or "+") .. NS.Blocks.SortOf(id) .. NS.Blocks.FilterOf(id)
+                .. (note and "!" or "")
             if not collapsed then
                 for _, r in ipairs(entries) do sig[#sig + 1] = r.entry.key end
             end
@@ -434,7 +438,13 @@ local function layBlock(b, host, y)
     h:SetBlock(b.id, b.meta, b.collapsed, true)
     headers[b.id] = h
     y = y + NS.Blocks.HEADER_H
-    if not b.collapsed then y = NS.Blocks.LayRows(b.entries, host, rowPool, y, "row", 0) end
+    if not b.collapsed then
+        y = NS.Blocks.LayRows(b.entries, host, rowPool, y, "row", 0)
+        if b.note then
+            h:SetNote(b.note)
+            y = y + NS.Blocks.NOTE_H
+        end
+    end
     return y + (tonumber(layoutSettings().blockGap) or 0)
 end
 

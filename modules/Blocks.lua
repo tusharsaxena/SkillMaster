@@ -1,4 +1,4 @@
-local _, NS = ...
+local addonName, NS = ...
 -- modules/Blocks.lua — the block engine (design §5.2 Display, §6.1, plan Task 3.2): the eight
 -- blocks, their persisted layout (docked, order, collapsed, point, scale, locked), the entries
 -- each one shows, the collapsible block header, and the one row layout pass the main window and
@@ -14,6 +14,10 @@ local _, NS = ...
 --   (owner feedback round 3): "name" (the catalog's: skills by name, stats as defined), "value"
 --   (high first), "valueAsc" (low first) or "progress" (nearest its max first); the LDB tooltip
 --   sorts its sections the same way.
+-- NS.Blocks.FilterOf(id) / :SetFilter(id, mode) / .FilterMenuRows(id) / .FilterMenu(id, anchor) /
+--   .PaintFilter(mark, id): the Weapon Skills block's row filter (owner feedback round 5, R5-10):
+--   "all", "learned", "equipped" (main hand, off hand, ranged) or "belowCap", from its header's
+--   filter mark on every surface that draws the block; B.Entries answers the rows it took out second.
 -- NS.Blocks.source: nil for the live models, or fn() -> skills, stats (test mode's preview, T5.2;
 --   the suites' fixtures).
 
@@ -143,6 +147,12 @@ function B:CycleSort(id)
         if m == cur then nextMode = B.SORTS[i % #B.SORTS + 1] end
     end
     return seam(path(id, "sort"), nextMode)
+end
+
+--- Give block `id` the row filter `mode` (its header's filter mark, round 5). Through the seam.
+function B:SetFilter(id, mode)
+    if not (B.FILTERABLE[id] and B.FILTER_LABEL[mode]) then return false end
+    return seam(path(id, "filter"), mode)
 end
 
 --- Pop block `id` out of the window into its own frame. Persisted; sends LAYOUT_CHANGED.
@@ -410,13 +420,99 @@ function B.SortEntries(id, items, entryOf)
     return items
 end
 
---- The rows block `id` shows, each { kind = "skill"|"stat", entry }, in its sort order.
+-- ---------------------------------------------------------------------------------------------
+-- Filtering (owner feedback round 5, R5-10): the Weapon Skills block's rows narrowed from its
+-- header's filter mark, a menu of B.FILTERS with the current one ticked
+-- ---------------------------------------------------------------------------------------------
+
+B.FILTERS = { "all", "learned", "equipped", "belowCap" }
+B.FILTERABLE = { weapon = true }
+B.FILTER_ICON = "ph:funnel"
+B.FILTER_LABEL = {
+    all = L["All"], learned = L["Learned"], equipped = L["Equipped"], belowCap = L["Below cap"],
+}
+
+--- Block `id`'s row filter: "all" for a block without one, or an unset or unknown value.
+function B.FilterOf(id)
+    if not B.FILTERABLE[id] then return "all" end
+    local s = B.Settings(id)
+    local mode = s and s.filter
+    return B.FILTER_LABEL[mode] and mode or "all"
+end
+
+local function learned(e) return e.learned ~= false end
+
+local KEEP = {
+    learned  = function(e) return learned(e) end,
+    equipped = function(e, ctx) return ctx.equipped[e.key] == true end,
+    belowCap = function(e) return learned(e) and (tonumber(e.max) or 0) > 0 and (tonumber(e.rank) or 0) < tonumber(e.max) end,
+}
+
+--- `items` narrowed to block `id`'s filter, in place of a new list; answers it and how many left.
+local function applyFilter(id, items)
+    local keep = KEEP[B.FilterOf(id)]
+    if not keep then return items, 0 end
+    local ctx = { equipped = NS.SkillHelpers.EquippedWeaponSkills() }
+    local out = {}
+    for _, r in ipairs(items) do
+        if keep(r.entry, ctx) then out[#out + 1] = r end
+    end
+    return out, #items - #out
+end
+
+--- The menu the filter mark opens: a title, then one radio row per filter, the current one ticked.
+function B.FilterMenuRows(id)
+    local rows = { { title = true, label = L["Show"] } }
+    for _, mode in ipairs(B.FILTERS) do
+        rows[#rows + 1] = { value = mode, label = B.FILTER_LABEL[mode], radio = true,
+            selected = function() return B.FilterOf(id) == mode end,
+            onClick = function() B:SetFilter(id, mode) end }
+    end
+    return rows
+end
+
+--- Open the filter menu on `anchor` (the mark); a second click on it closes the menu.
+function B.FilterMenu(id, anchor)
+    if not B.FILTERABLE[id] then return nil end
+    if GameTooltip and GameTooltip:IsOwned(anchor) then GameTooltip:Hide() end
+    B.menu = NS.Widgets.ContextMenu(anchor, B.FilterMenuRows(id), { owner = addonName })
+    return B.menu
+end
+
+--- The filter mark as block `id` has it: shown only on a block with a filter, the funnel in the
+--- accent while it narrows the rows (else the surface's own rest tint, `mark.baseToken`: the title's
+--- on a header, the skin's icon tint on a detached band), its tip naming the current filter.
+function B.PaintFilter(mark, id)
+    if not mark then return end
+    local on = B.FILTERABLE[id] == true
+    mark:SetShown(on)
+    if not on then return end
+    local mode = B.FilterOf(id)
+    NS.Chrome.SetIcon(mark, B.FILTER_ICON, "Y")
+    NS.Chrome.SetRestToken(mark, mode == "all" and mark.baseToken or "text.accent")
+    mark.tip = L["Showing: %s. Click to filter."]:format(B.FILTER_LABEL[mode])
+end
+
+-- The muted line an emptied block shows under its header (round 5, R5-10).
+B.NOTE_H = 20
+
+--- The muted line under a block's header when its filter took every row out, else nil.
+function B.FilterNote(entries, removed)
+    if #entries == 0 and (removed or 0) > 0 then return L["No rows match this filter."] end
+    return nil
+end
+
+--- The rows block `id` shows, each { kind = "skill"|"stat", entry }, in its sort order, and how many
+--- its filter took out.
 function B.Entries(id, skills, stats)
     local d = NS.BlockDefs[id]
-    if not d then return {} end
+    if not d then return {}, 0 end
     if skills == nil and stats == nil then skills, stats = B.Data() end
-    if d.source == "skills" then return B.SortEntries(id, skillEntries(skills, d.filter)) end
-    return B.SortEntries(id, statEntries(stats, d.filter))
+    if d.source == "skills" then
+        local entries, removed = applyFilter(id, skillEntries(skills, d.filter))
+        return B.SortEntries(id, entries), removed
+    end
+    return B.SortEntries(id, statEntries(stats, d.filter)), 0
 end
 
 -- No counts beside a title (owner feedback round 4): only Base & Combat says what its bars scale to.
@@ -456,9 +552,22 @@ function Header:SetBlock(id, meta, collapsed, docked)
     NS.Chrome.SetIcon(self.sort, B.SORT_ICON[mode], "=")
     self.sort.tip = L["Sorted: %s. Click for the next order."]:format(B.SORT_LABEL[mode])
     self.docked = docked
+    -- The filter mark (round 5, R5-10), left of sort on the weapon block only; restore and the meta
+    -- line move left of whichever mark is the last one shown.
+    B.PaintFilter(self.filter, id)
+    local left = self.filter:IsShown() and self.filter or self.sort
+    self.restore:ClearAllPoints()
+    self.restore:SetPoint("RIGHT", left, "LEFT", -4, 0)
     B.PaintRestore(self.restore, id)
     self.meta:ClearAllPoints()
-    self.meta:SetPoint("RIGHT", self.restore:IsShown() and self.restore or self.sort, "LEFT", -6, 0)
+    self.meta:SetPoint("RIGHT", self.restore:IsShown() and self.restore or left, "LEFT", -6, 0)
+    self:SetNote(nil)
+end
+
+--- The muted line under the header (an emptied filter's, round 5), or none.
+function Header:SetNote(text)
+    self.note:SetText(text or "")
+    self.note:SetShown(text ~= nil)
 end
 
 --- The restore mark (owner feedback round 4): shown while block `id` has hidden rows, its tip
@@ -514,11 +623,24 @@ local function buildHeader(parent)
     h.sort = NS.Chrome.IconButton(h, "list", "=", onSortClick)
     NS.Chrome.SetRestToken(h.sort, "text.heading")
     h.sort:SetPoint("RIGHT", h.detach, "LEFT", -4, 0)
-    -- The restore mark (owner feedback round 4), left of sort, only while the block hides rows.
+    -- The filter mark (round 5, R5-10), left of sort, on the weapon block only (B.PaintFilter).
+    h.filter = NS.Chrome.IconButton(h, B.FILTER_ICON, "Y", function(self) B.FilterMenu(h.id, self) end)
+    h.filter.baseToken = "text.heading"
+    NS.Chrome.SetRestToken(h.filter, h.filter.baseToken)
+    h.filter:SetPoint("RIGHT", h.sort, "LEFT", -4, 0)
+    h.filter:Hide()
+    -- The restore mark (owner feedback round 4), left of sort (or filter), only while the block hides rows.
     h.restore = NS.Chrome.IconButton(h, "eye", "o", onRestoreClick)
     NS.Chrome.SetRestToken(h.restore, "text.heading")
     h.restore:SetPoint("RIGHT", h.sort, "LEFT", -4, 0)
     h.restore:Hide()
+    -- An emptied filter's muted line, below the header in the space the window leaves for it.
+    h.note = h:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    h.note:SetPoint("TOPLEFT", h, "BOTTOMLEFT", 8, -4)
+    h.note:SetPoint("TOPRIGHT", h, "BOTTOMRIGHT", -8, -4)
+    h.note:SetJustifyH("LEFT")
+    NS.Skin.Text(h.note, "muted")
+    h.note:Hide()
     h.meta = h:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     h.meta:SetPoint("RIGHT", h.sort, "LEFT", -6, 0)
     NS.Skin.Text(h.meta, "muted")

@@ -126,6 +126,8 @@ add(NS.Live(H.BorderGroup({
 local B = NS.Blocks
 local sortValues = {}
 for i, m in ipairs(B.SORTS) do sortValues[i] = { value = m, text = B.SORT_LABEL[m] } end
+local filterValues = {}
+for i, m in ipairs(B.FILTERS) do filterValues[i] = { value = m, text = B.FILTER_LABEL[m] } end
 
 local function blockRows(id)
     local d, def = NS.BlockDefs[id], P.blocks[id]
@@ -170,6 +172,13 @@ for _, id in ipairs(NS.BLOCKS) do
             label = L["Equipped and below cap only"],
             desc = L["While detached, list only the weapons you have equipped and the skills still below their cap."],
             onChange = NS.ApplyLook })
+    end
+    -- The header's filter mark (round 5, R5-10): the weapon block's row filter.
+    if B.FILTERABLE[id] then
+        rows[#rows + 1] = row({ path = "layout.blocks." .. id .. ".filter", group = BLOCKS,
+            subgroup = NS.BlockDefs[id].title, type = "string", default = P.blocks[id].filter,
+            values = filterValues, label = L["Show rows"], onChange = B.Changed,
+            desc = L["Which of the block's rows show, here, in its detached frame and in a merged window: all of them, the skills you have learned, the weapons you have equipped (main hand, off hand, ranged), or the learned skills still below their cap. The filter mark on its header picks it. The LDB tooltip is not filtered."] })
     end
 end
 for _, r in ipairs(detachedRows) do rows[#rows + 1] = r end

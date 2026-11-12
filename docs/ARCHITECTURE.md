@@ -101,7 +101,11 @@ through `NS.SetByPath` (architecture-§5): the block header and the detached fra
 and `/sm set`. The `docked` and `collapsed`
 rows' `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`) stores the value and waits out combat;
 `order` stores plainly, its `onChange` `NS.Blocks.OrderChanged`. The seam logs each write
-(debug-logging-§10). `shown`, `scale` and `locked` are plain rows. `skills.hidden` /
+(debug-logging-§10). `shown`, `scale` and `locked` are plain rows. `sort` (round 3) and the weapon
+block's `filter` (round 5, R5-10: `all`, `learned`, `equipped`, `belowCap`) are plain rows too, each
+written from its header mark through the seam (`NS.Blocks:CycleSort`, `NS.Blocks:SetFilter`, the
+latter from the filter mark's menu); the filter narrows the block in the main window, its detached
+frame and its merged section (`NS.Blocks.Entries`), not the LDB tooltip. `skills.hidden` /
 `stats.hidden` are sets: one Hide row per catalog skill and per stat (get / set: false clears the
 entry), and one undrawn row per whole set (type `set`, default `{}`), which the row menu's Hide
 writes for a key with no row of its own (an `other:` skill) and the page's Defaults resets.
@@ -197,7 +201,7 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | `UNIT_INVENTORY_CHANGED`, `UNIT_AURA` | `NS.UnitEvents` (`core/UnitEventsSetup.lua`), `RegisterUnitEvent` for `"player"` on its one frame, stood up from `NS.RegisterRuntime` | `addon:OnBonusesUnitChanged`: player only, debounced `Bonuses.Refresh` (0.2 s), which re-reads only the part the event touched (an aura change never re-reads the 19 item tooltips); a 1 s ticker while a temp bonus naming a skill is live | gear, lures and buffs change the breakdown |
 | `UNIT_STATS`, `UNIT_ATTACK_POWER`, `UNIT_RANGED_ATTACK_POWER`, `UNIT_RESISTANCES`, `UNIT_DAMAGE` | `NS.UnitEvents`, for `"player"` (recorded by `modules/StatData.lua` at load) | `StatData:Request`: one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
 | `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
-| `PLAYER_EQUIPMENT_CHANGED` | `modules/Detached.lua` at load, on its own bus target | `onEquipmentChanged`: re-render the detached weapon block (or the merged window it is a section of) and re-sync the overlays while it is shown | a weapon swap changes the weapon block's equipped-only list |
+| `PLAYER_EQUIPMENT_CHANGED` | `modules/Detached.lua` at load, on its own bus target | `onEquipmentChanged`: re-render the detached weapon block (or the merged window it is a section of) and re-sync the overlays while it is shown; with the header's Equipped filter on a docked weapon block, refresh the main window at once (round 5, R5-10) | a weapon swap changes the weapon block's equipped-only list |
 | `PLAYER_LOGOUT` | `modules/Alts.lua` at load, on its own bus target | `Alts:Snapshot` | the last snapshot of the session |
 
 The bus subscribers on their own targets: `modules/SessionLog.lua` hears `SKILL_UP` (one log entry,
@@ -305,6 +309,10 @@ same tainted `OnShow` error (Known Limitations).
   section within its own group is the menu's and the split mark's work, then a fresh merge. A sub-header
   dragged is assumed to swallow its click (the client fires no `OnClick` after an `OnDragStart`);
   unverified in game.
+- The Weapon Skills filter (round 5, R5-10) reads the main hand, off hand and ranged slots as the
+  equipped marker does (`NS.SkillHelpers.EquippedWeaponSkills`): an empty main hand is Unarmed, and
+  a weapon whose item info is not cached yet names no skill until the next equipment change. The
+  LDB tooltip is not filtered. A block its filter empties keeps its header and a muted line.
 - Every client API the data modules use is assumed until `/sm probe` confirms it
   ([forever-quirks.md](forever-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.

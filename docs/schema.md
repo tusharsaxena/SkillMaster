@@ -53,6 +53,9 @@ SkillMasterDB
                       point = false,    -- point: drag-only, written only by modules/Detached.lua
                       sort = "name" }   -- "name" | "value" | "valueAsc" | "progress" (round 3)
       blocks.weapon.belowCapOnly = false   -- the detached compact preset's filter (M5 polish)
+      blocks.weapon.filter = "all"         -- "all" | "learned" | "equipped" | "belowCap": the header's
+                                           -- filter mark (round 5, R5-10); a new key with a default,
+                                           -- so no schemaVersion step (AceDB answers it)
       groups = {}                -- merged detached windows (round 5, R5-6), written only by
                                  -- modules/Groups.lua: [gid] = { point = { point, relPoint, x, y }
                                  -- | false, columns = { { id, ... }, ... } }; a member is a

@@ -58,8 +58,9 @@ NS.defaults = {
                 secondary     = { docked = true, order = 2, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
                 -- belowCapOnly: the detached compact preset shows only the equipped weapons and the
                 -- skills below their cap (Detached.dc.html; Layout > Blocks > Weapon skills).
+                -- filter: the header's filter mark (modules/Blocks.lua B.FILTERS; round 5, R5-10).
                 weapon        = { docked = true, order = 3, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name",
-                                  belowCapOnly = false },
+                                  belowCapOnly = false, filter = "all" },
                 other         = { docked = true, order = 4, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
                 stats_base    = { docked = true, order = 5, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
                 stats_spell   = { docked = true, order = 6, collapsed = true,  point = false, scale = 1, locked = false, shown = true, sort = "name" },

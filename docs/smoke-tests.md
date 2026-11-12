@@ -165,6 +165,17 @@ the checks below that cover each item:
   way: the window left with one section is a plain detached window. Drag a section out past the leeway
   and onto another detached window's side (the green strip lights): release merges it there. Lock
   frame on: the sub-header does not drag. In combat the split waits for the end of combat.
+- **SM-DISP-29** (round 5, R5-10: the weapon filter) The Weapon Skills header has a funnel mark left
+  of its sort mark, no other header does; its tooltip reads `Showing: All. Click to filter.` Click it:
+  a menu under the mark, Show, then All (ticked), Learned, Equipped, Below cap. Learned: the
+  not-learned weapons leave. Equipped: only the main hand, off hand and ranged weapons' skills stay,
+  and the funnel turns the accent color; swap the main-hand weapon for another type: the block follows
+  at once. Unequip the main hand with Equipped on and no Unarmed row: the header stays, with
+  `No rows match this filter.` under it. Below cap: only learned skills under their cap. Click the
+  mark again with the menu open: it closes. Detach the block: the band carries the funnel; merge it
+  with another detached block: its sub-header carries it, the other section's does not. Layout >
+  Blocks > Weapon Skills > Show rows shows the same choice. `/reload` and a profile switch: the
+  filter is the profile's. The LDB tooltip still lists every weapon.
 - **SM-BRK-1** (round 3) With nothing pinned (a fresh character, or right-click a pinned row > Pin to
   the broker feed again to unpin), the feed reads `Professions and Skills`. Right-click a row in the
   LDB tooltip: the row menu (pin, waypoint, trainers, Hide in this tooltip); Hide removes it from the

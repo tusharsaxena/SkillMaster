@@ -126,7 +126,9 @@ handle. Each controller is canceled before every render (`spec.beforeRender`).
 
 The Weapon skills subsection adds *Equipped and below cap only*
 (`layout.blocks.weapon.belowCapOnly`): the detached block keeps the equipped weapons and the
-learned skills below their cap, redrawn on the write's `LAYOUT_CHANGED`. The Journal's size
+learned skills below their cap, redrawn on the write's `LAYOUT_CHANGED`. *Show rows*
+(`layout.blocks.weapon.filter`, round 5, R5-10) is the header's filter mark as a dropdown: All,
+Learned, Equipped, Below cap, for the main window, the detached frame and a merged section alike. The Journal's size
 (`journal.size`, the resize grip) and every `point` are drag state with no row.
 
 ## Broker

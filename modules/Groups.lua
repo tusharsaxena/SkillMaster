@@ -563,7 +563,8 @@ local function onSubDragStop()
     if NS.GroupsSnap then NS.GroupsSnap.Drop() end
 end
 
--- A section's sub-header: chevron, title, sort mark, split mark.
+-- A section's sub-header: chevron, title, filter mark (the weapon block's, round 5, R5-10), sort
+-- mark, split mark; and the muted line an emptied filter shows under it.
 local function buildSub(f)
     local sh = CreateFrame("Button", nil, f.body)
     sh.owner = f
@@ -583,6 +584,12 @@ local function buildSub(f)
     sh.sort = NS.Chrome.IconButton(sh, "list", "=", function() NS.Blocks:CycleSort(sh.id) end)
     NS.Chrome.SetRestToken(sh.sort, "text.heading")
     sh.sort:SetPoint("RIGHT", sh.split, "LEFT", -4, 0)
+    sh.filter = NS.Chrome.IconButton(sh, NS.Blocks.FILTER_ICON, "Y", function(b) NS.Blocks.FilterMenu(sh.id, b) end)
+    sh.filter.baseToken = "text.heading"
+    NS.Chrome.SetRestToken(sh.filter, sh.filter.baseToken)
+    sh.filter:SetPoint("RIGHT", sh.sort, "LEFT", -4, 0)
+    sh.filter:Hide()
+    sh.note = NS.Detached.NewNote(sh)
     sh:SetScript("OnClick", onSubClick)
     sh:RegisterForDrag("LeftButton")
     sh:SetScript("OnDragStart", onSubDragStart)
@@ -599,6 +606,8 @@ local function setSub(sh, id)
     local mode = NS.Blocks.SortOf(id)
     NS.Chrome.SetIcon(sh.sort, NS.Blocks.SORT_ICON[mode], "=")
     sh.sort.tip = L["Sorted: %s. Click for the next order."]:format(NS.Blocks.SORT_LABEL[mode])
+    NS.Blocks.PaintFilter(sh.filter, id)
+    sh.note:Hide()
 end
 
 local function onBandClick(band, button)
@@ -697,7 +706,7 @@ local function layColumn(f, c, ids, host)
         f.sections[id] = sec
         y = y + G.SUB_H
         if not NS.Blocks.Settings(id).collapsed then
-            y = NS.Blocks.LayRows(D.Entries(id), host, f.rowPool, y + D.ROW_PAD, D.STYLE, D.PAD) + D.ROW_PAD
+            y = D.LayEntries(id, host, f.rowPool, y, sh.note)
         end
         sec.h = y - sec.y   -- its drawn extent (a top merge raises a group by it)
     end

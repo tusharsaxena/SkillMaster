@@ -412,6 +412,16 @@ Total.
 - round5 snap: in combat a drop still moves, and the merge it asks for waits for combat's end
 - round5 snap: a stand-down mid-drag drops the drag, the driver disarmed and the glow hidden
 
+### test_round5_followups.lua (7)
+
+- round5 filter: All, Learned, Equipped and Below cap narrow the weapon block, stored per profile through the seam
+- round5 filter: Layout > Blocks > Weapon skills has the Show rows row, its values the filter menu's
+- round5 filter: the weapon header's funnel opens a menu, the current filter ticked; a pick filters the window
+- round5 filter: a block its filter empties keeps its header and a muted line, not an empty block
+- round5 filter: the detached frame carries the filter mark and the muted line
+- round5 filter: a merged window's weapon sub-header carries the filter mark and the muted line
+- round5 filter: Equipped follows an equipment change in the main window at once
+
 ### test_blocks.lua (10)
 
 - blocks: the eight blocks, four skill categories then four stat groups
@@ -822,6 +832,7 @@ Total.
 | test_round5_style.lua | 9 |
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
+| test_round5_followups.lua | 7 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -852,4 +863,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **598** |
+| **Total** | **605** |

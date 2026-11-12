@@ -229,7 +229,8 @@ test("options: the library-absent load keeps every hand-written row; the compose
     local full, degraded = #NS.Schema, #NS2.Schema
     -- Round 5 (R5-7): Layout > Detached windows, three hand-written rows (scale, opacity, title band)
     -- and nine composed (the background pair and its skin companion, the border block and its).
-    assertEqual(full, 329, "the full schema (round 5: the Detached windows tab's twelve rows)")
-    assertEqual(degraded, 276, "the library-absent schema")
+    -- Round 5 (R5-10): the weapon block's Show rows filter, one hand-written row in both counts.
+    assertEqual(full, 330, "the full schema (round 5: the Detached windows tab's twelve rows, the weapon filter)")
+    assertEqual(degraded, 277, "the library-absent schema")
     assertEqual(full - degraded, 53, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3) and the detached background and border (9)")
 end)

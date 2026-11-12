@@ -800,6 +800,17 @@ L["Split this section from the group"] = true
 L["Dock every section in the main window"] = true
 L["Collapse or expand every section"] = true
 
+-- The Weapon Skills block's filter mark (round 5, R5-10: modules/Blocks.lua)
+L["All"] = true
+L["Learned"] = true
+L["Equipped"] = true
+L["Below cap"] = true
+L["Show"] = true
+L["Showing: %s. Click to filter."] = true
+L["No rows match this filter."] = true
+L["Show rows"] = true
+L["Which of the block's rows show, here, in its detached frame and in a merged window: all of them, the skills you have learned, the weapons you have equipped (main hand, off hand, ranged), or the learned skills still below their cap. The filter mark on its header picks it. The LDB tooltip is not filtered."] = true
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end
