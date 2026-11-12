@@ -2,6 +2,8 @@
 -- workflow. R5-10: the Weapon Skills block's filter mark (All, Learned, Equipped, Below cap) on its
 -- header in the main window, in its detached frame and on its merged-window sub-header; the filter
 -- persisted per profile through the seam; an emptied block's muted line; Equipped on an equipment change.
+-- R5-14: the trainer popup's "Also teaches" line wraps, its card and the window grow by the measured
+-- height (a secret or zero measure is one line), a cap clips each to one, the card's tooltip.
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -204,5 +206,95 @@ test("round5 filter: Equipped follows an equipment change in the main window at 
         wield(GUNS)
         M.__fireEvent("PLAYER_EQUIPMENT_CHANGED", 16)   -- no timers: not the stats rescan's redraw
         assertEqual(keysOf(windowWeaponRows()), "guns", "the swap redraws the block")
+    end)
+end)
+
+-- ── R5-14: the trainer popup's "Also teaches" line wraps ────────────────────────────────────
+
+local TP = NS.TrainerPopup
+
+-- The client measures `lines` wrapped lines (12 units each) on every card's "Also teaches" line,
+-- clipped by its max-lines as the client clips it; `secret` answers the height as a secret.
+local function measureAlso(lines, secret)
+    for _, c in ipairs(TP.Cards()) do
+        c.also.GetStringHeight = function(self)
+            local max = self:GetMaxLines()
+            local n = (max and max > 0) and math.min(lines, max) or lines
+            return secret and T.kit.secret(n * 12) or n * 12
+        end
+    end
+end
+
+-- The kit records no SetHeight (testkit revision 35): a recorder on the window and its cards, so
+-- GetHeight answers what the layout set.
+local function recordHeight(f)
+    f.SetHeight = function(self, h) self.__geomH, self.__geomLive = h, true end
+end
+
+local function armGeometry()
+    recordHeight(TP.Frame())
+    for _, c in ipairs(TP.Cards()) do recordHeight(c) end
+    TP.Relayout()
+end
+
+local function withPopup(fn)
+    local savedMax = TP.MAX_HEIGHT
+    TP.Show("fistWeapons")
+    armGeometry()
+    local ok, err = pcall(fn)
+    for _, c in ipairs(TP.Cards()) do c.also.GetStringHeight, c.SetHeight, c.__geomLive = nil, nil, nil end
+    TP.Frame().SetHeight, TP.Frame().__geomLive = nil, nil
+    TP.MAX_HEIGHT = savedMax
+    TP.Hide()
+    if not ok then error(err, 0) end
+end
+
+test("round5 trainer popup: the Also teaches line wraps inside its card, and the card and the window grow to fit", function()
+    withPopup(function()
+        local cards = TP.Cards()
+        assertTrue(#cards > 0, "the popup lists trainers")
+        local c = cards[1]
+        assertTrue(c.also:GetText() ~= "", "the first weapon master teaches other weapons too")
+        assertTrue(c.also:CanWordWrap(), "the line wraps")
+        assertTrue(c.also:GetWidth() > 0, "its width is bound to the card, so the wrap has a measure")
+        assertTrue(c.also:GetMaxLines() > 1, "it may take more than one line")
+        local baseCard, baseFrame = c:GetHeight(), TP.Frame():GetHeight()
+        measureAlso(3)
+        TP.Relayout()
+        assertEqual(c:GetHeight(), baseCard + 24, "three lines: the card grows by two")
+        assertEqual(TP.Frame():GetHeight(), baseFrame + 24 * #cards, "and the window by every card")
+    end)
+end)
+
+test("round5 trainer popup: a secret or zero measure keeps the one-line card, and too tall a window drops to one line each", function()
+    withPopup(function()
+        local c = TP.Cards()[1]
+        local baseCard, baseFrame = c:GetHeight(), TP.Frame():GetHeight()
+        local restore = T.kit.installSecretValue()
+        measureAlso(3, true)
+        local ok, err = pcall(TP.Relayout)
+        restore()
+        assertTrue(ok, "a secret height must not raise: " .. tostring(err))
+        assertEqual(c:GetHeight(), baseCard, "a secret measure reads as one line")
+        measureAlso(3)
+        TP.MAX_HEIGHT = baseFrame + 10
+        TP.Relayout()
+        assertEqual(c.also:GetMaxLines(), 1, "past the cap each line is clipped to one")
+        assertEqual(TP.Frame():GetHeight(), baseFrame, "and the window keeps its one-line height")
+    end)
+end)
+
+test("round5 trainer popup: a card's tooltip carries the whole Also teaches list", function()
+    withPopup(function()
+        local c = TP.Cards()[1]
+        local lines, savedAdd = {}, M.GameTooltip.AddLine
+        M.GameTooltip.AddLine = function(_, s) lines[#lines + 1] = s end
+        local ok, err = pcall(function() c:GetScript("OnEnter")(c) end)
+        M.GameTooltip.AddLine = savedAdd
+        assertTrue(ok, tostring(err))
+        assertEqual(lines[1], TP.Trainers()[1].name, "the trainer's name first")
+        assertEqual(lines[#lines], c.alsoText, "the full list last")
+        assertTrue(M.GameTooltip:IsShown(), "shown")
+        c:GetScript("OnLeave")(c)
     end)
 end)

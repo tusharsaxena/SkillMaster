@@ -8,6 +8,11 @@ local _, NS = ...
 -- with the window.
 --
 -- NS.TrainerPopup.Show(key) / .Hide() / .IsShown() / .Frame() / .Trainers() / .Select(i) / .Selected()
+-- / .Relayout() / .TextHeight(fs)
+--
+-- Round 5, R5-14: a card's "Also teaches" line wraps inside the card (up to ALSO_LINES lines), the
+-- card grows by the wrapped height and the window by the cards; past P.MAX_HEIGHT every line falls
+-- back to one (the client's ellipsis), and the card's tooltip always carries the whole list.
 
 NS.TrainerPopup = {}
 local P = NS.TrainerPopup
@@ -16,6 +21,11 @@ local LAYERS = NS.Constants.LAYERS
 
 P.FRAME_NAME = "SkillMasterTrainerPopup"
 local WIDTH, TITLE_H, PAD, CARD_H, BUTTON_H = 380, 26, 10, 54, 26
+-- The "Also teaches" line: the card's width less its 8-unit insets, the small font's line height
+-- (the fallback when the client measures nothing), and the lines a card may wrap to.
+local ALSO_W, LINE_H, ALSO_LINES = WIDTH - 2 * PAD - 16, 12, 4
+--- The popup's tallest: past it, the cards' "Also teaches" lines drop back to one line each.
+P.MAX_HEIGHT = 600
 
 local frame, cardPool
 local state = { key = nil, list = {}, selected = 1 }
@@ -53,6 +63,36 @@ end
 
 local function onCardClick(self) P.Select(self.index) end
 
+--- A FontString's wrapped height: its measured height, or one line when the client answers a
+--- secret, nothing or zero (an empty or not yet laid-out string).
+function P.TextHeight(fs)
+    local h = fs:GetStringHeight()
+    if (type(issecretvalue) == "function" and issecretvalue(h)) or type(h) ~= "number" or h <= 0 then
+        return LINE_H
+    end
+    return h
+end
+
+-- One tooltip line in a skin token's color (the row tooltip's rule: no typed color).
+local function tipLine(s, token, wrap)
+    local c = NS.Bar.Color(token) or NS.Bar.Color("text.body") or { 1, 1, 1 }
+    GameTooltip:AddLine(s, c[1], c[2], c[3], wrap)
+end
+
+-- The card's tooltip: the whole card, the "Also teaches" list unclipped.
+local function onCardEnter(self)
+    if not (GameTooltip and self.trainer) then return end
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    tipLine(self.trainer.name, "text.accent")
+    tipLine(self.where:GetText() or "", "text.body")
+    if self.alsoText and self.alsoText ~= "" then tipLine(self.alsoText, "text.muted", true) end
+    GameTooltip:Show()
+end
+
+local function onCardLeave(self)
+    if GameTooltip and GameTooltip:IsOwned(self) then GameTooltip:Hide() end
+end
+
 local function buildCard(parent)
     local c = CreateFrame("Button", nil, parent)
     c:SetHeight(CARD_H)
@@ -66,11 +106,15 @@ local function buildCard(parent)
     NS.Skin.Text(c.where, "body")
     c.also = c:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     c.also:SetPoint("TOPLEFT", c.where, "BOTTOMLEFT", 0, -3)
-    c.also:SetPoint("RIGHT", c, "RIGHT", -8, 0)
+    c.also:SetWidth(ALSO_W)   -- an explicit width, so the wrapped height measures before layout
     c.also:SetJustifyH("LEFT")
-    c.also:SetWordWrap(false)
+    c.also:SetJustifyV("TOP")
+    c.also:SetWordWrap(true)
+    c.also:SetNonSpaceWrap(true)   -- one long skill name still breaks inside the card
     NS.Skin.Text(c.also, "muted")
     c:SetScript("OnClick", onCardClick)
+    c:SetScript("OnEnter", onCardEnter)
+    c:SetScript("OnLeave", onCardLeave)
     return c
 end
 
@@ -96,15 +140,21 @@ local function paintName(fs)
     fs:SetTextColor(c[1], c[2], c[3], c[4] or 1)
 end
 
-local function fillCard(c, t, key, i)
-    c.index = i
+local function fillCard(c, t, key, i, maxLines)
+    c.index, c.trainer = i, t
     c.name:SetText(t.name)
     paintName(c.name)
     local cost = t.costByKey and t.costByKey[key] or t.cost
     c.cost:SetText(cost and NS.Rows.Money(cost) or "")
     c.where:SetText(whereText(t))
-    c.also:SetText(teachesText(t, key))
+    c.alsoText = teachesText(t, key)
+    c.also:SetMaxLines(maxLines)
+    c.also:SetText(c.alsoText)
+    -- The card's rest height carries one "Also teaches" line; a wrapped one adds the rest.
+    local h = math.ceil(CARD_H - LINE_H + math.max(LINE_H, P.TextHeight(c.also)))
+    c:SetHeight(h)
     NS.Skin.ListRow(c, i == state.selected and "selected" or "normal")
+    return h
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -175,7 +225,8 @@ local function build()
     return frame
 end
 
-local function layout()
+-- The cards, top down, each "Also teaches" line wrapping to `maxLines`; the y under the last.
+local function placeCards(maxLines)
     NS.Pool.ReleaseAll(cardPool)
     local y = TITLE_H + 30
     local unverified = false
@@ -184,10 +235,18 @@ local function layout()
         c:ClearAllPoints()
         c:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -y)
         c:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -y)
-        fillCard(c, t, state.key, i)
+        local h = fillCard(c, t, state.key, i, maxLines)
         c:Show()
-        y = y + CARD_H + 6
+        y = y + h + 6
         unverified = unverified or NS.Waypoints.UnverifiedMark(t) ~= ""
+    end
+    return y, unverified
+end
+
+local function layout()
+    local y, unverified = placeCards(ALSO_LINES)
+    if y + (unverified and 18 or 0) + BUTTON_H + 32 > P.MAX_HEIGHT then
+        y, unverified = placeCards(1)   -- too tall: one line each, the tooltip has the rest
     end
     frame.warning:ClearAllPoints()
     frame.warning:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -y)
@@ -262,6 +321,12 @@ function P.Show(key)
     layout()
     refreshActions()
     frame:Show()
+end
+
+--- Lay the open popup out again (its cards' text re-measured); a no-op while it is hidden.
+function P.Relayout()
+    if not P.IsShown() then return end
+    layout()
 end
 
 --- Select the `i`th card (the waypoint and print actions use it).

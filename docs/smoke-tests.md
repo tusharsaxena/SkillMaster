@@ -176,6 +176,11 @@ the checks below that cover each item:
   with another detached block: its sub-header carries it, the other section's does not. Layout >
   Blocks > Weapon Skills > Show rows shows the same choice. `/reload` and a profile switch: the
   filter is the profile's. The LDB tooltip still lists every weapon.
+- **SM-DISP-30** (round 5, R5-14: the trainer popup's wrap) Open the trainer popup on an unlearned
+  weapon (Fist Weapons, Staves): a weapon master's `Also teaches:` line wraps onto a second line
+  inside its card instead of being cut off, the card is taller by that line and the window by every
+  such card; the buttons and the footer stay below the last card. Hover a card: a tooltip with the
+  trainer's name, place and the whole `Also teaches` list.
 - **SM-BRK-1** (round 3) With nothing pinned (a fresh character, or right-click a pinned row > Pin to
   the broker feed again to unpin), the feed reads `Professions and Skills`. Right-click a row in the
   LDB tooltip: the row menu (pin, waypoint, trainers, Hide in this tooltip); Hide removes it from the

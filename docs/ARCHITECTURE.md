@@ -313,6 +313,10 @@ same tainted `OnShow` error (Known Limitations).
   equipped marker does (`NS.SkillHelpers.EquippedWeaponSkills`): an empty main hand is Unarmed, and
   a weapon whose item info is not cached yet names no skill until the next equipment change. The
   LDB tooltip is not filtered. A block its filter empties keeps its header and a muted line.
+- The trainer popup's "Also teaches" line (round 5, R5-14) wraps to four lines and the card grows by
+  the line's measured height (`GetStringHeight`); a measure the client answers secret, nil or zero
+  reads as one line. A popup that would pass `NS.TrainerPopup.MAX_HEIGHT` (600) clips every card's
+  line to one, and the card's tooltip always carries the whole list. There is no scroll in the popup.
 - Every client API the data modules use is assumed until `/sm probe` confirms it
   ([forever-quirks.md](forever-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.
