@@ -380,6 +380,7 @@ L["Arrow: trainers and waypoint \194\183 Right-click: menu"] = true
 L["Arrow: character panel \194\183 Shift-click: link \194\183 Right-click: menu"] = true
 L["Scale: vs %s"] = true
 L["Also teaches: %s"] = true
+L["%d yd"] = true
 L["Coordinates unverified on WoW Forever (flagged until the smoke pass)"] = true
 L["Set waypoint"] = true
 L["Print to chat"] = true

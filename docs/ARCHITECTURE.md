@@ -202,6 +202,7 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | `UNIT_STATS`, `UNIT_ATTACK_POWER`, `UNIT_RANGED_ATTACK_POWER`, `UNIT_RESISTANCES`, `UNIT_DAMAGE` | `NS.UnitEvents`, for `"player"` (recorded by `modules/StatData.lua` at load) | `StatData:Request`: one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
 | `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
 | `PLAYER_EQUIPMENT_CHANGED` | `modules/Detached.lua` at load, on its own bus target | `onEquipmentChanged`: re-render the detached weapon block (or the merged window it is a section of) and re-sync the overlays while it is shown; with the header's Equipped filter on a docked weapon block, refresh the main window at once (round 5, R5-10) | a weapon swap changes the weapon block's equipped-only list |
+| (timer) | `NS.TrainerPopup.Show` | `P.RefreshDistances` every 1 s (AceTimer, `P.TICK`) while the trainer popup is shown; `P.Hide` and the frame's `OnHide` cancel it (round 5, R5-15) | the player moves: the distances and the nearest-first order follow |
 | `PLAYER_LOGOUT` | `modules/Alts.lua` at load, on its own bus target | `Alts:Snapshot` | the last snapshot of the session |
 
 The bus subscribers on their own targets: `modules/SessionLog.lua` hears `SKILL_UP` (one log entry,
@@ -317,6 +318,13 @@ same tainted `OnShow` error (Known Limitations).
   the line's measured height (`GetStringHeight`); a measure the client answers secret, nil or zero
   reads as one line. A popup that would pass `NS.TrainerPopup.MAX_HEIGHT` (600) clips every card's
   line to one, and the card's tooltip always carries the whole list. There is no scroll in the popup.
+- The trainer popup's distances (round 5, R5-15) are measured from the map API's world positions
+  (`NS.Compat.PlayerWorldPos`, `MapWorldPos`), straight-line yards inside one instance (continent),
+  not a path. A trainer without coordinates (most profession trainers: the data gives only the weapon
+  masters' x and y), one on another continent, or a player the client gives no position (inside an
+  instance, a secret) shows no distance and sorts after the measured ones, in the data's order. The
+  cards can reorder under the pointer as the player moves (once a second); the selected trainer stays
+  selected. Not TomTom's distance (the owner's call: computed here). Unverified in game.
 - Every client API the data modules use is assumed until `/sm probe` confirms it
   ([forever-quirks.md](forever-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.

@@ -412,7 +412,7 @@ Total.
 - round5 snap: in combat a drop still moves, and the merge it asks for waits for combat's end
 - round5 snap: a stand-down mid-drag drops the drag, the driver disarmed and the glow hidden
 
-### test_round5_followups.lua (10)
+### test_round5_followups.lua (17)
 
 - round5 filter: All, Learned, Equipped and Below cap narrow the weapon block, stored per profile through the seam
 - round5 filter: Layout > Blocks > Weapon skills has the Show rows row, its values the filter menu's
@@ -424,6 +424,13 @@ Total.
 - round5 trainer popup: the Also teaches line wraps inside its card, and the card and the window grow to fit
 - round5 trainer popup: a secret or zero measure keeps the one-line card, and too tall a window drops to one line each
 - round5 trainer popup: a card's tooltip carries the whole Also teaches list
+- round5 distance: yards between two world positions, none across instances or without one
+- round5 distance: nearest first, the unmeasured last in their order, the input untouched
+- round5 distance: Compat reads the player's and a map point's world position, nil when the client cannot say
+- round5 distance: each card shows its distance and the popup sorts nearest first, the unknown last
+- round5 distance: the popup re-measures once a second while shown, keeps the selection, and stops on hide
+- round5 distance: a secret or missing player position shows no distance and keeps the data's order
+- round5 distance: Escape (the frame's own hide) stops the re-measure too
 
 ### test_blocks.lua (10)
 
@@ -835,7 +842,7 @@ Total.
 | test_round5_style.lua | 9 |
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
-| test_round5_followups.lua | 10 |
+| test_round5_followups.lua | 17 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -866,4 +873,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **608** |
+| **Total** | **615** |

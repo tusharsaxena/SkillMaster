@@ -113,3 +113,34 @@ function Trainers:NextRank(key, rank, max, level, faction, race)
     end
     return nil
 end
+
+-- ---------------------------------------------------------------------------------------------
+-- Round 5, R5-15: distances (pure math; the trainer popup measures the positions)
+-- ---------------------------------------------------------------------------------------------
+
+--- Yards between two world positions, each { instanceID, x, y } (NS.Compat.MapWorldPos's three
+--- returns); nil when either is missing or they lie in different instances (continents).
+function Trainers.Distance(a, b)
+    if type(a) ~= "table" or type(b) ~= "table" or a[1] == nil or a[1] ~= b[1] then return nil end
+    local dx, dy = a[2] - b[2], a[3] - b[3]
+    return math.sqrt(dx * dx + dy * dy)
+end
+
+--- A new list of `list`'s trainers, nearest first by `dist` (trainer record -> yards); a trainer with
+--- no distance comes after every measured one, the unmeasured keeping their order in `list`.
+function Trainers.ByDistance(list, dist)
+    local rank = {}
+    local out = {}
+    for i, t in ipairs(list) do rank[t], out[i] = i, t end
+    dist = dist or {}
+    table.sort(out, function(a, b)
+        local da, db = dist[a], dist[b]
+        if da and db then
+            if da ~= db then return da < db end
+        elseif da or db then
+            return da ~= nil
+        end
+        return rank[a] < rank[b]
+    end)
+    return out
+end

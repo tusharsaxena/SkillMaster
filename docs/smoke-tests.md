@@ -181,6 +181,13 @@ the checks below that cover each item:
   inside its card instead of being cut off, the card is taller by that line and the window by every
   such card; the buttons and the footer stay below the last card. Hover a card: a tooltip with the
   trainer's name, place and the whole `Also teaches` list.
+- **SM-DISP-31** (round 5, R5-15: the trainer distance) In Stormwind, open the trainer popup on an
+  unlearned weapon: each weapon master in a city on your continent shows `N yd` under its cost, the
+  nearest first; one on the other continent, or without coordinates, shows none and comes last.
+  Walk towards another trainer with the popup open: within about a second the yards change and the
+  cards reorder; the trainer you selected stays selected. Compare one card's yards with TomTom's arrow
+  (roughly equal: a straight line). Enter an instance (or a battleground) with the popup open: no
+  distances, no error.
 - **SM-BRK-1** (round 3) With nothing pinned (a fresh character, or right-click a pinned row > Pin to
   the broker feed again to unpin), the feed reads `Professions and Skills`. Right-click a row in the
   LDB tooltip: the row menu (pin, waypoint, trainers, Hide in this tooltip); Hide removes it from the

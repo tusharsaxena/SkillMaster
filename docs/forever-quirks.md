@@ -277,6 +277,7 @@ below on both clients.
 | `UnitRace("player")`, `UnitFactionGroup("player")` | `localized, raceFile` (`Human`, `Dwarf`, `Orc`, `Troll`, ...); `"Alliance"` / `"Horde"` | assumed (1.12) | Bonuses (racials, T2.2), Trainers (T2.4) |
 | `GetZoneText()` | the localized zone name, matched against the fishing table when no uiMapID matches | assumed (1.12) | SkillHelpers.FishingNeedHere (T2.4) |
 | `C_Map.GetBestMapForUnit`, `C_Map.SetUserWaypoint` | a uiMapID; a native map pin | listed (inherited from live); behavior unknown | Helpers, Waypoints (T2.4, T3.3) |
+| `C_Map.GetPlayerMapPosition(mapID, "player")`, `C_Map.GetWorldPosFromMapPos(mapID, CreateVector2D(x, y))` | a Vector2D (0..1) or nil (inside an instance); `instanceID, Vector2D` in world yards; either may be secret | listed (inherited from live); shape assumed, not measured; the catalog's uiMapIDs (1453 Stormwind, ...) unverified (SM-DISP-31) | TrainerPopup distances via Compat (round 5, R5-15) |
 | `CastSpellByName(name)` | protected from insecure code in combat | listed; protection unknown | the crafting rows' secure overlay (T3.3) |
 | `C_AddOns.IsAddOnLoaded("TomTom")` | true when TomTom is loaded; the bare `IsAddOnLoaded` is in neither set | listed | Waypoints (T3.3) |
 

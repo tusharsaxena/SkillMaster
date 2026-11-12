@@ -8,11 +8,16 @@ local _, NS = ...
 -- with the window.
 --
 -- NS.TrainerPopup.Show(key) / .Hide() / .IsShown() / .Frame() / .Trainers() / .Select(i) / .Selected()
--- / .Relayout() / .TextHeight(fs)
+-- / .Relayout() / .TextHeight(fs) / .Distance(t) / .RefreshDistances() / .Ticking()
 --
 -- Round 5, R5-14: a card's "Also teaches" line wraps inside the card (up to ALSO_LINES lines), the
 -- card grows by the wrapped height and the window by the cards; past P.MAX_HEIGHT every line falls
 -- back to one (the client's ellipsis), and the card's tooltip always carries the whole list.
+--
+-- Round 5, R5-15: each card shows the trainer's distance from the player ("123 yd"), measured from
+-- world positions (NS.Compat.PlayerWorldPos / MapWorldPos, the map API, guarded) and compared only
+-- inside one instance (continent); none when unknown. The cards sort nearest first, the unmeasured
+-- after in the data's order, and re-measure once a second (P.TICK, an AceTimer) while shown.
 
 NS.TrainerPopup = {}
 local P = NS.TrainerPopup
@@ -27,13 +32,21 @@ local ALSO_W, LINE_H, ALSO_LINES = WIDTH - 2 * PAD - 16, 12, 4
 --- The popup's tallest: past it, the cards' "Also teaches" lines drop back to one line each.
 P.MAX_HEIGHT = 600
 
-local frame, cardPool
-local state = { key = nil, list = {}, selected = 1 }
+local frame, cardPool, ticker
+local stopTicker   -- defined with the distances below; the frame's OnHide calls it
+-- base: the trainers in the data's order; list: the cards' order (nearest first); dist: yards each.
+local state = { key = nil, base = {}, list = {}, dist = {}, selected = 1 }
+--- Seconds between the distance re-measures while the popup is shown.
+P.TICK = 1
 
 function P.Frame() return frame end
 function P.IsShown() return frame ~= nil and frame:IsShown() == true end
 function P.Trainers() return state.list end
 function P.Selected() return state.list[state.selected] end
+--- Yards from the player to trainer `t` at the last measure, or nil when unknown.
+function P.Distance(t) return state.dist[t] end
+--- True while the distance re-measure runs (the popup is shown).
+function P.Ticking() return ticker ~= nil end
 --- The cards on show, in order (the suites read them).
 function P.Cards() return cardPool and cardPool.active or {} end
 
@@ -48,6 +61,11 @@ local function teachesText(t, key)
         if k ~= key then names[#names + 1] = skillName(k) end
     end
     return #names > 0 and L["Also teaches: %s"]:format(table.concat(names, ", ")) or ""
+end
+
+local function distText(t)
+    local d = state.dist[t]
+    return d and L["%d yd"]:format(math.floor(d + 0.5)) or ""
 end
 
 local function whereText(t)
@@ -101,6 +119,10 @@ local function buildCard(parent)
     c.cost = c:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     c.cost:SetPoint("TOPRIGHT", c, "TOPRIGHT", -8, -7)
     NS.Skin.Text(c.cost, "body")   -- the accent is the trainer name's alone (FB-11)
+    c.dist = c:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    c.dist:SetPoint("TOPRIGHT", c.cost, "BOTTOMRIGHT", 0, -3)
+    c.dist:SetJustifyH("RIGHT")
+    NS.Skin.Text(c.dist, "muted")
     c.where = c:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     c.where:SetPoint("TOPLEFT", c.name, "BOTTOMLEFT", 0, -3)
     NS.Skin.Text(c.where, "body")
@@ -147,6 +169,7 @@ local function fillCard(c, t, key, i, maxLines)
     local cost = t.costByKey and t.costByKey[key] or t.cost
     c.cost:SetText(cost and NS.Rows.Money(cost) or "")
     c.where:SetText(whereText(t))
+    c.dist:SetText(distText(t))
     c.alsoText = teachesText(t, key)
     c.also:SetMaxLines(maxLines)
     c.also:SetText(c.alsoText)
@@ -221,6 +244,7 @@ local function build()
     cardPool = NS.Pool.New()
     buildActions()
     UISpecialFrames[#UISpecialFrames + 1] = P.FRAME_NAME
+    frame:SetScript("OnHide", stopTicker)   -- Escape and the window's close hide it without P.Hide
     frame:Hide()
     return frame
 end
@@ -293,6 +317,69 @@ local function resolve(key)
         L["Trainers for your faction (%s) who teach %s:"]:format(faction, name)
 end
 
+-- ---------------------------------------------------------------------------------------------
+-- Distances (R5-15)
+-- ---------------------------------------------------------------------------------------------
+
+-- A trainer's world position, once measured (static, so kept); weak keys: the records are the data's.
+local worldOf = setmetatable({}, { __mode = "k" })
+
+local function trainerWorld(t)
+    local w = worldOf[t]
+    if w then return w end
+    if not (t.mapID and t.x and t.y) then return nil end
+    local instance, x, y = NS.Compat.MapWorldPos(t.mapID, t.x / 100, t.y / 100)
+    if instance == nil then return nil end
+    w = { instance, x, y }
+    worldOf[t] = w
+    return w
+end
+
+--- Yards from the player to each trainer of `list` (trainer -> yards; absent when unknown).
+local function measure(list)
+    local dist = {}
+    local instance, x, y = NS.Compat.PlayerWorldPos()
+    if instance == nil then return dist end
+    local me = { instance, x, y }
+    for _, t in ipairs(list) do dist[t] = NS.Trainers.Distance(me, trainerWorld(t)) end
+    return dist
+end
+
+function stopTicker()
+    if ticker and NS.addon then NS.addon:CancelTimer(ticker) end
+    ticker = nil
+end
+
+local function startTicker()
+    stopTicker()   -- a stand-down's CancelAllTimers may have taken the old one: always a fresh one
+    if NS.addon and NS.addon.ScheduleRepeatingTimer then
+        ticker = NS.addon:ScheduleRepeatingTimer(P.RefreshDistances, P.TICK)
+    end
+end
+
+local function sameOrder(a, b)
+    if #a ~= #b then return false end
+    for i = 1, #a do if a[i] ~= b[i] then return false end end
+    return true
+end
+
+--- Re-measure the distances: the cards' distance lines, and the order when it changed (the selected
+--- trainer stays selected). Stops the re-measure once the popup is hidden.
+function P.RefreshDistances()
+    if not P.IsShown() then return stopTicker() end
+    local selected = P.Selected()
+    state.dist = measure(state.base)
+    local list = NS.Trainers.ByDistance(state.base, state.dist)
+    if sameOrder(list, state.list) then
+        for _, c in ipairs(cardPool.active) do c.dist:SetText(distText(c.trainer)) end
+        return
+    end
+    state.list, state.selected = list, 1
+    for i, t in ipairs(list) do if t == selected then state.selected = i end end
+    layout()
+    refreshActions()
+end
+
 --- Open the popup on skill `key`.
 local RANK = {}
 for i, s in ipairs(LAYERS.STRATA_CHOICES) do RANK[s] = i end
@@ -315,12 +402,15 @@ function P.Show(key)
     build()
     frame:SetFrameStrata(P.Strata())   -- at each open: the openers' strata are the player's
     local list, title, intro = resolve(key)
-    state.key, state.list, state.selected = key, list, 1
+    state.dist = measure(list)
+    state.key, state.base, state.selected = key, list, 1
+    state.list = NS.Trainers.ByDistance(list, state.dist)
     frame.title:SetText(title)
     frame.intro:SetText(#list > 0 and intro or L["No trainer for your faction is recorded for this skill."])
     layout()
     refreshActions()
     frame:Show()
+    startTicker()
 end
 
 --- Lay the open popup out again (its cards' text re-measured); a no-op while it is hidden.
@@ -338,6 +428,7 @@ function P.Select(i)
 end
 
 function P.Hide()
+    stopTicker()
     if frame then frame:Hide() end
 end
 

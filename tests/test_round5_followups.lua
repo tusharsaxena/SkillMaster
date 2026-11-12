@@ -4,6 +4,9 @@
 -- persisted per profile through the seam; an emptied block's muted line; Equipped on an equipment change.
 -- R5-14: the trainer popup's "Also teaches" line wraps, its card and the window grow by the measured
 -- height (a secret or zero measure is one line), a cap clips each to one, the card's tooltip.
+-- R5-15: the trainer distances: the pure math (Trainers.Distance, ByDistance), the Compat world
+-- positions over the mocked C_Map (secret and missing guarded), the cards' yards, nearest first, the
+-- 1 s re-measure while shown and its stop on hide.
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -296,5 +299,152 @@ test("round5 trainer popup: a card's tooltip carries the whole Also teaches list
         assertEqual(lines[#lines], c.alsoText, "the full list last")
         assertTrue(M.GameTooltip:IsShown(), "shown")
         c:GetScript("OnLeave")(c)
+    end)
+end)
+
+-- ── R5-15: the trainer popup's distances ────────────────────────────────────────────────────
+
+local TR = NS.Trainers
+
+test("round5 distance: yards between two world positions, none across instances or without one", function()
+    assertEqual(TR.Distance({ 0, 0, 0 }, { 0, 3, 4 }), 5, "a 3-4-5 triangle")
+    assertEqual(TR.Distance({ 0, 0, 0 }, { 1, 3, 4 }), nil, "another continent is no distance")
+    assertEqual(TR.Distance(nil, { 0, 3, 4 }), nil, "no player position")
+    assertEqual(TR.Distance({ 0, 0, 0 }, nil), nil, "no trainer position")
+end)
+
+test("round5 distance: nearest first, the unmeasured last in their order, the input untouched", function()
+    local a, b, c, d, e = { n = "a" }, { n = "b" }, { n = "c" }, { n = "d" }, { n = "e" }
+    local input = { a, b, c, d, e }
+    local out = TR.ByDistance(input, { [b] = 300, [d] = 20, [e] = 300 })
+    local names = {}
+    for i, t in ipairs(out) do names[i] = t.n end
+    assertEqual(table.concat(names, ","), "d,b,e,a,c", "nearest first, ties and the unmeasured in input order")
+    assertEqual(input[1], a, "a new list: the data's order is kept")
+    assertEqual(#TR.ByDistance(input, nil), 5, "no distances: the same trainers")
+end)
+
+-- The player on Stormwind (1453, a 1000-yard square at the origin of instance 0); Ashenvale
+-- (1440) on instance 1.
+local function mapModel()
+    M.__map = { player = { mapID = 1453, x = 0.1, y = 0.12 }, worlds = {
+        [1453] = { instance = 0, ox = 0, oy = 0, w = 1000, h = 1000 },
+        [1440] = { instance = 1, ox = 0, oy = 0, w = 1000, h = 1000 },
+    } }
+    M.C_Map = M.__newMapApi()
+end
+
+test("round5 distance: Compat reads the player's and a map point's world position, nil when the client cannot say", function()
+    local C = NS.Compat
+    local saved = { M.C_Map, M.__map }
+    local ok, err = pcall(function()
+        mapModel()
+        local i, x, y = C.PlayerWorldPos()
+        assertEqual(i, 0); assertEqual(x, 100); assertEqual(y, 120)
+        i, x, y = C.MapWorldPos(1440, 0.5, 0.25)
+        assertEqual(i, 1); assertEqual(x, 500); assertEqual(y, 250)
+        assertEqual(C.MapWorldPos(9999, 0.5, 0.5), nil, "a map with no world rect")
+        assertEqual(C.MapWorldPos(1453, nil, 0.5), nil, "no coordinates")
+        M.__map.player = nil
+        assertEqual(C.PlayerWorldPos(), nil, "no map (an instance)")
+        mapModel()
+        local restore = T.kit.installSecretValue()
+        M.C_Map.GetPlayerMapPosition = function() return M.CreateVector2D(T.kit.secret(0.1), T.kit.secret(0.2)) end
+        local okSecret, got = pcall(C.PlayerWorldPos)
+        restore()
+        assertTrue(okSecret, "a secret position must not raise: " .. tostring(got))
+        assertEqual(got, nil, "a secret position is unknown")
+        M.C_Map = { GetBestMapForUnit = function() return 1453 end }
+        assertEqual(C.PlayerWorldPos(), nil, "an API the client lacks")
+        M.C_Map = nil
+        assertEqual(C.MapWorldPos(1453, 0.5, 0.5), nil, "no C_Map at all")
+    end)
+    M.C_Map, M.__map = saved[1], saved[2]
+    if not ok then error(err, 0) end
+end)
+
+-- Four trainers in the data's order: far, no coordinates, near, on another continent.
+local function distanceTrainers()
+    local function t(name, mapID, x, y)
+        return { name = name, faction = "Alliance", city = "Stormwind", mapID = mapID, x = x, y = y,
+                 teaches = { "staves" }, verified = true }
+    end
+    return { t("Far", 1453, 50, 50), t("Nowhere", 1453, nil, nil), t("Near", 1453, 10, 10),
+             t("Elsewhere", 1440, 10, 12) }
+end
+
+local function withDistancePopup(fn)
+    local saved = { M.C_Map, M.__map, TR.For, TR.NextRank }
+    local list = distanceTrainers()
+    TR.For = function() return list end
+    TR.NextRank = function() return nil end
+    mapModel()
+    TP.Show("staves")
+    local ok, err = pcall(fn, list)
+    TP.Hide()
+    M.C_Map, M.__map, TR.For, TR.NextRank = saved[1], saved[2], saved[3], saved[4]
+    if not ok then error(err, 0) end
+end
+
+local function cardNames()
+    local out = {}
+    for i, c in ipairs(TP.Cards()) do out[i] = c.name:GetText() end
+    return table.concat(out, ",")
+end
+
+test("round5 distance: each card shows its distance and the popup sorts nearest first, the unknown last", function()
+    withDistancePopup(function()
+        assertEqual(cardNames(), "Near,Far,Nowhere,Elsewhere")
+        local cards = TP.Cards()
+        assertEqual(cards[1].dist:GetText(), NS.L["%d yd"]:format(20), "Near: 20 yards")
+        assertEqual(cards[2].dist:GetText(), NS.L["%d yd"]:format(552), "Far: about 552 yards")
+        assertEqual(cards[3].dist:GetText(), "", "no coordinates: no distance")
+        assertEqual(cards[4].dist:GetText(), "", "another continent: no distance")
+        assertEqual(TP.Selected().name, "Near", "the nearest is selected")
+    end)
+end)
+
+test("round5 distance: the popup re-measures once a second while shown, keeps the selection, and stops on hide", function()
+    withDistancePopup(function()
+        assertTrue(TP.Ticking(), "the re-measure runs while shown")
+        TP.Select(1)   -- Near
+        M.__map.player = { mapID = 1453, x = 0.5, y = 0.52 }
+        M.__fireTimers()
+        assertEqual(cardNames(), "Far,Near,Nowhere,Elsewhere", "the player walked to Far")
+        assertEqual(TP.Selected().name, "Near", "the selected trainer stays selected")
+        assertEqual(TP.Cards()[1].dist:GetText(), NS.L["%d yd"]:format(20))
+        TP.Hide()
+        assertFalse(TP.Ticking(), "hidden: the re-measure stops")
+        M.__map.player = { mapID = 1453, x = 0.1, y = 0.12 }
+        M.__fireTimers()
+        assertEqual(cardNames(), "Far,Near,Nowhere,Elsewhere", "no re-sort while hidden")
+    end)
+end)
+
+test("round5 distance: a secret or missing player position shows no distance and keeps the data's order", function()
+    withDistancePopup(function()
+        TP.Hide()
+        M.__map.player = nil
+        TP.Show("staves")
+        assertEqual(cardNames(), "Far,Nowhere,Near,Elsewhere", "no position: the data's order")
+        for _, c in ipairs(TP.Cards()) do assertEqual(c.dist:GetText(), "") end
+        TP.Hide()
+        mapModel()
+        local restore = T.kit.installSecretValue()
+        M.C_Map.GetBestMapForUnit = function() return T.kit.secret(1453) end
+        local ok, err = pcall(TP.Show, "staves")
+        restore()
+        assertTrue(ok, "a secret map must not raise: " .. tostring(err))
+        assertEqual(cardNames(), "Far,Nowhere,Near,Elsewhere")
+    end)
+end)
+
+test("round5 distance: Escape (the frame's own hide) stops the re-measure too", function()
+    withDistancePopup(function()
+        assertTrue(TP.Ticking())
+        local onHide = TP.Frame():GetScript("OnHide")
+        assertTrue(type(onHide) == "function", "the frame stops it on hide")
+        onHide(TP.Frame())
+        assertFalse(TP.Ticking(), "stopped")
     end)
 end)

@@ -17,6 +17,8 @@ local _, NS = ...
 --   Compat.ClassIcon(classFile)            { atlas } or { file, coords } for a class's icon, or nil
 --   Compat.OpenTradeSkill(skillLineID)     open a profession's window by its line; true when it ran
 --   Compat.SelectSkillLine(i)              select line i in Character -> Skills; the call's name or nil
+--   Compat.MapWorldPos(mapID, x, y)        a map point's (0..1) world position: instance, x, y; or nil
+--   Compat.PlayerWorldPos()                the player's world position: instance, x, y; or nil
 -- PlayerLevel to SpellName (T5.2), and PlayerName (FB-17), exist so the simulator's seam (core/SimSetup.lua, LibKa0s-Sim-1.0) can answer
 -- every client read a simulated character needs (preview-mode, H1): a module reads them as
 -- `NS.Compat.Member(...)` at call time and never captures one in a local.
@@ -388,4 +390,42 @@ end
 function Compat.UnitSpeed(unit)
     if type(GetUnitSpeed) ~= "function" then return nil end
     return GetUnitSpeed(unit)
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- Round 5, R5-15: world positions for the trainer popup's distances. Every C_Map call and
+-- CreateVector2D is feature-detected and run under pcall; a position the client answers secret, or
+-- not at all (inside an instance), reads as unknown.
+-- ---------------------------------------------------------------------------------------------
+
+local function plainNumber(v) return not isSecret(v) and type(v) == "number" end
+
+--- The world position GetWorldPosFromMapPos gives a map point (x, y as 0..1 fractions).
+--- @return number|nil instanceID, number|nil x, number|nil y (yards); nil when unknown
+function Compat.MapWorldPos(mapID, x, y)
+    local api = C_Map
+    if not (plainNumber(mapID) and plainNumber(x) and plainNumber(y)) then return nil end
+    if type(api) ~= "table" or type(api.GetWorldPosFromMapPos) ~= "function"
+        or type(CreateVector2D) ~= "function" then return nil end
+    local ok, instance, pos = pcall(api.GetWorldPosFromMapPos, mapID, CreateVector2D(x, y))
+    if not ok or not plainNumber(instance) or isSecret(pos) or type(pos) ~= "table"
+        or type(pos.GetXY) ~= "function" then return nil end
+    local okXY, wx, wy = pcall(pos.GetXY, pos)
+    if not okXY or not (plainNumber(wx) and plainNumber(wy)) then return nil end
+    return instance, wx, wy
+end
+
+--- The player's world position: their best map, their place on it, and that point's world position.
+--- @return number|nil instanceID, number|nil x, number|nil y (yards); nil when unknown
+function Compat.PlayerWorldPos()
+    local api = C_Map
+    if type(api) ~= "table" or type(api.GetBestMapForUnit) ~= "function"
+        or type(api.GetPlayerMapPosition) ~= "function" then return nil end
+    local okMap, mapID = pcall(api.GetBestMapForUnit, "player")
+    if not okMap or not plainNumber(mapID) then return nil end
+    local okPos, pos = pcall(api.GetPlayerMapPosition, mapID, "player")
+    if not okPos or isSecret(pos) or type(pos) ~= "table" or type(pos.GetXY) ~= "function" then return nil end
+    local okXY, x, y = pcall(pos.GetXY, pos)
+    if not okXY or not (plainNumber(x) and plainNumber(y)) then return nil end
+    return Compat.MapWorldPos(mapID, x, y)
 end
