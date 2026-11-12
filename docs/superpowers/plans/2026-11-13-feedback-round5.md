@@ -43,8 +43,16 @@ Push after each milestone (M1, M2, M3); never merge without the owner's go.
 - **R5-7 (detached style):** a Detached windows group on the Layout page: scale, background opacity, border, title band, for every detached and merged window.
 - **R5-8 (trainer probe issue):** tusharsaxena/SkillMaster#3.
 - **R5-9 (mockup):** the UX mockup of R5-1, R5-2, R5-4, R5-6 and R5-7.
+- **R5-10 (weapon filter):** a filter mark on the Weapon Skills header, built like the sort mark: All, Learned, Equipped (and similar), with a fitting icon.
+- **R5-11 (empty Stats tab):** the Stats page's General tab is empty; fill it or remove it (R5-13 may absorb it).
+- **R5-12 (BoxList hide pages):** the checkbox-grid hide pages (Stats tabs, Broker tooltip skills/stats and similar) move to the BoxList layout (icon, name, eye).
+- **R5-13 (one Rows page):** one "Rows" page lists every skill and stat in the BoxList layout, with two eye columns (Window, LDB tooltip) under a header row; it replaces the separate show/hide pages.
+- **R5-14 (trainer popup wrap):** the popup's "Also teaches" text wraps; its box and the window grow to fit.
+- **R5-15 (trainer distance):** each trainer in the popup shows its distance from the player (world positions from the map API, guarded), and the list sorts nearest first.
+- Tracked only: tusharsaxena/SkillMaster#4 (every rank's trainers and other sources in the popup).
 
-Milestones: M1 = R5-1..R5-5 (small fixes), M2 = R5-7, M3 = R5-6.
+Milestones: M1 = R5-1..R5-5 (small fixes), M2 = R5-7, M3 = R5-6. Added by the owner during the run, a
+second workflow: M4 = R5-10, R5-14, R5-15; M5 = R5-11..R5-13.
 
 ## Ledger
 
@@ -60,3 +68,4 @@ Milestones: M1 = R5-1..R5-5 (small fixes), M2 = R5-7, M3 = R5-6.
 | R5-7 | done | da2299c |
 | R5-6 | done: R5-6a (model, persistence, merged window, split, menu) 9fec1a3 + 5217c4d; R5-6b (drag to merge, drag out: modules/GroupsSnap.lua) e445c62 + docs | e445c62 |
 | R5-review | done: the final review's fixes (a top merge's point, one combat queue entry per drop, the Journal's lock mark on a profile switch, the merged window's style pinned); inventory and badge | 4799b17 |
+| R5-10..R5-15 | queued (second workflow) | |
