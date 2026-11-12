@@ -17,6 +17,27 @@ NS.Print = NS.Util.print   -- the reclaim: the same object every settings file c
 
 function NS.IsTestMode() return NS.State.testMode == true end
 
+-- Test mode's surfaces (owner feedback round 5, R5-1): turning it on shows the main window, the
+-- Journal and test mode's three toasts (NS.Alerts.ShowTestToasts); turning it off takes the toasts
+-- down and hides each window test mode opened, leaving one the player had open. Nothing is stored.
+local openedForTest   -- { window = bool, journal = bool }: which windows test mode put up
+
+local function showTestSurfaces()
+    local W, J = NS.MainWindow, NS.Journal
+    openedForTest = { window = W and not W.IsShown(), journal = J and not J.IsShown() }
+    if openedForTest.window then W.Show() end
+    if openedForTest.journal then J.Show() end
+    if NS.Alerts then NS.Alerts.ShowTestToasts() end
+end
+
+local function hideTestSurfaces()
+    if NS.Alerts then NS.Alerts.HideTestToasts() end
+    local opened = openedForTest or {}
+    openedForTest = nil
+    if opened.window then NS.MainWindow.Hide() end
+    if opened.journal then NS.Journal.Hide() end
+end
+
 --- Flip test mode. Refuses while stood down (the one refusal helper), and refuses to START in
 --- combat or while a simulation runs (the two modes are exclusive, H5). Answers the new state.
 function NS.ToggleTestMode()
@@ -36,6 +57,7 @@ function NS.ToggleTestMode()
     NS.Debug("Test", "test mode %s", NS.State.testMode and "on" or "off")
     if NS.Preview then NS.Preview.Apply(NS.State.testMode) end
     if NS.MainWindow then NS.MainWindow.Refresh() end
+    if NS.State.testMode then showTestSurfaces() else hideTestSurfaces() end
     if NS.Helpers and NS.Helpers.RefreshScalars then NS.Helpers.RefreshScalars() end
     return NS.State.testMode
 end
@@ -48,6 +70,7 @@ function addon:OnEnterCombat()
     NS.Debug("Test", "test mode ended by combat")
     if NS.Preview then NS.Preview.Apply(false) end
     if NS.MainWindow then NS.MainWindow.Refresh() end
+    hideTestSurfaces()
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -68,6 +91,7 @@ function NS.StandDown()
     -- The simulation stops FIRST (H6), so its cleanup runs before anything below tears down.
     if NS.Sim then NS.Sim:Stop("standDown") NS.Sim:HidePanel() end
     NS.State.testMode = false
+    openedForTest = nil   -- every window and toast comes down below
     if NS.Preview then NS.Preview.Apply(false) end
     if NS.MainWindow then NS.MainWindow.StandDown() end
     if NS.Detached then NS.Detached.StandDown() end

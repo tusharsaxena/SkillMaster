@@ -291,6 +291,11 @@ the checks below that cover each item:
   timer near 4:12, Guns 105 +5, Fist Weapons, Polearms, Thrown and Riding unlearned), the summary
   reads "Ember Ironsong · Lv 22 · Dwarf Hunter" behind the Hunter icon and the strip says the data is sample data. `/sm test` again: your
   own character everywhere.
+- **SM-TEST-2** (round 5, R5-1) With the main window and the Journal closed, `/sm test`: both open,
+  and three toasts stack: the Leatherworking 150 / 150 cap toast (its next rank and trainer), a red weapon-gap
+  toast for Daggers and a green skill-up toast for Bows. They stay up (no countdown) and drag as one
+  stack. `/sm test` again: the toasts go and both windows close. Open the Journal first, then
+  `/sm test` twice: the Journal stays open. Enter combat in test mode: the toasts go with it.
 - **SM-SIM-1** Tick General → Master controls → Sim mode: the step panel opens beside the window and
   the box stays ticked. Start the fishing trip: every 3 s a step plays; a skill-up flashes the broker
   and adds a Journal line, the lure puts a teal segment on Fishing, the mount moves Run Speed to

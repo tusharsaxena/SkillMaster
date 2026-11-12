@@ -27,7 +27,7 @@ A.PAD_X, A.PAD_Y = 14, 12
 A.ICON, A.ICON_SMALL = 36, 28
 A.GAP = 12
 A.CLOSE_CLEAR = 26   -- the toast's close mark: 18 px, 4 px in, plus a margin
-A.STACK = 2          -- the mockup shows the cap and the weapon toast together
+A.STACK = 3          -- test mode shows a cap, a weapon-gap and a skill-up toast together (round 5)
 A.DEFAULT_GAP = 25
 A.UNTRAINED = 5   -- a weapon at this many points or fewer was never really used (alerts.weaponMode)
 
@@ -233,6 +233,59 @@ function A.OnSkillsUpdated(model)
             lastMax[key] = e.max
         end
     end
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- Test mode's toasts (owner feedback round 5, R5-1): one of each kind from the sample character,
+-- sticky while test mode is on (and draggable, so the player can place them), taken down when it ends.
+-- Built from the preview's model (NS.Preview.Skill), never the live one; nothing is recorded in the
+-- session's alerted sets, so a real alert after test mode still shows.
+-- ---------------------------------------------------------------------------------------------
+
+A.TEST_CAP, A.TEST_WEAPON, A.TEST_SKILLUP = "leatherworking", "daggers", "bows"
+A.TEST_KEYS = { "test:cap", "test:weapon", "test:skillup" }
+
+local function testCap(P)
+    local e = P.Skill(A.TEST_CAP)
+    if not (e and e.max) then return nil end
+    e = { key = e.key, name = e.name, rank = e.max, max = e.max }   -- the sample's craft, at its cap
+    local nextRank = NS.Trainers and NS.Trainers:NextRank(e.key, e.rank, e.max)
+    return nextRank and capPayload(e, nextRank) or nil
+end
+
+local function testGap(P)
+    local e = P.Skill(A.TEST_WEAPON)
+    if not e then return nil end
+    local cap = math.max(e.max or 0, NS.SkillHelpers.WeaponCap(P.Character().level))
+    return gapPayload(e, cap, cap - (e.rank or 0))
+end
+
+local function testUp(P)
+    local e = P.Skill(A.TEST_SKILLUP)
+    if not e then return nil end
+    return A.SkillUpPayload({ { key = e.key, name = e.name, rank = e.rank, max = e.max, category = e.category } })
+end
+
+--- Test mode's toasts: { { key, payload } ... }, cap, weapon gap, skill up, those the sample draws.
+function A.TestToasts()
+    local P, out = NS.Preview, {}
+    if not (P and P.IsOn()) then return out end
+    local payloads = { testCap(P), testGap(P), testUp(P) }
+    for i, key in ipairs(A.TEST_KEYS) do
+        if payloads[i] then out[#out + 1] = { key = key, payload = payloads[i] } end
+    end
+    return out
+end
+
+--- Show test mode's toasts, sticky (any of them already up is replaced).
+function A.ShowTestToasts()
+    A.HideTestToasts()
+    for _, t in ipairs(A.TestToasts()) do A.toast:Show(t.payload, { key = t.key, sticky = true }) end
+end
+
+--- Take test mode's toasts down (and drop any still waiting).
+function A.HideTestToasts()
+    for _, key in ipairs(A.TEST_KEYS) do A.toast:Remove(key) end
 end
 
 --- A left-click on a toast: a cap toast sets a waypoint to its trainer, or prints the directions.

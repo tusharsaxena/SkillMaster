@@ -164,3 +164,82 @@ test("round5 journal lock: /sm lock and /sm unlock repaint the Journal's mark", 
     NS.SetByPath("locked", was and true or false)
     J.Hide()
 end)
+
+-- ── R5-1: test mode's surfaces ───────────────────────────────────────────────────────────────
+
+local A = NS.Alerts
+
+local function visibleKeys()
+    local set = {}
+    for _, k in ipairs(A.toast:Stats().visibleKeys or {}) do set[k] = true end
+    return set
+end
+
+local function testOff() if NS.IsTestMode() then NS.ToggleTestMode() end M.__fireTimers() end
+
+test("round5 test mode: /sm test shows the main window, the Journal and one sticky toast of each kind", function()
+    testOff()
+    W.Hide()
+    J.Hide()
+    A.toast:Clear()
+    NS.Slash:OnSlash("test")
+    M.__fireTimers()
+    local ok, err = pcall(function()
+        assertTrue(NS.IsTestMode(), "test mode on")
+        assertTrue(W.IsShown(), "the main window shows")
+        assertTrue(J.IsShown(), "the Journal shows")
+        assertEqual(A.STACK, 3, "the stack holds the three")
+        local keys = visibleKeys()
+        for _, k in ipairs({ "test:cap", "test:weapon", "test:skillup" }) do
+            assertTrue(keys[k], k .. " on screen")
+        end
+        assertTrue(A.toast:Stats().sticky, "sticky: they stay while test mode is on")
+        local kinds = {}
+        for _, t in ipairs(A.TestToasts()) do kinds[t.payload.kind] = t.payload end
+        assertTrue(kinds.cap and kinds.weapon and kinds.skillup, "a cap, a weapon-gap and a skill-up toast")
+        local c = NS.Preview_Forever.character
+        assertTrue(NS.Preview.Character().name == c.name, "drawn from the sample character")
+        assertTrue(kinds.cap.title:find(NS.L["Leatherworking"], 1, true) ~= nil, "the sample's Leatherworking at its cap")
+    end)
+    testOff()
+    if not ok then error(err, 0) end
+end)
+
+test("round5 test mode: ending it takes the toasts down and puts the windows back as they were", function()
+    testOff()
+    W.Hide()
+    J.Hide()
+    NS.ToggleTestMode()
+    M.__fireTimers()
+    assertTrue(visibleKeys()["test:cap"] and W.IsShown() and J.IsShown(), "test mode put them all up")
+    NS.ToggleTestMode()
+    M.__fireTimers()
+    local keys = visibleKeys()
+    for _, k in ipairs({ "test:cap", "test:weapon", "test:skillup" }) do
+        assertFalse(keys[k], k .. " gone")
+    end
+    assertFalse(W.IsShown(), "the main window, hidden before, is hidden again")
+    assertFalse(J.IsShown(), "the Journal too")
+    -- A window open before test mode stays open after it.
+    J.Show()
+    NS.ToggleTestMode()
+    NS.ToggleTestMode()
+    M.__fireTimers()
+    assertTrue(J.IsShown(), "the Journal, open before, stays open")
+    J.Hide()
+end)
+
+test("round5 test mode: combat ends it and its toasts with it; nothing live is written", function()
+    testOff()
+    local before = NS.db.profile.alerts.point
+    NS.ToggleTestMode()
+    M.__fireTimers()
+    assertTrue(visibleKeys()["test:cap"], "the cap toast up in test mode")
+    NS.addon:OnEnterCombat()
+    M.__fireTimers()
+    assertFalse(NS.IsTestMode(), "combat ended test mode")
+    assertFalse(visibleKeys()["test:cap"], "the cap toast went with it")
+    assertEqual(NS.db.profile.alerts.point, before, "the toast's stored point untouched")
+    W.Hide()
+    J.Hide()
+end)

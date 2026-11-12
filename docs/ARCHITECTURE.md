@@ -143,7 +143,7 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 
 | Event | Registered by | Handler | Why |
 |---|---|---|---|
-| `PLAYER_REGEN_DISABLED` | `NS.RegisterRuntime` (`core/SkillMaster.lua`) | `addon:OnEnterCombat` | combat ends test mode and a running simulation (preview-mode) |
+| `PLAYER_REGEN_DISABLED` | `NS.RegisterRuntime` (`core/SkillMaster.lua`) | `addon:OnEnterCombat` | combat ends test mode (its three toasts and the windows it opened come down) and a running simulation (preview-mode) |
 | `PLAYER_REGEN_DISABLED`, `PLAYER_REGEN_ENABLED` | `modules/SecureOverlay.lua` at load, on its own bus target | disarm every crafting overlay at the combat-start edge; after combat run the queued layout work, then re-sync the overlays | Taint Notes below |
 | `SKILL_LINES_CHANGED` | `NS.SkillData:Enable` (from `NS.RegisterRuntime`) | debounced `SkillData:Scan` (0.1 s) | the skill list changed; the echo of the scan's own header toggles is ignored for 0.2 s |
 | `CHAT_MSG_SKILL` | `NS.SkillData:Enable` | debounced `SkillData:Scan` | a skill-up line |
@@ -238,6 +238,11 @@ same tainted `OnShow` error (Known Limitations).
   through the seam: the skill list, the player's level, class and race, the weapon enchant, the
   main hand's tooltip and the speed. The other stats, the buffs and the zone stay live during a
   session.
+- Turning test mode on (round 5) shows the main window, the Journal and three sticky toasts from the
+  sample character (a rank cap, a weapon gap, a skill up; `NS.Alerts.ShowTestToasts`, keys
+  `test:cap`, `test:weapon`, `test:skillup`); turning it off takes the toasts down and hides each
+  window test mode opened. The first-run skin picker previews through test mode, so it shows them too.
+  The toast stack holds three (`A.STACK`).
 - Test mode's lure timer counts from when test mode turned on and is redrawn on the next repaint,
   not every second (the live ticker follows only live temp bonuses).
 - On a client that is not enUS, the skill lines are matched on their skill-line ID when the

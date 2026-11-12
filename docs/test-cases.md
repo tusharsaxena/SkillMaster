@@ -333,7 +333,7 @@ Total.
 - round3 click: a weapon row opens the Skills tab with its line selected
 - round3 click: Compat.OpenTradeSkill answers false without the call, and the call's own answer with it
 
-### test_round5.lua (7)
+### test_round5.lua (10)
 
 - round5 detached mark: a detached row's action mark snaps to the pixel grid, as the main window's
 - round5 detached mark: the mark sits a whole unit down its row at any row height
@@ -342,6 +342,9 @@ Total.
 - round5 table headers: a look change repaints both bands (the Journal re-renders on LAYOUT_CHANGED)
 - round5 journal lock: the title bar's lock mark beside the close control toggles the one locked setting
 - round5 journal lock: /sm lock and /sm unlock repaint the Journal's mark
+- round5 test mode: /sm test shows the main window, the Journal and one sticky toast of each kind
+- round5 test mode: ending it takes the toasts down and puts the windows back as they were
+- round5 test mode: combat ends it and its toasts with it; nothing live is written
 
 ### test_blocks.lua (10)
 
@@ -747,7 +750,7 @@ Total.
 | test_round2_layout.lua | 8 |
 | test_round2_icons.lua | 11 |
 | test_round3.lua | 10 |
-| test_round5.lua | 7 |
+| test_round5.lua | 10 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -778,4 +781,4 @@ Total.
 | test_skin_switch.lua | 17 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **536** |
+| **Total** | **539** |
