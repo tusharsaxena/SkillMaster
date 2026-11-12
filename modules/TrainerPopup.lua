@@ -33,7 +33,7 @@ local ALSO_W, LINE_H, ALSO_LINES = WIDTH - 2 * PAD - 16, 12, 4
 P.MAX_HEIGHT = 600
 
 local frame, cardPool, ticker
-local stopTicker   -- defined with the distances below; the frame's OnHide calls it
+local stopTicker, startTicker   -- defined with the distances below; the frame's OnHide / OnShow call them
 -- base: the trainers in the data's order; list: the cards' order (nearest first); dist: yards each.
 local state = { key = nil, base = {}, list = {}, dist = {}, selected = 1 }
 --- Seconds between the distance re-measures while the popup is shown.
@@ -245,6 +245,9 @@ local function build()
     buildActions()
     UISpecialFrames[#UISpecialFrames + 1] = P.FRAME_NAME
     frame:SetScript("OnHide", stopTicker)   -- Escape and the window's close hide it without P.Hide
+    -- A UIParent hide (Alt+Z, a cinematic) runs OnHide too, and the popup comes back with it: the
+    -- re-measure restarts on that show (review, R5-followups).
+    frame:SetScript("OnShow", function() startTicker() end)
     frame:Hide()
     return frame
 end
@@ -350,7 +353,7 @@ function stopTicker()
     ticker = nil
 end
 
-local function startTicker()
+function startTicker()
     stopTicker()   -- a stand-down's CancelAllTimers may have taken the old one: always a fresh one
     if NS.addon and NS.addon.ScheduleRepeatingTimer then
         ticker = NS.addon:ScheduleRepeatingTimer(P.RefreshDistances, P.TICK)

@@ -411,7 +411,7 @@ Total.
 - round5 snap: in combat a drop still moves, and the merge it asks for waits for combat's end
 - round5 snap: a stand-down mid-drag drops the drag, the driver disarmed and the glow hidden
 
-### test_round5_followups.lua (23)
+### test_round5_followups.lua (27)
 
 - round5 filter: All, Learned, Equipped and Below cap narrow the weapon block, stored per profile through the seam
 - round5 filter: Layout > Blocks > Weapon skills has the Show rows row, its values the filter menu's
@@ -436,6 +436,10 @@ Total.
 - round5 rows: a group heading's eyes show that group's hidden rows again, one column each
 - round5 rows: a hide written while the page is hidden (the row menu) redraws it on its next show
 - round5 rows: the Rows page's Defaults restores both hidden sets; the Skills and Broker pages' leave them
+- round5 review: a UIParent hide and show (Alt+Z, a cinematic) restarts the popup's re-measure
+- round5 review: a block its filter emptied is content, so the window's empty message stays hidden
+- round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once
+- round5 review: a block reorder redraws the Rows page in the new order, shown or hidden
 
 ### test_blocks.lua (10)
 
@@ -847,7 +851,7 @@ Total.
 | test_round5_style.lua | 9 |
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
-| test_round5_followups.lua | 23 |
+| test_round5_followups.lua | 27 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -878,4 +882,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **620** |
+| **Total** | **624** |

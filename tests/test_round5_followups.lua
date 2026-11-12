@@ -668,3 +668,93 @@ test("round5 rows: the Rows page's Defaults restores both hidden sets; the Skill
     assertTrue(next(NS.db.profile.broker.tooltip.hiddenStats) == nil, "every tooltip-hidden stat")
     clearHidden()
 end)
+
+-- ── The R5-followups review (2026-11-13) ────────────────────────────────────────────────────
+
+test("round5 review: a UIParent hide and show (Alt+Z, a cinematic) restarts the popup's re-measure", function()
+    -- red under: only P.Show starts the ticker, so OnHide's stop outlives the implicit show
+    withDistancePopup(function()
+        local f = TP.Frame()
+        f:GetScript("OnHide")(f)   -- UIParent hid: the popup's OnHide runs, it stays IsShown()
+        assertFalse(TP.Ticking(), "the implicit hide stops it")
+        local onShow = f:GetScript("OnShow")
+        assertTrue(type(onShow) == "function", "the frame restarts it on show")
+        onShow(f)
+        assertTrue(TP.Ticking(), "running again once UIParent shows")
+        M.__map.player = { mapID = 1453, x = 0.5, y = 0.52 }
+        M.__fireTimers()
+        assertEqual(cardNames(), "Far,Near,Nowhere,Elsewhere", "the order follows the player again")
+    end)
+end)
+
+test("round5 review: a block its filter emptied is content, so the window's empty message stays hidden", function()
+    -- red under: plan() counting only entries, so the centered message drew over the header
+    withWeapons(function()
+        wield(nil)
+        set("layout.blocks.weapon.filter", "equipped")
+        M.__fireTimers()
+        assertTrue(header("weapon") ~= nil, "the weapon header and its note are laid out")
+        assertEqual(#W.Rows(), 0, "no row anywhere")
+        assertFalse(W.Frame().empty:IsShown(), "no 'No skills to show yet.' over the header")
+    end)
+end)
+
+local function headingsSince(from)
+    local out = {}
+    for _, h in ipairs(createdOf(from, "SkillMasterListHeading")) do out[#out + 1] = h.text end
+    return out
+end
+
+test("round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once", function()
+    -- red under: stale() skipping the refresh while the page is shown
+    clearHidden()
+    local panel = showRowsPage()
+    local ok, err = pcall(function()
+        local from = #aceGUI().__created
+        NS.SetByPath("skills.hidden.axes", true)   -- the row menu's Hide, `/sm set`
+        M.__fireTimers()
+        assertTrue(#headingsSince(from) > 0, "the shown page drew again")
+        from = #aceGUI().__created
+        NS.SetByPath("skills.hidden.bows", true)
+        M.__fireTimers()
+        local seq = drawn(from, { SkillMasterListHeading = true, Icon = true })
+        local showWin
+        for i, w in ipairs(seq) do
+            if w.type == "SkillMasterListHeading" and w.text == NS.BlockDefs.weapon.title then showWin = seq[i + 1] end
+        end
+        assertTrue(showWin ~= nil, "the Weapon Skills heading's window eye")
+        from = #aceGUI().__created
+        showWin.callbacks.OnClick()
+        M.__fireTimers()
+        assertEqual(#headingsSince(from), #NS.OptionsRows.Groups(), "one render for the whole show-all")
+    end)
+    clearHidden()
+    hidePanel(panel)
+    if not ok then error(err, 0) end
+end)
+
+test("round5 review: a block reorder redraws the Rows page in the new order, shown or hidden", function()
+    -- red under: nothing marking the page stale on a reorder
+    clearHidden()
+    local function indexOf(id)
+        for i, b in ipairs(NS.Blocks.Ordered()) do if b == id then return i end end
+    end
+    local was = indexOf("weapon")
+    local panel = showRowsPage()
+    hidePanel(panel)
+    local ok, err = pcall(function()
+        NS.Blocks:Move(was, 1)
+        M.__fireTimers()
+        local from
+        panel, from = showRowsPage()
+        assertEqual(headingsSince(from)[1], NS.BlockDefs.weapon.title, "hidden: the next show draws the new order")
+        from = #aceGUI().__created
+        NS.Blocks:Move(1, was)
+        M.__fireTimers()
+        assertEqual(headingsSince(from)[1], NS.BlockDefs[NS.Blocks.Ordered()[1]].title, "shown: drawn again at once")
+        assertTrue(NS.Blocks.Ordered()[1] ~= "weapon", "back in place")
+    end)
+    if indexOf("weapon") ~= was then NS.Blocks:Move(indexOf("weapon"), was) end
+    hidePanel(panel)
+    if not ok then error(err, 0) end
+end)

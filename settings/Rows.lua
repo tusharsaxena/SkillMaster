@@ -25,12 +25,26 @@ NS.OptionsRows = Rows
 -- The two columns' widths: wide enough for their captions over a 16 px eye.
 Rows.COLUMN_W, Rows.LABEL_W = 84, 0.62
 
--- A write while the page is not on screen (the row menu's Hide, `/sm set`, a header's restore eye)
--- marks the page owed a render, so its next show draws the eyes as they stand. On screen, the eye's
--- own click redraws it.
-local function stale()
+-- Every hide write, from any actor (the page's eyes, the row menu's Hide, `/sm set`, a header's
+-- restore eye), redraws the page: the library renders a page on screen now and marks a hidden one
+-- owed a render for its next show (review, R5-followups: a write from elsewhere left a shown page's
+-- eyes stale). Inside a bracket (a heading's show-all, the page's Defaults) the writes coalesce
+-- into one render on the next frame, as NS.ApplyLook does.
+local pending = false
+
+local function render()
+    pending = false
     local ctx = Rows.ctx
-    if ctx and ctx.panel and not ctx.panel:IsShown() then H.RefreshPanel(ctx, true) end
+    if ctx then H.RefreshPanel(ctx, true) end
+end
+
+local function stale()
+    if not Rows.ctx then return end
+    local S = NS.SchemaRuntime
+    if not (S and S.InBulk and S.InBulk() and NS.addon and NS.addon.ScheduleTimer) then return render() end
+    if pending then return end
+    pending = true
+    NS.addon:ScheduleTimer(render, 0)
 end
 
 local function windowChanged()
@@ -139,18 +153,17 @@ end
 
 local function hidden(path) return NS.GetSetting(path) == true end
 
-local function toggle(ctx, path, was)
-    return function()
-        if NS.SetByPath(path, not was) then H.RefreshPanel(ctx, true) end
-    end
+-- An eye's write redraws the page through its row's onChange (stale above), so a click renders once.
+local function toggle(path, was)
+    return function() NS.SetByPath(path, not was) end
 end
 
---- Show every hidden row of `g` in one column, as one act (one LAYOUT_CHANGED).
-local function showAll(ctx, paths)
+--- Show every hidden row of `g` in one column, as one act (one LAYOUT_CHANGED, one render).
+local function showAll(paths)
     return function()
         local entries = {}
         for i, p in ipairs(paths) do entries[i] = { path = p, value = false } end
-        if NS.SchemaRuntime.SetMany(entries, { act = "show", scope = PAGE }) then H.RefreshPanel(ctx, true) end
+        NS.SchemaRuntime.SetMany(entries, { act = "show", scope = PAGE })
     end
 end
 
@@ -162,20 +175,21 @@ local function hiddenIn(g, field)
     return out
 end
 
-local function groupMark(ctx, eye, paths, title)
+local function groupMark(eye, paths, title)
     local none = #paths == 0
-    return { image = eye, dimmed = none, onClick = not none and showAll(ctx, paths) or nil, title = title,
+    return { image = eye, dimmed = none, onClick = not none and showAll(paths) or nil, title = title,
              tooltip = none and L["Nothing in this group is hidden here."]
                  or L["%d hidden. Click to show them again."]:format(#paths) }
 end
 
-local function rowMark(ctx, eye, path, name, was, where)
-    return { image = eye, dimmed = was, onClick = toggle(ctx, path, was),
+local function rowMark(eye, path, name, was, where)
+    return { image = eye, dimmed = was, onClick = toggle(path, was),
              title = (was and L["Show %s"] or L["Hide %s"]):format(name), tooltip = where }
 end
 
 function Rows.Render(ctx)
     Rows.ctx = ctx
+    Rows.order = table.concat(NS.Blocks.Ordered(), ",")
     local scroll = H.EnsureScroll(ctx)
     if not scroll then return end
     H.TextRow(ctx, L["The first eye hides a row from the window and the detached blocks, the second from the LDB tooltip; a dimmed eye is hidden there. A row hidden from both is dimmed. A heading's eyes show its group's hidden rows again."])
@@ -185,21 +199,36 @@ function Rows.Render(ctx)
     NS.OptionsList.Header(scroll, list, { text = "", columns = { { text = L["Window"] }, { text = L["LDB tooltip"] } } })
     for _, g in ipairs(Rows.Groups()) do
         NS.OptionsList.Header(scroll, list, { text = g.title, heading = true, columns = {
-            groupMark(ctx, eye, hiddenIn(g, "windowPath"), L["Show in the window"]),
-            groupMark(ctx, eye, hiddenIn(g, "tipPath"), L["Show in the LDB tooltip"]),
+            groupMark(eye, hiddenIn(g, "windowPath"), L["Show in the window"]),
+            groupMark(eye, hiddenIn(g, "tipPath"), L["Show in the LDB tooltip"]),
         } })
         for _, r in ipairs(g.rows) do
             local inWin, inTip = hidden(r.windowPath), hidden(r.tipPath)
             NS.OptionsList.Row(scroll, list, {
                 text = r.name, icon = r.icon, dimmed = inWin and inTip,
                 actions = {
-                    rowMark(ctx, eye, r.windowPath, r.name, inWin, WINDOW_DESC),
-                    rowMark(ctx, eye, r.tipPath, r.name, inTip, TIP_DESC),
+                    rowMark(eye, r.windowPath, r.name, inWin, WINDOW_DESC),
+                    rowMark(eye, r.tipPath, r.name, inTip, TIP_DESC),
                 },
             })
         end
     end
     NS.OptionsList.Finish(list, scroll)
+end
+
+-- The groups follow the window's block order: a reorder (Layout > Block order's drag, `/sm set
+-- layout.blocks.<id>.order`, a profile switch) redraws the page, shown now or hidden at its next
+-- show (review, R5-followups). Every LAYOUT_CHANGED is checked; only a changed order renders.
+local function orderChanged()
+    if Rows.ctx and Rows.order ~= table.concat(NS.Blocks.Ordered(), ",") then
+        Rows.order = table.concat(NS.Blocks.Ordered(), ",")
+        H.RefreshPanel(Rows.ctx, true)
+    end
+end
+
+if NS.NewBusTarget then
+    Rows.events = NS.NewBusTarget()
+    if Rows.events then Rows.events:RegisterMessage(NS.MSG.LAYOUT_CHANGED, orderChanged) end
 end
 
 NS.RegisterSchemaPage(PAGE, L["Rows"], {

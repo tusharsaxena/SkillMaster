@@ -167,9 +167,10 @@ columns 84 px wide (`actionWidth`) and the name at 0.62 of the row (`labelWidth`
   `hiddenStats.<key>` (the LDB tooltip). Neither set reaches the other.
 
 The page's Defaults restores both hidden sets (every per-key row and the four whole-set rows). The
-row menu's Hide and a header's restore eye write the same rows; a write while the page is hidden
-marks it owed a render, so its next show draws the eyes as they stand. Nothing moved path, so no
-schemaVersion step.
+row menu's Hide and a header's restore eye write the same rows; every write redraws the page
+(shown: at once; hidden: on its next show), a bracketed batch (a heading's show-all, Defaults) once
+on the next frame, so the eyes always stand as stored. A block reorder (Layout > Block order) redraws
+it in the new order the same way. Nothing moved path, so no schemaVersion step.
 
 ## Bars
 

@@ -115,8 +115,13 @@ once, grouped under the window's block headings in `NS.Blocks.Ordered()`, one ey
 (Window, LDB tooltip) on `NS.OptionsList`'s two-column rows, and one show-all eye per column on each
 heading (`SetMany`, one act). It replaced the Skills page's Professions and Weapons tabs, the Stats
 page (gone: its General tab held only the undrawn set row) and the Broker page's Tooltip skills and
-Tooltip stats tabs. The paths did not move, so nothing migrated. A write made while the page is
-hidden (the row menu, a header's restore eye, `/sm set`) marks it owed a render.
+Tooltip stats tabs. The paths did not move, so nothing migrated. Every hide write, from any actor
+(the page's eyes, the row menu, a header's restore eye, `/sm set`), goes through `H.RefreshPanel`:
+a page on screen renders at once, a hidden one is owed a render; writes inside a bracket (a
+heading's show-all, the page's Defaults) coalesce into one render on the next frame. A
+`LAYOUT_CHANGED` that changed `NS.Blocks.Ordered()` (a Block order drag, `/sm set`, a profile
+switch) redraws the page the same way, so its groups follow the window's order (the R5-followups
+review).
 
 `profile.layout.detached` (round 5, R5-7) is one style for every detached window, set on Layout >
 Detached windows. `NS.Detached.ApplyStyle(frame)` paints it on each render: the scale (the frame's
@@ -210,7 +215,7 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | `UNIT_STATS`, `UNIT_ATTACK_POWER`, `UNIT_RANGED_ATTACK_POWER`, `UNIT_RESISTANCES`, `UNIT_DAMAGE` | `NS.UnitEvents`, for `"player"` (recorded by `modules/StatData.lua` at load) | `StatData:Request`: one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
 | `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
 | `PLAYER_EQUIPMENT_CHANGED` | `modules/Detached.lua` at load, on its own bus target | `onEquipmentChanged`: re-render the detached weapon block (or the merged window it is a section of) and re-sync the overlays while it is shown; with the header's Equipped filter on a docked weapon block, refresh the main window at once (round 5, R5-10) | a weapon swap changes the weapon block's equipped-only list |
-| (timer) | `NS.TrainerPopup.Show` | `P.RefreshDistances` every 1 s (AceTimer, `P.TICK`) while the trainer popup is shown; `P.Hide` and the frame's `OnHide` cancel it (round 5, R5-15) | the player moves: the distances and the nearest-first order follow |
+| (timer) | `NS.TrainerPopup.Show` | `P.RefreshDistances` every 1 s (AceTimer, `P.TICK`) while the trainer popup is shown; `P.Hide` and the frame's `OnHide` cancel it, the frame's `OnShow` restarts it (a UIParent hide and show, Alt+Z or a cinematic, runs both; the R5-followups review) (round 5, R5-15) | the player moves: the distances and the nearest-first order follow |
 | `PLAYER_LOGOUT` | `modules/Alts.lua` at load, on its own bus target | `Alts:Snapshot` | the last snapshot of the session |
 
 The bus subscribers on their own targets: `modules/SessionLog.lua` hears `SKILL_UP` (one log entry,

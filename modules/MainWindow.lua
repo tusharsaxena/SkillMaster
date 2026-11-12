@@ -313,7 +313,9 @@ end
 -- ---------------------------------------------------------------------------------------------
 
 local function plan(skills, stats)
-    local out, sig, total = {}, {}, 0
+    -- `laid` counts the blocks laid out, not their rows: a block its filter emptied shows its
+    -- header and note, so it is content and the window's empty message stays down (review, R5-followups).
+    local out, sig, laid = {}, {}, 0
     for _, id in ipairs(NS.Blocks.Docked()) do
         local entries, removed = NS.Blocks.Entries(id, skills, stats)
         -- A block its filter emptied keeps its header and a muted line (round 5, R5-10).
@@ -327,12 +329,12 @@ local function plan(skills, stats)
             if not collapsed then
                 for _, r in ipairs(entries) do sig[#sig + 1] = r.entry.key end
             end
-            total = total + #entries
+            laid = laid + 1
         end
     end
     -- The gathering hint changes a row's height: turning it on or off is a new layout.
     sig[#sig + 1] = (NS.db and NS.db.profile.skills.helperHint) and "hint" or "-"
-    return out, table.concat(sig, ","), total
+    return out, table.concat(sig, ","), laid
 end
 
 local function bodyTop()
@@ -506,7 +508,7 @@ function W.Render()
     local test, sim = NS.IsTestMode(), NS.IsSimRunning and NS.IsSimRunning() or false
     renderTitle(test, sim)
     local skills, stats = NS.Blocks.Data()
-    local blocks, sig, total = plan(skills, stats)
+    local blocks, sig, laid = plan(skills, stats)
     sig = sig .. "|" .. markerSig(test, sim)
     local SO = NS.SecureOverlay
     if sig == lastSig then
@@ -518,7 +520,7 @@ function W.Render()
         lastSig = sig
         if SO then SO:Sync() end
     end
-    frame.empty:SetShown(total == 0)
+    frame.empty:SetShown(laid == 0)
     paintToggleAll()
     local who, gains, alert = W.SummaryParts(skills)
     drawIdentity(who)

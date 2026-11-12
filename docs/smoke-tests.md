@@ -188,6 +188,12 @@ the checks below that cover each item:
   cards reorder; the trainer you selected stays selected. Compare one card's yards with TomTom's arrow
   (roughly equal: a straight line). Enter an instance (or a battleground) with the popup open: no
   distances, no error.
+- **SM-DISP-32** (R5-followups review) Open the trainer popup, press Alt+Z twice (the UI hides and
+  comes back): walk towards another trainer; within about a second the yards change and the cards
+  reorder, as before the Alt+Z.
+- **SM-DISP-33** (R5-followups review) Detach (or hide on Layout > Block order) every block but Weapon
+  Skills, set its filter to Equipped and unequip the main hand: the window shows the Weapon Skills
+  header and `No rows match this filter.`, and no `No skills to show yet.` over them.
 - **SM-BRK-1** (round 3) With nothing pinned (a fresh character, or right-click a pinned row > Pin to
   the broker feed again to unpin), the feed reads `Professions and Skills`. Right-click a row in the
   LDB tooltip: the row menu (pin, waypoint, trainers, Hide in this tooltip); Hide removes it from the
@@ -292,6 +298,11 @@ the checks below that cover each item:
   row dims. Hide Bows and Guns from the window; the Weapon Skills heading's Window eye brings both
   back at once (one repaint), leaving Axes's tooltip hide. With the Rows page closed, hide Fishing
   from its row menu and reopen Rows: Fishing's Window eye reads dimmed.
+- **SM-OPT-21** (R5-followups review) With Rows open and the main window visible, right-click Axes
+  in the window > Hide this row: Axes's Window eye dims at once and the Weapon Skills heading's
+  Window eye lights; click it: Axes comes back. `/sm set skills.hidden.bows true` with the page open:
+  the same. Drag Weapon Skills to the top on Layout > Block order, go back to Rows: Weapon Skills
+  is the first heading.
 - **SM-OPT-20** (round 5, R5-13) Hide a skill and a stat in both columns, then Skills > Defaults and
   Broker > Defaults: they stay hidden. Rows > Defaults: everything shows again in the window and the
   tooltip. Each Defaults button's tooltip says which.
