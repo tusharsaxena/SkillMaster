@@ -340,6 +340,7 @@ function D.Render(id)
     -- Read at each render: a skin switch can move the band (it re-renders through ApplyLook).
     local top = D.TopHeight(f)
     placeBody(f, top)
+    f.rowsH = y   -- the rows' drawn extent (the block as a merged section, NS.Groups)
     f.body:SetHeight(math.max(y, 1))
     f:SetHeight(top + y + D.PAD)
     f:SetMovable(not isLocked(id))

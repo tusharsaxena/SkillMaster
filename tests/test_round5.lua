@@ -131,7 +131,9 @@ local function lockIcon(b) return b.icon and b.icon:GetTexture() end
 
 test("round5 journal lock: the title bar's lock mark beside the close control toggles the one locked setting", function()
     local was = NS.GetSetting("locked")
+    local wasShown = W.IsShown()
     NS.SetByPath("locked", false)
+    W.Show()
     J.Show()
     local f = J.Frame()
     assertTrue(f.lockButton ~= nil, "the Journal carries a lock mark")
@@ -140,12 +142,36 @@ test("round5 journal lock: the title bar's lock mark beside the close control to
     f.lockButton:__fire("OnClick", "LeftButton")
     assertTrue(NS.GetSetting("locked") == true, "a click locks, through the seam")
     assertEqual(lockIcon(f.lockButton), NS.Icon("lock"), "and the mark shows it")
-    assertEqual(lockIcon(W.Frame() and W.Frame().lockButton or f.lockButton), NS.Icon("lock"),
-        "the main window's mark follows")
+    assertEqual(lockIcon(W.Frame().lockButton), NS.Icon("lock"), "the main window's mark follows")
     f.lockButton:__fire("OnClick", "LeftButton")
     assertTrue(NS.GetSetting("locked") == false, "a second click unlocks")
+    assertEqual(lockIcon(W.Frame().lockButton), NS.Icon("unlock"), "and the main window's mark again")
     NS.SetByPath("locked", was and true or false)
     J.Hide()
+    if not wasShown then W.Hide() end
+end)
+
+test("round5 journal lock: a profile switch repaints the Journal's mark from the new profile", function()
+    -- red under: a reloadProfile that repaints the main window's padlock but not the Journal's (no
+    -- `locked` reaction fires on a switch, and J.Render never repaints the mark).
+    local db = NS.db
+    local before = db:GetCurrentProfile()
+    local was = NS.GetSetting("locked")
+    NS.SetByPath("locked", true)
+    db.sv.profiles["Round5-Lock"] = { skin = { pickerSeen = true }, locked = false }
+    J.Show()
+    local f = J.Frame()
+    local ok, err = pcall(function()
+        assertEqual(lockIcon(f.lockButton), NS.Icon("lock"), "locked: the closed padlock")
+        db:SetProfile("Round5-Lock")
+        assertEqual(lockIcon(f.lockButton), NS.Icon("unlock"), "the new profile is unlocked: the open one")
+    end)
+    db:SetProfile(before)
+    db.sv.profiles["Round5-Lock"] = nil
+    NS.HideSkinPicker()
+    NS.SetByPath("locked", was and true or false)
+    J.Hide()
+    if not ok then error(err, 0) end
 end)
 
 test("round5 journal lock: /sm lock and /sm unlock repaint the Journal's mark", function()

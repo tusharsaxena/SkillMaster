@@ -140,7 +140,10 @@ local function reloadProfile()
     if NS.Blocks then NS.Blocks.Changed() end
     if NS.Broker then NS.Broker.Refresh() end   -- the feed's template is per profile
     if NS.Alerts then NS.Alerts.Refresh() end   -- T4.2: the toast's position from the new profile
-    if NS.Journal then NS.Journal.ApplyGeometry() end   -- its drop point and size are per profile
+    if NS.Journal then
+        NS.Journal.ApplyGeometry()   -- its drop point and size are per profile
+        NS.Journal.ApplyLock()       -- and its lock mark (no `locked` reaction fires on a switch)
+    end
     if NS.Helpers and NS.Helpers.RefreshAllPanels then NS.Helpers.RefreshAllPanels() end
     NS.MaybeShowSkinPicker()
 end

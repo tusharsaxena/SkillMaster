@@ -382,6 +382,154 @@ test("round5 groups: a merge on the left keeps the target where it stood", funct
     end)
 end)
 
+-- The height a block not collapsed takes as a section: its sub-header and its rows' two pads (the
+-- kit's rows answer no height of their own).
+local function sectionH() return G.SUB_H + 2 * D.ROW_PAD end
+
+test("round5 groups: a window dropped on a group's top raises the group by the dropped section, not the group", function()
+    -- red under: a mergePoint that measures windowOf(dragged) after the model moved it, which is
+    -- the target group's own frame (the group jumped up by its own height).
+    withMerged(function(layout)
+        local gid = G.Merge("secondary", "primary", "bottom")
+        local f, df = G.Frame(gid), D.Frame("weapon")
+        placed(M.UIParent, 0, 768, 1024, 768)
+        placed(f, 300, 600, D.WIDTH, 300)
+        placed(df, 100, 300, D.WIDTH, 120)
+        local ok, err = pcall(function()
+            assertEqual(G.Merge("weapon", gid, "top"), gid, "into the group")
+            local p = layout.groups[gid].point
+            assertEqual(p.x, 300, "the column stays")
+            assertEqual(p.y, 600 + sectionH(), "up by the weapon section alone")
+        end)
+        unplaced(f)
+        unplaced(df)
+        unplaced(M.UIParent)
+        if not ok then error(err, 0) end
+    end)
+end)
+
+test("round5 groups: a section dragged onto a window's top raises the new group by that section", function()
+    -- red under: the same mergePoint, which read the dragged section's window after the move (the
+    -- section's own hidden frame, or its old merged window) instead of the section as it was drawn.
+    withMerged(function(layout)
+        local gid = G.Merge("secondary", "primary", "bottom")
+        G.Merge("stats_base", gid, "bottom")
+        local f, tf = G.Frame(gid), D.Frame("weapon")
+        placed(M.UIParent, 0, 768, 1024, 768)
+        placed(f, 100, 700, D.WIDTH, 400)
+        placed(tf, 500, 400, D.WIDTH, 120)
+        local ok, err = pcall(function()
+            local into = G.Merge("secondary", "weapon", "top")
+            assertTrue(into ~= nil and into ~= gid, "a new group")
+            local p = layout.groups[into].point
+            assertEqual(p.x, 500, "level with the weapon window's left")
+            assertEqual(p.y, 400 + sectionH(), "up by the secondary section alone")
+        end)
+        unplaced(f)
+        unplaced(tf)
+        unplaced(M.UIParent)
+        if not ok then error(err, 0) end
+    end)
+end)
+
+test("round5 groups: two merges dropped in one combat both happen when it ends", function()
+    -- red under: one AfterCombat key for every merge, the second drop replacing the first.
+    withMerged(function()
+        M.InCombatLockdown = function() return true end
+        assertEqual(G.Merge("secondary", "primary", "bottom"), false, "the first queued")
+        assertEqual(G.Merge("weapon", "stats_base", "right"), false, "the second queued")
+        M.InCombatLockdown = function() return false end
+        M.__fireEvent("PLAYER_REGEN_ENABLED")
+        local a, b = G.Of("primary"), G.Of("stats_base")
+        assertTrue(a ~= nil and G.Of("secondary") == a, "the first merge ran")
+        assertTrue(b ~= nil and G.Of("weapon") == b and b ~= a, "and the second")
+    end)
+end)
+
+-- ── one style for detached and merged windows (R5-7) ───────────────────────────────────────
+
+local function near(a, b) return type(a) == "number" and math.abs(a - b) < 1e-6 end
+
+-- A merged window of primary and secondary under `fn(f, gid)`, every style key put back after.
+local function withStyledGroup(fn)
+    local style = NS.db.profile.layout.detached
+    local saved = {}
+    for k, v in pairs(style) do saved[k] = v end
+    withMerged(function()
+        local gid = G.Merge("secondary", "primary", "bottom")
+        local ok, err = pcall(fn, G.Frame(gid), gid)
+        for k in pairs(style) do style[k] = nil end
+        for k, v in pairs(saved) do style[k] = v end
+        NS.bus:SendMessage(NS.MSG.LAYOUT_CHANGED)
+        if not ok then error(err, 0) end
+    end)
+end
+
+local function set(path, v) assertTrue(NS.SetByPath(path, v) ~= false, "the seam takes " .. path) end
+
+-- The body's offset below the window's top and the band's height, as the merged window's render
+-- places them (the kit's frames keep neither).
+local function groupBodyTop(f, gid)
+    local y, h
+    rawset(f.body, "SetPoint", function(_, _, _, _, _, oy) y = y or oy end)
+    rawset(f.band, "SetHeight", function(_, v) h = v end)
+    G.Render(gid)
+    rawset(f.body, "SetPoint", nil)
+    rawset(f.band, "SetHeight", nil)
+    return y, h
+end
+
+test("round5 groups style: the merged window's background and border follow the Detached windows tab", function()
+    withStyledGroup(function(f)
+        assertFalse(f.styleBg:IsShown(), "the skin's fill by default")
+        set("layout.detached.bgColor", { 0.1, 0.2, 0.3, 0.4 })
+        set("layout.detached.bgFromSkin", false)
+        assertTrue(f.styleBg:IsShown(), "the swatch's fill shows")
+        local c = rawget(f.styleBg, "__color")
+        assertTrue(c ~= nil and near(c[1], 0.1) and near(c[4], 0.4), "in the swatch's color")
+        local function ownShown()
+            for _, e in ipairs(f.styleEdge.edges) do if e:IsShown() then return true end end
+            return false
+        end
+        assertFalse(ownShown(), "the skin's edge by default")
+        set("layout.detached.borderFromSkin", false)
+        assertTrue(D.ShellOpts(f).noBorder == true, "the skin's edge off")
+        assertTrue(ownShown(), "the window's own edge on")
+    end)
+end)
+
+test("round5 groups style: Title band Never hides the merged band and keeps a drag strip", function()
+    withStyledGroup(function(f, gid)
+        assertTrue(f.title:IsShown() and f.dockAll:IsShown() and f.collapseAll:IsShown(), "the band shows by default")
+        set("layout.detached.titleBand", "never")
+        assertFalse(f.title:IsShown() or f.dockAll:IsShown() or f.collapseAll:IsShown(), "no title, no marks")
+        local y, h = groupBodyTop(f, gid)
+        assertEqual(y, -D.GRIP_H, "the body starts below the drag strip")
+        assertEqual(h, D.GRIP_H, "the band's drag target is the strip")
+        set("layout.detached.titleBand", "always")
+        assertTrue(f.title:IsShown() and f.dockAll:IsShown(), "the band back")
+    end)
+end)
+
+test("round5 groups style: Title band On hover shows the merged band while the pointer is over it", function()
+    withStyledGroup(function(f, gid)
+        local over = false
+        rawset(f, "IsMouseOver", function() return over end)
+        set("layout.detached.titleBand", "hover")
+        local poll = f:GetScript("OnUpdate")
+        assertTrue(poll ~= nil, "the merged window polls the pointer")
+        assertFalse(f.title:IsShown() or f.dockAll:IsShown(), "hidden with the pointer away")
+        assertEqual(groupBodyTop(f, gid), -D.TitleHeight(f), "the body stays below the band")
+        over = true
+        poll(f, 1)
+        assertTrue(f.title:IsShown() and f.dockAll:IsShown() and f.collapseAll:IsShown(), "shown with the pointer over")
+        over = false
+        poll(f, 1)
+        assertFalse(f.title:IsShown(), "hidden again when it leaves")
+        rawset(f, "IsMouseOver", nil)
+    end)
+end)
+
 -- ── the store: schemaVersion 6 and the diagnostics ─────────────────────────────────────────
 
 test("round5 groups: schemaVersion 6 normalizes a stored layout.groups and drops a malformed one", function()

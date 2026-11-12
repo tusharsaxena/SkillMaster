@@ -307,18 +307,38 @@ local function windowOf(target)
     return NS.Detached.Frame(target)
 end
 
--- Where a group made or widened by a merge sits: the target window's top-left, moved left by the
--- columns added on the left or up by the window stacked on top, so the target stays where it is.
-local function mergePoint(groups, gid, dragged, target, side, before)
-    local tl, tt = uiRect(windowOf(target))
+-- How tall block `id` stands as a section of a merged window, unscaled: its sub-header and, unless
+-- collapsed, its rows as drawn now (in its merged window, else in its own).
+local function sectionExtent(id)
+    local gid = G.Of(id)
+    local sec = gid and frames[gid] and frames[gid].sections and frames[gid].sections[id]
+    if sec and plain(sec.h) then return sec.h end
+    if NS.Blocks.Settings(id).collapsed then return G.SUB_H end
+    local f = NS.Detached.Frame(id)
+    local h = f and f.rowsH
+    return G.SUB_H + (plain(h) and h or 0)
+end
+
+-- The height `dragged` (a block or a group, flattened into one column) adds on top of a column.
+local function stackedExtent(dragged)
+    local g = G.All()[dragged]
+    local h = 0
+    for _, id in ipairs(g and M.Members(g) or { dragged }) do h = h + sectionExtent(id) end
+    return h
+end
+
+-- Where a group made or widened by a merge sits: the target window's top-left (`rect`, measured
+-- before the merge moved anything), moved left by the columns added on the left or up by the
+-- sections stacked on top (`stacked`), so the target stays where it is.
+local function mergePoint(groups, gid, target, side, before, rect, stacked)
+    local tl, tt = rect and rect[1], rect and rect[2]
     local gs = groupScale()
     if tl then
-        local dl, dt, _, db = uiRect(windowOf(dragged))
         if side == "left" then
             local added = #(groups[gid].columns) - before
             tl = tl - added * NS.Detached.WIDTH * gs
-        elseif side == "top" and dl then
-            tt = tt + (dt - db)
+        elseif side == "top" then
+            tt = tt + stacked * gs
         end
         return pointAt(tl, tt, gs)
     end
@@ -339,15 +359,20 @@ function G.Merge(dragged, target, side, opts)
     local function known(x) return x ~= nil and (G.All()[x] ~= nil or valid(x)) end
     if not (known(dragged) and known(target)) then return nil end
     local result
-    local ran = whenSafe("group:merge", function()
+    -- One queued request per dragged window (a second drop in the same combat keeps the first's).
+    local ran = whenSafe("group:merge:" .. tostring(dragged), function()
         local groups = G.All()
         local tg = groups[target] and target or M.Find(groups, target)
         local before = tg and #groups[tg].columns or 1
+        -- Measured before the model moves anything: after it, windowOf(dragged) is the target's.
+        local rect = { uiRect(windowOf(target)) }
+        local stacked = side == "top" and stackedExtent(dragged) or 0
         local gid = M.Merge(groups, dragged, target, side, opts.col)
         if not gid then return end
         M.Normalize(groups, valid)
         if groups[gid] then
-            groups[gid].point = copyPoint(opts.point) or mergePoint(groups, gid, dragged, target, side, before) or false
+            groups[gid].point = copyPoint(opts.point) or mergePoint(groups, gid, target, side, before, rect, stacked)
+                or false
         end
         result = groups[gid] and gid or nil
         NS.Debug("Layout", "merged %s into %s (%s): %s", tostring(dragged), tostring(gid), side, G.Title(gid))
@@ -668,11 +693,13 @@ local function layColumn(f, c, ids, host)
         sh:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CONTENT + 1)
         sh:Show()
         setSub(sh, id)
-        f.sections[id] = { header = sh, col = c, y = y }
+        local sec = { header = sh, col = c, y = y }
+        f.sections[id] = sec
         y = y + G.SUB_H
         if not NS.Blocks.Settings(id).collapsed then
             y = NS.Blocks.LayRows(D.Entries(id), host, f.rowPool, y + D.ROW_PAD, D.STYLE, D.PAD) + D.ROW_PAD
         end
+        sec.h = y - sec.y   -- its drawn extent (a top merge raises a group by it)
     end
     return y
 end
