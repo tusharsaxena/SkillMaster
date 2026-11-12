@@ -58,6 +58,7 @@ function J.RangeLabel(range) return RANGE_LABEL[range] or range end
 local WIDTH, HEIGHT, TITLE_H, TAB_H, PAD = 720, 420, 26, 24, 12
 local SIDE_W, ROW_H, ALT_ROW_H, LABEL_W, ETA_LINES = 190, 18, 32, 150, 5
 local ALT_HEAD_H, CHIP_H, CHIP_GAP = 32, 20, 4
+local LOG_HEAD_H = 18   -- the Log table's header band (round 5), from the chrome's 4 px slack
 local SCROLL_W, SCROLL_GAP = 8, 4   -- the tables' scroll bars (owner feedback round 4)
 local BODY_TOP = TITLE_H + TAB_H + 8
 local LOG_CHROME_H = BODY_TOP + PAD + 20                     -- above and below the log's rows
@@ -279,6 +280,26 @@ local function placeColumns(parent, cols, role)
     return out
 end
 
+-- A table's header band (owner feedback round 5, R5-4): the headers read like one more row, so each
+-- stands on a band of its own, the block headers' fill (sm.headerBg, modules/Blocks.lua) with the
+-- skin's 1 px divider under it. The fill is repainted on every render (J.Render, which a look change
+-- reaches through LAYOUT_CHANGED); the divider is the skin's recorded paint.
+local function paintBand(header)
+    local c = NS.Bar.Color("sm.headerBg")
+    if c then header.bg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
+end
+
+local function makeBand(header)
+    header.bg = header:CreateTexture(nil, "BACKGROUND")
+    header.bg:SetAllPoints(header)
+    header.rule = header:CreateTexture(nil, "BORDER")
+    header.rule:SetHeight(1)
+    header.rule:SetPoint("BOTTOMLEFT", header, "BOTTOMLEFT", 0, 0)
+    header.rule:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", 0, 0)
+    NS.Skin.Divider(header.rule)
+    paintBand(header)
+end
+
 local function newLogRow(p)
     local row = CreateFrame("Frame", nil, p)
     row:SetHeight(ROW_H)
@@ -441,10 +462,13 @@ end
 local function buildLog()
     local p = panel()
     p.header = CreateFrame("Frame", nil, p)
-    p.header:SetHeight(16)
+    p.header:SetHeight(LOG_HEAD_H)
     p.header:SetPoint("TOPLEFT", p, "TOPLEFT", 0, 0)
     p.header:SetPoint("TOPRIGHT", p, "TOPRIGHT", -(SIDE_W + PAD + SCROLL_W + SCROLL_GAP), 0)
-    p.headers = placeColumns(p.header, { L["Date"], L["Time"], L["Skill"], L["Change"], L["Zone"] }, "heading")
+    makeBand(p.header)
+    -- The labels uppercase on the band, in the heading role (round 5).
+    p.headers = placeColumns(p.header, { L["Date"]:upper(), L["Time"]:upper(), L["Skill"]:upper(),
+        L["Change"]:upper(), L["Zone"]:upper() }, "heading")
     p.scroll = makeScrollBar(p, function(offset)
         state.logOffset = offset
         J.Render()
@@ -731,6 +755,7 @@ local function buildAltHeader(p)
     p.header:SetHeight(ALT_HEAD_H)
     p.header:SetPoint("TOPLEFT", p, "TOPLEFT", 0, -(CHIP_H + 6))
     p.header:SetPoint("TOPRIGHT", p, "TOPRIGHT", -(SCROLL_W + SCROLL_GAP), -(CHIP_H + 6))
+    makeBand(p.header)
     p.corner = text(p.header, "heading")
     p.corner:SetPoint("LEFT", p.header, "LEFT", 8, 0)
     p.corner:SetWidth(LABEL_W - 12)
@@ -949,6 +974,8 @@ function J.Render()
     frame.logPanel:SetShown(state.tab == "log")
     frame.altsPanel:SetShown(state.tab == "alts")
     for key, tab in pairs(frame.tabs) do NS.Skin.SetTabSelection(tab, key == state.tab) end
+    paintBand(frame.logPanel.header)
+    paintBand(frame.altsPanel.header)
     if state.tab == "log" then
         renderLog(frame.logPanel)
     else

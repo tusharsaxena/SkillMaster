@@ -53,4 +53,5 @@ Milestones: M1 = R5-1..R5-5 (small fixes), M2 = R5-7, M3 = R5-6.
 | R5-3 | done | bd32857 |
 | R5-8 | done | issue #3 |
 | R5-9 | in progress | |
-| R5-5 | done | (this commit) |
+| R5-5 | done | 5f7ef03 |
+| R5-4 | done | (this commit) |

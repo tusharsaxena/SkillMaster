@@ -178,6 +178,10 @@ the checks below that cover each item:
   the table scrolls; with few, it is gone. On Alts > Weapons with two characters, a scroll bar does
   the same, and every weapon either character can train is listed, "Unlearned" where a character
   has not learned it (a dash only where its class cannot train it). Other lists Riding.
+- **SM-JRN-7** (round 5, R5-4) The Log table's header (DATE, TIME, SKILL, CHANGE, ZONE, uppercase)
+  and the Alts table's header (the block's title and the character names) each stand on a band in
+  the block headers' color with a thin rule under it, plainly not a row; the rows keep their stripes.
+  `/sm skin` to another skin: both bands follow it.
 
 ## Integration (M3 + M4)
 

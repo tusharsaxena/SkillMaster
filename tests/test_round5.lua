@@ -78,3 +78,49 @@ test("round5 detached mark: every chrome mark snaps its art (the band's controls
     assertTrue(snapped(b.icon), "a fresh control's art snaps")
     assertFalse(b.glyph ~= nil and b.glyph:IsShown(), "the art drew, not the glyph")
 end)
+
+-- ── R5-4: the Journal's table headers ────────────────────────────────────────────────────────
+
+local J = NS.Journal
+
+local function sameColor(got, want, msg)
+    assertTrue(got ~= nil and want ~= nil, msg .. ": painted")
+    for i = 1, 3 do assertTrue(math.abs(got[i] - want[i]) < 1e-6, msg .. ": channel " .. i) end
+end
+
+local function colorOf(tex) return rawget(tex, "__color") end
+
+local function assertBand(header, what)
+    assertTrue(header.bg ~= nil, what .. ": a background band")
+    sameColor(colorOf(header.bg), NS.Bar.Color("sm.headerBg"), what .. ": the block header's color")
+    assertTrue(header.rule ~= nil, what .. ": a rule under it")
+    assertEqual(header.rule:GetHeight(), 1, what .. ": the rule is 1 px")
+    assertTrue(colorOf(header.rule) ~= nil, what .. ": the rule painted (the skin's divider)")
+    local point = header.rule:GetPoint(1)
+    assertEqual(point, "BOTTOMLEFT", what .. ": the rule along the band's bottom")
+end
+
+test("round5 table headers: the Log and Alts headers stand on a band of the block header's color with a rule", function()
+    J.Show()
+    J.SelectTab("log")
+    local log = J.Frame().logPanel
+    assertBand(log.header, "the Log header")
+    assertEqual(log.headers[1]:GetText(), NS.L["Date"]:upper(), "the Log labels read uppercase")
+    assertEqual(log.headers[5]:GetText(), NS.L["Zone"]:upper(), "every one")
+    J.SelectTab("alts")
+    assertBand(J.Frame().altsPanel.header, "the Alts header")
+    J.SelectTab("log")
+    J.Hide()
+end)
+
+test("round5 table headers: a look change repaints both bands (the Journal re-renders on LAYOUT_CHANGED)", function()
+    J.Show()
+    local f = J.Frame()
+    f.logPanel.header.bg:SetColorTexture(0, 0, 0, 0)
+    f.altsPanel.header.bg:SetColorTexture(0, 0, 0, 0)
+    NS.bus:SendMessage(NS.MSG.LAYOUT_CHANGED)
+    M.__fireTimers()
+    sameColor(colorOf(f.logPanel.header.bg), NS.Bar.Color("sm.headerBg"), "the Log band repainted")
+    sameColor(colorOf(f.altsPanel.header.bg), NS.Bar.Color("sm.headerBg"), "the Alts band repainted")
+    J.Hide()
+end)

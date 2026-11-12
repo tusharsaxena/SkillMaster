@@ -303,7 +303,7 @@ test("journal: the Log has a Date column beside the time, and every column keeps
     local p = J.Frame().logPanel
     local heads = {}
     for i, fs in ipairs(p.headers) do heads[i] = fs:GetText() end
-    assertEqual(table.concat(heads, ","), "Date,Time,Skill,Change,Zone")
+    assertEqual(table.concat(heads, ","), "DATE,TIME,SKILL,CHANGE,ZONE")   -- uppercase on the band (round 5)
     local rows = activeRows(p)
     local oldest = rows[#rows]
     assertEqual(oldest.cols[1]:GetText(), os.date("%m/%d/%y", oldest.entry.t), "the date")

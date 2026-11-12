@@ -333,11 +333,13 @@ Total.
 - round3 click: a weapon row opens the Skills tab with its line selected
 - round3 click: Compat.OpenTradeSkill answers false without the call, and the call's own answer with it
 
-### test_round5.lua (3)
+### test_round5.lua (5)
 
 - round5 detached mark: a detached row's action mark snaps to the pixel grid, as the main window's
 - round5 detached mark: the mark sits a whole unit down its row at any row height
 - round5 detached mark: every chrome mark snaps its art (the band's controls too)
+- round5 table headers: the Log and Alts headers stand on a band of the block header's color with a rule
+- round5 table headers: a look change repaints both bands (the Journal re-renders on LAYOUT_CHANGED)
 
 ### test_blocks.lua (10)
 
@@ -743,7 +745,7 @@ Total.
 | test_round2_layout.lua | 8 |
 | test_round2_icons.lua | 11 |
 | test_round3.lua | 10 |
-| test_round5.lua | 3 |
+| test_round5.lua | 5 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -774,4 +776,4 @@ Total.
 | test_skin_switch.lua | 17 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **532** |
+| **Total** | **534** |
