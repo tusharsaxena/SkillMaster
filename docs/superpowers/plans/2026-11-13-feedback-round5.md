@@ -71,4 +71,6 @@ second workflow: M4 = R5-10, R5-14, R5-15; M5 = R5-11..R5-13.
 | R5-10 | done: the weapon filter mark (All, Learned, Equipped, Below cap) on the header, band and sub-header; `layout.blocks.weapon.filter`; `ph:funnel` vendored | b75e7f1 |
 | R5-14 | done: the trainer popup's "Also teaches" line wraps (up to four lines, one each past `P.MAX_HEIGHT` 600), the card and window grow by its measured height (secret / zero = one line), the card's tooltip carries the whole list | 147f99d |
 | R5-15 | done: each trainer card shows its distance (`%d yd`, world positions via `Compat.PlayerWorldPos` / `MapWorldPos`, same instance only), nearest first, unknown last; a 1 s AceTimer re-measures while shown | 97237c2 |
-| R5-11..R5-13 | queued (second workflow) | |
+| R5-11 | done: the Stats page removed (its General tab held only the undrawn whole-set row; its other rows were hide rows, now on Rows) | c2db54b |
+| R5-12 | done: `NS.OptionsList` gains action columns (`actionWidth`, `labelWidth`) and an unboxed `Header` line (`SkillMasterListHeading`, `SkillMasterListCaption`); every hide grid is now BoxList rows | c2db54b |
+| R5-13 | done: one Rows page (`settings/Rows.lua`): every skill and stat under the window's block headings, two eyes a row (Window, LDB tooltip), a caption line, a show-all eye per column on each heading; Defaults clears both hidden sets; paths unchanged, no migration, schema counts unchanged (330 / 277) | c2db54b |
