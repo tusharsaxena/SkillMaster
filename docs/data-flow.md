@@ -37,13 +37,22 @@ other timer.
 
 `SKILL_UP(key, old, new)` adds one `{ t, key, old, new, zone }` to `db.char.log`, a ring of the
 newest `journal.keep` (500 by default; the Journal page, T5.1), or, while a simulation runs, to a
-session-only list (`SessionLog:Override`, T5.2) that the same cap trims. A profile switch to a lower cap never trims what the log held when the session first wrote to it; lowering *Skill-ups to keep* itself trims at once. *Clear log* asks first, as *Forget* does, and a row from another day shows its date. A session starts at login and again on the Journal's New session; `Gains` sums this
+session-only list (`SessionLog:Override`, T5.2) that the same cap trims. A profile switch to a lower cap never trims what the log held when the session first wrote to it; lowering *Skill-ups to keep* itself trims at once. *Clear log* asks first, as *Forget* does. A session starts at login and again on the Journal's New session; `Gains` sums this
 session's points (`GainsFor(key)` one skill's), `Rate(window, now, key)` is points an hour over the
 last `window` seconds of it (one skill's with `key`: the row tooltip's "This session" line), and
 `ETA(key)` is `(max - rank)` over the rate that skill's own gains this session set (nil under two
-gains). `SKILLS_UPDATED` asks for one alt snapshot 2 s later and `PLAYER_LOGOUT` takes one at once;
-an empty model (a list not loaded yet) keeps the skills the last snapshot had. The Journal reads
-both at render time and repaints on `SKILLS_UPDATED`, which follows a pass's `SKILL_UP`s.
+gains). `Since(from, key)`, `Gains(from)` and `ETA(key, from)` take a start instead of the
+session's (FB-32): the Journal's Log tab reads them from its range (`journal.range`: this session,
+the last 1, 3, 7 or 30 days, or all time, 0), and lists the date and the time of every row. Its
+summary card is the range's points, and points an hour for this session or a day for the others.
+`SKILLS_UPDATED` asks for one alt snapshot 2 s later and `PLAYER_LOGOUT` takes one at once;
+an empty model (a list not loaded yet) keeps the skills the last snapshot had. A snapshot carries
+the stats too (FB-33: `stats[key] = { group, value, display, pct }` from StatData's model; no model
+keeps the last snapshot's, and a snapshot from before FB-33 has none, a dash in the Journal). The
+Journal's Alts tab is a matrix, characters across and the rows of one main-window block down (a
+sub-tab per `NS.BLOCKS` id: a skill block's every skill some character has, a stat block's every
+`NS.STAT_DEFS` row). The Journal reads both at render time and repaints on `SKILLS_UPDATED`, which
+follows a pass's `SKILL_UP`s.
 
 ## Alerts (T4.2)
 
@@ -51,7 +60,8 @@ both at render time and repaints on `SKILLS_UPDATED`, which follows a pass's `SK
 profession at its cap whose `NS.Trainers:NextRank` answers a rank toasts once per skill and cap
 (`cap:<key>:<max>`) and prints one chat line naming the first trainer; a weapon skill
 `alerts.weaponGap` (25) or more below `max(max, 5 x level)` toasts once per skill per session
-(`weapon:<key>`). `SKILLS_UPDATED(model)` checks every weapon whose cap rose since the previous model
+(`weapon:<key>`), when `A.WeaponWatched` reads it: never a muted weapon (`alerts.weaponMuted`), and
+as `alerts.weaponMode` says (skip one at 5 points or fewer, the default; only the equipped; all). `SKILLS_UPDATED(model)` checks every weapon whose cap rose since the previous model
 (a level-up); the first model only records the caps. A left-click on a cap toast hands its trainer
 to `NS.Waypoints:Set` when that module exists, else prints the directions. The stand-down clears
 the toast; a profile reload re-reads its position.
@@ -118,7 +128,7 @@ The README's `## How the window works` is the player-facing version of this page
   waypoint, then the directions in chat; a trainer without coordinates always goes to chat.
 - The broker tooltip and the Journal's alt grid draw `NS.Bar` in its `mini` style: the broker from
   `NS.Rows.SkillValues` / `StatValues` with `NS.Rows.FillColor`, the Journal from the snapshot's rank,
-  cap and category. Both follow `profile.bars` (the colors, `miniHeight`, the fill direction) as the
+  cap and category. Both follow `profile.bars` (the colors, `miniHeight`, the broker tooltip's `brokerRowHeight`, the fill direction) as the
   window's rows do. While `bars.colors.fromSkin` is on (the default) a category fills in the skin's
   `sm.cat.<category>` owner token and a bonus in `sm.bonusTemp` / `sm.bonusPerm`, each the mockup's
   color under every skin unless the skin states its own (`core/SkinSetup.lua`).

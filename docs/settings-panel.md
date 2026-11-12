@@ -8,12 +8,13 @@ login; each page body builds on its first show.
 | Ka0s Skill Master (landing) | none | The logo, the tagline and the slash command list |
 | General | Master controls, Skin, Keybindings | Master controls, the skin, the key binding |
 | Layout | Window, Blocks, Block order | The window's width, maximum height, block spacing, summary strip, column count (one or two) and frame strata, and the detached blocks' strata; per block show, dock, collapse, lock and scale; the weapon block's compact filter (equipped and below cap only); the block order, dragged |
-| Bars | Bar, Colors, Text, Marks | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom) and position; ticks, markers, timer and spark. A live preview bar is pinned above the strip |
-| Skills | General, Professions, Weapons and other | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default), one Hide row per catalog skill |
+| Bars | Bar, Colors, Text, Marks, Icons | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom) and position; Rank tier colors (each tier a darker shade of the category color, By category only), markers, timer and spark (off by default); the rows' icons (show, size, zoom, and the composed border on the icon family with Use the row's color). No preview bar: the open window restyles live (owner feedback round 4) |
+| Skills | General, Professions, Weapons and other | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default), one Hide row per catalog skill, drawn on the Professions and Weapons tabs as a boxed row (icon, name, an eye) |
 | Stats | One tab per stat group | One Hide row per stat |
-| Broker | Feed, Tooltip, Tooltip skills, Tooltip stats | The feed's text template (a presets dropdown plus Custom) and the skill-up flash; Apply skin to the tooltip and the five section switches; one tooltip Hide row per catalog skill and per stat |
-| Alerts | Alerts | The rank-cap and weapon-gap alerts, the gap, the sound |
-| Journal | Journal | Skill-ups kept per character, the Alts tab's filter on open |
+| Broker | Feed, Tooltip, Tooltip skills, Tooltip stats | The feed's text template (a presets dropdown plus Custom) and the skill-up flash; the five section switches; one tooltip Hide row per catalog skill and per stat |
+| Tooltips | Main window tooltip, LDB tooltip | Each tooltip's bar width, bar height, row height and font size; Apply skin to the tooltip (the LDB tooltip). The heights keep their `bars.*` paths and the skin row `broker.tooltip.skin`; the widths and font sizes are `tooltips.row.*` / `tooltips.ldb.*` (owner feedback round 4) |
+| Alerts | Alerts, Muted weapons | The rank-cap and weapon-gap alerts, the gap, the sound; the skill-up alert, which skills it reads and its own sound (round 4) |
+| Journal | Journal | Skill-ups kept per character, the Log tab's range (the window's own picker writes the same row), the Alts sub-tab on open |
 | Trainers and Waypoints | Trainers and waypoints | The waypoint method, the chat line, the unverified mark; the trainer popup's Trainer name color with Use class color and Use the skin's color (on by default: the skin's accent) |
 | Profiles | none | AceDB profiles: switch, copy, reset, delete |
 
@@ -21,7 +22,7 @@ Every page but General and Profiles is declared through `NS.RegisterSchemaPage(k
 (`settings/OptionsSetup.lua`): a canvas subcategory drawn by `H.RenderTabbedSchema`, its Defaults
 button restoring the page. Every display row's `onChange` is `NS.ApplyLook`, which sends one
 `LAYOUT_CHANGED` per write (one per bulk reset, on the next frame), so the window, the detached
-blocks, the Journal and the Bars preview restyle at once. The block rows `layout.blocks.<id>.docked`
+blocks and the Journal restyle at once. The block rows `layout.blocks.<id>.docked`
 and `.collapsed` store through their `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`, which wait
 out combat), and every other actor (the header, the detached frame's buttons, the drag list) writes
 them through `NS.SetByPath`; the Hide rows (`skills.hidden.<key>`, `stats.hidden.<key>`, sets) read
@@ -90,13 +91,17 @@ fill two columns, each Window width wide, the shorter column first), *Window str
 (`layout.strata`) and *Detached block strata* (`layout.detachedStrata`). The two strata rows offer
 Background, Low, Medium and High (`NS.Constants.LAYERS.STRATA_CHOICES`, frame-layering-§1) and
 their tooltip is the library's `O.StrataTooltip`; the window's row applies through
-`NS.MainWindow.ApplySettings`, the crafting overlays take the host's strata on the sync that
+`NS.MainWindow.ApplySettings`, the crafting overlays sit one strata above the host's on the sync that
 follows, and the trainer popup opens one strata above the higher of the two.
 
 The Block order tab is a host tab keyed by its group (the rows `layout.blocks.<id>.order` are
-`skipRender`): one row per block in `NS.Blocks.Ordered()`, dragged through LibKa0s-Widgets-1.0's
-`ReorderList` (options-ui-§18); a drop calls `NS.Blocks:Move(from, to)`. The controller is
-canceled before every render (`spec.beforeRender`).
+`skipRender`): one boxed row per block in `NS.Blocks.Ordered()` on `NS.OptionsList`
+(`settings/BoxList.lua`, ConsumableMaster's Priority list look: a 28 px box, a 4 px gap, the `segment`
+handle), dragged through LibKa0s-Widgets-1.0's `ReorderList` (options-ui-§18); a drop calls
+`NS.Blocks:Move(from, to)`, and the row's eye writes `layout.blocks.<id>.shown`. The Skills page's
+Professions and Weapons tabs are host tabs keyed by their groups the same way: each Hide row drawn
+as a boxed row (the skill's icon, its name, an eye that writes the row through the seam), with no
+handle. Each controller is canceled before every render (`spec.beforeRender`).
 
 The Weapon skills subsection adds *Equipped and below cap only*
 (`layout.blocks.weapon.belowCapOnly`): the detached block keeps the equipped weapons and the
@@ -109,7 +114,7 @@ The feed's right-click opens this page by its key (`NS.Broker.SETTINGS_PAGE = "b
 `NS.Helpers.OpenOptionsPanel`); with the library absent it opens the main settings panel.
 
 - **Feed**: *Text*, the one template (`broker.template`; the presets cover skills and stats alike:
-  pinned skill and gains, pinned skill, lowest profession and gains, last skill-up and gains,
+  pinned skill and gains (with nothing pinned, the feed reads Professions and Skills), pinned skill, lowest profession and gains, last skill-up and gains,
   equipped weapon and Defense, pinned skill and crit, crit and speed), and *Skill-up flash*
   (`broker.flashSeconds`).
 - **Tooltip**: *Look*, *Apply skin to the tooltip* (`broker.tooltip.skin`, on): the tooltip is the
@@ -126,7 +131,7 @@ The feed's right-click opens this page by its key (`NS.Broker.SETTINGS_PAGE = "b
 
 The Bar tab's Fill subsection opens with *Fill direction* (`bars.fillDirection`, Left to right /
 Right to left): every bar, in the window, the detached blocks, the tooltips, the Journal and the
-broker, anchors its fill, bonus, spark, ticks and markers from that edge.
+broker, anchors its fill (or its tier segments), bonus, spark and markers from that edge.
 
 The Text tab's Content subsection opens with *Rows show* (`bars.rowDisplay`: Bar and value / Bar
 only / Value only), one setting for skill rows and stat rows alike. The window's rows and the
@@ -136,9 +141,8 @@ draws the value in the bar's place, a skill's shaped by the bar text template. T
 bar and the Journal's Alts mini bars are not rows and always draw. It replaced the Stats page's
 `stats.display` (schemaVersion 2, [schema.md](schema.md)).
 
-The preview is `NS.OptionsPreview`: an `NS.Bar` in the page's `H.PageHeader` frame drawing the
-mockup's Fishing 107 +25 / 150 with a lure's 4:12 (drawn still, no OnUpdate), restyled on every
-`LAYOUT_CHANGED`.
+The page has no preview bar (owner feedback round 4 removed the pinned Fishing 107 +25 / 150):
+every write restyles the open window and detached blocks at once.
 
 ## Profiles
 

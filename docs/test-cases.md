@@ -40,7 +40,7 @@ Total.
 - options: the unverified mark follows its row
 - options: the bar text template and the timer and marker switches reach the bar
 - options: the flat color mode draws the Bar color, or the skin's while its companion is on
-- options: the Bars page draws a live preview bar from NS.Bar, restyled by a write
+- options: the Bars page has no preview bar (owner feedback round 4)
 - options: every new page renders on its first show without raising
 - options: the journal's length is honored
 - options: the library-absent load keeps every hand-written row; the composers' rows are the gap
@@ -238,22 +238,23 @@ Total.
 - stats: a secret read never raises and keeps the stat's last plain value, marked stale
 - stats: leaving combat asks for a rescan (PLAYER_REGEN_ENABLED)
 
-### test_bar.lua (10)
+### test_bar.lua (11)
 
 - bar: a bonus past the cap clamps the base, draws to the end and keeps the full text (Review Focus 4)
 - bar: the bonus segment wears the temp or the permanent color
 - bar: an empty cap (an unlearned skill) draws nothing and raises nothing
-- bar: ticks at or beyond the cap are dropped
+- bar: Rank tier colors draw a tiered bar to its last tier, its fill one segment per tier entered
 - bar: markers keep the end and drop what is past it
 - bar: the timer formats m:ss and h:mm:ss
 - bar: SetTimer shows the time left, ticks it, and SetTimer(nil) disarms the OnUpdate
 - bar: a timer that runs out clears itself
 - bar: the resolved style reads the profile and the skin's tokens
 - bar: the pool hands bars back in order and clears their timers on release
+- bar: a secret width (a tooltip-anchored bar, tainted) lays out on the last plain width
 
 ### test_bars_live.lua (18)
 
-- bars live: the bar height reaches the window's rows and the preview, the detached height the blocks
+- bars live: the bar height reaches the window's rows and the detached blocks
 - bars live: the row height reaches every window row
 - bars live: the tooltip and mini heights reach the row tooltip and the broker tooltip
 - bars live: fill direction anchors the fill on the right edge, and back
@@ -265,11 +266,11 @@ Total.
 - bars live: turning the border off hides the drawn edges, and on shows them again
 - bars live: the bar text template and position reach the drawn text
 - bars live: the font color and size draw once their companions are off
-- bars live: rank tier ticks hide and come back
-- bars live: a tier tick draws above the fill, so a tick the rank has passed still shows
+- bars live: Rank tier colors split the fill by tier on a scale to 300, and off restores it
+- bars live: Rank tier colors works only under Color mode By category
 - bars live: threshold markers hide on a stat's bar and come back
 - bars live: the expiry timer hides at once and comes back
-- bars live: the spark hides when switched off and shows when on
+- bars live: the spark is off by default, shows when on and hides when off
 - bars live: every Bars page slider commits while it moves, so a mouse wheel turn is written
 
 ### test_bars_round2.lua (8)
@@ -283,12 +284,61 @@ Total.
 - trainer popup: the name's swatch draws once Use the skin's color is off, the class color through its companion
 - trainer popup: a changed name color reaches an open popup at once
 
+### test_bars_sizes.lua (8)
+
+- bar sizes: each tooltip's heights sit in its own group on the Tooltips page, no detached height
+- bar sizes: a detached block's bar and row take the main window's bar and row heights
+- bar sizes: LDB tooltip row height sizes every skill or stat line, and a release hands them back
+- bar sizes: Main window tooltip row height sizes the bar's line, and a clear hands it back
+- bar sizes: schemaVersion 4 drops a stored bars.compactHeight and keeps the rest
+- bar sizes: Use the skin's border is off by default, so a skin's real style never beats Show border off
+- tooltips: a font size reaches a tooltip's lines and goes back to each line's own font
+- tooltips: the row tooltip's bar takes Tooltips > Bar width; the LDB tooltip widens for its own
+
+### test_round2_layout.lua (8)
+
+- round2 layout: the window is wide enough for its body and the scroll bar's whole gutter
+- round3 marks: every row carries the one action mark (ph:sign-in), a stat row too (round 4)
+- round2 layout: a detached block's body starts under the skin's band, its rows padded above and below
+- round2 layout: Spark is off by default, the tier ticks are gone, Rank tier colors is a Marks row
+- round2 layout: Skills > Professions draws one boxed row per skill, its eye hiding and showing it
+- round2 layout: Layout > Block order draws one boxed row per block in order, its eye showing or hiding it
+- round4 restore: a block hiding rows shows an eye mark that brings them back; none otherwise
+- round4 restore: a stat block's mark brings back its own stats
+
+### test_round2_icons.lua (11)
+
+- round2 icons: a tier's shade is the category color darkened, the first tier the color itself
+- round2 icons: a row's mark stands in the header's column, the bar one inset short of it
+- round2 icons: the bar's timer sits inside its far end, and the near end when the text sits right
+- round2 icons: the Icons tab's rows, their defaults the old fixed look
+- round2 icons: size, zoom, border and its color reach the drawn icon; off hides it
+- round2 icons: the LDB tooltip draws the window's block titles on header bands and stripes every other row
+- round2 icons: a skill's name in the LDB tooltip is white, a weapon below its cap included
+- round2 icons: Pin to the broker feed redraws the feed at once
+- round2 header: Weapon Skills carries no cap line beside its title
+- round2 header: the detach mark wears the title's color at rest and the hot color under the pointer
+- round2 hammer: the action mark lights up while the pointer is on it, as the detach mark does
+
+### test_round3.lua (10)
+
+- round3 sort: Value orders a block high first, not-learned rows last; Default is the catalog's
+- round3 sort: the header's sort mark cycles Default, Value high, Value low, Progress, and the window redraws
+- round3 sort: the LDB tooltip lists a section in its block's order
+- round3 alerts: skip untrained by default; equipped only; every weapon; a muted weapon never
+- round3 window: collapsing every block keeps the window's height; Shrink to fit lets it shrink
+- round3 broker: a second Pin on the pinned skill unpins it, and the feed reads Professions and Skills
+- round3 broker: a right-click on a tooltip row opens the row menu, whose Hide leaves it out of the tooltip only
+- round3 broker: the bars stop at the widest value, never past the old fixed column
+- round3 click: a weapon row opens the Skills tab with its line selected
+- round3 click: Compat.OpenTradeSkill answers false without the call, and the call's own answer with it
+
 ### test_blocks.lua (10)
 
 - blocks: the eight blocks, four skill categories then four stat groups
 - test_blocks_detach_dock_roundtrip: a block leaves the window, gets its own frame and comes back
 - blocks: a detached frame saves its drop point; locked refuses the drag
-- test_rows_unlearned_variant: an unlearned skill is a dimmed row with its trainer and a Go button
+- test_rows_unlearned_variant: an unlearned skill is a dimmed row with its trainer and the action mark
 - rows: money and the riding trainer line
 - rows: the color modes
 - test_mainwindow_collapsed_persisted: collapsing a block is stored, survives a re-render and the header toggles it
@@ -296,10 +346,13 @@ Total.
 - mainwindow: an empty model shows the empty state, and data hides it
 - mainwindow: a skin switch restyles every bar, header and icon well, not only the values
 
-### test_interact.lua (10)
+### test_interact.lua (17)
 
 - test_secure_overlay_deferred_in_combat: crafting overlays are made and moved only out of combat
 - secure overlay: hiding the window hides its overlays; the stand-down takes them down
+- secure overlay: a click that reaches a crafting row logs its overlay's state, before and after the re-sync
+- secure overlay: the pointer entering a crafting row lays its overlay before any press
+- secure overlay: only the hovered crafting row is armed, one strata over its window, until the pointer leaves
 - interact: the click map (design §6.5)
 - interact: shift-click links the row to chat; right-click opens the row menu
 - test_rowtooltip_lines_fishing_lure: the lure, its timer, the session and the fishing helper
@@ -308,36 +361,55 @@ Total.
 - rowtooltip: Show draws on GameTooltip with the bar, Hide gives it back
 - trainer popup: the faction's trainers, the selection and the waypoint button
 - test_waypoints_fallback_order: TomTom, then the native pin, then chat
+- interact: shift-click on a profession row inserts its trade link, as the spellbook icon does
+- panel overlay: a weapon row's mark opens the panel by the micro button, then the Skills tab on its line
+- panel overlay: a stat row's mark opens the paper doll; from another tab it reopens there
+- panel overlay: no micro button, no overlay; a plain mark click in combat says why and opens nothing
 
-### test_sessionlog.lua (5)
+### test_sessionlog.lua (6)
 
 - test_sessionlog_ring_cap: the log keeps the newest 500 skill-ups in db.char.log
 - test_sessionlog_eta: (max - rank) / the skill's own rate over this session's gains
 - sessionlog: Gains counts points this session, per skill too; Rate is points an hour
 - sessionlog: a SKILL_UP on the bus lands in the log with the zone
 - sessionlog: a malformed skill-up is refused, never stored
+- sessionlog: Since, Gains and ETA take a range start (the Journal's range picker, FB-32)
 
-### test_alts.lua (4)
+### test_alts.lua (6)
 
 - test_alts_snapshot_two_word_name: the key is realm-key, then the whole two-word name
 - alts: a half-loaded (empty) model keeps the skills the last snapshot had
 - alts: List puts this character first, then by name; Forget drops one
 - alts: a burst of SKILLS_UPDATED is one debounced snapshot; PLAYER_LOGOUT snapshots at once
+- alts: the snapshot carries the character's stats by key, with each one's block and display
+- alts: no stat model keeps the stats the last snapshot had; an old snapshot has none
 
-### test_journal.lua (10)
+### test_journal.lua (22)
 
 - journal: /sm journal toggles it, through the one toggle handler
 - journal: the chrome is the shared one: the title, the wrapped close control, the window tier
-- journal: the tabs switch panels: Session Log first, then Alts
+- journal: the tabs switch panels: Log first, then Alts
 - journal: the log lists skill-ups newest first, with the session's gains, and Clear empties it
 - journal: a SKILLS_UPDATED repaints an open log
-- journal: the alts grid shows a character per row and a mini bar per skill it has
-- journal: right-click on a character asks before forgetting it
+- journal: the alts matrix has a column per character, a row per skill, a mini bar per skill it has
+- journal: the alts sub-tabs are the main window's blocks, in its order
+- journal: a stats sub-tab lists every stat of its block; a snapshot without stats reads a dash
+- journal: a character's name is two lines in its column; the rest is the header's tooltip
+- journal: right-click on a character's name asks before forgetting it
 - journal: an unlocked drag saves the drop point; Reset position forgets it
 - journal: the stand-down hides it
 - journal: durations and ETAs read as the mockup writes them
+- journal: the Log has a Date column beside the time, and every column keeps to its width
+- journal: the range picker narrows the Log and its summary; the choice is stored per profile
+- journal: the range is a schema row on the Journal page with the six choices
+- journal: the ETA note wraps inside its card
+- journal: schemaVersion 5 turns a stored pre-FB-33 filter into its block
+- journal: a grab pins the window by its top-left, and the release saves that point with the size
+- journal: a saved size beyond the screen comes back on it; a wider window shows more characters
+- journal: the Log table scrolls by a bar that shows only while it overflows
+- journal: the Alts table scrolls by a bar too
 
-### test_alerts.lua (11)
+### test_alerts.lua (14)
 
 - test_alerts_cap_once: reaching the cap toasts once with the next trainer, and says it in chat
 - alerts: the cap alert comes back for the next cap, never twice for one
@@ -350,6 +422,9 @@ Total.
 - alerts: the real toast draws the cap payload with the mockup's lines
 - alerts: the stand-down clears the toast; a profile reload refreshes it
 - alerts: the defaults carry every alerts key
+- alerts: a skill point toasts Skill up with the session, the cap and the ETA; close ones fold
+- alerts: Skill-up alerts for narrows the skills; off reads none
+- alerts: the real toast tints a skill up green and a weapon gap red, the cap toast neither
 
 ### test_template.lua (3)
 
@@ -357,7 +432,7 @@ Total.
 - test_template_tokens: no pin falls back to the last skill-up, then to the lowest profession
 - test_template_unknown_token_empty: unknown tokens and missing data render empty
 
-### test_broker.lua (16)
+### test_broker.lua (17)
 
 - broker: one data source, "Skill Master", separate from the launcher object
 - broker: the feed renders its template
@@ -369,6 +444,7 @@ Total.
 - broker: the Broker page has a Hide row per catalog skill and per stat, apart from the window's
 - broker: clicks follow design §6.5 and never touch a secure frame
 - broker: a crafting row without ShowAndScrollTo still opens the main window
+- broker: a hovered tooltip row wears the window's hover wash, under its text, until the pointer leaves
 - broker: stood down, the feed reads Off and its tooltip says so; standing up re-renders
 - broker: the tooltip wears the skin by default, on its own frame, never on GameTooltip
 - broker: Apply skin off draws the plain GameTooltip, and takes the skinned one down
@@ -433,13 +509,12 @@ Total.
 - m5 seam: Journal > log length caps the live log, also while a simulation's override is in place
 - m5 seam: diagnostics report test mode's sample data in state, model and sim
 
-### test_m5_review.lua (6)
+### test_m5_review.lua (5)
 
 - profile switch: the window's bars restyle from the new profile with the same row set
 - profile switch: the broker feed re-reads the new profile's template
 - profile switch: the Journal takes the new profile's drop point and size
-- profile reset: one LAYOUT_CHANGED reaches the look listeners (the Bars preview, the Journal)
-- bars preview: the fill is the Fishing row's own color, and a palette or mode edit reaches it
+- profile reset: one LAYOUT_CHANGED reaches the look listeners (the Journal)
 - test mode: a sample row's menu cannot pin the sample skill into the character's store
 
 ### test_m5_leftovers.lua (14)
@@ -450,7 +525,7 @@ Total.
 - settings: fill direction, both strata and the column count each have a live row
 - settings: a strata row's tooltip is the library's, over the row's own values (frame-layering-§1)
 - fill direction: right to left anchors the fill, the bonus and the spark on the bar's right edge
-- strata: the window and a detached block take their rows' strata live; overlays sit in the host's
+- strata: the window and a detached block take their rows' strata live; overlays sit one strata over the host's
 - columns: two columns lay the docked blocks side by side in a window twice as wide
 - sim: a row's menu cannot pin while a simulation runs, and can again after it
 - test mode: the broker's {pinned} and {equippedWeapon} are the sample character's
@@ -487,7 +562,7 @@ Total.
 - fb14: Compat.SpellTexture reads C_Spell first, then the global, else nil
 - fb14: the row's icon is a trimmed texture, not two letters
 - fb15: the attach mark is the detach mark turned 180 degrees
-- fb16: Collapse all and Expand all drive every docked block's collapse
+- fb16: one Expand / Collapse all control, between settings and close, showing what a click does
 - fb16: SetAllCollapsed leaves the detached blocks alone and answers how many it changed
 - fb17: the class icon's source: the atlas where the client has it, else the class sheet
 - fb17: test mode's summary line names the sample character with its class icon
@@ -525,7 +600,7 @@ Total.
 - disabled 9: re-enabling restores the registration set from current state
 - disabled 10: releasing ONE hold does not resurrect an addon the other holds down
 
-### test_diagnostics.lua (8)
+### test_diagnostics.lua (9)
 
 - diagnostics: the report carries this addon's ten sections and raises in none
 - diagnostics: stood down, the state section says so and reads nothing else
@@ -535,6 +610,7 @@ Total.
 - diagnostics: bonuses lists each skill's modifier and the cached sources, collecting none
 - diagnostics: bonuses says so when nothing is cached yet
 - diagnostics: layout prints the window and every block's stored state, detached ones flagged
+- diagnostics: the settings section lists only the rows off their default, with their values
 
 ### test_diagnostics_contract.lua (9)
 
@@ -604,7 +680,7 @@ Total.
 - skin values: no typed value outside the kit's categories and the host's rows
 - skin values: the check is falsifiable, a planted value of each shape is reported
 
-### test_skin_switch.lua (18)
+### test_skin_switch.lua (17)
 
 - skin switch: the check is falsifiable, a surface that redraws a literal is reported
 - skin switch: the main window changes
@@ -621,7 +697,6 @@ Total.
 - skin switch: the row tooltip's bar changes with the Scope ignored
 - skin switch: the broker feed tooltip changes
 - skin switch: the broker feed tooltip changes with the Scope ignored
-- skin switch: the Bars page preview changes
 - skin switch: the debug console changes
 - skin switch: the debug console changes with the Scope ignored
 
@@ -655,37 +730,41 @@ Total.
 | test_helpers.lua | 8 |
 | test_bonuses.lua | 16 |
 | test_statdata.lua | 16 |
-| test_bar.lua | 10 |
+| test_bar.lua | 11 |
 | test_bars_live.lua | 18 |
 | test_bars_round2.lua | 8 |
+| test_bars_sizes.lua | 8 |
+| test_round2_layout.lua | 8 |
+| test_round2_icons.lua | 11 |
+| test_round3.lua | 10 |
 | test_blocks.lua | 10 |
-| test_interact.lua | 10 |
-| test_sessionlog.lua | 5 |
-| test_alts.lua | 4 |
-| test_journal.lua | 10 |
-| test_alerts.lua | 11 |
+| test_interact.lua | 17 |
+| test_sessionlog.lua | 6 |
+| test_alts.lua | 6 |
+| test_journal.lua | 22 |
+| test_alerts.lua | 14 |
 | test_template.lua | 3 |
-| test_broker.lua | 16 |
+| test_broker.lua | 17 |
 | test_polish.lua | 12 |
 | test_preview.lua | 6 |
 | test_sim.lua | 12 |
 | test_seams.lua | 5 |
 | test_m5_seams.lua | 7 |
-| test_m5_review.lua | 6 |
+| test_m5_review.lua | 5 |
 | test_m5_leftovers.lua | 14 |
 | test_m6_fixes.lua | 18 |
 | test_fb2_chrome.lua | 10 |
 | test_surface_parity.lua | 11 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
-| test_diagnostics.lua | 8 |
+| test_diagnostics.lua | 9 |
 | test_diagnostics_contract.lua | 8 |
 | test_eol.lua | 2 |
 | test_prose.lua | 15 |
 | test_layout_cap.lua | 13 |
 | test_lizard_sighted.lua | 8 |
 | test_skin_values.lua | 3 |
-| test_skin_switch.lua | 18 |
+| test_skin_switch.lua | 17 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **466** |
+| **Total** | **529** |

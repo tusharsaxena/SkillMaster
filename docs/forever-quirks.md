@@ -265,6 +265,8 @@ below on both clients.
 | `C_Texture.GetAtlasInfo("classicon-<class>")`, `CLASS_ICON_TCOORDS` | the atlas answers a table where the client has it; else the class sheet's `{ l, r, t, b }` per class file | assumed; which source Forever carries is not measured (SM-DISP-13) | MainWindow summary line (FB-17) |
 | `UnitName("player")` | the player's name | assumed | MainWindow summary line (FB-17) |
 | `C_Spell.GetSpellName(spellID)` (fallback: `GetSpellInfo(spellID)`) | the spell's localized name | listed (inherited from live); the catalog's `openSpellID`s (vanilla Apprentice ranks) unverified | SecureOverlay (the crafting cast) |
+| `C_TradeSkillUI.OpenTradeSkill(skillLineID)` | opens a profession's window by its line; not protected on Retail | assumed; Skinning (393) and Fishing (356) have their own window on Forever (seen in game, 2026-11-11), the call unverified (`/sm probe` lists it) | Interact (Skinning, Fishing: owner feedback round 3) |
+| `C_SkillInfo.SetSelectedSkill(i)` / `SetSelectedSkill(i)`, `SkillFrame_SetSelection(i)` | select line i in Character > Skills | assumed; which one Forever's Skills tab answers is unverified (`/sm probe` lists them) | Interact (a weapon or Other row's click, round 3) |
 | `UnitStat(unit, i)`, `UnitAttackPower(unit)`, `UnitRangedAttackPower(unit)` | `base, effective, pos, neg`; `base, pos, neg` | assumed (1.12); `UnitStat` **measured** to answer secret numbers in an AceTimer callback | StatData (T2.3) |
 | `UnitArmor(unit)` | `base, effective, armor, pos, neg`; mitigation derived from the effective armor and the level, capped at 75% | assumed (1.12) | StatData (T2.3) |
 | `UnitDefenseSkill(unit)` | `base, modifier` (the kit's Forever set lists it; neither set lists `UnitDefense`) | listed by the kit's Forever set; shape assumed | StatData (T2.3) |
@@ -283,3 +285,35 @@ can list a name the client lacks); it is not a measurement. *Source:* this addon
 (`docs/superpowers/specs/2026-11-10-skill-master-design.md` §5.4) and the kit's
 `tests/_kit/client_globals_forever.lua`, read when the missing-globals gate flagged the probe's first
 draft for calling the bare `GetSkillLineInfo` (2026-11-10).
+
+### The character panel and secret geometry (measured, 2026-11-12)
+
+The owner's in-game errors and clicks on Forever 1.60.1 (build 70888), with the stock UI's source
+read from Gethe/wow-ui-source branch `forever` (`Blizzard_UIPanels_Game/Camelot/CharacterFrame.lua`,
+`SkillsFrame.lua`, `Blizzard_MicroMenu/Mainline/MainMenuBarMicroButtons.lua`).
+
+- **A frame anchored to `GameTooltip` can answer a secret width.** The row tooltip's bar, anchored to a
+  `GameTooltipTextLeftN` line with `SetWidth(200)`, answered `GetWidth()` as a secret number, and
+  `Bar:Layout` raised "attempt to perform arithmetic on a secret number value (execution tainted by
+  'SkillMaster')" on every hover (21x). *Do:* test `issecretvalue` on a geometry read before arithmetic;
+  the bar falls back to the last plain width, seeded by the caller that set it (`bar.knownWidth`).
+- **The Skills tab is `SkillsFrame`.** Forever's character panel is the Camelot `CharacterFrame`; its
+  sub-frames are `PaperDollFrame`, `ReputationFrame`, `SkillsFrame`, `PVPRankFrame`, `TokenFrame` and
+  `StatisticsFrame` (`CHARACTERFRAME_SUBFRAMES`). `ToggleCharacter("SkillFrame")`, the 1.12 name, finds no
+  frame and silently does nothing (the owner: "clicking doesn't do anything"; the debug log showed the
+  line selected by `C_SkillInfo.SetSelectedSkill`, so the selection worked and only the open failed).
+  The tab keeps a non-header selection it finds on show (`SelectFirstSkillIfNoneSelected`), so selecting
+  first and opening after lands on the line.
+- **An addon that shows `CharacterFrame` taints its `OnShow`.** `ToggleCharacter("PaperDollFrame")` from
+  the addon raised "attempt to compare a secret number value (execution tainted by 'SkillMaster')" in
+  `TextStatusBar.lua` `UpdateTextStringWithValues`, reached from `CharacterFrame:OnShow`'s
+  `playerFrameHealthBar:ShowStatusBarText()` (2x), out of combat. *Do:* open the panel through a secure
+  click on `CharacterMicroButton` (a `SecureActionButtonTemplate` running the macro
+  `/click CharacterMicroButton`), whose `OnClick` calls `ToggleCharacter("PaperDollFrame")` untainted.
+  No secure route reaches the Skills tab: its mode tabs are `Frame`s with a mouse-up handler, not
+  buttons, and no key binding names it, so the switch to it after a secure open is a tainted
+  `ToggleCharacter("SkillsFrame", true)` on the panel already shown (no `OnShow` of the panel).
+  Unverified in game whether that switch raises.
+- **A profession's chat link.** The spellbook's shift-click inserts
+  `C_SpellBook.GetSpellBookItemTradeSkillLink(slot, bank)`, falling back to the spell link
+  (`Blizzard_PlayerSpells/SpellBook/Blizzard_SpellBookItem.lua`). Unverified in game from an addon.

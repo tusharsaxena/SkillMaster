@@ -7,7 +7,8 @@ LibKa0s-DebugLog-1.0's console (`core/DebugLogSetup.lua`). `/sm debug` toggles t
 (`NS.State.debug`, off at every login and `/reload`, never saved) and independent of the window, so a
 bug can be reproduced with the console closed and read afterwards. Lines are tag-first:
 `[Set]` (the write seam), `[Test]` (test mode and its sample data), `[Sim]` (the simulator and its
-seam), `[Migrate]`, `[Bus]`, plus the library's own `[Cmd]`,
+seam), `[Migrate]`, `[Bus]`, `[Click]` (a crafting overlay's cast, a click that found no armed
+overlay, a pin to the broker feed), plus the library's own `[Cmd]`,
 `[Cfg]`, `[Launcher]` and `[Lifecycle]` lines.
 
 ## The diagnostics report

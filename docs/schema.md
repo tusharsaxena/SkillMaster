@@ -12,16 +12,19 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (3)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (5)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "PvP-Traxex Silentshot" (forever-quirks-§4);
                                  -- each { name, class, className, race, faction, level, updated,
-                                 -- skills = { [key] = { name, category, rank, max } } }
+                                 -- skills = { [key] = { name, category, rank, max } },
+                                 -- stats = { [key] = { group, value, display, pct } } } (FB-33;
+                                 -- absent in an older snapshot: the Journal draws a dash)
   char.<db.keys.char>
     pinned = false               -- the skill key the broker's {pinned} shows (the row menu's Pin)
-    log = {}                     -- the session log's ring (modules/SessionLog.lua): the newest 500
-                                 -- { t, key, old, new, zone }, oldest first
+    log = {}                     -- the log's ring (modules/SessionLog.lua): the newest journal.keep
+                                 -- (500; 50 .. 2000) { t, key, old, new, zone }, oldest first; the
+                                 -- Journal's ranges reach no further back than it holds
   profiles.<name>
     enabled = true               -- Enable Ka0s Skill Master; /sm enable, /sm disable
     scale   = 1                  -- Master scale (0.5 .. 2)
@@ -35,27 +38,46 @@ SkillMasterDB
       pickerSeen = false,
     }
     layout = {                   -- the Layout page (T5.1)
-      width = 440, maxHeight = 560, blockGap = 0, summary = true,
+      width = 420, maxHeight = 560, blockGap = 0, summary = true,
+      fitHeight = false,         -- off: the window stays maxHeight tall (owner feedback round 3)
       columns = 1,               -- 1 | 2 columns of docked blocks, each `width` wide
       strata = "MEDIUM", detachedStrata = "MEDIUM",   -- BACKGROUND | LOW | MEDIUM | HIGH
       blocks.<id> = { shown = true, docked = true, order = n, collapsed, scale = 1, locked = false,
-                      point = false }   -- point: drag-only, written only by modules/Detached.lua
+                      point = false,    -- point: drag-only, written only by modules/Detached.lua
+                      sort = "name" }   -- "name" | "value" | "valueAsc" | "progress" (round 3)
       blocks.weapon.belowCapOnly = false   -- the detached compact preset's filter (M5 polish)
     }
+    icons = {                    -- Bars > Icons (feedback round 2): the rows' in-game icons
+      show = true, size = 16, zoom = 7,   -- zoom: the % cropped from each side of the art
+      border = true, borderStyle = "Solid", borderSize = 1, borderColor, useClassColorBorder,
+      borderStyleFromSkin = true,         -- the style and thickness follow the skin's icon border
+      borderColorFromRow = true,          -- the row's own color (a meaning color: no skin companion)
+      borderColorFromSkin = true,         -- off the row's: the skin's icon border, else the swatch
+    }
     bars = {                     -- the Bars page (T5.1); defaults/Profile.lua comments each key
-      height, compactHeight, tooltipHeight, miniHeight, rowHeight, fontSize, textAnchor,
+      height, rowHeight,         -- the main window's bar and row, and the detached blocks' (no
+                                 -- separate detached height: schemaVersion 4 drops compactHeight)
+      tooltipHeight, tooltipRowHeight,   -- Main window tooltip bar / row height (the row tooltip)
+      miniHeight = 10, brokerRowHeight = 18,   -- LDB tooltip bar / row height (miniHeight: the journal's too)
+      fontSize, textAnchor,
       fillDirection = "LEFT",    -- "LEFT" (left to right) | "RIGHT" (right to left)
       rowDisplay = "both",       -- Rows show, skill and stat rows alike: "both" | "bar" | "text"
-      textTemplate = "{rank} {bonus} / {max}", spark, ticks, markers, timer, colorMode,
+      textTemplate = "{rank} {bonus} / {max}", markers, timer, colorMode,
+      spark = false,             -- off by default (feedback round 2)
+      tierColors = false,        -- Rank tier colors (Color mode By category only): a profession's fill
+                                 -- per tier on a scale to 300, each tier a darker shade of the category
+                                 -- color; replaced the tier ticks (schemaVersion 4 drops `ticks`)
       barTexture, barAlpha, barColor, useClassColorBar, barTextureFromSkin, barColorFromSkin,
       bgColor, useClassColorBg, bgColorFromSkin,
       border = false,            -- Show border: off by default from feedback round 2 (FB-10); no
                                  -- migration, as AceDB stripped a stored true (the old default)
-      borderStyle, borderSize, borderColor, useClassColorBorder, borderStyleFromSkin,
-      borderColorFromSkin,       -- a skin's real bar border style wins while the style companion
-                                 -- is on (skinning-§6); under None, Show border decides
+      borderStyle, borderSize, borderColor, useClassColorBorder,
+      borderStyleFromSkin = false,   -- Use the skin's border: OFF by default, the one companion that
+                                 -- is (options-ui-§16 deviation, ARCHITECTURE.md); while on, a skin's
+                                 -- real bar border style wins (skinning-§6); under None, Show border decides
+      borderColorFromSkin,
       font, fontColor, useClassColorFont, fontFlags = "@skin", fontShadow, fontFromSkin,
-      fontColorFromSkin, fontShadowFromSkin,   -- every *FromSkin defaults true
+      fontColorFromSkin, fontShadowFromSkin,   -- every other *FromSkin defaults true
       colors = { fromSkin = true, primary, secondary, weapon, other, stats, bonusTemp, bonusPerm },
                                  -- fromSkin on: the skin's sm.cat.* / sm.bonus* owner tokens draw
     }                            -- colors are positional { r, g, b, a }
@@ -73,7 +95,10 @@ SkillMasterDB
         hiddenStats  = { [key] = true },   -- left out of the tooltip only, apart from stats.hidden
       },
     }
-    journal = { point = false, size = false, keep = 500, filter = "professions" }
+    journal = { point = false, size = false, keep = 500, range = "session", filter = "primary" }
+                                 -- range: session | 1d | 3d | 7d | 30d | all (the Log tab, FB-32);
+                                 -- filter: an NS.BLOCKS id (the Alts sub-tab on open, FB-33; a stored
+                                 -- "professions" / "weapons" reads as primary / weapon)
                                  -- point and size ({ w, h }, the resize grip): drag state, written
                                  -- only by modules/Journal.lua; keep and filter: the Journal page
     waypoints = { method = "auto", announce = true }   -- method: "auto" | "tomtom" | "native" | "chat"
@@ -84,6 +109,8 @@ SkillMasterDB
       cap = true,                -- rank-cap toast + chat line
       weapon = true,             -- weapon-gap toast
       weaponGap = 25,            -- points below the weapon cap (5 x level) that count as behind
+      weaponMode = "untrained",  -- "untrained" (skip 5 points or fewer) | "equipped" | "all"
+      weaponMuted = {},          -- weapons the gap alert never reads, a set of keys
       sound = false,             -- the toast's sound
       point = false,             -- toast drop point, written only by modules/Alerts.lua
     }
@@ -116,6 +143,8 @@ LibDBIcon's own.
 | 0 → 1 | pre-versioning | nothing to reshape; the stamp itself |
 | 1 → 2 | `rowDisplayFromStats`, per profile | moves a stored `stats.display` of `"bar"` or `"text"` onto `bars.rowDisplay` (unless one is already stored) and drops `stats.display`; `"both"`, the default of both keys, moves nothing |
 | 2 → 3 | `oneBrokerFeed`, per profile | one broker feed (FB-12): a stored `broker.templates.all` becomes `broker.template` (unless one other than the default is already stored), and `broker.templates` goes with the Professions, Weapons and Stats feeds' templates; a profile with no `broker.templates` passes through |
+| 3 → 4 | `retiredBarKeys`, per profile | drops a stored `bars.compactHeight` (a detached block takes the main window's heights) and `bars.ticks` (replaced by Rank tier colors); nothing carries over |
+| 4 → 5 | `journalFilterToBlock`, per profile | the Alts sub-tabs became the main window's blocks (FB-33): a stored `journal.filter` of `"professions"` becomes `"primary"`, `"weapons"` becomes `"weapon"`; `"other"` stays |
 
 No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
 companion defaulting on, so no stored profile predates the companions and none has to be moved

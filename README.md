@@ -3,7 +3,7 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-466%2F466_passing-green)
+![Tests](https://img.shields.io/badge/Tests-529%2F529_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
@@ -80,3 +80,4 @@ The backlog lives on GitHub: please file bugs and ideas at https://github.com/tu
 ## Credits
 
 - Open Iconic by Waybury, MIT license, https://github.com/iconic/open-iconic (the window and console marks).
+- Phosphor Icons, MIT license, https://github.com/phosphor-icons/core (the action mark on every skill row).
