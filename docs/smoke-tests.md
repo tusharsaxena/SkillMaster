@@ -182,6 +182,9 @@ the checks below that cover each item:
   and the Alts table's header (the block's title and the character names) each stand on a band in
   the block headers' color with a thin rule under it, plainly not a row; the rows keep their stripes.
   `/sm skin` to another skin: both bands follow it.
+- **SM-JRN-8** (round 5, R5-2) The Journal's title bar carries a padlock left of its close mark, its
+  tooltip "Lock or unlock the window". Click it: it closes, the main window's padlock closes too, and
+  neither the Journal nor the main window drags or resizes. `/sm unlock`: both padlocks open.
 
 ## Integration (M3 + M4)
 

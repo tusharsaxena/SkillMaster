@@ -124,3 +124,43 @@ test("round5 table headers: a look change repaints both bands (the Journal re-re
     sameColor(colorOf(f.altsPanel.header.bg), NS.Bar.Color("sm.headerBg"), "the Alts band repainted")
     J.Hide()
 end)
+
+-- ── R5-2: the Journal's lock mark ────────────────────────────────────────────────────────────
+
+local function lockIcon(b) return b.icon and b.icon:GetTexture() end
+
+test("round5 journal lock: the title bar's lock mark beside the close control toggles the one locked setting", function()
+    local was = NS.GetSetting("locked")
+    NS.SetByPath("locked", false)
+    J.Show()
+    local f = J.Frame()
+    assertTrue(f.lockButton ~= nil, "the Journal carries a lock mark")
+    assertEqual(f.lockButton.tip, NS.L["Lock or unlock the window"], "the main window's tooltip")
+    assertEqual(lockIcon(f.lockButton), NS.Icon("unlock"), "unlocked: the open padlock")
+    f.lockButton:__fire("OnClick", "LeftButton")
+    assertTrue(NS.GetSetting("locked") == true, "a click locks, through the seam")
+    assertEqual(lockIcon(f.lockButton), NS.Icon("lock"), "and the mark shows it")
+    assertEqual(lockIcon(W.Frame() and W.Frame().lockButton or f.lockButton), NS.Icon("lock"),
+        "the main window's mark follows")
+    f.lockButton:__fire("OnClick", "LeftButton")
+    assertTrue(NS.GetSetting("locked") == false, "a second click unlocks")
+    NS.SetByPath("locked", was and true or false)
+    J.Hide()
+end)
+
+test("round5 journal lock: /sm lock and /sm unlock repaint the Journal's mark", function()
+    local was = NS.GetSetting("locked")
+    NS.SetByPath("locked", false)
+    J.Show()
+    local f = J.Frame()
+    NS.Slash:OnSlash("lock")
+    assertEqual(lockIcon(f.lockButton), NS.Icon("lock"), "/sm lock: the closed padlock")
+    NS.Slash:OnSlash("unlock")
+    assertEqual(lockIcon(f.lockButton), NS.Icon("unlock"), "/sm unlock: the open one")
+    J.Hide()
+    NS.SetByPath("locked", true)
+    J.Show()
+    assertEqual(lockIcon(f.lockButton), NS.Icon("lock"), "a change while hidden shows on the next open")
+    NS.SetByPath("locked", was and true or false)
+    J.Hide()
+end)

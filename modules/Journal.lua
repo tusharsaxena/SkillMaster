@@ -851,6 +851,24 @@ local function buildChrome()
         close:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     end
     frame.close = close
+    -- The lock mark (owner feedback round 5, R5-2): the main window's own, beside the close control,
+    -- toggling the one `locked` setting (/sm lock, /sm unlock); J.ApplyLock repaints it.
+    frame.lockButton = NS.Chrome.IconButton(frame, "lock", "L",
+        function() NS.SetByPath("locked", not NS.GetSetting("locked")) end, L["Lock or unlock the window"])
+    frame.lockButton:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CHROME)
+    if close then
+        frame.lockButton:SetPoint("RIGHT", close, "LEFT", -4, 0)
+    else
+        frame.lockButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -4)
+    end
+end
+
+--- Paint the lock mark from the `locked` setting: the closed padlock while locked. The setting's
+--- reaction (settings/General.lua, NS.MasterReactions.locked) calls it on every write, from any source.
+function J.ApplyLock()
+    if not (frame and frame.lockButton) then return end
+    local locked = NS.GetSetting("locked")
+    NS.Chrome.SetIcon(frame.lockButton, locked and "lock" or "unlock", locked and "L" or "U")
 end
 
 local function onDragStart(self)
@@ -1065,6 +1083,7 @@ function J.Show()
         if J.FILTERS[pick] then state.filter, state.altOffset = pick, 0 end
     end
     f:Show()
+    J.ApplyLock()
     J.Render()
     return true
 end

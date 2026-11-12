@@ -29,7 +29,7 @@ SkillMasterDB
     enabled = true               -- Enable Ka0s Skill Master; /sm enable, /sm disable
     scale   = 1                  -- Master scale (0.5 .. 2)
     alpha   = 1                  -- Master opacity (0 .. 1)
-    locked  = false              -- Lock frame; /sm lock, /sm unlock
+    locked  = false              -- Lock frame; /sm lock, /sm unlock, the window's and the Journal's lock marks
     window  = { point = false }  -- drop point, written only by modules/MainWindow.lua
     skin = {
       source = "ka0s", skin = <library default: WoW Forever>,
