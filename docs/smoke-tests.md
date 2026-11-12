@@ -124,6 +124,10 @@ the checks below that cover each item:
   the title.
 - **SM-DISP-23** (round 3) The Defense / Lockpicking / Riding block reads Other skills in the
   window, the LDB tooltip, and on the Skills, Bars and Broker pages.
+- **SM-DISP-24** (round 5, R5-5) Detach the Weapon block and drag it about the screen: every row's
+  action mark (the arrow into a bracket) draws as crisp as the main window's wherever the frame is
+  dropped, the bracket's right stroke as bright as its left, nothing cut at the right edge. Bars >
+  Row height 21: the marks still sit centered in their rows, crisp.
 - **SM-BRK-1** (round 3) With nothing pinned (a fresh character, or right-click a pinned row > Pin to
   the broker feed again to unpin), the feed reads `Professions and Skills`. Right-click a row in the
   LDB tooltip: the row menu (pin, waypoint, trainers, Hide in this tooltip); Hide removes it from the

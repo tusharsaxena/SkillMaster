@@ -495,7 +495,8 @@ function R.Acquire(pool, parent, styleKey)
     row.iconFrame:ClearAllPoints()
     row.iconFrame:SetPoint("TOPLEFT", row, "TOPLEFT", R.PAD, -(h - R.ICON) / 2)
     row.act:ClearAllPoints()
-    row.act:SetPoint("TOPRIGHT", row, "TOPRIGHT", -R.EDGE, -(h - R.GO_W) / 2)
+    -- A whole unit down (round 5, R5-5): an odd row height left the mark half a unit off the grid.
+    row.act:SetPoint("TOPRIGHT", row, "TOPRIGHT", -R.EDGE, -floor((h - R.GO_W) / 2))
     row:SetHeight(h)
     row:Show()
     return row

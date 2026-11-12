@@ -7,6 +7,7 @@ local addonName, NS = ...
 -- NS.Chrome.SetIcon(button, icon, glyph, turned)                       swap the mark (lock / unlock);
 --                                                                      `turned` draws it rotated 180
 --                                                                      degrees (the attach mark)
+-- NS.Chrome.Snap(texture)                                              snap art to the pixel grid
 -- NS.Chrome.MakeResizable(frame, spec) -> grip                         the one resize helper
 -- NS.Chrome.TooltipFontSize(tip, size, first) / .RestoreTooltipFonts(tip)   a tooltip's lines at a
 --                                                                      size (Tooltips page), and back
@@ -86,6 +87,16 @@ end
 -- the box's cutout there (owner feedback round 2, FB-15).
 C.UPRIGHT, C.TURNED = { 0, 1, 0, 1 }, { 1, 0, 1, 0 }
 
+--- Snap `tex` to the physical pixel grid (round 5, R5-5). The 13 px art sits centered in the 18 px
+--- control, 2.5 px in, so where it falls on the screen's pixels follows the frame's own position: the
+--- main window's marks happened to land on the grid, a detached frame's (dropped anywhere) half a
+--- pixel off, and the art's 1-texel strokes straddled two pixels at half intensity (the owner's
+--- screenshots). Snapped, every mark draws crisp wherever its window stands.
+function C.Snap(tex)
+    if type(tex.SetSnapToPixelGrid) == "function" then tex:SetSnapToPixelGrid(true) end
+    if type(tex.SetTexelSnappingBias) == "function" then tex:SetTexelSnappingBias(0) end
+end
+
 --- Draw `icon` (a declared catalog name) on the button, or `glyph` where the art does not resolve.
 --- `turned` draws the mark rotated 180 degrees; a pooled button set upright again is reset.
 function C.SetIcon(b, icon, glyph, turned)
@@ -95,6 +106,7 @@ function C.SetIcon(b, icon, glyph, turned)
             b.icon = b:CreateTexture(nil, "OVERLAY")
             b.icon:SetPoint("CENTER", b, "CENTER", 0, 0)
             b.icon:SetSize(C.ART, C.ART)
+            C.Snap(b.icon)
         end
         b.icon:SetTexture(path)
         b.icon:SetTexCoord(unpack(turned and C.TURNED or C.UPRIGHT))
