@@ -29,7 +29,11 @@ test("skin colors: every HUD color companion defaults on, in the defaults and on
     local bars = NS.defaults.profile.bars
     assertEqual(bars.colors.fromSkin, true, "bars.colors.fromSkin")
     for k, v in pairs(bars) do
-        if type(k) == "string" and k:find("FromSkin$") then assertEqual(v, true, "bars." .. k) end
+        -- borderStyleFromSkin is the one documented exception (options-ui-§16 deviation,
+        -- docs/ARCHITECTURE.md; tests/test_bars_sizes.lua pins it off).
+        if type(k) == "string" and k:find("FromSkin$") and k ~= "borderStyleFromSkin" then
+            assertEqual(v, true, "bars." .. k)
+        end
     end
     local found = false
     for _, row in ipairs(NS.Schema) do
@@ -134,15 +138,21 @@ test("fill direction: right to left anchors the fill, the bonus and the spark on
     assertTrue(tostring((bar.fill:GetPoint(1))):find("LEFT$") ~= nil, "and back")
 end)
 
-test("strata: the window and a detached block take their rows' strata live; overlays sit in the host's", function()
+test("strata: the window and a detached block take their rows' strata live; overlays sit one strata over the host's", function()
     local W, D, layout = NS.MainWindow, NS.Detached, NS.db.profile.layout
     NS.ToggleTestMode()   -- the sample's Leatherworking row carries a crafting overlay
     W.Show()
     NS.SetByPath("layout.strata", "LOW")
     assertEqual(W.Frame():GetFrameStrata(), "LOW", "the window")
+    local lw
+    for _, row in ipairs(W.Rows()) do if row.entry and row.entry.key == "leatherworking" then lw = row end end
+    lw:__fire("OnEnter")   -- only the hovered crafting row is armed
     local overlay = NS.SecureOverlay.Overlay("leatherworking")
     assertTrue(overlay ~= nil, "precondition: the crafting row's overlay exists")
-    assertEqual(overlay:GetFrameStrata(), "LOW", "the overlay follows its host's strata")
+    -- One strata over its host (the documented frame-layering-§1 deviation): a toplevel window's
+    -- raised group outranks any level in its own strata.
+    assertEqual(overlay:GetFrameStrata(), "MEDIUM", "the overlay sits one strata over its host's")
+    lw:__fire("OnLeave")
     assertTrue(overlay:GetFrameLevel() > W.Frame():GetFrameLevel() + NS.Constants.LAYERS.LEVEL.CONTENT,
         "and stays over the rows")
     NS.ToggleTestMode()

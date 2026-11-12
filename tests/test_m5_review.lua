@@ -7,7 +7,7 @@
 --     the secondary-skill green), so a palette, mode or flat-color edit shows in it;
 --   * test mode writes nothing of the character's own: a sample row's menu cannot pin it.
 local T = _G.SKM_TEST
-local NS, M = T.NS, T.mocks
+local NS = T.NS
 local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
 
 local function firstBarHeight()
@@ -91,7 +91,7 @@ test("profile switch: the Journal takes the new profile's drop point and size", 
     if not ok then error(err, 0) end
 end)
 
-test("profile reset: one LAYOUT_CHANGED reaches the look listeners (the Bars preview, the Journal)", function()
+test("profile reset: one LAYOUT_CHANGED reaches the look listeners (the Journal)", function()
     -- red under: a reloadProfile that repaints only the window and the detached blocks.
     withProfile("ReviewReset", function(db)
         db:SetProfile("ReviewReset")
@@ -103,41 +103,6 @@ test("profile reset: one LAYOUT_CHANGED reaches the look listeners (the Bars pre
         if not ok then error(err, 0) end
         assertTrue(seen >= 1, "the reset sends LAYOUT_CHANGED")
     end)
-end)
-
--- ---------------------------------------------------------------------------------------------
--- The Bars page's preview follows the Colors tab
--- ---------------------------------------------------------------------------------------------
-
-local function sameColor(a, b)
-    if type(a) ~= "table" or type(b) ~= "table" then return false end
-    for i = 1, 3 do if math.abs((a[i] or 0) - (b[i] or 0)) > 1e-9 then return false end end
-    return true
-end
-
-test("bars preview: the fill is the Fishing row's own color, and a palette or mode edit reaches it", function()
-    -- red under: a preview whose values carry no color, so it always fills in the skin's bar fill
-    -- whatever Color mode, the palette or Bar > Fill say.
-    local panel = M.__subcategories["Bars"]
-    panel:Show()
-    panel:__fire("OnShow")
-    local preview = NS.OptionsPreview.bar
-    assertTrue(preview ~= nil, "the preview bar exists after the first show")
-    local P = NS.defaults.profile.bars
-    assertTrue(sameColor(preview.fillColor, P.colors.secondary), "By category: Fishing's secondary color")
-    NS.SetByPath("bars.colors.fromSkin", false)
-    NS.SetByPath("bars.colors.secondary", { 1, 0, 0, 1 })
-    assertTrue(sameColor(preview.fillColor, { 1, 0, 0 }), "a palette edit repaints the preview")
-    NS.SetByPath("bars.colorMode", "flat")
-    NS.SetByPath("bars.barColorFromSkin", false)
-    assertTrue(sameColor(preview.fillColor, P.barColor), "Flat: Bar > Fill's color")
-    NS.SetByPath("bars.barColorFromSkin", P.barColorFromSkin)
-    NS.SetByPath("bars.colorMode", P.colorMode)
-    NS.SetByPath("bars.colors.secondary", P.colors.secondary)
-    NS.SetByPath("bars.colors.fromSkin", P.colors.fromSkin)
-    panel:Hide()
-    panel:__fire("OnHide")
-    M.__fireTimers()
 end)
 
 -- ---------------------------------------------------------------------------------------------

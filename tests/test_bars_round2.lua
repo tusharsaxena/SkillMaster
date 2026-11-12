@@ -167,10 +167,13 @@ test("bar border: off under the default skin's None; a real skin style wins only
         return style, show, size
     end)
     local ok, err = pcall(withWindow, function()
-        assertTrue(NS.Bar.ResolveStyle("row").border ~= nil, "a skin stating a real style wins (skinning-§6)")
-        assertTrue(follows, "the companion is on by default")
+        -- The companion defaults OFF (the owner's ruling, an options-ui-§16 deviation).
+        assertEqual(NS.Bar.ResolveStyle("row").border, nil, "the companion off by default: Show border off is off")
+        assertFalse(follows, "the companion is off by default")
+        set("bars.borderStyleFromSkin", true)
+        assertTrue(NS.Bar.ResolveStyle("row").border ~= nil, "opted in: a skin stating a real style wins (skinning-§6)")
         set("bars.borderStyleFromSkin", false)
-        assertEqual(NS.Bar.ResolveStyle("row").border, nil, "the companion off: Show border off is off")
+        assertEqual(NS.Bar.ResolveStyle("row").border, nil, "the companion off again: Show border off is off")
     end)
     rawset(S, "BarBorder", prev)
     if not ok then error(err, 0) end

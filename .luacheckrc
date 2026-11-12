@@ -35,8 +35,16 @@ read_globals = {
   "C_TooltipInfo", "C_UnitAuras", "issecretvalue",
   -- M3 the display (modules/Chrome.lua .. modules/Waypoints.lua): the tooltip, the character frame,
   -- chat linking, the modifier keys and the waypoint providers (TomTom, the native user waypoint)
-  "GameTooltip", "ToggleCharacter", "ChatEdit_InsertLink", "ChatFrame_OpenChat", "IsShiftKeyDown",
+  "GameTooltip", "ToggleCharacter",
+  -- owner feedback round 4: Forever's character panel (Camelot), opened by its micro button
+  "CharacterMicroButton", "CharacterFrame", "PaperDollFrame", "SkillsFrame", "EventRegistry",
+  "C_SpellBook",                 -- a profession's trade link (core/Compat.lua TradeSkillLink)
+  "ChatEdit_InsertLink", "ChatFrame_OpenChat", "IsShiftKeyDown",
   "TomTom", "UiMapPoint", "C_SuperTrack",
+  -- the click debug (modules/SecureOverlay.lua SO.MouseFoci): the frames under the pointer
+  "GetMouseFoci",
+  -- owner feedback round 3: Skinning / Fishing windows by line ID, the Skills tab's selection
+  "C_TradeSkillUI", "SetSelectedSkill", "SkillFrame", "SkillFrame_SetSelection", "SkillFrame_UpdateSkills",
   -- T4.1 Broker (modules/Broker.lua): the main hand's weapon class
   "GetInventoryItemLink", "GetItemInfoInstant",
   -- M6: a spell's localized name from its ID (core/Compat.lua SpellName, localization-§4)

@@ -135,10 +135,11 @@ function HELPERS.fishing(out, e)
 end
 
 local HINTS = {
-    secure = L["Click: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
-    skills = L["Click: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"],
-    trainer = L["Click: trainers and waypoint \194\183 Right-click: menu"],
-    paperdoll = L["Click: character panel \194\183 Shift-click: link \194\183 Right-click: menu"],
+    secure = L["Arrow: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
+    tradeskill = L["Arrow: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
+    skills = L["Arrow: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"],
+    trainer = L["Arrow: trainers and waypoint \194\183 Right-click: menu"],
+    paperdoll = L["Arrow: character panel \194\183 Shift-click: link \194\183 Right-click: menu"],
 }
 
 local function hint(out, kind, e)
@@ -207,21 +208,45 @@ local tipBar
 
 function RT.Bar() return tipBar end
 
+-- The bar's line, sized to Bars > Main window tooltip row height; back to auto height (0) with
+-- the bar, since GameTooltip keeps a font string's height for whoever fills the line next.
+local sizedLine
+
+-- The tooltip's own settings (the Tooltips page, owner feedback round 4).
+local function tipSettings()
+    local t = NS.db and NS.db.profile.tooltips
+    return t and t.row or NS.defaults.profile.tooltips.row
+end
+
+local widened = false
+
 local function hideBar()
     if tipBar then tipBar:Hide() end
+    if sizedLine then sizedLine:SetHeight(0) sizedLine = nil end
+    -- GameTooltip is shared: its lines' fonts and its minimum width go back for the next owner.
+    if GameTooltip then NS.Chrome.RestoreTooltipFonts(GameTooltip) end
+    if widened and GameTooltip and GameTooltip.SetMinimumWidth then GameTooltip:SetMinimumWidth(0) end
+    widened = false
 end
 
 --- The one tooltip bar, on GameTooltip. It goes with the tooltip's CONTENT, not only with the
 --- tooltip: SetOwner on a shown GameTooltip clears it (OnTooltipCleared) without hiding it, and a
 --- bar hidden by OnHide alone stayed on screen over whatever the tooltip showed next, the broker
 --- feed's rows among them (feedback round 2, FB-9).
-local function ensureBar()
-    if tipBar then return tipBar end
-    tipBar = Bar.Create(GameTooltip, "tooltip")
+local hooked = false
+local function ensureHooks()
+    if hooked then return end
+    hooked = true
     GameTooltip:HookScript("OnHide", hideBar)
     if GameTooltip.HasScript and GameTooltip:HasScript("OnTooltipCleared") then
         GameTooltip:HookScript("OnTooltipCleared", hideBar)
     end
+end
+
+local function ensureBar()
+    ensureHooks()
+    if tipBar then return tipBar end
+    tipBar = Bar.Create(GameTooltip, "tooltip")
     return tipBar
 end
 
@@ -234,14 +259,23 @@ local function addLine(l)
     end
 end
 
+local function sizeBarLine(n)
+    local fs = _G["GameTooltipTextLeft" .. n]
+    if not (fs and fs.SetHeight) then return end
+    fs:SetHeight(Bar.TooltipRowHeight("tooltip"))
+    sizedLine = fs
+end
+
 local function placeBar(row, n)
     local b = ensureBar()
     b:ApplyStyle(Bar.ResolveStyle("tooltip"))   -- each show, so a skin switch since the last one lands
     local anchor = _G["GameTooltipTextLeft" .. n]
     b:ClearAllPoints()
     if anchor then
+        local w = tonumber(tipSettings().barWidth) or 200   -- Tooltips > Bar width
         b:SetPoint("LEFT", anchor, "LEFT", 0, 0)
-        b:SetWidth(200)
+        b:SetWidth(w)
+        b.knownWidth = w   -- the width Layout uses when the tooltip answers its own as secret
     end
     local stat = row.kind == "stat"
     local v = stat and NS.Rows.StatValues(row.entry) or (NS.Rows.SkillValues(row.entry))
@@ -269,6 +303,16 @@ function RT.Show(row)
             addLine(l)
             n = n + 1
         end
+    end
+    if barAt then sizeBarLine(barAt) end
+    -- Tooltips > Font size on this tooltip's lines, and room for Tooltips > Bar width (both undone
+    -- by hideBar when the tooltip clears or hides).
+    ensureHooks()
+    local t = tipSettings()
+    NS.Chrome.TooltipFontSize(GameTooltip, t.fontSize, 1)
+    if barAt and GameTooltip.SetMinimumWidth then
+        GameTooltip:SetMinimumWidth((tonumber(t.barWidth) or 200) + 20)
+        widened = true
     end
     GameTooltip:Show()
     if barAt then placeBar(row, barAt) end

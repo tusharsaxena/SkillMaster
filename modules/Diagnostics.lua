@@ -18,7 +18,8 @@ local function identity(out)
 end
 
 local function settings(out)
-    out:nonDefaults(NS.Schema, NS.GetSetting, function(row) return row.default end, nil,
+    -- get(row) is handed the row: read its path (a bare NS.GetSetting read every row as nil).
+    out:nonDefaults(NS.Schema, function(row) return NS.GetSetting(row.path) end, function(row) return row.default end, nil,
         { always = { "enabled", "skin.source", "skin.skin" } })
 end
 

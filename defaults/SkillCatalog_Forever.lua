@@ -9,6 +9,9 @@ local _, NS = ...
 --   tiers           the rank caps a profession trains through, or nil
 --   openSpell       the enUS spell whose cast opens the tradeskill window (T3.3), or nil
 --   opensSkillsTab  true when a click opens Character -> Skills instead
+--   tradeSkill      true when the line has its own profession window on WoW Forever with no open
+--                   spell (Skinning and Fishing: Camping recipes, owner feedback round 3); a click
+--                   opens it by skill-line ID (NS.Compat.OpenTradeSkill), else the Skills tab
 --   name            the enUS skill-line name, a locale key (locales/enUS.lua)
 --   aliases         more enUS line names for the same key (the racial riding lines), locale keys
 --   order           the row order inside a category for synthesized (unlearned) rows
@@ -49,7 +52,7 @@ NS.SkillCatalog = {
     herbalism       = gather("Herbalism", "primary", 5),
     leatherworking  = craft("Leatherworking", "primary", 6),
     mining          = gather("Mining", "primary", 7, "Smelting"),
-    skinning        = gather("Skinning", "primary", 8),
+    skinning        = gather("Skinning", "primary", 8),   -- tradeSkill, below
     tailoring       = craft("Tailoring", "primary", 9),
     -- Secondary skills
     cooking         = craft("Cooking", "secondary", 1),
@@ -100,6 +103,11 @@ local OPEN_SPELL_IDS = {
     tailoring = 3908, cooking = 2550, firstAid = 3273, mining = 2656,   -- Mining opens by Smelting
 }
 for key, id in pairs(SKILL_LINE_IDS) do NS.SkillCatalog[key].skillLineID = id end
+-- Skinning and Fishing open their own window on WoW Forever (seen in game, owner feedback round 3,
+-- 2026-11-11), by no spell: the window opens by the skill-line ID.
+for _, key in ipairs({ "skinning", "fishing" }) do
+    NS.SkillCatalog[key].tradeSkill, NS.SkillCatalog[key].opensSkillsTab = true, false
+end
 for key, id in pairs(OPEN_SPELL_IDS) do NS.SkillCatalog[key].openSpellID = id end
 -- The row icons (owner feedback round 2, FB-14): an in-game Interface\Icons\ texture per line,
 -- never a LibKa0s glyph. A profession draws its own spell's runtime texture first (iconSpellID,

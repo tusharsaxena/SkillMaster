@@ -15,8 +15,13 @@ NS.defaults = {
         -- named non-setting state (the detached frames' drag writes it); every other key has a row
         -- on the Layout page (T5.1), and `docked`, `order` and `collapsed` write through NS.Blocks.
         layout = {
-            width     = 440,     -- the main window's width, px
-            maxHeight = 560,     -- the window scrolls past this
+            -- The main window's width, px: 420 since the rows' marks moved into the header's column
+            -- and the bar's timer inside it, which gave every bar 18 px back (feedback round 2).
+            width     = 420,
+            maxHeight = 560,     -- the window's height; it scrolls past this
+            -- Shrink the window to its rows (up to maxHeight). Off by default: the window keeps its
+            -- height when blocks collapse or expand (owner feedback round 3).
+            fitHeight = false,
             blockGap  = 0,       -- px between two docked blocks
             summary   = true,    -- the strip under the title: level, session gains, next alert
             columns   = 1,       -- the window's body: 1 or 2 columns of docked blocks, each `width` wide
@@ -24,18 +29,19 @@ NS.defaults = {
             -- window's, and every detached block's. The crafting overlays take their host's.
             strata         = "MEDIUM",
             detachedStrata = "MEDIUM",
+            -- sort: the block's row order (modules/Blocks.lua B.SORTS; owner feedback round 3).
             blocks = {
-                primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, locked = false, shown = true },
-                secondary     = { docked = true, order = 2, collapsed = false, point = false, scale = 1, locked = false, shown = true },
+                primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
+                secondary     = { docked = true, order = 2, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
                 -- belowCapOnly: the detached compact preset shows only the equipped weapons and the
                 -- skills below their cap (Detached.dc.html; Layout > Blocks > Weapon skills).
-                weapon        = { docked = true, order = 3, collapsed = false, point = false, scale = 1, locked = false, shown = true,
+                weapon        = { docked = true, order = 3, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name",
                                   belowCapOnly = false },
-                other         = { docked = true, order = 4, collapsed = false, point = false, scale = 1, locked = false, shown = true },
-                stats_base    = { docked = true, order = 5, collapsed = false, point = false, scale = 1, locked = false, shown = true },
-                stats_spell   = { docked = true, order = 6, collapsed = true,  point = false, scale = 1, locked = false, shown = true },
-                stats_defense = { docked = true, order = 7, collapsed = true,  point = false, scale = 1, locked = false, shown = true },
-                stats_utility = { docked = true, order = 8, collapsed = false, point = false, scale = 1, locked = false, shown = true },
+                other         = { docked = true, order = 4, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
+                stats_base    = { docked = true, order = 5, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
+                stats_spell   = { docked = true, order = 6, collapsed = true,  point = false, scale = 1, locked = false, shown = true, sort = "name" },
+                stats_defense = { docked = true, order = 7, collapsed = true,  point = false, scale = 1, locked = false, shown = true, sort = "name" },
+                stats_utility = { docked = true, order = 8, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
             },
         },
         -- Rows a player hid from the row menu (T3.3) or the Skills and Stats pages, whether unlearned
@@ -49,12 +55,33 @@ NS.defaults = {
         -- `colors.fromSkin` is on (the default, skinning-§6) the skin's owner tokens draw instead
         -- (core/SkinSetup.lua, sm.cat.* and sm.bonus*). Both carry the approved mockup's colors
         -- (docs/superpowers/specs/2026-11-10-skill-master-mockups).
+        -- The rows' in-game icons (Bars > Icons, feedback round 2): shown, their size, how far the
+        -- art is cropped each side (the 1.x art's baked-in border; 7 is the old fixed crop), and the
+        -- composed border. Its color is the row's own (the meaning color FB-14 chose, so it takes no
+        -- skin companion, options-ui-§17) while borderColorFromRow is on; off, the skin's icon border
+        -- while borderColorFromSkin is on, else the swatch through its class companion.
+        icons = {
+            show                = true,
+            size                = 16,
+            zoom                = 7,
+            border              = true,
+            borderStyle         = "Solid",
+            borderSize          = 1,
+            borderColor         = { 0.24, 0.22, 0.20, 1 },
+            useClassColorBorder = false,
+            borderStyleFromSkin = true,
+            borderColorFromRow  = true,
+            borderColorFromSkin = true,
+        },
         bars = {
             height        = 14,          -- a row's bar, px
-            compactHeight = 11,          -- a detached block's compact bar
-            tooltipHeight = 8,           -- the bar inside a row tooltip
-            miniHeight    = 6,           -- the journal's and the broker tooltip's mini bars
-            rowHeight     = 20,          -- one skill or stat row
+            tooltipHeight = 8,           -- the bar inside the main window's row tooltip
+            tooltipRowHeight = 14,       -- that bar's line in the row tooltip
+            -- The LDB (broker) tooltip's bars (and the journal's) and its lines: a little over the
+            -- old 6 and 14, under the window's 14 and 20 (feedback round 2).
+            miniHeight    = 10,
+            brokerRowHeight = 18,
+            rowHeight     = 20,          -- one skill or stat row (the detached blocks' too)
             fontSize      = 11,          -- the bar text, before the skin's HUD scale
             textAnchor    = "CENTER",    -- "LEFT" | "CENTER" | "RIGHT"
             fillDirection = "LEFT",      -- the edge the fill grows from: "LEFT" (left to right) | "RIGHT"
@@ -63,8 +90,12 @@ NS.defaults = {
             rowDisplay    = "both",
             -- The bar text; tokens {rank} {bonus} {max} {pct} {left} (modules/Bar.lua Bar.Text).
             textTemplate  = "{rank} {bonus} / {max}",
-            spark         = true,        -- a thin line riding the end of the fill
-            ticks         = true,        -- profession tier ticks (75 / 150 / 225)
+            spark         = false,       -- a thin line riding the end of the fill (off: feedback round 2)
+            -- Color mode By category only: a profession's fill split per rank tier (Apprentice 0-75,
+            -- Journeyman 75-150, Expert 150-225, Artisan 225-300) on a scale to 300 whatever the cap,
+            -- each tier a darker shade of the category's color (modules/Bar.lua Bar.TierShade). The
+            -- tier ticks it replaced are gone (feedback round 2; schemaVersion 4 drops `ticks`).
+            tierColors    = false,
             markers       = true,        -- a stat's threshold markers (hit cap, resist cap)
             timer         = true,        -- the temporary bonus's time left beside the bar
             colorMode     = "category",  -- "category" | "progress" | "likelihood" | "flat"
@@ -87,7 +118,11 @@ NS.defaults = {
             borderSize          = 1,
             borderColor         = { 0.24, 0.22, 0.20, 1 },
             useClassColorBorder = false,
-            borderStyleFromSkin = true,
+            -- Off by default, unlike every other companion (feedback round 2, the owner's ruling):
+            -- under a skin stating a real bar border (Azeroth, High Contrast, WoW Midnight) the
+            -- companion on would draw that edge over Show border off. A documented deviation from
+            -- options-ui-§16 (docs/ARCHITECTURE.md). No migration: AceDB stripped a stored true.
+            borderStyleFromSkin = false,
             borderColorFromSkin = true,
             font                = "Ka0s Prototype",
             fontColor           = { 1, 1, 1, 1 },
@@ -109,9 +144,16 @@ NS.defaults = {
             },
         },
         -- The Journal window: its drop point and size ({ w, h }, from its resize grip; the same rule:
-        -- written by modules/Journal.lua alone), the session log's length per character and the Alts
-        -- tab's filter on open.
-        journal = { point = false, size = false, keep = 500, filter = "professions" },
+        -- written by modules/Journal.lua alone), the log's length per character, the Log tab's
+        -- range (FB-32) and the Alts sub-tab on open (a block id, NS.BLOCKS; FB-33).
+        journal = { point = false, size = false, keep = 500, range = "all", filter = "primary" },   -- range: All time (round 4)
+        -- The Tooltips page (owner feedback round 4): each tooltip's own bar width and font size. Its
+        -- bar and row heights stay at bars.tooltipHeight / tooltipRowHeight (the main window's) and
+        -- bars.miniHeight / brokerRowHeight (the LDB tooltip's), their rows moved to that page.
+        tooltips = {
+            row = { barWidth = 200, fontSize = 12 },   -- the tooltip of a main window or detached row
+            ldb = { barWidth = 128, fontSize = 12 },   -- the LDB (broker) tooltip; 128 keeps its old 380 px
+        },
         -- T5.1 the Trainers and Waypoints page (modules/Waypoints.lua, modules/TrainerPopup.lua).
         waypoints = {
             method   = "auto",   -- "auto" (TomTom, else the map pin, else chat) | "tomtom" | "native" | "chat"
@@ -142,7 +184,17 @@ NS.defaults = {
             cap       = true,   -- a profession at its rank's cap, with a next rank: toast + chat
             weapon    = true,   -- a weapon skill weaponGap or more below its cap: toast
             weaponGap = 25,     -- skill points below the cap (5 x level) that count as behind
+            -- Which weapons the gap alert reads (owner feedback round 3): "untrained" skips a weapon
+            -- still at A.UNTRAINED points or fewer (never really used), "equipped" reads only the
+            -- weapons equipped now, "all" every learned weapon. weaponMuted: weapons never alerted.
+            weaponMode  = "untrained",
+            weaponMuted = {},
             sound     = false,  -- play the toast's sound as each alert shows
+            -- The skill-up toast (owner feedback round 4): on by default, for "all" skills,
+            -- "professions" (primary and secondary) or "combat" (weapon and Other); its own sound.
+            skillUp      = true,
+            skillUpScope = "all",
+            skillUpSound = false,
             point     = false,  -- the toast stack's drop point, in UIParent's units
         },
         -- The one broker data feed, "Skill Master" (modules/Broker.lua, design §6.7; feedback round

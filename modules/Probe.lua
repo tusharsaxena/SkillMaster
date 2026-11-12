@@ -41,6 +41,12 @@ P.APIS = {
     { "C_Map.SetUserWaypoint",   function() return C_Map and C_Map.SetUserWaypoint end },
     { "C_Map.GetBestMapForUnit", function() return C_Map and C_Map.GetBestMapForUnit end },
     { "CastSpellByName",         function() return CastSpellByName end },
+    -- Owner feedback round 3: Skinning / Fishing windows and the Skills tab's selection.
+    { "C_TradeSkillUI.OpenTradeSkill", function() return C_TradeSkillUI and C_TradeSkillUI.OpenTradeSkill end },
+    { "C_SkillInfo.SetSelectedSkill",  function() return C_SkillInfo and C_SkillInfo.SetSelectedSkill end },
+    { "SetSelectedSkill",              function() return SetSelectedSkill end },
+    { "SkillFrame_SetSelection",       function() return SkillFrame_SetSelection end },
+    { "SkillFrame_UpdateSkills",       function() return SkillFrame_UpdateSkills end },
 }
 local TOMTOM = 'IsAddOnLoaded("TomTom")'
 

@@ -81,17 +81,17 @@ local function catalogSkill(key, rank, max)
     return { name = cat and L[cat.name] or key, category = cat and cat.category or "other", rank = rank, max = max }
 end
 
-local function ownRecord(c, skills, now)
+local function ownRecord(c, skills, now, stats)
     local mine = {}
     for key, e in pairs(skills.byKey) do
         if e.learned then mine[key] = { name = e.name, category = e.category, rank = e.rank, max = e.max } end
     end
     return { name = c.name, class = c.classFile, className = L[c.class], race = L[c.race], level = c.level,
-             faction = c.faction, updated = now, skills = mine }
+             faction = c.faction, updated = now, skills = mine, stats = NS.Alts.StatsOf(stats) }
 end
 
-local function buildAlts(c, skills, now)
-    local list = { { key = c.realm .. "-" .. c.name, record = ownRecord(c, skills, now), isCurrent = true } }
+local function buildAlts(c, skills, now, stats)
+    local list = { { key = c.realm .. "-" .. c.name, record = ownRecord(c, skills, now, stats), isCurrent = true } }
     local others = {}
     for _, a in ipairs(fixture().alts or {}) do
         local s = {}
@@ -126,7 +126,7 @@ function P.Build()
     d.stats, d.statIndex = NS.StatData.Build(fixture().stats, c.level)
     d.candidates = buildCandidates(clock)
     d.log = buildLog(d.skills, now)
-    d.alts = buildAlts(c, d.skills, now)
+    d.alts = buildAlts(c, d.skills, now, d.stats)   -- the others carry no stats: a dash each (FB-33)
     d.broker = buildBroker(d)
     return d
 end

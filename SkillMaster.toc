@@ -170,6 +170,8 @@ settings\Schema.lua
 settings\Slash.lua
 # LOAD-BEARING: NS.Helpers and NS.RegisterOptionsPage, called at FILE SCOPE by every page below.
 settings\OptionsSetup.lua
+# NS.OptionsList, the boxed list row the Layout and Skills pages draw at RENDER time.
+settings\BoxList.lua
 # LOAD-BEARING: General registers FIRST and Profiles LAST; page order IS registration order.
 settings\General.lua
 # T5.1 the display pages, in the sidebar's order (Skills.lua registers Skills, then Stats). Each reads
@@ -178,6 +180,7 @@ settings\Layout.lua
 settings\Bars.lua
 settings\Skills.lua
 settings\Broker.lua
+settings\Tooltips.lua
 settings\Alerts.lua
 settings\Journal.lua
 settings\Trainers.lua

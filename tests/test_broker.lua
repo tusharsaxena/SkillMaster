@@ -124,7 +124,12 @@ end)
 test("broker: the feed renders its template", function()
     reset()
     B.Refresh()
-    assertEqual(B.Text(), "Skinning 122/150 · +0", "no pin and no skill-up yet: the lowest profession")
+    assertEqual(B.Text(), "Professions and Skills", "nothing pinned (the default): the feed's plain title")
+    NS.db.char.pinned = "skinning"
+    B.Refresh()
+    assertEqual(B.Text(), "Skinning 122/150 · +0", "a pinned skill and the session's gains")
+    NS.db.char.pinned = false
+    B.Refresh()
     NS.SetByPath("broker.template", "{stat:crit} crit · {stat:speed}")
     assertEqual(B.Text(), "9.1% crit · 100%", "a stat token on the same feed")
     NS.SetByPath("broker.template", NS.defaults.profile.broker.template)
@@ -150,7 +155,7 @@ test("test_broker_flash_reverts: any skill-up flashes the feed, then the templat
     assertEqual(B.FlashSeconds(), 5, "profile.broker.flashSeconds defaults to 5")
     M.__now = M.__now + 5
     M.__fireTimers()
-    assertEqual(B.Text(), "Bows 81/110 · +1", "reverted: the last skill-up is the pin, one gain")
+    assertEqual(B.Text(), "Professions and Skills", "reverted: nothing pinned, the plain title")
     NS.bus:SendMessage(NS.MSG.SKILL_UP, "cooking", 133, 134)
     assertTrue(B.Text():find("Cooking 134", 1, true) ~= nil, "and so does a profession's: " .. B.Text())
     M.__now = M.__now + 5
@@ -170,8 +175,8 @@ test("broker: the tooltip's skill sections are on and Stats is off by default", 
     local tip = recordingTip()
     local rows = B.FillTooltip(tip)
     local text = joined(tip)
-    for _, want in ipairs({ "Skill Master", "+1 this session", "PRIMARY", "SECONDARY",
-                            "WEAPON", "OTHER", "Skinning", "Guns", "Defense" }) do
+    for _, want in ipairs({ "Skill Master", "+1 this session", "Primary Professions", "Secondary Skills",
+                            "Weapon Skills", "Other skills", "Skinning", "Guns", "Defense" }) do
         assertTrue(text:find(want, 1, true) ~= nil, "tooltip has " .. want .. "\n" .. text)
     end
     assertFalse(text:find("Ranged Crit", 1, true) ~= nil, "no stats by default\n" .. text)
@@ -238,7 +243,10 @@ test("broker: the Broker page has a Hide row per catalog skill and per stat, apa
     for _, id in ipairs(B.SECTIONS) do
         assertTrue(paths["broker.tooltip.sections." .. id] ~= nil, "a switch for " .. id)
     end
-    assertTrue(paths["broker.tooltip.skin"] ~= nil, "the skin switch")
+    local tips = {}
+    for _, row in ipairs(NS.SchemaForPage("tooltips")) do tips[row.path] = row end
+    assertTrue(tips["broker.tooltip.skin"] ~= nil, "the skin switch, on the Tooltips page (round 4)")
+    assertTrue(paths["broker.tooltip.skin"] == nil, "and no longer on the Broker page")
     assertTrue(paths["broker.template"] ~= nil and paths["broker.preset"] ~= nil, "the one template")
     for path in pairs(paths) do
         assertFalse(path:find("^broker%.templates") ~= nil, "no old feed template row: " .. path)
@@ -258,7 +266,7 @@ test("broker: clicks follow design §6.5 and never touch a secure frame", functi
     B.OpenRow({ kind = "skill", key = "bows" })
     B.OpenRow({ kind = "stat", key = "speed" })
     W.Toggle, W.ShowAndScrollTo, M.ToggleCharacter = saved[1], saved[2], saved[3]
-    assertEqual(table.concat(calls, ","), "toggle,scroll:cooking,char:SkillFrame,char:PaperDollFrame")
+    assertEqual(table.concat(calls, ","), "toggle,scroll:cooking,char:SkillsFrame,char:PaperDollFrame")
 end)
 
 test("broker: a crafting row without ShowAndScrollTo still opens the main window", function()
@@ -271,6 +279,29 @@ test("broker: a crafting row without ShowAndScrollTo still opens the main window
     B.OpenRow({ kind = "skill", key = "cooking" })
     W.Show, W.ShowAndScrollTo = realShow, saved
     assertEqual(shown, 1)
+end)
+
+test("broker: a hovered tooltip row wears the window's hover wash, under its text, until the pointer leaves", function()
+    withTooltip(function()
+        reset()
+        local tip = dressed(B.Tip(), B.TIP_NAME)
+        B.OnEnter(M.UIParent)
+        local hits = B.Hits()
+        assertTrue(#hits > 0, "the rows are clickable")
+        assertTrue(B.HoverWash(tip) == nil or not B.HoverWash(tip):IsShown(), "nothing washed before a hover")
+        local hit = hits[1]
+        hit:__fire("OnEnter")
+        local wash = B.HoverWash(tip)
+        assertTrue(wash ~= nil and wash:IsShown(), "the hovered row is washed")
+        assertTrue(wash:GetParent() == tip, "on the tooltip itself, so the text stays above it")
+        assertEqual(select(1, wash:GetDrawLayer()), "BORDER", "in the stripes' layer, over them")
+        hit:__fire("OnLeave")
+        assertFalse(wash:IsShown(), "the wash goes when the pointer leaves the row")
+        hits[#hits]:__fire("OnEnter")
+        assertTrue(wash:IsShown(), "another row's hover reuses it")
+        B.HideTooltip()
+        assertFalse(wash:IsShown(), "and it goes with the tooltip")
+    end)
 end)
 
 test("broker: stood down, the feed reads Off and its tooltip says so; standing up re-renders", function()
@@ -288,7 +319,7 @@ test("broker: stood down, the feed reads Off and its tooltip says so; standing u
     assertEqual(off, "Off")
     assertEqual(#rows, 0, "no clickable rows while disabled")
     assertTrue(joined(tip):find("disabled", 1, true) ~= nil, joined(tip))
-    assertEqual(B.Text(), "Skinning 122/150 · +0")
+    assertEqual(B.Text(), "Professions and Skills")
 end)
 
 -- ── FB-13: the tooltip's skin ────────────────────────────────────────────────────────────────
@@ -380,8 +411,7 @@ test("broker: schemaVersion 3 carries the All template and drops the other feeds
     sv.profiles["OneFeed-Fresh"] = {}
     NS.db.global.schemaVersion = 2
     NS:RunMigrations()
-    assertEqual(NS.db.global.schemaVersion, 3)
-    assertEqual(NS.SCHEMA_VERSION, 3)
+    assertEqual(NS.db.global.schemaVersion, NS.SCHEMA_VERSION, "the runner reaches the newest step")
     local p = sv.profiles
     assertEqual(p["OneFeed-Custom"].broker.template, "{last} Lv {level}", "the All template carries")
     assertTrue(p["OneFeed-Custom"].broker.templates == nil, "the old table goes")

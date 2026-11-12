@@ -1,28 +1,31 @@
 local _, NS = ...
 -- modules/Bar.lua — the skill/stat data bar (plan Task 3.1, design §6.2/§6.3): a base fill, a bonus
--- segment past it in its own color (temp or permanent), tier ticks, threshold markers, a spark,
+-- segment past it in its own color (temp or permanent), threshold markers, a spark, the fill split
+-- into one color per rank tier (Rank tier colors, on a scale to the last tier),
 -- the "rank +bonus / max" text and an optional expiry timer. Drawn on the skin's tokens
 -- (core/SkinSetup.lua owner tokens, the bar texture through S.BarTexture) and pooled (NS.Pool).
 --
 -- Interface (the main window, the detached blocks, the row tooltip, and later the journal and the
 -- broker tooltip all draw through it):
 --   NS.Bar.Create(parent, styleKey) -> bar           styleKey: "row" | "compact" | "tooltip" | "mini"
---   bar:SetValues{ value, max, bonus, bonusKind = "temp"|"perm", ticks = { n... },
+--   bar:SetValues{ value, max, bonus, bonusKind = "temp"|"perm", tiers = { n... },
 --                  markers = { { at, label } }, text, color }
 --   bar:SetTimer(expires|nil)                         expires: a GetTime() second
 --   bar:ApplyStyle(style)                             a NS.Bar.ResolveStyle(styleKey) table
 --   NS.Bar.NewPool() / Acquire(pool, parent, styleKey) / ReleaseAll(pool)
 --   NS.Bar.Compute(values) -> geom, NS.Bar.FormatTimer(seconds), NS.Bar.Color(token)
--- `bar.geom` is the last Compute: fill and bonus as fractions of the width, ticks and markers as
--- fractions; read by the tests and by the tooltip, written by SetValues only.
+--   NS.Bar.TooltipRowHeight("tooltip" | "mini") -> px   a tooltip bar line's height
+-- `bar.geom` is the last Compute: fill and bonus as fractions of the width, markers and the tier
+-- segments ({ from, to, tier }) as fractions; read by the tests and the tooltip, written by SetValues.
 
 NS.Bar = {}
 local Bar = NS.Bar
 local floor, max, min = math.floor, math.max, math.min
 
 Bar.TIMER_TICK = 0.2   -- seconds between timer redraws while one runs (the only per-frame work)
-Bar.TIMER_W    = 38    -- the timer column a row reserves right of its bar
+Bar.TIMER_W    = 38    -- the timer's width, drawn inside the bar's far end (feedback round 2)
 local EDGE = 1         -- the border's width, px
+local function isSecret(v) return type(issecretvalue) == "function" and issecretvalue(v) and true or false end
 
 -- ---------------------------------------------------------------------------------------------
 -- Colors and the resolved style
@@ -80,12 +83,14 @@ Bar.Media = media
 --- on (S.BarBorder), else the stored three. skinning-§6: a skin that states a real bar border style
 --- wins over Show border while the companion is on, and the host never gates the stored toggle
 --- ahead of the call (nor after it). Under a skin's None (Ka0s Default, WoW Forever) Show border
---- off is off; under a real style the companion off hands it back (feedback round 2, FB-10).
+--- off is off; under a real style the companion off hands it back (feedback round 2, FB-10). The
+--- style companion defaults OFF here (a documented options-ui-§16 deviation), so Show border off
+--- is off under every skin until the player opts into the skin's border.
 local function border(p)
     local show, style, size = p.border == true, p.borderStyle or "Solid", tonumber(p.borderSize) or 1
     local S = NS.Skin
     if S.IsEnabled() and S.BarBorder then
-        local st, sh, sz = S.BarBorder(style, show, size, p.borderStyleFromSkin ~= false)
+        local st, sh, sz = S.BarBorder(style, show, size, p.borderStyleFromSkin == true)
         if st ~= nil then style, show, size = st, sh, sz end
     end
     if style == "None" or (tonumber(size) or 0) <= 0 then show = false end
@@ -102,7 +107,25 @@ local function font(p)
     }
 end
 
-local HEIGHT_KEY = { row = "height", compact = "compactHeight", tooltip = "tooltipHeight", mini = "miniHeight" }
+-- A detached block's compact bar is as tall as the main window's (the owner's ruling, feedback
+-- round 2: no separate Detached bar height).
+--- Rank tier `tier`'s shade of `c`: the category's own color for the first tier (Apprentice), each
+--- tier after it darker by one step, its alpha kept (feedback round 2).
+Bar.TIER_SHADE = { 1, 0.8, 0.64, 0.5 }
+function Bar.TierShade(c, tier)
+    local k = Bar.TIER_SHADE[tier] or Bar.TIER_SHADE[#Bar.TIER_SHADE]
+    return { c[1] * k, c[2] * k, c[3] * k, c[4] or 1 }
+end
+
+local HEIGHT_KEY = { row = "height", compact = "height", tooltip = "tooltipHeight", mini = "miniHeight" }
+
+--- The height of one tooltip line carrying a bar: the stored row height `rowKey`, never shorter
+--- than the bar `barKey` it carries. "tooltip" (the row tooltip) or "mini" (the LDB tooltip).
+local ROW_KEY = { tooltip = { "tooltipRowHeight", "tooltipHeight" }, mini = { "brokerRowHeight", "miniHeight" } }
+function Bar.TooltipRowHeight(styleKey)
+    local k, p = ROW_KEY[styleKey] or ROW_KEY.mini, profileBars()
+    return math.max(tonumber(p[k[1]]) or 14, tonumber(p[k[2]]) or 0)
+end
 
 --- The style one kind of bar draws with: the profile's sizes, switches, media and colors, each
 --- following the skin where its companion says so.
@@ -116,7 +139,9 @@ function Bar.ResolveStyle(styleKey)
         fill = Bar.Color("sm.barFill"),
         bg = Bar.Swatch("bgColor", "sm.barBg", "useClassColorBg"),
         border = edge.show and edge.color or nil, borderStyle = edge.style, borderSize = edge.size,
-        tick = Bar.Color("sm.tick"), marker = Bar.Color("sm.marker"), spark = p.spark and Bar.Color("sm.spark"),
+        marker = Bar.Color("sm.marker"), spark = p.spark and Bar.Color("sm.spark"),
+        -- Rank tier colors works under Color mode By category alone (feedback round 2).
+        tiered = p.tierColors == true and (p.colorMode or "category") == "category",
         text = Bar.Swatch("fontColor", "sm.barText", "useClassColorFont"), timer = Bar.Color("sm.timer"),
         bonusTemp = Bar.PlayerColor("bonusTemp", "sm.bonusTemp"),
         bonusPerm = Bar.PlayerColor("bonusPerm", "sm.bonusPerm"),
@@ -125,7 +150,7 @@ function Bar.ResolveStyle(styleKey)
         font = font(p), fontSize = p.fontSize, textAnchor = p.textAnchor or "CENTER",
         reverse = p.fillDirection == "RIGHT",   -- fills from the right edge (Bars > Fill direction)
         template = p.textTemplate,
-        showText = styleKey ~= "mini" and styleKey ~= "tooltip", showTicks = p.ticks ~= false,
+        showText = styleKey ~= "mini" and styleKey ~= "tooltip",
         showMarkers = p.markers ~= false, showTimer = p.timer ~= false,
     }
 end
@@ -140,10 +165,14 @@ local function clamp01(x)
     return x
 end
 
-local function fractions(list, cap, inclusive)
-    local out = {}
-    for _, t in ipairs(list or {}) do
-        if t > 0 and (t < cap or (inclusive and t == cap)) then out[#out + 1] = t / cap end
+--- The fill split by rank tier on a scale to the last tier: one { from, to, tier } per tier the
+--- value has entered, as fractions of the scale. `tiers` is the catalog's caps ({ 75, 150, 225, 300 }).
+local function tierSegments(tiers, value, scale)
+    local out, from = {}, 0
+    for i, cap in ipairs(tiers) do
+        if value <= from then break end
+        out[#out + 1] = { from = from / scale, to = min(value, cap) / scale, tier = i }
+        from = cap
     end
     return out
 end
@@ -177,18 +206,21 @@ function Bar.Text(value, bonus, cap, template)
 end
 
 --- The bar's geometry from its values. The base clamps to [0, 1]; the bonus reaches at most the
---- end (Review Focus 4); the text keeps the full numbers. Ticks strictly under the cap, markers
---- up to and including it.
-function Bar.Compute(v, template)
+--- end (Review Focus 4); the text keeps the full numbers. Markers up to and including the cap.
+--- `tiered` (Rank tier colors) draws a bar carrying `tiers` on a scale to its last tier (300 for a
+--- profession) whatever its cap, its fill in `segments`, one per tier entered.
+function Bar.Compute(v, template, tiered)
     local cap = tonumber(v.max) or 0
     local value = tonumber(v.value) or 0
     local bonus = tonumber(v.bonus) or 0
-    local g = { fill = 0, bonus = 0, ticks = {}, markers = {} }
-    if cap > 0 then
-        g.fill = clamp01(value / cap)
-        g.bonus = max(0, clamp01((value + max(bonus, 0)) / cap) - g.fill)
-        g.ticks = fractions(v.ticks, cap, false)
-        g.markers = markerFractions(v.markers, cap)
+    local g = { fill = 0, bonus = 0, markers = {} }
+    local tiers = tiered and type(v.tiers) == "table" and #v.tiers > 0 and v.tiers or nil
+    local scale = tiers and tonumber(tiers[#tiers]) or cap
+    if scale > 0 then
+        g.fill = clamp01(value / scale)
+        g.bonus = max(0, clamp01((value + max(bonus, 0)) / scale) - g.fill)
+        g.markers = markerFractions(v.markers, scale)
+        if tiers then g.segments = tierSegments(tiers, min(value, scale), scale) end
     end
     g.text = v.text or Bar.Text(value, bonus, cap, template)
     return g
@@ -297,18 +329,27 @@ local function origin(bar)
     return "LEFT", 1
 end
 
---- Place the fill, the bonus, the spark, the ticks and the markers from `geom` on the current width,
---- from the style's edge. Cheap: anchors and widths only (standalone-windows, Resizing).
+--- Place the fill (or its tier segments), the bonus, the spark and the markers from `geom` on the
+--- current width, from the style's edge. Cheap: anchors and widths only (standalone-windows, Resizing).
 function Methods:Layout()
     local g, w = self.geom, self:GetWidth()
-    w = (type(w) == "number" and w or 0) - 2 * EDGE
+    -- WoW Forever answers a tooltip-anchored bar's width as a secret number while the addon's code
+    -- is tainted (measured 2026-11-12, RowTooltip.placeBar): no arithmetic on it, so the last plain
+    -- width stands in (the caller seeds `knownWidth` when it sets one).
+    if isSecret(w) or type(w) ~= "number" then
+        w = self.knownWidth or 0
+    elseif w > 0 then
+        self.knownWidth = w   -- a frame not laid out yet answers 0: never the width to fall back to
+    end
+    w = w - 2 * EDGE
     local side, sgn = origin(self)
     local fillW, bonusW = max(0, w * g.fill), max(0, w * g.bonus)
     self.fill:ClearAllPoints()
     self.fill:SetPoint("TOP" .. side, self, "TOP" .. side, sgn * EDGE, -EDGE)
     self.fill:SetPoint("BOTTOM" .. side, self, "BOTTOM" .. side, sgn * EDGE, EDGE)
     self.fill:SetWidth(max(fillW, 0.01))
-    self.fill:SetShown(fillW >= 0.5)
+    self.fill:SetShown(fillW >= 0.5 and not g.segments)
+    self:LayoutSegments(g.segments, w)
     local x = sgn * (EDGE + fillW)
     self.bonus:ClearAllPoints()
     self.bonus:SetPoint("TOP" .. side, self, "TOP" .. side, x, -EDGE)
@@ -319,8 +360,23 @@ function Methods:Layout()
     self.spark:SetPoint("TOP", self, "TOP" .. side, x, 0)
     self.spark:SetPoint("BOTTOM", self, "BOTTOM" .. side, x, 0)
     self.spark:SetShown(self.style.spark and fillW >= 1 and g.fill < 1 or false)   -- false: Spark off
-    self:LayoutMarks(self.tickTextures, g.ticks, w, function(t) return t end)
     self:LayoutMarks(self.markerTextures, g.markers, w, function(m) return m.at end)
+end
+
+--- The tier segments, each from its tier's start to where the value stops in it; none untiered.
+function Methods:LayoutSegments(segs, w)
+    local side, sgn = origin(self)
+    for i, t in ipairs(self.segmentTextures) do
+        local seg = segs and segs[i]
+        local sw = seg and w * (seg.to - seg.from) or 0
+        if seg and sw >= 0.5 then
+            t:ClearAllPoints()
+            t:SetPoint("TOP" .. side, self, "TOP" .. side, sgn * (EDGE + w * seg.from), -EDGE)
+            t:SetPoint("BOTTOM" .. side, self, "BOTTOM" .. side, sgn * (EDGE + w * seg.from), EDGE)
+            t:SetWidth(sw)
+        end
+        t:SetShown(seg ~= nil and sw >= 0.5)
+    end
 end
 
 function Methods:LayoutMarks(list, marks, w, at)
@@ -339,14 +395,14 @@ end
 
 function Methods:PaintMarks()
     local g, s = self.geom, self.style
-    -- Above the fill (ARTWORK 1) and the bonus (ARTWORK 2): a tier tick sits under the rank once the
-    -- skill has passed it, and at a lower sublevel the fill painted over it, so it never showed.
-    local ticks = textureList(self, "tickTextures", #g.ticks, "ARTWORK", 3)
-    for i, t in ipairs(ticks) do
-        if g.ticks[i] and s.tick then t:SetColorTexture(rgba(s.tick)) end
-        t:SetWidth(1)
+    -- The tier segments take the fill's place and layer (ARTWORK 1), each its tier's shade of the
+    -- row's fill color (its category's, under By category).
+    local segs = textureList(self, "segmentTextures", g.segments and #g.segments or 0, "ARTWORK", 1)
+    local base = (self.values and self.values.color) or s.fill
+    for i, t in ipairs(segs) do
+        local seg = g.segments and g.segments[i]
+        if seg and base then paintFill(t, Bar.TierShade(base, seg.tier), s) end
     end
-    if not s.showTicks then for i = #g.ticks, 1, -1 do g.ticks[i] = nil end end
     if s.showMarkers == false then for i = #g.markers, 1, -1 do g.markers[i] = nil end end
     local marks = textureList(self, "markerTextures", #g.markers, "OVERLAY")
     for i, t in ipairs(marks) do
@@ -358,7 +414,7 @@ end
 --- Set the numbers. Recomputes the geometry, repaints the fill and bonus colors, redraws.
 function Methods:SetValues(v)
     self.values = v
-    self.geom = Bar.Compute(v, self.style and self.style.template)
+    self.geom = Bar.Compute(v, self.style and self.style.template, self.style and self.style.tiered)
     local s = self.style
     local fillColor = v.color or s.fill
     if fillColor ~= self.fillColor then
@@ -410,11 +466,17 @@ function Methods:SetTimer(expires)
     self:SetScript("OnUpdate", timerTick)
 end
 
+--- The text at its anchor; the timer inside the bar's far end, or its near end when the text sits
+--- right, so the two never share a corner.
 local function placeText(bar, anchor)
     bar.text:ClearAllPoints()
     local x = anchor == "LEFT" and 4 or (anchor == "RIGHT" and -4 or 0)
     bar.text:SetPoint(anchor, bar, anchor, x, 0)
     bar.text:SetJustifyH(anchor)
+    local side = anchor == "RIGHT" and "LEFT" or "RIGHT"
+    bar.timer:ClearAllPoints()
+    bar.timer:SetPoint(side, bar, side, side == "LEFT" and 3 or -3, 0)
+    bar.timer:SetJustifyH(side)
 end
 
 local function paintText(bar, s)
@@ -457,13 +519,11 @@ local function buildRegions(bar)
     bar.spark = bar:CreateTexture(nil, "OVERLAY")
     bar.spark:SetWidth(1)
     bar.edges = Bar.MakeEdges(bar, "OVERLAY")
-    bar.tickTextures, bar.markerTextures = {}, {}
+    bar.segmentTextures, bar.markerTextures = {}, {}
     bar.text = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     bar.text:SetWordWrap(false)
     bar.timer = bar:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    bar.timer:SetPoint("LEFT", bar, "RIGHT", 4, 0)
     bar.timer:SetWidth(Bar.TIMER_W - 4)
-    bar.timer:SetJustifyH("LEFT")
     bar.timer:Hide()
 end
 

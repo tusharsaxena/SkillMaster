@@ -1,6 +1,6 @@
 local addonName, NS = ...
 -- modules/MainWindow.lua — the Skill Master window (standalone-windows, design §6.1, mockup "Main"):
--- its chrome (title band with lock, Expand all and Collapse all, journal, settings and close), the
+-- its chrome (title band with lock, journal, settings, one Expand / Collapse all and close), the
 -- optional summary strip (the character's class icon and name, then its level line), the
 -- docked blocks in a scrolled body (NS.Blocks headers and NS.Rows rows), the bonus legend, the
 -- test-mode strip, the drag-only position, the one toggle handler and the Show window key binding.
@@ -18,6 +18,10 @@ local LAYERS = NS.Constants.LAYERS
 W.FRAME_NAME = "SkillMasterMainWindow"
 W.SCROLL_NAME = "SkillMasterMainScroll"
 local TITLE_H, SUMMARY_H, FOOTER_H, MIN_H, SCROLLBAR_W = 28, 22, 22, 120, 16
+-- What the scroll bar takes past the body: UIPanelScrollFrameTemplate hangs its 16 px bar 6 px off
+-- the scroll frame's right edge, and 4 px keep it off the window's border. The window grows by this
+-- gutter rather than the body shrinking, so the rows stay Window width's (feedback round 2).
+local SCROLL_GUTTER = 6 + SCROLLBAR_W + 4
 W.CLASS_ICON = 14   -- the summary line's class icon, px
 
 local frame          -- built on first show
@@ -29,7 +33,7 @@ local COLUMN_GAP = 6   -- px between two columns of blocks
 
 local function layoutSettings() return (NS.db and NS.db.profile.layout) or NS.defaults.profile.layout end
 local function columns() return tonumber(layoutSettings().columns) == 2 and 2 or 1 end
-local function columnWidth() return (tonumber(layoutSettings().width) or 440) - 4 - SCROLLBAR_W end
+local function columnWidth() return (tonumber(layoutSettings().width) or 420) - 4 - SCROLLBAR_W end
 
 --- The scrolled body's width: Layout > Columns columns, each Window width's body wide.
 function W.ContentWidth()
@@ -37,8 +41,8 @@ function W.ContentWidth()
     return n * columnWidth() + (n - 1) * COLUMN_GAP
 end
 
---- The window's width: the body, its scroll bar and its edges.
-local function width() return W.ContentWidth() + 4 + SCROLLBAR_W end
+--- The window's width: the body, its scroll bar's whole gutter and its edges.
+local function width() return W.ContentWidth() + 4 + SCROLL_GUTTER end
 
 local function savePoint()
     local point, _, relPoint, x, y = frame:GetPoint(1)
@@ -78,8 +82,28 @@ local function openJournal()
     if NS.Journal and NS.Journal.Toggle then NS.Journal.Toggle() end
 end
 local function openSettings() NS.OpenOptionsPanel() end
-local function collapseAll() NS.Blocks:SetAllCollapsed(true) end
-local function expandAll() NS.Blocks:SetAllCollapsed(false) end
+--- Whether any docked block that draws rows is expanded: the one Expand / Collapse all control
+--- then collapses, else it expands (the two are one control, feedback round 2).
+function W.AnyExpanded()
+    local skills, stats = NS.Blocks.Data()
+    for _, id in ipairs(NS.Blocks.Docked()) do
+        if not NS.Blocks.Settings(id).collapsed and #NS.Blocks.Entries(id, skills, stats) > 0 then return true end
+    end
+    return false
+end
+
+local function toggleAll() NS.Blocks:SetAllCollapsed(W.AnyExpanded()) end
+
+--- Show the control as what a click does now: Collapse all (inward arrows) while a block is open,
+--- Expand all (outward arrows) once every one is collapsed.
+local function paintToggleAll()
+    local b = frame and frame.toggleAllButton
+    if not b then return end
+    local collapse = W.AnyExpanded()
+    NS.Chrome.SetIcon(b, collapse and "fullscreen-exit" or "fullscreen-enter", collapse and "-" or "+")
+    b.tip = collapse and L["Collapse all blocks"] or L["Expand all blocks"]
+    b.collapses = collapse
+end
 
 local function controlLevel(b)
     if b then b:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CHROME) end
@@ -90,21 +114,18 @@ local function buildTitleControls()
     frame.lockButton = NS.Chrome.IconButton(frame, "lock", "L", toggleLock, L["Lock or unlock the window"])
     frame.journalButton = NS.Chrome.IconButton(frame, "document", "J", openJournal, L["Open the journal"])
     frame.settingsButton = NS.Chrome.IconButton(frame, "settings", "S", openSettings, L["Open the settings panel"])
-    -- Expand all (outward arrows) and Collapse all (inward arrows), FB-16: on the lock's side, so
-    -- three controls stand each side of the centered title and it keeps the band's middle at the
-    -- narrowest Window width.
-    frame.expandAllButton = NS.Chrome.IconButton(frame, "fullscreen-enter", "+", expandAll, L["Expand all blocks"])
-    frame.collapseAllButton = NS.Chrome.IconButton(frame, "fullscreen-exit", "-", collapseAll,
-        L["Collapse all blocks"])
+    -- Expand all and Collapse all (FB-16) are one control, between the settings mark and the close:
+    -- it shows what a click does now (paintToggleAll), never both at once (feedback round 2).
+    frame.toggleAllButton = NS.Chrome.IconButton(frame, "fullscreen-exit", "-", toggleAll, L["Collapse all blocks"])
     -- Each by name: frame.close is nil without the Core library, and ipairs would stop at that hole.
     controlLevel(frame.close)
     controlLevel(frame.lockButton)
-    controlLevel(frame.expandAllButton)
-    controlLevel(frame.collapseAllButton)
+    controlLevel(frame.toggleAllButton)
     controlLevel(frame.journalButton)
     controlLevel(frame.settingsButton)
-    local left = { frame.lockButton, frame.expandAllButton, frame.collapseAllButton }
-    local right = { frame.settingsButton, frame.journalButton }
+    -- The lock stands with the other marks at the top right (owner feedback round 3).
+    local left = {}
+    local right = { frame.toggleAllButton, frame.settingsButton, frame.journalButton, frame.lockButton }
     if frame.close then table.insert(right, 1, frame.close) end
     NS.Skin.Header(frame, { title = frame.title, align = "CENTER", left = left, right = right })
     if not frame.lockButton:GetPoint(1) then   -- no skin library: the same strip, anchored by hand
@@ -160,7 +181,7 @@ local function paintLegend()
     end
 end
 
---- A legend mark: a thin line drawn as the bar draws it (a tick 1 px, a marker 2 px) in the bar's
+--- A legend mark: a thin line drawn as the bar draws it (a marker, 2 px) in the bar's
 --- own color, then its label, laid right to left from `anchor`. Drawn, never typed: no face has to
 --- carry a glyph for it (skinning-§4).
 local function legendMark(parent, colorKey, w, label, anchor)
@@ -181,10 +202,9 @@ local function buildLegend()
     f:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -1, 1)
     local t1, fs1 = swatch(f, "bonusTemp", L["temp bonus"])
     local t2, fs2 = swatch(f, "bonusPerm", L["permanent bonus"], fs1)
-    local marker, fs3, tex3 = legendMark(f, "marker", 2, L["threshold"])
-    local tick, fs4 = legendMark(f, "tick", 1, L["rank tier"], tex3)
-    f.swatches = { { tex = t1, key = "bonusTemp" }, { tex = t2, key = "bonusPerm" }, marker, tick }
-    f.marks = { fs4, fs3 }
+    local marker, fs3 = legendMark(f, "marker", 2, L["threshold"])
+    f.swatches = { { tex = t1, key = "bonusTemp" }, { tex = t2, key = "bonusPerm" }, marker }
+    f.marks = { fs3 }
     f.rule = f:CreateTexture(nil, "BORDER")
     f.rule:SetPoint("TOPLEFT", f, "TOPLEFT", 0, 0)
     f.rule:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, 0)
@@ -299,7 +319,7 @@ local function plan(skills, stats)
         if #entries > 0 then
             local collapsed = NS.Blocks.Settings(id).collapsed and true or false
             out[#out + 1] = { id = id, entries = entries, collapsed = collapsed, meta = NS.Blocks.Meta(id, entries) }
-            sig[#sig + 1] = id .. (collapsed and "-" or "+")
+            sig[#sig + 1] = id .. (collapsed and "-" or "+") .. NS.Blocks.SortOf(id)
             if not collapsed then
                 for _, r in ipairs(entries) do sig[#sig + 1] = r.entry.key end
             end
@@ -439,11 +459,14 @@ end
 local function fit(top, y)
     frame.scroll:ClearAllPoints()
     frame.scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", 2, -(top + 1))
-    frame.scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(2 + SCROLLBAR_W), FOOTER_H + 2)
+    frame.scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(2 + SCROLL_GUTTER), FOOTER_H + 2)
     local maxH = layoutSettings().maxHeight or 560
     frame:SetWidth(width())
     frame.content:SetWidth(W.ContentWidth())
-    frame:SetHeight(math.max(MIN_H, math.min(top + y + FOOTER_H + 4, maxH)))
+    -- The window keeps Window height unless Shrink to fit is on: a block collapsing or expanding
+    -- never resizes it (owner feedback round 3).
+    local h = layoutSettings().fitHeight and math.min(top + y + FOOTER_H + 4, maxH) or maxH
+    frame:SetHeight(math.max(MIN_H, h))
 end
 
 local function renderTitle(test, sim)
@@ -486,6 +509,7 @@ function W.Render()
         if SO then SO:Sync() end
     end
     frame.empty:SetShown(total == 0)
+    paintToggleAll()
     local who, gains, alert = W.SummaryParts(skills)
     drawIdentity(who)
     frame.summaryGains:SetText(gains)
@@ -497,6 +521,7 @@ end
 
 --- The rows drawn this pass (the suites and the overlay sync read them).
 function W.Rows() return rowPool and rowPool.active or {} end
+function W.Headers() return headerPool and headerPool.active or {} end
 
 --- The header drawn for block `id` this pass, or nil.
 function W.HeaderFor(id) return headers[id] end
@@ -628,6 +653,6 @@ do
     rawset(_G, "BINDING_NAME_" .. journal, L["Toggle journal"])
     NS.BINDINGS = {
         { command = window,  tooltip = L["Shows or hides the Skill Master window."] },
-        { command = journal, tooltip = L["Shows or hides the Journal: the session log and your alts."] },
+        { command = journal, tooltip = L["Shows or hides the Journal: the skill-up log and your alts."] },
     }
 end

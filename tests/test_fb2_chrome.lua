@@ -151,21 +151,32 @@ end)
 
 -- ── FB-16: Expand all / Collapse all ─────────────────────────────────────────────────────────
 
-test("fb16: Collapse all and Expand all drive every docked block's collapse", function()
+test("fb16: one Expand / Collapse all control, between settings and close, showing what a click does", function()
+    -- Feedback round 2: the two marks read as one duplicated pair on the lock's side; they are one
+    -- control now, at the top right, its mark and tip the act a click performs.
     withWorld(function()
         W.Show()
         local f = W.Frame()
-        assertTrue(f.collapseAllButton ~= nil and f.expandAllButton ~= nil, "both buttons")
-        assertEqual(f.collapseAllButton.icon:GetTexture(), NS.Icon("fullscreen-exit"))
-        assertEqual(f.expandAllButton.icon:GetTexture(), NS.Icon("fullscreen-enter"))
+        local b = f.toggleAllButton
+        assertTrue(b ~= nil, "the one control")
+        assertTrue(f.collapseAllButton == nil and f.expandAllButton == nil, "no separate pair")
         assertTrue(NS.Icon("fullscreen-enter") ~= nil, "the declared, shipped icon")
-        assertTrue(type(f.collapseAllButton.tip) == "string" and type(f.expandAllButton.tip) == "string")
-        f.collapseAllButton:GetScript("OnClick")(f.collapseAllButton, "LeftButton")
+        assertTrue(W.AnyExpanded(), "a block is open")
+        assertEqual(b.icon:GetTexture(), NS.Icon("fullscreen-exit"), "so it shows Collapse all")
+        assertEqual(b.tip, NS.L["Collapse all blocks"])
+        b:GetScript("OnClick")(b, "LeftButton")
+        M.__fireTimers()
         for _, id in ipairs(B.Docked()) do assertTrue(B.Settings(id).collapsed, id .. " collapsed") end
         local hdr = W.HeaderFor("weapon")
         assertTrue(hdr ~= nil and hdr.collapsed, "the headers redraw collapsed")
-        f.expandAllButton:GetScript("OnClick")(f.expandAllButton, "LeftButton")
+        W.Render()
+        assertEqual(b.icon:GetTexture(), NS.Icon("fullscreen-enter"), "all collapsed: Expand all")
+        assertEqual(b.tip, NS.L["Expand all blocks"])
+        b:GetScript("OnClick")(b, "LeftButton")
+        M.__fireTimers()
         for _, id in ipairs(B.Docked()) do assertFalse(B.Settings(id).collapsed, id .. " expanded") end
+        W.Render()
+        assertEqual(b.icon:GetTexture(), NS.Icon("fullscreen-exit"), "and back to Collapse all")
     end)
 end)
 

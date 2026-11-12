@@ -50,17 +50,25 @@ test("bar: an empty cap (an unlearned skill) draws nothing and raises nothing", 
     assertEqual(bar.geom.bonus, 0)
 end)
 
-test("bar: ticks at or beyond the cap are dropped", function()
-    -- red under: a tick filter of `<= max` (a tick drawn on the end) or none at all.
-    local bar = fresh()
-    bar:SetValues{ value = 146, max = 150, ticks = { 75, 150, 225, 300 } }
-    assertEqual(#bar.geom.ticks, 1, "only 75 stays under a 150 cap")
-    assertNear(bar.geom.ticks[1], 0.5, 1e-9)
-    local shown = 0
-    for _, t in ipairs(bar.tickTextures) do if t:IsShown() then shown = shown + 1 end end
-    assertEqual(shown, 1, "one tick texture on screen")
-    bar:SetValues{ value = 10, max = 300, ticks = { 75, 150, 225, 300 } }
-    assertEqual(#bar.geom.ticks, 3, "75, 150 and 225 under 300")
+test("bar: Rank tier colors draw a tiered bar to its last tier, its fill one segment per tier entered", function()
+    -- Feedback round 2: the tier ticks gave way to a fill colored per rank tier on a scale to 300.
+    local tiers = { 75, 150, 225, 300 }
+    local g = Bar.Compute({ value = 121, max = 150, bonus = 10, tiers = tiers }, nil, true)
+    assertNear(g.fill, 121 / 300, 1e-9, "on a scale to 300, not to the cap")
+    assertNear(g.bonus, 10 / 300, 1e-9, "the bonus on the same scale")
+    assertEqual(#g.segments, 2, "Apprentice and Journeyman entered")
+    assertNear(g.segments[1].from, 0, 1e-9)
+    assertNear(g.segments[1].to, 75 / 300, 1e-9)
+    assertEqual(g.segments[2].tier, 2)
+    assertNear(g.segments[2].to, 121 / 300, 1e-9, "the second stops at the rank")
+    assertEqual(g.text, "121 +10 / 150", "the text keeps the real cap")
+    assertEqual(#Bar.Compute({ value = 300, max = 300, tiers = tiers }, nil, true).segments, 4, "all four at 300")
+    assertEqual(#Bar.Compute({ value = 0, max = 75, tiers = tiers }, nil, true).segments, 0, "none at 0")
+    local plain = Bar.Compute({ value = 121, max = 150, tiers = tiers }, nil, false)
+    assertTrue(plain.segments == nil, "off: no segments")
+    assertNear(plain.fill, 121 / 150, 1e-9, "off: on the cap")
+    local weapon = Bar.Compute({ value = 50, max = 110 }, nil, true)
+    assertTrue(weapon.segments == nil and math.abs(weapon.fill - 50 / 110) < 1e-9, "untiered: as before")
 end)
 
 test("bar: markers keep the end and drop what is past it", function()
@@ -114,7 +122,7 @@ test("bar: the resolved style reads the profile and the skin's tokens", function
     local style = Bar.ResolveStyle("row")
     assertEqual(style.height, NS.db.profile.bars.height)
     assertTrue(type(style.bg) == "table" and #style.bg >= 3, "the background is a color")
-    assertTrue(type(style.tick) == "table", "the tick color is a token")
+    assertFalse(style.tiered, "Rank tier colors off by default")
     assertTrue(type(style.bonusTemp) == "table" and type(style.bonusPerm) == "table", "both bonus colors")
     local mini = Bar.ResolveStyle("mini")
     assertTrue(mini.height < style.height, "a mini bar is shorter")
@@ -131,4 +139,18 @@ test("bar: the pool hands bars back in order and clears their timers on release"
     assertTrue(Bar.Acquire(pool, M.UIParent, "row") == a, "position 1 gets its bar back")
     assertTrue(Bar.Acquire(pool, M.UIParent, "row") == b)
     Bar.ReleaseAll(pool)
+end)
+
+test("bar: a secret width (a tooltip-anchored bar, tainted) lays out on the last plain width", function()
+    -- red under: arithmetic on the secret GetWidth (Forever, 2026-11-12: Bar.lua Layout from
+    -- RowTooltip.placeBar, "attempt to perform arithmetic on a secret number value").
+    local Kit = T.kit
+    local restore = Kit.installSecretValue()
+    local bar = fresh("tooltip")
+    bar.knownWidth = 200
+    bar.GetWidth = function() return Kit.secret(200) end
+    local ok, err = pcall(bar.SetValues, bar, { value = 74, max = 125 })
+    restore()
+    assertTrue(ok, tostring(err))
+    assertNear(bar.fill:GetWidth(), (200 - 2) * 74 / 125, 1e-6, "the fill sized from the plain width")
 end)

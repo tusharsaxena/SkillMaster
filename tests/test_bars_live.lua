@@ -2,7 +2,7 @@
 -- The owner reported from WoW Forever that the Size, Fill, Background, Border, Text and Marks rows
 -- had no visible effect. Each case writes a row through the panel's own write seam (the
 -- descriptor's set, NS.SetByPath, which runs the row's onChange) and asserts what the DRAWN bar
--- regions now carry on a main-window row, a detached block's row and the Bars page preview, not
+-- regions now carry on a main-window row and a detached block's row, not
 -- only the resolved style table the earlier cases read.
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
@@ -52,16 +52,6 @@ local function withLSM(fn)
     if not ok then error(err, 0) end
 end
 
-local preview
-local function previewBar()
-    if not preview then
-        local f = M.CreateFrame("Frame", nil, M.UIParent)
-        NS.OptionsPreview.Build(nil, f)
-        preview = spy(NS.OptionsPreview.bar)
-    end
-    return preview
-end
-
 --- A learned skill row in the main window, by key.
 local function windowRow(key)
     for _, row in ipairs(NS.MainWindow.Rows()) do
@@ -75,13 +65,14 @@ local function detachedRow(key)
     end
 end
 
---- The three bars a Bars-page row must reach: the window's Leatherworking row, the detached Fishing
---- row (the secondary block popped out, with the lure's timer) and the preview. Spied in place.
+--- The two bars a Bars-page row must reach: the window's Leatherworking row and the detached Fishing
+--- row (the secondary block popped out, with the lure's timer). Spied in place. (The page's own
+--- preview bar came off: owner feedback round 4.)
 local function surfaces()
     local w, d = windowRow("leatherworking"), detachedRow("fishing")
     assertTrue(w ~= nil, "the window draws a Leatherworking row")
     assertTrue(d ~= nil, "the detached secondary block draws a Fishing row")
-    return { window = spy(w.bar), detached = spy(d.bar), preview = previewBar() }
+    return { window = spy(w.bar), detached = spy(d.bar) }
 end
 
 local function setUp()
@@ -114,7 +105,7 @@ local function case(name, fn)
 end
 
 local function each(bars, fn)
-    for _, name in ipairs({ "window", "detached", "preview" }) do fn(bars[name], name) end
+    for _, name in ipairs({ "window", "detached" }) do fn(bars[name], name) end
 end
 
 local function rgbaOf(region)
@@ -127,13 +118,10 @@ end
 -- Size
 -- ---------------------------------------------------------------------------------------------
 
-case("bars live: the bar height reaches the window's rows and the preview, the detached height the blocks", function(bars)
+case("bars live: the bar height reaches the window's rows and the detached blocks", function(bars)
     set("bars.height", 23)
     assertEqual(bars.window.__testH, 23, "the window's bar")
-    assertEqual(bars.preview.__testH, 23, "the preview")
-    set("bars.compactHeight", 17)
-    assertEqual(bars.detached.__testH, 17, "the detached block's bar")
-    assertEqual(bars.window.__testH, 23, "the window keeps the row height")
+    assertEqual(bars.detached.__testH, 23, "the detached block's bar: one Bar height for both")
 end)
 
 case("bars live: the row height reaches every window row", function()
@@ -292,32 +280,40 @@ local function shownCount(list)
     return n
 end
 
-case("bars live: rank tier ticks hide and come back", function(bars)
-    each(bars, function(b, name) assertTrue(shownCount(b.tickTextures) > 0, name .. ": a tick at 75") end)
-    set("bars.ticks", false)
-    each(bars, function(b, name) assertEqual(shownCount(b.tickTextures), 0, name .. ": no tick") end)
-    set("bars.ticks", true)
-    each(bars, function(b, name) assertTrue(shownCount(b.tickTextures) > 0, name .. ": the tick is back") end)
+case("bars live: Rank tier colors split the fill by tier on a scale to 300, and off restores it", function(bars)
+    -- The window's Leatherworking (146 / 150) and the detached Fishing (107 / 150).
+    each(bars, function(b, name)
+        assertEqual(shownCount(b.segmentTextures), 0, name .. ": off by default, no segments")
+        assertTrue(b.fill:IsShown(), name .. ": the one fill")
+    end)
+    set("bars.tierColors", true)
+    each(bars, function(b, name)
+        assertEqual(shownCount(b.segmentTextures), 2, name .. ": Apprentice and Journeyman")
+        assertFalse(b.fill:IsShown(), name .. ": the segments take the fill's place")
+        assertNear(b.geom.fill, b.values.value / 300, 1e-9, name .. ": to 300")
+        local base = b.values.color
+        local function paint(t) local p = M.__paint(t) return p.texture and p.vertex or p.color end
+        local c1, c2 = paint(b.segmentTextures[1]), paint(b.segmentTextures[2])
+        assertNear(c1[1], base[1], 1e-6, name .. ": Apprentice in the category's own color")
+        assertNear(c2[3], base[3] * NS.Bar.TIER_SHADE[2], 1e-6, name .. ": Journeyman a shade darker")
+        assertTrue(c2[1] < c1[1] or c1[1] == 0, name .. ": darker, not another hue")
+    end)
+    set("bars.tierColors", false)
+    each(bars, function(b, name)
+        assertEqual(shownCount(b.segmentTextures), 0, name .. ": off again")
+        assertTrue(b.fill:IsShown(), name .. ": the fill is back")
+    end)
 end)
 
-case("bars live: a tier tick draws above the fill, so a tick the rank has passed still shows", function(bars)
-    -- red under: ticks made at ARTWORK sublevel 0, under the fill (ARTWORK 1): in the client the
-    -- fill painted over every tick below the rank (the preview's 75 at Fishing 107), so Rank tier
-    -- ticks looked inert. The mock does not composite, so the layers are compared.
-    local order = { BACKGROUND = 1, BORDER = 2, ARTWORK = 3, OVERLAY = 4, HIGHLIGHT = 5 }
-    local function above(t, under)
-        local tl, ts = t:GetDrawLayer()
-        local ul, us = under:GetDrawLayer()
-        if order[tl] ~= order[ul] then return (order[tl] or 0) > (order[ul] or 0) end
-        return (ts or 0) > (us or 0)
-    end
+case("bars live: Rank tier colors works only under Color mode By category", function(bars)
+    set("bars.tierColors", true)
+    set("bars.colorMode", "progress")
     each(bars, function(b, name)
-        assertTrue(#b.tickTextures > 0, name .. ": a tick is drawn")
-        for _, t in ipairs(b.tickTextures) do
-            assertTrue(above(t, b.fill), name .. ": the tick is above the fill")
-            assertTrue(above(t, b.bonus), name .. ": and above the bonus segment")
-        end
+        assertEqual(shownCount(b.segmentTextures), 0, name .. ": By progress draws no tiers")
+        assertNear(b.geom.fill, b.values.value / b.values.max, 1e-9, name .. ": on the cap again")
     end)
+    set("bars.colorMode", "category")
+    each(bars, function(b, name) assertEqual(shownCount(b.segmentTextures), 2, name .. ": back under By category") end)
 end)
 
 case("bars live: threshold markers hide on a stat's bar and come back", function()
@@ -335,15 +331,15 @@ end)
 
 case("bars live: the expiry timer hides at once and comes back", function(bars)
     assertTrue(bars.detached.timer:IsShown(), "the lure's timer shows on the detached Fishing row")
-    assertTrue(bars.preview.timer:IsShown(), "and on the preview")
     set("bars.timer", false)
     each(bars, function(b, name) assertFalse(b.timer:IsShown(), name .. ": no timer") end)
     set("bars.timer", true)
     assertTrue(bars.detached.timer:IsShown(), "the detached timer is back")
-    assertTrue(bars.preview.timer:IsShown(), "the preview's timer is back")
 end)
 
-case("bars live: the spark hides when switched off and shows when on", function(bars)
+case("bars live: the spark is off by default, shows when on and hides when off", function(bars)
+    each(bars, function(b, name) assertFalse(b.spark:IsShown(), name .. ": off by default (feedback round 2)") end)
+    set("bars.spark", true)
     each(bars, function(b, name) assertTrue(b.spark:IsShown(), name .. ": the spark rides the fill") end)
     set("bars.spark", false)
     each(bars, function(b, name) assertFalse(b.spark:IsShown(), name .. ": no spark") end)
@@ -373,7 +369,6 @@ test("bars live: every Bars page slider commits while it moves, so a mouse wheel
     slider:__fire("OnValueChanged", 21)   -- a wheel notch, or a drag frame
     M.__fireTimers()
     assertEqual(NS.GetSetting("bars.height"), 21, "stored without a release")
-    assertEqual(NS.OptionsPreview.bar.style.height, 21, "and the preview restyled")
     NS.Helpers.RestoreDefaults("bars")
     panel:Hide()
     panel:__fire("OnHide")

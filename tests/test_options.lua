@@ -186,18 +186,16 @@ test("options: the flat color mode draws the Bar color, or the skin's while its 
     M.__fireTimers()
 end)
 
-test("options: the Bars page draws a live preview bar from NS.Bar, restyled by a write", function()
+test("options: the Bars page has no preview bar (owner feedback round 4)", function()
+    -- red under: the pinned Fishing 107 +25 / 150 preview above the page's strip
     local panel = M.__subcategories["Bars"]
     assertTrue(panel ~= nil, "Bars registered")
     panel:Show()
     panel:__fire("OnShow")
-    local preview = NS.OptionsPreview and NS.OptionsPreview.bar
-    assertTrue(preview ~= nil, "the preview bar exists after the first show")
-    assertNear(preview.geom.fill, 107 / 150, 1e-9, "Fishing 107 / 150, the mockup's")
-    assertEqual(preview.values.bonusKind, "temp", "with the lure's temp bonus")
-    NS.SetByPath("bars.height", 22)
-    assertEqual(preview.style.height, 22, "a write restyles the preview at once")
-    NS.SetByPath("bars.height", NS.defaults.profile.bars.height)
+    assertTrue(NS.OptionsPreview == nil, "no preview module")
+    local page
+    for _, pg in ipairs(NS.SchemaPages or {}) do if pg.key == "bars" or pg.id == "bars" then page = pg end end
+    assertTrue(page == nil or page.header == nil, "no pinned header on the page")
     panel:Hide()
     panel:__fire("OnHide")
     M.__fireTimers()
@@ -229,7 +227,7 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- Trainers page's name color pair).
     local NS2 = loadDegraded()
     local full, degraded = #NS.Schema, #NS2.Schema
-    assertEqual(full, 270, "the full schema")
-    assertEqual(degraded, 234, "the library-absent schema")
-    assertEqual(full - degraded, 36, "Master controls (8, Sim mode among them), the Bars blocks (25) and the trainer name color (3)")
+    assertEqual(full, 317, "the full schema (round 4: the Tooltips page's four rows, the skill-up alert's three)")
+    assertEqual(degraded, 273, "the library-absent schema")
+    assertEqual(full - degraded, 44, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8) and the trainer name color (3)")
 end)

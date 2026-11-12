@@ -31,7 +31,9 @@ C.MINIMAP_PATH = "global.minimap.shown"
 --              STRATA_CHOICES (layout.strata), toplevel, clamped; its title bar,
 --              test strip and close control are levels over the window's own (+ OVERLAY, + CHROME);
 --              its scrolled body + CONTENT; the crafting rows' secure overlays (modules/SecureOverlay.lua,
---              parented to UIParent, at their host's strata) + SECURE over the host, under its chrome
+--              parented to UIParent) one strata ABOVE their host (STRATA_ABOVE), armed only over the
+--              hovered row: a documented frame-layering-§1 deviation (docs/ARCHITECTURE.md), since a
+--              toplevel host's raised group outranks any level in its own strata
 --   T4 window  the trainer popup (modules/TrainerPopup.lua), HIGH: opened from the window or a
 --              detached block, so one strata above the higher of the two (STRATA_ABOVE, never under
 --              HIGH: DIALOG over a High pick), toplevel, clamped, closed with the window

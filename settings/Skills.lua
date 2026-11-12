@@ -66,7 +66,7 @@ local CATEGORY_TAB = {
     primary   = { PROFESSIONS, L["Primary professions"] },
     secondary = { PROFESSIONS, L["Secondary skills"] },
     weapon    = { WEAPONS, L["Weapon skills"] },
-    other     = { WEAPONS, L["Defense, lockpicking and riding"] },
+    other     = { WEAPONS, L["Other skills"] },
 }
 local RANK = { primary = 1, secondary = 2, weapon = 3, other = 4 }
 
@@ -88,7 +88,75 @@ for _, key in ipairs(keys) do
     skillRows[#skillRows + 1] = hideRow("skills", "skills", key, L[c.name], tab[1], tab[2])
 end
 NS.RegisterSchemaRows(skillRows)
+
+-- ---------------------------------------------------------------------------------------------
+-- The Professions and Weapons and other tabs: each skill a boxed row (settings/BoxList.lua, after
+-- ConsumableMaster's Priority list, feedback round 2): its in-game icon, its name, and an eye that
+-- hides or shows it. The rows draw from the tab's own Hide rows, which stay registered: the eye
+-- writes them through the seam, and `/sm set`, Defaults and the row menu reach them as before.
+-- ---------------------------------------------------------------------------------------------
+local HideList = {}
+NS.OptionsHideList = HideList
+
+local function toggleHidden(ctx, path, hidden)
+    return function()
+        if NS.SetByPath(path, not hidden) then NS.Helpers.RefreshPanel(ctx, true) end
+    end
+end
+
+--- The tab's rows grouped by subgroup, in schema order: { { title, rows } ... }.
+local function sections(rows)
+    local out, at = {}, {}
+    for _, r in ipairs(rows or {}) do
+        if r.subgroup and r.path and r.path:find("^skills%.hidden%.") then
+            local s = at[r.subgroup]
+            if not s then
+                s = { title = r.subgroup, rows = {} }
+                at[r.subgroup] = s
+                out[#out + 1] = s
+            end
+            s.rows[#s.rows + 1] = r
+        end
+    end
+    return out
+end
+HideList.Sections = sections
+
+function HideList.Render(ctx, rows)
+    local H = NS.Helpers
+    local scroll = H.EnsureScroll(ctx)
+    if not scroll then return end
+    local list = NS.OptionsList.Begin(ctx)
+    local eye = NS.Icon and NS.Icon("eye")
+    for i, s in ipairs(sections(rows)) do
+        H.Section(ctx, s.title)
+        if i == 1 then
+            H.TextRow(ctx, L["The eye hides a skill from the window and the detached blocks, or shows it again. A hidden skill is dimmed."])
+            if H.AddSpacer then H.AddSpacer(scroll, 4) end
+        end
+        for _, r in ipairs(s.rows) do
+            local key = r.path:match("^skills%.hidden%.(.+)$")
+            local c = NS.SkillCatalog[key]
+            local hidden = r.get and r.get() or false
+            NS.OptionsList.Row(scroll, list, {
+                text = c and L[c.name] or key, icon = NS.Rows.Icon("skill", key), dimmed = hidden,
+                actions = { {
+                    image = eye, dimmed = hidden, onClick = toggleHidden(ctx, r.path, hidden),
+                    title = hidden and L["Show %s"]:format(c and L[c.name] or key) or r.label,
+                    tooltip = r.desc,
+                } },
+            })
+        end
+    end
+    NS.OptionsList.Finish(list, scroll)
+end
+
 NS.RegisterSchemaPage("skills", L["Skills"], {
+    tabs = {
+        { key = PROFESSIONS, label = PROFESSIONS, render = HideList.Render },
+        { key = WEAPONS, label = WEAPONS, render = HideList.Render },
+    },
+    beforeRender = NS.OptionsList.Cancel,
     defaultsTooltip = L["Restore every Skills setting on this profile to its default. Every hidden skill is shown again."],
 })
 

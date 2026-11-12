@@ -27,9 +27,24 @@ local L = NS.L
 local LAYERS = NS.Constants.LAYERS
 
 local MAIN_HAND = 16
-local NAME_W, VALUE_W, MIN_W = 128, 124, 380   -- the bar's height is profile.bars.miniHeight
+local NAME_W, VALUE_W = 128, 124   -- the bar's height is profile.bars.miniHeight, its line's
+                                   -- profile.bars.brokerRowHeight; its width Tooltips > Bar width
+
+-- The tooltip's own settings (the Tooltips page, owner feedback round 4).
+local function tipSettings()
+    local t = NS.db and NS.db.profile.tooltips
+    return t and t.ldb or NS.defaults.profile.tooltips.ldb
+end
+
+--- The tooltip's minimum width: the name column, Tooltips > Bar width and the value column. The
+--- bars stretch between the two columns, so the width is the least a bar draws.
+function B.MinWidth()
+    return NAME_W + (tonumber(tipSettings().barWidth) or 128) + VALUE_W
+end
+-- The bar stops this far short of its line's value (owner feedback round 3: the fixed VALUE_W
+-- left a wide gap): the widest value drawn, the tooltip's own right inset and this gap.
+B.VALUE_GAP, B.TIP_INSET = 8, 10
 local HIDE_POLL = 0.1          -- seconds between the tooltip's leave checks
-local DOT = " \194\183 "
 
 -- The feed's LibDataBroker name (a key display addons store placements under, so never localized;
 -- the launcher object is the addon's folder name, "SkillMaster") and the label a display draws.
@@ -176,9 +191,16 @@ local function flashText(name, new)
     return colored("sem.good", ("%s %s %d"):format(mark, name, new))
 end
 
+--- A template that shows the pinned skill, with nothing pinned, reads "Professions and Skills"
+--- (owner feedback round 3: no pin is the default, and the feed then never guesses a skill).
+local function unpinned(ctx)
+    return ctx.pinned == nil and template():find("{pinned}", 1, true) ~= nil
+end
+
 local function feedText(ctx)
     if NS.IsStoodDown() then return L["Off"] end
     if flash then return flash end
+    if unpinned(ctx) then return L["Professions and Skills"] end
     local out = NS.Template.Render(template(), ctx)
     if out:gsub("[%s%p]", "") == "" then return B.LABEL end   -- never a blank cell
     return out
@@ -276,6 +298,7 @@ local function drawMiniBar(tip, n, values)
     bar:ClearAllPoints()
     bar:SetPoint("LEFT", line, "LEFT", NAME_W, 0)
     bar:SetPoint("RIGHT", tip, "RIGHT", -VALUE_W, 0)
+    bar.skmLine = n
     bar:SetValues(values)
     barsDrawn = barsDrawn + 1
     return true
@@ -283,8 +306,112 @@ end
 
 function B.BarsDrawn() return barsDrawn end
 
+--- The bars' right inset for `tip`: the widest value on a bar's line, the tooltip's inset and the
+--- gap; VALUE_W when no width answers (a stand-in tooltip, a value-less line).
+function B.ValueInset(tip)
+    local name, widest = tip.GetName and tip:GetName(), 0
+    for _, bar in ipairs(barPool.active or {}) do
+        local fs = name and bar.skmLine and _G[name .. "TextRight" .. bar.skmLine]
+        local w = fs and fs.GetStringWidth and tonumber(fs:GetStringWidth()) or 0
+        if w > widest then widest = w end
+    end
+    if widest <= 0 then return VALUE_W end
+    return math.min(VALUE_W, math.ceil(widest) + B.TIP_INSET + B.VALUE_GAP)
+end
+
+--- Pull every bar's right end in to the value column's real width.
+local function fitBars(tip)
+    local inset = B.ValueInset(tip)
+    for _, bar in ipairs(barPool.active or {}) do
+        local line = bar.skmLine and lineRegion(tip, bar.skmLine)
+        if line then
+            bar:ClearAllPoints()
+            bar:SetPoint("LEFT", line, "LEFT", NAME_W, 0)
+            bar:SetPoint("RIGHT", tip, "RIGHT", -inset, 0)
+        end
+    end
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- Row height: a skill or stat line's font strings take Bars > LDB tooltip row height. The shared
+-- GameTooltip keeps a font string's height across owners, so every line sized here goes back to
+-- auto height (SetHeight(0)) with the bars, before anyone else's lines land on it.
+-- ---------------------------------------------------------------------------------------------
+
+local sized = {}
+
+local function sizeRow(tip, n, h)
+    local name = tip.GetName and tip:GetName()
+    if not name then return end
+    h = h or NS.Bar.TooltipRowHeight("mini")
+    for _, side in ipairs({ "TextLeft", "TextRight" }) do
+        local fs = _G[name .. side .. n]
+        if fs and fs.SetHeight then
+            fs:SetHeight(h)
+            sized[#sized + 1] = fs
+        end
+    end
+end
+
+local function unsizeRows()
+    for i = #sized, 1, -1 do
+        sized[i]:SetHeight(0)
+        sized[i] = nil
+    end
+end
+
 --- The mini bars on the open tooltip (NS.Bar widgets; the suites read them).
 function B.Bars() return barPool.active or {} end
+
+-- ---------------------------------------------------------------------------------------------
+-- Bands: the window's look on the tooltip (feedback round 2): a section's header band
+-- (`sm.headerBg`, the block header's) and the alternate rows' stripe (`list.stripe`, the window
+-- rows'). Textures on the tooltip itself, in its BORDER layer, above its backdrop and below its
+-- text; a child frame would draw over the text. Each tooltip keeps its own pool, every texture
+-- hidden again with the bars, so the shared GameTooltip shows nothing of the feed's for its next owner.
+-- ---------------------------------------------------------------------------------------------
+
+local bands = {}   -- [tooltip] = { textures, used = n }
+B.HEADER_PAD = 6   -- a section header line is this much taller than a row
+
+local function band(tip, n, h, r, g, b, a)
+    local line = lineRegion(tip, n)
+    if not (line and tip.CreateTexture and r) then return nil end
+    local pool = bands[tip]
+    if not pool then pool = { used = 0 } bands[tip] = pool end
+    pool.used = pool.used + 1
+    local t = pool[pool.used]
+    if not t then
+        t = tip:CreateTexture(nil, "BORDER")
+        pool[pool.used] = t
+    end
+    t:ClearAllPoints()
+    t:SetPoint("LEFT", line, "LEFT", -6, 0)
+    t:SetPoint("RIGHT", tip, "RIGHT", -4, 0)
+    t:SetHeight(h + 2)
+    t:SetColorTexture(r, g, b, a or 1)
+    t:Show()
+    return t
+end
+
+local function releaseBands()
+    for _, pool in pairs(bands) do
+        for i = 1, pool.used do pool[i]:Hide() end
+        pool.used = 0
+    end
+end
+
+--- The bands drawn on `tip` now (the suites read them).
+function B.Bands(tip)
+    local pool, out = bands[tip], {}
+    for i = 1, pool and pool.used or 0 do out[i] = pool[i] end
+    return out
+end
+
+local function stripe(tip, n, i)
+    if i % 2 ~= 0 then return end   -- the window's rows stripe the even ones (NS.Rows SetStripe)
+    band(tip, n, NS.Bar.TooltipRowHeight("mini"), NS.Skin.Color("list.stripe"))
+end
 
 -- ---------------------------------------------------------------------------------------------
 -- Row hit areas: plain buttons over the tooltip's lines, so a row can be clicked (never secure)
@@ -292,12 +419,47 @@ function B.Bars() return barPool.active or {} end
 
 local hitPool = NS.Pool.New()
 
+-- The hovered row's wash (the window's `list.hover`, NS.Rows onEnter): one texture per tooltip, on
+-- the tooltip in the stripes' BORDER layer one sublevel up, so it covers a stripe and never the
+-- text. A wash on the hit button would sit over the line, the button being a child frame.
+local hovers = {}   -- [tooltip] = texture
+
+--- The hover wash on `tip`, or nil before its first hover (the suites read it).
+function B.HoverWash(tip) return hovers[tip] end
+
+local function showHover(hit)
+    local tip, row = hit:GetParent(), hit.row
+    local line = tip and row and lineRegion(tip, row.line)
+    local r, g, b, a = NS.Skin.Color("list.hover")
+    if not (line and r and tip.CreateTexture) then return end
+    local t = hovers[tip]
+    if not t then
+        t = tip:CreateTexture(nil, "BORDER", nil, 1)
+        hovers[tip] = t
+    end
+    t:ClearAllPoints()
+    t:SetPoint("LEFT", line, "LEFT", -6, 0)
+    t:SetPoint("RIGHT", tip, "RIGHT", -4, 0)
+    t:SetHeight(hit:GetHeight())
+    t:SetColorTexture(r, g, b, a or 1)
+    t:Show()
+end
+
+local function hideHovers()
+    for _, t in pairs(hovers) do t:Hide() end
+end
+
 local function newHit()
     local hit = CreateFrame("Button", nil, UIParent)
-    hit:RegisterForClicks("LeftButtonUp")
-    hit:SetScript("OnClick", function(self, button) B.OpenRow(self.row, button) end)
+    hit:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    hit:SetScript("OnClick", function(self, button) B.OpenRow(self.row, button, self) end)
+    hit:SetScript("OnEnter", showHover)
+    hit:SetScript("OnLeave", hideHovers)
     return hit
 end
+
+--- The tooltip's clickable rows now (the suites read them).
+function B.Hits() return hitPool.active or {} end
 
 local function addHit(tip, row)
     local line = lineRegion(tip, row.line)
@@ -313,7 +475,15 @@ local function addHit(tip, row)
     hit:Show()
 end
 
+local ownTip   -- this file's own tooltip frame, made on the first skinned show (skinnedTip, below)
+
 local function releaseAll()
+    unsizeRows()
+    -- Tooltips > Font size undone on whichever tooltip carried it (a no-op on one never sized).
+    if ownTip then NS.Chrome.RestoreTooltipFonts(ownTip) end
+    if GameTooltip then NS.Chrome.RestoreTooltipFonts(GameTooltip) end
+    releaseBands()
+    hideHovers()
     NS.Bar.ReleaseAll(barPool)
     NS.Pool.ReleaseAll(hitPool)
 end
@@ -322,10 +492,11 @@ end
 -- Tooltip content
 -- ---------------------------------------------------------------------------------------------
 
-local GROUP_TITLES = {
-    primary = L["Primary"], secondary = L["Secondary"], weapon = L["Weapon"], other = L["Other"],
-    base = L["Base"], spell = L["Spell"], defense = L["Defense"], utility = L["Utility"],
-}
+--- A section's title: the window's block title (Primary Professions, Stats · Base & Combat, ...).
+local function sectionTitle(id)
+    local d = NS.BlockDefs[id]
+    return d and d.title or id
+end
 
 --- A skill's bar values, and the token its bonus number is colored in (temp or permanent).
 local function skillBar(e)
@@ -344,10 +515,11 @@ local function skillValue(e, bonus)
     return text
 end
 
-local function nameColor(e, highlightBelowCap)
+-- A skill's name is white, the tooltip's value color, as the window's are (feedback round 2); an
+-- unlearned one is muted.
+local function nameColor(e)
     if not e.learned then return "gtip.muted" end
-    if highlightBelowCap and (e.rank or 0) < (e.max or 0) then return "sem.warn" end
-    return "gtip.body"
+    return "gtip.value"
 end
 
 -- A line honors Rows show (bars.rowDisplay) as the window's rows do: Bar only leaves the value
@@ -355,45 +527,54 @@ end
 local function showsBar() return NS.Rows.Display() ~= "text" end
 local function showsValue() return NS.Rows.Display() ~= "bar" end
 
-local function isDefense(e)
-    local cat = NS.SkillCatalog[e.key]
-    return cat ~= nil and cat.kind == "defense"
-end
-
--- A weapon skill, and Defense, below its cap draws its name in the warning color (the old Weapons
--- feed's highlight).
-local function belowCapHighlight(section, e)
-    return section == "weapon" or isDefense(e)
-end
-
-local function addSkillRow(tip, e, section)
+local function addSkillRow(tip, e, i)
     local values, bonus = skillBar(e)
     local value = (showsValue() or not e.learned) and skillValue(e, bonus) or ""
-    tip:AddDoubleLine(colored(nameColor(e, belowCapHighlight(section, e)), e.name or e.key), value)
+    tip:AddDoubleLine(colored(nameColor(e), e.name or e.key), value)
     local n = tip:NumLines()
+    sizeRow(tip, n)
+    stripe(tip, n, i)
     if e.learned and (e.max or 0) > 0 and showsBar() then drawMiniBar(tip, n, values) end
     return { line = n, kind = "skill", key = e.key }
 end
 
+--- A section's header: the window's block title in the header text color on the header band, a
+--- little taller than a row. No chevron: the tooltip's sections do not collapse.
 local function addTitle(tip, title)
-    tip:AddLine(colored("text.accent", title:upper()))
+    tip:AddLine(colored("list.header.text", title))
+    local n = tip:NumLines()
+    local h = NS.Bar.TooltipRowHeight("mini") + B.HEADER_PAD
+    sizeRow(tip, n, h)
+    local c = NS.Bar.Color("sm.headerBg")
+    if c then band(tip, n, h, c[1], c[2], c[3], c[4]) end
+end
+
+--- Section `id`'s entries in its block's sort order (NS.Blocks.SortEntries, owner feedback round 3).
+local function sorted(id, list)
+    return NS.Blocks.SortEntries(id, list, function(e) return e end)
 end
 
 local function addSkillSection(tip, rows, section, m)
-    local any = false
+    local i, list = 0, {}
     for _, key in ipairs(m.order[section] or {}) do
-        local e = m.byKey[key]
-        if e and not B.HiddenInTooltip("skill", key) then
-            if not any then addTitle(tip, GROUP_TITLES[section]) any = true end
-            rows[#rows + 1] = addSkillRow(tip, e, section)
+        if m.byKey[key] then list[#list + 1] = m.byKey[key] end
+    end
+    for _, e in ipairs(sorted(section, list)) do
+        local key = e.key
+        if not B.HiddenInTooltip("skill", key) then
+            if i == 0 then addTitle(tip, sectionTitle(section)) end
+            i = i + 1
+            rows[#rows + 1] = addSkillRow(tip, e, i)
         end
     end
 end
 
-local function addStatRow(tip, e)
+local function addStatRow(tip, e, i)
     local value = showsValue() and colored("gtip.value", e.display or "") or ""
-    tip:AddDoubleLine(colored("gtip.body", e.label or e.key), value)
+    tip:AddDoubleLine(colored("gtip.value", e.label or e.key), value)
     local n = tip:NumLines()
+    sizeRow(tip, n)
+    stripe(tip, n, i)
     if showsBar() then
         local values = NS.Rows.StatValues(e)
         values.color = NS.Rows.FillColor(e, true)
@@ -409,11 +590,13 @@ local function addStatsSection(tip, rows)
         return
     end
     for _, group in ipairs(NS.StatData.GROUPS) do
-        local any = false
-        for _, e in ipairs(sm[group] or {}) do
+        local i, list = 0, {}
+        for n, e in ipairs(sm[group] or {}) do list[n] = e end
+        for _, e in ipairs(sorted("stats_" .. group, list)) do
             if not B.HiddenInTooltip("stat", e.key) then
-                if not any then addTitle(tip, L["Stats"] .. DOT .. GROUP_TITLES[group]) any = true end
-                rows[#rows + 1] = addStatRow(tip, e)
+                if i == 0 then addTitle(tip, sectionTitle("stats_" .. group)) end
+                i = i + 1
+                rows[#rows + 1] = addStatRow(tip, e, i)
             end
         end
     end
@@ -447,7 +630,7 @@ function B.FillTooltip(tip)
     releaseAll()
     barsDrawn = 0
     local rows = {}
-    if tip.SetMinimumWidth then tip:SetMinimumWidth(MIN_W) end
+    if tip.SetMinimumWidth then tip:SetMinimumWidth(B.MinWidth()) end
     tip:AddDoubleLine(colored("gtip.title", B.LABEL),
         colored("gtip.muted", L["+%d this session"]:format(view().gains.total)))
     if NS.IsStoodDown() then
@@ -455,7 +638,8 @@ function B.FillTooltip(tip)
         return rows
     end
     fillSections(tip, rows)
-    tip:AddLine(colored("gtip.footer", L["Click label: toggle window \194\183 Click row: open its window \194\183 Right-click: feed options"]))
+    fitBars(tip)
+    tip:AddLine(colored("gtip.footer", L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, right-click for the menu"]))
     return rows
 end
 
@@ -495,12 +679,27 @@ local function openSkillRow(key)
     end
     local cat = NS.SkillCatalog[key]
     if cat and cat.openSpell then return showInWindow(key) end
-    return openCharacter("SkillFrame")
+    local I = NS.Interact
+    if cat and cat.tradeSkill and I then return I.OpenTradeSkill(key) end
+    if I then return I.OpenSkills(key) end
+    return openCharacter("SkillsFrame")   -- Forever's Skills tab (round 4)
 end
 
---- One tooltip row's click.
-function B.OpenRow(row)
+--- The row menu for a tooltip row (owner feedback round 3): the window's own (NS.Interact.Menu,
+--- pin, waypoint, trainers, hide) on the tooltip row's entry. Answers the menu, or nil.
+function B.RowMenu(row, anchor)
+    local I, v = NS.Interact, view()
+    local e
+    if row.kind == "skill" then e = v.model and v.model.byKey[row.key]
+    elseif row.kind == "stat" then e = v.statIndex and v.statIndex[row.key] end
+    if not (I and e) then return nil end
+    return I.Menu({ kind = row.kind, entry = e, frame = anchor, surface = "broker" })
+end
+
+--- One tooltip row's click: left opens what the row opens, right the row menu.
+function B.OpenRow(row, button, anchor)
     if type(row) ~= "table" then return end
+    if button == "RightButton" then return B.RowMenu(row, anchor) end
     if row.kind == "stat" then return openCharacter("PaperDollFrame") end
     if row.kind == "skill" then return openSkillRow(row.key) end
 end
@@ -526,7 +725,7 @@ end
 -- The tooltip frame (FB-13): the shared GameTooltip as it is, or this file's own, skinned
 -- ---------------------------------------------------------------------------------------------
 
-local ownTip   -- made on the first skinned show
+-- ownTip: declared above releaseAll, made on the first skinned show
 
 local function skinnedTip()
     if not ownTip then
@@ -618,10 +817,10 @@ function B.OnEnter(frame)
     owner, current = frame, tip
     local rows = B.FillTooltip(tip)
     tip:Show()
-    if tip == ownTip then
-        paintTip(tip)
-        tip:Show()   -- a shown tooltip lays itself out again for the skin's fonts
-    end
+    if tip == ownTip then paintTip(tip) end
+    -- Tooltips > Font size, after the skin's fonts, then one more layout pass for both.
+    NS.Chrome.TooltipFontSize(tip, tipSettings().fontSize, 1)
+    tip:Show()   -- a shown tooltip lays itself out again for the new fonts
     for _, row in ipairs(rows) do addHit(tip, row) end
 end
 

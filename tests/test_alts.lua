@@ -108,3 +108,41 @@ test("alts: a burst of SKILLS_UPDATED is one debounced snapshot; PLAYER_LOGOUT s
     assertTrue(NS.db.global.characters["PvE-Quill Ashbrook"] ~= nil, "logout snapshots without waiting")
     forgetAll()
 end)
+
+-- ── FB-33: the snapshot carries the stats the main window's four stat blocks show ────────────
+
+local function statModel()
+    return NS.StatData.Build({ strength = 88, armor = { 30, 1500 }, meleeCrit = 5.2 }, 22)
+end
+
+test("alts: the snapshot carries the character's stats by key, with each one's block and display", function()
+    -- red under: a record with skills alone (the Alts stat sub-tabs would be all dashes)
+    forgetAll()
+    local realModel = NS.StatData.Model
+    NS.StatData.Model = function() return statModel() end
+    local ok, err = pcall(as, "Ember Ironsong", "PvE", model(), function() A:Snapshot(10) end)
+    NS.StatData.Model = realModel
+    if not ok then error(err, 0) end
+    local st = NS.db.global.characters["PvE-Ember Ironsong"].stats
+    assertTrue(st ~= nil, "stats stored")
+    assertEqual(st.strength.group, "base")
+    assertEqual(st.strength.value, 88)
+    assertEqual(st.strength.display, "88")
+    assertTrue(type(st.strength.pct) == "number", "the bar's scale too")
+    assertEqual(st.armor.group, "defense")
+    forgetAll()
+end)
+
+test("alts: no stat model keeps the stats the last snapshot had; an old snapshot has none", function()
+    forgetAll()
+    local realModel, realScan = NS.StatData.Model, NS.StatData.Scan
+    NS.StatData.Model = function() return statModel() end
+    as("Ember Ironsong", "PvE", model(), function() A:Snapshot(1) end)
+    NS.StatData.Model, NS.StatData.Scan = function() return nil end, function() return nil end
+    local ok, err = pcall(as, "Ember Ironsong", "PvE", model(), function() A:Snapshot(2) end)
+    NS.StatData.Model, NS.StatData.Scan = realModel, realScan
+    if not ok then error(err, 0) end
+    assertEqual(NS.db.global.characters["PvE-Ember Ironsong"].stats.strength.value, 88, "kept")
+    assertEqual(A.StatsOf(nil), nil, "no model, no stats: the Journal draws a dash")
+    forgetAll()
+end)

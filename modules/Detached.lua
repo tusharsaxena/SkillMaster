@@ -17,7 +17,10 @@ local D = NS.Detached
 local LAYERS = NS.Constants.LAYERS
 local Perf = NS.Perf
 
-D.WIDTH, D.TITLE_H, D.PAD = 300, 22, 4
+D.WIDTH, D.TITLE_H, D.PAD = 280, 22, 4   -- 280: the rows' 18 px back (feedback round 2)
+-- The rows' own breathing room above the first row and below the last (feedback round 2); the
+-- spacing between rows is the rows' own height and is not touched.
+D.ROW_PAD = 4
 D.STYLE = "compact"
 
 local frames = {}
@@ -109,14 +112,40 @@ local function buildBand(f)
         NS.L["Dock this block in the main window"])
     NS.Chrome.SetIcon(f.dock, "external-link", "-", true)
     f.collapse = NS.Chrome.IconButton(f, "chevron-down", "v", function() NS.Blocks:ToggleCollapsed(f.id) end)
+    -- The block's sort mark, as on its header in the window (owner feedback round 3).
+    f.sort = NS.Chrome.IconButton(f, "list", "=", function() NS.Blocks:CycleSort(f.id) end)
+    -- The restore mark (owner feedback round 4), leftmost so its hiding leaves no gap.
+    f.restore = NS.Chrome.IconButton(f, "eye", "o", function() NS.Blocks.RestoreHidden(f.id) end)
+    f.restore:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
+    f.restore:Hide()
     f.dock:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.collapse:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
-    NS.Skin.Header(f, { title = f.title, align = "LEFT", right = { f.dock, f.collapse } })
+    f.sort:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
+    NS.Skin.Header(f, { title = f.title, align = "LEFT", right = { f.dock, f.collapse, f.sort, f.restore } })
     if not f.dock:GetPoint(1) then
         f.dock:SetPoint("TOPRIGHT", f, "TOPRIGHT", -D.PAD, -2)
         f.collapse:SetPoint("RIGHT", f.dock, "LEFT", -2, 0)
+        f.sort:SetPoint("RIGHT", f.collapse, "LEFT", -2, 0)
+        f.restore:SetPoint("RIGHT", f.sort, "LEFT", -2, 0)
         f.title:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -5)
     end
+end
+
+--- The title band's height: the skin's band (S.Band, its `title.height` plus the border inset), never
+--- under TITLE_H. The body starts below it, so the title the header centers on the band reads
+--- centered rather than half covered by the first row (feedback round 2).
+function D.TitleHeight(f)
+    local band = NS.Skin.Band and NS.Skin.Band(f)
+    if not (band and band.GetHeight and band.GetPoint) then return D.TITLE_H end
+    local h = tonumber(band:GetHeight()) or 0
+    local y = select(5, band:GetPoint(1))   -- the band's inset below the frame's top edge
+    return math.max(D.TITLE_H, h + math.abs(tonumber(y) or 0))
+end
+
+local function placeBody(f, top)
+    f.body:ClearAllPoints()
+    f.body:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -top)
+    f.body:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, -top)
 end
 
 local function build(id)
@@ -132,8 +161,7 @@ local function build(id)
     f:SetScript("OnDragStop", onDragStop)
     if NS.SecureOverlay then NS.SecureOverlay:Follow(f) end
     f.body = CreateFrame("Frame", nil, f)
-    f.body:SetPoint("TOPLEFT", f, "TOPLEFT", 0, -D.TITLE_H)
-    f.body:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, -D.TITLE_H)
+    placeBody(f, D.TITLE_H)
     f.body:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CONTENT)
     f.rowPool = NS.Rows.NewPool()
     NS.Skin.Shell(f)
@@ -151,12 +179,19 @@ function D.Render(id)
     local collapsed = settings(id).collapsed
     NS.Chrome.SetIcon(f.collapse, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")
+    local mode = NS.Blocks.SortOf(id)
+    NS.Chrome.SetIcon(f.sort, NS.Blocks.SORT_ICON[mode], "=")
+    f.sort.tip = NS.L["Sorted: %s. Click for the next order."]:format(NS.Blocks.SORT_LABEL[mode])
+    NS.Blocks.PaintRestore(f.restore, id)
     local y = 0
     if not collapsed then
-        y = NS.Blocks.LayRows(D.Entries(id), f.body, f.rowPool, 0, D.STYLE, D.PAD)
+        y = NS.Blocks.LayRows(D.Entries(id), f.body, f.rowPool, D.ROW_PAD, D.STYLE, D.PAD) + D.ROW_PAD
     end
+    -- Read at each render: a skin switch can move the band (it re-renders through ApplyLook).
+    local top = D.TitleHeight(f)
+    placeBody(f, top)
     f.body:SetHeight(math.max(y, 1))
-    f:SetHeight(D.TITLE_H + y + D.PAD)
+    f:SetHeight(top + y + D.PAD)
     f:SetMovable(not isLocked(id))
     if t0 then Perf.Note("detachedRender", debugprofilestop() - t0) end
 end

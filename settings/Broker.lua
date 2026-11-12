@@ -1,10 +1,10 @@
 local _, NS = ...
 -- settings/Broker.lua — the Broker page (design §6.7; feedback round 2, FB-12 and FB-13): the one
--- feed's text template and skill-up flash, and its tooltip: the skin, the five sections and one
+-- feed's text template and skill-up flash, and its tooltip: the five sections and one
 -- Hide row per catalog skill and per stat. A write repaints the feed at once (NS.Broker.Refresh).
 --
 --   Feed            -- Text -- the template (presets + Custom)   -- Skill-up flash
---   Tooltip         -- Look -- Apply skin to the tooltip          -- Sections -- one switch each
+--   Tooltip         -- Sections -- one switch each (the skin row is on the Tooltips page)
 --   Tooltip skills  one Hide row per catalog skill, by category
 --   Tooltip stats   one Hide row per stat, by group
 --
@@ -58,18 +58,11 @@ rows[#rows + 1] = {
 -- ---------------------------------------------------------------------------------------------
 -- Tooltip: the skin and the sections
 -- ---------------------------------------------------------------------------------------------
-rows[#rows + 1] = {
-    path = "broker.tooltip.skin", page = PAGE, group = TOOLTIP, subgroup = L["Look"], type = "bool",
-    default = P.tooltip.skin, label = L["Apply skin to the tooltip"],
-    desc = L["Draw the feed's tooltip in the skin's backdrop, border and fonts. Off, it is the game's plain tooltip."],
-    onChange = function()
-        if NS.Broker and NS.Broker.HideTooltip then NS.Broker.HideTooltip() end
-    end,
-}
+-- "Apply skin to the tooltip" (broker.tooltip.skin) moved to the Tooltips page (owner feedback round 4).
 
 local SECTION_LABEL = {
     primary = L["Primary professions"], secondary = L["Secondary skills"], weapon = L["Weapon skills"],
-    other = L["Defense, lockpicking and riding"], stats = L["Stats"],
+    other = L["Other skills"], stats = L["Stats"],
 }
 for _, id in ipairs(NS.Broker.SECTIONS) do
     rows[#rows + 1] = {
@@ -114,7 +107,7 @@ end
 
 local CATEGORY_SUBGROUP = {
     primary = L["Primary professions"], secondary = L["Secondary skills"], weapon = L["Weapon skills"],
-    other = L["Defense, lockpicking and riding"],
+    other = L["Other skills"],
 }
 rows[#rows + 1] = setRow("hiddenSkills", TIP_SKILLS)
 for _, key in ipairs(NS.SortedSkillKeys) do

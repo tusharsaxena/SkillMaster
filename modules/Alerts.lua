@@ -1,10 +1,16 @@
 local addonName, NS = ...
--- modules/Alerts.lua — the rank-cap and weapon-gap alerts (design §5.2, plan Task 4.2) on
+-- modules/Alerts.lua — the rank-cap, weapon-gap and skill-up alerts (design §5.2, plan Task 4.2) on
 -- LibKa0s-Toast-1.0: a profession at its rank's cap with a next rank to train toasts once per cap
 -- and says the trainer in chat; a weapon skill `alerts.weaponGap` or more below its cap toasts once
 -- per skill per session, on SKILL_UP or a level-up. Each alert has its switch; `alerts.sound` plays
 -- the toast's sound. A left-click on a cap toast sets a waypoint to the trainer (NS.Waypoints, T3.3)
 -- or, without it, prints the directions.
+--
+-- Owner feedback round 4 (the mockup "Skill Master alert toasts"): a skill-up toast on every point
+-- (alerts.skillUp, alerts.skillUpScope), green, short-lived (A.SKILLUP_SECONDS), its own sound
+-- switch; skill-ups within A.FOLD_SECONDS of the last share one toast. The weapon-gap toast is
+-- restyled red. Each kind wears a tint and an edge of its semantic color (A.KIND_TOKEN) over the
+-- skin's toast shell, a small uppercase label, and its numbers in that color.
 --
 -- Reads the model through NS.SkillData:Get / the SKILLS_UPDATED payload and the next rank through
 -- NS.Trainers:NextRank, both at call time. The toast frames are plain (never protected), so they
@@ -23,12 +29,21 @@ A.GAP = 12
 A.CLOSE_CLEAR = 26   -- the toast's close mark: 18 px, 4 px in, plus a margin
 A.STACK = 2          -- the mockup shows the cap and the weapon toast together
 A.DEFAULT_GAP = 25
+A.UNTRAINED = 5   -- a weapon at this many points or fewer was never really used (alerts.weaponMode)
+
+A.SKILLUP_SECONDS = 4   -- a skill-up toast's life (the others keep the library's 8)
+A.FOLD_SECONDS = 5      -- skill-ups this close together share one toast
+-- The semantic color each kind wears (the skin's tokens): skill up green, weapon gap red.
+A.KIND_TOKEN = { skillup = "sem.good", weapon = "sem.bad" }
+A.TINT_ALPHA, A.EDGE_ALPHA = 0.12, 0.55
 
 local shownCap, shownGap, lastMax = {}, {}, {}
+local recentUps, lastUpAt = {}, nil   -- the skill-ups the open skill-up toast folds
 
 --- Forget what this session alerted (the suites; a session otherwise never resets).
 function A.Reset()
     shownCap, shownGap, lastMax = {}, {}, {}
+    recentUps, lastUpAt = {}, nil
 end
 
 local function copy(t)
@@ -85,9 +100,44 @@ end
 local function gapPayload(e, cap, gap)
     return {
         kind = "weapon", key = e.key, name = e.name, gap = gap,
-        title = ("%s %d / %d"):format(e.name, e.rank, cap),
-        detail = L["is %d below your cap. Glancing blows and misses are more likely."]:format(gap),
+        label = L["Weapon skill gap"],
+        title = ("%s %d / %d"):format(e.name, e.rank, cap), delta = ("-%d"):format(gap),
+        detail = L["Glancing blows and misses are more likely."],
     }
+end
+
+local function log() return NS.Preview and NS.Preview.Log() or NS.SessionLog end
+
+--- The skill-up line under the title: this session's points, the points to cap and the ETA, each
+--- when known ("3 this session · 49 to cap · ~2 h at this pace").
+local function upDetail(e)
+    local parts, SL = {}, log()
+    local n = SL and SL.GainsFor and SL:GainsFor(e.key)
+    if type(n) == "number" and n > 0 then parts[#parts + 1] = L["%d this session"]:format(n) end
+    local left = (e.max or 0) - (e.rank or 0)
+    if left > 0 then parts[#parts + 1] = L["%d to cap"]:format(left) end
+    local eta = left > 0 and SL and SL.ETA and SL:ETA(e.key)
+    if eta and eta > 0 and NS.RowTooltip then
+        parts[#parts + 1] = L["%s at this pace"]:format(NS.RowTooltip.FormatETA(eta))
+    end
+    return table.concat(parts, " \194\183 ")
+end
+
+--- The skill-up toast over `ups` (oldest first, the newest titles it): one skill, or "Skill up · 3
+--- skills" with the others named under it.
+function A.SkillUpPayload(ups)
+    local e = ups[#ups]
+    local p = { kind = "skillup", key = e.key, name = e.name,
+                title = ("%s %d / %d"):format(e.name, e.rank or 0, e.max or 0), delta = "+1" }
+    if #ups == 1 then
+        p.label, p.detail = L["Skill up"], upDetail(e)
+        return p
+    end
+    local others = {}
+    for i = #ups - 1, 1, -1 do others[#others + 1] = ("%s %d"):format(ups[i].name, ups[i].rank or 0) end
+    p.label = L["Skill up \194\183 %d skills"]:format(#ups)
+    p.detail = L["Also %s"]:format(table.concat(others, ", "))
+    return p
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -114,10 +164,21 @@ function A.CheckCap(e)
     return true
 end
 
+--- Whether weapon `e` is one the gap alert reads: not muted, and as alerts.weaponMode says
+--- (owner feedback round 3: Unarmed at 4 / 120 toasted on every level-up).
+function A.WeaponWatched(e)
+    local muted = setting("weaponMuted")
+    if type(muted) == "table" and muted[e.key] then return false end
+    local mode = setting("weaponMode") or "untrained"
+    if mode == "equipped" then return NS.SkillHelpers.EquippedWeaponSkills()[e.key] == true end
+    if mode == "untrained" then return (e.rank or 0) > A.UNTRAINED end
+    return true
+end
+
 --- A weapon skill `alerts.weaponGap` or more below its cap: toast, once per skill per session.
 function A.CheckGap(e)
     if not (e and e.learned and e.kind == "weapon") or shownGap[e.key] then return false end
-    if setting("weapon") == false then return false end
+    if setting("weapon") == false or not A.WeaponWatched(e) then return false end
     local cap = math.max(e.max or 0, NS.SkillHelpers.WeaponCap(NS.Compat.PlayerLevel()))
     local gap = cap - (e.rank or 0)
     if gap < (tonumber(setting("weaponGap")) or A.DEFAULT_GAP) then return false end
@@ -126,11 +187,39 @@ function A.CheckGap(e)
     return true
 end
 
+--- Whether the skill-up alert reads entry `e` (alerts.skillUp, alerts.skillUpScope).
+function A.SkillUpWatched(e)
+    if setting("skillUp") == false then return false end
+    local scope = setting("skillUpScope") or "all"
+    local prof = e.category == "primary" or e.category == "secondary"
+    if scope == "professions" then return prof end
+    if scope == "combat" then return not prof end
+    return true
+end
+
+local function now() return type(GetTime) == "function" and GetTime() or 0 end
+
+--- A skill point on `e`: the skill-up toast, folded into the open one when the last skill-up was
+--- under A.FOLD_SECONDS ago (the same skill's again replaces its own entry).
+function A.CheckSkillUp(e)
+    if not (e and e.learned ~= false and A.SkillUpWatched(e)) then return false end
+    local t = now()
+    if not (lastUpAt and t - lastUpAt <= A.FOLD_SECONDS) then recentUps = {} end
+    for i = #recentUps, 1, -1 do if recentUps[i].key == e.key then table.remove(recentUps, i) end end
+    recentUps[#recentUps + 1] = { key = e.key, name = e.name, rank = e.rank, max = e.max,
+                                  category = e.category }
+    lastUpAt = t
+    if A.toast.Remove then A.toast:Remove("skillup") end
+    show(A.SkillUpPayload(recentUps), "skillup")
+    return true
+end
+
 --- SKILL_UP(key, old, new): the model already holds the new rank.
 function A.OnSkillUp(key)
     local e = NS.SkillData and NS.SkillData:Get(key)
     if not e then return end
     if e.kind == "weapon" then A.CheckGap(e) else A.CheckCap(e) end
+    A.CheckSkillUp(e)
 end
 
 --- SKILLS_UPDATED(model): a weapon whose cap rose (a level-up) is checked; the first model, at
@@ -181,7 +270,28 @@ local function text(frame, role, size)
 end
 
 local function onMouseUp(frame, button)
-    if button == "LeftButton" and not NS.IsTestMode() then A.OnToastClick(frame.skmPayload) end
+    if button == "LeftButton" and not NS.IsTestMode() and frame.skmPayload and frame.skmPayload.kind == "cap" then
+        A.OnToastClick(frame.skmPayload)
+    end
+end
+
+--- The kind's tint and edge over the skin's shell (owner feedback round 4), or none (the cap toast).
+local function paintKind(frame, kind)
+    local token = A.KIND_TOKEN[kind]
+    local r, g, b
+    if token then r, g, b = NS.Skin.Color(token) end   -- not `token and ...`: that keeps one value
+    if not r then
+        frame.skmTint:Hide()
+        for _, t in ipairs(frame.skmEdges) do t:Hide() end
+        return nil
+    end
+    frame.skmTint:SetColorTexture(r, g, b, A.TINT_ALPHA)
+    frame.skmTint:Show()
+    for _, t in ipairs(frame.skmEdges) do
+        t:SetColorTexture(r, g, b, A.EDGE_ALPHA)
+        t:Show()
+    end
+    return token
 end
 
 local function rows(frame)
@@ -194,6 +304,13 @@ local function rows(frame)
     icon.art:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -1, 1)
     icon.art:SetTexCoord(unpack(NS.Rows.ICON_TRIM))
     frame.skmIcon = icon
+    -- The kind's tint over the shell's backdrop and under the text, and a 1 px edge of its color.
+    frame.skmTint = frame:CreateTexture(nil, "BORDER", nil, 1)
+    frame.skmTint:SetAllPoints(frame)
+    frame.skmTint:Hide()
+    frame.skmEdges = NS.Bar.MakeEdges(frame, "BORDER")
+    for _, t in ipairs(frame.skmEdges) do t:Hide() end
+    frame.skmLabel = text(frame, "body", 10)
     frame.skmTitle = text(frame, "heading", 13)
     frame.skmDetail = text(frame, "body")
     frame.skmHint = text(frame, "accent", 11)
@@ -216,7 +333,17 @@ local function layout(frame, p)
         fs:ClearAllPoints()
         fs:SetWidth(textW)
     end
-    title:SetPoint("TOPLEFT", icon, "TOPRIGHT", A.GAP, 0)
+    local label = frame.skmLabel
+    label:ClearAllPoints()
+    label:SetWidth(textW)
+    if cap then
+        label:Hide()
+        title:SetPoint("TOPLEFT", icon, "TOPRIGHT", A.GAP, 0)
+    else
+        label:Show()
+        label:SetPoint("TOPLEFT", icon, "TOPRIGHT", A.GAP, 0)
+        title:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -2)
+    end
     detail:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -2)
     frame.skmHint:SetPoint("TOPLEFT", detail, "BOTTOMLEFT", 0, -4)
     return size, padY
@@ -230,21 +357,26 @@ function A.Build(frame, p)
     frame.skmIcon.art:SetTexture(NS.Rows.Icon("skill", p.key))
     local size, padY = layout(frame, p)
     local cap = p.kind == "cap"
+    A.lastKind = p.kind   -- the duration and sound getters run right after the build
+    local token = paintKind(frame, p.kind)
+    frame.skmDetail:SetText(p.detail or "")
+    frame.skmDetail:Show()
+    frame.skmHint:SetShown(cap)
     if cap then
         frame.skmTitle:SetText(p.title)
-        frame.skmDetail:SetText(p.detail)
-        frame.skmDetail:Show()
-        frame.skmHint:Show()
     else
-        local open, close = colorCode("sem.warn")
-        frame.skmTitle:SetText(("%s%s%s %s"):format(open, p.title, close, p.detail))
-        frame.skmDetail:Hide()
-        frame.skmHint:Hide()
+        -- The label and the numbers in the kind's color: "Bows 81 / 130 +1", "Crossbows 97 / 130 -33".
+        local open, close = colorCode(token)
+        local name, nums = p.title:match("^(.-) (%d+ / %d+)$")
+        local title = name and ("%s %s%s %s%s"):format(name, open, nums, p.delta or "", close)
+            or ("%s %s%s%s"):format(p.title, open, p.delta or "", close)
+        frame.skmTitle:SetText(title)
+        frame.skmLabel:SetText(open .. (p.label or ""):upper() .. close)
     end
     local h = frame.skmTitle:GetStringHeight() or 0
-    if cap then
-        h = h + 2 + (frame.skmDetail:GetStringHeight() or 0) + 4 + (frame.skmHint:GetStringHeight() or 0)
-    end
+    h = h + 2 + (frame.skmDetail:GetStringHeight() or 0)
+    if cap then h = h + 4 + (frame.skmHint:GetStringHeight() or 0)
+    else h = h + 2 + (frame.skmLabel:GetStringHeight() or 0) end
     return A.WIDTH, math.max(size, h) + 2 * padY
 end
 
@@ -270,7 +402,13 @@ function A.NewToast()
     return Toast:New({
         owner = addonName, name = "SkillMasterAlertToast", build = A.Build,
         width = A.WIDTH, stack = A.STACK,
-        sound = function() return setting("sound") == true end,
+        -- Read right after each build (Toast's present): the kind just built picks its own sound
+        -- switch and its life (a skill-up toast is short).
+        sound = function()
+            if A.lastKind == "skillup" then return setting("skillUpSound") == true end
+            return setting("sound") == true
+        end,
+        duration = function() return A.lastKind == "skillup" and A.SKILLUP_SECONDS or nil end,
         draggable = function() return NS.IsTestMode() end,
         -- Drag-only geometry (architecture-§5's named owner): only this file writes alerts.point.
         getPosition = function() local t = alertsTable() return t and t.point or nil end,

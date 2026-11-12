@@ -9,6 +9,10 @@ local _, NS = ...
 -- NS.Blocks:Detach(id) / :Dock(id) / :SetCollapsed(id, v) / :ToggleCollapsed(id) / :SetAllCollapsed(v) /
 --   :Move(from, to) / :SetOrder(id, n) / .Ordered() (every block, shown or not, in its order)
 -- NS.Blocks.Docked() / .Undocked() / .Entries(id) / .Meta(id, entries) / .Settings(id)
+-- NS.Blocks.SortOf(id) / :CycleSort(id) / .SortEntries(id, items, entryOf): each block's row order
+--   (owner feedback round 3): "name" (the catalog's: skills by name, stats as defined), "value"
+--   (high first), "valueAsc" (low first) or "progress" (nearest its max first); the LDB tooltip
+--   sorts its sections the same way.
 -- NS.Blocks.source: nil for the live models, or fn() -> skills, stats (test mode's preview, T5.2;
 --   the suites' fixtures).
 
@@ -24,7 +28,7 @@ NS.BlockDefs = {
     primary       = def("primary", L["Primary Professions"], "skills", "primary"),
     secondary     = def("secondary", L["Secondary Skills"], "skills", "secondary"),
     weapon        = def("weapon", L["Weapon Skills"], "skills", "weapon"),
-    other         = def("other", L["Defense \194\183 Lockpicking \194\183 Riding"], "skills", "other"),
+    other         = def("other", L["Other skills"], "skills", "other"),
     stats_base    = def("stats_base", L["Stats \194\183 Base & Combat"], "stats", "base"),
     stats_spell   = def("stats_spell", L["Stats \194\183 Spell & Regen"], "stats", "spell"),
     stats_defense = def("stats_defense", L["Stats \194\183 Defense & Resists"], "stats", "defense"),
@@ -124,6 +128,16 @@ local function seam(p, v)
     if not set then return false end
     lastRan = true
     return set(p, v) == true and lastRan ~= false
+end
+
+--- The next sort mode for block `id` (its header's sort mark): Default, Value high, Value low,
+--- Progress, round again. Through the seam, so Layout > Blocks shows it.
+function B:CycleSort(id)
+    local cur, nextMode = B.SortOf(id), B.SORTS[1]
+    for i, m in ipairs(B.SORTS) do
+        if m == cur then nextMode = B.SORTS[i % #B.SORTS + 1] end
+    end
+    return seam(path(id, "sort"), nextMode)
 end
 
 --- Pop block `id` out of the window into its own frame. Persisted; sends LAYOUT_CHANGED.
@@ -246,6 +260,60 @@ local function skillEntries(skills, category)
     return out
 end
 
+--- The keys hidden from block `id` (skills.hidden / stats.hidden, set true): a skill whose
+--- catalog category, else model category, is the block's; a stat whose group is the block's.
+--- @return table keys, string "skills"|"stats"
+function B.HiddenKeys(id)
+    local d = NS.BlockDefs[id]
+    if not d then return {}, "skills" end
+    local kind = d.source == "skills" and "skills" or "stats"
+    local p = NS.db and NS.db.profile
+    local set = p and p[kind] and p[kind].hidden or {}
+    local groupOf = {}
+    if kind == "stats" then
+        for _, sd in ipairs(NS.STAT_DEFS or {}) do groupOf[sd.key] = sd.group end
+    end
+    local model = kind == "skills" and NS.SkillData and type(NS.SkillData.Model) == "function" and NS.SkillData:Model()
+    local out = {}
+    for key, on in pairs(set) do
+        if on == true then
+            local group
+            if kind == "stats" then
+                group = groupOf[key]
+            else
+                local cat = NS.SkillCatalog[key]
+                local e = model and model.byKey and model.byKey[key]
+                group = (cat and cat.category) or (e and e.category)
+            end
+            if group == d.filter then out[#out + 1] = key end
+        end
+    end
+    table.sort(out)
+    return out, kind
+end
+
+--- Show every row hidden from block `id` again, through the seam (owner feedback round 4: from
+--- the window, without the settings). A key with its own schema row is cleared there; any other
+--- (an "other:" line) through the whole set's row, as the row menu's Hide writes it.
+--- @return number how many rows came back
+function B.RestoreHidden(id)
+    local keys, kind = B.HiddenKeys(id)
+    if #keys == 0 then return 0 end
+    local rest = {}
+    for k, v in pairs(NS.db.profile[kind].hidden or {}) do rest[k] = v end
+    local whole = false
+    for _, key in ipairs(keys) do
+        local p = kind .. ".hidden." .. key
+        if NS.FindSchemaRow(p) then NS.SetByPath(p, false) else rest[key], whole = nil, true end
+    end
+    if whole then
+        for k in pairs(rest) do if NS.db.profile[kind].hidden[k] ~= true then rest[k] = nil end end
+        NS.SetByPath(kind .. ".hidden", rest)
+    end
+    NS.Debug("Click", "restored %d hidden row(s) in %s", #keys, id)
+    return #keys
+end
+
 local function statEntries(stats, group)
     local out = {}
     for _, e in ipairs(stats and stats[group] or {}) do
@@ -254,38 +322,82 @@ local function statEntries(stats, group)
     return out
 end
 
---- The rows block `id` shows, each { kind = "skill"|"stat", entry }.
+-- ---------------------------------------------------------------------------------------------
+-- Sorting (owner feedback round 3): a block's rows in its stored order, cycled from its header
+-- ---------------------------------------------------------------------------------------------
+
+B.SORTS = { "name", "value", "valueAsc", "progress" }
+B.SORT_ICON = { name = "list", value = "sort-desc", valueAsc = "sort-asc", progress = "ph:sort-descending" }
+B.SORT_LABEL = {
+    name = L["Default order"], value = L["Value, highest first"], valueAsc = L["Value, lowest first"],
+    progress = L["Progress to max, nearest first"],
+}
+
+--- Block `id`'s sort mode, "name" when unset or unknown.
+function B.SortOf(id)
+    local s = B.Settings(id)
+    local mode = s and s.sort
+    return B.SORT_LABEL[mode] and mode or "name"
+end
+
+local function numeric(e)
+    if e.rank ~= nil then return tonumber(e.rank) or 0 end
+    return tonumber(e.value) or tonumber(e.pct) or 0
+end
+
+local function progress(e)
+    if e.rank ~= nil then
+        local max = tonumber(e.max) or 0
+        return max > 0 and (tonumber(e.rank) or 0) / max or 0
+    end
+    return tonumber(e.pct) or 0
+end
+
+local KEY = { value = numeric, valueAsc = numeric, progress = progress }
+
+--- `items` in block `id`'s order, in place: `entryOf(item)` is the item's model entry (default
+--- item.entry). A not-learned row stays below the learned ones; a tie keeps the catalog's order.
+function B.SortEntries(id, items, entryOf)
+    local mode = B.SortOf(id)
+    local key = KEY[mode]
+    if not key then return items end
+    entryOf = entryOf or function(item) return item.entry end
+    local rank = {}
+    for i, item in ipairs(items) do
+        local e = entryOf(item)
+        rank[item] = { learned = e.learned ~= false, v = key(e), i = i }
+    end
+    table.sort(items, function(a, b)
+        local x, y = rank[a], rank[b]
+        if x.learned ~= y.learned then return x.learned end
+        if x.v ~= y.v then
+            if mode == "valueAsc" then return x.v < y.v end
+            return x.v > y.v
+        end
+        return x.i < y.i
+    end)
+    return items
+end
+
+--- The rows block `id` shows, each { kind = "skill"|"stat", entry }, in its sort order.
 function B.Entries(id, skills, stats)
     local d = NS.BlockDefs[id]
     if not d then return {} end
     if skills == nil and stats == nil then skills, stats = B.Data() end
-    if d.source == "skills" then return skillEntries(skills, d.filter) end
-    return statEntries(stats, d.filter)
+    if d.source == "skills" then return B.SortEntries(id, skillEntries(skills, d.filter)) end
+    return B.SortEntries(id, statEntries(stats, d.filter))
 end
 
-local function learnedCount(entries)
-    local n = 0
-    for _, r in ipairs(entries) do if r.entry.learned ~= false then n = n + 1 end end
-    return n
-end
-
+-- No counts beside a title (owner feedback round 4): only Base & Combat says what its bars scale to.
 local META = {
-    primary = function(entries) return ("%d / 2"):format(learnedCount(entries)) end,
-    secondary = function(entries) return tostring(learnedCount(entries)) end,
-    weapon = function(entries)
-        local first = entries[1] and entries[1].entry
-        local cap = first and first.learned ~= false and first.max or 0
-        return cap > 0 and L["cap %d (5 \195\151 level)"]:format(cap) or ""
-    end,
-    other = function() return "" end,
     stats_base = function() return L["vs highest primary"] end,
 }
 
---- The muted line beside a block's title (the mockup's: "2 / 2", "cap 110 (5 × level)", a count).
+--- The muted line beside a block's title: Base & Combat's scale note, else nothing.
 function B.Meta(id, entries)
     local fn = META[id]
     if fn then return fn(entries) end
-    return #entries > 0 and tostring(#entries) or ""
+    return ""
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -309,7 +421,22 @@ function Header:SetBlock(id, meta, collapsed, docked)
     -- Detach is the external-link mark; dock (attach) is the same mark turned 180 degrees.
     NS.Chrome.SetIcon(self.detach, "external-link", docked and "+" or "-", not docked)
     self.detach.tip = docked and L["Detach this block into its own frame"] or L["Dock this block in the main window"]
+    local mode = B.SortOf(id)
+    NS.Chrome.SetIcon(self.sort, B.SORT_ICON[mode], "=")
+    self.sort.tip = L["Sorted: %s. Click for the next order."]:format(B.SORT_LABEL[mode])
     self.docked = docked
+    B.PaintRestore(self.restore, id)
+    self.meta:ClearAllPoints()
+    self.meta:SetPoint("RIGHT", self.restore:IsShown() and self.restore or self.sort, "LEFT", -6, 0)
+end
+
+--- The restore mark (owner feedback round 4): shown while block `id` has hidden rows, its tip
+--- saying how many. Shared by the window's header and the detached frame's band.
+function B.PaintRestore(mark, id)
+    local n = #(B.HiddenKeys(id))
+    mark:SetShown(n > 0)
+    mark.tip = n == 1 and L["1 hidden row. Click to show it again."]
+        or L["%d hidden rows. Click to show them again."]:format(n)
 end
 
 local function onHeaderClick(self) B:ToggleCollapsed(self.id) end
@@ -317,6 +444,18 @@ local function onHeaderClick(self) B:ToggleCollapsed(self.id) end
 local function onDetachClick(self)
     local h = self:GetParent()
     if h.docked then B:Detach(h.id) else B:Dock(h.id) end
+end
+
+local function onRestoreClick(self)
+    local h = self:GetParent()
+    if GameTooltip and GameTooltip:IsOwned(self) then GameTooltip:Hide() end   -- its tip names a count about to go
+    B.RestoreHidden(h.id)
+end
+
+local function onSortClick(self)
+    local h = self:GetParent()
+    B:CycleSort(h.id)
+    if self:IsMouseOver() == true and self:GetScript("OnEnter") then self:GetScript("OnEnter")(self) end
 end
 
 local function buildHeader(parent)
@@ -338,9 +477,19 @@ local function buildHeader(parent)
     h.title:SetPoint("LEFT", h.chevron, "RIGHT", 2, 0)
     NS.Skin.Text(h.title, "heading")
     h.detach = NS.Chrome.IconButton(h, "external-link", "+", onDetachClick)
+    NS.Chrome.SetRestToken(h.detach, "text.heading")   -- the title's color at rest (round 2)
     h.detach:SetPoint("RIGHT", h, "RIGHT", -4, 0)
+    -- The sort mark (owner feedback round 3), left of detach in the same rest color.
+    h.sort = NS.Chrome.IconButton(h, "list", "=", onSortClick)
+    NS.Chrome.SetRestToken(h.sort, "text.heading")
+    h.sort:SetPoint("RIGHT", h.detach, "LEFT", -4, 0)
+    -- The restore mark (owner feedback round 4), left of sort, only while the block hides rows.
+    h.restore = NS.Chrome.IconButton(h, "eye", "o", onRestoreClick)
+    NS.Chrome.SetRestToken(h.restore, "text.heading")
+    h.restore:SetPoint("RIGHT", h.sort, "LEFT", -4, 0)
+    h.restore:Hide()
     h.meta = h:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    h.meta:SetPoint("RIGHT", h.detach, "LEFT", -6, 0)
+    h.meta:SetPoint("RIGHT", h.sort, "LEFT", -6, 0)
     NS.Skin.Text(h.meta, "muted")
     h:SetScript("OnClick", onHeaderClick)
     return h

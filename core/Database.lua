@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 3
+NS.SCHEMA_VERSION = 5
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -38,12 +38,35 @@ local function oneBrokerFeed(_, profile)
     if kept == nil or kept == NS.defaults.profile.broker.template then broker.template = old end
 end
 
+--- 3 -> 4 (feedback round 2, the owner's rulings): no Detached bar height and no rank tier ticks. A
+--- detached block's bar and row take the main window's Bar height and Row height, so a stored
+--- `bars.compactHeight` goes; the ticks gave way to Rank tier colors (`bars.tierColors`, a new key
+--- with its own default), so a stored `bars.ticks` goes. Nothing carries over.
+local function retiredBarKeys(_, profile)
+    local bars = type(profile) == "table" and profile.bars
+    if type(bars) ~= "table" then return end
+    bars.compactHeight = nil
+    bars.ticks = nil
+end
+
+--- 4 -> 5 (owner feedback round 3, FB-33): the Alts sub-tabs are the main window's blocks, so a
+--- stored `journal.filter` of "professions" or "weapons" names no sub-tab any more: it becomes the
+--- block it opened on ("primary", "weapon"). "other" is a block id already and stays.
+local LEGACY_FILTER = { professions = "primary", weapons = "weapon" }
+local function journalFilterToBlock(_, profile)
+    local j = type(profile) == "table" and profile.journal
+    if type(j) ~= "table" then return end
+    j.filter = LEGACY_FILTER[j.filter] or j.filter
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile.
 local STEPS = {
     { to = 1, run = function() end },   -- 0 -> 1: pre-versioning, a no-op
     { to = 2, run = rowDisplayFromStats, perProfile = true },
     { to = 3, run = oneBrokerFeed, perProfile = true },
+    { to = 4, run = retiredBarKeys, perProfile = true },
+    { to = 5, run = journalFilterToBlock, perProfile = true },
 }
 
 function NS:InitDB()

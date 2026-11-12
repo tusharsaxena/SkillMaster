@@ -127,3 +127,13 @@ test("diagnostics: layout prints the window and every block's stored state, deta
     assertTrue(text:find("block weapon docked=false", 1, true) ~= nil, text)
     assertTrue(text:find("docked order: primary, secondary, other", 1, true) ~= nil, text)
 end)
+
+test("diagnostics: the settings section lists only the rows off their default, with their values", function()
+    -- red under: a getter handed the row instead of its path (every row read nil, so all printed
+    -- as "path = nil (default)", owner's dump 2026-11-12).
+    NS.SetByPath("layout.width", 500)
+    local text = flat(NS.DebugLog:BuildDiagnostics())
+    NS.SetByPath("layout.width", NS.defaults.profile.layout.width)
+    assertTrue(text:find("layout.width = 500 (", 1, true) ~= nil, text)
+    assertTrue(not text:find("layout.maxHeight =", 1, true), "a row at its default printed:\n" .. text)
+end)

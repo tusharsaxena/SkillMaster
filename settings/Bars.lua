@@ -1,22 +1,23 @@
 local _, NS = ...
 -- settings/Bars.lua — the Bars page (design §6.6, mockup "Options"): every look the bar widget
--- (modules/Bar.lua) draws, with the live preview bar pinned above the strip.
+-- (modules/Bar.lua) draws. No preview bar (owner feedback round 4): the open window is the preview.
 --
---   Bar      -- Size -- the five heights          -- Fill -- the composed bar block (flat mode's color)
+--   Bar      -- Size -- the six heights           -- Fill -- the composed bar block (flat mode's color)
 --            -- Background -- the swatch pair     -- Border -- the composed border block
 --   Colors   the color mode, then the category and bonus palette (a palette: no class companion,
 --            options-ui-§17's exemption), following the skin under one companion
 --   Text     -- Content -- template and anchor    -- Font -- the composed font block
---   Marks    the tier ticks, the stat markers, the timer and the spark
+--   Marks    the rank tier shades (By category only), the stat markers, the timer and the spark
 --
--- Every row's onChange is NS.ApplyLook (LAYOUT_CHANGED): the window, the detached blocks, the
--- journal and the preview restyle at once. The composed blocks start on the skin (skinning-§6):
+-- Every row's onChange is NS.ApplyLook (LAYOUT_CHANGED): the window, the detached blocks and the
+-- journal restyle at once. The composed blocks start on the skin (skinning-§6):
 -- each `*FromSkin` companion defaults true in defaults/Profile.lua and in the composer.
 local H = NS.Helpers
 local L = NS.L
 local P = NS.defaults.profile.bars
 local PAGE = "bars"
-local BAR, COLORS, TEXT, MARKS = L["Bar"], L["Colors"], L["Text"], L["Marks"]
+local BAR, COLORS, TEXT, MARKS, ICONS = L["Bar"], L["Colors"], L["Text"], L["Marks"], L["Icons"]
+local PI = NS.defaults.profile.icons
 
 local function row(t)
     t.page = PAGE
@@ -40,14 +41,9 @@ end
 
 local SIZE = L["Size"]
 local rows = {
-    px("bars.height", BAR, SIZE, L["Bar height (px)"], L["Height of a row's bar in the main window."], 6, 30),
-    px("bars.rowHeight", BAR, SIZE, L["Row height (px)"], L["Height of one skill or stat row, its bar included."], 14, 40),
-    px("bars.compactHeight", BAR, SIZE, L["Detached bar height (px)"],
-        L["Height of a bar in a detached block."], 4, 24),
-    px("bars.tooltipHeight", BAR, SIZE, L["Tooltip bar height (px)"],
-        L["Height of the bar inside a row's tooltip."], 4, 20),
-    px("bars.miniHeight", BAR, SIZE, L["Mini bar height (px)"],
-        L["Height of the small bars in the Journal's Alts tab and the broker tooltips."], 3, 16),
+    px("bars.height", BAR, SIZE, L["Bar height (px)"], L["Height of a row's bar in the main window and the detached blocks."], 6, 30),
+    px("bars.rowHeight", BAR, SIZE, L["Row height (px)"], L["Height of one skill or stat row, its bar included, in the main window and the detached blocks."], 14, 40),
+    -- The four tooltip sizes moved to the Tooltips page (settings/Tooltips.lua, owner feedback round 4).
     row({ path = "bars.fillDirection", group = BAR, subgroup = L["Fill"], type = "string", default = P.fillDirection,
           label = L["Fill direction"], desc = L["The edge every bar fills from."],
           values = { { value = "LEFT", text = L["Left to right"] }, { value = "RIGHT", text = L["Right to left"] } } }),
@@ -107,11 +103,12 @@ add(rows, {
     swatch("primary", L["Primary professions"], L["Fill of a primary profession's bar (By category)."]),
     swatch("secondary", L["Secondary skills"], L["Fill of a secondary skill's bar (By category)."]),
     swatch("weapon", L["Weapon skills"], L["Fill of a weapon skill's bar (By category)."]),
-    swatch("other", L["Defense, lockpicking and riding"], L["Fill of the Other block's bars (By category)."]),
+    swatch("other", L["Other skills"], L["Fill of the Other block's bars (By category)."]),
     swatch("stats", L["Stats"], L["Fill of a stat's bar (By category)."]),
     swatch("bonusTemp", L["Temporary bonus"], L["The bonus segment of a temporary bonus: a lure, a buff."]),
     swatch("bonusPerm", L["Permanent bonus"], L["The bonus segment of a permanent bonus: a racial, an item."]),
 })
+
 
 -- Text: content first (options-ui-§16, U-10d), then the font block. Rows show (bars.rowDisplay,
 -- feedback round 1 FB-3) is one setting for skill and stat rows alike. The bar text is a presets
@@ -166,71 +163,55 @@ local function mark(key, label, desc)
     return row({ path = "bars." .. key, group = MARKS, type = "bool", default = P[key], label = label, desc = desc })
 end
 add(rows, {
-    mark("ticks", L["Rank tier ticks"], L["A tick on a profession's bar at each rank's cap (75, 150, 225)."]),
+    mark("tierColors", L["Rank tier colors"],
+        L["Draw a profession's bar to 300 whatever its cap, its fill split by rank tier: Apprentice to 75 in its category's color, then Journeyman, Expert and Artisan each a shade darker. Works only while Color mode (Colors) is By category."]),
     mark("markers", L["Threshold markers"], L["A stat's marks: the hit cap, the resist cap, crit immunity."]),
     mark("timer", L["Expiry timer"], L["The time a temporary bonus has left, beside its bar."]),
     mark("spark", L["Spark"], L["A thin line riding the end of the fill."]),
 })
 
+-- Icons (feedback round 2): the rows' in-game icons in the window and the detached blocks. The
+-- border is the composed block (options-ui-§16) on the icon family (fromSkin = "icon": its style and
+-- thickness follow the skin's icon border while the companion is on); its color is the row's own
+-- by default (Use the row's color), else the skin's, else the swatch.
+local ICON = L["Icon"]
+add(rows, {
+    row({ path = "icons.show", group = ICONS, subgroup = ICON, type = "bool", default = PI.show,
+          label = L["Show icons"], desc = L["Draw each row's in-game icon at its left end."] }),
+    row({ path = "icons.size", group = ICONS, subgroup = ICON, type = "number", default = PI.size,
+          min = 10, max = 28, step = 1, label = L["Icon size (px)"],
+          desc = L["The icon's width and height, its border included. Never taller than the row."],
+          disabledIf = function() return NS.GetSetting("icons.show") == false end }),
+    row({ path = "icons.zoom", group = ICONS, subgroup = ICON, type = "number", default = PI.zoom,
+          min = 0, max = 30, step = 1, label = L["Icon zoom (%)"],
+          desc = L["How much of the art's edge is cropped away on each side. 7 trims the old icons' baked-in border."],
+          disabledIf = function() return NS.GetSetting("icons.show") == false end }),
+})
+add(rows, H.BorderGroup({
+    prefix = "icons.", page = PAGE, group = ICONS, subgroup = L["Border"], show = true, fromSkin = "icon",
+    classColor = classColor, keys = { borderShow = "border" },
+    tooltips = { borderColor = L["The icon border's color. Not read while Use the row's color or Use the skin's color is on."] },
+    defaults = { borderShow = PI.border, borderStyle = PI.borderStyle, borderSize = PI.borderSize,
+                 borderColor = PI.borderColor, useClassColorBorder = PI.useClassColorBorder,
+                 borderStyleFromSkin = PI.borderStyleFromSkin },
+    extra = {
+        { path = "icons.borderColorFromRow", page = PAGE, type = "bool", label = L["Use the row's color"],
+          default = PI.borderColorFromRow,
+          desc = L["Edge each icon in its row's own color (its category, progress or skill-up chance, as Color mode says). Use the skin's color and Border color are not read while this is on."] },
+        fromSkin("icons.borderColorFromSkin", L["Use the skin's color"], L["Border color"]),
+    },
+}))
+
 -- Every slider on the page commits while it moves (throttled by the library), not only on release:
--- the preview pinned above the strip is the point of the page, and AceGUI's mouse wheel fires no
--- release at all, so a wheel-turned height was never written.
+-- the open window restyles as it moves, and AceGUI's mouse wheel fires no release at all, so a
+-- wheel-turned height was never written. (The page's pinned preview bar came off: owner feedback
+-- round 4.)
 for _, r in ipairs(rows) do
     if r.type == "number" and r.commitOn == nil then r.commitOn = "change" end
 end
 
 NS.RegisterSchemaRows(NS.Live(rows))
 
--- ---------------------------------------------------------------------------------------------
--- The live preview (the mockup's): Fishing 107 +25 / 150 with a lure's 4:12, drawn by NS.Bar in
--- the page's pinned header frame, restyled on every LAYOUT_CHANGED while it exists.
--- ---------------------------------------------------------------------------------------------
-NS.OptionsPreview = NS.OptionsPreview or {}
-local Preview = NS.OptionsPreview
-Preview.VALUES = { value = 107, max = 150, bonus = 25, bonusKind = "temp", ticks = { 75, 150, 225, 300 } }
--- The row the preview stands for, as NS.Rows.FillColor reads it: the fill follows Color mode, the
--- palette (Fishing is a secondary skill) and Bar > Fill exactly as the window's Fishing row does.
-Preview.ENTRY = { key = "fishing", category = "secondary", rank = 107, max = 150 }
-Preview.EXPIRES_IN = 252   -- 4:12
-local HEADER_H, NAME_W = 44, 110
-
-function Preview.Refresh()
-    local bar = Preview.bar
-    if not bar then return end
-    bar:ApplyStyle(NS.Bar.ResolveStyle("row"))
-    local v = {}
-    for k, x in pairs(Preview.VALUES) do v[k] = x end
-    v.color = NS.Rows.FillColor(Preview.ENTRY)
-    bar:SetValues(v)
-    -- The lure's time left, drawn still: a preview arms no OnUpdate (nothing may run while the
-    -- page is closed or the addon stood down).
-    bar.timer:SetText(NS.Bar.FormatTimer(Preview.EXPIRES_IN))
-    bar.timer:SetShown(bar.style.showTimer ~= false)
-end
-
-local function buildPreview(_, frame)
-    if not frame.skmPreview then
-        local name = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        name:SetPoint("LEFT", frame, "LEFT", 4, -4)
-        name:SetWidth(NAME_W)
-        name:SetJustifyH("LEFT")
-        name:SetText(L["Fishing"])
-        local bar = NS.Bar.Create(frame, "row")
-        bar:SetPoint("LEFT", frame, "LEFT", NAME_W + 8, -4)
-        bar:SetPoint("RIGHT", frame, "RIGHT", -(NS.Bar.TIMER_W + 8), -4)
-        frame.skmPreview = { name = name, bar = bar }
-    end
-    Preview.bar = frame.skmPreview.bar
-    Preview.Refresh()
-end
-Preview.Build = buildPreview   -- the skin-switch test builds the preview on a frame of its own
-
-if NS.NewBusTarget then
-    Preview.events = NS.NewBusTarget()
-    if Preview.events then Preview.events:RegisterMessage(NS.MSG.LAYOUT_CHANGED, Preview.Refresh) end
-end
-
 NS.RegisterSchemaPage(PAGE, L["Bars"], {
-    header = { height = HEADER_H, build = buildPreview },
     defaultsTooltip = L["Restore every Bars setting on this profile to its default."],
 })

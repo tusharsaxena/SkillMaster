@@ -239,7 +239,7 @@ function NS.ResetProfileCounted(db)
 end
 
 local VALID_PAGES = {
-    general = true, layout = true, bars = true, skills = true, stats = true, broker = true,
+    general = true, layout = true, bars = true, skills = true, stats = true, broker = true, tooltips = true,
     alerts = true, journal = true, trainers = true, profiles = true,
 }
 -- The library's four value types, plus `set` ({ [key] = true }): the hidden-row sets' whole-set rows.

@@ -23,15 +23,14 @@ L["Shows or hides the Skill Master window."] = true
 
 -- The Journal window (modules/Journal.lua).
 L["Skill Master \194\183 Journal"] = true
-L["Session Log"] = true
 L["Alts"] = true
 L["Time"] = true
 L["Skill"] = true
 L["Change"] = true
 L["Zone"] = true
 L["No skill-ups logged yet."] = true
-L["This session \194\183 %s"] = true
-L["%.1f skill-ups / hour"] = true
+L["Skill-ups this session (%s)"] = true
+L["Average: %.1f an hour"] = true
 L["ETA to cap"] = true
 L["Two skill-ups of a skill give it an ETA."] = true
 L["New session"] = true
@@ -44,12 +43,38 @@ L["~%d m"] = true
 L["~%d h"] = true
 L["Professions"] = true
 L["Weapons"] = true
-L["Character"] = true
 L["No characters recorded yet."] = true
 L["Lv %d %s %s"] = true
 L["%s \194\183 this character"] = true
 L["Snapshots update on login, logout and every skill change. Right-click a character to forget it."] = true
 L["Forget %s? Their snapshot is removed until they log in again."] = true
+-- FB-32 (the Log tab) and FB-33 (the Alts tab).
+L["Log"] = true
+L["Date"] = true
+L["%m/%d/%y"] = true
+L["Current session"] = true
+L["Last 1 day"] = true
+L["Last 3 days"] = true
+L["Last 7 days"] = true
+L["Last 30 days"] = true
+L["All time"] = true
+L["No skill-ups in this range."] = true
+L["Skill-ups \194\183 %s"] = true
+L["Average: %.1f a day over %s"] = true
+L["1 day"] = true
+L["%d days"] = true
+L["Unlearned"] = true
+L["Base & Combat"] = true
+L["Spell & Regen"] = true
+L["Defense & Resists"] = true
+L["Realm: %s"] = true
+L["Last seen: %s"] = true
+L["Right-click to forget this character."] = true
+L["No character has a skill in this block yet."] = true
+L["How many skill-ups the Log keeps per character; the oldest go first."] = true
+L["Log shows"] = true
+L["The skill-ups the Log tab lists and sums: this session, the last few days or all of them."] = true
+L["The block the Alts tab shows when the Journal opens."] = true
 
 -- Slash help rows.
 L["List available commands"] = true
@@ -58,7 +83,7 @@ L["Choose a skin: open the skin picker"] = true
 L["Show the Skill Master window"] = true
 L["Hide the Skill Master window"] = true
 L["Show or hide the Skill Master window"] = true
-L["Show or hide the Journal: the session log and your alts"] = true
+L["Show or hide the Journal: the skill-up log and your alts"] = true
 L["Lock the window in place"] = true
 L["Unlock the window so it can be dragged"] = true
 L["Turn test mode on or off"] = true
@@ -282,7 +307,6 @@ L["repair"] = true
 -- BEGIN T4.2 (Alerts) -- merged by the integrator.
 L["%s · %s cap"] = true
 L["Train %s (Lv %d): %s"] = true
-L["is %d below your cap. Glancing blows and misses are more likely."] = true
 L["Click to set waypoint · right-click to dismiss"] = true
 L["no trainer known"] = true
 L["%s: %s"] = true
@@ -295,12 +319,11 @@ L["Go"] = true
 L["Primary Professions"] = true
 L["Secondary Skills"] = true
 L["Weapon Skills"] = true
-L["Defense \194\183 Lockpicking \194\183 Riding"] = true
+L["Other skills"] = true
 L["Stats \194\183 Base & Combat"] = true
 L["Stats \194\183 Spell & Regen"] = true
 L["Stats \194\183 Defense & Resists"] = true
 L["Stats \194\183 Utility"] = true
-L["cap %d (5 \195\151 level)"] = true
 L["vs highest primary"] = true
 L["Detach this block into its own frame"] = true
 L["Dock this block in the main window"] = true
@@ -309,7 +332,6 @@ L["Lock or unlock the window"] = true
 L["Open the journal"] = true
 L["temp bonus"] = true
 L["permanent bonus"] = true
-L["rank tier"] = true
 L["threshold"] = true
 L["Lv %d \194\183 %s %s"] = true
 L["\194\183 %s"] = true
@@ -318,6 +340,7 @@ L["Collapse all blocks"] = true
 
 -- The interactions: the click map, the row menu, the row tooltip, the trainer popup, the waypoints (T3.3).
 L["Profession windows open from Skill Master out of combat."] = true
+L["The character panel opens from Skill Master out of combat."] = true
 L["Pin to the broker feed"] = true
 L["Set a waypoint to the trainer"] = true
 L["Show trainers"] = true
@@ -351,10 +374,10 @@ L["%s at %d"] = true
 L["Fishing in %s needs ~%d (you: %d +%d)"] = true
 L["no fish escape"] = true
 L["fish will escape"] = true
-L["Click: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"] = true
-L["Click: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"] = true
-L["Click: trainers and waypoint \194\183 Right-click: menu"] = true
-L["Click: character panel \194\183 Shift-click: link \194\183 Right-click: menu"] = true
+L["Arrow: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"] = true
+L["Arrow: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"] = true
+L["Arrow: trainers and waypoint \194\183 Right-click: menu"] = true
+L["Arrow: character panel \194\183 Shift-click: link \194\183 Right-click: menu"] = true
 L["Scale: vs %s"] = true
 L["Also teaches: %s"] = true
 L["Coordinates unverified on WoW Forever (flagged until the smoke pass)"] = true
@@ -378,14 +401,12 @@ L["+%d this session"] = true
 L["Off"] = true
 L["No stats to show yet."] = true
 L["Ka0s Skill Master is disabled."] = true
-L["Base"] = true
-L["Spell"] = true
 L["Utility"] = true
 -- ---- END T4.1 ----
 
 -- ---- BEGIN M5 polish (the M3/M4 review leftovers) ----
 -- The broker tooltip's footer (modules/Broker.lua), as the mockup writes it.
-L["Click label: toggle window \194\183 Click row: open its window \194\183 Right-click: feed options"] = true
+L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, right-click for the menu"] = true
 -- The one-line gathering hint under a row (modules/Rows.lua, profile.skills.helperHint).
 L["Gathers %s \194\183 next: %s at %d"] = true
 L["Gathers %s"] = true
@@ -413,7 +434,7 @@ L["Reload your interface (/reload) to finish changing the skin."] = true
 -- The key bindings (modules/MainWindow.lua, launcher-§6).
 L["Toggle skills window"] = true
 L["Toggle journal"] = true
-L["Shows or hides the Journal: the session log and your alts."] = true
+L["Shows or hides the Journal: the skill-up log and your alts."] = true
 -- ==== END T5.3 ====
 
 -- ---- T5.1 the settings pages (settings/Layout.lua, Bars.lua, Skills.lua, Broker.lua, Alerts.lua,
@@ -425,15 +446,13 @@ L["Marks"] = true
 L["Draw this in the skin's look. %s is not read while this is on."] = true
 L["Size"] = true
 L["Bar height (px)"] = true
-L["Height of a row's bar in the main window."] = true
+L["Height of a row's bar in the main window and the detached blocks."] = true
 L["Row height (px)"] = true
-L["Height of one skill or stat row, its bar included."] = true
-L["Detached bar height (px)"] = true
-L["Height of a bar in a detached block."] = true
-L["Tooltip bar height (px)"] = true
-L["Height of the bar inside a row's tooltip."] = true
-L["Mini bar height (px)"] = true
-L["Height of the small bars in the Journal's Alts tab and the broker tooltips."] = true
+L["Height of one skill or stat row, its bar included, in the main window and the detached blocks."] = true
+L["Height of the bar in the tooltip of a main window or detached row."] = true
+L["Height of the bar's line in the tooltip of a main window or detached row. Never shorter than its bar."] = true
+L["Height of the bars in the LDB (broker) tooltip, and in the Journal's Alts tab."] = true
+L["Height of one skill or stat line in the LDB (broker) tooltip. Never shorter than its bar."] = true
 L["Fill"] = true
 L["The fill color while Color mode (Colors) is Flat. Not read while Use the skin's color is on."] = true
 L["The color behind the fill. Not read while Use the skin's color is on."] = true
@@ -460,7 +479,6 @@ L["Secondary skills"] = true
 L["Fill of a secondary skill's bar (By category)."] = true
 L["Weapon skills"] = true
 L["Fill of a weapon skill's bar (By category)."] = true
-L["Defense, lockpicking and riding"] = true
 L["Fill of the Other block's bars (By category)."] = true
 L["Stats"] = true
 L["Fill of a stat's bar (By category)."] = true
@@ -487,13 +505,24 @@ L["Font"] = true
 L["Font color"] = true
 L["Use the skin's shadow"] = true
 L["Font shadow"] = true
-L["Rank tier ticks"] = true
-L["A tick on a profession's bar at each rank's cap (75, 150, 225)."] = true
 L["Threshold markers"] = true
 L["A stat's marks: the hit cap, the resist cap, crit immunity."] = true
 L["Expiry timer"] = true
 L["The time a temporary bonus has left, beside its bar."] = true
 L["Spark"] = true
+L["Rank tier colors"] = true
+L["Icons"] = true
+L["Icon"] = true
+L["Show icons"] = true
+L["Draw each row's in-game icon at its left end."] = true
+L["Icon size (px)"] = true
+L["The icon's width and height, its border included. Never taller than the row."] = true
+L["Icon zoom (%)"] = true
+L["How much of the art's edge is cropped away on each side. 7 trims the old icons' baked-in border."] = true
+L["The icon border's color. Not read while Use the row's color or Use the skin's color is on."] = true
+L["Use the row's color"] = true
+L["Edge each icon in its row's own color (its category, progress or skill-up chance, as Color mode says). Use the skin's color and Border color are not read while this is on."] = true
+L["Draw a profession's bar to 300 whatever its cap, its fill split by rank tier: Apprentice to 75 in its category's color, then Journeyman, Expert and Artisan each a shade darker. Works only while Color mode (Colors) is By category."] = true
 L["A thin line riding the end of the fill."] = true
 L["Bars"] = true
 L["Restore every Bars setting on this profile to its default."] = true
@@ -502,8 +531,6 @@ L["Blocks"] = true
 L["Block order"] = true
 L["Window width (px)"] = true
 L["Width of the Skill Master window. Multiplied by Master scale on General > Master controls."] = true
-L["Maximum window height (px)"] = true
-L["The window grows with its rows up to this height, then scrolls."] = true
 L["Block spacing (px)"] = true
 L["Space between two docked blocks."] = true
 L["Show summary strip"] = true
@@ -537,7 +564,10 @@ L["Block scale"] = true
 L["Scale of the block's own frame while it is detached."] = true
 L["Position: %s"] = true
 L["The block's place in the window, 1 at the top. Drag it on Layout > Block order."] = true
-L["Drag a block by its handle to move it. Hidden blocks keep their place."] = true
+L["Drag a block by its handle to move it. The eye shows or hides it; a hidden block keeps its place."] = true
+L["Hide this block"] = true
+L["Show %s"] = true
+L["The eye hides a skill from the window and the detached blocks, or shows it again. A hidden skill is dimmed."] = true
 L["Drag to reorder"] = true
 L["Layout"] = true
 L["Restore every Layout setting on this profile to its default: the window, every block and the block order."] = true
@@ -582,7 +612,6 @@ L["How long the feed shows the skill that just went up (^ Bows 81) in place of i
 L["Tooltip"] = true
 L["Tooltip skills"] = true
 L["Tooltip stats"] = true
-L["Look"] = true
 L["Apply skin to the tooltip"] = true
 L["Draw the feed's tooltip in the skin's backdrop, border and fonts. Off, it is the game's plain tooltip."] = true
 L["Sections"] = true
@@ -599,13 +628,10 @@ L["A toast when a weapon skill falls behind its cap (5 per level) by the gap bel
 L["Weapon skill gap (points)"] = true
 L["How far below its cap a weapon skill must be before it alerts. Needs Weapon skill alert."] = true
 L["Play a sound"] = true
-L["Play the toast's sound as each alert shows."] = true
 L["Restore every Alerts setting on this profile to its default."] = true
 L["Journal"] = true
 L["Skill-ups to keep"] = true
-L["How many skill-ups the Session Log keeps per character; the oldest go first."] = true
 L["Alts tab opens on"] = true
-L["The skills the Alts tab shows when the Journal opens."] = true
 L["Restore every Journal setting on this profile to its default. The log itself is kept."] = true
 L["Trainers and waypoints"] = true
 L["Waypoint method"] = true
@@ -685,6 +711,67 @@ L["unknown command '%s'"] = true
 L["v%s slash commands"] = true
 L["The simulator needs LibKa0s-Sim-1.0."] = true
 -- ---- END M5 integration ----
+
+-- Owner feedback round 3 (main thread): the broker title with nothing pinned
+L["Professions and Skills"] = true
+L["Hide in this tooltip"] = true
+L["Default order"] = true
+L["Value, highest first"] = true
+L["Value, lowest first"] = true
+L["Progress to max, nearest first"] = true
+L["Sorted: %s. Click for the next order."] = true
+L["Sort rows by"] = true
+L["The order of the block's rows, here, in its detached frame and in the LDB tooltip. The sort mark on its header cycles it."] = true
+L["Skip untrained weapons"] = true
+L["Equipped weapons only"] = true
+L["Every learned weapon"] = true
+L["Weapons that alert"] = true
+L["Skip untrained weapons leaves out a weapon still at 5 points or fewer. Equipped weapons only reads the main hand, off hand and ranged weapons you wear now."] = true
+L["Muted weapons"] = true
+L["The weapons the weapon skill alert never reads, as a set of keys."] = true
+L["Mute %s"] = true
+L["Never alert for this weapon, whatever its gap."] = true
+L["Window height (px)"] = true
+L["Height of the Skill Master window; the rows scroll inside it."] = true
+L["Shrink to fit the rows"] = true
+L["Shrink the window when its rows take less than Window height, so it grows and shrinks as blocks expand and collapse."] = true
+
+-- owner feedback round 4: the Tooltips page (settings/Tooltips.lua)
+L["Main window tooltip"] = true
+L["LDB tooltip"] = true
+L["Bar width (px)"] = true
+L["Font size"] = true
+L["Tooltips"] = true
+L["Width of the bar in the tooltip of a main window or detached row."] = true
+L["Size of Skill Master's lines in the tooltip of a main window or detached row. The game's other tooltips keep theirs."] = true
+L["Width of the bars in the LDB (broker) tooltip. The tooltip widens to fit them; a wide value column can stretch them further."] = true
+L["Size of the text in the LDB (broker) tooltip."] = true
+L["Restore every Tooltips setting on this profile to its default."] = true
+
+-- owner feedback round 4: the section header's restore mark (modules/Blocks.lua)
+L["1 hidden row. Click to show it again."] = true
+L["%d hidden rows. Click to show them again."] = true
+
+-- owner feedback round 4: the skill-up alert (modules/Alerts.lua, settings/Alerts.lua)
+L["Skill ups"] = true
+L["Skill-up alert"] = true
+L["A short green toast on every skill point. Skill-ups a few seconds apart share one toast."] = true
+L["All skills"] = true
+L["Professions only"] = true
+L["Weapons and Other only"] = true
+L["Skill-up alerts for"] = true
+L["Which skills the skill-up alert reads: every skill, the primary and secondary professions, or the weapon and Other skills. Needs Skill-up alert."] = true
+L["Play a sound on skill up"] = true
+L["Play the toast's sound as each skill-up toast shows."] = true
+L["Play the toast's sound as each rank cap or weapon skill alert shows."] = true
+L["Weapon skill gap"] = true
+L["Glancing blows and misses are more likely."] = true
+L["%d this session"] = true
+L["%d to cap"] = true
+L["%s at this pace"] = true
+L["Skill up"] = true
+L["Skill up \194\183 %d skills"] = true
+L["Also %s"] = true
 
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.

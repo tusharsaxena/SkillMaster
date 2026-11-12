@@ -115,11 +115,6 @@ Kit.skinSwitch = {
             NS.Broker.HideTooltip()
             NS.Preview.Apply(false)
         end },
-        { name = "the Bars page preview", scope = "panel", build = function()
-            local f = mocks.CreateFrame("Frame", nil, mocks.UIParent)
-            NS.OptionsPreview.Build(nil, f)
-            return f
-        end },
         { name = "the debug console", build = function()
             NS.DebugLog:Show()
             return NS.DebugLog._frameForTest
@@ -153,6 +148,10 @@ Kit.run{
         "test_bar",
         "test_bars_live",
         "test_bars_round2",
+        "test_bars_sizes",
+        "test_round2_layout",
+        "test_round2_icons",
+        "test_round3",
         "test_blocks",
         "test_interact",
         "test_sessionlog",
