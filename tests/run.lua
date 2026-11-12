@@ -167,6 +167,7 @@ Kit.run{
         "test_round5",
         "test_round5_style",
         "test_round5_groups",
+        "test_round5_snap",
         "test_blocks",
         "test_interact",
         "test_sessionlog",

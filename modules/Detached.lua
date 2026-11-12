@@ -83,13 +83,19 @@ end
 local function onDragStart(self)
     if isLocked(self.id) then return end
     self:StartMoving()
+    self.dragging = true
     if NS.SecureOverlay then NS.SecureOverlay:SetMoving(self, true) end
+    -- The drag that merges: this window dropped on another's side (round 5, modules/GroupsSnap.lua).
+    if NS.GroupsSnap then NS.GroupsSnap.BeginWindow(self, self.id) end
 end
 
 local function onDragStop(self)
+    if not self.dragging then return end
+    self.dragging = nil
     self:StopMovingOrSizing()
     savePoint(self)
     if NS.SecureOverlay then NS.SecureOverlay:SetMoving(self, false) end
+    if NS.GroupsSnap then NS.GroupsSnap.Drop() end
 end
 
 local function belowCapOnly(id)

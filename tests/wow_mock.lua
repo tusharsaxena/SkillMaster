@@ -18,6 +18,9 @@ return function()
     -- bonus (Guns, a Dwarf's) reads them, whichever suite published the model (suites swap these).
     M.UnitRace = function() return "Human", "Human" end
     M.UnitFactionGroup = function() return "Alliance", "Alliance" end
+    -- The pointer in screen px (round 5, R5-6b: a section dragged out of a merged window).
+    M.__cursor = { 0, 0 }
+    M.GetCursorPosition = function() return M.__cursor[1], M.__cursor[2] end
     M.__popups = {}
     M.StaticPopup_Show = function(name) M.__popups[#M.__popups + 1] = name end
     -- The TOC fields the addon reads through NS.Meta.

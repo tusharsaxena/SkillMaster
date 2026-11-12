@@ -43,6 +43,8 @@ read_globals = {
   "TomTom", "UiMapPoint", "C_SuperTrack",
   -- the click debug (modules/SecureOverlay.lua SO.MouseFoci): the frames under the pointer
   "GetMouseFoci",
+  -- round 5, R5-6b: the pointer a merged window's section drag follows (modules/GroupsSnap.lua)
+  "GetCursorPosition",
   -- owner feedback round 3: Skinning / Fishing windows by line ID, the Skills tab's selection
   "C_TradeSkillUI", "SetSelectedSkill", "SkillFrame", "SkillFrame_SetSelection", "SkillFrame_UpdateSkills",
   -- T4.1 Broker (modules/Broker.lua): the main hand's weapon class

@@ -123,6 +123,9 @@ modules\Detached.lua
 # Conventional: NS.Groups, the merged detached windows (round 5, R5-6); reads NS.Blocks and
 # NS.Detached at CALL time.
 modules\Groups.lua
+# Conventional: NS.GroupsSnap, the merged windows' drags (round 5, R5-6b); reads NS.Groups and
+# NS.Detached at CALL time.
+modules\GroupsSnap.lua
 # T3.3, each conventional (reached at CALL time): the combat queue and the crafting rows' secure
 # overlays (registers its two combat events on its own bus target at FILE SCOPE, after core\Bus.lua),
 # the click map, the row tooltip, the trainer popup and the waypoint providers.

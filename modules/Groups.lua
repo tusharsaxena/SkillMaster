@@ -279,6 +279,7 @@ local function groupScale() return tonumber(NS.Detached.Style().scale) or 1 end
 local function blockScale(id)
     return (tonumber(NS.Blocks.Settings(id).scale) or 1) * groupScale()
 end
+G.PointAt, G.BlockScale = pointAt, blockScale   -- a section dragged out lands at its drop (GroupsSnap)
 
 local function copyPoint(p)
     if type(p) ~= "table" then return false end
@@ -469,6 +470,7 @@ local function isLocked(gid)
     end
     return false
 end
+G.IsLocked = isLocked
 
 -- The header drag's writer of the group's point.
 local function savePoint(f)
@@ -487,6 +489,8 @@ local function onDragStart(f)
     f:StartMoving()
     f.dragging = true
     if NS.SecureOverlay then NS.SecureOverlay:SetMoving(f, true) end
+    -- The drag that merges: this window dropped on another's side (modules/GroupsSnap.lua).
+    if NS.GroupsSnap then NS.GroupsSnap.BeginWindow(f, f.gid) end
 end
 
 local function onDragStop(f)
@@ -495,6 +499,7 @@ local function onDragStop(f)
     f:StopMovingOrSizing()
     savePoint(f)
     if NS.SecureOverlay then NS.SecureOverlay:SetMoving(f, false) end
+    if NS.GroupsSnap then NS.GroupsSnap.Drop() end
 end
 G.OnDragStart, G.OnDragStop = onDragStart, onDragStop
 
@@ -520,6 +525,17 @@ local function onSubClick(sh, button)
     NS.Blocks:ToggleCollapsed(sh.id)
 end
 
+-- A sub-header dragged out of the window splits its section off past the leeway (GroupsSnap).
+local function onSubDragStart(sh)
+    local f = sh.owner
+    if not (f.gid and sh.id) or isLocked(f.gid) or not NS.GroupsSnap then return end
+    NS.GroupsSnap.BeginSection(sh, f.gid, sh.id)
+end
+
+local function onSubDragStop()
+    if NS.GroupsSnap then NS.GroupsSnap.Drop() end
+end
+
 -- A section's sub-header: chevron, title, sort mark, split mark.
 local function buildSub(f)
     local sh = CreateFrame("Button", nil, f.body)
@@ -541,6 +557,9 @@ local function buildSub(f)
     NS.Chrome.SetRestToken(sh.sort, "text.heading")
     sh.sort:SetPoint("RIGHT", sh.split, "LEFT", -4, 0)
     sh:SetScript("OnClick", onSubClick)
+    sh:RegisterForDrag("LeftButton")
+    sh:SetScript("OnDragStart", onSubDragStart)
+    sh:SetScript("OnDragStop", onSubDragStop)
     return sh
 end
 
@@ -763,6 +782,7 @@ end
 
 --- Stand-down: every merged window hidden, its rows parked.
 function G.StandDown()
+    if NS.GroupsSnap then NS.GroupsSnap.Cancel() end
     for _, f in pairs(frames) do
         release(f)
         f:Hide()
