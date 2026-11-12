@@ -183,7 +183,7 @@ local function trainerOf(e)
 end
 
 --- Hide through the seam (architecture-§5): the key's own row when the catalog has one, else the
---- whole set's row (settings/Skills.lua), so an unknown "other:" key is still a settings write
+--- whole set's row (settings/Rows.lua), so an unknown "other:" key is still a settings write
 --- that the page's Defaults undoes.
 local function hideRow(row)
     if row.surface == "broker" then return I.HideInTooltip(row) end
@@ -197,7 +197,7 @@ local function hideRow(row)
     return NS.SetByPath(kind .. ".hidden", set)
 end
 
---- Leave `row` out of the LDB tooltip (its own hidden sets, settings/Broker.lua): the tooltip's
+--- Leave `row` out of the LDB tooltip (its own hidden sets, settings/Rows.lua): the tooltip's
 --- row menu hides there, never in the main window.
 function I.HideInTooltip(row)
     local setKey = row.kind == "stat" and "hiddenStats" or "hiddenSkills"

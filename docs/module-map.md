@@ -67,11 +67,12 @@ position says so beside its TOC line (toc-file-§5).
 | `settings/Slash.lua` | `NS.COMMANDS` and the dispatcher (LibKa0s-Slash-1.0) | before the landing spec reads it |
 | `settings/OptionsSetup.lua` | the panel descriptor, `NS.Helpers` (LibKa0s-Options-1.0), `NS.Live`, `NS.TemplateRows` (a template's presets dropdown and its Custom box) | before every page file |
 | `settings/General.lua` | landing spec, Master controls, Skin and Keybindings tabs | first page registered |
-| `settings/BoxList.lua` | `NS.OptionsList`: the boxed list row (ConsumableMaster's Priority list look) the Skills tabs and Block order draw, its own AceGUI label widget (`SkillMasterListLabel`) | after OptionsSetup; read at render time |
+| `settings/BoxList.lua` | `NS.OptionsList`: the boxed list row (ConsumableMaster's Priority list look) the Rows page and Block order draw, with any number of action columns (`actionWidth`, `labelWidth`) and an unboxed `Header` line over them; its own AceGUI widgets (`SkillMasterListLabel`, `SkillMasterListHeading`, `SkillMasterListCaption`) | after OptionsSetup; read at render time |
 | `settings/Layout.lua` | the Layout page: window, per-block rows, the Block order drag list on `NS.OptionsList` (handle, name, an eye for Show this block; `NS.OptionsBlockOrder`) | after General |
 | `settings/Bars.lua` | the Bars page | after Layout |
-| `settings/Skills.lua` | the Skills and Stats pages, the Hide rows from the catalog and `NS.STAT_DEFS`; the Professions and Weapons tabs draw them as boxed rows with an eye (`NS.OptionsHideList`) | after Bars |
-| `settings/Broker.lua` | the Broker page: feed templates, flash | after Skills |
+| `settings/Skills.lua` | the Skills page (unlearned skills, the gathering hints); `NS.SortedSkillKeys`, the catalog in the window's order | after Bars |
+| `settings/Rows.lua` | the Rows page (round 5, R5-13, `NS.OptionsRows`): the window's and the LDB tooltip's Hide rows for every catalog skill and stat, the four whole-set rows, drawn as boxed rows with two eyes under the window's block headings (`Groups`, `Render`) | after Skills |
+| `settings/Broker.lua` | the Broker page: feed templates, flash, the tooltip's section switches | after Rows |
 | `settings/Alerts.lua` | the Alerts page | after Broker |
 | `settings/Journal.lua` | the Journal page: log length, the Log's range, the Alts sub-tab on open | after Alerts |
 | `settings/Trainers.lua` | the Trainers and Waypoints page | before Profiles |

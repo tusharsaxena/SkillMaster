@@ -1,56 +1,15 @@
 local _, NS = ...
--- settings/Skills.lua — the Skills and Stats pages (design §6.6): the skill rows' switches, and one
--- Hide row per catalog skill and per stat (how either kind of row draws is the Bars page's Rows show), so a row hidden from the row menu (T3.3) can be
--- shown again here or with `/sm set skills.hidden.<key> false`.
+-- settings/Skills.lua — the Skills page (design §6.6): the skill rows' switches (unlearned skills,
+-- the gathering and fishing hints). How a skill row draws is the Bars page's Rows show.
 --
--- The hide rows are generated from NS.SkillCatalog and NS.STAT_DEFS at load. `skills.hidden` and
--- `stats.hidden` are sets ({ [key] = true }), so each row reads and writes its entry through get /
--- set: false clears the entry rather than storing it.
+-- Every skill's and stat's Hide (the window's and the LDB tooltip's) is on the Rows page
+-- (settings/Rows.lua, round 5, R5-13), which replaced this page's Professions and Weapons tabs and the
+-- Stats page. This file still sorts the catalog for the pages that walk it (NS.SortedSkillKeys).
 local L = NS.L
 local PS = NS.defaults.profile.skills
 
--- ---------------------------------------------------------------------------------------------
--- The hide rows
--- ---------------------------------------------------------------------------------------------
-
-local function hiddenSet(kind)
-    local p = NS.db and NS.db.profile[kind]
-    return p and p.hidden
-end
-
-local function hideRow(page, kind, key, name, group, subgroup)
-    return {
-        path = kind .. ".hidden." .. key, page = page, group = group, subgroup = subgroup, type = "bool",
-        default = false, label = L["Hide %s"]:format(name),
-        desc = L["Leave this row out of the window and the detached blocks. The row menu's Hide sets it too. The feed's tooltip has its own, on the Broker page."],
-        get = function()
-            local set = hiddenSet(kind)
-            return set ~= nil and set[key] == true
-        end,
-        set = function(v)
-            local set = hiddenSet(kind)
-            if set then set[key] = v and true or nil end
-        end,
-        onChange = NS.ApplyLook,
-    }
-end
-
---- The whole set's row (review F-002): not drawn, but the page's Defaults, `/sm reset` and the
---- row menu reach it, so a key with no row of its own (an "other:" skill the catalog does not
---- know) is a settings write that the page's Defaults undoes.
-local function setRow(page, kind, group)
-    return {
-        path = kind .. ".hidden", page = page, group = group, type = "set", default = {}, skipRender = true,
-        label = L["Hidden rows"], desc = L["Every row hidden from the row menu, as a set of keys."],
-        onChange = NS.ApplyLook,
-    }
-end
-
--- ---------------------------------------------------------------------------------------------
--- Skills
--- ---------------------------------------------------------------------------------------------
-local SK_GENERAL, PROFESSIONS, WEAPONS = L["General"], L["Professions"], L["Weapons and other"]
-local skillRows = NS.Live({
+local SK_GENERAL = L["General"]
+NS.RegisterSchemaRows(NS.Live({
     { path = "skills.showUnlearned", page = "skills", group = SK_GENERAL, type = "bool", default = PS.showUnlearned,
       label = L["Show unlearned skills"],
       desc = L["List the weapon skills and Riding your class can learn but has not, dimmed, with their trainer."] },
@@ -60,16 +19,9 @@ local skillRows = NS.Live({
     { path = "skills.helperHint", page = "skills", group = SK_GENERAL, type = "bool", default = PS.helperHint,
       label = L["Hint under the row"],
       desc = L["One muted line under the Skinning, Mining, Herbalism and Fishing rows: what you can gather now and the next step."] },
-})
+}))
 
-local CATEGORY_TAB = {
-    primary   = { PROFESSIONS, L["Primary professions"] },
-    secondary = { PROFESSIONS, L["Secondary skills"] },
-    weapon    = { WEAPONS, L["Weapon skills"] },
-    other     = { WEAPONS, L["Other skills"] },
-}
 local RANK = { primary = 1, secondary = 2, weapon = 3, other = 4 }
-
 local keys = {}
 for key in pairs(NS.SkillCatalog) do keys[#keys + 1] = key end
 table.sort(keys, function(a, b)
@@ -78,102 +30,10 @@ table.sort(keys, function(a, b)
     if (ca.order or 0) ~= (cb.order or 0) then return (ca.order or 0) < (cb.order or 0) end
     return a < b
 end)
--- The catalog in the pages' order (category, then catalog order): the Broker page's tooltip Hide
--- rows walk it too (settings/Broker.lua, loaded after this file).
+-- The catalog in the window's order (category, then catalog order): the Rows and Alerts pages walk
+-- it (settings/Rows.lua, settings/Alerts.lua, loaded after this file).
 NS.SortedSkillKeys = keys
-skillRows[#skillRows + 1] = setRow("skills", "skills", SK_GENERAL)
-for _, key in ipairs(keys) do
-    local c = NS.SkillCatalog[key]
-    local tab = CATEGORY_TAB[c.category] or CATEGORY_TAB.other
-    skillRows[#skillRows + 1] = hideRow("skills", "skills", key, L[c.name], tab[1], tab[2])
-end
-NS.RegisterSchemaRows(skillRows)
-
--- ---------------------------------------------------------------------------------------------
--- The Professions and Weapons and other tabs: each skill a boxed row (settings/BoxList.lua, after
--- ConsumableMaster's Priority list, feedback round 2): its in-game icon, its name, and an eye that
--- hides or shows it. The rows draw from the tab's own Hide rows, which stay registered: the eye
--- writes them through the seam, and `/sm set`, Defaults and the row menu reach them as before.
--- ---------------------------------------------------------------------------------------------
-local HideList = {}
-NS.OptionsHideList = HideList
-
-local function toggleHidden(ctx, path, hidden)
-    return function()
-        if NS.SetByPath(path, not hidden) then NS.Helpers.RefreshPanel(ctx, true) end
-    end
-end
-
---- The tab's rows grouped by subgroup, in schema order: { { title, rows } ... }.
-local function sections(rows)
-    local out, at = {}, {}
-    for _, r in ipairs(rows or {}) do
-        if r.subgroup and r.path and r.path:find("^skills%.hidden%.") then
-            local s = at[r.subgroup]
-            if not s then
-                s = { title = r.subgroup, rows = {} }
-                at[r.subgroup] = s
-                out[#out + 1] = s
-            end
-            s.rows[#s.rows + 1] = r
-        end
-    end
-    return out
-end
-HideList.Sections = sections
-
-function HideList.Render(ctx, rows)
-    local H = NS.Helpers
-    local scroll = H.EnsureScroll(ctx)
-    if not scroll then return end
-    local list = NS.OptionsList.Begin(ctx)
-    local eye = NS.Icon and NS.Icon("eye")
-    for i, s in ipairs(sections(rows)) do
-        H.Section(ctx, s.title)
-        if i == 1 then
-            H.TextRow(ctx, L["The eye hides a skill from the window and the detached blocks, or shows it again. A hidden skill is dimmed."])
-            if H.AddSpacer then H.AddSpacer(scroll, 4) end
-        end
-        for _, r in ipairs(s.rows) do
-            local key = r.path:match("^skills%.hidden%.(.+)$")
-            local c = NS.SkillCatalog[key]
-            local hidden = r.get and r.get() or false
-            NS.OptionsList.Row(scroll, list, {
-                text = c and L[c.name] or key, icon = NS.Rows.Icon("skill", key), dimmed = hidden,
-                actions = { {
-                    image = eye, dimmed = hidden, onClick = toggleHidden(ctx, r.path, hidden),
-                    title = hidden and L["Show %s"]:format(c and L[c.name] or key) or r.label,
-                    tooltip = r.desc,
-                } },
-            })
-        end
-    end
-    NS.OptionsList.Finish(list, scroll)
-end
 
 NS.RegisterSchemaPage("skills", L["Skills"], {
-    tabs = {
-        { key = PROFESSIONS, label = PROFESSIONS, render = HideList.Render },
-        { key = WEAPONS, label = WEAPONS, render = HideList.Render },
-    },
-    beforeRender = NS.OptionsList.Cancel,
-    defaultsTooltip = L["Restore every Skills setting on this profile to its default. Every hidden skill is shown again."],
-})
-
--- ---------------------------------------------------------------------------------------------
--- Stats
--- ---------------------------------------------------------------------------------------------
-local ST_GENERAL = L["General"]
-local GROUP_TAB = {
-    base = L["Base and combat"], spell = L["Spell and regen"],
-    defense = L["Defense and resists"], utility = L["Utility"],
-}
--- How a stat row draws is the Bars page's Rows show (bars.rowDisplay), shared with skill rows.
-local statRows = { setRow("stats", "stats", ST_GENERAL) }
-for _, def in ipairs(NS.STAT_DEFS) do
-    statRows[#statRows + 1] = hideRow("stats", "stats", def.key, def.label, GROUP_TAB[def.group] or GROUP_TAB.utility)
-end
-NS.RegisterSchemaRows(statRows)
-NS.RegisterSchemaPage("stats", L["Stats"], {
-    defaultsTooltip = L["Restore every Stats setting on this profile to its default. Every hidden stat is shown again."],
+    defaultsTooltip = L["Restore every Skills setting on this profile to its default. Hidden rows stay hidden: the Rows page's Defaults shows them again."],
 })

@@ -106,6 +106,7 @@ SkillMasterDB
         skin = true,             -- Apply skin to the tooltip (FB-13): the feed's own skinned frame
         sections = { primary = true, secondary = true, weapon = true, other = true, stats = false },
         hiddenSkills = { [key] = true },   -- left out of the tooltip only, apart from skills.hidden
+                                           -- (all four hidden sets: the Rows page, round 5, R5-13)
         hiddenStats  = { [key] = true },   -- left out of the tooltip only, apart from stats.hidden
       },
     }

@@ -176,15 +176,17 @@ settings\Schema.lua
 settings\Slash.lua
 # LOAD-BEARING: NS.Helpers and NS.RegisterOptionsPage, called at FILE SCOPE by every page below.
 settings\OptionsSetup.lua
-# NS.OptionsList, the boxed list row the Layout and Skills pages draw at RENDER time.
+# NS.OptionsList, the boxed list row the Layout and Rows pages draw at RENDER time.
 settings\BoxList.lua
 # LOAD-BEARING: General registers FIRST and Profiles LAST; page order IS registration order.
 settings\General.lua
-# T5.1 the display pages, in the sidebar's order (Skills.lua registers Skills, then Stats). Each reads
+# T5.1 the display pages, in the sidebar's order (Skills, then Rows). Each reads
 # NS.Blocks, NS.SkillCatalog, NS.STAT_DEFS and NS.Template at FILE SCOPE, all loaded above.
 settings\Layout.lua
 settings\Bars.lua
 settings\Skills.lua
+# R5-13 the Rows page: reads NS.SortedSkillKeys (Skills.lua) at FILE SCOPE.
+settings\Rows.lua
 settings\Broker.lua
 settings\Tooltips.lua
 settings\Alerts.lua

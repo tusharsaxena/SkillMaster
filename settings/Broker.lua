@@ -1,26 +1,21 @@
 local _, NS = ...
 -- settings/Broker.lua — the Broker page (design §6.7; feedback round 2, FB-12 and FB-13): the one
--- feed's text template and skill-up flash, and its tooltip: the five sections and one
--- Hide row per catalog skill and per stat. A write repaints the feed at once (NS.Broker.Refresh).
+-- feed's text template and skill-up flash, and its tooltip's five sections. A write repaints the
+-- feed at once (NS.Broker.Refresh).
 --
 --   Feed            -- Text -- the template (presets + Custom)   -- Skill-up flash
 --   Tooltip         -- Sections -- one switch each (the skin row is on the Tooltips page)
---   Tooltip skills  one Hide row per catalog skill, by category
---   Tooltip stats   one Hide row per stat, by group
 --
 -- The template is a presets dropdown plus "Custom", which shows a text box taking the tokens
 -- (NS.TemplateRows, settings/OptionsSetup.lua). A preset whose text carries a word goes through L;
 -- the shipped default (defaults/Profile.lua) is matched as it is stored.
 --
--- The tooltip's Hide sets (`broker.tooltip.hiddenSkills`, `broker.tooltip.hiddenStats`) are apart
--- from the main window's (`skills.hidden`, `stats.hidden`, settings/Skills.lua), whose pattern
--- these rows follow: each reads and writes its entry through get / set, false clearing it, and an
--- undrawn whole-set row per kind lets the page's Defaults clear a key with no row of its own.
+-- The tooltip's Hide sets (`broker.tooltip.hiddenSkills`, `broker.tooltip.hiddenStats`) are drawn
+-- on the Rows page (settings/Rows.lua, round 5, R5-13), beside the main window's.
 local L = NS.L
 local P = NS.defaults.profile.broker
 local PAGE = "broker"
 local FEED, TOOLTIP = L["Feed"], L["Tooltip"]
-local TIP_SKILLS, TIP_STATS = L["Tooltip skills"], L["Tooltip stats"]
 
 local function refresh()
     if NS.Broker and NS.Broker.Refresh then NS.Broker.Refresh() end
@@ -72,62 +67,8 @@ for _, id in ipairs(NS.Broker.SECTIONS) do
     }
 end
 
--- ---------------------------------------------------------------------------------------------
--- Tooltip skills and stats: the Hide rows
--- ---------------------------------------------------------------------------------------------
-
-local function tipSet(setKey)
-    local b = NS.db and NS.db.profile.broker
-    return b and b.tooltip and b.tooltip[setKey]
-end
-
-local function hideRow(setKey, key, name, group, subgroup)
-    return {
-        path = "broker.tooltip." .. setKey .. "." .. key, page = PAGE, group = group, subgroup = subgroup,
-        type = "bool", default = false, label = L["Hide %s"]:format(name),
-        desc = L["Leave this row out of the feed's tooltip. The main window has its own Hide, on the Skills and Stats pages."],
-        get = function()
-            local set = tipSet(setKey)
-            return set ~= nil and set[key] == true
-        end,
-        set = function(v)
-            local set = tipSet(setKey)
-            if set then set[key] = v and true or nil end
-        end,
-    }
-end
-
-local function setRow(setKey, group)
-    return {
-        path = "broker.tooltip." .. setKey, page = PAGE, group = group, type = "set", default = {},
-        skipRender = true, label = L["Hidden rows"],
-        desc = L["Every row the feed's tooltip leaves out, as a set of keys."],
-    }
-end
-
-local CATEGORY_SUBGROUP = {
-    primary = L["Primary professions"], secondary = L["Secondary skills"], weapon = L["Weapon skills"],
-    other = L["Other skills"],
-}
-rows[#rows + 1] = setRow("hiddenSkills", TIP_SKILLS)
-for _, key in ipairs(NS.SortedSkillKeys) do
-    local c = NS.SkillCatalog[key]
-    local sub = CATEGORY_SUBGROUP[c.category] or CATEGORY_SUBGROUP.other
-    rows[#rows + 1] = hideRow("hiddenSkills", key, L[c.name], TIP_SKILLS, sub)
-end
-
-local GROUP_SUBGROUP = {
-    base = L["Base and combat"], spell = L["Spell and regen"],
-    defense = L["Defense and resists"], utility = L["Utility"],
-}
-rows[#rows + 1] = setRow("hiddenStats", TIP_STATS)
-for _, def in ipairs(NS.STAT_DEFS) do
-    rows[#rows + 1] = hideRow("hiddenStats", def.key, def.label, TIP_STATS,
-        GROUP_SUBGROUP[def.group] or GROUP_SUBGROUP.utility)
-end
-
 NS.RegisterSchemaRows(NS.Live(rows, refresh))
 
 NS.RegisterSchemaPage(PAGE, L["Broker"], {
-    defaultsTooltip = L["Restore every Broker setting on this profile to its default. Every hidden tooltip row is shown again."],
+    defaultsTooltip = L["Restore every Broker setting on this profile to its default. Hidden tooltip rows stay hidden: the Rows page's Defaults shows them again."],
 })

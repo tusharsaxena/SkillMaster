@@ -295,13 +295,12 @@ Total.
 - tooltips: a font size reaches a tooltip's lines and goes back to each line's own font
 - tooltips: the row tooltip's bar takes Tooltips > Bar width; the LDB tooltip widens for its own
 
-### test_round2_layout.lua (8)
+### test_round2_layout.lua (7)
 
 - round2 layout: the window is wide enough for its body and the scroll bar's whole gutter
 - round3 marks: every row carries the one action mark (ph:sign-in), a stat row too (round 4)
 - round2 layout: a detached block's body starts under the skin's band, its rows padded above and below
 - round2 layout: Spark is off by default, the tier ticks are gone, Rank tier colors is a Marks row
-- round2 layout: Skills > Professions draws one boxed row per skill, its eye hiding and showing it
 - round2 layout: Layout > Block order draws one boxed row per block in order, its eye showing or hiding it
 - round4 restore: a block hiding rows shows an eye mark that brings them back; none otherwise
 - round4 restore: a stat block's mark brings back its own stats
@@ -412,7 +411,7 @@ Total.
 - round5 snap: in combat a drop still moves, and the merge it asks for waits for combat's end
 - round5 snap: a stand-down mid-drag drops the drag, the driver disarmed and the glow hidden
 
-### test_round5_followups.lua (17)
+### test_round5_followups.lua (23)
 
 - round5 filter: All, Learned, Equipped and Below cap narrow the weapon block, stored per profile through the seam
 - round5 filter: Layout > Blocks > Weapon skills has the Show rows row, its values the filter menu's
@@ -431,6 +430,12 @@ Total.
 - round5 distance: the popup re-measures once a second while shown, keeps the selection, and stops on hide
 - round5 distance: a secret or missing player position shows no distance and keeps the data's order
 - round5 distance: Escape (the frame's own hide) stops the re-measure too
+- round5 rows: the Stats page is gone (its General tab drew nothing) and the Rows page holds every hide row
+- round5 rows: the groups follow the window's block order, skills by category, stats by group
+- round5 rows: the page draws a column header, a heading per group and two eyes per row
+- round5 rows: a group heading's eyes show that group's hidden rows again, one column each
+- round5 rows: a hide written while the page is hidden (the row menu) redraws it on its next show
+- round5 rows: the Rows page's Defaults restores both hidden sets; the Skills and Broker pages' leave them
 
 ### test_blocks.lua (10)
 
@@ -540,7 +545,7 @@ Total.
 - broker: the tooltip's skill sections are on and Stats is off by default
 - broker: each section has its own switch
 - broker: a tooltip Hide leaves the main window alone, and the window's Hide leaves the tooltip
-- broker: the Broker page has a Hide row per catalog skill and per stat, apart from the window's
+- broker: a tooltip Hide row per catalog skill and per stat, on the Rows page (R5-13), apart from the window's
 - broker: clicks follow design §6.5 and never touch a secure frame
 - broker: a crafting row without ShowAndScrollTo still opens the main window
 - broker: a hovered tooltip row wears the window's hover wash, under its text, until the pointer leaves
@@ -639,7 +644,7 @@ Total.
 - SM-01: the dock buttons (detach, dock) are stored through NS.SetByPath
 - SM-01: a drag move renumbers every changed block through the seam with one LAYOUT_CHANGED
 - SM-01: the row menu's Hide is stored through NS.SetByPath
-- F-002: a hidden skill the catalog does not know is shown again by the Skills page Defaults
+- F-002: a hidden skill the catalog does not know is shown again by the Rows page Defaults
 - F-012: standing up re-reads the stats and the bonuses, so no simulated value outlives a disable
 - F-001: a skill line is matched on its skill-line ID, so a German client's lines land on their rows
 - F-001: the adapter carries the struct's skill-line ID
@@ -835,14 +840,14 @@ Total.
 | test_bars_live.lua | 18 |
 | test_bars_round2.lua | 8 |
 | test_bars_sizes.lua | 8 |
-| test_round2_layout.lua | 8 |
+| test_round2_layout.lua | 7 |
 | test_round2_icons.lua | 11 |
 | test_round3.lua | 10 |
 | test_round5.lua | 11 |
 | test_round5_style.lua | 9 |
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
-| test_round5_followups.lua | 17 |
+| test_round5_followups.lua | 23 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -873,4 +878,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **615** |
+| **Total** | **620** |

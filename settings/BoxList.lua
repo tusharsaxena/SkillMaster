@@ -1,18 +1,26 @@
 local addonName, NS = ...
--- settings/BoxList.lua — the boxed list row the Skills page's hide lists and the Layout page's Block
--- order share (feedback round 2, after ConsumableMaster's Priority list): one bounded box per row
--- (LibKa0s-Widgets-1.0's ReorderList row box, options-ui-§18), a drag handle on the left when the
--- list reorders, the entry's icon and name vertically centered, and square action marks on the right.
+-- settings/BoxList.lua — the boxed list row the Rows page and the Layout page's Block order share
+-- (feedback round 2, after ConsumableMaster's Priority list): one bounded box per row (LibKa0s-Widgets-1.0's
+-- ReorderList row box, options-ui-§18), a drag handle on the left when the list reorders, the entry's
+-- icon and name vertically centered, and square action marks on the right.
 --
--- NS.OptionsList.Begin(ctx, opts) -> list | nil   opts = { onMove = fn(from, to) | nil }; one per render
+-- NS.OptionsList.Begin(ctx, opts) -> list | nil   one per render; opts = { onMove = fn(from, to) | nil,
+--   actionWidth = px | nil (each action column's width, ACTION_W by default),
+--   labelWidth = 0..1 | nil (the name's relative width when the row has actions) }
 -- NS.OptionsList.Row(scroll, list, spec) -> row, label, marks   spec = { text, icon, dimmed, actions = { action... } }
 --   action = { image, title, tooltip, dimmed, onClick }
+-- NS.OptionsList.Header(scroll, list, spec) -> row, label, cells   an unboxed line over the rows, its
+--   cells in the same columns as the rows' actions (round 5, R5-13): spec = { text, heading, columns =
+--   { cell... } }, a cell an action (it has `image`) or a caption { text }; `heading` draws
+--   the text as a section heading, else the line is the column captions' own.
 -- NS.OptionsList.Cancel(ctx)                        before anything is drawn (the page's beforeRender)
 --
 -- The row's name and icon are one AceGUI widget of this addon's own ("SkillMasterListLabel": a fixed
 -- row-high frame, the icon and the text centered on it), because AceGUI's Label hangs its text from
--- the top of a row and Flow gives a row no vertical alignment. Nothing is drawn on AceGUI's pooled
--- frames: the box and the handle are the library's, given back by Cancel.
+-- the top of a row and Flow gives a row no vertical alignment. A header's text is one of two more
+-- ("SkillMasterListHeading", a section heading; "SkillMasterListCaption", a column's caption,
+-- centered over it). Nothing is drawn on AceGUI's pooled frames: the box and the handle are the
+-- library's, given back by Cancel.
 
 local List = {}
 NS.OptionsList = List
@@ -25,6 +33,7 @@ List.ACTION_W, List.LEAD_W, List.HANDLE_W_FALLBACK = 32, 8, 30
 List.ICON = 18
 
 local WIDGET, WIDGET_VERSION = "SkillMasterListLabel", 1
+local HEADING, CAPTION, TEXT_VERSION = "SkillMasterListHeading", "SkillMasterListCaption", 1
 
 local function aceGUI() return NS.AceGUI or (LibStub and LibStub("AceGUI-3.0", true)) end
 
@@ -95,6 +104,38 @@ local function registerLabel()
 end
 registerLabel()
 
+--- A header's text: a row-high frame with one vertically centered line, in `role`'s skin color.
+local function registerText(wtype, font, justify, role)
+    local AceGUI = aceGUI()
+    if not (AceGUI and AceGUI.RegisterAsWidget and AceGUI.RegisterWidgetType) then return end
+    if (AceGUI.GetWidgetVersion and AceGUI:GetWidgetVersion(wtype) or 0) >= TEXT_VERSION then return end
+    local methods = {
+        OnAcquire = function(self)
+            self:SetHeight(List.ROW_H)
+            self:SetText("")
+            NS.Skin.Text(self.label, role)
+        end,
+        SetText = function(self, text) self.label:SetText(text or "") end,
+    }
+    local function constructor()
+        local frame = CreateFrame("Frame", nil, UIParent)
+        frame:SetHeight(List.ROW_H)
+        frame:Hide()
+        local label = frame:CreateFontString(nil, "OVERLAY", font)
+        label:SetPoint("LEFT", frame, "LEFT", 4, 0)
+        label:SetPoint("RIGHT", frame, "RIGHT", -4, 0)
+        label:SetJustifyH(justify)
+        label:SetJustifyV("MIDDLE")
+        label:SetWordWrap(false)
+        local widget = { type = wtype, frame = frame, label = label }
+        for k, fn in pairs(methods) do widget[k] = fn end
+        return AceGUI:RegisterAsWidget(widget)
+    end
+    AceGUI:RegisterWidgetType(wtype, constructor, TEXT_VERSION)
+end
+registerText(HEADING, "GameFontNormal", "LEFT", "heading")
+registerText(CAPTION, "GameFontNormalSmall", "CENTER", "muted")
+
 -- ---------------------------------------------------------------------------------------------
 -- The list
 -- ---------------------------------------------------------------------------------------------
@@ -117,6 +158,7 @@ function List.Begin(ctx, opts)
         onMove = opts.onMove or function() end,
     })
     list.skmReorders = opts.onMove ~= nil
+    list.skmActionW, list.skmLabelW = opts.actionWidth, opts.labelWidth
     ctx.skmList = list
     return list
 end
@@ -136,11 +178,11 @@ local function slot(AceGUI, row, width)
     row:AddChild(s)
 end
 
-local function action(AceGUI, row, a)
+local function action(AceGUI, row, a, width)
     local b = AceGUI:Create("Icon")
     b:SetImage(a.image)
     b:SetImageSize(16, 16)
-    b:SetWidth(List.ACTION_W)
+    b:SetWidth(width or List.ACTION_W)
     b:SetHeight(List.ROW_H)
     -- The real Icon's SetDisabled(false), run on every acquire, gives the image back its full color,
     -- so a dimmed mark never leaks into the next page that borrows the widget.
@@ -169,10 +211,10 @@ function List.Row(scroll, list, spec)
     local muted = spec.dimmed and NS.Bar.Color("sm.muted")
     if muted then label:SetColor(muted[1], muted[2], muted[3]) end
     local actions = spec.actions or {}
-    label:SetRelativeWidth(#actions > 0 and (reorders and 0.78 or 0.84) or 0.9)
+    label:SetRelativeWidth(List.LabelWidth(list, #actions))
     row:AddChild(label)
     local marks = {}
-    for _, a in ipairs(actions) do marks[#marks + 1] = action(AceGUI, row, a) end
+    for _, a in ipairs(actions) do marks[#marks + 1] = action(AceGUI, row, a, list and list.skmActionW) end
     scroll:AddChild(row)
     if list then
         list:AddRow(row.frame, { ghostText = spec.text, height = List.ROW_H, dimmed = spec.dimmed,
@@ -180,6 +222,48 @@ function List.Row(scroll, list, spec)
     end
     if NS.Helpers.AddSpacer then NS.Helpers.AddSpacer(scroll, List.ROW_GAP) end
     return row, label, marks
+end
+
+--- The name's relative width in a row of `n` actions: the list's own (Begin's labelWidth), or the
+--- one-mark default.
+function List.LabelWidth(list, n)
+    if n == 0 then return 0.9 end
+    if list and list.skmLabelW then return list.skmLabelW end
+    return list and list.skmReorders and 0.78 or 0.84
+end
+
+--- One unboxed line in `scroll`, laid as a row is (the lead, the text at the name's width, then one
+--- cell per column at the action's width), so its cells sit over the rows' marks. Not a list row:
+--- it takes no box and no drag.
+function List.Header(scroll, list, spec)
+    local AceGUI = aceGUI()
+    if not (AceGUI and scroll) then return nil end
+    local row = AceGUI:Create("SimpleGroup")
+    row:SetLayout("Flow")
+    row:SetFullWidth(true)
+    row:SetHeight(List.ROW_H)
+    slot(AceGUI, row, list and list.skmReorders and handleGutter() or List.LEAD_W)
+    local label = AceGUI:Create(spec.heading and HEADING or CAPTION)
+    label:SetText(spec.text)
+    local columns = spec.columns or {}
+    label:SetRelativeWidth(List.LabelWidth(list, #columns))
+    row:AddChild(label)
+    local width = list and list.skmActionW or List.ACTION_W
+    local cells = {}
+    for _, c in ipairs(columns) do
+        if c.image then
+            cells[#cells + 1] = action(AceGUI, row, c, width)
+        else
+            local cap = AceGUI:Create(CAPTION)
+            cap:SetText(c.text)
+            cap:SetWidth(width)
+            row:AddChild(cap)
+            cells[#cells + 1] = cap
+        end
+    end
+    scroll:AddChild(row)
+    if NS.Helpers.AddSpacer then NS.Helpers.AddSpacer(scroll, List.ROW_GAP) end
+    return row, label, cells
 end
 
 --- Close a render's list on its scroll content (the library lays the boxes and handles there).

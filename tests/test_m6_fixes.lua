@@ -82,7 +82,7 @@ test("SM-01: the row menu's Hide is stored through NS.SetByPath", function()
     assertEqual(NS.db.profile.skills.hidden.guns, nil, "cleared, not stored as false")
 end)
 
-test("F-002: a hidden skill the catalog does not know is shown again by the Skills page Defaults", function()
+test("F-002: a hidden skill the catalog does not know is shown again by the Rows page Defaults", function()
     -- red under: no settings row reaching skills.hidden as a set (the key stays hidden until a profile reset)
     local row = { kind = "skill", entry = { key = "other:Jewelcrafting", name = "Jewelcrafting", rank = 1, max = 5 } }
     local hide
@@ -90,8 +90,8 @@ test("F-002: a hidden skill the catalog does not know is shown again by the Skil
     local paths = throughSeam(function() hide.onClick("hide", hide) end)
     assertTrue(NS.db.profile.skills.hidden["other:Jewelcrafting"], "hidden")
     assertTrue(#paths >= 1, "through the seam")
-    NS.SchemaRuntime.BulkRun("reset", "skills", function()
-        for _, r in ipairs(NS.SchemaForPage("skills")) do NS.ApplyDefault(r) end
+    NS.SchemaRuntime.BulkRun("reset", "rows", function()
+        for _, r in ipairs(NS.SchemaForPage("rows")) do NS.ApplyDefault(r) end
     end)
     assertEqual(NS.db.profile.skills.hidden["other:Jewelcrafting"], nil, "the page Defaults shows it again")
 end)

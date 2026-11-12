@@ -7,6 +7,9 @@
 -- R5-15: the trainer distances: the pure math (Trainers.Distance, ByDistance), the Compat world
 -- positions over the mocked C_Map (secret and missing guarded), the cards' yards, nearest first, the
 -- 1 s re-measure while shown and its stop on hide.
+-- R5-11..R5-13: the Rows page (settings/Rows.lua): the Stats page gone, every Hide row there, the
+-- groups in the window's block order, the column captions, the headings' show-all eyes, two eyes a
+-- row, its Defaults (both hidden sets) and its redraw after a write made while it was hidden.
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -447,4 +450,221 @@ test("round5 distance: Escape (the frame's own hide) stops the re-measure too", 
         onHide(TP.Frame())
         assertFalse(TP.Ticking(), "stopped")
     end)
+end)
+
+-- ── R5-11..R5-13: the Rows page ─────────────────────────────────────────────────────────────
+
+local function aceGUI() return M.__libs["AceGUI-3.0"] end
+
+local function createdOf(from, wtype)
+    local out = {}
+    local list = aceGUI().__created
+    for i = from + 1, #list do
+        local w = list[i]
+        if w.type == wtype and not w.__released then out[#out + 1] = w end
+    end
+    return out
+end
+
+-- Every live widget drawn after `from` of the given types, in creation order.
+local function drawn(from, types)
+    local out = {}
+    local list = aceGUI().__created
+    for i = from + 1, #list do
+        local w = list[i]
+        if types[w.type] and not w.__released then out[#out + 1] = w end
+    end
+    return out
+end
+
+local function showRowsPage()
+    local panel = M.__subcategories[NS.L["Rows"]]
+    assertTrue(panel ~= nil, "the Rows page is registered")
+    local from = #aceGUI().__created
+    panel:Show()
+    panel:__fire("OnShow")
+    M.__fireTimers()
+    return panel, from
+end
+
+local function hidePanel(panel)
+    panel:Hide()
+    panel:__fire("OnHide")
+    M.__fireTimers()
+end
+
+local function clearHidden()
+    NS.db.profile.skills.hidden, NS.db.profile.stats.hidden = {}, {}
+    NS.db.profile.broker.tooltip.hiddenSkills, NS.db.profile.broker.tooltip.hiddenStats = {}, {}
+end
+
+test("round5 rows: the Stats page is gone (its General tab drew nothing) and the Rows page holds every hide row", function()
+    -- red under: the Stats page still registered, or a hide row left on the Skills, Stats or Broker page
+    assertTrue(M.__subcategories[NS.L["Stats"]] == nil, "no Stats page")
+    assertTrue(M.__subcategories[NS.L["Rows"]] ~= nil, "a Rows page")
+    local onRows = {}
+    for _, row in ipairs(NS.Schema) do
+        assertTrue(row.page ~= "stats", "no row on the old Stats page: " .. tostring(row.path))
+        local hide = row.path:find("^skills%.hidden") or row.path:find("^stats%.hidden")
+            or row.path:find("^broker%.tooltip%.hidden")
+        if hide then
+            assertEqual(row.page, "rows", row.path .. " is on the Rows page")
+            onRows[row.path] = true
+        end
+    end
+    for key in pairs(NS.SkillCatalog) do
+        assertTrue(onRows["skills.hidden." .. key], "window row for " .. key)
+        assertTrue(onRows["broker.tooltip.hiddenSkills." .. key], "tooltip row for " .. key)
+    end
+    for _, def in ipairs(NS.STAT_DEFS) do
+        assertTrue(onRows["stats.hidden." .. def.key], "window row for " .. def.key)
+        assertTrue(onRows["broker.tooltip.hiddenStats." .. def.key], "tooltip row for " .. def.key)
+    end
+    for _, setPath in ipairs({ "skills.hidden", "stats.hidden", "broker.tooltip.hiddenSkills", "broker.tooltip.hiddenStats" }) do
+        assertTrue(onRows[setPath], "the whole-set row " .. setPath)
+    end
+    local skills = NS.SchemaForPage("skills")
+    assertEqual(#skills, 3, "the Skills page keeps its three switches")
+end)
+
+test("round5 rows: the groups follow the window's block order, skills by category, stats by group", function()
+    local groups = NS.OptionsRows.Groups()
+    local ordered = NS.Blocks.Ordered()
+    assertEqual(#groups, #ordered, "one group per block")
+    for i, id in ipairs(ordered) do
+        assertEqual(groups[i].id, id)
+        assertEqual(groups[i].title, NS.BlockDefs[id].title)
+    end
+    local primary = groups[1]
+    assertEqual(primary.id, "primary")
+    local seen = {}
+    for _, r in ipairs(primary.rows) do
+        seen[r.key] = r
+        assertEqual(NS.SkillCatalog[r.key].category, "primary", r.key .. " is a primary profession")
+    end
+    local lw = seen.leatherworking
+    assertTrue(lw ~= nil, "Leatherworking under Primary Professions")
+    assertEqual(lw.windowPath, "skills.hidden.leatherworking")
+    assertEqual(lw.tipPath, "broker.tooltip.hiddenSkills.leatherworking")
+    assertEqual(lw.icon, NS.Rows.Icon("skill", "leatherworking"))
+    local base
+    for _, g in ipairs(groups) do if g.id == "stats_base" then base = g end end
+    assertTrue(base ~= nil and #base.rows > 0, "the Base & Combat stats")
+    assertEqual(base.rows[1].windowPath, "stats.hidden." .. base.rows[1].key)
+    assertEqual(base.rows[1].tipPath, "broker.tooltip.hiddenStats." .. base.rows[1].key)
+    local total = 0
+    for _, g in ipairs(groups) do total = total + #g.rows end
+    local n = #NS.STAT_DEFS
+    for _ in pairs(NS.SkillCatalog) do n = n + 1 end
+    assertEqual(total, n, "every skill and stat once")
+end)
+
+test("round5 rows: the page draws a column header, a heading per group and two eyes per row", function()
+    clearHidden()
+    local panel, from = showRowsPage()
+    local ok, err = pcall(function()
+    local captions = {}
+    for _, c in ipairs(createdOf(from, "SkillMasterListCaption")) do
+        if c.text ~= "" then captions[#captions + 1] = c end
+    end
+    assertEqual(#captions, 2, "two column captions")
+    assertEqual(captions[1].text, NS.L["Window"])
+    assertEqual(captions[2].text, NS.L["LDB tooltip"])
+    local headings = createdOf(from, "SkillMasterListHeading")
+    local groups = NS.OptionsRows.Groups()
+    assertEqual(#headings, #groups, "a heading per group")
+    for i, g in ipairs(groups) do assertEqual(headings[i].text, g.title) end
+    -- Per row: its label, then its window eye, then its tooltip eye.
+    local seq = drawn(from, { SkillMasterListLabel = true, Icon = true })
+    local lwAt
+    for i, w in ipairs(seq) do
+        if w.type == "SkillMasterListLabel" and w.text == NS.L["Leatherworking"] then lwAt = i end
+    end
+    assertTrue(lwAt ~= nil, "Leatherworking has a row")
+    local winEye, tipEye = seq[lwAt + 1], seq[lwAt + 2]
+    assertEqual(winEye.type, "Icon")
+    assertEqual(tipEye.type, "Icon")
+    assertEqual(winEye.image[1], NS.Icon("eye"))
+    winEye.callbacks.OnClick()
+    M.__fireTimers()
+    assertTrue(NS.db.profile.skills.hidden.leatherworking == true, "the window eye writes skills.hidden")
+    assertTrue(NS.db.profile.broker.tooltip.hiddenSkills.leatherworking == nil, "and not the tooltip's")
+    tipEye.callbacks.OnClick()
+    M.__fireTimers()
+    assertTrue(NS.db.profile.broker.tooltip.hiddenSkills.leatherworking == true, "the tooltip eye writes its own set")
+    end)
+    clearHidden()
+    hidePanel(panel)
+    if not ok then error(err, 0) end
+end)
+
+test("round5 rows: a group heading's eyes show that group's hidden rows again, one column each", function()
+    -- red under: no show-all eye on a heading, or one that reaches another group or the other column
+    clearHidden()
+    NS.SetByPath("skills.hidden.axes", true)
+    NS.SetByPath("skills.hidden.bows", true)
+    NS.SetByPath("broker.tooltip.hiddenSkills.guns", true)
+    NS.SetByPath("skills.hidden.fishing", true)   -- another group's
+    local panel, from = showRowsPage()
+    local function weaponMarks(since)
+        local seq = drawn(since, { SkillMasterListHeading = true, Icon = true })
+        for i, w in ipairs(seq) do
+            if w.type == "SkillMasterListHeading" and w.text == NS.BlockDefs.weapon.title then
+                return seq[i + 1], seq[i + 2]
+            end
+        end
+    end
+    local ok, err = pcall(function()
+        local showWin = weaponMarks(from)
+        assertTrue(showWin ~= nil and showWin.type == "Icon", "the Weapon Skills heading's window eye")
+        from = #aceGUI().__created
+        showWin.callbacks.OnClick()
+        M.__fireTimers()
+        assertTrue(NS.db.profile.skills.hidden.axes == nil and NS.db.profile.skills.hidden.bows == nil, "both shown")
+        assertTrue(NS.db.profile.skills.hidden.fishing == true, "another group's row stays hidden")
+        assertTrue(NS.db.profile.broker.tooltip.hiddenSkills.guns == true, "the tooltip column is apart")
+        local _, showTip = weaponMarks(from)
+        assertTrue(showTip ~= nil and showTip.type == "Icon", "the page drew again, the tooltip eye with it")
+        showTip.callbacks.OnClick()
+        M.__fireTimers()
+        assertTrue(NS.db.profile.broker.tooltip.hiddenSkills.guns == nil, "the tooltip's eye shows Guns again")
+    end)
+    clearHidden()
+    hidePanel(panel)
+    if not ok then error(err, 0) end
+end)
+
+test("round5 rows: a hide written while the page is hidden (the row menu) redraws it on its next show", function()
+    -- red under: the page drawn once and shown again with the eyes it had
+    clearHidden()
+    local panel = showRowsPage()
+    hidePanel(panel)
+    NS.SetByPath("broker.tooltip.hiddenStats.speed", true)
+    local from
+    panel, from = showRowsPage()
+    local labels = createdOf(from, "SkillMasterListLabel")
+    hidePanel(panel)
+    clearHidden()
+    assertTrue(#labels > 0, "the page drew again")
+end)
+
+test("round5 rows: the Rows page's Defaults restores both hidden sets; the Skills and Broker pages' leave them", function()
+    clearHidden()
+    NS.SetByPath("skills.hidden.axes", true)
+    NS.SetByPath("stats.hidden.agility", true)
+    NS.SetByPath("broker.tooltip.hiddenSkills.bows", true)
+    NS.SetByPath("broker.tooltip.hiddenStats.speed", true)
+    NS.db.profile.skills.hidden["other:Jewelcrafting"] = true   -- a key with no row of its own
+    NS.Helpers.RestoreDefaults("skills")
+    NS.Helpers.RestoreDefaults("broker")
+    M.__fireTimers()
+    assertTrue(NS.db.profile.skills.hidden.axes == true, "Skills' Defaults leaves the hidden rows")
+    assertTrue(NS.db.profile.broker.tooltip.hiddenSkills.bows == true, "Broker's too")
+    NS.Helpers.RestoreDefaults("rows")
+    M.__fireTimers()
+    assertTrue(next(NS.db.profile.skills.hidden) == nil, "every window-hidden skill shown")
+    assertTrue(next(NS.db.profile.stats.hidden) == nil, "every window-hidden stat")
+    assertTrue(next(NS.db.profile.broker.tooltip.hiddenSkills) == nil, "every tooltip-hidden skill")
+    assertTrue(next(NS.db.profile.broker.tooltip.hiddenStats) == nil, "every tooltip-hidden stat")
+    clearHidden()
 end)

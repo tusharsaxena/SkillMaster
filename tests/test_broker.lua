@@ -231,14 +231,16 @@ test("broker: a tooltip Hide leaves the main window alone, and the window's Hide
     end)
 end)
 
-test("broker: the Broker page has a Hide row per catalog skill and per stat, apart from the window's", function()
-    local paths = {}
+test("broker: a tooltip Hide row per catalog skill and per stat, on the Rows page (R5-13), apart from the window's", function()
+    local paths, onRows = {}, {}
     for _, row in ipairs(NS.SchemaForPage("broker")) do paths[row.path] = row end
+    for _, row in ipairs(NS.SchemaForPage("rows")) do onRows[row.path] = row end
     for key in pairs(NS.SkillCatalog) do
-        assertTrue(paths["broker.tooltip.hiddenSkills." .. key] ~= nil, "a row for " .. key)
+        assertTrue(onRows["broker.tooltip.hiddenSkills." .. key] ~= nil, "a row for " .. key)
+        assertTrue(paths["broker.tooltip.hiddenSkills." .. key] == nil, "not on the Broker page: " .. key)
     end
     for _, def in ipairs(NS.STAT_DEFS) do
-        assertTrue(paths["broker.tooltip.hiddenStats." .. def.key] ~= nil, "a row for " .. def.key)
+        assertTrue(onRows["broker.tooltip.hiddenStats." .. def.key] ~= nil, "a row for " .. def.key)
     end
     for _, id in ipairs(B.SECTIONS) do
         assertTrue(paths["broker.tooltip.sections." .. id] ~= nil, "a switch for " .. id)

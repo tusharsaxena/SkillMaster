@@ -568,16 +568,12 @@ L["The block's place in the window, 1 at the top. Drag it on Layout > Block orde
 L["Drag a block by its handle to move it. The eye shows or hides it; a hidden block keeps its place."] = true
 L["Hide this block"] = true
 L["Show %s"] = true
-L["The eye hides a skill from the window and the detached blocks, or shows it again. A hidden skill is dimmed."] = true
 L["Drag to reorder"] = true
 L["Layout"] = true
 L["Restore every Layout setting on this profile to its default: the window, every block and the block order."] = true
 L["Hide %s"] = true
 L["Hidden rows"] = true
-L["Every row hidden from the row menu, as a set of keys."] = true
-L["Leave this row out of the window and the detached blocks. The row menu's Hide sets it too. The feed's tooltip has its own, on the Broker page."] = true
 L["General"] = true
-L["Weapons and other"] = true
 L["Show unlearned skills"] = true
 L["List the weapon skills and Riding your class can learn but has not, dimmed, with their trainer."] = true
 L["Gathering and fishing hints"] = true
@@ -585,14 +581,9 @@ L["Hint under the row"] = true
 L["One muted line under the Skinning, Mining, Herbalism and Fishing rows: what you can gather now and the next step."] = true
 L["In a gathering skill's tooltip: the highest level you can skin, the next node you can gather and the skill a zone's fish need."] = true
 L["Skills"] = true
-L["Restore every Skills setting on this profile to its default. Every hidden skill is shown again."] = true
-L["Base and combat"] = true
-L["Spell and regen"] = true
-L["Defense and resists"] = true
 L["Bar and value"] = true
 L["Bar only"] = true
 L["Value only"] = true
-L["Restore every Stats setting on this profile to its default. Every hidden stat is shown again."] = true
 L["Feed"] = true
 L["Feed text"] = true
 L["Skill-up flash"] = true
@@ -611,16 +602,11 @@ L["Flash duration (seconds, 0 = off)"] = true
 L["How long the feed shows the skill that just went up (^ Bows 81) in place of its text."] = true
 -- FB-12 / FB-13: the feed's tooltip (settings/Broker.lua)
 L["Tooltip"] = true
-L["Tooltip skills"] = true
-L["Tooltip stats"] = true
 L["Apply skin to the tooltip"] = true
 L["Draw the feed's tooltip in the skin's backdrop, border and fonts. Off, it is the game's plain tooltip."] = true
 L["Sections"] = true
 L["Draw this section in the feed's tooltip."] = true
-L["Leave this row out of the feed's tooltip. The main window has its own Hide, on the Skills and Stats pages."] = true
-L["Every row the feed's tooltip leaves out, as a set of keys."] = true
 L["Broker"] = true
-L["Restore every Broker setting on this profile to its default. Every hidden tooltip row is shown again."] = true
 L["Alerts"] = true
 L["Rank cap alert"] = true
 L["A toast and a chat line when a profession reaches its rank's cap and a higher rank can be trained."] = true
@@ -811,6 +797,25 @@ L["Showing: %s. Click to filter."] = true
 L["No rows match this filter."] = true
 L["Show rows"] = true
 L["Which of the block's rows show, here, in its detached frame and in a merged window: all of them, the skills you have learned, the weapons you have equipped (main hand, off hand, ranged), or the learned skills still below their cap. The filter mark on its header picks it. The LDB tooltip is not filtered."] = true
+
+-- The Rows page (round 5, R5-11..R5-13: settings/Rows.lua)
+L["Rows"] = true
+L["Show and hide"] = true
+L["Hide %s in the LDB tooltip"] = true
+L["Leave this row out of the window and the detached blocks. The row menu's Hide sets it too."] = true
+L["Leave this row out of the LDB tooltip. The tooltip's row menu's Hide sets it too."] = true
+L["Every skill hidden from the window, as a set of keys."] = true
+L["Every stat hidden from the window, as a set of keys."] = true
+L["Every skill the LDB tooltip leaves out, as a set of keys."] = true
+L["Every stat the LDB tooltip leaves out, as a set of keys."] = true
+L["Nothing in this group is hidden here."] = true
+L["%d hidden. Click to show them again."] = true
+L["Show in the window"] = true
+L["Show in the LDB tooltip"] = true
+L["The first eye hides a row from the window and the detached blocks, the second from the LDB tooltip; a dimmed eye is hidden there. A row hidden from both is dimmed. A heading's eyes show its group's hidden rows again."] = true
+L["Show every skill and stat again, in the window and in the LDB tooltip: both hidden sets are cleared, on this profile."] = true
+L["Restore every Skills setting on this profile to its default. Hidden rows stay hidden: the Rows page's Defaults shows them again."] = true
+L["Restore every Broker setting on this profile to its default. Hidden tooltip rows stay hidden: the Rows page's Defaults shows them again."] = true
 
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.

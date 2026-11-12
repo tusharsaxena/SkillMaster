@@ -1,6 +1,6 @@
 -- tests/test_round2_layout.lua — the owner's second round-2 follow-up: the window's scroll gutter,
 -- the rows' Go (map-marker) and Open (book) marks, the detached block's centered title and row
--- padding, the Skills tabs and Block order as boxed lists (settings/BoxList.lua, after
+-- padding, Block order as a boxed list (settings/BoxList.lua, after
 -- ConsumableMaster's Priority list), and the Marks defaults (Spark off, no tier ticks).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
@@ -146,31 +146,6 @@ local function hide(panel)
     panel:__fire("OnHide")
     M.__fireTimers()
 end
-
-test("round2 layout: Skills > Professions draws one boxed row per skill, its eye hiding and showing it", function()
-    local panel, from = showTab("skills", "Skills", NS.L["Professions"])
-    local labels = created(from, "SkillMasterListLabel")
-    local byText = {}
-    for _, l in ipairs(labels) do byText[l.text] = l end
-    assertTrue(byText[NS.L["Leatherworking"]] ~= nil, "Leatherworking has a row")
-    assertTrue(byText[NS.L["Cooking"]] ~= nil, "and the secondary skills too")
-    assertTrue(byText[NS.L["Axes"]] == nil, "a weapon skill is on the other tab")
-    local lw = byText[NS.L["Leatherworking"]]
-    assertTrue(lw.image ~= nil and lw.image[1] == NS.Rows.Icon("skill", "leatherworking"), "with its in-game icon")
-    local eyes = created(from, "Icon")
-    assertTrue(#eyes >= #labels, "an eye per row")
-    -- The row order is the label order, so the eye after Leatherworking's label is its own.
-    local idx
-    for i, l in ipairs(labels) do if l == lw then idx = i end end
-    local eye = eyes[idx]
-    assertEqual(eye.image[1], NS.Icon("eye"), "the eye mark")
-    eye.callbacks.OnClick()
-    M.__fireTimers()
-    assertTrue(NS.db.profile.skills.hidden.leatherworking == true, "the eye hides it, through the seam")
-    NS.SetByPath("skills.hidden.leatherworking", false)
-    assertTrue(NS.db.profile.skills.hidden.leatherworking == nil, "and the row's set clears the entry")
-    hide(panel)
-end)
 
 test("round2 layout: Layout > Block order draws one boxed row per block in order, its eye showing or hiding it", function()
     local panel, from = showTab("layout", "Layout", NS.L["Block order"])

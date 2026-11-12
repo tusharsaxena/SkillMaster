@@ -56,14 +56,14 @@ test("options: every display default outside bars and layout has a row too", fun
 end)
 
 test("options: the pages register in the mockup's order, General first and Profiles last", function()
-    local want = { "General", "Layout", "Bars", "Skills", "Stats", "Broker", "Alerts", "Journal",
+    local want = { "General", "Layout", "Bars", "Skills", "Rows", "Broker", "Alerts", "Journal",
                    "Trainers and Waypoints" }
     for _, name in ipairs(want) do
         assertTrue(M.__subcategories[name] ~= nil, name .. " registered a subcategory")
     end
     local keys = {}
     for _, row in ipairs(NS.Schema) do keys[row.page] = true end
-    for _, page in ipairs({ "general", "layout", "bars", "skills", "stats", "broker", "alerts", "journal",
+    for _, page in ipairs({ "general", "layout", "bars", "skills", "rows", "broker", "alerts", "journal",
                             "trainers" }) do
         assertTrue(keys[page], page .. " declares rows")
     end
@@ -202,7 +202,7 @@ test("options: the Bars page has no preview bar (owner feedback round 4)", funct
 end)
 
 test("options: every new page renders on its first show without raising", function()
-    for _, name in ipairs({ "Layout", "Skills", "Stats", "Broker", "Alerts", "Journal", "Trainers and Waypoints" }) do
+    for _, name in ipairs({ "Layout", "Skills", "Rows", "Broker", "Alerts", "Journal", "Trainers and Waypoints" }) do
         local panel = M.__subcategories[name]
         local ok, err = pcall(function()
             panel:Show()
@@ -230,6 +230,8 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- Round 5 (R5-7): Layout > Detached windows, three hand-written rows (scale, opacity, title band)
     -- and nine composed (the background pair and its skin companion, the border block and its).
     -- Round 5 (R5-10): the weapon block's Show rows filter, one hand-written row in both counts.
+    -- Round 5 (R5-11..R5-13): the Rows page took every Hide row and the four whole-set rows over from
+    -- the Skills, Stats and Broker pages one for one, same paths: neither count moves (delta 0).
     assertEqual(full, 330, "the full schema (round 5: the Detached windows tab's twelve rows, the weapon filter)")
     assertEqual(degraded, 277, "the library-absent schema")
     assertEqual(full - degraded, 53, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3) and the detached background and border (9)")

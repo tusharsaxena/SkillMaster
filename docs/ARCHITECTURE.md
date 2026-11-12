@@ -108,7 +108,15 @@ latter from the filter mark's menu); the filter narrows the block in the main wi
 frame and its merged section (`NS.Blocks.Entries`), not the LDB tooltip. `skills.hidden` /
 `stats.hidden` are sets: one Hide row per catalog skill and per stat (get / set: false clears the
 entry), and one undrawn row per whole set (type `set`, default `{}`), which the row menu's Hide
-writes for a key with no row of its own (an `other:` skill) and the page's Defaults resets.
+writes for a key with no row of its own (an `other:` skill) and the page's Defaults resets. The
+LDB tooltip's own sets (`broker.tooltip.hiddenSkills` / `hiddenStats`) follow the same pattern. All
+four sets live on one page, Rows (`settings/Rows.lua`, round 5, R5-11..R5-13): every skill and stat
+once, grouped under the window's block headings in `NS.Blocks.Ordered()`, one eye per set
+(Window, LDB tooltip) on `NS.OptionsList`'s two-column rows, and one show-all eye per column on each
+heading (`SetMany`, one act). It replaced the Skills page's Professions and Weapons tabs, the Stats
+page (gone: its General tab held only the undrawn set row) and the Broker page's Tooltip skills and
+Tooltip stats tabs. The paths did not move, so nothing migrated. A write made while the page is
+hidden (the row menu, a header's restore eye, `/sm set`) marks it owed a render.
 
 `profile.layout.detached` (round 5, R5-7) is one style for every detached window, set on Layout >
 Detached windows. `NS.Detached.ApplyStyle(frame)` paints it on each render: the scale (the frame's

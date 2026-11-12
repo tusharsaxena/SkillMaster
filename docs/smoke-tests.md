@@ -123,7 +123,7 @@ the checks below that cover each item:
   at the top right with the journal, settings, Expand / Collapse all and close marks; nothing left of
   the title.
 - **SM-DISP-23** (round 3) The Defense / Lockpicking / Riding block reads Other skills in the
-  window, the LDB tooltip, and on the Skills, Bars and Broker pages.
+  window, the LDB tooltip, and on the Rows, Bars and Broker pages.
 - **SM-DISP-24** (round 5, R5-5) Detach the Weapon block and drag it about the screen: every row's
   action mark (the arrow into a bracket) draws as crisp as the main window's wherever the frame is
   dropped, the bracket's right stroke as bright as its left, nothing cut at the right edge. Bars >
@@ -198,8 +198,8 @@ the checks below that cover each item:
 - **SM-OPT-15** (round 2) Bars > Icons: Icon size 24 (capped at the row's height), Icon zoom 20 (the
   art fills the well), Border thickness 2; untick Use the row's color and Use the skin's color and
   pick a swatch: every icon takes it. Untick Show icons: the names move left into the icons' place.
-- **SM-OPT-14** (round 2) Skills > Professions and Weapons and other: one boxed row per skill, its
-  icon and name, an eye on the right; click the eye: the row dims and the skill leaves the window,
+- **SM-OPT-14** (round 2; the Rows page since round 5) Rows: one boxed row per skill, its
+  icon and name, the eyes on the right; click the Window eye: the row dims and the skill leaves the window,
   click again to bring it back. Layout > Block order: the same boxes, a three-line handle on the
   left to drag, an eye that hides or shows the block.
 - **SM-DISP-13** (FB-17) The summary line opens with the class icon, then the character's name in
@@ -269,7 +269,7 @@ the checks below that cover each item:
   template's text. Gain a skill point: the feed reads `^ <skill> <new>` for five seconds, with the
   up chevron. Hover it: the tooltip lists Primary, Secondary, Weapon and Other with mini bars, no
   Stats; it wears the skin (backdrop, border, fonts). Broker > Tooltip: turn Stats on and Weapon
-  off, hover again: stats show, weapons do not. Tooltip skills: hide Cooking; the tooltip leaves it
+  off, hover again: stats show, weapons do not. Rows: Cooking's LDB tooltip eye; the tooltip leaves it
   out and the main window still shows it. Turn *Apply skin to the tooltip* off: the plain tooltip;
   hover a unit or item afterwards, its GameTooltip is the game's own look.
 - **SM-CFG-1** Settings → AddOns → Ka0s Skill Master: the landing page lists the slash commands; General
@@ -281,6 +281,20 @@ the checks below that cover each item:
 - **SM-OPT-16** (round 4) Tooltips > Main window tooltip: Bar width 300 and Font size 16: hover a row,
   the tooltip's bar is wider and its lines larger; hover a bag item: its tooltip is the game's normal
   size. Tooltips > LDB tooltip: Bar width 250 widens the feed's tooltip; Font size 10 shrinks its text.
+- **SM-OPT-18** (round 5, R5-11..R5-13) The sidebar lists Skills, Rows, Broker; no Stats page. Skills
+  has one tab, General, with its three switches. Rows: a Window / LDB tooltip caption line over two
+  eye columns, then the window's block headings in its block order (Primary Professions, Secondary
+  Skills, Weapon Skills, Other skills, the four stat groups), each skill or stat a boxed row with its
+  icon, name and two eyes, the eyes aligned under the captions at any panel width; the names never
+  wrap past the eyes. Broker shows Feed and Tooltip only.
+- **SM-OPT-19** (round 5, R5-13) Rows: Axes's Window eye hides it from the window and a detached
+  Weapon block, the LDB tooltip still lists it; its LDB tooltip eye then hides it there too and the
+  row dims. Hide Bows and Guns from the window; the Weapon Skills heading's Window eye brings both
+  back at once (one repaint), leaving Axes's tooltip hide. With the Rows page closed, hide Fishing
+  from its row menu and reopen Rows: Fishing's Window eye reads dimmed.
+- **SM-OPT-20** (round 5, R5-13) Hide a skill and a stat in both columns, then Skills > Defaults and
+  Broker > Defaults: they stay hidden. Rows > Defaults: everything shows again in the window and the
+  tooltip. Each Defaults button's tooltip says which.
 - **SM-OPT-17** (round 4) Hide two weapon rows from their row menu: an eye mark shows in the Weapon
   Skills header (and on the block's band when detached), its tip "2 hidden rows"; click it: both rows
   come back and the mark goes. A hidden Secondary row stays hidden.
@@ -296,8 +310,8 @@ the checks below that cover each item:
 - **SM-OPT-3** Layout > Block order: drag Weapon Skills to the top; the window reorders. Layout >
   Blocks: turn off Dock in the window for one block, it pops out; turn it back on in combat and it
   docks after combat.
-- **SM-OPT-4** Hide a skill from its row menu, then Skills > Professions (or Weapons and other):
-  untick its Hide row and the row comes back.
+- **SM-OPT-4** Hide a skill from its row menu, then open Rows: its Window eye is dimmed; click it
+  and the row comes back.
 - **SM-OPT-5** Trainers and Waypoints: Waypoint method Chat only, click an unlearned row's Go: only
   the chat line, no TomTom arrow. Turn Mark unverified trainers off: no "(unverified)".
 - **SM-OPT-6** A fresh profile: no bar draws a border under any skin, Azeroth, High Contrast and

@@ -9,9 +9,9 @@ login; each page body builds on its first show.
 | General | Master controls, Skin, Keybindings | Master controls, the skin, the key binding |
 | Layout | Window, Blocks, Detached windows, Block order | The window's width, maximum height, block spacing, summary strip, column count (one or two) and frame strata; per block show, dock, collapse, lock and scale; the weapon block's compact filter (equipped and below cap only); every detached window's scale, opacity, title band, strata, background and border; the block order, dragged |
 | Bars | Bar, Colors, Text, Marks, Icons | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom) and position; Rank tier colors (each tier a darker shade of the category color, By category only), markers, timer and spark (off by default); the rows' icons (show, size, zoom, and the composed border on the icon family with Use the row's color). No preview bar: the open window restyles live (owner feedback round 4) |
-| Skills | General, Professions, Weapons and other | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default), one Hide row per catalog skill, drawn on the Professions and Weapons tabs as a boxed row (icon, name, an eye) |
-| Stats | One tab per stat group | One Hide row per stat |
-| Broker | Feed, Tooltip, Tooltip skills, Tooltip stats | The feed's text template (a presets dropdown plus Custom) and the skill-up flash; the five section switches; one tooltip Hide row per catalog skill and per stat |
+| Skills | General | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default) |
+| Rows | Show and hide | Every catalog skill and stat once, under the window's block headings in its block order: a boxed row (icon, name) with two eyes, the main window's Hide (`skills.hidden.<key>`, `stats.hidden.<key>`) and the LDB tooltip's (`broker.tooltip.hiddenSkills.<key>`, `hiddenStats.<key>`); a Window / LDB tooltip caption line on top; each heading's two eyes show that group's hidden rows again (round 5, R5-11..R5-13) |
+| Broker | Feed, Tooltip | The feed's text template (a presets dropdown plus Custom) and the skill-up flash; the five section switches |
 | Tooltips | Main window tooltip, LDB tooltip | Each tooltip's bar width, bar height, row height and font size; Apply skin to the tooltip (the LDB tooltip). The heights keep their `bars.*` paths and the skin row `broker.tooltip.skin`; the widths and font sizes are `tooltips.row.*` / `tooltips.ldb.*` (owner feedback round 4) |
 | Alerts | Alerts, Muted weapons | The rank-cap and weapon-gap alerts, the gap, the sound; the skill-up alert, which skills it reads and its own sound (round 4) |
 | Journal | Journal | Skill-ups kept per character, the Log tab's range (the window's own picker writes the same row), the Alts sub-tab on open |
@@ -25,9 +25,11 @@ button restoring the page. Every display row's `onChange` is `NS.ApplyLook`, whi
 blocks and the Journal restyle at once. The block rows `layout.blocks.<id>.docked`
 and `.collapsed` store through their `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`, which wait
 out combat), and every other actor (the header, the detached frame's buttons, the drag list) writes
-them through `NS.SetByPath`; the Hide rows (`skills.hidden.<key>`, `stats.hidden.<key>`, sets) read
-and write through `get` / `set`, and an undrawn whole-set row per kind (`skills.hidden`,
-`stats.hidden`, type `set`) lets the page's Defaults clear a key with no row of its own.
+them through `NS.SetByPath`; the Hide rows (`skills.hidden.<key>`, `stats.hidden.<key>`,
+`broker.tooltip.hiddenSkills.<key>`, `broker.tooltip.hiddenStats.<key>`, sets) read and write
+through `get` / `set`, and an undrawn whole-set row per set (type `set`) lets the Rows page's
+Defaults clear a key with no row of its own. Each page's Defaults restores its own rows only: the
+Skills and Broker pages' leave the hidden rows hidden, the Rows page's shows every one again.
 
 The text templates (`bars.textTemplate`, `broker.template`) are two rows each, built by
 `NS.TemplateRows` (`settings/OptionsSetup.lua`): a session-only presets dropdown
@@ -119,10 +121,9 @@ The Block order tab is a host tab keyed by its group (the rows `layout.blocks.<i
 `skipRender`): one boxed row per block in `NS.Blocks.Ordered()` on `NS.OptionsList`
 (`settings/BoxList.lua`, ConsumableMaster's Priority list look: a 28 px box, a 4 px gap, the `segment`
 handle), dragged through LibKa0s-Widgets-1.0's `ReorderList` (options-ui-§18); a drop calls
-`NS.Blocks:Move(from, to)`, and the row's eye writes `layout.blocks.<id>.shown`. The Skills page's
-Professions and Weapons tabs are host tabs keyed by their groups the same way: each Hide row drawn
-as a boxed row (the skill's icon, its name, an eye that writes the row through the seam), with no
-handle. Each controller is canceled before every render (`spec.beforeRender`).
+`NS.Blocks:Move(from, to)`, and the row's eye writes `layout.blocks.<id>.shown`. The Rows page's one
+tab is a host tab keyed by its group the same way (see [Rows](#rows)). Each controller is canceled
+before every render (`spec.beforeRender`).
 
 The Weapon skills subsection adds *Equipped and below cap only*
 (`layout.blocks.weapon.belowCapOnly`): the detached block keeps the equipped weapons and the
@@ -144,11 +145,31 @@ The feed's right-click opens this page by its key (`NS.Broker.SETTINGS_PAGE = "b
   feed's own frame in the skin's backdrop, border and fonts; off, the game's plain GameTooltip.
   The switch takes a shown tooltip down. *Sections*: one switch per section
   (`broker.tooltip.sections.<primary|secondary|weapon|other|stats>`), Stats off by default.
-- **Tooltip skills** and **Tooltip stats**: one *Hide <name>* row per catalog skill
-  (`broker.tooltip.hiddenSkills.<key>`, by category) and per stat (`broker.tooltip.hiddenStats.<key>`,
-  by group). These sets are the tooltip's own: the Skills and Stats pages' Hide rows
-  (`skills.hidden`, `stats.hidden`) govern the window and the detached blocks, and neither reaches
-  the other. Each kind has an undrawn whole-set row (`type = "set"`) for the page's Defaults.
+
+The tooltip's Hide rows moved to the [Rows](#rows) page (round 5, R5-13), same paths.
+
+## Rows
+
+Owner feedback round 5 (R5-11..R5-13, `settings/Rows.lua`). One page in place of the Skills page's
+Professions and Weapons tabs, the Stats page (its General tab drew nothing: its one row was the
+undrawn whole-set row) and the Broker page's Tooltip skills and Tooltip stats tabs. Its one tab,
+*Show and hide*, is a host tab over `NS.OptionsList` (`settings/BoxList.lua`) begun with two action
+columns 84 px wide (`actionWidth`) and the name at 0.62 of the row (`labelWidth`):
+
+- an unboxed caption line (`NS.OptionsList.Header`) naming the columns, *Window* and *LDB tooltip*;
+- per block in `NS.Blocks.Ordered()` (Primary Professions, Secondary Skills, Weapon Skills, Other
+  skills, then the four stat groups by default), a heading line with the block's window title and
+  one eye per column: it shows every hidden row of that group in that column again, as one act
+  (`SetMany`, one `LAYOUT_CHANGED`), dimmed when nothing there is hidden;
+- per skill (by catalog category) or stat (by group), a boxed row: its icon, its name (dimmed while
+  hidden from both) and two eyes, each writing its row through the seam: `skills.hidden.<key>` /
+  `stats.hidden.<key>` (the window and the detached blocks) and `broker.tooltip.hiddenSkills.<key>` /
+  `hiddenStats.<key>` (the LDB tooltip). Neither set reaches the other.
+
+The page's Defaults restores both hidden sets (every per-key row and the four whole-set rows). The
+row menu's Hide and a header's restore eye write the same rows; a write while the page is hidden
+marks it owed a render, so its next show draws the eyes as they stand. Nothing moved path, so no
+schemaVersion step.
 
 ## Bars
 
@@ -161,7 +182,7 @@ only / Value only), one setting for skill rows and stat rows alike. The window's
 detached blocks' (both laid by `NS.Blocks.LayRows` through `NS.Rows`) and the broker tooltip's lines
 honor it: Bar only drops the value text (an unlearned skill keeps its *Not learned*), Value only
 draws the value in the bar's place, a skill's shaped by the bar text template. The row tooltip's
-bar and the Journal's Alts mini bars are not rows and always draw. It replaced the Stats page's
+bar and the Journal's Alts mini bars are not rows and always draw. It replaced the old Stats page's
 `stats.display` (schemaVersion 2, [schema.md](schema.md)).
 
 The page has no preview bar (owner feedback round 4 removed the pinned Fishing 107 +25 / 150):
