@@ -34,14 +34,12 @@ for i, id in ipairs(NS.BLOCKS) do
     J.FILTER_ORDER[i] = id
     J.FILTERS[id] = { source = d.source, filter = d.filter }
 end
-local FILTER_LABEL = {
-    primary = L["Primary"], secondary = L["Secondary"], weapon = L["Weapons"], other = L["Other"],
-    stats_base = L["Base & Combat"], stats_spell = L["Spell & Regen"],
-    stats_defense = L["Defense & Resists"], stats_utility = L["Utility"],
-}
-
---- The sub-tab's short label.
-function J.FilterLabel(id) return FILTER_LABEL[id] or id end
+--- The sub-tab's short label: the block's short name (NS.BlockDefs[id].short, shared with a merged
+--- window's title, round 5).
+function J.FilterLabel(id)
+    local d = NS.BlockDefs[id]
+    return d and d.short or id
+end
 
 -- ── the Log's ranges (FB-32) ──────────────────────────────────────────────────────────────────
 

@@ -4,10 +4,11 @@ local _, NS = ...
 -- each one shows, the collapsible block header, and the one row layout pass the main window and
 -- the detached frames both draw with. Detach, Dock and a collapse send LAYOUT_CHANGED.
 --
--- NS.BLOCKS = { ids in default order }; NS.BlockDefs[id] = { id, title, source, filter }
+-- NS.BLOCKS = { ids in default order }; NS.BlockDefs[id] = { id, title, short, source, filter }
 -- profile.layout.blocks[id] = { docked, order, collapsed, point, scale, locked }
 -- NS.Blocks:Detach(id) / :Dock(id) / :SetCollapsed(id, v) / :ToggleCollapsed(id) / :SetAllCollapsed(v) /
---   :Move(from, to) / :SetOrder(id, n) / .Ordered() (every block, shown or not, in its order)
+--   :Move(from, to) / :SetOrder(id, n) / .Ordered() (every block, shown or not, in its order) /
+--   :SetCollapsedFor(ids, v) / :DockAll(ids) (a merged window's Collapse all and Dock all, round 5)
 -- NS.Blocks.Docked() / .Undocked() / .Entries(id) / .Meta(id, entries) / .Settings(id)
 -- NS.Blocks.SortOf(id) / :CycleSort(id) / .SortEntries(id, items, entryOf): each block's row order
 --   (owner feedback round 3): "name" (the catalog's: skills by name, stats as defined), "value"
@@ -20,19 +21,21 @@ local L = NS.L
 
 NS.BLOCKS = { "primary", "secondary", "weapon", "other", "stats_base", "stats_spell", "stats_defense", "stats_utility" }
 
-local function def(id, title, source, filter)
-    return { id = id, title = title, source = source, filter = filter }
+-- `short`: the block's short name, the Journal's Alts sub-tab label and a merged window's title part
+-- (round 5, R5-6: "Primary \194\183 Secondary").
+local function def(id, title, short, source, filter)
+    return { id = id, title = title, short = short, source = source, filter = filter }
 end
 
 NS.BlockDefs = {
-    primary       = def("primary", L["Primary Professions"], "skills", "primary"),
-    secondary     = def("secondary", L["Secondary Skills"], "skills", "secondary"),
-    weapon        = def("weapon", L["Weapon Skills"], "skills", "weapon"),
-    other         = def("other", L["Other skills"], "skills", "other"),
-    stats_base    = def("stats_base", L["Stats \194\183 Base & Combat"], "stats", "base"),
-    stats_spell   = def("stats_spell", L["Stats \194\183 Spell & Regen"], "stats", "spell"),
-    stats_defense = def("stats_defense", L["Stats \194\183 Defense & Resists"], "stats", "defense"),
-    stats_utility = def("stats_utility", L["Stats \194\183 Utility"], "stats", "utility"),
+    primary       = def("primary", L["Primary Professions"], L["Primary"], "skills", "primary"),
+    secondary     = def("secondary", L["Secondary Skills"], L["Secondary"], "skills", "secondary"),
+    weapon        = def("weapon", L["Weapon Skills"], L["Weapons"], "skills", "weapon"),
+    other         = def("other", L["Other skills"], L["Other"], "skills", "other"),
+    stats_base    = def("stats_base", L["Stats \194\183 Base & Combat"], L["Base & Combat"], "stats", "base"),
+    stats_spell   = def("stats_spell", L["Stats \194\183 Spell & Regen"], L["Spell & Regen"], "stats", "spell"),
+    stats_defense = def("stats_defense", L["Stats \194\183 Defense & Resists"], L["Defense & Resists"], "stats", "defense"),
+    stats_utility = def("stats_utility", L["Stats \194\183 Utility"], L["Utility"], "stats", "utility"),
 }
 
 NS.Blocks = {}
@@ -105,6 +108,8 @@ function B.StoreDocked(id, docked)
     if not s then return false end
     lastRan = whenSafe("dock:" .. id, function()
         s.docked = docked and true or false
+        -- A block docked back in the window leaves its merged group (round 5, R5-6).
+        if s.docked and NS.Groups then NS.Groups.Leave(id) end
         B.Changed()
     end)
     return lastRan
@@ -205,23 +210,49 @@ end
 --- state: its frame has its own chevron. One bracket, one LAYOUT_CHANGED; in combat each write
 --- waits for the end of combat, as a chevron's does. Answers how many blocks it changed.
 function B:SetAllCollapsed(collapsed)
-    collapsed = collapsed and true or false
-    local ids = {}
-    for _, id in ipairs(B.Docked()) do
-        if (B.Settings(id).collapsed and true or false) ~= collapsed then ids[#ids + 1] = id end
-    end
-    if #ids == 0 then return 0 end
+    return B:SetCollapsedFor(B.Docked(), collapsed)
+end
+
+-- Run `write` inside one bulk bracket named `verb`: the seam logs it as one line and the writes'
+-- LAYOUT_CHANGED is sent once, after.
+local function bracket(verb, write)
     local S = NS.SchemaRuntime
-    local function write() for _, id in ipairs(ids) do B:SetCollapsed(id, collapsed) end end
     bulk = true
     local ok, err = pcall(function()
-        if S and S.BulkRun then S.BulkRun(collapsed and "collapse" or "expand", "layout.blocks", write)
-        else write() end
+        if S and S.BulkRun then S.BulkRun(verb, "layout.blocks", write) else write() end
     end)
     bulk = false
     if not ok then error(err, 0) end
     B.Changed()
-    return #ids
+end
+
+--- Collapse (true) or expand (false) the blocks `ids`, each through the seam (SetAllCollapsed's
+--- docked blocks, a merged window's Collapse all: round 5). One bracket, one LAYOUT_CHANGED.
+--- Answers how many blocks it changed.
+function B:SetCollapsedFor(ids, collapsed)
+    collapsed = collapsed and true or false
+    local todo = {}
+    for _, id in ipairs(ids) do
+        local s = B.Settings(id)
+        if s and (s.collapsed and true or false) ~= collapsed then todo[#todo + 1] = id end
+    end
+    if #todo == 0 then return 0 end
+    bracket(collapsed and "collapse" or "expand",
+        function() for _, id in ipairs(todo) do B:SetCollapsed(id, collapsed) end end)
+    return #todo
+end
+
+--- Dock every detached block of `ids` in the main window, each through the seam (a merged window's
+--- Dock all, round 5); each leaves its group. One bracket, one LAYOUT_CHANGED. Answers how many.
+function B:DockAll(ids)
+    local todo = {}
+    for _, id in ipairs(ids) do
+        local s = B.Settings(id)
+        if s and s.docked == false then todo[#todo + 1] = id end
+    end
+    if #todo == 0 then return 0 end
+    bracket("dock", function() for _, id in ipairs(todo) do B:Dock(id) end end)
+    return #todo
 end
 
 function B:ToggleCollapsed(id)
@@ -552,7 +583,9 @@ function B.UpdateSpeedWatch()
     if s.docked ~= false then
         onScreen = NS.MainWindow and NS.MainWindow.IsShown() and not s.collapsed
     else
-        local f = NS.Detached and NS.Detached.Frame("stats_utility")
+        -- Its own frame, or its merged window's (round 5).
+        local gid = NS.Groups and NS.Groups.Of("stats_utility")
+        local f = gid and NS.Groups.Frame(gid) or (NS.Detached and NS.Detached.Frame("stats_utility"))
         onScreen = f and f:IsShown() and not s.collapsed
     end
     NS.StatData:WatchSpeed(onScreen and true or false)

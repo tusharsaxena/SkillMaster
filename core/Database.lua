@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 5
+NS.SCHEMA_VERSION = 6
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -59,6 +59,21 @@ local function journalFilterToBlock(_, profile)
     j.filter = LEGACY_FILTER[j.filter] or j.filter
 end
 
+--- 5 -> 6 (owner feedback round 5, R5-6): merged detached windows, `layout.groups` (a new key with
+--- its own default {}). Nothing carries over; a stored `layout.groups` that is not a table goes (the
+--- default answers), and a stored one is normalized against the profile's own blocks: a member that
+--- is no detached block of this profile, a block in two groups, an empty column and a group of fewer
+--- than two blocks go (modules/Groups.lua's NS.Groups.Model.Normalize, loaded by the time it runs).
+local function groupsNormalized(_, profile)
+    local layout = type(profile) == "table" and profile.layout
+    if type(layout) ~= "table" or layout.groups == nil then return end
+    if type(layout.groups) ~= "table" then layout.groups = nil return end
+    local blocks = type(layout.blocks) == "table" and layout.blocks or {}
+    NS.Groups.Model.Normalize(layout.groups, function(id)
+        return NS.BlockDefs[id] ~= nil and type(blocks[id]) == "table" and blocks[id].docked == false
+    end)
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile.
 local STEPS = {
@@ -67,6 +82,7 @@ local STEPS = {
     { to = 3, run = oneBrokerFeed, perProfile = true },
     { to = 4, run = retiredBarKeys, perProfile = true },
     { to = 5, run = journalFilterToBlock, perProfile = true },
+    { to = 6, run = groupsNormalized, perProfile = true },
 }
 
 function NS:InitDB()

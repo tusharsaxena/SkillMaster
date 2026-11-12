@@ -791,6 +791,15 @@ L["The edge of a detached window. Not read while Use the skin's border is on."] 
 L["Use the skin's border"] = true
 L["Edge every detached window as the skin edges its windows. Border style, thickness and color are not read while this is on."] = true
 
+-- Merged detached windows (round 5, R5-6: modules/Groups.lua)
+L["Split from the group"] = true
+L["Unmerge all"] = true
+L["Dock in the main window"] = true
+L["Dock all in the main window"] = true
+L["Split this section from the group"] = true
+L["Dock every section in the main window"] = true
+L["Collapse or expand every section"] = true
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

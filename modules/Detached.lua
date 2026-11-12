@@ -10,7 +10,7 @@ local _, NS = ...
 -- cap are shown. An equipment change redraws it.
 --
 -- NS.Detached.Refresh(anchor) / .RefreshValues() / .StandDown() / .Frame(id) / .Rows(id) / .Render(id)
--- NS.Detached.Entries(id) -> the entries a detached frame draws
+-- NS.Detached.Entries(id) -> the entries a detached frame draws; .StorePoint(id, p) (a split's landing)
 -- NS.Detached.ApplyStyle(f) / .Style() / .TopHeight(f) -> the shared Detached windows style (R5-7)
 
 NS.Detached = {}
@@ -51,6 +51,16 @@ local function savePoint(f)
     local point, _, relPoint, x, y = f:GetPoint(1)
     if type(point) ~= "string" then return end
     settings(f.id).point = { point = point, relPoint = relPoint or point, x = x or 0, y = y or 0 }
+end
+
+--- Give block `id` the drop point `p` ({ point, relPoint, x, y } against UIParent): where a section
+--- split from a merged window, or a window unmerged, lands (round 5, R5-6; modules/Groups.lua). The
+--- point's other writer beside a drag's savePoint; this module stays its one owner.
+function D.StorePoint(id, p)
+    local s = settings(id)
+    if not (s and type(p) == "table" and type(p.point) == "string") then return false end
+    s.point = { point = p.point, relPoint = p.relPoint or p.point, x = tonumber(p.x) or 0, y = tonumber(p.y) or 0 }
+    return true
 end
 
 local function applyPoint(f)
@@ -333,12 +343,15 @@ end
 --- Show every detached block's frame and hide every docked block's. Nothing shows while stood down.
 --- `anchor == false` (a data repaint) leaves a frame already on screen where it is, so a frame the
 --- player is dragging is not re-anchored; a layout change, a first show and the default re-anchor.
+--- A block in a merged window (NS.Groups, round 5) draws there, its own frame hidden; the merged
+--- windows refresh with the same `anchor`.
 function D.Refresh(anchor)
     local down = NS.IsStoodDown and NS.IsStoodDown()
+    local G = NS.Groups
     for _, id in ipairs(NS.BLOCKS) do
         local s = settings(id)
         local f = frames[id]
-        if s.docked == false and not down then
+        if s.docked == false and not down and not (G and G.Of(id)) then
             f = f or build(id)
             if anchor ~= false or not f:IsShown() then applyPoint(f) end
             f:Show()
@@ -348,6 +361,7 @@ function D.Refresh(anchor)
             f:Hide()
         end
     end
+    if G then G.Refresh(anchor) end
     NS.Blocks.UpdateSpeedWatch()
     if NS.SecureOverlay then NS.SecureOverlay:Sync() end
 end
@@ -361,6 +375,7 @@ function D.RefreshValues()
             NS.Rows.RefreshValues(f.rowPool, lookup)
         end
     end
+    if NS.Groups then NS.Groups.RefreshValues() end
 end
 
 --- Stand-down: every detached frame hidden, its rows parked.
@@ -369,6 +384,7 @@ function D.StandDown()
         NS.Rows.ReleaseAll(f.rowPool)
         f:Hide()
     end
+    if NS.Groups then NS.Groups.StandDown() end
 end
 
 -- The equipped marker and the compact filter follow the equipment: a shown weapon block redraws.
@@ -377,6 +393,13 @@ local function onEquipmentChanged()
     local f = frames.weapon
     if f and f:IsShown() then
         D.Render("weapon")
+        if NS.SecureOverlay then NS.SecureOverlay:Sync() end
+    end
+    -- Or its merged window's section (round 5).
+    local gid = NS.Groups and NS.Groups.Of("weapon")
+    local g = gid and NS.Groups.Frame(gid)
+    if g and g:IsShown() then
+        NS.Groups.Render(gid)
         if NS.SecureOverlay then NS.SecureOverlay:Sync() end
     end
 end

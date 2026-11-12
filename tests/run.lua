@@ -78,6 +78,18 @@ Kit.skinSwitch = {
             NS.db.profile.layout.blocks.other.docked = true
             NS.Detached.Refresh()
         end },
+        -- A merged window (round 5, R5-6): two detached blocks as one.
+        { name = "a merged window", build = function()
+            local b = NS.db.profile.layout.blocks
+            b.other.docked, b.secondary.docked = false, false
+            NS.Detached.Refresh()
+            return NS.Groups.Frame(NS.Groups.Merge("secondary", "other", "bottom"))
+        end, reset = function()
+            local b = NS.db.profile.layout.blocks
+            b.other.docked, b.secondary.docked = true, true
+            NS.db.profile.layout.groups = {}
+            NS.Detached.Refresh()
+        end },
         { name = "the journal", build = function()
             NS.Journal.Show()
             return NS.Journal.Frame()
@@ -154,6 +166,7 @@ Kit.run{
         "test_round3",
         "test_round5",
         "test_round5_style",
+        "test_round5_groups",
         "test_blocks",
         "test_interact",
         "test_sessionlog",

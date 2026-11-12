@@ -48,6 +48,10 @@ NS.defaults = {
                 borderFromSkin      = true,
                 titleBand           = "always",
             },
+            -- Merged detached windows (round 5, R5-6; modules/Groups.lua, their one owner; named
+            -- non-setting state, no row sets it): [gid] = { point = {...} | false, columns = { { id,
+            -- ... }, ... } }, each column a list of detached block ids, top to bottom.
+            groups = {},
             -- sort: the block's row order (modules/Blocks.lua B.SORTS; owner feedback round 3).
             blocks = {
                 primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },

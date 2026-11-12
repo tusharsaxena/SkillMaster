@@ -258,6 +258,12 @@ local function wanted()
         local f = D.Frame(id)
         if f and f:IsShown() and not moving[f] then scan(D.Rows(id), f, nil) end
     end
+    -- The merged windows (round 5, R5-6): their sections' rows.
+    local G = NS.Groups
+    for _, gid in ipairs(G and G.Shown() or {}) do
+        local f = G.Frame(gid)
+        if not moving[f] then scan(G.Rows(gid), f, nil) end
+    end
     return out
 end
 
