@@ -63,8 +63,13 @@ local function registerLabel()
             end
             self.label:SetPoint("RIGHT", self.frame, "RIGHT", -4, 0)
         end,
+        -- No color: the skin's body text (a token, never a literal: the skin-values gate).
         SetColor = function(self, r, g, b)
-            self.label:SetTextColor(r or 1, g or 1, b or 1)
+            if r then
+                self.label:SetTextColor(r, g or r, b or r)
+            else
+                NS.Skin.Text(self.label, "body")
+            end
             self.image:SetDesaturated(r ~= nil)
         end,
     }
