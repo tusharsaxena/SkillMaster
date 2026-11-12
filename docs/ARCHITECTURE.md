@@ -19,7 +19,8 @@ professions are a different system, so the addon's core has nothing to show ther
 The build (TOC `0.1.0` until the release bump; the README's Version History carries the 1.0.0
 row) holds the whole v1 design: the Ace3 substrate and one LibKa0s setup file per major, each with
 its degradation stub; the data layer (skills, bonuses, stats, trainers, helpers); the display (the
-bar widget, the blocks and rows in one or two columns, the detached frames, the crafting overlays,
+bar widget, the blocks and rows in one or two columns, the detached frames and the merged windows
+(round 5), the crafting overlays,
 the row tooltip, the trainer popup and waypoints); the broker feed, the alerts, the session log,
 the alt overview and the Journal; the settings pages for every display setting; test mode's sample
 character (`modules/Preview.lua` over `defaults/Preview_Forever.lua`) and the simulator
@@ -42,7 +43,8 @@ wrapped at load by the simulator's seam (`core/SimSetup.lua`);
 `defaults/Profile.lua` is the defaults tree and `defaults/*_Forever.lua` the data tables (the skill
 catalog, the class weapon lists, trainers, ranks, gathering, fishing, racials, stat definitions);
 `modules/` holds the display (the bar widget `NS.Bar`, the title-bar controls `NS.Chrome`, the
-blocks `NS.Blocks`, the rows `NS.Rows`, the detached frames, the main window, the secure crafting
+blocks `NS.Blocks`, the rows `NS.Rows`, the detached frames, the merged windows `NS.Groups`, the
+main window, the secure crafting
 overlays, the click map `NS.Interact`, the row tooltip, the trainer popup and `NS.Waypoints`), the
 `/sm probe` report, the skills model (`SkillData`), the bonus breakdown (`Bonuses`), the stats
 model (`StatData`), the trainer lookups (`Trainers`), the skill helpers (`NS.SkillHelpers`,
@@ -88,8 +90,9 @@ grip's release); `char.log` is `modules/SessionLog.lua`'s and `global.characters
 is the same kind: its one owner is `modules/Alerts.lua`, whose toast descriptor's `setPosition` (a
 test-mode drag, or the toast's `ResetPosition`) is its only writer.
 
-`profile.layout.blocks[id].point` (T3.2) is named non-setting state: its one writer is `savePoint`
-in `modules/Detached.lua` (a detached frame's `OnDragStop`). `docked`, `order` and `collapsed` are
+`profile.layout.blocks[id].point` (T3.2) is named non-setting state, owned by `modules/Detached.lua`:
+its writers are `savePoint` (a detached frame's `OnDragStop`) and `D.StorePoint` (where a section
+split from a merged window, or a window unmerged, lands; called by `modules/Groups.lua`). `docked`, `order` and `collapsed` are
 settings like any other, with schema rows on the Layout page (T5.1), and every actor writes them
 through `NS.SetByPath` (architecture-§5): the block header and the detached frame's buttons
 (`NS.Blocks:Detach` / `:Dock` / `:SetCollapsed`), the Block order drag list (`:Move`, every changed
@@ -112,6 +115,19 @@ gradient and art and under the band), the border (the skin's edge while `borderF
 band (`noTopBar` and the frame's `bandParts` hidden for Never; for On hover a 0.1 s `OnUpdate` poll of
 `IsMouseOver` toggles both). `S.Shell` is re-called only when its opts change, and the skin's own
 repaint replays the recorded ones. A merged group's frame takes the same call.
+
+`profile.layout.groups` (round 5, R5-6) is named non-setting state: the merged detached windows, each
+`[gid] = { point, columns = { { id, ... }, ... } }`, membership derived from the columns. Its one owner
+is `modules/Groups.lua` (`NS.Groups`): `Merge`, `Split`, `Unmerge`, `Leave` (called from
+`NS.Blocks.StoreDocked`, so a block docked by any path leaves its group), the band drag's
+`savePoint`, and the normalization every read runs (`NS.Groups.Model.Normalize`: a member no longer
+detached, a repeat, an empty column and a group of fewer than two blocks go). The pure model
+(`NS.Groups.Model`) works on plain tables and is what the headless suite and the schemaVersion 6
+step drive. A grouped block's own frame hides and its rows draw in the merged window; its own
+`point` is kept for when it leaves. Merges, splits and unmerges wait out combat on
+`SecureOverlay:AfterCombat` as a dock does; Collapse all and Dock all write each block through the
+seam inside one bulk bracket (`NS.Blocks:SetCollapsedFor`, `:DockAll`). The merged window takes the
+Detached windows style through `NS.Detached.ApplyStyle`.
 
 `char.pinned`, the skill the broker's `{pinned}` shows, is named non-setting state: its one writer
 is the row menu's Pin (`I.MenuRows` in `modules/Interact.lua`), disabled while test mode or a
@@ -161,7 +177,7 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | `UNIT_INVENTORY_CHANGED`, `UNIT_AURA` | `NS.UnitEvents` (`core/UnitEventsSetup.lua`), `RegisterUnitEvent` for `"player"` on its one frame, stood up from `NS.RegisterRuntime` | `addon:OnBonusesUnitChanged`: player only, debounced `Bonuses.Refresh` (0.2 s), which re-reads only the part the event touched (an aura change never re-reads the 19 item tooltips); a 1 s ticker while a temp bonus naming a skill is live | gear, lures and buffs change the breakdown |
 | `UNIT_STATS`, `UNIT_ATTACK_POWER`, `UNIT_RANGED_ATTACK_POWER`, `UNIT_RESISTANCES`, `UNIT_DAMAGE` | `NS.UnitEvents`, for `"player"` (recorded by `modules/StatData.lua` at load) | `StatData:Request`: one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
 | `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
-| `PLAYER_EQUIPMENT_CHANGED` | `modules/Detached.lua` at load, on its own bus target | `onEquipmentChanged`: re-render the detached weapon block and re-sync the overlays while it is shown | a weapon swap changes the weapon block's equipped-only list |
+| `PLAYER_EQUIPMENT_CHANGED` | `modules/Detached.lua` at load, on its own bus target | `onEquipmentChanged`: re-render the detached weapon block (or the merged window it is a section of) and re-sync the overlays while it is shown | a weapon swap changes the weapon block's equipped-only list |
 | `PLAYER_LOGOUT` | `modules/Alts.lua` at load, on its own bus target | `Alts:Snapshot` | the last snapshot of the session |
 
 The bus subscribers on their own targets: `modules/SessionLog.lua` hears `SKILL_UP` (one log entry,
@@ -201,8 +217,10 @@ the rows, the window and the detached frames hide, move and re-lay freely in com
 creation, attribute, anchor, strata, level, show and hide of an overlay happens in `Sync`, which in
 combat only marks itself dirty; `PLAYER_REGEN_DISABLED` (lockdown not yet on,
 events-frames-taint-§2) disarms every overlay so none stays mouse-live in combat, and
-`PLAYER_REGEN_ENABLED` replays the combat queue (`SecureOverlay:AfterCombat`: dock, detach and
-collapse wait there, Review Focus 3) and re-syncs. A mark click in combat reaches the plain mark
+`PLAYER_REGEN_ENABLED` replays the combat queue (`SecureOverlay:AfterCombat`: dock, detach,
+collapse, and a merge, split or unmerge of merged windows wait there, Review Focus 3) and re-syncs.
+The overlays scan the merged windows' rows too and follow each merged window (`SO:Follow`, and
+`SetMoving` while its band drags it). A mark click in combat reaches the plain mark
 and prints one line (a profession, or the character panel). Shift- and right-clicks pass through the overlay (`PostClick`) to the row's
 handlers. The broker feed (`modules/Broker.lua`, T4.1) is never secure: its tooltip rows are
 plain buttons parented to the tooltip frame (its own, or GameTooltip with the skin off) that open windows (the main window, the character frame), and

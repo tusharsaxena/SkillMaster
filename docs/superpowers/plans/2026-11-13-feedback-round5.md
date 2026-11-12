@@ -58,3 +58,4 @@ Milestones: M1 = R5-1..R5-5 (small fixes), M2 = R5-7, M3 = R5-6.
 | R5-2 | done | a97ba33 |
 | R5-1 | done | 20beab6 |
 | R5-7 | done | da2299c |
+| R5-6 | in progress: R5-6a (model, persistence, merged window, split, menu) done; R5-6b (drag to merge, drag out) next | 9fec1a3 |

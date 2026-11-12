@@ -137,6 +137,16 @@ the checks below that cover each item:
   a window: its band returns and the window drags by it; point away: gone. Never: no band, the rows
   move up, a thin strip at the top still drags the window. Detached block strata sits on this tab.
   `/sm skin` to another skin: every pick above survives the repaint.
+- **SM-DISP-26** (round 5, R5-6: the merged window; needs R5-6b's drag to merge in game) Detach
+  Primary Professions and Secondary Skills and drag Secondary onto Primary's bottom edge: one window
+  titled `Primary · Secondary`, each section under its own sub-header (chevron, title, sort mark, split mark); the band's two marks collapse / expand both
+  sections and dock both. Right-click a sub-header: Split from the group, Unmerge all, Dock in the main
+  window, Dock all in the main window; on the band the two section rows are grayed. The split mark
+  pops the section out beside the window, and the window left with one section is a plain detached
+  window again. Drag the band: the window moves and comes back there after `/reload`; Lock frame on:
+  it stays. Hover a crafting profession's mark in the merged window and click: the profession opens.
+  In combat a split waits and runs when combat ends. Layout > Detached windows: opacity and border
+  reach the merged window too.
 - **SM-BRK-1** (round 3) With nothing pinned (a fresh character, or right-click a pinned row > Pin to
   the broker feed again to unpin), the feed reads `Professions and Skills`. Right-click a row in the
   LDB tooltip: the row menu (pin, waypoint, trainers, Hide in this tooltip); Hide removes it from the

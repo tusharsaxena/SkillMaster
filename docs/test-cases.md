@@ -346,6 +346,43 @@ Total.
 - round5 test mode: ending it takes the toasts down and puts the windows back as they were
 - round5 test mode: combat ends it and its toasts with it; nothing live is written
 
+### test_round5_style.lua (9)
+
+- round5 detached style: every row is on the Layout page's Detached windows tab, the strata row moved there
+- round5 detached style: the companions start on the skin, in the composer and in the defaults
+- round5 detached style: Window scale multiplies the block's own scale
+- round5 detached style: Window opacity reaches the open window
+- round5 detached style: the background follows the skin until its companion is off, then the swatch
+- round5 detached style: the border is the skin's, the window's own, or none
+- round5 detached style: Title band Never hides the band and keeps a drag strip
+- round5 detached style: Title band On hover shows the band while the pointer is over the window
+- round5 detached style: a skin switch keeps the style
+
+### test_round5_groups.lua (22)
+
+- round5 groups model: two lone windows merged on a side make a group, left and right as columns
+- round5 groups model: top and bottom stack into the target's column
+- round5 groups model: a dragged group merges whole, its columns kept beside, stacked above or below
+- round5 groups model: a window is never merged into itself, and an unknown side is refused
+- round5 groups model: a section moves within its own group, and a split group of one dissolves
+- round5 groups model: Normalize drops refused, repeated and malformed members, empty columns and groups
+- round5 groups: a merge draws one window, the sections' own frames hidden, the title their short names
+- round5 groups: left and right merges make columns, each the detached width, the header spanning them
+- round5 groups: each sub-header carries a chevron, the title, the sort mark and the split mark
+- round5 groups: the split mark pops the section out beside the group, and a group of one dissolves
+- round5 groups: a split at a drop point lands there; a three-section group stays a group
+- round5 groups: the menu splits, unmerges and docks, from a sub-header or the band
+- round5 groups: a right-click on a sub-header or the band opens the menu
+- round5 groups: a block docked by any path leaves its group
+- round5 groups: Collapse all collapses every section, then expands them; Dock all docks every one
+- round5 groups: a merge, a split and an unmerge in combat wait for its end
+- round5 groups: a hovered crafting row in a merged window gets its overlay, over the merged window
+- round5 groups: the merged window takes the Detached windows style
+- round5 groups: the band drags the window and its drop is the group's point; locked, it stays
+- round5 groups: a merge on the left keeps the target where it stood
+- round5 groups: schemaVersion 6 normalizes a stored layout.groups and drops a malformed one
+- round5 groups: the diagnostics' layout section names each group and each block's
+
 ### test_blocks.lua (10)
 
 - blocks: the eight blocks, four skill categories then four stat groups
@@ -693,13 +730,15 @@ Total.
 - skin values: no typed value outside the kit's categories and the host's rows
 - skin values: the check is falsifiable, a planted value of each shape is reported
 
-### test_skin_switch.lua (17)
+### test_skin_switch.lua (19)
 
 - skin switch: the check is falsifiable, a surface that redraws a literal is reported
 - skin switch: the main window changes
 - skin switch: the main window changes with the Scope ignored
 - skin switch: a detached block changes
 - skin switch: a detached block changes with the Scope ignored
+- skin switch: a merged window changes
+- skin switch: a merged window changes with the Scope ignored
 - skin switch: the journal changes
 - skin switch: the journal changes with the Scope ignored
 - skin switch: the trainer popup changes
@@ -751,6 +790,8 @@ Total.
 | test_round2_icons.lua | 11 |
 | test_round3.lua | 10 |
 | test_round5.lua | 10 |
+| test_round5_style.lua | 9 |
+| test_round5_groups.lua | 22 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -778,7 +819,7 @@ Total.
 | test_layout_cap.lua | 13 |
 | test_lizard_sighted.lua | 8 |
 | test_skin_values.lua | 3 |
-| test_skin_switch.lua | 17 |
+| test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **539** |
+| **Total** | **572** |

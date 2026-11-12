@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (5)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (6)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "PvP-Traxex Silentshot" (forever-quirks-§4);
@@ -53,6 +53,10 @@ SkillMasterDB
                       point = false,    -- point: drag-only, written only by modules/Detached.lua
                       sort = "name" }   -- "name" | "value" | "valueAsc" | "progress" (round 3)
       blocks.weapon.belowCapOnly = false   -- the detached compact preset's filter (M5 polish)
+      groups = {}                -- merged detached windows (round 5, R5-6), written only by
+                                 -- modules/Groups.lua: [gid] = { point = { point, relPoint, x, y }
+                                 -- | false, columns = { { id, ... }, ... } }; a member is a
+                                 -- detached block, in one group at most; two or more per group
     }
     icons = {                    -- Bars > Icons (feedback round 2): the rows' in-game icons
       show = true, size = 16, zoom = 7,   -- zoom: the % cropped from each side of the art
@@ -139,7 +143,10 @@ writers: `profile.window.point`, owned by `modules/MainWindow.lua` (`savePoint` 
 `modules/Journal.lua` (`savePoint` on drag stop and `J.ResetPosition`; `saveSize` on the resize
 grip's release); `global.characters`, owned by `modules/Alts.lua` (`Snapshot`, `Forget`);
 `char.log`, owned by `modules/SessionLog.lua` (`Add`, `Clear`); `profile.alerts.point`, owned by
-`modules/Alerts.lua` (the toast's `setPosition`); `char.pinned`, owned by `modules/Interact.lua`
+`modules/Alerts.lua` (the toast's `setPosition`); `profile.layout.blocks.<id>.point`, owned by
+`modules/Detached.lua` (`savePoint` on drag stop, `StorePoint` for a section split or unmerged from a
+merged window); `profile.layout.groups`, owned by `modules/Groups.lua` (`Merge`, `Split`, `Unmerge`,
+`Leave`, the band drag's `savePoint`, the normalization on read); `char.pinned`, owned by `modules/Interact.lua`
 (the row menu's Pin, refused while test mode or a simulation runs); `global.minimap.minimapPos`,
 LibDBIcon's own.
 
@@ -152,6 +159,7 @@ LibDBIcon's own.
 | 2 → 3 | `oneBrokerFeed`, per profile | one broker feed (FB-12): a stored `broker.templates.all` becomes `broker.template` (unless one other than the default is already stored), and `broker.templates` goes with the Professions, Weapons and Stats feeds' templates; a profile with no `broker.templates` passes through |
 | 3 → 4 | `retiredBarKeys`, per profile | drops a stored `bars.compactHeight` (a detached block takes the main window's heights) and `bars.ticks` (replaced by Rank tier colors); nothing carries over |
 | 4 → 5 | `journalFilterToBlock`, per profile | the Alts sub-tabs became the main window's blocks (FB-33): a stored `journal.filter` of `"professions"` becomes `"primary"`, `"weapons"` becomes `"weapon"`; `"other"` stays |
+| 5 → 6 | `groupsNormalized`, per profile | merged detached windows (round 5, R5-6), `layout.groups`, a new key defaulting to `{}`: nothing carries over; a stored `layout.groups` that is not a table goes, a stored one is normalized against the profile's own blocks (a member that is not a detached block there, a repeat, an empty column and a group of fewer than two go); a profile with none passes through |
 
 No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
 companion defaulting on, so no stored profile predates the companions and none has to be moved
