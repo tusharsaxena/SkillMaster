@@ -68,4 +68,5 @@ second workflow: M4 = R5-10, R5-14, R5-15; M5 = R5-11..R5-13.
 | R5-7 | done | da2299c |
 | R5-6 | done: R5-6a (model, persistence, merged window, split, menu) 9fec1a3 + 5217c4d; R5-6b (drag to merge, drag out: modules/GroupsSnap.lua) e445c62 + docs | e445c62 |
 | R5-review | done: the final review's fixes (a top merge's point, one combat queue entry per drop, the Journal's lock mark on a profile switch, the merged window's style pinned); inventory and badge | 4799b17 |
-| R5-10..R5-15 | queued (second workflow) | |
+| R5-10 | done: the weapon filter mark (All, Learned, Equipped, Below cap) on the header, band and sub-header; `layout.blocks.weapon.filter`; `ph:funnel` vendored | b75e7f1 |
+| R5-11..R5-15 | queued (second workflow) | |
