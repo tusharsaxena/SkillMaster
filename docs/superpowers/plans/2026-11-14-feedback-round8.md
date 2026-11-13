@@ -48,4 +48,7 @@ review of both branches and a fix pass.
 
 | Task | Status | Commit |
 |---|---|---|
-| R8-1..R8-5, L1 | queued (workflow) | |
+| R8-3 | done, gate green (704/704, luacheck 0/0); commit refused by the permission check, snapshot `r8-after-R8-3.patch` | uncommitted |
+| R8-4 | done, gate green (706/706, luacheck 0/0); not committed (commits refused), cumulative snapshot `r8-after-R8-4.patch` | uncommitted |
+| R8-2 | done, gate green (708/708, luacheck 0/0); not committed (commits refused), cumulative snapshot `r8-after-R8-2.patch` | uncommitted |
+| R8-1, R8-5, L1 | queued (workflow) | |

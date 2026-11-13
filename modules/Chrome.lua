@@ -9,6 +9,10 @@ local addonName, NS = ...
 -- NS.Chrome.SetIcon(button, icon, glyph, turned)                       swap the mark (lock / unlock);
 --                                                                      `turned` draws it rotated 180
 --                                                                      degrees (the attach mark)
+-- NS.Chrome.SetBadge(button, token)                                    the filled badge: a solid square
+--                                                                      in `token` behind the mark, the
+--                                                                      mark in the header's background
+--                                                                      (nil takes it off; round 8, R8-2)
 -- NS.Chrome.Snap(texture)                                              snap art to the pixel grid
 -- NS.Chrome.MakeResizable(frame, spec) -> grip                         the one resize helper
 -- NS.Chrome.TooltipFontSize(tip, size, first) / .RestoreTooltipFonts(tip)   a tooltip's lines at a
@@ -34,6 +38,12 @@ C.INK = {   -- [mark] = { left, top, right, bottom } in the art's 64 px square
     ["ph:sort-descending"] = { 8, 8, 56, 56 }, ["ph:funnel"] = { 6, 10, 58, 58 },
 }
 local INK_SQUARE = 64
+
+-- The filled badge (owner feedback round 8, R8-2: an active filter, the mockup's option 1): a solid
+-- square in the mark's own rest color under the mark, the mark drawn on it in the window's background
+-- (`win.bg`, what shows through the header's translucent fill), inset so the square reads as the
+-- mark's footprint: BADGE_SIZE inside the C.SIZE control, the mark's longer side BADGE_INK.
+C.BADGE_SIZE, C.BADGE_INK, C.BADGE_INK_TOKEN = 16, 10, "win.bg"
 
 -- ---------------------------------------------------------------------------------------------
 -- A tooltip's font size (the Tooltips page, owner feedback round 4). GameTooltip's line font strings
@@ -83,20 +93,34 @@ local function hideTip(self)
     if GameTooltip and GameTooltip:IsOwned(self) then GameTooltip:Hide() end
 end
 
-local function onEnter(self)
-    if self.icon then NS.Skin.Mark(self.icon, { token = "icon.hot" }) end
-    if self.glyph then NS.Skin.Text(self.glyph, "accent") end
-    showTip(self)
-end
-
---- The mark's tint at rest: the button's own token (C.SetRestToken), else the skin's icon tint.
+--- The mark's tint at rest: on a badge the header's background, else the button's own token
+--- (C.SetRestToken), else the skin's icon tint.
 local function rest(b)
+    if b.badgeToken then return { token = C.BADGE_INK_TOKEN } end
     return b.restToken and { token = b.restToken } or nil
 end
 
+--- Paint `b` hot (under the pointer) or at rest. A badged mark lights its square and keeps the mark
+--- dark on it, so it stays readable; any other mark lights itself.
+local function paint(b, hot)
+    if b.badgeToken and b.badge then
+        -- The square's fill read through the seam at each paint (a skin switch repaints every header).
+        local r, g, bl, a = NS.Skin.Color(hot and "icon.hot" or b.badgeToken)
+        if r then b.badge:SetColorTexture(r, g, bl, a or 1) end
+        if b.icon then NS.Skin.Mark(b.icon, rest(b)) end
+    elseif b.icon then
+        NS.Skin.Mark(b.icon, hot and { token = "icon.hot" } or rest(b))
+    end
+    if b.glyph then NS.Skin.Text(b.glyph, hot and "accent" or "muted") end
+end
+
+local function onEnter(self)
+    paint(self, true)
+    showTip(self)
+end
+
 local function onLeave(self)
-    if self.icon then NS.Skin.Mark(self.icon, rest(self)) end
-    if self.glyph then NS.Skin.Text(self.glyph, "muted") end
+    paint(self, false)
     hideTip(self)
 end
 
@@ -116,12 +140,12 @@ function C.Snap(tex)
 end
 
 --- A header mark's art (C.HeaderMark): `icon` cropped to its ink box (C.INK, the whole square for a
---- mark it does not list), its longer side C.INK_SIZE, turned 180 degrees with `turned`.
-local function fitInk(tex, icon, turned)
+--- mark it does not list), its longer side `size` (C.INK_SIZE), turned 180 degrees with `turned`.
+local function fitInk(tex, icon, turned, size)
     local box = C.INK[icon] or { 0, 0, INK_SQUARE, INK_SQUARE }
     local l, t, r, btm = box[1] / INK_SQUARE, box[2] / INK_SQUARE, box[3] / INK_SQUARE, box[4] / INK_SQUARE
     local w, h = r - l, btm - t
-    local scale = C.INK_SIZE / math.max(w, h)
+    local scale = (size or C.INK_SIZE) / math.max(w, h)
     tex:SetSize(w * scale, h * scale)
     if turned then tex:SetTexCoord(r, l, btm, t) else tex:SetTexCoord(l, r, t, btm) end
 end
@@ -138,8 +162,9 @@ function C.SetIcon(b, icon, glyph, turned)
             C.Snap(b.icon)
         end
         b.icon:SetTexture(path)
+        b.iconName, b.turned = icon, turned
         if b.fit then
-            fitInk(b.icon, icon, turned)
+            fitInk(b.icon, icon, turned, b.badgeToken and C.BADGE_INK or C.INK_SIZE)
         else
             b.icon:SetTexCoord(unpack(turned and C.TURNED or C.UPRIGHT))
         end
@@ -163,11 +188,30 @@ function C.SetRestToken(b, token)
     if b.icon then NS.Skin.Mark(b.icon, rest(b)) end
 end
 
+--- The filled badge on `b` (owner feedback round 8, R8-2): with `token`, a solid C.BADGE_SIZE square
+--- in that skin token under the mark, the mark refitted to C.BADGE_INK and drawn in the header's
+--- background (C.BADGE_INK_TOKEN); under the pointer the square is `icon.hot`. nil takes it off:
+--- the mark at its own size and rest tint again. A mark drawn as a glyph (no art) wears no badge.
+function C.SetBadge(b, token)
+    if not b.icon then token = nil end
+    b.badgeToken = token
+    if token and not b.badge then
+        b.badge = b:CreateTexture(nil, "ARTWORK")
+        b.badge:SetPoint("CENTER", b, "CENTER", 0, 0)
+        b.badge:SetSize(C.BADGE_SIZE, C.BADGE_SIZE)
+        C.Snap(b.badge)
+    end
+    if b.badge then b.badge:SetShown(token ~= nil) end
+    if b.icon and b.fit and b.iconName then
+        fitInk(b.icon, b.iconName, b.turned, token and C.BADGE_INK or C.INK_SIZE)
+    end
+    paint(b, false)
+end
+
 --- Mark `b` hot (`icon.hot`) or at rest, as the pointer over it would: for a mark that takes no
 --- mouse itself (a crafting row's hammer, under the row's secure overlay).
 function C.SetHot(b, hot)
-    if b.icon then NS.Skin.Mark(b.icon, hot and { token = "icon.hot" } or rest(b)) end
-    if b.glyph then NS.Skin.Text(b.glyph, hot and "accent" or "muted") end
+    paint(b, hot)
 end
 
 --- One square control: the catalog mark (or the glyph), the skin's tint at rest and hot under the

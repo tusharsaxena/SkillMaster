@@ -515,7 +515,7 @@ Total.
 - round7 filters: Primary and Secondary narrow to below cap or at cap with a rank to train; unlearned is All only
 - round7 filters: Other skills offers Learned and Below cap
 - round7 filters: a stat section's Non-zero leaves out 0 and 0% rows, an emptied one keeps its muted line
-- round7 filters: every window header carries the funnel, accent while it narrows, and its menu
+- round7 filters: every window header carries the funnel, the filled badge while it narrows, and its menu
 - round7 filters: a detached stat frame and a merged section carry the mark and follow the filter
 - round7 filters: both LDB tooltip styles honor every block's filter
 - round7 go icon: Open a row from defaults to The go icon, Main window style only
@@ -525,12 +525,14 @@ Total.
 - round7 go icon: in combat a hover arms nothing and the icon's click says why, as the window's
 - round7 go icon: a tooltip row's shift-click links it into chat
 
-### test_round8.lua (4)
+### test_round8.lua (6)
 
 - round8 header marks: a detached band's marks rest in the main window header's color
 - round8 header marks: a merged window's band and section sub-headers match the main window header
 - round8 ldb tooltip: its headers carry no sort or filter mark, on All or a narrowing filter
 - round8 ldb tooltip: the main window's headers keep their sort and filter marks
+- round8 filter badge: the window header's funnel on a solid square while it narrows, hover readable
+- round8 filter badge: a detached band and a merged sub-header wear the same badge
 
 ### test_blocks.lua (10)
 
@@ -945,7 +947,7 @@ Total.
 | test_round5_followups.lua | 27 |
 | test_round6.lua | 54 |
 | test_round7.lua | 25 |
-| test_round8.lua | 4 |
+| test_round8.lua | 6 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -976,4 +978,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **706** |
+| **Total** | **708** |

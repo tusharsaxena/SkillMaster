@@ -189,7 +189,7 @@ the checks below that cover each item:
   of its sort mark (every header has one since round 7, SM-DISP-51); its tooltip reads `Showing: All. Click to filter.` Click it:
   a menu under the mark, Show, then All (ticked), Learned, Equipped, Below cap. Learned: the
   not-learned weapons leave. Equipped: only the main hand, off hand and ranged weapons' skills stay,
-  and the funnel turns the accent color; swap the main-hand weapon for another type: the block follows
+  and the funnel wears the filled badge (SM-DISP-55); swap the main-hand weapon for another type: the block follows
   at once. Unequip the main hand with Equipped on and no Unarmed row: the header stays, with
   `No rows match this filter.` under it. Below cap: only learned skills under their cap. Click the
   mark again with the menu open: it closes. Detach the block: the band carries the funnel; merge it
@@ -283,8 +283,8 @@ the checks below that cover each item:
   carries the funnel left of its sort mark, in the title's color, its marks one size on one line.
   Primary Professions' funnel: Show, then All (ticked), Below cap, At cap (needs training). Below
   cap: only learned professions under their rank's cap. At cap: only learned professions at their
-  rank's cap with a higher rank to train (a profession at Artisan's top cap leaves); the funnel turns
-  the accent color. Unlearned professions show under All only. Secondary Skills the same. Other
+  rank's cap with a higher rank to train (a profession at Artisan's top cap leaves); the funnel wears
+  the filled badge (SM-DISP-55). Unlearned professions show under All only. Secondary Skills the same. Other
   skills: All, Learned, Below cap. Each stat section: All, Non-zero; Non-zero leaves out every row
   reading `0` or `0.0%` (Armor `0 (0.0%)` too); a section left with nothing keeps its header and
   `No rows match this filter.` Detach a stat block: its band carries the funnel; merge two detached
@@ -320,6 +320,15 @@ the checks below that cover each item:
   main window's headers, detached bands and merged sub-headers keep their sort and filter marks.
   Tooltip style Classic: the section titles carry no marks, as before, and follow the same sort and
   filter.
+- **SM-DISP-55** (round 8, R8-2: the filter badge) In the main window set Weapon Skills' filter to
+  Learned: its funnel now sits on a solid square in the title's color, the funnel drawn dark on it
+  (the window's background), the square no wider than the marks beside it and on their line; the
+  other headers' funnels on All stay plain. Hover the badge: the square turns the skin's hot color
+  with the funnel still readable on it, and the tooltip names the filter; move off: the title's color
+  again. Set it back to All: the plain funnel at its usual size. Detach the block, and merge two
+  detached blocks with a filter on one: the band's and the sub-header's funnels wear the same badge.
+  Switch skins with a filter on: the square follows the new title color and the funnel the new
+  background. `/reload`: the badge is still there.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

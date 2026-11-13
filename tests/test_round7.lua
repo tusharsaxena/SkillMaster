@@ -403,7 +403,7 @@ test("round7 filters: a stat section's Non-zero leaves out 0 and 0% rows, an emp
     end)
 end)
 
-test("round7 filters: every window header carries the funnel, accent while it narrows, and its menu", function()
+test("round7 filters: every window header carries the funnel, the filled badge while it narrows, and its menu", function()
     withR7(function()
         W7.Show()
         W7.Refresh(true)
@@ -424,7 +424,7 @@ test("round7 filters: every window header carries the funnel, accent while it na
         M.__fireTimers()
         assertEqual(NS.db.profile.layout.blocks.stats_utility.filter, "nonZero", "the pick is stored")
         for _, x in ipairs(W7.Headers()) do if x.id == "stats_utility" then h = x end end
-        assertEqual(h.filter.restToken, "text.accent", "the accent while it narrows")
+        assertEqual(h.filter.badgeToken, "text.heading", "the filled badge while it narrows (round 8, R8-2)")
         assertTrue(h.note:IsShown() and h.note:GetText() == NS.L["No rows match this filter."], "the emptied stat block's muted line")
         assertTrue(h.filter.tip:find(NS.L["Non-zero"], 1, true) ~= nil, "the tip names it: " .. tostring(h.filter.tip))
     end)
@@ -447,7 +447,7 @@ test("round7 filters: a detached stat frame and a merged section carry the mark 
         assertTrue(sh.filter:IsShown(), "the merged sub-header's funnel")
         setF("primary", "atCap")
         M.__fireTimers()
-        assertEqual(G7.Section(gid, "primary").header.filter.restToken, "text.accent")
+        assertEqual(G7.Section(gid, "primary").header.filter.badgeToken, "text.heading", "the filled badge (round 8, R8-2)")
     end)
 end)
 

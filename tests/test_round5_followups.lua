@@ -141,7 +141,7 @@ test("round5 filter: the weapon header's funnel opens a menu, the current filter
         assertEqual(keysOf(windowWeaponRows()), "staves", "the window redraws with the equipped weapon only")
         h = header("weapon")
         assertTrue(h.filter.tip:find(NS.L["Equipped"], 1, true) ~= nil, "the tip follows: " .. h.filter.tip)
-        assertEqual(h.filter.restToken, "text.accent", "a filter that narrows the rows draws the mark in the accent")
+        assertTrue(h.filter.badgeToken == "text.heading" and h.filter.badge:IsShown(), "a filter that narrows the rows draws the filled badge (round 8, R8-2)")
     end)
 end)
 

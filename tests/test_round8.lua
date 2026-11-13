@@ -1,6 +1,6 @@
 -- tests/test_round8.lua — the owner's round-8 feedback (2026-11-14): the header marks of a detached
 -- or merged window in the main window header's color (R8-3); the LDB tooltip's headers without
--- their sort and filter marks (R8-4).
+-- their sort and filter marks (R8-4); the active filter as a filled badge (R8-2).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -36,6 +36,12 @@ end
 local function tintOf(tex)
     local r, g, b = tex:GetVertexColor()
     return ("%.3f,%.3f,%.3f"):format(r or -1, g or -1, b or -1)
+end
+
+--- A color texture's fill (the mock keeps SetColorTexture's components).
+local function fillOf(tex)
+    local c = tex.__color or {}
+    return ("%.3f,%.3f,%.3f"):format(c[1] or -1, c[2] or -1, c[3] or -1)
 end
 
 -- ── R8-3: a detached or merged window's marks in the main window header's color ──────────────
@@ -155,5 +161,80 @@ test("round8 ldb tooltip: the main window's headers keep their sort and filter m
             assertTrue(h.sort:IsShown(), h.id .. ": the sort mark")
             assertTrue(h.filter:IsShown(), h.id .. ": the filter mark")
         end
+    end)
+end)
+
+-- ── R8-2: an active filter as the filled badge ────────────────────────────────────────────────
+
+local C8 = NS.Chrome
+
+local function longSide(tex)
+    local w, h = tex:GetSize()
+    return math.max(w or 0, h or 0)
+end
+
+--- `mark` (a filter mark) on All: the funnel alone in its rest color, at the header marks' size.
+local function assertPlain(mark, where)
+    assertTrue(not (mark.badge and mark.badge:IsShown()), where .. ": no badge on All")
+    assertEqual(tintOf(mark.icon), color(mark.baseToken), where .. ": the funnel in its rest color")
+    assertEqual(longSide(mark.icon), C8.INK_SIZE, where .. ": the header marks' size")
+end
+
+--- `mark` narrowing: a solid square in its rest color, the funnel on it in the header's background.
+local function assertBadge(mark, where)
+    assertTrue(mark.badge ~= nil and mark.badge:IsShown(), where .. ": the badge")
+    local w, h = mark.badge:GetSize()
+    assertEqual(w, C8.BADGE_SIZE, where .. ": the badge's width")
+    assertEqual(h, C8.BADGE_SIZE, where .. ": a square")
+    assertTrue(C8.BADGE_SIZE <= C8.SIZE, where .. ": inside the control, the other marks' footprint")
+    assertEqual(fillOf(mark.badge), color(mark.baseToken), where .. ": the square in the mark's rest color")
+    assertEqual(tintOf(mark.icon), color(C8.BADGE_INK_TOKEN), where .. ": the funnel in the header's background")
+    assertEqual(longSide(mark.icon), C8.BADGE_INK, where .. ": the funnel inset on the square")
+    assertEqual(mark.restToken, mark.baseToken, where .. ": no accent tint any more")
+    local badgeLayer, iconLayer = mark.badge:GetDrawLayer(), mark.icon:GetDrawLayer()
+    assertTrue(badgeLayer == "ARTWORK" and iconLayer == "OVERLAY", where .. ": the square under the funnel")
+    assertTrue(mark.tip:find(NS.L["Showing: %s. Click to filter."]:match("^[^%%]+"), 1, true) ~= nil, where .. ": the tip still names it")
+end
+
+test("round8 filter badge: the window header's funnel on a solid square while it narrows, hover readable", function()
+    withBlocks(function()
+        W8.Show()
+        W8.Refresh(true)
+        local id = W8.Headers()[1].id
+        assertPlain(header(id).filter, id)
+        assertTrue(NS.SetByPath("layout.blocks." .. id .. ".filter", B8.FiltersOf(id)[2]))
+        M.__fireTimers()
+        local mark = header(id).filter
+        assertBadge(mark, id)
+        -- Under the pointer the square goes hot and the funnel stays dark on it.
+        mark:__fire("OnEnter")
+        assertEqual(fillOf(mark.badge), color("icon.hot"), "the square hot under the pointer")
+        assertEqual(tintOf(mark.icon), color(C8.BADGE_INK_TOKEN), "the funnel still dark on it")
+        mark:__fire("OnLeave")
+        assertEqual(fillOf(mark.badge), color(mark.baseToken), "the square at rest again")
+        assertTrue(NS.SetByPath("layout.blocks." .. id .. ".filter", "all"))
+        M.__fireTimers()
+        assertPlain(header(id).filter, id .. " back on All")
+    end)
+end)
+
+test("round8 filter badge: a detached band and a merged sub-header wear the same badge", function()
+    withBlocks(function()
+        B8:Detach("stats_spell")
+        M.__fireTimers()
+        local f = D8.Frame("stats_spell")
+        assertPlain(f.filter, "detached")
+        assertTrue(NS.SetByPath("layout.blocks.stats_spell.filter", "nonZero"))
+        M.__fireTimers()
+        assertBadge(D8.Frame("stats_spell").filter, "detached")
+        NS.db.profile.layout.blocks.primary.docked = false
+        D8.Refresh()
+        local gid = G8.Merge("primary", "stats_spell", "bottom")
+        assertTrue(gid ~= nil, "merged")
+        assertPlain(G8.Section(gid, "primary").header.filter, "merged primary")
+        assertTrue(NS.SetByPath("layout.blocks.primary.filter", "belowCap"))
+        M.__fireTimers()
+        assertBadge(G8.Section(gid, "primary").header.filter, "merged primary")
+        assertBadge(G8.Section(gid, "stats_spell").header.filter, "merged stats_spell")
     end)
 end)

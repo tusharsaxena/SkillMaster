@@ -552,17 +552,19 @@ function B.FilterMenu(id, anchor)
     return B.menu
 end
 
---- The filter mark as block `id` has it: shown only on a block with a filter, the funnel in the
---- accent while it narrows the rows (else the surface's own rest tint, `mark.baseToken`: the title's
---- on a header, the skin's icon tint on a detached band), its tip naming the current filter.
+--- The filter mark as block `id` has it: shown only on a block with a filter, the funnel alone in
+--- the surface's rest tint (`mark.baseToken`, the title's on every header since round 8, R8-3) on
+--- All, and while it narrows the rows the filled badge (round 8, R8-2: a solid square in that same
+--- tint, the funnel dark on it; NS.Chrome.SetBadge); its tip naming the current filter.
 function B.PaintFilter(mark, id)
     if not mark then return end
     local on = B.FILTERABLE[id] == true
     mark:SetShown(on)
     if not on then return end
     local mode = B.FilterOf(id)
+    NS.Chrome.SetRestToken(mark, mark.baseToken)
+    NS.Chrome.SetBadge(mark, mode ~= "all" and (mark.baseToken or "icon.tint") or nil)
     NS.Chrome.SetIcon(mark, B.FILTER_ICON, "Y")
-    NS.Chrome.SetRestToken(mark, mode == "all" and mark.baseToken or "text.accent")
     mark.tip = L["Showing: %s. Click to filter."]:format(B.FILTER_LABEL[mode])
 end
 
