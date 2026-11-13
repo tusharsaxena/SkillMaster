@@ -221,11 +221,6 @@ local function sameColor(got, want, what)
     for i = 1, 3 do assertNear(got[i], want[i], 1e-6, what) end
 end
 
-test("round2 header: Weapon Skills carries no cap line beside its title", function()
-    assertEqual(NS.Blocks.Meta("weapon", { { entry = { learned = true, max = 120 } } }), "",
-        "no \"cap 120 (5 x level)\"")
-end)
-
 test("round2 header: the detach mark wears the title's color at rest and the hot color under the pointer", function()
     withWorld(function()
         local h = W.Headers()[1]

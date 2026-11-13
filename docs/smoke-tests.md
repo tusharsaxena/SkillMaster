@@ -263,6 +263,10 @@ the checks below that cover each item:
   arrow and set it again: the map pin with the game's own arrow. Trainers and Waypoints > Waypoint
   method offers Map pin and Chat only, no TomTom entry. A profile that had TomTom first or Map pin
   stored reads Map pin after the upgrade.
+- **SM-DISP-48** (round 7, R7-3) Expand Stats · Base & Combat in the main window, a detached frame, a
+  merged window and the Skill Master Stats feed's tooltip (both styles): no `vs highest primary` (or
+  any other muted text) beside any block title; the header holds the chevron, the title and its marks
+  only. Hover a stat row: its tooltip still has the `Scale: vs ...` line.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

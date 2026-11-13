@@ -1,6 +1,6 @@
 -- tests/test_round7.lua — the owner's round-7 feedback (2026-11-13): TomTom support removed, the
 -- native pin and Skill Master's own arrow always (R7-7); the icon border's row color off on a new
--- profile (R7-2).
+-- profile (R7-2); no header meta text (R7-3).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -140,4 +140,19 @@ test("round7 icon border: schemaVersion 12 keeps the row's color on every profil
     NS:RunMigrations()
     assertTrue(sv.profiles["R7-New"].icons == nil, "a fresh install starts with the row's color off")
     for _, k in ipairs({ "R7-Old", "R7-Off", "R7-Empty", "R7-New" }) do sv.profiles[k] = nil end
+end)
+
+-- ── R7-3: no header meta ─────────────────────────────────────────────────────────────────────
+
+test("round7 header meta: no block header carries a line beside its title, Base & Combat included", function()
+    assertTrue(NS.Blocks.Meta == nil, "no meta seam left")
+    assertTrue(rawget(NS.L, "vs highest primary") == nil, "the dead locale key went")
+    local pool = NS.Blocks.NewHeaderPool()
+    local h = NS.Blocks.AcquireHeader(pool, M.UIParent)
+    h:SetBlock("stats_base", false, true)
+    assertTrue(h.meta == nil, "no meta font string on the header")
+    assertEqual(h.title:GetText(), NS.BlockDefs.stats_base.title, "the title alone")
+    h:SetBlock("weapon", true, false)
+    assertTrue(h.collapsed and not h.docked, "SetBlock(id, collapsed, docked)")
+    NS.Blocks.ReleaseHeaders(pool)
 end)

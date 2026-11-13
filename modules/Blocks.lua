@@ -9,7 +9,7 @@ local addonName, NS = ...
 -- NS.Blocks:Detach(id) / :Dock(id) / :SetCollapsed(id, v) / :ToggleCollapsed(id) / :SetAllCollapsed(v) /
 --   :Move(from, to) / :SetOrder(id, n) / .Ordered() (every block, shown or not, in its order) /
 --   :SetCollapsedFor(ids, v) / :DockAll(ids) (a merged window's Collapse all and Dock all, round 5)
--- NS.Blocks.Docked() / .Undocked() / .Entries(id) / .Meta(id, entries) / .Settings(id)
+-- NS.Blocks.Docked() / .Undocked() / .Entries(id) / .Settings(id)
 -- NS.Blocks.SortOf(id) / :SetSort(id, mode) / .SortEntries(id, items, entryOf) / .SortMenu(id, anchor) /
 --   .PaintSort(mark, id): each block's row order
 --   (owner feedback round 3): "name" (the catalog's: skills by name, stats as defined), "value"
@@ -543,20 +543,10 @@ function B.Entries(id, skills, stats, isHidden)
     return B.SortEntries(id, statEntries(stats, d.filter, isHidden)), 0
 end
 
--- No counts beside a title (owner feedback round 4): only Base & Combat says what its bars scale to.
-local META = {
-    stats_base = function() return L["vs highest primary"] end,
-}
-
---- The muted line beside a block's title: Base & Combat's scale note, else nothing.
-function B.Meta(id, entries)
-    local fn = META[id]
-    if fn then return fn(entries) end
-    return ""
-end
-
 -- ---------------------------------------------------------------------------------------------
--- The block header: chevron, title, meta, detach (or dock) control
+-- The block header: chevron, title, detach (or dock) control. Nothing beside the title: no counts
+-- (owner feedback round 4) and no scale note (round 7, R7-3: Base & Combat's "vs highest primary"
+-- went; the row tooltip's Scale line still says what a stat bar scales to).
 -- ---------------------------------------------------------------------------------------------
 
 local Header = {}
@@ -566,11 +556,10 @@ local function paintHeaderBg(h)
     if c then h.bg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
 end
 
-function Header:SetBlock(id, meta, collapsed, docked)
+function Header:SetBlock(id, collapsed, docked)
     self.id, self.collapsed = id, collapsed and true or false
     paintHeaderBg(self)   -- every layout, so a skin switch reaches a pooled header
     self.title:SetText(NS.BlockDefs[id].title)
-    self.meta:SetText(meta or "")
     NS.Chrome.SetIcon(self.chevron, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")
     -- Detach is the external-link mark; dock (attach) is the same mark turned 180 degrees.
@@ -578,15 +567,13 @@ function Header:SetBlock(id, meta, collapsed, docked)
     self.detach.tip = docked and L["Detach this block into its own frame"] or L["Dock this block in the main window"]
     B.PaintSort(self.sort, id)
     self.docked = docked
-    -- The filter mark (round 5, R5-10), left of sort on the weapon block only; restore and the meta
-    -- line move left of whichever mark is the last one shown.
+    -- The filter mark (round 5, R5-10), left of sort on the weapon block only; restore moves left of
+    -- whichever mark is the last one shown.
     B.PaintFilter(self.filter, id)
     local left = self.filter:IsShown() and self.filter or self.sort
     self.restore:ClearAllPoints()
     self.restore:SetPoint("RIGHT", left, "LEFT", -4, 0)
     B.PaintRestore(self.restore, id)
-    self.meta:ClearAllPoints()
-    self.meta:SetPoint("RIGHT", self.restore:IsShown() and self.restore or left, "LEFT", -6, 0)
     self:SetNote(nil)
 end
 
@@ -665,9 +652,6 @@ local function buildHeader(parent)
     h.note:SetJustifyH("LEFT")
     NS.Skin.Text(h.note, "muted")
     h.note:Hide()
-    h.meta = h:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    h.meta:SetPoint("RIGHT", h.sort, "LEFT", -6, 0)
-    NS.Skin.Text(h.meta, "muted")
     h:SetScript("OnClick", onHeaderClick)
     return h
 end

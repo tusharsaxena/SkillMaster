@@ -327,8 +327,7 @@ local function plan(skills, stats)
         local note = NS.Blocks.FilterNote(entries, removed)
         if #entries > 0 or note then
             local collapsed = NS.Blocks.Settings(id).collapsed and true or false
-            out[#out + 1] = { id = id, entries = entries, collapsed = collapsed, meta = NS.Blocks.Meta(id, entries),
-                              note = note }
+            out[#out + 1] = { id = id, entries = entries, collapsed = collapsed, note = note }
             sig[#sig + 1] = id .. (collapsed and "-" or "+") .. NS.Blocks.SortOf(id) .. NS.Blocks.FilterOf(id)
                 .. (note and "!" or "")
             if not collapsed then
@@ -442,7 +441,7 @@ local function layBlock(b, host, y)
     h:ClearAllPoints()
     h:SetPoint("TOPLEFT", host, "TOPLEFT", 0, -y)
     h:SetPoint("TOPRIGHT", host, "TOPRIGHT", 0, -y)
-    h:SetBlock(b.id, b.meta, b.collapsed, true)
+    h:SetBlock(b.id, b.collapsed, true)
     headers[b.id] = h
     y = y + NS.Blocks.HEADER_H
     if not b.collapsed then

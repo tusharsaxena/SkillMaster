@@ -94,8 +94,6 @@ local function stillHeader(h)
     h.restore:Hide()
     h.sort:ClearAllPoints()
     h.sort:SetPoint("RIGHT", h, "RIGHT", -4, 0)
-    h.meta:ClearAllPoints()
-    h.meta:SetPoint("RIGHT", h.filter:IsShown() and h.filter or h.sort, "LEFT", -6, 0)
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -220,7 +218,7 @@ local function layBlock(id, skills, stats, y)
     h:SetPoint("TOPLEFT", host, "TOPLEFT", 0, -y)
     h:SetPoint("TOPRIGHT", host, "TOPRIGHT", 0, -y)
     local collapsed = NS.Blocks.Settings(id).collapsed and true or false
-    h:SetBlock(id, NS.Blocks.Meta(id, entries), collapsed, true)
+    h:SetBlock(id, collapsed, true)
     stillHeader(h)
     y = y + NS.Blocks.HEADER_H
     if not collapsed then

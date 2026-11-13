@@ -324,7 +324,6 @@ L["Stats \194\183 Base & Combat"] = true
 L["Stats \194\183 Spell & Regen"] = true
 L["Stats \194\183 Defense & Resists"] = true
 L["Stats \194\183 Utility"] = true
-L["vs highest primary"] = true
 L["Detach this block into its own frame"] = true
 L["Dock this block in the main window"] = true
 L["%s near cap: train %s"] = true
