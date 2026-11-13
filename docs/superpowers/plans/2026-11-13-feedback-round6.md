@@ -64,4 +64,4 @@ Milestones: M1 = R6-1..R6-8, M2 = R6-10, R6-9; M3 = R6-11 (after the mockup pick
 | R6-10 | done | 380c10a |
 | R6-9 | done | 8efb5df |
 | R6 review | done | ecef52c |
-| R6-11 | waiting on the owner's mockup pick | |
+| R6-11 | done (mockup A, the solid chevron) | 8141df5 |
