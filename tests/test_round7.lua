@@ -468,8 +468,7 @@ test("round7 filters: both LDB tooltip styles honor every block's filter", funct
             assertTrue(drawn.tailoring and not drawn.mining and not drawn.alchemy, "Main window style: Primary at cap")
             local primary
             for _, h in ipairs(BP.Headers()) do if h.id == "primary" then primary = h end end
-            assertTrue(primary.filter:IsShown(), "the panel header's funnel, a still state glyph")
-            assertEqual(primary.filter.restToken, "text.accent", "in the accent")
+            assertFalse(primary.filter:IsShown(), "no funnel on the panel's header (round 8, R8-4)")
             Br.OnEnter(M.UIParent, "stats")
             drawn = {}
             for _, row in ipairs(BP.Rows()) do if row.entry then drawn[row.entry.key] = true end end

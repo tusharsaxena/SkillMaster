@@ -3,7 +3,8 @@ local addonName, NS = ...
 -- R6-10; Tooltips > Tooltip style "Main window", the default for a new profile). An addon-owned
 -- frame at TOOLTIP strata that draws what the main window draws: the skin's window shell and title
 -- band, test mode's strip, the window's block headers (NS.Blocks, the chevron showing the block's
--- collapse in the window, its sort and filter marks) and the window's rows (NS.Rows: icon, name, the
+-- collapse in the window; no sort or filter mark since round 8, R8-4, the rows following the
+-- window's sort and filter all the same) and the window's rows (NS.Rows: icon, name, the
 -- shared bar with its text inside it, the action mark at its right end), at the window's row
 -- height, fonts and bar size, in a scrolled body (the wheel and the Journal's skin scroll bar) under
 -- the tooltip's own Width and Height (tooltips.ldb.width / .height, the window's default size to
@@ -152,8 +153,9 @@ end
 -- A header's marks that act in the window; here nothing on a header takes the pointer.
 local MARKS = { "chevron", "sort", "filter", "detach", "restore" }
 
---- A header as a state line: the chevron says the window's collapse, the sort and filter marks the
---- window's order and filter; detach and restore (actions only) are not drawn.
+--- A header as a state line: the chevron says the window's collapse. No other mark is drawn: detach
+--- and restore are actions only, and the sort and filter marks went in round 8 (R8-4; the owner's
+--- call), the rows following the window's order and filter all the same (NS.Broker.TooltipEntries).
 local function stillHeader(h)
     h:EnableMouse(false)
     for _, k in ipairs(MARKS) do
@@ -161,8 +163,8 @@ local function stillHeader(h)
     end
     h.detach:Hide()
     h.restore:Hide()
-    h.sort:ClearAllPoints()
-    h.sort:SetPoint("RIGHT", h, "RIGHT", -4, 0)
+    h.sort:Hide()
+    h.filter:Hide()
 end
 
 -- ---------------------------------------------------------------------------------------------

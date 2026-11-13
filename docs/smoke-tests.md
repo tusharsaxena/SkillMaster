@@ -210,12 +210,12 @@ the checks below that cover each item:
   distances, no error.
 - **SM-DISP-39** (round 6, R6-10) On a new profile, hover the broker feed: the tooltip looks like the
   main window, as wide as it, in the skin's shell with the title band (Skill Master · Professions and Skills since round 7, the session's
-  gains at the right): the window's block headers (chevron, title, the sort mark; the funnel on
-  Weapon Skills), its rows (icon, name, the bar with its text inside it, the action mark at the
+  gains at the right): the window's block headers (chevron and title; no sort or filter mark since
+  round 8, SM-DISP-54), its rows (icon, name, the bar with its text inside it, the action mark at the
   right end), at the window's row height and fonts, the footer hints under them. Collapse Weapon
   Skills in the window, hover again: its header shows the right chevron and no rows. Set the weapon
   filter to Learned and the sort to Value, highest first: the tooltip follows both. Click a header,
-  its chevron or its marks: nothing happens. Left-click a weapon row: Skills opens; right-click it:
+  or its chevron: nothing happens. Left-click a weapon row: Skills opens; right-click it:
   the row menu draws whole, over the tooltip, and the tooltip stays while the menu is open. Tooltips
   > LDB tooltip: Height 200, hover: the body scrolls with the wheel and its scroll bar. Tooltip
   style Classic: today's lines and mini bars, and the row menu over them is whole too. An existing
@@ -289,9 +289,9 @@ the checks below that cover each item:
   reading `0` or `0.0%` (Armor `0 (0.0%)` too); a section left with nothing keeps its header and
   `No rows match this filter.` Detach a stat block: its band carries the funnel; merge two detached
   blocks: both sub-headers carry it. Layout > Blocks > each block > Show rows offers the same set.
-  Hover each feed in both Tooltip styles: the sections follow their filters, and the Main window
-  style's headers show the funnel (accent while it narrows) without taking a click. `/reload` and a
-  profile switch: each filter is the profile's.
+  Hover each feed in both Tooltip styles: the sections follow their filters (the Main window style's
+  headers carry no funnel since round 8, SM-DISP-54). `/reload` and a profile switch: each filter is
+  the profile's.
 - **SM-DISP-52** (round 7, R7-6: open from the go icon) Tooltip style Main window, Tooltips > LDB
   tooltip > Open a row from at its default, The go icon (an existing profile too). Hover the Skill
   Master feed: the footer reads `Rows: click the go icon to open, shift-click to link, right-click for
@@ -313,6 +313,13 @@ the checks below that cover each item:
   blocks: the band's dock-all and collapse-all marks the same; each section sub-header's chevron,
   funnel, sort and split marks look as the main window header's chevron, funnel, sort and detach.
   Switch skins: every mark follows the new skin's title color.
+- **SM-DISP-54** (round 8, R8-4: the LDB tooltip's headers) Tooltip style Main window: hover either
+  feed: each block header shows its chevron and title only, no sort mark and no funnel, on All and
+  with a filter narrowing the rows. Set Weapon Skills' filter to Below cap and its sort to Value,
+  highest first, in the main window, then hover again: the tooltip's weapon rows follow both. The
+  main window's headers, detached bands and merged sub-headers keep their sort and filter marks.
+  Tooltip style Classic: the section titles carry no marks, as before, and follow the same sort and
+  filter.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

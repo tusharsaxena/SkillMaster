@@ -1,8 +1,9 @@
 -- tests/test_round8.lua — the owner's round-8 feedback (2026-11-14): the header marks of a detached
--- or merged window in the main window header's color (R8-3).
+-- or merged window in the main window header's color (R8-3); the LDB tooltip's headers without
+-- their sort and filter marks (R8-4).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
-local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
+local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
 
 local B8, W8, D8, G8 = NS.Blocks, NS.MainWindow, NS.Detached, NS.Groups
 
@@ -82,5 +83,77 @@ test("round8 header marks: a merged window's band and section sub-headers match 
             assertEqual(tintOf(sh[k].icon), tintOf(main[k].icon), k .. ": drawn so")
         end
         assertEqual(sh.split.restToken, "text.heading", "split, as the window header's detach")
+    end)
+end)
+
+-- ── R8-4: the LDB tooltip's headers carry no sort or filter mark ─────────────────────────────
+
+local Br, BP = NS.Broker, NS.BrokerPanel
+
+local function tipSkill(key, name, category, rank, max)
+    return { key = key, name = name, category = category, rank = rank, max = max, modifier = 0,
+             tempPoints = 0, learned = true }
+end
+
+--- The feed's tooltip in the Main window style over a fixture, then everything put back.
+local function withPanel(fn)
+    local savedSource, p = Br.source, NS.db.profile.tooltips.ldb
+    local savedStyle = p.style
+    local byKey = {
+        tailoring = tipSkill("tailoring", "Tailoring", "primary", 120, 150),
+        bows      = tipSkill("bows", "Bows", "weapon", 80, 110),
+        maces     = tipSkill("maces", "Maces", "weapon", 110, 110),
+    }
+    local v = { model = { byKey = byKey, order = { primary = { "tailoring" }, secondary = {},
+                weapon = { "bows", "maces" }, other = {} } },
+                statsModel = { base = {}, spell = {}, defense = {}, utility = {} }, statIndex = {},
+                gains = { total = 0, byKey = {} } }
+    Br.source = function() return v end
+    p.style = "window"
+    local ok, err = pcall(fn)
+    Br.HideTooltip()
+    Br.source, p.style = savedSource, savedStyle
+    for _, id in ipairs(NS.BLOCKS) do NS.db.profile.layout.blocks[id].filter = "all" end
+    W8.Hide()
+    M.__fireTimers()
+    if not ok then error(err, 0) end
+end
+
+local function panelHeader(id)
+    for _, h in ipairs(BP.Headers()) do if h.id == id then return h end end
+    return nil
+end
+
+test("round8 ldb tooltip: its headers carry no sort or filter mark, on All or a narrowing filter", function()
+    withPanel(function()
+        Br.OnEnter(M.UIParent)
+        assertTrue(#BP.Headers() > 0, "the panel drew its headers")
+        for _, h in ipairs(BP.Headers()) do
+            assertFalse(h.sort:IsShown(), h.id .. ": no sort mark")
+            assertFalse(h.filter:IsShown(), h.id .. ": no filter mark")
+            assertTrue(h.chevron:IsShown(), h.id .. ": the chevron still says the window's collapse")
+        end
+        assertTrue(NS.SetByPath("layout.blocks.weapon.filter", "belowCap"))
+        M.__fireTimers()
+        Br.OnEnter(M.UIParent)
+        local weapon = panelHeader("weapon")
+        assertFalse(weapon.filter:IsShown(), "no filter mark while the filter narrows")
+        assertFalse(weapon.sort:IsShown(), "and no sort mark")
+        local keys = {}
+        for _, row in ipairs(BP.Rows()) do if row.entry then keys[row.entry.key] = true end end
+        assertTrue(keys.bows and not keys.maces, "the rows still follow the window's filter")
+    end)
+end)
+
+test("round8 ldb tooltip: the main window's headers keep their sort and filter marks", function()
+    withPanel(function()
+        Br.OnEnter(M.UIParent)   -- the panel's headers first: its own pool, never the window's
+        W8.Show()
+        W8.Refresh(true)
+        assertTrue(#W8.Headers() > 0, "the window drew its headers")
+        for _, h in ipairs(W8.Headers()) do
+            assertTrue(h.sort:IsShown(), h.id .. ": the sort mark")
+            assertTrue(h.filter:IsShown(), h.id .. ": the filter mark")
+        end
     end)
 end)

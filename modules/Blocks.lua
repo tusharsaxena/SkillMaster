@@ -614,6 +614,7 @@ function Header:SetBlock(id, collapsed, docked)
     NS.Chrome.SetIcon(self.detach, "external-link", docked and "+" or "-", not docked)
     self.detach.tip = docked and L["Detach this block into its own frame"] or L["Dock this block in the main window"]
     B.PaintSort(self.sort, id)
+    self.sort:Show()   -- the LDB panel's headers hide it (round 8, R8-4); a header is a pool's own
     self.docked = docked
     -- The filter mark (round 5, R5-10; every block, round 7, R7-1), left of sort; restore moves left
     -- of whichever mark is the last one shown.
