@@ -41,6 +41,6 @@ Milestones: M1 = R7-7, R7-2, R7-3, R7-5, R7-4, R7-8; M2 = R7-1; M3 = R7-6.
 | R7-3 | done (uncommitted) | |
 | R7-5 | done (uncommitted) | |
 | R7-4 | done (uncommitted) | |
-| R7-8 | queued (workflow) | |
+| R7-8 | done (uncommitted) | |
 | R7-1 | queued (workflow) | |
 | R7-6 | queued (workflow) | |
