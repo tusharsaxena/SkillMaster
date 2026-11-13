@@ -764,7 +764,7 @@ test("round6 ldb look: a new profile draws the Main window style on its own TOOL
         assertEqual(BP.ContentWidth(), NS.MainWindow.ContentWidth(), "one Width draws the window's body")
         Br.OnEnter(M.UIParent)
         assertTrue(f:IsShown(), "it shows on the feed's hover")
-        assertEqual(f.title:GetText(), Br.LABEL)
+        assertEqual(f.title:GetText(), Br.FEEDS.skills.title, "the feed's tooltip title (R7-5)")
         assertEqual(f.footer:GetText(), Br.FooterText(), "the footer hints stay")
     end)
     withFeedTip("classic", function()
@@ -941,7 +941,7 @@ test("round6 stats feed: a second data source, its tooltip the four stat blocks,
     withFeedTip("window", function()
         obj.OnEnter(M.UIParent)
         assertEqual(Br.Feed(), "stats")
-        assertEqual(BP.Frame().title:GetText(), "Skill Master Stats")
+        assertEqual(BP.Frame().title:GetText(), "Skill Master \194\183 Stats")
         local ids = {}
         for _, h in ipairs(BP.Headers()) do ids[#ids + 1] = h.id end
         assertEqual(table.concat(ids, ","), "stats_base", "the stat blocks with rows, no skill block")
@@ -953,7 +953,7 @@ test("round6 stats feed: a second data source, its tooltip the four stat blocks,
         local tip, lines = statsTip()
         Br.FillTooltip(tip, "stats")
         local text = table.concat(lines, "\n")
-        assertTrue(text:find("Skill Master Stats", 1, true) ~= nil and text:find("Ranged Crit", 1, true) ~= nil, text)
+        assertTrue(text:find("Skill Master \194\183 Stats", 1, true) ~= nil and text:find("Ranged Crit", 1, true) ~= nil, text)
         assertTrue(text:find("Tailoring", 1, true) == nil, "Classic: no skills either")
         NS.db.profile.broker.tooltip.hiddenStats = { rangedCrit = true }   -- the Rows page's LDB tooltip eye
         tip, lines = statsTip()

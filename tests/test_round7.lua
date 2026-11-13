@@ -1,6 +1,6 @@
 -- tests/test_round7.lua — the owner's round-7 feedback (2026-11-13): TomTom support removed, the
 -- native pin and Skill Master's own arrow always (R7-7); the icon border's row color off on a new
--- profile (R7-2); no header meta text (R7-3).
+-- profile (R7-2); no header meta text (R7-3); the LDB tooltips' titles (R7-5).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -155,4 +155,32 @@ test("round7 header meta: no block header carries a line beside its title, Base 
     h:SetBlock("weapon", true, false)
     assertTrue(h.collapsed and not h.docked, "SetBlock(id, collapsed, docked)")
     NS.Blocks.ReleaseHeaders(pool)
+end)
+
+-- ── R7-5: the LDB tooltips' titles ───────────────────────────────────────────────────────────
+
+test("round7 titles: the two feeds' tooltips read Skill Master · Professions and Skills and Skill Master · Stats", function()
+    local Br = NS.Broker
+    local SKILLS, STATS = "Skill Master \194\183 Professions and Skills", "Skill Master \194\183 Stats"
+    assertEqual(Br.FEEDS.skills.title, SKILLS)
+    assertEqual(Br.FEEDS.stats.title, STATS)
+    -- Both styles read B.Heading: the Main window style's panel title and the Classic tooltip's first line.
+    local lines = {}
+    local tip = M.CreateFrame("GameTooltip", "SkillMasterR7TitleTip", M.UIParent)
+    function tip:AddLine(s) lines[#lines + 1] = s end
+    function tip:AddDoubleLine(l, r) lines[#lines + 1] = l .. " " .. tostring(r) end
+    function tip:NumLines() return #lines end
+    Br.FillTooltip(tip, "skills")
+    assertTrue(lines[1]:find(SKILLS, 1, true) ~= nil, "Classic skills title: " .. tostring(lines[1]))
+    assertEqual((Br.Heading()), SKILLS, "the panel's title")
+    lines = {}
+    Br.FillTooltip(tip, "stats")
+    assertTrue(lines[1]:find(STATS, 1, true) ~= nil, "Classic stats title: " .. tostring(lines[1]))
+    assertEqual((Br.Heading()), STATS)
+    Br.FillTooltip(tip, "skills")
+    -- The LibDataBroker names and labels a display stores by are unchanged.
+    assertEqual(Br.NAME, "Skill Master")
+    assertEqual(Br.STATS_NAME, "Skill Master Stats")
+    assertEqual(Br.Object().label, "Skill Master")
+    assertEqual(Br.StatsObject().label, "Skill Master Stats")
 end)

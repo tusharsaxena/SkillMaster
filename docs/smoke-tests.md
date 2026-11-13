@@ -209,7 +209,7 @@ the checks below that cover each item:
   arrow (roughly equal: a straight line). Enter an instance (or a battleground) with the popup open: no
   distances, no error.
 - **SM-DISP-39** (round 6, R6-10) On a new profile, hover the broker feed: the tooltip looks like the
-  main window, as wide as it, in the skin's shell with the title band (Skill Master, the session's
+  main window, as wide as it, in the skin's shell with the title band (Skill Master · Professions and Skills since round 7, the session's
   gains at the right): the window's block headers (chevron, title, the sort mark; the funnel on
   Weapon Skills), its rows (icon, name, the bar with its text inside it, the action mark at the
   right end), at the window's row height and fonts, the footer hints under them. Collapse Weapon
@@ -267,6 +267,10 @@ the checks below that cover each item:
   merged window and the Skill Master Stats feed's tooltip (both styles): no `vs highest primary` (or
   any other muted text) beside any block title; the header holds the chevron, the title and its marks
   only. Hover a stat row: its tooltip still has the `Scale: vs ...` line.
+- **SM-DISP-49** (round 7, R7-5) Hover the Skill Master feed, then the Skill Master Stats feed, in each
+  Tooltip style: the titles read `Skill Master · Professions and Skills` and `Skill Master · Stats`
+  (a middle dot). The broker display still shows both feeds where you had placed them (their names
+  are unchanged) and their texts as before.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

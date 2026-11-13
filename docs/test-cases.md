@@ -497,7 +497,7 @@ Total.
 - round6 arrow review: a profile switch re-applies the shown arrow's scale and position
 - round6 arrow review: right-clicking test mode's sample over a real waypoint brings the real arrow back
 
-### test_round7.lua (8)
+### test_round7.lua (9)
 
 - round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Skill Master's arrow always
 - round7 no TomTom: the arrow off super-tracks the pin (the client's arrow)
@@ -507,6 +507,7 @@ Total.
 - round7 icon border: Use the row's color is off on a new profile, so the skin's icon border draws
 - round7 icon border: schemaVersion 12 keeps the row's color on every profile stored before
 - round7 header meta: no block header carries a line beside its title, Base & Combat included
+- round7 titles: the two feeds' tooltips read Skill Master · Professions and Skills and Skill Master · Stats
 
 ### test_blocks.lua (10)
 
@@ -920,7 +921,7 @@ Total.
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
 | test_round6.lua | 54 |
-| test_round7.lua | 8 |
+| test_round7.lua | 9 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -951,4 +952,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **685** |
+| **Total** | **686** |

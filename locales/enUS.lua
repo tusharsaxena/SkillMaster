@@ -831,6 +831,9 @@ L["Nothing to show in this tooltip."] = true
 -- ---- Round 6, R6-9: the Skill Master Stats feed (modules/Broker.lua, settings/Broker.lua) ----
 L["Skill Master Stats"] = true
 L["Stats feed sections"] = true
+-- Round 7, R7-5: the LDB tooltips' titles (modules/Broker.lua B.FEEDS)
+L["Skill Master \194\183 Professions and Skills"] = true
+L["Skill Master \194\183 Stats"] = true
 L["Draw this stat block in the Skill Master Stats feed's tooltip."] = true
 
 -- ---- Round 6, R6-11: Skill Master's waypoint arrow (modules/WaypointArrow.lua, settings/Trainers.lua) ----

@@ -70,10 +70,12 @@ B.STATS_LABEL = L["Skill Master Stats"]
 B.SECTIONS = { "primary", "secondary", "weapon", "other" }
 B.STAT_SECTIONS = { "stats_base", "stats_spell", "stats_defense", "stats_utility" }
 
--- The feeds: "skills" (the first, B.NAME) and "stats" (B.STATS_NAME).
+-- The feeds: "skills" (the first, B.NAME) and "stats" (B.STATS_NAME). `title` is the tooltip's
+-- (both styles; owner feedback round 7, R7-5): "Skill Master · Professions and Skills" and
+-- "Skill Master · Stats". The LibDataBroker names and labels stay (a display stores by name).
 B.FEEDS = {
-    skills = { label = B.LABEL, sections = B.SECTIONS },
-    stats  = { label = B.STATS_LABEL, sections = B.STAT_SECTIONS },
+    skills = { label = B.LABEL, title = L["Skill Master \194\183 Professions and Skills"], sections = B.SECTIONS },
+    stats  = { label = B.STATS_LABEL, title = L["Skill Master \194\183 Stats"], sections = B.STAT_SECTIONS },
 }
 local feed = "skills"   -- the feed whose tooltip shows now (B.OnEnter)
 
@@ -701,9 +703,9 @@ function B.ShownBlocks()
     return out
 end
 
---- The tooltip's title and its session gains line.
+--- The tooltip's title (the feed's, R7-5) and its session gains line.
 function B.Heading()
-    return B.FEEDS[feed].label, L["+%d this session"]:format(view().gains.total)
+    return B.FEEDS[feed].title, L["+%d this session"]:format(view().gains.total)
 end
 
 --- Fill `tip` (the feed's tooltip, or a stand-in) with the shown sections. Answers the clickable
