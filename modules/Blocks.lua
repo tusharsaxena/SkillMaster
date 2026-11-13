@@ -10,7 +10,8 @@ local addonName, NS = ...
 --   :Move(from, to) / :SetOrder(id, n) / .Ordered() (every block, shown or not, in its order) /
 --   :SetCollapsedFor(ids, v) / :DockAll(ids) (a merged window's Collapse all and Dock all, round 5)
 -- NS.Blocks.Docked() / .Undocked() / .Entries(id) / .Meta(id, entries) / .Settings(id)
--- NS.Blocks.SortOf(id) / :CycleSort(id) / .SortEntries(id, items, entryOf): each block's row order
+-- NS.Blocks.SortOf(id) / :SetSort(id, mode) / .SortEntries(id, items, entryOf) / .SortMenu(id, anchor) /
+--   .PaintSort(mark, id): each block's row order
 --   (owner feedback round 3): "name" (the catalog's: skills by name, stats as defined), "value"
 --   (high first), "valueAsc" (low first) or "progress" (nearest its max first); the LDB tooltip
 --   sorts its sections the same way.
@@ -139,14 +140,11 @@ local function seam(p, v)
     return set(p, v) == true and lastRan ~= false
 end
 
---- The next sort mode for block `id` (its header's sort mark): Default, Value high, Value low,
---- Progress, round again. Through the seam, so Layout > Blocks shows it.
-function B:CycleSort(id)
-    local cur, nextMode = B.SortOf(id), B.SORTS[1]
-    for i, m in ipairs(B.SORTS) do
-        if m == cur then nextMode = B.SORTS[i % #B.SORTS + 1] end
-    end
-    return seam(path(id, "sort"), nextMode)
+--- Give block `id` the sort order `mode` (its header's sort menu, round 6). Through the seam, so
+--- Layout > Blocks shows it.
+function B:SetSort(id, mode)
+    if not B.SORT_LABEL[mode] then return false end
+    return seam(path(id, "sort"), mode)
 end
 
 --- Give block `id` the row filter `mode` (its header's filter mark, round 5). Through the seam.
@@ -420,6 +418,34 @@ function B.SortEntries(id, items, entryOf)
     return items
 end
 
+--- The menu the sort mark opens (round 6, R6-5), the filter menu's shape: a title, then one radio
+--- row per order, the current one ticked.
+function B.SortMenuRows(id)
+    local rows = { { title = true, label = L["Sort rows by"] } }
+    for _, mode in ipairs(B.SORTS) do
+        rows[#rows + 1] = { value = mode, label = B.SORT_LABEL[mode], radio = true,
+            selected = function() return B.SortOf(id) == mode end,
+            onClick = function() B:SetSort(id, mode) end }
+    end
+    return rows
+end
+
+--- Open the sort menu on `anchor` (the mark); a second click on it closes the menu.
+function B.SortMenu(id, anchor)
+    if GameTooltip and GameTooltip:IsOwned(anchor) then GameTooltip:Hide() end
+    B.menu = NS.Widgets.ContextMenu(anchor, B.SortMenuRows(id), { owner = addonName })
+    return B.menu
+end
+
+--- The sort mark as block `id` has it: the order's icon, its tip naming the order. Shared by the
+--- window's header, a detached band and a merged window's sub-header.
+function B.PaintSort(mark, id)
+    if not mark then return end
+    local mode = B.SortOf(id)
+    NS.Chrome.SetIcon(mark, B.SORT_ICON[mode], "=")
+    mark.tip = L["Sorted: %s. Click to sort."]:format(B.SORT_LABEL[mode])
+end
+
 -- ---------------------------------------------------------------------------------------------
 -- Filtering (owner feedback round 5, R5-10): the Weapon Skills block's rows narrowed from its
 -- header's filter mark, a menu of B.FILTERS with the current one ticked
@@ -548,9 +574,7 @@ function Header:SetBlock(id, meta, collapsed, docked)
     -- Detach is the external-link mark; dock (attach) is the same mark turned 180 degrees.
     NS.Chrome.SetIcon(self.detach, "external-link", docked and "+" or "-", not docked)
     self.detach.tip = docked and L["Detach this block into its own frame"] or L["Dock this block in the main window"]
-    local mode = B.SortOf(id)
-    NS.Chrome.SetIcon(self.sort, B.SORT_ICON[mode], "=")
-    self.sort.tip = L["Sorted: %s. Click for the next order."]:format(B.SORT_LABEL[mode])
+    B.PaintSort(self.sort, id)
     self.docked = docked
     -- The filter mark (round 5, R5-10), left of sort on the weapon block only; restore and the meta
     -- line move left of whichever mark is the last one shown.
@@ -593,9 +617,7 @@ local function onRestoreClick(self)
 end
 
 local function onSortClick(self)
-    local h = self:GetParent()
-    B:CycleSort(h.id)
-    if self:IsMouseOver() == true and self:GetScript("OnEnter") then self:GetScript("OnEnter")(self) end
+    B.SortMenu(self:GetParent().id, self)
 end
 
 local function buildHeader(parent)
@@ -619,7 +641,7 @@ local function buildHeader(parent)
     h.detach = NS.Chrome.HeaderMark(h, "external-link", "+", onDetachClick)
     NS.Chrome.SetRestToken(h.detach, "text.heading")   -- the title's color at rest (round 2)
     h.detach:SetPoint("RIGHT", h, "RIGHT", -4, 0)
-    -- The sort mark (owner feedback round 3), left of detach in the same rest color.
+    -- The sort mark (owner feedback round 3; its menu, round 6), left of detach in the same rest color.
     h.sort = NS.Chrome.HeaderMark(h, "list", "=", onSortClick)
     NS.Chrome.SetRestToken(h.sort, "text.heading")
     h.sort:SetPoint("RIGHT", h.detach, "LEFT", -4, 0)

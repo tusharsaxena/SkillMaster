@@ -165,8 +165,12 @@ test("round5 groups: each sub-header carries a chevron, the title, the sort mark
         assertEqual(sh.title:GetText(), NS.BlockDefs.secondary.title)
         assertTrue(sh.chevron ~= nil and sh.sort ~= nil and sh.split ~= nil, "the four parts")
         assertEqual(sh.split.tip, NS.L["Split this section from the group"])
+        local real, rows = NS.Widgets.ContextMenu, nil
+        NS.Widgets.ContextMenu = function(_, r) rows = r return {} end
         sh.sort:__fire("OnClick", "LeftButton")
-        assertEqual(B.SortOf("secondary"), "value", "the sort mark cycles the block's order")
+        NS.Widgets.ContextMenu = real
+        for _, r in ipairs(rows or {}) do if r.value == "value" then r.onClick() end end
+        assertEqual(B.SortOf("secondary"), "value", "the sort mark's menu sets the block's order")
         NS.db.profile.layout.blocks.secondary.sort = "name"
         sh.chevron:__fire("OnClick", "LeftButton")
         assertTrue(NS.db.profile.layout.blocks.secondary.collapsed, "the chevron collapses the section")

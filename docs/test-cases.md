@@ -322,7 +322,7 @@ Total.
 ### test_round3.lua (10)
 
 - round3 sort: Value orders a block high first, not-learned rows last; Default is the catalog's
-- round3 sort: the header's sort mark cycles Default, Value high, Value low, Progress, and the window redraws
+- round3 sort: the header's sort mark picks Default, Value high, Value low, Progress (its menu, round 6), and the window redraws
 - round3 sort: the LDB tooltip lists a section in its block's order
 - round3 alerts: skip untrained by default; equipped only; every weapon; a muted weapon never
 - round3 window: collapsing every block keeps the window's height; Shrink to fit lets it shrink
@@ -441,7 +441,7 @@ Total.
 - round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once
 - round5 review: a block reorder redraws the Rows page in the new order, shown or hidden
 
-### test_round6.lua (7)
+### test_round6.lua (8)
 
 - round6 toast: the gap and skill-up toasts wear the cap toast's skin shell, no tint or edge of their own
 - round6 toast: the value stays red or green and carries its delta in brackets
@@ -450,6 +450,7 @@ Total.
 - round6 test mode: the LDB tooltip says test mode under its title while it is on
 - round6 header marks: every ink box is the shipped art's own
 - round6 header marks: the window header, a detached band, a merged band and a sub-header draw every mark fitted
+- round6 sort menu: the sort mark opens a menu of every order on the header, the band and the sub-header
 
 ### test_blocks.lua (10)
 
@@ -862,7 +863,7 @@ Total.
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
-| test_round6.lua | 7 |
+| test_round6.lua | 8 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -893,4 +894,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **631** |
+| **Total** | **632** |

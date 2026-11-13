@@ -317,3 +317,75 @@ test("round6 header marks: the window header, a detached band, a merged band and
     M.__fireTimers()
     if not ok then error(err, 0) end
 end)
+
+-- ── R6-5: the sort mark's menu ───────────────────────────────────────────────────────────────
+
+--- The sort mark `mark` opens the filter mark's menu on itself: a title, one radio row per order
+--- (the current one ticked), and a row's click stores its order through the seam. `redraw` answers
+--- the mark again after a layout (a pooled header can change).
+local function checkSortMenu(where, id, mark, redraw)
+    local Bk = NS.Blocks
+    local real, opened = NS.Widgets.ContextMenu, nil
+    NS.Widgets.ContextMenu = function(anchor, rows, opts) opened = { anchor = anchor, rows = rows, opts = opts } return {} end
+    local ok, err = pcall(function()
+        assertEqual(mark.tip, NS.L["Sorted: %s. Click to sort."]:format(Bk.SORT_LABEL.name), where .. ": the tip names the order")
+        mark:__fire("OnClick", "LeftButton")
+        assertTrue(opened ~= nil and opened.anchor == mark, where .. ": the click opens a menu on the mark")
+        assertEqual(Bk.SortOf(id), "name", where .. ": the click alone changes nothing")
+        local rows = opened.rows
+        assertTrue(rows[1].title == true, where .. ": a title row first")
+        assertEqual(#rows, #Bk.SORTS + 1, where .. ": one row per order")
+        for i, mode in ipairs(Bk.SORTS) do
+            local r = rows[i + 1]
+            assertTrue(r.radio == true and r.value == mode and r.label == Bk.SORT_LABEL[mode], where .. ": " .. mode)
+            assertEqual(r.selected(), mode == "name", where .. ": " .. mode .. " ticked only when current")
+        end
+        rows[4].onClick()   -- Value, lowest first
+        M.__fireTimers()
+        assertEqual(Bk.SortOf(id), "valueAsc", where .. ": the row's order")
+        assertEqual(NS.db.profile.layout.blocks[id].sort, "valueAsc", where .. ": stored through the seam")
+        assertTrue(rows[4].selected() and not rows[2].selected(), where .. ": the tick follows")
+        local again = redraw()
+        assertEqual(again.tip, NS.L["Sorted: %s. Click to sort."]:format(Bk.SORT_LABEL.valueAsc), where .. ": the redrawn tip")
+        assertEqual(again.icon:GetTexture(), NS.Icon(Bk.SORT_ICON.valueAsc), where .. ": and its mark")
+    end)
+    NS.Widgets.ContextMenu = real
+    NS.db.profile.layout.blocks[id].sort = "name"
+    if not ok then error(err, 0) end
+end
+
+test("round6 sort menu: the sort mark opens a menu of every order on the header, the band and the sub-header", function()
+    local layout = NS.db.profile.layout
+    for _, id in ipairs(NS.BLOCKS) do layout.blocks[id].sort = "name" end
+    NS.Preview.Apply(true)
+    W.Show()
+    M.__fireTimers()
+    local ok, err = pcall(function()
+        W.Render()
+        checkSortMenu("header", "weapon", W.HeaderFor("weapon").sort, function()
+            W.Render()
+            return W.HeaderFor("weapon").sort
+        end)
+        layout.blocks.weapon.docked = false
+        D.Refresh()
+        checkSortMenu("band", "weapon", D.Frame("weapon").sort, function()
+            D.Render("weapon")
+            return D.Frame("weapon").sort
+        end)
+        layout.blocks.secondary.docked = false
+        D.Refresh()
+        local gid = G.Merge("weapon", "secondary", "bottom")
+        checkSortMenu("sub-header", "secondary", G.Section(gid, "secondary").header.sort, function()
+            G.Render(gid)
+            return G.Section(gid, "secondary").header.sort
+        end)
+    end)
+    layout.groups = {}
+    layout.blocks.weapon.docked, layout.blocks.secondary.docked = true, true
+    for _, id in ipairs(NS.BLOCKS) do layout.blocks[id].sort = "name" end
+    D.Refresh()
+    W.Hide()
+    NS.Preview.Apply(false)
+    M.__fireTimers()
+    if not ok then error(err, 0) end
+end)

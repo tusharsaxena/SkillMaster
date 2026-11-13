@@ -118,11 +118,16 @@ the checks below that cover each item:
 - **SM-DISP-20** (round 2) Out of combat, click a crafting row (Leatherworking, Cooking, First Aid)
   once: its profession window opens on the first click. Open a bag over a crafting row and click the
   bag there: the bag takes the click, and no profession opens.
-- **SM-DISP-21** (round 3) Each block header has a sort mark left of its detach mark. Click it on
-  Weapon Skills: Value, highest first (Guns 120 on top, the not-learned rows still last), then lowest
-  first, then Progress to max, then back to the default order. Layout > Blocks > Weapon Skills > Sort
+- **SM-DISP-21** (round 3; its menu, round 6) Each block header has a sort mark left of its detach
+  mark. Click it on Weapon Skills: a menu like the filter mark's opens under "Sort rows by" with
+  Default order ticked. Pick Value, highest first (Guns 120 on top, the not-learned rows still last),
+  then lowest first, then Progress to max, then the default order: each pick reorders the rows and
+  the mark's tip names the order. Layout > Blocks > Weapon Skills > Sort
   rows by shows the same choice; a detached block's band carries the mark too; the LDB tooltip lists
   Weapon Skills in the same order.
+- **SM-DISP-34** (round 6, R6-5) Pop Weapon Skills out and merge it with another detached block: the
+  band's sort mark and each sub-header's sort mark open the same menu, the current order ticked; a
+  pick there reorders the main window's block too. Click the mark again with the menu open: it closes.
 - **SM-DISP-22** (round 3) Collapse every block: the window keeps its height and its rows area goes
   empty. Layout > Shrink to fit the rows on: the window shrinks to its headers. The lock mark stands
   at the top right with the journal, settings, Expand / Collapse all and close marks; nothing left of

@@ -62,20 +62,29 @@ test("round3 sort: Value orders a block high first, not-learned rows last; Defau
     end)
 end)
 
-test("round3 sort: the header's sort mark cycles Default, Value high, Value low, Progress, and the window redraws", function()
+test("round3 sort: the header's sort mark picks Default, Value high, Value low, Progress (its menu, round 6), and the window redraws", function()
     withWorld(function()
         local header
         for _, h in ipairs(W.Headers()) do if h.id == "weapon" then header = h end end
         assertTrue(header ~= nil and header.sort ~= nil, "the weapon header carries a sort mark")
         assertEqual(header.sort.icon:GetTexture(), NS.Icon("list"), "Default at first")
-        for _, want in ipairs({ "value", "valueAsc", "progress", "name" }) do
+        local real, menu = NS.Widgets.ContextMenu, nil
+        NS.Widgets.ContextMenu = function(_, r) menu = r return {} end
+        local function pick(want)
             header.sort:__fire("OnClick", "LeftButton")
+            for _, r in ipairs(menu or {}) do if r.value == want then r.onClick() end end
             M.__fireTimers()
-            assertEqual(Blocks.SortOf("weapon"), want, "the next mode")
-            assertEqual(NS.db.profile.layout.blocks.weapon.sort, want, "stored through the seam")
         end
-        header.sort:__fire("OnClick", "LeftButton")
-        M.__fireTimers()
+        local ok, err = pcall(function()
+            for _, want in ipairs({ "value", "valueAsc", "progress", "name" }) do
+                pick(want)
+                assertEqual(Blocks.SortOf("weapon"), want, "the picked mode")
+                assertEqual(NS.db.profile.layout.blocks.weapon.sort, want, "stored through the seam")
+            end
+            pick("value")
+        end)
+        NS.Widgets.ContextMenu = real
+        if not ok then error(err, 0) end
         for _, h in ipairs(W.Headers()) do if h.id == "weapon" then header = h end end
         assertEqual(header.sort.icon:GetTexture(), NS.Icon("sort-desc"), "the redrawn header shows Value, highest first")
         local rows = {}

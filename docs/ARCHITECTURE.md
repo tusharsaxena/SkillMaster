@@ -103,8 +103,8 @@ rows' `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`) stores the value and wa
 `order` stores plainly, its `onChange` `NS.Blocks.OrderChanged`. The seam logs each write
 (debug-logging-§10). `shown`, `scale` and `locked` are plain rows. `sort` (round 3) and the weapon
 block's `filter` (round 5, R5-10: `all`, `learned`, `equipped`, `belowCap`) are plain rows too, each
-written from its header mark through the seam (`NS.Blocks:CycleSort`, `NS.Blocks:SetFilter`, the
-latter from the filter mark's menu); the filter narrows the block in the main window, its detached
+written from its header mark's menu through the seam (`NS.Blocks:SetSort` from the sort mark's,
+round 6, `NS.Blocks:SetFilter` from the filter mark's); the filter narrows the block in the main window, its detached
 frame and its merged section (`NS.Blocks.Entries`), not the LDB tooltip. `skills.hidden` /
 `stats.hidden` are sets: one Hide row per catalog skill and per stat (get / set: false clears the
 entry), and one undrawn row per whole set (type `set`, default `{}`), which the row menu's Hide

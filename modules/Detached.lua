@@ -158,7 +158,7 @@ local function buildBand(f)
     NS.Chrome.SetIcon(f.dock, "external-link", "-", true)
     f.collapse = NS.Chrome.HeaderMark(f, "chevron-down", "v", function() NS.Blocks:ToggleCollapsed(f.id) end)
     -- The block's sort mark, as on its header in the window (owner feedback round 3).
-    f.sort = NS.Chrome.HeaderMark(f, "list", "=", function() NS.Blocks:CycleSort(f.id) end)
+    f.sort = NS.Chrome.HeaderMark(f, "list", "=", function(b) NS.Blocks.SortMenu(f.id, b) end)
     -- The block's filter mark, on a block that has a filter (the weapon block; round 5, R5-10).
     if NS.Blocks.FILTERABLE[f.id] then
         f.filter = NS.Chrome.HeaderMark(f, NS.Blocks.FILTER_ICON, "Y", function(b) NS.Blocks.FilterMenu(f.id, b) end)
@@ -367,9 +367,7 @@ function D.Render(id)
     local collapsed = settings(id).collapsed
     NS.Chrome.SetIcon(f.collapse, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")
-    local mode = NS.Blocks.SortOf(id)
-    NS.Chrome.SetIcon(f.sort, NS.Blocks.SORT_ICON[mode], "=")
-    f.sort.tip = NS.L["Sorted: %s. Click for the next order."]:format(NS.Blocks.SORT_LABEL[mode])
+    NS.Blocks.PaintSort(f.sort, id)
     if f.filter then NS.Blocks.PaintFilter(f.filter, id) end
     f.ownScale = settings(id).scale or 1
     D.ApplyStyle(f)
