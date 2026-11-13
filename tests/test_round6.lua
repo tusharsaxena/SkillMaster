@@ -1,7 +1,8 @@
 -- tests/test_round6.lua — the owner's round-6 feedback (2026-11-13): the toasts in the cap toast's
 -- look, test mode's cues on the Journal and the LDB tooltip, the header marks at one size and one
 -- vertical center, the sort mark's menu, every block expanded on a new profile, the thresholds'
--- two switches, the trainer popup's Set waypoint button and its next-rank-and-above trainers.
+-- two switches, the trainer popup's Set waypoint button and its next-rank-and-above trainers, and
+-- Skill Master's own waypoint arrow (R6-11).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -239,7 +240,7 @@ local function artFile(icon)
     return path and (path:gsub("^Interface\\AddOns\\[^\\]+\\", ""):gsub("\\", "/") .. ".tga")
 end
 
-local function near(a, b) return math.abs(a - b) < 1e-6 end
+local function near(a, b) return type(a) == "number" and math.abs(a - b) < 1e-6 end
 
 --- One mark as a header draws it: fitted, its ink cropped exactly, its longer side C.INK_SIZE,
 --- centered on its control.
@@ -1095,4 +1096,247 @@ test("round6 review: schemaVersion 10 keeps Spell and Defense collapsed on a pro
         assertTrue(sv.profiles["R6-Later10"].layout == nil, "from " .. from .. ": nothing written")
     end
     for _, k in ipairs({ "R6-Old10", "R6-Open10", "R6-Empty10", "R6-Later10" }) do sv.profiles[k] = nil end
+end)
+
+-- ── R6-11: Skill Master's own waypoint arrow ─────────────────────────────────────────────────
+
+local WA, Wp = NS.WaypointArrow, NS.Waypoints
+
+--- A trainer at (50, 50) on map 1453, whose world rect is 1000 x 1000 yards from the origin, the
+--- native pin API recorded, no TomTom, and the player at `player` (0..1 on 1453); then all back.
+local function withArrow(player, fn)
+    local saved = { TomTom = M.TomTom, C_Map = M.C_Map, map = M.__map, UiMapPoint = M.UiMapPoint,
+                    C_SuperTrack = M.C_SuperTrack, facing = M.__facing, wp = NS.db.profile.waypoints }
+    local rec = { set = 0, cleared = 0, superTrack = {}, has = true }
+    M.TomTom = nil
+    M.__map = { player = player, worlds = { [1453] = { instance = 0, ox = 0, oy = 0, w = 1000, h = 1000 } } }
+    M.C_Map = M.__newMapApi()
+    M.C_Map.SetUserWaypoint = function(point) rec.set = rec.set + 1 rec.point = point rec.has = true end
+    M.C_Map.CanSetUserWaypointOnMap = function() return true end
+    M.C_Map.ClearUserWaypoint = function() rec.cleared = rec.cleared + 1 rec.has = false end
+    M.C_Map.HasUserWaypoint = function() return rec.has end
+    M.C_Map.GetUserWaypoint = function() return rec.point end
+    M.UiMapPoint = { CreateFromCoordinates = function(mapID, x, y)
+        return { uiMapID = mapID, position = M.CreateVector2D(x, y) } end }
+    M.C_SuperTrack = { SetSuperTrackedUserWaypoint = function(v) rec.superTrack[#rec.superTrack + 1] = v end }
+    M.__facing = 0
+    NS.db.profile.waypoints = { method = "auto", announce = false, arrow = true, arrowScale = 1,
+                                arrowFrame = { point = false } }
+    local trainer = { name = "Woo Ping", faction = "Alliance", city = "Stormwind", subzone = "Trade District",
+                      mapID = 1453, x = 50, y = 50, teaches = { "swords" }, verified = true }
+    local ok, err = pcall(fn, trainer, rec)
+    WA.StandDown()
+    M.TomTom, M.C_Map, M.__map, M.UiMapPoint = saved.TomTom, saved.C_Map, saved.map, saved.UiMapPoint
+    M.C_SuperTrack, M.__facing, NS.db.profile.waypoints = saved.C_SuperTrack, saved.facing, saved.wp
+    if not ok then error(err, 0) end
+end
+
+local function tick() WA.Frame():__fire("OnUpdate", WA.THROTTLE + 0.001) end
+
+test("round6 arrow: the rotation is bearing minus facing, counter-clockwise from north (x north, y west)", function()
+    assertTrue(near(WA.Rotation(0, 0, 100, 0, 0), 0), "target due north, facing north: straight ahead")
+    assertTrue(near(WA.Rotation(0, 0, 0, 100, 0), math.pi / 2), "target due west: a quarter turn left")
+    assertTrue(near(WA.Rotation(0, 0, 0, -100, 0), -math.pi / 2), "target due east: a quarter turn right")
+    assertTrue(near(WA.Rotation(0, 0, 100, 0, math.pi / 2), -math.pi / 2), "facing west, target north: to the right")
+    assertTrue(near(math.abs(WA.Rotation(0, 0, -100, 0, 0)), math.pi), "target due south: behind")
+    assertTrue(near(WA.Rotation(0, 0, 100, 0, 2 * math.pi - 0.1), 0.1), "kept inside one turn")
+    assertEqual(WA.Rotation(0, 0, 100, 0, nil), nil, "no facing: no rotation")
+    local restore = T.kit.installSecretValue()
+    local ok, got = pcall(WA.Rotation, 0, 0, 100, 0, T.kit.secret(1))
+    restore()
+    assertTrue(ok, "a secret facing must not raise: " .. tostring(got))
+    assertEqual(got, nil, "a secret facing is no facing")
+end)
+
+test("round6 arrow: the fill blends from the skin's accent at 300 yd to its sem.good at 30 yd", function()
+    local far, good = NS.Bar.Color("text.accent"), NS.Bar.Color("sem.good")
+    for i = 1, 3 do
+        assertTrue(near(WA.Blend(300)[i], far[i]) and near(WA.Blend(4000)[i], far[i]), "the accent at 300 yd or more")
+        assertTrue(near(WA.Blend(30)[i], good[i]) and near(WA.Blend(3)[i], good[i]), "sem.good at 30 yd or less")
+        assertTrue(near(WA.Blend(165)[i], (far[i] + good[i]) / 2), "halfway between at 165 yd")
+    end
+end)
+
+test("round6 arrow: without TomTom a waypoint sets the native pin unsuper-tracked and shows the arrow on it", function()
+    withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t, rec)
+        assertEqual(Wp:Set(t), "native")
+        assertEqual(rec.set, 1, "the native pin is still set")
+        assertEqual(rec.superTrack[#rec.superTrack], false, "and not super-tracked: the game's arrow goes away")
+        assertTrue(WA.IsShown(), "Skill Master's arrow shows")
+        assertEqual(WA.Target(), t)
+        local f = WA.Frame()
+        assertTrue(f:GetScript("OnUpdate") ~= nil, "its OnUpdate runs while shown")
+        assertEqual(f:GetFrameStrata(), "MEDIUM")
+        assertTrue(f:IsClampedToScreen(), "clamped")
+        assertEqual(f.text:GetText(), NS.L["%d yd"]:format(100), "the yards under the art")
+        assertTrue(f.fill:IsShown() and near(f.fill:GetRotation(), 0), "target due north, facing north: up")
+        assertEqual(f.fill.__texture or f.fill:GetTexture(), WA.FILL_TEXTURE)
+        local o, edge = { f.outline:GetVertexColor() }, NS.Bar.Color("bar.border")
+        assertTrue(near(o[1], edge[1]) and near(o[2], edge[2]) and near(o[3], edge[3]), "the outline in bar.border")
+    end)
+end)
+
+test("round6 arrow: Show Skill Master's arrow off, or TomTom loaded, keeps the old behavior", function()
+    withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t, rec)
+        NS.db.profile.waypoints.arrow = false
+        assertEqual(Wp:Set(t), "native")
+        assertEqual(rec.superTrack[#rec.superTrack], true, "the native pin is super-tracked")
+        assertFalse(WA.IsShown(), "no arrow of ours")
+        NS.db.profile.waypoints.arrow = true
+        assertEqual(Wp:Set(t), "native")
+        assertTrue(WA.IsShown())
+        M.TomTom = { AddWaypoint = function() return {} end }
+        assertEqual(Wp:Set(t), "tomtom")
+        assertFalse(WA.IsShown(), "TomTom's arrow points: ours hides")
+        assertFalse(WA.Wanted(), "and is never wanted while TomTom is loaded")
+        WA.ShowTest()
+        assertFalse(WA.IsShown(), "not even in test mode")
+    end)
+end)
+
+test("round6 arrow: the arrow follows the player's facing and place, throttled, and turns color by distance", function()
+    withArrow({ mapID = 1453, x = 0.5, y = 0.4 }, function(t)
+        Wp:Set(t)
+        local f = WA.Frame()
+        assertTrue(near(f.fill:GetRotation(), math.pi / 2), "target due west: a quarter turn left")
+        M.__facing = math.pi / 2
+        f:__fire("OnUpdate", WA.THROTTLE / 2)
+        assertTrue(near(f.fill:GetRotation(), math.pi / 2), "inside the throttle: not re-measured")
+        f:__fire("OnUpdate", WA.THROTTLE / 2 + 0.001)
+        assertTrue(near(f.fill:GetRotation(), 0), "facing west now: straight ahead")
+        M.__map.player = { mapID = 1453, x = 0.5, y = 0.48 }   -- 20 yd east of the trainer
+        tick()
+        assertEqual(f.text:GetText(), NS.L["%d yd"]:format(20))
+        local c, good = { f.fill:GetVertexColor() }, NS.Bar.Color("sem.good")
+        assertTrue(near(c[1], good[1]) and near(c[2], good[2]) and near(c[3], good[3]), "sem.good within 30 yd")
+    end)
+end)
+
+test("round6 arrow: no facing hides the art and keeps the distance; no distance shows the name alone, dim", function()
+    withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t)
+        Wp:Set(t)
+        local f = WA.Frame()
+        M.__facing = nil
+        tick()
+        assertFalse(f.fill:IsShown() or f.outline:IsShown(), "no facing: no art")
+        assertEqual(f.text:GetText(), NS.L["%d yd"]:format(100), "the distance stays")
+        local restore = T.kit.installSecretValue()
+        M.__facing = T.kit.secret(1)
+        local ok, err = pcall(tick)
+        restore()
+        assertTrue(ok, "a secret facing must not raise: " .. tostring(err))
+        assertFalse(f.fill:IsShown(), "a secret facing: no art")
+        M.__facing = 0
+        M.__map.player = nil   -- an instance: the client knows no map
+        tick()
+        assertFalse(f.fill:IsShown(), "no distance: no art")
+        assertEqual(f.text:GetText(), "Woo Ping", "the trainer's name alone")
+        local c, muted = { f.text:GetTextColor() }, NS.Bar.Color("text.muted")
+        assertTrue(near(c[1], muted[1]) and near(c[2], muted[2]) and near(c[3], muted[3]), "dim, in the muted role")
+        assertTrue(WA.IsShown(), "the arrow stays up")
+    end)
+end)
+
+test("round6 arrow: within 5 yd the arrow hides, the pin clears and chat says you have arrived", function()
+    withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t, rec)
+        Wp:Set(t)
+        local before = #M.__printed()
+        M.__map.player = { mapID = 1453, x = 0.5, y = 0.504 }   -- 4 yd away
+        tick()
+        assertFalse(WA.IsShown(), "arrived: the arrow hides")
+        assertEqual(rec.cleared, 1, "the native pin is cleared")
+        assertTrue(WA.Frame():GetScript("OnUpdate") == nil, "its OnUpdate is off")
+        local all = M.__printed()
+        assertTrue(#all > before and tostring(all[#all]):find("You have arrived: Woo Ping", 1, true) ~= nil,
+            "the arrival line")
+    end)
+end)
+
+test("round6 arrow: right-click clears the waypoint; a cleared or replaced native pin hides the arrow", function()
+    withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t, rec)
+        Wp:Set(t)
+        WA.Frame():__fire("OnMouseUp", "RightButton")
+        assertFalse(WA.IsShown(), "right-click hides it")
+        assertEqual(rec.cleared, 1, "and clears the native pin")
+        Wp:Set(t)
+        M.__fireEvent("USER_WAYPOINT_UPDATED")
+        assertTrue(WA.IsShown(), "our own pin's update keeps it")
+        rec.point = M.UiMapPoint.CreateFromCoordinates(1453, 0.1, 0.1)
+        M.__fireEvent("USER_WAYPOINT_UPDATED")
+        assertFalse(WA.IsShown(), "a pin placed elsewhere hides it")
+        Wp:Set(t)
+        rec.has = false
+        M.__fireEvent("USER_WAYPOINT_UPDATED")
+        assertFalse(WA.IsShown(), "a pin cleared elsewhere hides it")
+        local other = { name = "Other", mapID = 1453, x = 10, y = 10 }
+        Wp:Set(t)
+        Wp:Set(other)
+        assertEqual(WA.Target(), other, "a new trainer waypoint retargets it")
+    end)
+end)
+
+test("round6 arrow: a drag saves the point on the profile; the profile's lock refuses it", function()
+    withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t)
+        Wp:Set(t)
+        local f = WA.Frame()
+        local placed
+        f.GetPoint = function() return "TOPLEFT", M.UIParent, "TOPLEFT", 40, -60 end
+        f.SetPoint = function(_, point) placed = point end
+        f:__fire("OnDragStart")
+        f:__fire("OnDragStop")
+        local p = NS.db.profile.waypoints.arrowFrame.point
+        assertEqual(p.point, "TOPLEFT"); assertEqual(p.x, 40); assertEqual(p.y, -60)
+        local savedLock = NS.db.profile.locked
+        NS.db.profile.locked = true
+        f.__userPlaced = nil
+        f:__fire("OnDragStart")
+        NS.db.profile.locked = savedLock
+        assertTrue(not f.__userPlaced, "locked: the drag never starts")
+        f:Hide()
+        WA.Show(t)
+        f.GetPoint, f.SetPoint = nil, nil
+        assertEqual(placed, "TOPLEFT", "the saved point is where it shows again")
+    end)
+end)
+
+test("round6 arrow: test mode shows it on a sample trainer at a sample distance, writes nothing, and takes it down", function()
+    withArrow(nil, function()
+        local before = NS.db.profile.waypoints.arrowFrame.point
+        WA.ShowTest()
+        assertTrue(WA.IsShown(), "the sample arrow shows")
+        local sample = WA.Target()
+        assertTrue(sample ~= nil and sample.mapID ~= nil and sample.x ~= nil, "on a sample trainer with coordinates")
+        local f = WA.Frame()
+        tick()
+        assertEqual(f.text:GetText(), NS.L["%d yd"]:format(WA.SAMPLE_YARDS), "at the sample distance")
+        assertTrue(f.fill:IsShown() and near(f.fill:GetRotation(), WA.SAMPLE_ROTATION), "at the sample angle")
+        assertEqual(NS.db.profile.waypoints.arrowFrame.point, before, "nothing written")
+        WA.HideTest()
+        assertFalse(WA.IsShown(), "test mode's end takes it down")
+        assertTrue(f:GetScript("OnUpdate") == nil, "its OnUpdate off")
+    end)
+end)
+
+test("round6 arrow: /sm test raises and lowers the arrow with test mode's other surfaces", function()
+    withArrow(nil, function()
+        NS.ToggleTestMode()
+        local on = WA.IsShown()
+        NS.ToggleTestMode()
+        assertTrue(on, "test mode on: the arrow shows")
+        assertFalse(WA.IsShown(), "test mode off: it hides")
+    end)
+end)
+
+test("round6 arrow: turning the arrow off hands the pin back to the game's arrow; the scale applies at once", function()
+    withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t, rec)
+        Wp:Set(t)
+        local f, scale = WA.Frame(), nil
+        f.SetScale = function(_, v) scale = v end
+        NS.SetByPath("waypoints.arrowScale", 1.5)
+        f.SetScale = nil
+        assertEqual(scale, 1.5, "the scale at once")
+        NS.SetByPath("waypoints.arrow", false)
+        assertFalse(WA.IsShown(), "off: the arrow hides")
+        assertEqual(rec.superTrack[#rec.superTrack], true, "and the native pin is super-tracked again")
+    end)
 end)

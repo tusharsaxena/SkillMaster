@@ -3,7 +3,7 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-662%2F662_passing-green)
+![Tests](https://img.shields.io/badge/Tests-674%2F674_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
@@ -11,7 +11,7 @@ Skill Master puts every skill your character has into one window of bars you can
 
 - Skills in four groups (Primary, Secondary, Weapon, Other) and stats in four more, each a block you can collapse, reorder, or pop out into its own frame.
 - Hover tooltips with the bonus breakdown, the next rank and its trainer, how far a weapon is behind its cap, and gathering and fishing hints.
-- Click a profession to open it, an unlearned skill for its trainers, nearest first with their distance in yards, and a waypoint (TomTom, a map pin, or directions in chat).
+- Click a profession to open it, an unlearned skill for its trainers, nearest first with their distance in yards, and a waypoint (TomTom, a map pin with Skill Master's own arrow pointing the way, or directions in chat).
 - Two broker feeds for Titan Panel and the like: Skill Master, its tooltip your skills, and Skill Master Stats, its tooltip your stat blocks and its text a stat you pin from a stat row's menu; alerts when a profession caps or a weapon falls behind, a Journal with this session's skill-ups and an overview of your alts.
 - Every part of the look is a setting: bar sizes, fill direction, colors, border, font, text, one or two columns, frame layering, and skins.
 
@@ -81,3 +81,4 @@ The backlog lives on GitHub: please file bugs and ideas at https://github.com/tu
 
 - Open Iconic by Waybury, MIT license, https://github.com/iconic/open-iconic (the window and console marks).
 - Phosphor Icons, MIT license, https://github.com/phosphor-icons/core (the action mark on every skill row, the Progress sort mark and the Weapon Skills filter mark).
+- The waypoint arrow (`media/waypoint/`) is original art made for Skill Master, under the addon's MIT license.

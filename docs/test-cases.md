@@ -441,7 +441,7 @@ Total.
 - round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once
 - round5 review: a block reorder redraws the Rows page in the new order, shown or hidden
 
-### test_round6.lua (38)
+### test_round6.lua (50)
 
 - round6 toast: the gap and skill-up toasts wear the cap toast's skin shell, no tint or edge of their own
 - round6 toast: the value stays red or green and carries its delta in brackets
@@ -481,6 +481,18 @@ Total.
 - round6 review: the Set waypoint button keeps the skin's hover look beside its own tooltip
 - round6 review: schemaVersion 8 keeps an empty stored profile on Classic too; only a fresh install starts new
 - round6 review: schemaVersion 10 keeps Spell and Defense collapsed on a profile from before R6-8
+- round6 arrow: the rotation is bearing minus facing, counter-clockwise from north (x north, y west)
+- round6 arrow: the fill blends from the skin's accent at 300 yd to its sem.good at 30 yd
+- round6 arrow: without TomTom a waypoint sets the native pin unsuper-tracked and shows the arrow on it
+- round6 arrow: Show Skill Master's arrow off, or TomTom loaded, keeps the old behavior
+- round6 arrow: the arrow follows the player's facing and place, throttled, and turns color by distance
+- round6 arrow: no facing hides the art and keeps the distance; no distance shows the name alone, dim
+- round6 arrow: within 5 yd the arrow hides, the pin clears and chat says you have arrived
+- round6 arrow: right-click clears the waypoint; a cleared or replaced native pin hides the arrow
+- round6 arrow: a drag saves the point on the profile; the profile's lock refuses it
+- round6 arrow: test mode shows it on a sample trainer at a sample distance, writes nothing, and takes it down
+- round6 arrow: /sm test raises and lowers the arrow with test mode's other surfaces
+- round6 arrow: turning the arrow off hands the pin back to the game's arrow; the scale applies at once
 
 ### test_blocks.lua (10)
 
@@ -893,7 +905,7 @@ Total.
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
-| test_round6.lua | 38 |
+| test_round6.lua | 50 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -924,4 +936,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **662** |
+| **Total** | **674** |

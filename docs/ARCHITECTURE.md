@@ -45,7 +45,8 @@ catalog, the class weapon lists, trainers, ranks, gathering, fishing, racials, s
 `modules/` holds the display (the bar widget `NS.Bar`, the title-bar controls `NS.Chrome`, the
 blocks `NS.Blocks`, the rows `NS.Rows`, the detached frames, the merged windows `NS.Groups` and their drags `NS.GroupsSnap`, the
 main window, the secure crafting
-overlays, the click map `NS.Interact`, the row tooltip, the trainer popup and `NS.Waypoints`), the
+overlays, the click map `NS.Interact`, the row tooltip, the trainer popup, `NS.Waypoints` and
+Skill Master's own waypoint arrow `NS.WaypointArrow`), the
 `/sm probe` report, the skills model (`SkillData`), the bonus breakdown (`Bonuses`), the stats
 model (`StatData`), the trainer lookups (`Trainers`), the skill helpers (`NS.SkillHelpers`,
 `modules/Helpers.lua`), the session log (`NS.SessionLog`), the alt snapshots (`NS.Alts`), the
@@ -89,6 +90,9 @@ grip's release); `char.log` is `modules/SessionLog.lua`'s and `global.characters
 `modules/Alts.lua`'s ([schema.md](schema.md)). `profile.alerts.point`, the alert toasts' drop point,
 is the same kind: its one owner is `modules/Alerts.lua`, whose toast descriptor's `setPosition` (a
 test-mode drag, or the toast's `ResetPosition`) is its only writer.
+`profile.waypoints.arrowFrame.point`, the waypoint arrow's drop point (round 6, R6-11), is the same
+kind: its one owner is `modules/WaypointArrow.lua`, whose `savePoint` (on `OnDragStop`; the profile's
+`locked` refuses the drag) is its only writer.
 
 `profile.layout.blocks[id].point` (T3.2) is named non-setting state, owned by `modules/Detached.lua`:
 its writers are `savePoint` (a detached frame's `OnDragStop`) and `D.StorePoint` (where a section
@@ -218,6 +222,8 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | `PLAYER_EQUIPMENT_CHANGED` | `modules/Detached.lua` at load, on its own bus target | `onEquipmentChanged`: re-render the detached weapon block (or the merged window it is a section of) and re-sync the overlays while it is shown; with the header's Equipped filter on a docked weapon block, refresh the main window at once (round 5, R5-10) | a weapon swap changes the weapon block's equipped-only list |
 | (timer) | `NS.TrainerPopup.Show` | `P.RefreshDistances` every 1 s (AceTimer, `P.TICK`) while the trainer popup is shown; `P.Hide` and the frame's `OnHide` cancel it, the frame's `OnShow` restarts it (a UIParent hide and show, Alt+Z or a cinematic, runs both; the R5-followups review) (round 5, R5-15) | the player moves: the distances and the nearest-first order follow |
 | `PLAYER_LOGOUT` | `modules/Alts.lua` at load, on its own bus target | `Alts:Snapshot` | the last snapshot of the session |
+| `USER_WAYPOINT_UPDATED` | `modules/WaypointArrow.lua` at load, on its own bus target | `WaypointArrow.OnWaypointUpdated`: with an arrow up, `C_Map.HasUserWaypoint` false, or a pin whose world place lies more than 2 yd from the trainer's, hides it; a pin the client cannot place keeps it (round 6, R6-11) | the native pin was cleared or replaced elsewhere (the world map's own pin) |
+| (`OnUpdate`) | `NS.WaypointArrow` on show | one measure every `WA.THROTTLE` (0.03 s): the player's world place and facing against the trainer's, the art's rotation, color and the yards; armed on show, set to nil on every hide path (round 6, R6-11) | the arrow follows the player |
 
 The bus subscribers on their own targets: `modules/SessionLog.lua` hears `SKILL_UP` (one log entry,
 with the zone); `modules/Alts.lua` hears `SKILLS_UPDATED` (one snapshot 2 s after a burst);
@@ -236,7 +242,8 @@ latch's stand-down and stand-up are its only teardown and rebuild.
 
 ## Taint Notes
 
-The window, the detached frames, the rows and the trainer popup are plain frames, and the key
+The window, the detached frames, the rows, the trainer popup and the waypoint arrow are plain frames
+(the arrow stays up in combat: it is not secure), and the key
 binding clicks a plain, non-secure button. The settings panel never opens in combat (the library
 refuses, options-ui-§2). The one secure surface is the action marks' overlays
 (`modules/SecureOverlay.lua`, T3.3; owner feedback round 4: a row's own click opens nothing, its
@@ -356,6 +363,16 @@ same tainted `OnShow` error (Known Limitations).
   the trainer (every profession trainer today), Waypoint method is Chat only, or neither TomTom nor the
   native pin API is there. Its tooltip says which; Print to chat always works. A disabled button's
   tooltip needs `SetMotionScriptsWhileDisabled`, called when the client has it. Unverified in game.
+- Skill Master's waypoint arrow (round 6, R6-11) shows only without TomTom and only with a native
+  pin set (`C_Map.SetUserWaypoint` on a map that takes one); with TomTom loaded it never shows, even
+  under Waypoint method Map pin (the game's arrow then points, as before). Its pin is set with
+  `C_SuperTrack.SetSuperTrackedUserWaypoint(false)`, not just without the `true` call, so a pin the
+  game was super-tracking loses its arrow too. The bearing assumes `GetWorldPosFromMapPos` answers x
+  north and y west and `GetPlayerFacing` radians counter-clockwise from north (the retail
+  convention); with no facing (nil or secret) the art hides and the yards stay, and with no distance
+  (another continent, an instance) the trainer's name shows alone, dim. Arrival is 5 yd, straight
+  line. A pin replaced elsewhere is noticed only where the client answers `C_Map.GetUserWaypoint`
+  and a world place for it. Unverified in game.
 - Every client API the data modules use is assumed until `/sm probe` confirms it
   ([forever-quirks.md](forever-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.

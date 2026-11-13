@@ -100,6 +100,9 @@ return function()
         }
     end
     M.C_Map = M.__newMapApi()
+    -- Round 6, R6-11: the player's facing, radians counter-clockwise from north (the arrow's turn).
+    M.__facing = 0
+    M.GetPlayerFacing = function() return M.__facing end
     installBindings(M)
     -- Frames answer strata and level (frame-layering-§5): the window sets both.
     installLayers(M)

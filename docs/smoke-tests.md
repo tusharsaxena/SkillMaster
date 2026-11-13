@@ -234,6 +234,24 @@ the checks below that cover each item:
   before this build that never changed a setting opens the feed tooltip on Classic.
 - **SM-DISP-42** (round 6, review) Open the trainer popup on a weapon master with TomTom or the map
   pin available: hover Set waypoint: its label takes the skin's hover color, as Print to chat's does.
+- **SM-DISP-43** (round 6, R6-11) TomTom disabled. Open the trainer popup on an unlearned weapon,
+  pick a weapon master in your city and click Set waypoint: the map pin is set, the game's own arrow
+  does not show, and Skill Master's solid chevron shows above the screen's center with the yards
+  under it in the skin's body font. Turn on the spot: the chevron turns to keep pointing at the
+  trainer (turn left and it turns right). Face the trainer: it points straight up. Far away (300 yd
+  or more) it is the skin's accent; walk in: it shades into the skin's green by 30 yd. Within about
+  5 yd it goes, the map pin clears and chat says `You have arrived: <trainer>`.
+- **SM-DISP-44** (round 6, R6-11) With the arrow up: hover it: the tooltip names the trainer and the
+  place with `Right-click to clear the waypoint. Drag to move the arrow.` Drag it elsewhere, `/reload`
+  and set a waypoint again: it shows where you left it. `/sm lock`: it no longer drags. Right-click it:
+  it goes and the map pin clears. Set it again and click elsewhere on the world map to place your own
+  pin: the arrow goes. Set it again and pick another trainer's Set waypoint: the arrow points at the
+  new one. Enter an instance (or ride to another continent): the art goes and the trainer's name
+  shows alone, dimmed. Enter combat: it stays.
+- **SM-DISP-45** (round 6, R6-11) Trainers and Waypoints: Arrow scale 1.5: the arrow grows at once.
+  Untick Show Skill Master's arrow with it up: it goes and the game's own arrow points at the pin;
+  set a waypoint again: the game's arrow, no Skill Master arrow. Tick it again. Enable TomTom and
+  `/reload`: Set waypoint gives TomTom's arrow and never Skill Master's.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon with TomTom loaded,
   then without it: the primary button reads `Set waypoint` both times (no `(TomTom)`, `(map pin)` or
   `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
@@ -454,6 +472,10 @@ the checks below that cover each item:
   nothing overlaps. Hover the LDB feed: the same line sits under the tooltip's title. `/sm test`
   again: the strip and the line go and the Journal's tabs move back up. Right-click the Journal's
   strip: End test ends test mode.
+- **SM-TEST-4** (round 6, R6-11) Without TomTom, `/sm test`: Skill Master's waypoint arrow shows,
+  pointing up and to the left at a sample weapon master with `240 yd` under it; no map pin is set.
+  Drag it where you want it. `/sm test` again: it goes (a waypoint you had set before test mode comes
+  back). Enter combat in test mode: it goes with the rest.
 - **SM-SIM-1** Tick General → Master controls → Sim mode: the step panel opens beside the window and
   the box stays ticked. Start the fishing trip: every 3 s a step plays; a skill-up flashes the broker
   and adds a Journal line, the lure puts a teal segment on Fishing, the mount moves Run Speed to

@@ -192,6 +192,13 @@ NS.defaults = {
         waypoints = {
             method   = "auto",   -- "auto" (TomTom, else the map pin, else chat) | "tomtom" | "native" | "chat"
             announce = true,     -- say in chat where a waypoint was set
+            -- Round 6, R6-11: without TomTom the native pin comes with Skill Master's own arrow
+            -- (modules/WaypointArrow.lua) and is not super-tracked; off, the client's arrow again.
+            arrow      = true,
+            arrowScale = 1,      -- the arrow frame's scale (0.5 .. 2)
+            -- Drag-only geometry, no control sets it: written by modules/WaypointArrow.lua alone
+            -- (architecture-§5's named-owner rule; docs/ARCHITECTURE.md names the writer).
+            arrowFrame = { point = false },
         },
         trainers = {
             unverified = true,   -- mark trainer data not yet checked on WoW Forever

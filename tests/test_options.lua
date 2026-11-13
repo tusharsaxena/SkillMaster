@@ -241,7 +241,9 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- both counts, the delta unmoved.
     -- Round 6 (R6-9): the Broker page's Stats section switch gave way to the stats feed's four stat
     -- block switches, hand-written: -1 +4 = +3 in both counts, the delta unmoved.
-    assertEqual(full, 337, "the full schema (round 6: the stats feed's four section switches)")
-    assertEqual(degraded, 284, "the library-absent schema")
+    -- Round 6 (R6-11): Trainers and Waypoints' Show Skill Master's arrow and Arrow scale,
+    -- hand-written: +2 in both counts, the delta unmoved.
+    assertEqual(full, 339, "the full schema (round 6: the waypoint arrow's two rows)")
+    assertEqual(degraded, 286, "the library-absent schema")
     assertEqual(full - degraded, 53, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3) and the detached background and border (9)")
 end)

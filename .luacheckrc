@@ -41,6 +41,8 @@ read_globals = {
   "C_SpellBook",                 -- a profession's trade link (core/Compat.lua TradeSkillLink)
   "ChatEdit_InsertLink", "ChatFrame_OpenChat", "IsShiftKeyDown",
   "TomTom", "UiMapPoint", "C_SuperTrack",
+  -- round 6, R6-11: the player's facing, for Skill Master's own arrow (modules/WaypointArrow.lua)
+  "GetPlayerFacing",
   -- round 5, R5-15: the map point a world position is read for (core/Compat.lua MapWorldPos)
   "CreateVector2D",
   -- the click debug (modules/SecureOverlay.lua SO.MouseFoci): the frames under the pointer

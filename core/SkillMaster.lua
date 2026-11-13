@@ -28,10 +28,12 @@ local function showTestSurfaces()
     if openedForTest.window then W.Show() end
     if openedForTest.journal then J.Show() end
     if NS.Alerts then NS.Alerts.ShowTestToasts() end
+    if NS.WaypointArrow then NS.WaypointArrow.ShowTest() end   -- R6-11: the arrow on a sample trainer
 end
 
 local function hideTestSurfaces()
     if NS.Alerts then NS.Alerts.HideTestToasts() end
+    if NS.WaypointArrow then NS.WaypointArrow.HideTest() end
     local opened = openedForTest or {}
     openedForTest = nil
     if opened.window then NS.MainWindow.Hide() end
@@ -97,6 +99,7 @@ function NS.StandDown()
     if NS.Detached then NS.Detached.StandDown() end
     if NS.SecureOverlay then NS.SecureOverlay:StandDown() end
     if NS.TrainerPopup then NS.TrainerPopup.Hide() end
+    if NS.WaypointArrow then NS.WaypointArrow.StandDown() end   -- R6-11: no arrow stays up
     if NS.Widgets and NS.Widgets.CloseMenu then NS.Widgets.CloseMenu() end   -- the row menu closes with us
     if NS.Journal then NS.Journal.StandDown() end
     if NS.Alerts then NS.Alerts.StandDown() end   -- T4.2: no toast stays up or waits

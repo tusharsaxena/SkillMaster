@@ -128,7 +128,10 @@ The README's `## How the window works` is the player-facing version of this page
   detached block, or an unknown key, still shows the window. An unlearned broker row opens
   `NS.TrainerPopup.Show(key)`. Neither path touches a secure frame (design §6.5).
 - A left-click on a cap toast hands its trainer to `NS.Waypoints:Set`: TomTom, then the native user
-  waypoint, then the directions in chat; a trainer without coordinates always goes to chat.
+  waypoint, then the directions in chat; a trainer without coordinates always goes to chat. Without
+  TomTom and with Show Skill Master's arrow on, the native pin is set unsuper-tracked and
+  `NS.WaypointArrow.Show(trainer)` points at it (round 6, R6-11); a TomTom waypoint hides the arrow,
+  and `USER_WAYPOINT_UPDATED` (the pin cleared or replaced elsewhere) does too.
 - The broker tooltip and the Journal's alt grid draw `NS.Bar` in its `mini` style: the broker from
   `NS.Rows.SkillValues` / `StatValues` with `NS.Rows.FillColor`, the Journal from the snapshot's rank,
   cap and category. Both follow `profile.bars` (the colors, `miniHeight`, the broker tooltip's `brokerRowHeight`, the fill direction) as the

@@ -2,7 +2,9 @@ local _, NS = ...
 -- modules/Waypoints.lua — a trainer's waypoint (design §2 goal 7, plan Task 3.3): TomTom when it is
 -- loaded, else the client's native user waypoint (C_Map.SetUserWaypoint, feature-detected), else
 -- the directions in chat. A trainer without coordinates (most profession trainers: the data never
--- guesses a pin, defaults/Trainers_Forever.lua) always goes to chat.
+-- guesses a pin, defaults/Trainers_Forever.lua) always goes to chat. Without TomTom the native pin
+-- comes with Skill Master's own arrow (modules/WaypointArrow.lua, round 6, R6-11) and is not
+-- super-tracked, unless Show Skill Master's arrow is off.
 --
 -- NS.Waypoints:Set(trainer) -> "tomtom"|"native"|"chat"; :Method(trainer); :Blocked(trainer);
 -- :Print(trainer); :Directions(trainer)
@@ -83,13 +85,20 @@ local function viaTomTom(t)
         { title = t.name, persistent = false, minimap = true, world = true })
 end
 
-local function viaNative(t)
+-- The native pin, super-tracked (the client's own arrow) unless Skill Master's arrow points the way
+-- (round 6, R6-11: NS.WaypointArrow.Wanted, no TomTom); then the pin is set and explicitly not
+-- super-tracked, so an earlier pin's client arrow goes away too.
+local function viaNative(t, ownArrow)
     return pcall(function()
         C_Map.SetUserWaypoint(UiMapPoint.CreateFromCoordinates(t.mapID, t.x / 100, t.y / 100))
         if type(C_SuperTrack) == "table" and type(C_SuperTrack.SetSuperTrackedUserWaypoint) == "function" then
-            C_SuperTrack.SetSuperTrackedUserWaypoint(true)
+            C_SuperTrack.SetSuperTrackedUserWaypoint(not ownArrow)
         end
     end)
+end
+
+local function arrowWanted()
+    return NS.WaypointArrow ~= nil and NS.WaypointArrow.Wanted()
 end
 
 --- Set the waypoint for trainer `t` by the first method that works; a failing provider falls to
@@ -97,10 +106,13 @@ end
 function Wp:Set(t)
     local method = Wp:Method(t)
     if method == "tomtom" and viaTomTom(t) then
+        if NS.WaypointArrow then NS.WaypointArrow.Hide() end   -- TomTom's arrow points now
         announce(L["Waypoint set (TomTom): %s"]:format(Wp:Directions(t)))
         return "tomtom"
     end
-    if (method == "tomtom" or method == "native") and nativeReady(t) and viaNative(t) then
+    local own = arrowWanted()
+    if (method == "tomtom" or method == "native") and nativeReady(t) and viaNative(t, own) then
+        if own then NS.WaypointArrow.Show(t) end
         announce(L["Map pin set: %s"]:format(Wp:Directions(t)))
         return "native"
     end

@@ -837,6 +837,14 @@ L["Skill Master Stats"] = true
 L["Stats feed sections"] = true
 L["Draw this stat block in the Skill Master Stats feed's tooltip."] = true
 
+-- ---- Round 6, R6-11: Skill Master's waypoint arrow (modules/WaypointArrow.lua, settings/Trainers.lua) ----
+L["Show Skill Master's arrow"] = true
+L["Without TomTom, a map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin."] = true
+L["Arrow scale"] = true
+L["Size of Skill Master's waypoint arrow."] = true
+L["Right-click to clear the waypoint. Drag to move the arrow."] = true
+L["You have arrived: %s"] = true
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

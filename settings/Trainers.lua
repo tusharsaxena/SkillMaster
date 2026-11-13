@@ -1,7 +1,7 @@
 local _, NS = ...
 -- settings/Trainers.lua — the Trainers and Waypoints page (modules/Waypoints.lua): which waypoint a
--- trainer's Go button sets, whether chat says so, the unverified-data mark, and the trainer popup's
--- name color (a swatch on the skin's accent by default, with its class-color companion).
+-- trainer's Go button sets, whether chat says so, Skill Master's own arrow and its scale (round 6,
+-- R6-11), the unverified-data mark, and the trainer popup's name color (a swatch on the skin's accent by default, with its class-color companion).
 local H = NS.Helpers
 local L = NS.L
 local PW, PT = NS.defaults.profile.waypoints, NS.defaults.profile.trainers
@@ -15,6 +15,15 @@ NS.RegisterSchemaRows(NS.Live({
                  { value = "native", text = L["Map pin"] }, { value = "chat", text = L["Chat only"] } } },
     { path = "waypoints.announce", page = PAGE, group = GROUP, type = "bool", default = PW.announce,
       label = L["Say where in chat"], desc = L["Print a chat line naming the trainer when a waypoint is set."] },
+    -- Round 6, R6-11: Skill Master's own arrow (modules/WaypointArrow.lua).
+    { path = "waypoints.arrow", page = PAGE, group = GROUP, type = "bool", default = PW.arrow,
+      label = L["Show Skill Master's arrow"],
+      desc = L["Without TomTom, a map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin."],
+      onChange = function() if NS.WaypointArrow then NS.WaypointArrow.ApplySettings() end end },
+    { path = "waypoints.arrowScale", page = PAGE, group = GROUP, type = "number", default = PW.arrowScale,
+      min = 0.5, max = 2, step = 0.05, commitOn = "change", label = L["Arrow scale"],
+      desc = L["Size of Skill Master's waypoint arrow."],
+      onChange = function() if NS.WaypointArrow then NS.WaypointArrow.ApplySettings() end end },
     { path = "trainers.unverified", page = PAGE, group = GROUP, type = "bool", default = PT.unverified,
       label = L["Mark unverified trainers"],
       desc = L["Flag trainer data not yet checked on WoW Forever, in tooltips, the trainer popup and chat."] },
