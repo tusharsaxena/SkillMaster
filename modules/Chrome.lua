@@ -4,6 +4,8 @@ local addonName, NS = ...
 -- fallback rung) and the hover tooltip line they carry.
 --
 -- NS.Chrome.IconButton(parent, icon, glyph, onClick, tip) -> button   (button.icon or button.glyph)
+-- NS.Chrome.HeaderMark(parent, icon, glyph, onClick, tip) -> button    the same, its art fitted to
+--                                                                      one ink box (C.INK_SIZE)
 -- NS.Chrome.SetIcon(button, icon, glyph, turned)                       swap the mark (lock / unlock);
 --                                                                      `turned` draws it rotated 180
 --                                                                      degrees (the attach mark)
@@ -16,6 +18,22 @@ NS.Chrome = {}
 local C = NS.Chrome
 
 C.SIZE, C.ART = 18, 13   -- one size and one pitch for every control strip
+
+-- A block header's marks (owner feedback round 6, R6-3): each catalog mark leaves its own margin in
+-- its 64 px square (the funnel 52 x 48 at the square's lower middle, the list mark 64 x 56 at its
+-- top, external-link the whole square), so drawn at one texture size they read at different sizes
+-- and heights. A header mark (C.HeaderMark) is cropped to its ink box, measured here from the
+-- shipped art (tests/test_round6.lua checks every box against the file), and drawn with its longer
+-- side C.INK_SIZE px, centered on its control: every mark one size and one vertical center.
+C.INK_SIZE = 12
+C.INK = {   -- [mark] = { left, top, right, bottom } in the art's 64 px square
+    ["chevron-down"] = { 0, 8, 64, 52 },  ["chevron-right"] = { 8, 0, 52, 64 },
+    ["external-link"] = { 0, 0, 64, 64 }, ["fullscreen-enter"] = { 0, 0, 64, 64 },
+    eye = { 0, 8, 64, 56 },               list = { 0, 0, 64, 56 },
+    ["sort-desc"] = { 0, 0, 64, 64 },     ["sort-asc"] = { 0, 0, 64, 64 },
+    ["ph:sort-descending"] = { 8, 8, 56, 56 }, ["ph:funnel"] = { 6, 10, 58, 58 },
+}
+local INK_SQUARE = 64
 
 -- ---------------------------------------------------------------------------------------------
 -- A tooltip's font size (the Tooltips page, owner feedback round 4). GameTooltip's line font strings
@@ -97,6 +115,17 @@ function C.Snap(tex)
     if type(tex.SetTexelSnappingBias) == "function" then tex:SetTexelSnappingBias(0) end
 end
 
+--- A header mark's art (C.HeaderMark): `icon` cropped to its ink box (C.INK, the whole square for a
+--- mark it does not list), its longer side C.INK_SIZE, turned 180 degrees with `turned`.
+local function fitInk(tex, icon, turned)
+    local box = C.INK[icon] or { 0, 0, INK_SQUARE, INK_SQUARE }
+    local l, t, r, btm = box[1] / INK_SQUARE, box[2] / INK_SQUARE, box[3] / INK_SQUARE, box[4] / INK_SQUARE
+    local w, h = r - l, btm - t
+    local scale = C.INK_SIZE / math.max(w, h)
+    tex:SetSize(w * scale, h * scale)
+    if turned then tex:SetTexCoord(r, l, btm, t) else tex:SetTexCoord(l, r, t, btm) end
+end
+
 --- Draw `icon` (a declared catalog name) on the button, or `glyph` where the art does not resolve.
 --- `turned` draws the mark rotated 180 degrees; a pooled button set upright again is reset.
 function C.SetIcon(b, icon, glyph, turned)
@@ -109,7 +138,11 @@ function C.SetIcon(b, icon, glyph, turned)
             C.Snap(b.icon)
         end
         b.icon:SetTexture(path)
-        b.icon:SetTexCoord(unpack(turned and C.TURNED or C.UPRIGHT))
+        if b.fit then
+            fitInk(b.icon, icon, turned)
+        else
+            b.icon:SetTexCoord(unpack(turned and C.TURNED or C.UPRIGHT))
+        end
         NS.Skin.Mark(b.icon, rest(b))
         if b.glyph then b.glyph:Hide() end
         return
@@ -139,16 +172,28 @@ end
 
 --- One square control: the catalog mark (or the glyph), the skin's tint at rest and hot under the
 --- pointer, `tip` as a one-line tooltip, `onClick(button, mouseButton)`.
-function C.IconButton(parent, icon, glyph, onClick, tip)
+local function newButton(parent, icon, glyph, onClick, tip, fit)
     local b = CreateFrame("Button", nil, parent)
     b:SetSize(C.SIZE, C.SIZE)
     b:RegisterForClicks("AnyUp")
     b.tip = tip
+    b.fit = fit
     C.SetIcon(b, icon, glyph)
     b:SetScript("OnEnter", onEnter)
     b:SetScript("OnLeave", onLeave)
     if onClick then b:SetScript("OnClick", onClick) end
     return b
+end
+
+function C.IconButton(parent, icon, glyph, onClick, tip)
+    return newButton(parent, icon, glyph, onClick, tip, nil)
+end
+
+--- A block header's mark (round 6, R6-3): an IconButton whose art is fitted to its ink box, so every
+--- header mark (the window's header, a detached or merged window's band, a section's sub-header)
+--- draws at one size and one vertical center whatever margin its art leaves.
+function C.HeaderMark(parent, icon, glyph, onClick, tip)
+    return newButton(parent, icon, glyph, onClick, tip, true)
 end
 
 -- ---------------------------------------------------------------------------------------------

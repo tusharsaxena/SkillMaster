@@ -183,3 +183,137 @@ test("round6 test mode: the LDB tooltip says test mode under its title while it 
     tip:ClearLines()
     assertTrue(B.AddTestModeLine(tip) == false and tip:NumLines() == 0, "off: the helper adds nothing")
 end)
+
+-- ── R6-3: every header mark one size and one vertical center ─────────────────────────────────
+
+local C, D, G, W = NS.Chrome, NS.Detached, NS.Groups, NS.MainWindow
+
+--- The ink box of a shipped TGA (32-bit, RLE or raw, either origin): { left, top, right, bottom }
+--- in pixels over every pixel with any alpha, the way C.INK was measured.
+local function inkOf(file)
+    local fh = assert(io.open(file, "rb"), file)
+    local data = fh:read("*a")
+    fh:close()
+    local idLen, cmapType, imgType = data:byte(1), data:byte(2), data:byte(3)
+    assert(cmapType == 0 and (imgType == 2 or imgType == 10), file .. ": a true-color TGA")
+    local w, h = data:byte(13) + data:byte(14) * 256, data:byte(15) + data:byte(16) * 256
+    assert(data:byte(17) == 32, file .. ": 32 bits a pixel")
+    local topDown = (data:byte(18) % 64) >= 32
+    local pos, n, total = 19 + idLen, 0, w * h
+    local l, t, r, b = w, h, -1, -1
+    local function put(alpha)
+        if alpha > 0 then
+            local x, y = n % w, math.floor(n / w)
+            if not topDown then y = h - 1 - y end
+            l, t, r, b = math.min(l, x), math.min(t, y), math.max(r, x), math.max(b, y)
+        end
+        n = n + 1
+    end
+    while n < total do
+        if imgType == 2 then
+            put(data:byte(pos + 3))
+            pos = pos + 4
+        else
+            local head = data:byte(pos)
+            pos = pos + 1
+            local count = head % 128 + 1
+            if head >= 128 then
+                local alpha = data:byte(pos + 3)
+                pos = pos + 4
+                for _ = 1, count do put(alpha) end
+            else
+                for _ = 1, count do
+                    put(data:byte(pos + 3))
+                    pos = pos + 4
+                end
+            end
+        end
+    end
+    return { l, t, r + 1, b + 1 }, w
+end
+
+--- The repo path of a catalog mark's art: NS.Icon's extensionless client path, made a file.
+local function artFile(icon)
+    local path = NS.Icon(icon)
+    return path and (path:gsub("^Interface\\AddOns\\[^\\]+\\", ""):gsub("\\", "/") .. ".tga")
+end
+
+local function near(a, b) return math.abs(a - b) < 1e-6 end
+
+--- One mark as a header draws it: fitted, its ink cropped exactly, its longer side C.INK_SIZE,
+--- centered on its control.
+local function checkMark(where, b)
+    if not (b and b.icon) then return 0 end
+    assertTrue(b.fit == true, where .. ": built as a header mark")
+    local icon
+    for name in pairs(C.INK) do if NS.Icon(name) == b.icon:GetTexture() then icon = name end end
+    assertTrue(icon ~= nil, where .. ": its art has an ink box (" .. tostring(b.icon:GetTexture()) .. ")")
+    local w, h = b.icon:GetSize()
+    assertTrue(near(math.max(w, h), C.INK_SIZE), ("%s: %s's longer side is %d, drew %gx%g"):format(where, icon, C.INK_SIZE, w, h))
+    local point, rel, relPoint, x, y = b.icon:GetPoint(1)
+    assertTrue(point == "CENTER" and rel == b and relPoint == "CENTER" and x == 0 and y == 0, where .. ": centered on its control")
+    local box = C.INK[icon]
+    local l, r, t, btm = box[1] / 64, box[3] / 64, box[2] / 64, box[4] / 64
+    -- The client's eight-value answer: the corners UL, LL, UR, LR, each x then y.
+    local c = { b.icon:GetTexCoord() }
+    local upright = near(c[1], l) and near(c[2], t) and near(c[5], r) and near(c[4], btm)
+    local turned = near(c[1], r) and near(c[2], btm) and near(c[5], l) and near(c[4], t)
+    assertTrue(upright or turned, where .. ": " .. icon .. " cropped to its ink box")
+    return 1
+end
+
+test("round6 header marks: every ink box is the shipped art's own", function()
+    for icon, box in pairs(C.INK) do
+        local file = artFile(icon)
+        assertTrue(file ~= nil, icon .. ": a declared mark")
+        local ink, size = inkOf(file)
+        assertEqual(size, 64, icon .. ": a 64 px square")
+        assertEqual(table.concat(box, ","), table.concat(ink, ","), icon .. "'s ink box (" .. file .. ")")
+    end
+end)
+
+test("round6 header marks: the window header, a detached band, a merged band and a sub-header draw every mark fitted", function()
+    local layout = NS.db.profile.layout
+    NS.Preview.Apply(true)
+    W.Show()
+    M.__fireTimers()
+    local ok, err = pcall(function()
+        local n = 0
+        -- The window's header: the weapon block shows the filter mark; one hidden row shows restore.
+        NS.db.profile.skills.hidden = NS.db.profile.skills.hidden or {}
+        NS.db.profile.skills.hidden.daggers = true
+        W.Render()
+        local h = W.HeaderFor("weapon")
+        assertTrue(h ~= nil, "the weapon block's header")
+        for _, k in ipairs({ "chevron", "filter", "sort", "detach", "restore" }) do
+            n = n + checkMark("header " .. k, h[k])
+        end
+        assertTrue(h.filter:IsShown() and h.restore:IsShown(), "the filter and restore marks show")
+        -- A detached band.
+        layout.blocks.weapon.docked = false
+        D.Refresh()
+        local f = D.Frame("weapon")
+        for _, k in ipairs({ "dock", "collapse", "sort", "filter", "restore" }) do
+            n = n + checkMark("band " .. k, f[k])
+        end
+        -- A merged window's band and its sections' sub-headers.
+        layout.blocks.secondary.docked = false
+        D.Refresh()
+        local gid = G.Merge("weapon", "secondary", "bottom")
+        local g = G.Frame(gid)
+        for _, k in ipairs({ "dockAll", "collapseAll" }) do n = n + checkMark("merged band " .. k, g[k]) end
+        local sh = G.Section(gid, "weapon").header
+        for _, k in ipairs({ "chevron", "filter", "sort", "split" }) do
+            n = n + checkMark("sub-header " .. k, sh[k])
+        end
+        assertTrue(n >= 16, "every surface's marks checked, " .. n)
+    end)
+    NS.db.profile.skills.hidden.daggers = nil
+    layout.groups = {}
+    layout.blocks.weapon.docked, layout.blocks.secondary.docked = true, true
+    D.Refresh()
+    W.Hide()
+    NS.Preview.Apply(false)
+    M.__fireTimers()
+    if not ok then error(err, 0) end
+end)

@@ -38,6 +38,11 @@ the checks below that cover each item:
   band disappears and test mode is off.
 - **SM-WIN-4** Bind keys under Options → Keybindings → Ka0s Skill Master: *Toggle skills window* toggles
   the window and *Toggle journal* toggles the Journal. `/sm disable`: each press refuses on one line.
+- **SM-WIN-5** (round 6, R6-3) Hide one weapon row so the Weapon Skills header shows every mark
+  (eye, filter funnel, sort, pop-out): all four read the same size and sit on one line, none higher,
+  lower or smaller than the others. Pop the block out and merge it with another detached block: the
+  band's marks and the sub-header's marks read the same. Set the sort to Value, highest first and
+  Progress: the sort mark keeps the size.
 
 ## Display (M3)
 

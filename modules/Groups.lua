@@ -572,19 +572,19 @@ local function buildSub(f)
     sh:RegisterForClicks("AnyUp")
     sh.bg = sh:CreateTexture(nil, "BACKGROUND")
     sh.bg:SetAllPoints(sh)
-    sh.chevron = NS.Chrome.IconButton(sh, "chevron-down", "v", function() NS.Blocks:ToggleCollapsed(sh.id) end)
+    sh.chevron = NS.Chrome.HeaderMark(sh, "chevron-down", "v", function() NS.Blocks:ToggleCollapsed(sh.id) end)
     sh.chevron:SetPoint("LEFT", sh, "LEFT", 4, 0)
     sh.title = sh:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     sh.title:SetPoint("LEFT", sh.chevron, "RIGHT", 2, 0)
     NS.Skin.Text(sh.title, "heading")
-    sh.split = NS.Chrome.IconButton(sh, "fullscreen-enter", "^",
+    sh.split = NS.Chrome.HeaderMark(sh, "fullscreen-enter", "^",
         function() G.Split(f.gid, sh.id) end, L["Split this section from the group"])
     NS.Chrome.SetRestToken(sh.split, "text.heading")
     sh.split:SetPoint("RIGHT", sh, "RIGHT", -4, 0)
-    sh.sort = NS.Chrome.IconButton(sh, "list", "=", function() NS.Blocks:CycleSort(sh.id) end)
+    sh.sort = NS.Chrome.HeaderMark(sh, "list", "=", function() NS.Blocks:CycleSort(sh.id) end)
     NS.Chrome.SetRestToken(sh.sort, "text.heading")
     sh.sort:SetPoint("RIGHT", sh.split, "LEFT", -4, 0)
-    sh.filter = NS.Chrome.IconButton(sh, NS.Blocks.FILTER_ICON, "Y", function(b) NS.Blocks.FilterMenu(sh.id, b) end)
+    sh.filter = NS.Chrome.HeaderMark(sh, NS.Blocks.FILTER_ICON, "Y", function(b) NS.Blocks.FilterMenu(sh.id, b) end)
     sh.filter.baseToken = "text.heading"
     NS.Chrome.SetRestToken(sh.filter, sh.filter.baseToken)
     sh.filter:SetPoint("RIGHT", sh.sort, "LEFT", -4, 0)
@@ -620,10 +620,10 @@ local function buildBand(f)
     if f.title.SetWordWrap then f.title:SetWordWrap(false) end
     f.title:SetJustifyH("LEFT")
     -- The attach mark: external-link turned 180 degrees, a detached window's dock mark.
-    f.dockAll = NS.Chrome.IconButton(f, "external-link", "-", function() G.DockAll(f.gid) end,
+    f.dockAll = NS.Chrome.HeaderMark(f, "external-link", "-", function() G.DockAll(f.gid) end,
         L["Dock every section in the main window"])
     NS.Chrome.SetIcon(f.dockAll, "external-link", "-", true)
-    f.collapseAll = NS.Chrome.IconButton(f, "chevron-down", "v", function() G.CollapseAll(f.gid) end,
+    f.collapseAll = NS.Chrome.HeaderMark(f, "chevron-down", "v", function() G.CollapseAll(f.gid) end,
         L["Collapse or expand every section"])
     -- The band's own click target (under the marks): a right-click opens the menu, a drag moves the
     -- window as the frame's own does.

@@ -153,19 +153,19 @@ local function buildBand(f)
     f.title:SetText(NS.BlockDefs[f.id].title)
     NS.Skin.Text(f.title, "heading")
     -- The attach mark: the header's detach mark (external-link) turned 180 degrees (FB-15).
-    f.dock = NS.Chrome.IconButton(f, "external-link", "-", function() NS.Blocks:Dock(f.id) end,
+    f.dock = NS.Chrome.HeaderMark(f, "external-link", "-", function() NS.Blocks:Dock(f.id) end,
         NS.L["Dock this block in the main window"])
     NS.Chrome.SetIcon(f.dock, "external-link", "-", true)
-    f.collapse = NS.Chrome.IconButton(f, "chevron-down", "v", function() NS.Blocks:ToggleCollapsed(f.id) end)
+    f.collapse = NS.Chrome.HeaderMark(f, "chevron-down", "v", function() NS.Blocks:ToggleCollapsed(f.id) end)
     -- The block's sort mark, as on its header in the window (owner feedback round 3).
-    f.sort = NS.Chrome.IconButton(f, "list", "=", function() NS.Blocks:CycleSort(f.id) end)
+    f.sort = NS.Chrome.HeaderMark(f, "list", "=", function() NS.Blocks:CycleSort(f.id) end)
     -- The block's filter mark, on a block that has a filter (the weapon block; round 5, R5-10).
     if NS.Blocks.FILTERABLE[f.id] then
-        f.filter = NS.Chrome.IconButton(f, NS.Blocks.FILTER_ICON, "Y", function(b) NS.Blocks.FilterMenu(f.id, b) end)
+        f.filter = NS.Chrome.HeaderMark(f, NS.Blocks.FILTER_ICON, "Y", function(b) NS.Blocks.FilterMenu(f.id, b) end)
         f.filter:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     end
     -- The restore mark (owner feedback round 4), leftmost so its hiding leaves no gap.
-    f.restore = NS.Chrome.IconButton(f, "eye", "o", function() NS.Blocks.RestoreHidden(f.id) end)
+    f.restore = NS.Chrome.HeaderMark(f, "eye", "o", function() NS.Blocks.RestoreHidden(f.id) end)
     f.restore:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.restore:Hide()
     f.dock:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
