@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (7)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (10)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "PvP-Traxex Silentshot" (forever-quirks-§4);
@@ -52,10 +52,10 @@ SkillMasterDB
         titleBand = "always",    -- "always" | "hover" | "never"
       },
       blocks.<id> = { shown = true, docked = true, order = n, collapsed = false, scale = 1, locked = false,
-                      -- collapsed: false for every block (round 6, R6-8: Spell and Defense were true);
-                      -- a default change only, no schemaVersion step: a profile that stored a value
-                      -- keeps it, and one that never toggled them (AceDB stores no default) reads
-                      -- the new default, expanded
+                      -- collapsed: false for every block (round 6, R6-8: Spell and Defense were true)
+                      -- on a new profile; schemaVersion 10 writes the old true into a profile stored
+                      -- before R6-8 that never toggled them (AceDB stores no default), so it keeps
+                      -- them collapsed; a stored value stays
                       point = false,    -- point: drag-only, written only by modules/Detached.lua
                       sort = "name" }   -- "name" | "value" | "valueAsc" | "progress" (round 3)
       blocks.weapon.belowCapOnly = false   -- the detached compact preset's filter (M5 polish)
@@ -184,8 +184,9 @@ LibDBIcon's own.
 | 4 → 5 | `journalFilterToBlock`, per profile | the Alts sub-tabs became the main window's blocks (FB-33): a stored `journal.filter` of `"professions"` becomes `"primary"`, `"weapons"` becomes `"weapon"`; `"other"` stays |
 | 5 → 6 | `groupsNormalized`, per profile | merged detached windows (round 5, R5-6), `layout.groups`, a new key defaulting to `{}`: nothing carries over; a stored `layout.groups` that is not a table goes, a stored one is normalized against the profile's own blocks (a member that is not a detached block there, a repeat, an empty column and a group of fewer than two go); a profile with none passes through |
 | 6 → 7 | `markersSplit`, per profile | thresholds split per surface (round 6, R6-4): a stored `bars.markers = false` carries to both `bars.markersWindow` and `bars.markersTooltip`; any stored `bars.markers` goes, and otherwise the new defaults answer (window off, row tooltip on) |
-| 7 → 8 | `classicTooltipKept`, per profile | the LDB tooltip's style (round 6, R6-10), `tooltips.ldb.style`, a new key whose default `"window"` is for new profiles only: every non-empty profile an earlier install stored gets `"classic"`, today's look, unless it already holds a style; a fresh install (the run starts at stamp 0) and an empty stored profile pass through. The runner hands each step `(sv, profile, from)` for this |
+| 7 → 8 | `classicTooltipKept`, per profile | the LDB tooltip's style (round 6, R6-10), `tooltips.ldb.style`, a new key whose default `"window"` is for new profiles only: every profile an earlier install stored gets `"classic"`, today's look, unless it already holds a style, an empty stored profile included (AceDB keeps a never-customized profile as `{}`, and the step runs at OnInitialize, before any new profile exists; the round's review); only a fresh install (the run starts at stamp 0) passes through. The runner hands each step `(sv, profile, from)` for this |
 | 8 → 9 | `statsSectionRetired`, per profile | the stat blocks moved to their own feed, Skill Master Stats (round 6, R6-9), with a switch per stat block (`broker.tooltip.sections.stats_*`, new keys defaulting on): a stored `broker.tooltip.sections.stats` goes; nothing carries over |
+| 9 → 10 | `statsCollapseKept`, per profile | Spell and Defense default to expanded on a new profile (round 6, R6-8; added by the round's review): a profile stored before R6-8 (the run starts at stamp 1 to 6) gets `layout.blocks.stats_spell.collapsed` and `stats_defense.collapsed = true`, the old default AceDB stripped, where none is stored; a stored value stays; a fresh install and a build already on the new default (stamp 7 or later) pass through |
 
 No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
 companion defaulting on, so no stored profile predates the companions and none has to be moved

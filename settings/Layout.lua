@@ -151,7 +151,7 @@ local function blockRows(id)
               onChange = NS.ApplyLook }),
         row({ path = base .. "sort", group = BLOCKS, subgroup = d.title, type = "string", default = def.sort,
               values = sortValues, label = L["Sort rows by"], onChange = B.Changed,
-              desc = L["The order of the block's rows, here, in its detached frame and in the LDB tooltip. The sort mark on its header cycles it."] }),
+              desc = L["The order of the block's rows, here, in its detached frame and in the LDB tooltip. The sort mark on its header opens a menu of every order."] }),
         row({ path = base .. "scale", group = BLOCKS, subgroup = d.title, type = "number", default = def.scale,
               min = 0.5, max = 2, step = 0.05, label = L["Block scale"],
               desc = L["Scale of the block's own frame while it is detached."], onChange = NS.ApplyLook }),

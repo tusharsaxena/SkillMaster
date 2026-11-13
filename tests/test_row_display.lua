@@ -177,7 +177,7 @@ test("rows show: schemaVersion 2 moves a stored stats.display once, in every sto
     assertTrue(p["RowsShow-Both"].bars == nil, "the default moves nothing")
     assertTrue(p["RowsShow-Both"].stats.display == nil)
     assertEqual(p["RowsShow-Kept"].bars.rowDisplay, "bar", "a stored rowDisplay wins")
-    assertTrue(next(p["RowsShow-Fresh"]) == nil, "a fresh profile passes through unchanged")
+    assertTrue(p["RowsShow-Fresh"].bars == nil and p["RowsShow-Fresh"].stats == nil, "a profile with neither key passes this step")
     -- Once: the stamp is past the step, so a stats.display written back later is not moved again.
     p["RowsShow-Both"].stats.display = "text"
     NS:RunMigrations()

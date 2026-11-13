@@ -143,6 +143,21 @@ local function buildBody()
     headerPool, rowPool = NS.Blocks.NewHeaderPool(), NS.Rows.NewPool()
 end
 
+--- The strip menu's rows: End test, as the window's strip has (the library's label).
+function P.StripMenuRows()
+    return { { label = L["End test"], value = "END_TEST", onClick = function() NS.ToggleTestMode() end } }
+end
+
+local stripMenu
+--- The strip's menu while it was last opened (the suites read it).
+function P.StripMenu() return stripMenu end
+
+local function stripClick(self, button)
+    if button ~= "RightButton" then return end
+    stripMenu = NS.Widgets.ContextMenu(self, P.StripMenuRows(), { owner = addonName, cursor = true })
+    if stripMenu then NS.Broker.RaiseMenu(stripMenu, frame) end
+end
+
 local function build()
     if frame then return frame end
     frame = CreateFrame("Frame", P.FRAME_NAME, UIParent, "BackdropTemplate")
@@ -154,12 +169,16 @@ local function build()
     frame.title:SetPoint("TOP", frame, "TOP", 0, -7)
     frame.gains = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.gains:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -9)
+    -- No onEnd: the library's strip menu opens at its own FULLSCREEN_DIALOG strata, under this
+    -- TOOLTIP frame. The strip's right-click opens the same End test row here, lifted above the
+    -- tooltip as the row menu is (NS.Broker.RaiseMenu), so the tooltip stays up while it is open.
     frame.strip = NS.Widgets.TestStrip(frame, {
         text  = L["Test mode: the skills shown are sample data."],
         owner = addonName,
-        onEnd = function() NS.ToggleTestMode() end,
     })
     if frame.strip then
+        frame.strip:EnableMouse(true)
+        frame.strip:SetScript("OnMouseUp", stripClick)
         frame.strip:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -TITLE_H)
         frame.strip:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -TITLE_H)
         frame.strip:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.OVERLAY)

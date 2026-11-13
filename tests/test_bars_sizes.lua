@@ -167,7 +167,7 @@ test("bar sizes: schemaVersion 4 drops a stored bars.compactHeight and keeps the
     assertTrue(NS.SCHEMA_VERSION >= 4, "step 4 is in the ladder")
     assertTrue(sv.profiles["Sizes-Custom"].bars.compactHeight == nil, "the stored detached height goes")
     assertEqual(sv.profiles["Sizes-Custom"].bars.height, 21, "the bar height is kept")
-    assertTrue(next(sv.profiles["Sizes-Fresh"]) == nil, "a fresh profile passes through")
+    assertTrue(sv.profiles["Sizes-Fresh"].bars == nil, "a profile with no bars passes this step (later steps may write it)")
     sv.profiles["Sizes-Custom"], sv.profiles["Sizes-Fresh"] = nil, nil
 end)
 

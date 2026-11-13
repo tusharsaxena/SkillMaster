@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 9
+NS.SCHEMA_VERSION = 10
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -88,11 +88,12 @@ end
 --- 7 -> 8 (owner feedback round 6, R6-10): the LDB tooltip's style, `tooltips.ldb.style`, a new key
 --- whose default "window" is the main window's look, for new profiles only (owner: "as a default
 --- setting for new profiles, can be customized later"). Every profile an earlier install stored keeps
---- the look it had: "classic", unless it already holds a style. A fresh install (`from` 0: no stamp
---- was ever stored) and a fresh profile (an empty stored table: nothing chosen, nothing drawn yet)
---- pass through, so they start on the new look.
+--- the look it had: "classic", unless it already holds a style. An empty stored table is such a
+--- profile too (AceDB keeps a never-customized profile as {}, and the step runs at OnInitialize,
+--- before any new profile exists). Only a fresh install (`from` 0: no stamp was ever stored) passes
+--- through, so its profiles start on the new look.
 local function classicTooltipKept(_, profile, from)
-    if (from or 0) == 0 or type(profile) ~= "table" or next(profile) == nil then return end
+    if (from or 0) == 0 or type(profile) ~= "table" then return end
     if type(profile.tooltips) ~= "table" then profile.tooltips = {} end
     local t = profile.tooltips
     if type(t.ldb) ~= "table" then t.ldb = {} end
@@ -110,6 +111,26 @@ local function statsSectionRetired(_, profile)
     if type(sections) == "table" then sections.stats = nil end
 end
 
+--- 9 -> 10 (owner feedback round 6, review of R6-8): Spell and Defense default to expanded
+--- (`layout.blocks.stats_spell/stats_defense.collapsed`, true -> false) for new profiles. AceDB
+--- stripped the old default true, so a profile stored before R6-8 holds no value and would open both
+--- blocks on upgrade: it is written the old true. A stored value is the player's choice and stays. A
+--- fresh install (`from` 0) and a build already on the new default (`from` 7 or later: R6-8 landed
+--- before step 7) pass through.
+local OLD_COLLAPSED = { "stats_spell", "stats_defense" }
+local function statsCollapseKept(_, profile, from)
+    from = from or 0
+    if from == 0 or from >= 7 or type(profile) ~= "table" then return end
+    if type(profile.layout) ~= "table" then profile.layout = {} end
+    if type(profile.layout.blocks) ~= "table" then profile.layout.blocks = {} end
+    local blocks = profile.layout.blocks
+    for _, id in ipairs(OLD_COLLAPSED) do
+        if type(blocks[id]) ~= "table" then blocks[id] = {} end
+        -- rawget: the active profile may already wear AceDB's defaults, whose false is no choice.
+        if rawget(blocks[id], "collapsed") == nil then blocks[id].collapsed = true end
+    end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
 -- is the stamp the run started at (0 on a fresh install).
@@ -123,6 +144,7 @@ local STEPS = {
     { to = 7, run = markersSplit, perProfile = true },
     { to = 8, run = classicTooltipKept, perProfile = true },
     { to = 9, run = statsSectionRetired, perProfile = true },
+    { to = 10, run = statsCollapseKept, perProfile = true },
 }
 
 function NS:InitDB()

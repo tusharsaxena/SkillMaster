@@ -234,13 +234,14 @@ local function buildActions()
     frame.warning:SetText(L["Coordinates unverified on WoW Forever (flagged until the smoke pass)"])
     NS.Skin.Text(frame.warning, "sem.warn")
     frame.waypoint = button(frame, L["Set waypoint"], setWaypoint, true)
-    frame.waypoint:SetScript("OnEnter", function(self)
+    -- Hooked, not set: NS.Skin.Button hooked its hover look on these scripts, and SetScript drops it.
+    frame.waypoint:HookScript("OnEnter", function(self)
         if not (GameTooltip and self.blockedText) then return end
         GameTooltip:SetOwner(self, "ANCHOR_TOP")
         tipLine(self.blockedText, "text.body", true)
         GameTooltip:Show()
     end)
-    frame.waypoint:SetScript("OnLeave", onCardLeave)
+    frame.waypoint:HookScript("OnLeave", onCardLeave)
     frame.print = button(frame, L["Print to chat"], printDirections, false)
 end
 

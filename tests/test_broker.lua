@@ -433,7 +433,7 @@ test("broker: schemaVersion 3 carries the All template and drops the other feeds
     assertTrue(p["OneFeed-Others"].broker.template == nil, "no All template: the default stands")
     assertTrue(p["OneFeed-Others"].broker.templates == nil, "a dead feed's template goes")
     assertEqual(p["OneFeed-Kept"].broker.template, "{pinned} kept", "a stored template wins")
-    assertTrue(next(p["OneFeed-Fresh"]) == nil, "a fresh profile passes through")
+    assertTrue(p["OneFeed-Fresh"].broker == nil, "a profile with no broker passes this step (later steps may write it)")
     -- Once: the stamp is past the step.
     p["OneFeed-Others"].broker.templates = { all = "{level}" }
     NS:RunMigrations()

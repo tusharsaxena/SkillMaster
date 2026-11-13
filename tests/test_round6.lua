@@ -482,7 +482,7 @@ test("round6 thresholds: schemaVersion 7 carries a stored false to both switches
     assertTrue(off.markers == nil and on.markers == nil, "the old key goes")
     assertEqual(off.height, 21, "the rest is kept")
     assertTrue(on.markersWindow == nil and on.markersTooltip == nil, "the old default leaves the new defaults to answer")
-    assertTrue(next(sv.profiles["R6-Fresh"]) == nil, "a fresh profile passes through")
+    assertTrue(sv.profiles["R6-Fresh"].bars == nil, "a profile with no bars passes this step (later steps may write it)")
     sv.profiles["R6-Off"], sv.profiles["R6-On"], sv.profiles["R6-Fresh"] = nil, nil, nil
 end)
 
@@ -900,7 +900,7 @@ test("round6 ldb look: the classic-only rows are dimmed in the Main window style
     end)
 end)
 
-test("round6 ldb look: schemaVersion 8 keeps every stored profile on Classic; a fresh install and profile start on it new", function()
+test("round6 ldb look: schemaVersion 8 keeps every stored profile on Classic; a fresh install starts on it new", function()
     local sv = rawget(_G, "SkillMasterDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["R6-Old"] = { bars = { height = 15 } }
@@ -912,7 +912,7 @@ test("round6 ldb look: schemaVersion 8 keeps every stored profile on Classic; a 
     assertTrue(NS.SCHEMA_VERSION >= 8, "step 8 is in the ladder")
     assertEqual(sv.profiles["R6-Old"].tooltips.ldb.style, "classic", "an existing profile keeps today's look")
     assertEqual(sv.profiles["R6-Chose"].tooltips.ldb.style, "window", "a stored style is kept")
-    assertTrue(next(sv.profiles["R6-Empty"]) == nil, "a fresh profile passes through")
+    assertEqual(sv.profiles["R6-Empty"].tooltips.ldb.style, "classic", "an empty stored profile is an existing one (review)")
     -- A fresh install: no stamp was ever stored, so the step leaves its profiles to the new default.
     sv.profiles["R6-New"] = { bars = { height = 15 } }
     NS.db.global.schemaVersion = 0
@@ -1005,4 +1005,94 @@ test("round6 stats feed: schemaVersion 9 drops a stored Stats section switch, th
     assertEqual(sections.weapon, false, "the rest is kept")
     assertTrue(next(sv.profiles["R6-Fresh9"]) == nil, "a fresh profile passes through")
     sv.profiles["R6-Stats"], sv.profiles["R6-Fresh9"] = nil, nil
+end)
+
+-- ── R6 review: the fixes from the round's review ─────────────────────────────────────────────
+
+test("round6 review: the Main window style's test strip opens its menu above the tooltip, and it ends test mode", function()
+    withFeedTip("window", function()
+        withTestMode(function()
+            Br.OnEnter(M.UIParent)
+            local panel = BP.Frame()
+            local strip = panel.strip
+            assertTrue(strip ~= nil and strip:IsShown(), "the strip shows in test mode")
+            strip:__fire("OnMouseUp", "RightButton")
+            local m = BP.StripMenu()
+            assertTrue(m ~= nil and m:IsShown(), "a right-click opens the strip's menu")
+            assertEqual(m:GetFrameStrata(), "TOOLTIP", "in the tooltip's strata")
+            assertTrue(m:GetFrameLevel() > panel:GetFrameLevel(), "above the tooltip")
+            assertTrue(Br.MenuOpen(), "the tooltip stays up while it is open")
+            local rows = BP.StripMenuRows()
+            assertEqual(#rows, 1)
+            assertEqual(rows[1].value, "END_TEST")
+            rows[1].onClick(rows[1].value, rows[1])
+            assertFalse(NS.IsTestMode(), "End test ends test mode")
+            m:Hide()
+            m:__fire("OnHide")
+            assertFalse(Br.MenuOpen())
+            -- The kit's Hide fires no OnHide: release the test-mode rows (their bar timers) as the client does.
+            Br.HideTooltip()
+            panel:__fire("OnHide")
+        end)
+    end)
+end)
+
+test("round6 review: the Set waypoint button keeps the skin's hover look beside its own tooltip", function()
+    withTrainerPopup("fistWeapons", { tomtom = true }, function(f)
+        local function rgb(b) local r, g, bl = b.text:GetTextColor() return ("%.3f,%.3f,%.3f"):format(r, g, bl) end
+        f.waypoint:GetScript("OnLeave")(f.waypoint)   -- the rest look (the mock fires no OnEnable)
+        local rest = rgb(f.waypoint)
+        f.waypoint:GetScript("OnEnter")(f.waypoint)
+        assertTrue(rgb(f.waypoint) ~= rest, "the hover repaints the label, as Print to chat's does")
+        f.waypoint:GetScript("OnLeave")(f.waypoint)
+        assertEqual(rgb(f.waypoint), rest, "and leaving puts it back")
+        f.print:GetScript("OnLeave")(f.print)
+        local pRest = rgb(f.print)
+        f.print:GetScript("OnEnter")(f.print)
+        assertTrue(rgb(f.print) ~= pRest, "Print to chat's hover, for the comparison")
+        f.print:GetScript("OnLeave")(f.print)
+    end)
+end)
+
+test("round6 review: schemaVersion 8 keeps an empty stored profile on Classic too; only a fresh install starts new", function()
+    local sv = rawget(_G, "SkillMasterDB")
+    sv.profiles = sv.profiles or {}
+    sv.profiles["R6-Untouched"] = {}
+    NS.db.global.schemaVersion = 7
+    NS:RunMigrations()
+    local p = sv.profiles["R6-Untouched"]
+    assertEqual(p.tooltips and p.tooltips.ldb and p.tooltips.ldb.style, "classic", "an empty stored profile is an existing one")
+    sv.profiles["R6-Untouched"] = {}
+    NS.db.global.schemaVersion = 0
+    NS:RunMigrations()
+    assertTrue(sv.profiles["R6-Untouched"].tooltips == nil, "a fresh install's profile starts on the Main window style")
+    sv.profiles["R6-Untouched"] = nil
+end)
+
+test("round6 review: schemaVersion 10 keeps Spell and Defense collapsed on a profile from before R6-8", function()
+    local sv = rawget(_G, "SkillMasterDB")
+    sv.profiles = sv.profiles or {}
+    sv.profiles["R6-Old10"] = { bars = { height = 15 } }
+    sv.profiles["R6-Open10"] = { layout = { blocks = { stats_spell = { collapsed = false, order = 3 } } } }
+    sv.profiles["R6-Empty10"] = {}
+    NS.db.global.schemaVersion = 6
+    NS:RunMigrations()
+    assertTrue(NS.SCHEMA_VERSION >= 10, "step 10 is in the ladder")
+    local old = sv.profiles["R6-Old10"].layout.blocks
+    assertEqual(old.stats_spell.collapsed, true, "Spell stays collapsed, the old default")
+    assertEqual(old.stats_defense.collapsed, true, "Defense too")
+    assertTrue(old.stats_base == nil and old.weapon == nil, "no other block is written")
+    local open = sv.profiles["R6-Open10"].layout.blocks
+    assertEqual(open.stats_spell.collapsed, false, "an expanded block the player chose stays expanded")
+    assertEqual(open.stats_spell.order, 3, "and keeps the rest")
+    assertEqual(open.stats_defense.collapsed, true)
+    assertEqual(sv.profiles["R6-Empty10"].layout.blocks.stats_spell.collapsed, true, "an empty stored profile is existing")
+    -- A build already on the R6-8 default (stamp 7 or later) and a fresh install pass through.
+    for _, from in ipairs({ 7, 9, 0 }) do
+        sv.profiles["R6-Later10"] = { bars = { height = 15 } }
+        NS.db.global.schemaVersion = from
+        NS:RunMigrations()
+        assertTrue(sv.profiles["R6-Later10"].layout == nil, "from " .. from .. ": nothing written")
+    end
+    for _, k in ipairs({ "R6-Old10", "R6-Open10", "R6-Empty10", "R6-Later10" }) do sv.profiles[k] = nil end
 end)

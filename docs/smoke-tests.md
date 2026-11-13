@@ -136,7 +136,8 @@ the checks below that cover each item:
   Threshold markers off has both new switches off after the update.
 - **SM-DISP-35** (round 6, R6-8) Create a new profile (Profiles > New) and switch to it: every block,
   Spell and Defense included, is expanded in the window and in the LDB tooltip. Switch back to an
-  existing profile: a block you had collapsed there (by a click) stays collapsed.
+  existing profile: a block you had collapsed there (by a click) stays collapsed. Load a profile from
+  before round 6 that never touched Spell or Defense: both stay collapsed after the update.
 - **SM-DISP-22** (round 3) Collapse every block: the window keeps its height and its rows area goes
   empty. Layout > Shrink to fit the rows on: the window shrinks to its headers. The lock mark stands
   at the top right with the journal, settings, Expand / Collapse all and close marks; nothing left of
@@ -227,6 +228,12 @@ the checks below that cover each item:
   to unpin. Left-click the stats feed: the window toggles; right-click: the Broker page. Broker >
   Tooltip > Stats feed sections: turn Utility off: the stats tooltip leaves it out. Rows: a stat's
   LDB tooltip eye leaves it out of the stats feed's tooltip.
+- **SM-DISP-41** (round 6, review) On a new profile run `/sm test`, hover the Skill Master feed and
+  right-click the amber strip at the top of its tooltip: the End test menu draws whole, over the
+  tooltip, and the tooltip stays while it is open; click End test: test mode ends. A profile from
+  before this build that never changed a setting opens the feed tooltip on Classic.
+- **SM-DISP-42** (round 6, review) Open the trainer popup on a weapon master with TomTom or the map
+  pin available: hover Set waypoint: its label takes the skin's hover color, as Print to chat's does.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon with TomTom loaded,
   then without it: the primary button reads `Set waypoint` both times (no `(TomTom)`, `(map pin)` or
   `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
