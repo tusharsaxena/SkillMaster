@@ -7,7 +7,7 @@ login; each page body builds on its first show.
 |---|---|---|
 | Ka0s Skill Master (landing) | none | The logo, the tagline and the slash command list |
 | General | Master controls, Skin, Keybindings | Master controls, the skin, the key binding |
-| Layout | Window, Blocks, Detached windows, Block order | The window's width, maximum height, block spacing, summary strip, column count (one or two) and frame strata; per block show, dock, collapse, lock and scale; the weapon block's compact filter (equipped and below cap only); every detached window's scale, opacity, title band, strata, background and border; the block order, dragged |
+| Layout | Window, Blocks, Detached windows, Block order | The window's width, maximum height, block spacing, summary strip, column count (one or two) and frame strata; per block show, dock, collapse, lock, scale and Show rows (its header's filter, round 7); the weapon block's compact filter (equipped and below cap only); every detached window's scale, opacity, title band, strata, background and border; the block order, dragged |
 | Bars | Bar, Colors, Text, Marks, Icons | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom) and position; Rank tier colors (each tier a darker shade of the category color, By category only), thresholds in the window (off by default) and in the row tooltip (on; round 6, R6-4), timer and spark (off by default); the rows' icons (show, size, zoom, and the composed border on the icon family with Use the row's color). No preview bar: the open window restyles live (owner feedback round 4) |
 | Skills | General | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default) |
 | Rows | Show and hide | Every catalog skill and stat once, under the window's block headings in its block order: a boxed row (icon, name) with two eyes, the main window's Hide (`skills.hidden.<key>`, `stats.hidden.<key>`) and the LDB tooltip's (`broker.tooltip.hiddenSkills.<key>`, `hiddenStats.<key>`); a Window / LDB tooltip caption line on top; each heading's two eyes show that group's hidden rows again (round 5, R5-11..R5-13) |
@@ -127,9 +127,12 @@ before every render (`spec.beforeRender`).
 
 The Weapon skills subsection adds *Equipped and below cap only*
 (`layout.blocks.weapon.belowCapOnly`): the detached block keeps the equipped weapons and the
-learned skills below their cap, redrawn on the write's `LAYOUT_CHANGED`. *Show rows*
-(`layout.blocks.weapon.filter`, round 5, R5-10) is the header's filter mark as a dropdown: All,
-Learned, Equipped, Below cap, for the main window, the detached frame and a merged section alike. The Journal's size
+learned skills below their cap, redrawn on the write's `LAYOUT_CHANGED`. Every block's subsection
+has *Show rows* (`layout.blocks.<id>.filter`; the weapon block's, round 5, R5-10; every block's,
+round 7, R7-1), the header's filter mark as a dropdown of the block's own set: Primary and Secondary
+All, Below cap, At cap (needs training); Weapon Skills All, Learned, Equipped, Below cap; Other
+skills All, Learned, Below cap; each stat section All, Non-zero. It narrows the main window, the
+detached frame, a merged section and both LDB tooltip styles alike. The Journal's size
 (`journal.size`, the resize grip) and every `point` are drag state with no row.
 
 ## Broker

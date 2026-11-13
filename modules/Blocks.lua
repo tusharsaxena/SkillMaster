@@ -15,10 +15,13 @@ local addonName, NS = ...
 --   (owner feedback round 3): "name" (the catalog's: skills by name, stats as defined), "value"
 --   (high first), "valueAsc" (low first) or "progress" (nearest its max first); the LDB tooltip
 --   sorts its sections the same way.
--- NS.Blocks.FilterOf(id) / :SetFilter(id, mode) / .FilterMenuRows(id) / .FilterMenu(id, anchor) /
---   .PaintFilter(mark, id): the Weapon Skills block's row filter (owner feedback round 5, R5-10):
---   "all", "learned", "equipped" (main hand, off hand, ranged) or "belowCap", from its header's
---   filter mark on every surface that draws the block; B.Entries answers the rows it took out second.
+-- NS.Blocks.FilterOf(id) / :SetFilter(id, mode) / .FiltersOf(id) / .OffersFilter(id, mode) /
+--   .FilterMenuRows(id) / .FilterMenu(id, anchor) / .PaintFilter(mark, id): each block's row filter
+--   (Weapon Skills', owner feedback round 5, R5-10; every block's, round 7, R7-1), its set in
+--   B.FILTER_SETS: the professions "all", "belowCap", "atCap" (a rank left to train); weapons "all",
+--   "learned", "equipped" (main hand, off hand, ranged), "belowCap"; other skills "all", "learned",
+--   "belowCap"; each stat section "all", "nonZero". Picked from the header's filter mark on every
+--   surface that draws the block; B.Entries answers the rows it took out second.
 -- NS.Blocks.source: nil for the live models, or fn() -> skills, stats (test mode's preview, T5.2;
 --   the suites' fixtures).
 
@@ -149,7 +152,7 @@ end
 
 --- Give block `id` the row filter `mode` (its header's filter mark, round 5). Through the seam.
 function B:SetFilter(id, mode)
-    if not (B.FILTERABLE[id] and B.FILTER_LABEL[mode]) then return false end
+    if not B.OffersFilter(id, mode) then return false end
     return seam(path(id, "filter"), mode)
 end
 
@@ -447,38 +450,82 @@ function B.PaintSort(mark, id)
 end
 
 -- ---------------------------------------------------------------------------------------------
--- Filtering (owner feedback round 5, R5-10): the Weapon Skills block's rows narrowed from its
--- header's filter mark, a menu of B.FILTERS with the current one ticked
+-- Filtering (owner feedback round 5, R5-10; every block, round 7, R7-1): a block's rows narrowed
+-- from its header's filter mark, a menu of its own set (B.FILTER_SETS) with the current one ticked
 -- ---------------------------------------------------------------------------------------------
 
-B.FILTERS = { "all", "learned", "equipped", "belowCap" }
-B.FILTERABLE = { weapon = true }
+-- Each block's filters, "all" first. A profession: below its rank's cap, or at it with a rank left
+-- to train. A stat section: the rows whose value is not 0 (or 0%).
+local SKILL_CAP = { "all", "belowCap", "atCap" }
+local STAT_SET = { "all", "nonZero" }
+B.FILTER_SETS = {
+    primary = SKILL_CAP, secondary = SKILL_CAP,
+    weapon = { "all", "learned", "equipped", "belowCap" },
+    other = { "all", "learned", "belowCap" },
+    stats_base = STAT_SET, stats_spell = STAT_SET, stats_defense = STAT_SET, stats_utility = STAT_SET,
+}
+B.FILTERABLE = {}
+for id in pairs(B.FILTER_SETS) do B.FILTERABLE[id] = true end
 B.FILTER_ICON = "ph:funnel"
 B.FILTER_LABEL = {
     all = L["All"], learned = L["Learned"], equipped = L["Equipped"], belowCap = L["Below cap"],
+    atCap = L["At cap (needs training)"], nonZero = L["Non-zero"],
 }
 
---- Block `id`'s row filter: "all" for a block without one, or an unset or unknown value.
+--- Block `id`'s filters in menu order ({ "all" } for an unknown block).
+function B.FiltersOf(id) return B.FILTER_SETS[id] or { "all" } end
+
+--- Whether `mode` is one of block `id`'s filters.
+function B.OffersFilter(id, mode)
+    for _, m in ipairs(B.FILTER_SETS[id] or {}) do if m == mode then return true end end
+    return false
+end
+
+--- Block `id`'s row filter: "all" for an unset value or one its set does not offer.
 function B.FilterOf(id)
-    if not B.FILTERABLE[id] then return "all" end
     local s = B.Settings(id)
     local mode = s and s.filter
-    return B.FILTER_LABEL[mode] and mode or "all"
+    return B.OffersFilter(id, mode) and mode or "all"
 end
 
 local function learned(e) return e.learned ~= false end
 
+local function capped(e)
+    local max = tonumber(e.max) or 0
+    return learned(e) and max > 0, max
+end
+
+-- A stat's shown value is zero: its display has no digit but 0 ("0", "0.0%", "0 (0.0%)").
+local function zeroStat(e)
+    if e.display ~= nil then return not tostring(e.display):find("[1-9]") end
+    return (tonumber(e.value) or 0) == 0
+end
+
+-- An unlearned skill is in no filter but All (round 7).
 local KEEP = {
     learned  = function(e) return learned(e) end,
-    equipped = function(e, ctx) return ctx.equipped[e.key] == true end,
-    belowCap = function(e) return learned(e) and (tonumber(e.max) or 0) > 0 and (tonumber(e.rank) or 0) < tonumber(e.max) end,
+    equipped = function(e, ctx) return ctx.equipped()[e.key] == true end,
+    belowCap = function(e)
+        local on, max = capped(e)
+        return on and (tonumber(e.rank) or 0) < max
+    end,
+    atCap    = function(e)
+        local on, max = capped(e)
+        if not (on and (tonumber(e.rank) or 0) >= max) then return false end
+        return NS.Trainers ~= nil and NS.Trainers:NextRank(e.key, e.rank, max) ~= nil
+    end,
+    nonZero  = function(e) return not zeroStat(e) end,
 }
 
 --- `items` narrowed to block `id`'s filter, in place of a new list; answers it and how many left.
 local function applyFilter(id, items)
     local keep = KEEP[B.FilterOf(id)]
     if not keep then return items, 0 end
-    local ctx = { equipped = NS.SkillHelpers.EquippedWeaponSkills() }
+    local eq
+    local ctx = { equipped = function()
+        eq = eq or NS.SkillHelpers.EquippedWeaponSkills()
+        return eq
+    end }
     local out = {}
     for _, r in ipairs(items) do
         if keep(r.entry, ctx) then out[#out + 1] = r end
@@ -489,7 +536,7 @@ end
 --- The menu the filter mark opens: a title, then one radio row per filter, the current one ticked.
 function B.FilterMenuRows(id)
     local rows = { { title = true, label = L["Show"] } }
-    for _, mode in ipairs(B.FILTERS) do
+    for _, mode in ipairs(B.FiltersOf(id)) do
         rows[#rows + 1] = { value = mode, label = B.FILTER_LABEL[mode], radio = true,
             selected = function() return B.FilterOf(id) == mode end,
             onClick = function() B:SetFilter(id, mode) end }
@@ -540,7 +587,8 @@ function B.Entries(id, skills, stats, isHidden)
         local entries, removed = applyFilter(id, skillEntries(skills, d.filter, isHidden))
         return B.SortEntries(id, entries), removed
     end
-    return B.SortEntries(id, statEntries(stats, d.filter, isHidden)), 0
+    local entries, removed = applyFilter(id, statEntries(stats, d.filter, isHidden))
+    return B.SortEntries(id, entries), removed
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -567,8 +615,8 @@ function Header:SetBlock(id, collapsed, docked)
     self.detach.tip = docked and L["Detach this block into its own frame"] or L["Dock this block in the main window"]
     B.PaintSort(self.sort, id)
     self.docked = docked
-    -- The filter mark (round 5, R5-10), left of sort on the weapon block only; restore moves left of
-    -- whichever mark is the last one shown.
+    -- The filter mark (round 5, R5-10; every block, round 7, R7-1), left of sort; restore moves left
+    -- of whichever mark is the last one shown.
     B.PaintFilter(self.filter, id)
     local left = self.filter:IsShown() and self.filter or self.sort
     self.restore:ClearAllPoints()
@@ -634,7 +682,7 @@ local function buildHeader(parent)
     h.sort = NS.Chrome.HeaderMark(h, "list", "=", onSortClick)
     NS.Chrome.SetRestToken(h.sort, "text.heading")
     h.sort:SetPoint("RIGHT", h.detach, "LEFT", -4, 0)
-    -- The filter mark (round 5, R5-10), left of sort, on the weapon block only (B.PaintFilter).
+    -- The filter mark (round 5, R5-10; on every block, round 7, R7-1), left of sort (B.PaintFilter).
     h.filter = NS.Chrome.HeaderMark(h, B.FILTER_ICON, "Y", function(self) B.FilterMenu(h.id, self) end)
     h.filter.baseToken = "text.heading"
     NS.Chrome.SetRestToken(h.filter, h.filter.baseToken)

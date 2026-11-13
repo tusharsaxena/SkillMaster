@@ -53,19 +53,20 @@ NS.defaults = {
             -- ... }, ... } }, each column a list of detached block ids, top to bottom.
             groups = {},
             -- sort: the block's row order (modules/Blocks.lua B.SORTS; owner feedback round 3).
+            -- filter: the header's filter mark (modules/Blocks.lua B.FILTER_SETS; the weapon block's,
+            -- round 5, R5-10; every block's, round 7, R7-1), "all" by default.
             blocks = {
-                primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
-                secondary     = { docked = true, order = 2, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
+                primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
+                secondary     = { docked = true, order = 2, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
                 -- belowCapOnly: the detached compact preset shows only the equipped weapons and the
                 -- skills below their cap (Detached.dc.html; Layout > Blocks > Weapon skills).
-                -- filter: the header's filter mark (modules/Blocks.lua B.FILTERS; round 5, R5-10).
                 weapon        = { docked = true, order = 3, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name",
                                   belowCapOnly = false, filter = "all" },
-                other         = { docked = true, order = 4, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
-                stats_base    = { docked = true, order = 5, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
-                stats_spell   = { docked = true, order = 6, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
-                stats_defense = { docked = true, order = 7, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
-                stats_utility = { docked = true, order = 8, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name" },
+                other         = { docked = true, order = 4, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
+                stats_base    = { docked = true, order = 5, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
+                stats_spell   = { docked = true, order = 6, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
+                stats_defense = { docked = true, order = 7, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
+                stats_utility = { docked = true, order = 8, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
             },
         },
         -- Rows a player hid from the row menu (T3.3) or the Skills and Stats pages, whether unlearned

@@ -3,13 +3,13 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-688%2F688_passing-green)
+![Tests](https://img.shields.io/badge/Tests-695%2F695_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
 Skill Master puts every skill your character has into one window of bars you can style: each weapon skill, your primary and secondary professions, Defense, Lockpicking and Riding, with your character stats beside them. A bar shows your rank against its cap, and anything raising it (a racial, an item, a fishing lure, a buff) as its own colored segment with a timer when it runs out. Unlearned skills tell you where to train them.
 
-- Skills in four groups (Primary, Secondary, Weapon, Other) and stats in four more, each a block you can collapse, reorder, or pop out into its own frame.
+- Skills in four groups (Primary, Secondary, Weapon, Other) and stats in four more, each a block you can collapse, reorder, sort, filter (say, only the professions at their cap that need training, or only the stats that aren't zero), or pop out into its own frame.
 - Hover tooltips with the bonus breakdown, the next rank and its trainer, how far a weapon is behind its cap, and gathering and fishing hints.
 - Click a profession to open it, an unlearned skill for its trainers, nearest first with their distance in yards, and a waypoint (a map pin with Skill Master's own arrow pointing the way, or directions in chat).
 - Two broker feeds for Titan Panel and the like: Skill Master, its tooltip your skills, and Skill Master Stats, its tooltip your stat blocks and its text a stat you pin from a stat row's menu; alerts when a profession caps or a weapon falls behind, a Journal with this session's skill-ups and an overview of your alts.
@@ -80,5 +80,5 @@ The backlog lives on GitHub: please file bugs and ideas at https://github.com/tu
 ## Credits
 
 - Open Iconic by Waybury, MIT license, https://github.com/iconic/open-iconic (the window and console marks).
-- Phosphor Icons, MIT license, https://github.com/phosphor-icons/core (the action mark on every skill row, the Progress sort mark and the Weapon Skills filter mark).
+- Phosphor Icons, MIT license, https://github.com/phosphor-icons/core (the action mark on every skill row, the Progress sort mark and every block's filter mark).
 - The waypoint arrow (`media/waypoint/`) is original art made for Skill Master, under the addon's MIT license.

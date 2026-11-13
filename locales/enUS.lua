@@ -795,7 +795,6 @@ L["Show"] = true
 L["Showing: %s. Click to filter."] = true
 L["No rows match this filter."] = true
 L["Show rows"] = true
-L["Which of the block's rows show, here, in its detached frame and in a merged window: all of them, the skills you have learned, the weapons you have equipped (main hand, off hand, ranged), or the learned skills still below their cap. The filter mark on its header picks it. The LDB tooltip is not filtered."] = true
 
 -- The Rows page (round 5, R5-11..R5-13: settings/Rows.lua)
 L["Rows"] = true
@@ -843,6 +842,14 @@ L["Arrow scale"] = true
 L["Size of Skill Master's waypoint arrow."] = true
 L["Right-click to clear the waypoint. Drag to move the arrow."] = true
 L["You have arrived: %s"] = true
+
+-- ---- Round 7, R7-1: a filter on every block (modules/Blocks.lua B.FILTER_SETS, settings/Layout.lua) ----
+L["At cap (needs training)"] = true
+L["Non-zero"] = true
+L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, the learned skills still below their rank's cap, or the learned skills at their cap with a higher rank to train. The filter mark on its header picks it."] = true
+L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, the skills you have learned, the weapons you have equipped (main hand, off hand, ranged), or the learned skills still below their cap. The filter mark on its header picks it."] = true
+L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, the skills you have learned, or the learned skills still below their cap. The filter mark on its header picks it."] = true
+L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, or only the stats whose value is not 0. The filter mark on its header picks it."] = true
 
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.

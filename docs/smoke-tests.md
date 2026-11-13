@@ -186,16 +186,16 @@ the checks below that cover each item:
   and onto another detached window's side (the green strip lights): release merges it there. Lock
   frame on: the sub-header does not drag. In combat the split waits for the end of combat.
 - **SM-DISP-29** (round 5, R5-10: the weapon filter) The Weapon Skills header has a funnel mark left
-  of its sort mark, no other header does; its tooltip reads `Showing: All. Click to filter.` Click it:
+  of its sort mark (every header has one since round 7, SM-DISP-51); its tooltip reads `Showing: All. Click to filter.` Click it:
   a menu under the mark, Show, then All (ticked), Learned, Equipped, Below cap. Learned: the
   not-learned weapons leave. Equipped: only the main hand, off hand and ranged weapons' skills stay,
   and the funnel turns the accent color; swap the main-hand weapon for another type: the block follows
   at once. Unequip the main hand with Equipped on and no Unarmed row: the header stays, with
   `No rows match this filter.` under it. Below cap: only learned skills under their cap. Click the
   mark again with the menu open: it closes. Detach the block: the band carries the funnel; merge it
-  with another detached block: its sub-header carries it, the other section's does not. Layout >
+  with another detached block: its sub-header carries it (the other section's its own). Layout >
   Blocks > Weapon Skills > Show rows shows the same choice. `/reload` and a profile switch: the
-  filter is the profile's. The LDB tooltip still lists every weapon.
+  filter is the profile's. Every other block has its own funnel since round 7 (SM-DISP-51).
 - **SM-DISP-30** (round 5, R5-14: the trainer popup's wrap) Open the trainer popup on an unlearned
   weapon (Fist Weapons, Staves): a weapon master's `Also teaches:` line wraps onto a second line
   inside its card instead of being cut off, the card is taller by that line and the window by every
@@ -276,6 +276,19 @@ the checks below that cover each item:
   height; dragging does nothing), and no empty gutter shows. Set Tooltips > LDB tooltip > Height to
   200 and hover: the thumb is its normal size and color and drags the body. Switch skins: both looks
   follow the skin.
+- **SM-DISP-51** (round 7, R7-1: a filter on every block) Every block header in the main window
+  carries the funnel left of its sort mark, in the title's color, its marks one size on one line.
+  Primary Professions' funnel: Show, then All (ticked), Below cap, At cap (needs training). Below
+  cap: only learned professions under their rank's cap. At cap: only learned professions at their
+  rank's cap with a higher rank to train (a profession at Artisan's top cap leaves); the funnel turns
+  the accent color. Unlearned professions show under All only. Secondary Skills the same. Other
+  skills: All, Learned, Below cap. Each stat section: All, Non-zero; Non-zero leaves out every row
+  reading `0` or `0.0%` (Armor `0 (0.0%)` too); a section left with nothing keeps its header and
+  `No rows match this filter.` Detach a stat block: its band carries the funnel; merge two detached
+  blocks: both sub-headers carry it. Layout > Blocks > each block > Show rows offers the same set.
+  Hover each feed in both Tooltip styles: the sections follow their filters, and the Main window
+  style's headers show the funnel (accent while it narrows) without taking a click. `/reload` and a
+  profile switch: each filter is the profile's.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

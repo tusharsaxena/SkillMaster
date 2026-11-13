@@ -105,11 +105,14 @@ through `NS.SetByPath` (architecture-§5): the block header and the detached fra
 and `/sm set`. The `docked` and `collapsed`
 rows' `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`) stores the value and waits out combat;
 `order` stores plainly, its `onChange` `NS.Blocks.OrderChanged`. The seam logs each write
-(debug-logging-§10). `shown`, `scale` and `locked` are plain rows. `sort` (round 3) and the weapon
-block's `filter` (round 5, R5-10: `all`, `learned`, `equipped`, `belowCap`) are plain rows too, each
-written from its header mark's menu through the seam (`NS.Blocks:SetSort` from the sort mark's,
-round 6, `NS.Blocks:SetFilter` from the filter mark's); the filter narrows the block in the main window, its detached
-frame and its merged section (`NS.Blocks.Entries`), not the LDB tooltip. `skills.hidden` /
+(debug-logging-§10). `shown`, `scale` and `locked` are plain rows. `sort` (round 3) and each
+block's `filter` (the weapon block's, round 5, R5-10; every block's, round 7, R7-1; each block's set
+in `NS.Blocks.FILTER_SETS`: Primary and Secondary `all`, `belowCap`, `atCap`; Weapon Skills `all`,
+`learned`, `equipped`, `belowCap`; Other skills `all`, `learned`, `belowCap`; each stat section
+`all`, `nonZero`) are plain rows too, each written from its header mark's menu through the seam
+(`NS.Blocks:SetSort` from the sort mark's, round 6, `NS.Blocks:SetFilter` from the filter mark's,
+which refuses a mode outside the block's set); the filter narrows the block in the main window, its
+detached frame, its merged section and both LDB tooltip styles (`NS.Blocks.Entries`). `skills.hidden` /
 `stats.hidden` are sets: one Hide row per catalog skill and per stat (get / set: false clears the
 entry), and one undrawn row per whole set (type `set`, default `{}`), which the row menu's Hide
 writes for a key with no row of its own (an `other:` skill) and the page's Defaults resets. The
@@ -336,8 +339,13 @@ same tainted `OnShow` error (Known Limitations).
   unverified in game.
 - The Weapon Skills filter (round 5, R5-10) reads the main hand, off hand and ranged slots as the
   equipped marker does (`NS.SkillHelpers.EquippedWeaponSkills`): an empty main hand is Unarmed, and
-  a weapon whose item info is not cached yet names no skill until the next equipment change. The
-  LDB tooltip is not filtered. A block its filter empties keeps its header and a muted line.
+  a weapon whose item info is not cached yet names no skill until the next equipment change. A block
+  its filter empties keeps its header and a muted line.
+- The professions' At cap (needs training) filter (round 7, R7-1) asks `NS.Trainers:NextRank` per
+  row, so it answers from the bundled rank ladders: a skill at its rank's cap with no ladder (none
+  ships for it) never shows there. Unlearned rows show under All only. A stat section's Non-zero
+  reads the row's shown value (no digit but 0: `0`, `0.0%`, `0 (0.0%)`), so a value that rounds to
+  zero counts as zero.
 - The trainer popup's "Also teaches" line (round 5, R5-14) wraps to four lines and the card grows by
   the line's measured height (`GetStringHeight`); a measure the client answers secret, nil or zero
   reads as one line. The card's tooltip always carries the whole list. Past

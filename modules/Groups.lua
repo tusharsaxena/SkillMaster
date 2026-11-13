@@ -563,8 +563,8 @@ local function onSubDragStop()
     if NS.GroupsSnap then NS.GroupsSnap.Drop() end
 end
 
--- A section's sub-header: chevron, title, filter mark (the weapon block's, round 5, R5-10), sort
--- mark, split mark; and the muted line an emptied filter shows under it.
+-- A section's sub-header: chevron, title, filter mark (round 5, R5-10; every block's, round 7,
+-- R7-1), sort mark, split mark; and the muted line an emptied filter shows under it.
 local function buildSub(f)
     local sh = CreateFrame("Button", nil, f.body)
     sh.owner = f

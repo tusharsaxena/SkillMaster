@@ -227,3 +227,240 @@ test("round7 scroll bar: the LDB panel builds its bar always shown", function()
     end
     NS.Broker.HideTooltip()
 end)
+
+-- ── R7-1: a filter on every block ────────────────────────────────────────────────────────────
+
+local B7, W7, D7, G7 = NS.Blocks, NS.MainWindow, NS.Detached, NS.Groups
+
+local function sk(key, name, category, rank, max, learned)
+    return { key = key, name = name, category = category, rank = rank, max = max, modifier = 0,
+             tempPoints = 0, learned = learned ~= false }
+end
+
+-- Tailoring at its Journeyman cap (a rank to train), Alchemy at the top rank (none), Mining below
+-- its cap, Herbalism not learned; Cooking at cap with a rank, Fishing below; Defense below cap,
+-- Lockpicking at its cap, Riding not learned. Each stat group: a non-zero row and its zero rows.
+local function r7Models()
+    local byKey = {
+        tailoring = sk("tailoring", "Tailoring", "primary", 150, 150),
+        alchemy   = sk("alchemy", "Alchemy", "primary", 300, 300),
+        mining    = sk("mining", "Mining", "primary", 90, 150),
+        herbalism = sk("herbalism", "Herbalism", "primary", 0, 0, false),
+        cooking   = sk("cooking", "Cooking", "secondary", 75, 75),
+        fishing   = sk("fishing", "Fishing", "secondary", 40, 75),
+        swords    = sk("swords", "Swords", "weapon", 80, 110),
+        defense   = sk("defense", "Defense", "other", 100, 110),
+        lockpick  = sk("lockpick", "Lockpicking", "other", 50, 50),
+        riding    = sk("riding", "Riding", "other", 0, 0, false),
+    }
+    local function st(key, value, display) return { key = key, label = key, value = value, display = display, pct = value, markers = {} } end
+    local stats = {
+        base    = { st("str", 54, "54"), st("rap", 0, "0") },
+        spell   = { st("sdmg", 0, "0"), st("scrit", 0, "0.0%"), st("mp5", 12, "12") },
+        defense = { st("armor", 0, "0 (0.0%)"), st("fire", 15, "15") },
+        utility = { st("speed", 0, "0%") },
+    }
+    local skills = { byKey = byKey, order = {
+        primary = { "tailoring", "alchemy", "mining", "herbalism" }, secondary = { "cooking", "fishing" },
+        weapon = { "swords" }, other = { "defense", "lockpick", "riding" } } }
+    return skills, stats
+end
+
+--- The fixture models as the window's source, NextRank answering a rank only for the skills that
+--- have one (Tailoring, Cooking, Mining), then every block's filter put back to All.
+local function withR7(fn)
+    local skills, stats = r7Models()
+    local saved = { B7.source, NS.Trainers.NextRank, NS.Widgets.ContextMenu }
+    local HAS = { tailoring = true, cooking = true, mining = true }
+    B7.source = function() return skills, stats end
+    NS.Trainers.NextRank = function(_, key) return HAS[key] and { rankName = "Next", cap = 999 } or nil end
+    local ok, err = pcall(fn, skills, stats)
+    B7.source, NS.Trainers.NextRank, NS.Widgets.ContextMenu = saved[1], saved[2], saved[3]
+    for _, id in ipairs(NS.BLOCKS) do
+        local s = NS.db.profile.layout.blocks[id]
+        s.filter, s.docked, s.collapsed = "all", true, false
+    end
+    NS.db.profile.layout.groups = {}
+    D7.Refresh()
+    W7.Hide()
+    M.__fireTimers()
+    if not ok then error(err, 0) end
+end
+
+local function keys(list)
+    local out = {}
+    for _, r in ipairs(list) do out[#out + 1] = r.entry.key end
+    return table.concat(out, ",")
+end
+
+local function setF(id, mode)
+    local ok, err = NS.SetByPath("layout.blocks." .. id .. ".filter", mode)
+    assertTrue(ok, id .. " " .. mode .. ": " .. tostring(err))
+end
+
+test("round7 filters: each block's own set, a Show rows row for every block, All by default", function()
+    local want = {
+        primary = "all,belowCap,atCap", secondary = "all,belowCap,atCap",
+        weapon = "all,learned,equipped,belowCap", other = "all,learned,belowCap",
+        stats_base = "all,nonZero", stats_spell = "all,nonZero", stats_defense = "all,nonZero", stats_utility = "all,nonZero",
+    }
+    for _, id in ipairs(NS.BLOCKS) do
+        assertEqual(table.concat(B7.FiltersOf(id), ","), want[id], id .. ": its set")
+        assertEqual(NS.defaults.profile.layout.blocks[id].filter, "all", id .. ": All on a new profile")
+        local row = NS.FindSchemaRow("layout.blocks." .. id .. ".filter")
+        assertTrue(row ~= nil, id .. ": a Layout > Blocks Show rows row")
+        assertEqual(row.default, "all")
+        local values = {}
+        for _, v in ipairs(row.values) do values[#values + 1] = v.value end
+        assertEqual(table.concat(values, ","), want[id], id .. ": the dropdown is the menu")
+        assertTrue(type(row.desc) == "string" and row.desc ~= "" and not row.desc:find("not filtered", 1, true),
+            id .. ": its tooltip, which no longer says the LDB tooltip is unfiltered")
+        local menu = {}
+        for _, r in ipairs(B7.FilterMenuRows(id)) do if r.radio then menu[#menu + 1] = r.value end end
+        assertEqual(table.concat(menu, ","), want[id], id .. ": the header menu")
+    end
+    assertEqual(B7.FILTER_LABEL.atCap, NS.L["At cap (needs training)"])
+    assertEqual(B7.FILTER_LABEL.nonZero, NS.L["Non-zero"])
+end)
+
+test("round7 filters: Primary and Secondary narrow to below cap or at cap with a rank to train; unlearned is All only", function()
+    withR7(function()
+        assertEqual(keys(B7.Entries("primary")), "tailoring,alchemy,mining,herbalism", "All")
+        setF("primary", "belowCap")
+        local e, removed = B7.Entries("primary")
+        assertEqual(keys(e), "mining", "below cap: learned and under its rank's max")
+        assertEqual(removed, 3)
+        setF("primary", "atCap")
+        assertEqual(keys(B7.Entries("primary")), "tailoring", "at cap with a higher rank; Alchemy's top rank is out, Herbalism too")
+        setF("secondary", "atCap")
+        assertEqual(keys(B7.Entries("secondary")), "cooking")
+        setF("secondary", "belowCap")
+        assertEqual(keys(B7.Entries("secondary")), "fishing")
+        assertFalse(B7:SetFilter("primary", "learned"), "a filter outside the set is refused")
+        NS.db.profile.layout.blocks.primary.filter = "equipped"
+        assertEqual(B7.FilterOf("primary"), "all", "a stored filter the set does not offer reads All")
+    end)
+end)
+
+test("round7 filters: Other skills offers Learned and Below cap", function()
+    withR7(function()
+        setF("other", "learned")
+        assertEqual(keys(B7.Entries("other")), "defense,lockpick")
+        setF("other", "belowCap")
+        assertEqual(keys(B7.Entries("other")), "defense")
+        assertFalse(B7:SetFilter("other", "equipped"), "no Equipped on Other skills")
+    end)
+end)
+
+test("round7 filters: a stat section's Non-zero leaves out 0 and 0% rows, an emptied one keeps its muted line", function()
+    withR7(function()
+        setF("stats_base", "nonZero")
+        assertEqual(keys(B7.Entries("stats_base")), "str")
+        setF("stats_spell", "nonZero")
+        local e, removed = B7.Entries("stats_spell")
+        assertEqual(keys(e), "mp5", "0 and 0.0% out")
+        assertEqual(removed, 2)
+        setF("stats_defense", "nonZero")
+        assertEqual(keys(B7.Entries("stats_defense")), "fire", "0 (0.0%) armor out")
+        setF("stats_utility", "nonZero")
+        e, removed = B7.Entries("stats_utility")
+        assertEqual(#e, 0)
+        assertEqual(B7.FilterNote(e, removed), NS.L["No rows match this filter."], "the muted line")
+    end)
+end)
+
+test("round7 filters: every window header carries the funnel, accent while it narrows, and its menu", function()
+    withR7(function()
+        W7.Show()
+        W7.Refresh(true)
+        local seen = {}
+        for _, h in ipairs(W7.Headers()) do
+            seen[#seen + 1] = h.id
+            assertTrue(h.filter:IsShown(), h.id .. ": the filter mark")
+            assertEqual(h.filter.restToken, "text.heading", h.id .. ": the title's tint on All")
+        end
+        assertEqual(#seen, #NS.BLOCKS, "every block drew a header")
+        local opened
+        NS.Widgets.ContextMenu = function(anchor, rows) opened = { anchor = anchor, rows = rows } return {} end
+        local h
+        for _, x in ipairs(W7.Headers()) do if x.id == "stats_utility" then h = x end end
+        h.filter:__fire("OnClick", "LeftButton")
+        assertTrue(opened ~= nil and opened.anchor == h.filter, "the stat header's funnel opens the menu")
+        for _, r in ipairs(opened.rows) do if r.value == "nonZero" then r.onClick() end end
+        M.__fireTimers()
+        assertEqual(NS.db.profile.layout.blocks.stats_utility.filter, "nonZero", "the pick is stored")
+        for _, x in ipairs(W7.Headers()) do if x.id == "stats_utility" then h = x end end
+        assertEqual(h.filter.restToken, "text.accent", "the accent while it narrows")
+        assertTrue(h.note:IsShown() and h.note:GetText() == NS.L["No rows match this filter."], "the emptied stat block's muted line")
+        assertTrue(h.filter.tip:find(NS.L["Non-zero"], 1, true) ~= nil, "the tip names it: " .. tostring(h.filter.tip))
+    end)
+end)
+
+test("round7 filters: a detached stat frame and a merged section carry the mark and follow the filter", function()
+    withR7(function()
+        B7:Detach("stats_spell")
+        M.__fireTimers()
+        local f = D7.Frame("stats_spell")
+        assertTrue(f.filter ~= nil and f.filter:IsShown(), "the detached band's funnel")
+        setF("stats_spell", "nonZero")
+        M.__fireTimers()
+        assertEqual(#D7.Rows("stats_spell"), 1, "the detached rows follow")
+        NS.db.profile.layout.blocks.primary.docked = false
+        D7.Refresh()
+        local gid = G7.Merge("primary", "stats_spell", "bottom")
+        assertTrue(gid ~= nil, "merged")
+        local sh = G7.Section(gid, "primary").header
+        assertTrue(sh.filter:IsShown(), "the merged sub-header's funnel")
+        setF("primary", "atCap")
+        M.__fireTimers()
+        assertEqual(G7.Section(gid, "primary").header.filter.restToken, "text.accent")
+    end)
+end)
+
+test("round7 filters: both LDB tooltip styles honor every block's filter", function()
+    local Br, BP = NS.Broker, NS.BrokerPanel
+    withR7(function(skills, stats)
+        local savedSource, p = Br.source, NS.db.profile.tooltips.ldb
+        local savedStyle = p.style
+        Br.source = function() return { model = skills, statsModel = stats, statIndex = {}, gains = { total = 0, byKey = {} } } end
+        local ok, err = pcall(function()
+            setF("primary", "atCap")
+            setF("stats_spell", "nonZero")
+            setF("stats_utility", "nonZero")
+            p.style = "window"
+            Br.OnEnter(M.UIParent)
+            local drawn = {}
+            for _, row in ipairs(BP.Rows()) do if row.entry then drawn[row.entry.key] = true end end
+            assertTrue(drawn.tailoring and not drawn.mining and not drawn.alchemy, "Main window style: Primary at cap")
+            local primary
+            for _, h in ipairs(BP.Headers()) do if h.id == "primary" then primary = h end end
+            assertTrue(primary.filter:IsShown(), "the panel header's funnel, a still state glyph")
+            assertEqual(primary.filter.restToken, "text.accent", "in the accent")
+            Br.OnEnter(M.UIParent, "stats")
+            drawn = {}
+            for _, row in ipairs(BP.Rows()) do if row.entry then drawn[row.entry.key] = true end end
+            assertTrue(drawn.mp5 and not drawn.sdmg and not drawn.scrit, "Main window style: Non-zero stats")
+            local util
+            for _, h in ipairs(BP.Headers()) do if h.id == "stats_utility" then util = h end end
+            assertTrue(util ~= nil and util.note:IsShown(), "an emptied stat section keeps its header and muted line")
+            p.style = "classic"
+            local lines = {}
+            local tip = M.CreateFrame("GameTooltip", "SkillMasterR7FilterTip", M.UIParent)
+            function tip:AddLine(t) lines[#lines + 1] = t end
+            function tip:AddDoubleLine(l) lines[#lines + 1] = l end
+            function tip:NumLines() return #lines end
+            Br.FillTooltip(tip, "skills")
+            local text = table.concat(lines, "\n")
+            assertTrue(text:find("Tailoring", 1, true) and not text:find("Mining", 1, true), "Classic: Primary at cap: " .. text)
+            lines = {}
+            Br.FillTooltip(tip, "stats")
+            text = table.concat(lines, "\n")
+            assertTrue(text:find("mp5", 1, true) and not text:find("sdmg", 1, true), "Classic: Non-zero stats: " .. text)
+            assertTrue(text:find(NS.L["No rows match this filter."], 1, true) ~= nil, "Classic: an emptied stat section's muted line")
+        end)
+        Br.HideTooltip()
+        Br.source, p.style = savedSource, savedStyle
+        Br.FillTooltip(M.CreateFrame("GameTooltip", "SkillMasterR7FeedReset", M.UIParent), "skills")   -- the skills feed again
+        if not ok then error(err, 0) end
+    end)
+end)

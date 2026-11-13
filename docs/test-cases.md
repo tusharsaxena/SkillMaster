@@ -497,7 +497,7 @@ Total.
 - round6 arrow review: a profile switch re-applies the shown arrow's scale and position
 - round6 arrow review: right-clicking test mode's sample over a real waypoint brings the real arrow back
 
-### test_round7.lua (11)
+### test_round7.lua (18)
 
 - round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Skill Master's arrow always
 - round7 no TomTom: the arrow off super-tracks the pin (the client's arrow)
@@ -510,6 +510,13 @@ Total.
 - round7 titles: the two feeds' tooltips read Skill Master · Professions and Skills and Skill Master · Stats
 - round7 scroll bar: an always-shown bar is drawn disabled while nothing scrolls, enabled once it does
 - round7 scroll bar: the LDB panel builds its bar always shown
+- round7 filters: each block's own set, a Show rows row for every block, All by default
+- round7 filters: Primary and Secondary narrow to below cap or at cap with a rank to train; unlearned is All only
+- round7 filters: Other skills offers Learned and Below cap
+- round7 filters: a stat section's Non-zero leaves out 0 and 0% rows, an emptied one keeps its muted line
+- round7 filters: every window header carries the funnel, accent while it narrows, and its menu
+- round7 filters: a detached stat frame and a merged section carry the mark and follow the filter
+- round7 filters: both LDB tooltip styles honor every block's filter
 
 ### test_blocks.lua (10)
 
@@ -923,7 +930,7 @@ Total.
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
 | test_round6.lua | 54 |
-| test_round7.lua | 11 |
+| test_round7.lua | 18 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -954,4 +961,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **688** |
+| **Total** | **695** |

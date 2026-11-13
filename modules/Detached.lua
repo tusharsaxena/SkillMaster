@@ -159,7 +159,7 @@ local function buildBand(f)
     f.collapse = NS.Chrome.HeaderMark(f, "chevron-down", "v", function() NS.Blocks:ToggleCollapsed(f.id) end)
     -- The block's sort mark, as on its header in the window (owner feedback round 3).
     f.sort = NS.Chrome.HeaderMark(f, "list", "=", function(b) NS.Blocks.SortMenu(f.id, b) end)
-    -- The block's filter mark, on a block that has a filter (the weapon block; round 5, R5-10).
+    -- The block's filter mark, on a block that has a filter (every block since round 7, R7-1).
     if NS.Blocks.FILTERABLE[f.id] then
         f.filter = NS.Chrome.HeaderMark(f, NS.Blocks.FILTER_ICON, "Y", function(b) NS.Blocks.FilterMenu(f.id, b) end)
         f.filter:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)

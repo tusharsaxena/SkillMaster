@@ -126,8 +126,25 @@ add(NS.Live(H.BorderGroup({
 local B = NS.Blocks
 local sortValues = {}
 for i, m in ipairs(B.SORTS) do sortValues[i] = { value = m, text = B.SORT_LABEL[m] } end
-local filterValues = {}
-for i, m in ipairs(B.FILTERS) do filterValues[i] = { value = m, text = B.FILTER_LABEL[m] } end
+-- Each block's Show rows values: its own filter set (round 7, R7-1), in its header menu's order.
+local function filterValues(id)
+    local out = {}
+    for i, m in ipairs(B.FiltersOf(id)) do out[i] = { value = m, text = B.FILTER_LABEL[m] } end
+    return out
+end
+
+-- What each block's Show rows row says its filters keep, by the block's source and category.
+local FILTER_DESC = {
+    primary   = L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, the learned skills still below their rank's cap, or the learned skills at their cap with a higher rank to train. The filter mark on its header picks it."],
+    weapon    = L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, the skills you have learned, the weapons you have equipped (main hand, off hand, ranged), or the learned skills still below their cap. The filter mark on its header picks it."],
+    other     = L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, the skills you have learned, or the learned skills still below their cap. The filter mark on its header picks it."],
+    stats     = L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, or only the stats whose value is not 0. The filter mark on its header picks it."],
+}
+FILTER_DESC.secondary = FILTER_DESC.primary
+local function filterDesc(id)
+    local d = NS.BlockDefs[id]
+    return d.source == "stats" and FILTER_DESC.stats or FILTER_DESC[id]
+end
 
 local function blockRows(id)
     local d, def = NS.BlockDefs[id], P.blocks[id]
@@ -173,12 +190,12 @@ for _, id in ipairs(NS.BLOCKS) do
             desc = L["While detached, list only the weapons you have equipped and the skills still below their cap."],
             onChange = NS.ApplyLook })
     end
-    -- The header's filter mark (round 5, R5-10): the weapon block's row filter.
+    -- The header's filter mark (round 5, R5-10; every block, round 7, R7-1): the block's row filter.
     if B.FILTERABLE[id] then
         rows[#rows + 1] = row({ path = "layout.blocks." .. id .. ".filter", group = BLOCKS,
             subgroup = NS.BlockDefs[id].title, type = "string", default = P.blocks[id].filter,
-            values = filterValues, label = L["Show rows"], onChange = B.Changed,
-            desc = L["Which of the block's rows show, here, in its detached frame and in a merged window: all of them, the skills you have learned, the weapons you have equipped (main hand, off hand, ranged), or the learned skills still below their cap. The filter mark on its header picks it. The LDB tooltip is not filtered."] })
+            values = filterValues(id), label = L["Show rows"], onChange = B.Changed,
+            desc = filterDesc(id) })
     end
 end
 for _, r in ipairs(detachedRows) do rows[#rows + 1] = r end

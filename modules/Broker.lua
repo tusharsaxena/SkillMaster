@@ -614,8 +614,8 @@ function B.Models()
 end
 
 --- Block `id`'s rows in the tooltip, each { kind, entry }, and how many its filter took out: the
---- window's block as NS.Blocks.Entries lays it (its sort order, the weapon block's filter, owner
---- feedback round 6, R6-10; unlearned rows as Skills > Show unlearned says), less the tooltip's own
+--- window's block as NS.Blocks.Entries lays it (its sort order and its filter, owner feedback
+--- round 6, R6-10, every block's filter since round 7, R7-1; unlearned rows as Skills > Show unlearned says), less the tooltip's own
 --- Hide sets in place of the window's.
 function B.TooltipEntries(id, skills, stats)
     if skills == nil and stats == nil then return {}, 0 end
@@ -648,9 +648,12 @@ local function addStatRow(tip, e, i)
 end
 
 local function addStatSection(tip, rows, id, sm)
-    local entries = B.TooltipEntries(id, nil, sm)
-    if #entries > 0 then addTitle(tip, sectionTitle(id)) end
+    local entries, removed = B.TooltipEntries(id, nil, sm)
+    local note = NS.Blocks.FilterNote(entries, removed)
+    if #entries == 0 and not note then return end
+    addTitle(tip, sectionTitle(id))
     for i, r in ipairs(entries) do rows[#rows + 1] = addStatRow(tip, r.entry, i) end
+    if note then tip:AddLine(colored("gtip.muted", note)) end
 end
 
 -- One shown section of the feed. Answers whether the no-model line has been written (once per

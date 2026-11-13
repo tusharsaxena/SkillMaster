@@ -98,8 +98,8 @@ test("round5 filter: All, Learned, Equipped and Below cap narrow the weapon bloc
             assertEqual(keysOf(entries), want[mode], mode)
             assertEqual(removed, 3 - #entries, mode .. ": answers how many it took out")
         end
-        assertEqual(B.FilterOf("primary"), "all", "a block without a filter is always All")
-        assertFalse(B:SetFilter("primary", "learned"), "and takes none")
+        assertEqual(B.FilterOf("primary"), "all", "another block's filter is its own, All by default")
+        assertFalse(B:SetFilter("primary", "learned"), "and takes only a filter of its own set (round 7, R7-1)")
         assertFalse(B:SetFilter("weapon", "bogus"), "an unknown filter is refused")
     end)
 end)
@@ -111,8 +111,8 @@ test("round5 filter: Layout > Blocks > Weapon skills has the Show rows row, its 
     assertEqual(row.default, "all")
     local values = {}
     for _, v in ipairs(row.values) do values[#values + 1] = v.value end
-    assertEqual(table.concat(values, ","), table.concat(B.FILTERS, ","))
-    assertTrue(NS.FindSchemaRow("layout.blocks.primary.filter") == nil, "no other block has one")
+    assertEqual(table.concat(values, ","), table.concat(B.FiltersOf("weapon"), ","))
+    assertEqual(table.concat(values, ","), "all,learned,equipped,belowCap", "the weapon set, unchanged in round 7")
 end)
 
 test("round5 filter: the weapon header's funnel opens a menu, the current filter ticked; a pick filters the window", function()
@@ -122,8 +122,6 @@ test("round5 filter: the weapon header's funnel opens a menu, the current filter
         assertTrue(h.filter:IsShown(), "shown on the weapon block")
         assertEqual(h.filter.icon:GetTexture(), NS.Icon("ph:funnel"), "the funnel")
         assertTrue(h.filter.tip:find(NS.L["All"], 1, true) ~= nil, "its tip names the current filter: " .. h.filter.tip)
-        local other = header("primary") or header("other")
-        if other then assertFalse(other.filter:IsShown(), "no filter mark on another block") end
         local opened
         NS.Widgets.ContextMenu = function(anchor, rows) opened = { anchor = anchor, rows = rows } return {} end
         h.filter:__fire("OnClick", "LeftButton")
@@ -181,7 +179,7 @@ test("round5 filter: the detached frame carries the filter mark and the muted li
         assertTrue(f.note:IsShown(), "the muted line in the detached frame")
         B:Detach("primary")
         M.__fireTimers()
-        assertTrue(D.Frame("primary").filter == nil, "a block without a filter has no mark")
+        assertTrue(D.Frame("primary").filter ~= nil, "every block has the mark since round 7 (R7-1)")
     end)
 end)
 
@@ -194,7 +192,7 @@ test("round5 filter: a merged window's weapon sub-header carries the filter mark
         assertTrue(gid ~= nil, "merged")
         local sh = G.Section(gid, "weapon").header
         assertTrue(sh.filter:IsShown(), "the weapon section's sub-header has the filter mark")
-        assertFalse(G.Section(gid, "other").header.filter:IsShown(), "the other section's has none")
+        assertTrue(G.Section(gid, "other").header.filter:IsShown(), "the other section's too (round 7, R7-1)")
         wield(nil)
         set("layout.blocks.weapon.filter", "equipped")
         M.__fireTimers()

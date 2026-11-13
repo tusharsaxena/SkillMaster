@@ -244,7 +244,9 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- block switches, hand-written: -1 +4 = +3 in both counts, the delta unmoved.
     -- Round 6 (R6-11): Trainers and Waypoints' Show Skill Master's arrow and Arrow scale,
     -- hand-written: +2 in both counts, the delta unmoved.
-    assertEqual(full, 339, "the full schema (round 6: the waypoint arrow's two rows)")
-    assertEqual(degraded, 286, "the library-absent schema")
+    -- Round 7 (R7-1): Layout > Blocks' Show rows filter on the seven other blocks, hand-written: +7
+    -- in both counts, the delta unmoved.
+    assertEqual(full, 346, "the full schema (round 7: Show rows on every block)")
+    assertEqual(degraded, 293, "the library-absent schema")
     assertEqual(full - degraded, 53, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3) and the detached background and border (9)")
 end)
