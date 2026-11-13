@@ -22,6 +22,8 @@ SkillMasterDB
                                  -- absent in an older snapshot: the Journal draws a dash)
   char.<db.keys.char>
     pinned = false               -- the skill key the broker's {pinned} shows (the row menu's Pin)
+    pinnedStat = false           -- the stat key the Skill Master Stats feed shows (a stat row's Pin;
+                                 -- round 6, R6-9); none: the feed reads "Stats"
     log = {}                     -- the log's ring (modules/SessionLog.lua): the newest journal.keep
                                  -- (500; 50 .. 2000) { t, key, old, new, zone }, oldest first; the
                                  -- Journal's ranges reach no further back than it holds
@@ -112,7 +114,9 @@ SkillMasterDB
       template = "{pinned} · +{gains}",   -- the feed's text (presets + Custom)
       tooltip = {
         skin = true,             -- Apply skin to the tooltip (FB-13): the feed's own skinned frame
-        sections = { primary = true, secondary = true, weapon = true, other = true, stats = false },
+        sections = { primary = true, secondary = true, weapon = true, other = true,   -- Skill Master
+                     stats_base = true, stats_spell = true, stats_defense = true,      -- Skill Master
+                     stats_utility = true },   -- Stats (round 6, R6-9; schemaVersion 9 dropped `stats`)
         hiddenSkills = { [key] = true },   -- left out of the tooltip only, apart from skills.hidden
                                            -- (all four hidden sets: the Rows page, round 5, R5-13)
         hiddenStats  = { [key] = true },   -- left out of the tooltip only, apart from stats.hidden
@@ -165,8 +169,8 @@ grip's release); `global.characters`, owned by `modules/Alts.lua` (`Snapshot`, `
 `modules/Alerts.lua` (the toast's `setPosition`); `profile.layout.blocks.<id>.point`, owned by
 `modules/Detached.lua` (`savePoint` on drag stop, `StorePoint` for a section split or unmerged from a
 merged window); `profile.layout.groups`, owned by `modules/Groups.lua` (`Merge`, `Split`, `Unmerge`,
-`Leave`, the band drag's `savePoint`, the normalization on read); `char.pinned`, owned by `modules/Interact.lua`
-(the row menu's Pin, refused while test mode or a simulation runs); `global.minimap.minimapPos`,
+`Leave`, the band drag's `savePoint`, the normalization on read); `char.pinned` and `char.pinnedStat`, owned by `modules/Interact.lua`
+(the row menu's Pin on a skill and on a stat row, refused while test mode or a simulation runs); `global.minimap.minimapPos`,
 LibDBIcon's own.
 
 ## Migrations
@@ -181,6 +185,7 @@ LibDBIcon's own.
 | 5 → 6 | `groupsNormalized`, per profile | merged detached windows (round 5, R5-6), `layout.groups`, a new key defaulting to `{}`: nothing carries over; a stored `layout.groups` that is not a table goes, a stored one is normalized against the profile's own blocks (a member that is not a detached block there, a repeat, an empty column and a group of fewer than two go); a profile with none passes through |
 | 6 → 7 | `markersSplit`, per profile | thresholds split per surface (round 6, R6-4): a stored `bars.markers = false` carries to both `bars.markersWindow` and `bars.markersTooltip`; any stored `bars.markers` goes, and otherwise the new defaults answer (window off, row tooltip on) |
 | 7 → 8 | `classicTooltipKept`, per profile | the LDB tooltip's style (round 6, R6-10), `tooltips.ldb.style`, a new key whose default `"window"` is for new profiles only: every non-empty profile an earlier install stored gets `"classic"`, today's look, unless it already holds a style; a fresh install (the run starts at stamp 0) and an empty stored profile pass through. The runner hands each step `(sv, profile, from)` for this |
+| 8 → 9 | `statsSectionRetired`, per profile | the stat blocks moved to their own feed, Skill Master Stats (round 6, R6-9), with a switch per stat block (`broker.tooltip.sections.stats_*`, new keys defaulting on): a stored `broker.tooltip.sections.stats` goes; nothing carries over |
 
 No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
 companion defaulting on, so no stored profile predates the companions and none has to be moved

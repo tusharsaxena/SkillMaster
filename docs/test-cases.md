@@ -441,7 +441,7 @@ Total.
 - round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once
 - round5 review: a block reorder redraws the Rows page in the new order, shown or hidden
 
-### test_round6.lua (31)
+### test_round6.lua (34)
 
 - round6 toast: the gap and skill-up toasts wear the cap toast's skin shell, no tint or edge of their own
 - round6 toast: the value stays red or green and carries its delta in brackets
@@ -474,6 +474,9 @@ Total.
 - round6 ldb look: the row menu draws above the tooltip in both styles, and goes back as it hides
 - round6 ldb look: the classic-only rows are dimmed in the Main window style, width and height in Classic
 - round6 ldb look: schemaVersion 8 keeps every stored profile on Classic; a fresh install and profile start on it new
+- round6 stats feed: a second data source, its tooltip the four stat blocks, its clicks the skills feed's
+- round6 stats feed: a stat row's menu pins its stat to the feed per character; with none it reads Stats
+- round6 stats feed: schemaVersion 9 drops a stored Stats section switch, the stat blocks' switches answer
 
 ### test_blocks.lua (10)
 
@@ -576,11 +579,11 @@ Total.
 
 ### test_broker.lua (17)
 
-- broker: one data source, "Skill Master", separate from the launcher object
+- broker: two data sources, "Skill Master" and "Skill Master Stats" (R6-9), separate from the launcher object
 - broker: the feed renders its template
 - broker: {equippedWeapon} follows the main hand's weapon class
 - test_broker_flash_reverts: any skill-up flashes the feed, then the template comes back
-- broker: the tooltip's skill sections are on and Stats is off by default
+- broker: the skills feed's tooltip has the four skill sections, on by default, and no stats
 - broker: each section has its own switch
 - broker: a tooltip Hide leaves the main window alone, and the window's Hide leaves the tooltip
 - broker: a tooltip Hide row per catalog skill and per stat, on the Rows page (R5-13), apart from the window's
@@ -886,7 +889,7 @@ Total.
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
-| test_round6.lua | 31 |
+| test_round6.lua | 34 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -917,4 +920,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **655** |
+| **Total** | **658** |

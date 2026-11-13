@@ -109,7 +109,7 @@ local function joined(tip)
 end
 
 
-test("broker: one data source, \"Skill Master\", separate from the launcher object", function()
+test("broker: two data sources, \"Skill Master\" and \"Skill Master Stats\" (R6-9), separate from the launcher object", function()
     reset()
     local obj = M.__ldbObjects["Skill Master"]
     assertTrue(obj ~= nil, "the feed is registered")
@@ -120,7 +120,8 @@ test("broker: one data source, \"Skill Master\", separate from the launcher obje
     assertTrue(B.Object() == obj, "B.Object is it")
     local sources = 0
     for _, o in pairs(M.__ldbObjects) do if o.type == "data source" then sources = sources + 1 end end
-    assertEqual(sources, 1, "exactly one data source")
+    assertEqual(sources, 2, "the skills feed and the stats feed (round 6, R6-9)")
+    assertTrue(M.__ldbObjects["Skill Master Stats"] == B.StatsObject(), "the stats feed")
     for _, gone in ipairs({ "SkillMaster_All", "SkillMaster_Professions", "SkillMaster_Weapons", "SkillMaster_Stats" }) do
         assertTrue(M.__ldbObjects[gone] == nil, gone .. " is gone")
     end
@@ -168,14 +169,13 @@ test("test_broker_flash_reverts: any skill-up flashes the feed, then the templat
     M.__fireTimers()
 end)
 
-test("broker: the tooltip's skill sections are on and Stats is off by default", function()
+test("broker: the skills feed's tooltip has the four skill sections, on by default, and no stats", function()
     reset()
     for _, id in ipairs({ "primary", "secondary", "weapon", "other" }) do
         assertEqual(NS.defaults.profile.broker.tooltip.sections[id], true, id .. " on by default")
         assertTrue(B.SectionShown(id), id)
     end
-    assertEqual(NS.defaults.profile.broker.tooltip.sections.stats, false, "Stats off by default")
-    assertFalse(B.SectionShown("stats"))
+    assertTrue(NS.defaults.profile.broker.tooltip.sections.stats == nil, "no Stats section here (R6-9)")
     NS.bus:SendMessage(NS.MSG.SKILL_UP, "bows", 80, 81)
     publish(81)
     local tip = recordingTip()
@@ -198,27 +198,29 @@ test("broker: each section has its own switch", function()
     withTooltip(function()
         reset()
         NS.SetByPath("broker.tooltip.sections.weapon", false)
-        NS.SetByPath("broker.tooltip.sections.stats", true)
+        NS.SetByPath("broker.tooltip.sections.stats_base", false)
         local tip = recordingTip()
-        local rows = B.FillTooltip(tip)
+        B.FillTooltip(tip)
         local text = joined(tip)
         assertFalse(text:find("Guns", 1, true) ~= nil, "Weapon off: no weapon skills\n" .. text)
         assertTrue(text:find("Skinning", 1, true) ~= nil and text:find("Defense", 1, true) ~= nil, text)
-        assertTrue(text:find("Ranged Crit", 1, true) ~= nil and text:find("Speed", 1, true) ~= nil,
-            "Stats on: the stats\n" .. text)
+        tip = recordingTip()
+        local rows = B.FillTooltip(tip, "stats")
+        text = joined(tip)
+        assertFalse(text:find("Ranged Crit", 1, true) ~= nil, "Base & Combat off\n" .. text)
+        assertTrue(text:find("Speed", 1, true) ~= nil, "the stats feed draws Utility\n" .. text)
         local stat = false
         for _, r in ipairs(rows) do stat = stat or (r.kind == "stat" and r.key == "speed") end
         assertTrue(stat, "a stat row is clickable")
         for _, id in ipairs(B.SECTIONS) do NS.SetByPath("broker.tooltip.sections." .. id, false) end
         tip = recordingTip()
-        assertEqual(#B.FillTooltip(tip), 0, "every section off: no rows")
+        assertEqual(#B.FillTooltip(tip, "skills"), 0, "every section off: no rows")
     end)
 end)
 
 test("broker: a tooltip Hide leaves the main window alone, and the window's Hide leaves the tooltip", function()
     withTooltip(function()
         reset()
-        NS.SetByPath("broker.tooltip.sections.stats", true)
         assertTrue(NS.SetByPath("broker.tooltip.hiddenSkills.bows", true))
         assertTrue(NS.SetByPath("broker.tooltip.hiddenStats.speed", true))
         assertTrue(NS.db.profile.broker.tooltip.hiddenSkills.bows == true, "stored in the tooltip's set")
@@ -226,8 +228,12 @@ test("broker: a tooltip Hide leaves the main window alone, and the window's Hide
         assertTrue(next(NS.db.profile.stats.hidden) == nil, "the window's stats.hidden is untouched")
         NS.db.profile.skills.hidden.guns = true   -- hidden from the window only
         local tip = recordingTip()
-        B.FillTooltip(tip)
+        B.FillTooltip(tip, "skills")
         local text = joined(tip)
+        tip = recordingTip()
+        B.FillTooltip(tip, "stats")
+        text = text .. "\n" .. joined(tip)
+        B.FillTooltip(recordingTip(), "skills")
         assertFalse(text:find("Bows", 1, true) ~= nil, "the tooltip leaves Bows out\n" .. text)
         assertFalse(text:find("Speed", 1, true) ~= nil, "and Speed\n" .. text)
         assertTrue(text:find("Guns", 1, true) ~= nil, "a window-hidden skill still shows in the tooltip")

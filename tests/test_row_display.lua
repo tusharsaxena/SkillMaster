@@ -130,24 +130,28 @@ test("rows show: the broker tooltip's skill and stat lines honor it", function()
     local B = NS.Broker
     local want = { both = { bars = 1, value = true }, bar = { bars = 1, value = false },
                    text = { bars = 0, value = true } }
-    -- One section at a time, so the bar count is that line's: Secondary (Fishing), then Stats.
+    -- One section at a time, so the bar count is that line's: Secondary (Fishing) on the skills feed,
+    -- then Base & Combat on the stats feed (round 6, R6-9).
     local sections = NS.db.profile.broker.tooltip.sections
-    local saved = {}
-    for _, id in ipairs(B.SECTIONS) do saved[id] = sections[id] end
+    local all, saved = {}, {}
+    for _, id in ipairs(B.SECTIONS) do all[#all + 1] = id end
+    for _, id in ipairs(B.STAT_SECTIONS) do all[#all + 1] = id end
+    for _, id in ipairs(all) do saved[id] = sections[id] end
     for _, mode in ipairs({ "both", "bar", "text" }) do
         NS.SetByPath("bars.rowDisplay", mode)
-        for _, section in ipairs({ "secondary", "stats" }) do
-            for _, id in ipairs(B.SECTIONS) do sections[id] = id == section end
+        for _, section in ipairs({ "secondary", "stats_base" }) do
+            for _, id in ipairs(all) do sections[id] = id == section end
             local tip = recordingTip()
-            B.FillTooltip(tip)
-            local name = section == "stats" and "Agility" or "Fishing"
+            B.FillTooltip(tip, section == "stats_base" and "stats" or "skills")
+            local name = section == "stats_base" and "Agility" or "Fishing"
             local value = valueOf(tip, name)
             assertEqual(B.BarsDrawn(), want[mode].bars, mode .. " " .. section .. ": mini bars")
             assertEqual(value ~= nil and value ~= "", want[mode].value, mode .. " " .. section .. ": value "
                 .. tostring(value))
         end
     end
-    for _, id in ipairs(B.SECTIONS) do sections[id] = saved[id] end
+    for _, id in ipairs(all) do sections[id] = saved[id] end
+    B.FillTooltip(recordingTip(), "skills")
     NS.SetByPath("bars.rowDisplay", NS.defaults.profile.bars.rowDisplay)
 end)
 

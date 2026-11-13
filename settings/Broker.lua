@@ -1,6 +1,7 @@
 local _, NS = ...
--- settings/Broker.lua — the Broker page (design §6.7; feedback round 2, FB-12 and FB-13): the one
--- feed's text template and skill-up flash, and its tooltip's five sections. A write repaints the
+-- settings/Broker.lua — the Broker page (design §6.7; feedback round 2, FB-12 and FB-13): the Skill
+-- Master feed's text template and skill-up flash, its tooltip's four sections, and the Skill Master
+-- Stats feed's four (round 6, R6-9; its text is the pinned stat, no template). A write repaints the
 -- feed at once (NS.Broker.Refresh).
 --
 --   Feed            -- Text -- the template (presets + Custom)   -- Skill-up flash
@@ -55,17 +56,23 @@ rows[#rows + 1] = {
 -- ---------------------------------------------------------------------------------------------
 -- "Apply skin to the tooltip" (broker.tooltip.skin) moved to the Tooltips page (owner feedback round 4).
 
+-- The Skill Master feed's four sections, then the Skill Master Stats feed's four (round 6, R6-9).
 local SECTION_LABEL = {
     primary = L["Primary professions"], secondary = L["Secondary skills"], weapon = L["Weapon skills"],
-    other = L["Other skills"], stats = L["Stats"],
+    other = L["Other skills"],
 }
-for _, id in ipairs(NS.Broker.SECTIONS) do
-    rows[#rows + 1] = {
-        path = "broker.tooltip.sections." .. id, page = PAGE, group = TOOLTIP, subgroup = L["Sections"],
-        type = "bool", default = P.tooltip.sections[id], label = SECTION_LABEL[id],
-        desc = L["Draw this section in the feed's tooltip."],
-    }
+local function sectionRows(ids, subgroup, desc)
+    for _, id in ipairs(ids) do
+        rows[#rows + 1] = {
+            path = "broker.tooltip.sections." .. id, page = PAGE, group = TOOLTIP, subgroup = subgroup,
+            type = "bool", default = P.tooltip.sections[id], label = SECTION_LABEL[id] or NS.BlockDefs[id].short,
+            desc = desc,
+        }
+    end
 end
+sectionRows(NS.Broker.SECTIONS, L["Sections"], L["Draw this section in the feed's tooltip."])
+sectionRows(NS.Broker.STAT_SECTIONS, L["Stats feed sections"],
+    L["Draw this stat block in the Skill Master Stats feed's tooltip."])
 
 NS.RegisterSchemaRows(NS.Live(rows, refresh))
 

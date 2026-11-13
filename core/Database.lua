@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 8
+NS.SCHEMA_VERSION = 9
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -100,6 +100,16 @@ local function classicTooltipKept(_, profile, from)
     if rawget(t.ldb, "style") == nil then t.ldb.style = "classic" end
 end
 
+--- 8 -> 9 (owner feedback round 6, R6-9): the stat blocks moved to their own feed, Skill Master Stats,
+--- with a switch per stat block (`broker.tooltip.sections.stats_*`, new keys defaulting on). The old
+--- Stats switch, `broker.tooltip.sections.stats`, names no section any more: a stored one goes.
+local function statsSectionRetired(_, profile)
+    local b = type(profile) == "table" and profile.broker
+    local t = type(b) == "table" and b.tooltip
+    local sections = type(t) == "table" and t.sections
+    if type(sections) == "table" then sections.stats = nil end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
 -- is the stamp the run started at (0 on a fresh install).
@@ -112,6 +122,7 @@ local STEPS = {
     { to = 6, run = groupsNormalized, perProfile = true },
     { to = 7, run = markersSplit, perProfile = true },
     { to = 8, run = classicTooltipKept, perProfile = true },
+    { to = 9, run = statsSectionRetired, perProfile = true },
 }
 
 function NS:InitDB()

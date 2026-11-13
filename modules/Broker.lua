@@ -1,10 +1,12 @@
 local addonName, NS = ...
--- modules/Broker.lua — the one broker data feed, "Skill Master" (design §6.7, plan Task 4.1;
--- feedback round 2, FB-12): a LibDataBroker-1.1 "data source" whose text is a template
--- (modules/Template.lua), flashed on a skill-up, with a tooltip of mini bars and clickable rows
--- (design §6.5) in five sections: Primary, Secondary, Weapon, Other and Stats. Each section has its
--- own switch and each skill and stat its own tooltip Hide (profile.broker.tooltip), apart from the
--- main window's skills.hidden / stats.hidden.
+-- modules/Broker.lua — the broker data feeds (design §6.7, plan Task 4.1; feedback round 2, FB-12;
+-- owner feedback round 6, R6-9): "Skill Master", a LibDataBroker-1.1 "data source" whose text is a
+-- template (modules/Template.lua), flashed on a skill-up, with a tooltip of clickable rows (design
+-- §6.5) in four sections, Primary, Secondary, Weapon and Other; and "Skill Master Stats", whose text
+-- is the stat pinned from a stat row's menu and whose tooltip holds the four stat blocks. Each
+-- section has its own switch and each skill and stat its own tooltip Hide (profile.broker.tooltip),
+-- apart from the main window's skills.hidden / stats.hidden. Both feeds share the clicks and the
+-- one tooltip machinery below (one tooltip shows at a time); B.Feed() names the one showing.
 --
 -- The tooltip (FB-13): with "Apply skin to the tooltip" on (broker.tooltip.skin, the default) it is
 -- this file's own GameTooltip-template frame, painted with the skin's window shell and fonts; off,
@@ -57,8 +59,26 @@ local HIDE_POLL = 0.1          -- seconds between the tooltip's leave checks
 B.NAME = "Skill Master"
 B.LABEL = L["Skill Master"]
 
--- The tooltip's sections, in order; each one's switch is broker.tooltip.sections.<id>.
-B.SECTIONS = { "primary", "secondary", "weapon", "other", "stats" }
+-- The second feed, "Skill Master Stats" (owner feedback round 6, R6-9): the stat blocks' tooltip, and
+-- the stat pinned from a stat row's menu as its text (char.pinnedStat; "Stats" with none).
+B.STATS_NAME = "Skill Master Stats"
+B.STATS_LABEL = L["Skill Master Stats"]
+
+-- Each feed's tooltip sections, in order, each a block id whose switch is broker.tooltip.sections.<id>:
+-- the skills feed's four skill blocks, the stats feed's four stat blocks (R6-9 moved the Stats
+-- section to its own feed).
+B.SECTIONS = { "primary", "secondary", "weapon", "other" }
+B.STAT_SECTIONS = { "stats_base", "stats_spell", "stats_defense", "stats_utility" }
+
+-- The feeds: "skills" (the first, B.NAME) and "stats" (B.STATS_NAME).
+B.FEEDS = {
+    skills = { label = B.LABEL, sections = B.SECTIONS },
+    stats  = { label = B.STATS_LABEL, sections = B.STAT_SECTIONS },
+}
+local feed = "skills"   -- the feed whose tooltip shows now (B.OnEnter)
+
+--- The feed whose tooltip is up, or was last: "skills" | "stats".
+function B.Feed() return feed end
 
 -- The owned tooltip frame's global name (its TextLeftN lines are found by it, as GameTooltip's are).
 B.TIP_NAME = "SkillMasterBrokerTooltip"
@@ -76,6 +96,7 @@ local gains = { total = 0, byKey = {} }
 local last
 local flash, flashTimer = nil, nil
 local object, rendered
+local statsObject, statsRendered   -- the stats feed's (R6-9)
 
 --- Back to a fresh session (the suites call this between cases).
 function B.ResetSession()
@@ -159,9 +180,9 @@ function B.MainHandSkill()
     return NS.SkillHelpers.WeaponSkillInSlot(MAIN_HAND)
 end
 
-local function pinnedKey()
+local function pinnedKey(field)
     local char = NS.db and NS.db.char
-    local key = type(char) == "table" and char.pinned or nil
+    local key = type(char) == "table" and char[field or "pinned"] or nil
     return type(key) == "string" and key or nil
 end
 
@@ -212,7 +233,24 @@ local function feedText(ctx)
     return out
 end
 
---- Re-render the feed's text; an unchanged text is not re-assigned (each write is a display
+--- The stat pinned to the stats feed (the row menu's Pin on a stat row, R6-9): this character's
+--- char.pinnedStat, or the sample's while a source is set. Its stat entry, or nil.
+function B.PinnedStat()
+    local v, sourced = view()
+    local key
+    if sourced then key = v.pinnedStat else key = pinnedKey("pinnedStat") end
+    return key and v.statIndex and v.statIndex[key] or nil
+end
+
+--- The stats feed's text: the pinned stat's label and value ("Ranged Crit 9.1%"), else "Stats".
+local function statsFeedText()
+    if NS.IsStoodDown() then return L["Off"] end
+    local e = B.PinnedStat()
+    if not e then return L["Stats"] end
+    return ("%s %s"):format(e.label or e.key, e.display or "")
+end
+
+--- Re-render both feeds' text; an unchanged text is not re-assigned (each write is a display
 --- callback).
 function B.Refresh()
     if NS.IsStoodDown() then flash = nil end
@@ -221,11 +259,18 @@ function B.Refresh()
         rendered = new
         if object then object.text = new end
     end
+    new = statsFeedText()
+    if statsRendered ~= new then
+        statsRendered = new
+        if statsObject then statsObject.text = new end
+    end
 end
 
---- The feed's text now, and its LibDataBroker object (nil without the library).
+--- The feed's text now, and its LibDataBroker object (nil without the library); the stats feed's.
 function B.Text() return rendered end
 function B.Object() return object end
+function B.StatsText() return statsRendered end
+function B.StatsObject() return statsObject end
 
 local function endFlash()
     flashTimer = nil
@@ -600,39 +645,31 @@ local function addStatRow(tip, e, i)
     return { line = n, kind = "stat", key = e.key }
 end
 
-local function addStatsSection(tip, rows)
-    local sm = view().statsModel
-    if not sm then
-        tip:AddLine(colored("gtip.muted", L["No stats to show yet."]))
-        return
-    end
-    for _, group in ipairs(NS.StatData.GROUPS) do
-        local id = "stats_" .. group
-        local entries = B.TooltipEntries(id, nil, sm)
-        if #entries > 0 then addTitle(tip, sectionTitle(id)) end
-        for i, r in ipairs(entries) do rows[#rows + 1] = addStatRow(tip, r.entry, i) end
-    end
+local function addStatSection(tip, rows, id, sm)
+    local entries = B.TooltipEntries(id, nil, sm)
+    if #entries > 0 then addTitle(tip, sectionTitle(id)) end
+    for i, r in ipairs(entries) do rows[#rows + 1] = addStatRow(tip, r.entry, i) end
 end
 
--- One shown section. Answers whether the no-model line has been written (once for the four skill
--- sections, before the first test-mode or live model lands).
-local function fillSection(tip, rows, section, m, told)
-    if section == "stats" then
-        addStatsSection(tip, rows)
-        return told
-    end
+-- One shown section of the feed. Answers whether the no-model line has been written (once per
+-- tooltip, before the first test-mode or live model lands).
+local function fillSection(tip, rows, section, v, told)
+    local stat = NS.BlockDefs[section].source == "stats"
+    local m = stat and v.statsModel or (not stat and v.model)
     if m then
-        addSkillSection(tip, rows, section, m)
+        if stat then addStatSection(tip, rows, section, m) else addSkillSection(tip, rows, section, m) end
         return told
     end
-    if not told then tip:AddLine(colored("gtip.muted", L["No skills to show yet."])) end
+    if not told then
+        tip:AddLine(colored("gtip.muted", stat and L["No stats to show yet."] or L["No skills to show yet."]))
+    end
     return true
 end
 
 local function fillSections(tip, rows)
-    local m, told = view().model, false
-    for _, section in ipairs(B.SECTIONS) do
-        if B.SectionShown(section) then told = fillSection(tip, rows, section, m, told) end
+    local v, told = view(), false
+    for _, section in ipairs(B.FEEDS[feed].sections) do
+        if B.SectionShown(section) then told = fillSection(tip, rows, section, v, told) end
     end
 end
 
@@ -650,16 +687,12 @@ function B.FooterText()
     return L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, right-click for the menu"]
 end
 
---- The blocks the Main window style draws, in the window's block order (NS.Blocks.Ordered): each
---- shown section's block, the Stats section's four stat blocks.
+--- The blocks the Main window style draws for the feed showing now, in the window's block order
+--- (NS.Blocks.Ordered): each of its shown sections' block.
 function B.ShownBlocks()
     local want = {}
-    for _, section in ipairs(B.SECTIONS) do
-        if B.SectionShown(section) and section == "stats" then
-            for _, g in ipairs(NS.StatData.GROUPS) do want["stats_" .. g] = true end
-        elseif B.SectionShown(section) then
-            want[section] = true
-        end
+    for _, section in ipairs(B.FEEDS[feed].sections) do
+        if B.SectionShown(section) then want[section] = true end
     end
     local out = {}
     for _, id in ipairs(NS.Blocks.Ordered()) do
@@ -670,18 +703,20 @@ end
 
 --- The tooltip's title and its session gains line.
 function B.Heading()
-    return B.LABEL, L["+%d this session"]:format(view().gains.total)
+    return B.FEEDS[feed].label, L["+%d this session"]:format(view().gains.total)
 end
 
 --- Fill `tip` (the feed's tooltip, or a stand-in) with the shown sections. Answers the clickable
---- rows, each { line, kind = "skill" | "stat", key }.
-function B.FillTooltip(tip)
+--- rows, each { line, kind = "skill" | "stat", key }. `which` picks the feed ("skills", the default,
+--- or "stats"); it stays the feed showing now.
+function B.FillTooltip(tip, which)
+    if which then feed = B.FEEDS[which] and which or "skills" end
     releaseAll()
     barsDrawn = 0
     local rows = {}
     if tip.SetMinimumWidth then tip:SetMinimumWidth(B.MinWidth()) end
-    tip:AddDoubleLine(colored("gtip.title", B.LABEL),
-        colored("gtip.muted", L["+%d this session"]:format(view().gains.total)))
+    local title, gained = B.Heading()
+    tip:AddDoubleLine(colored("gtip.title", title), colored("gtip.muted", gained))
     B.AddTestModeLine(tip)
     if NS.IsStoodDown() then
         tip:AddLine(colored("gtip.muted", L["Ka0s Skill Master is disabled."]))
@@ -898,7 +933,9 @@ function B.HideTooltip()
     owner, current = nil, nil
 end
 
-function B.OnEnter(frame)
+--- Show feed `which`'s tooltip ("skills", the default, or "stats") on its display cell `frame`.
+function B.OnEnter(frame, which)
+    feed = B.FEEDS[which] and which or "skills"
     local tip = B.Tip()
     stopPoll()
     if current and current ~= tip then B.HideTooltip() end
@@ -910,7 +947,7 @@ function B.OnEnter(frame)
         tip:Show()
         return
     end
-    local rows = B.FillTooltip(tip)
+    local rows = B.FillTooltip(tip, feed)
     tip:Show()
     if tip == ownTip then paintTip(tip) end
     -- Tooltips > Font size, after the skin's fonts, then one more layout pass for both.
@@ -958,6 +995,16 @@ if LDB then
         icon  = NS.Constants.LOGO_ICON_PATH,
         OnClick = B.OnClick,
         OnEnter = function(frame) B.OnEnter(frame) end,
+        OnLeave = function() B.OnLeave() end,
+    })
+    -- The stats feed (R6-9): its own text, the same clicks, the stat blocks' tooltip.
+    statsObject = LDB:NewDataObject(B.STATS_NAME, {
+        type  = "data source",
+        label = B.STATS_LABEL,
+        text  = L["Stats"],
+        icon  = NS.Constants.LOGO_ICON_PATH,
+        OnClick = B.OnClick,
+        OnEnter = function(frame) B.OnEnter(frame, "stats") end,
         OnLeave = function() B.OnLeave() end,
     })
 else

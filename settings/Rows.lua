@@ -89,7 +89,7 @@ local function setRow(path, desc, onChange)
 end
 
 local WINDOW_DESC = L["Leave this row out of the window and the detached blocks. The row menu's Hide sets it too."]
-local TIP_DESC = L["Leave this row out of the LDB tooltip. The tooltip's row menu's Hide sets it too."]
+local TIP_DESC = L["Leave this row out of the LDB tooltip: a skill out of the Skill Master feed's, a stat out of the Skill Master Stats feed's. The tooltip's row menu's Hide sets it too."]
 
 local function pair(rows, kind, key, name)
     local winKind, tipKey = kind == "stat" and "stats" or "skills", kind == "stat" and "hiddenStats" or "hiddenSkills"

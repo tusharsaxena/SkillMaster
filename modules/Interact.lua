@@ -209,32 +209,38 @@ function I.HideInTooltip(row)
     return NS.SetByPath("broker.tooltip." .. setKey, set)
 end
 
+--- The row menu's Pin row: `field` of this character's store (char.pinned for a skill, the Skill
+--- Master feed's; char.pinnedStat for a stat, the Skill Master Stats feed's, round 6, R6-9).
+local function pinRow(field, key)
+    -- A test-mode or simulated row is the sample character's: pinning it would write the sample's
+    -- row into this character's store (preview-mode: nothing of the live state is written while
+    -- either runs).
+    local sample = NS.IsTestMode() or (NS.IsSimRunning ~= nil and NS.IsSimRunning())
+    -- A second click on a pinned row unpins it; nothing pinned is the default, and the feed then
+    -- reads "Professions and Skills" / "Stats" (owner feedback round 3).
+    local function pinned() return NS.db.char ~= nil and NS.db.char[field] == key end
+    return { value = "pin", label = L["Pin to the broker feed"], radio = true, disabled = sample,
+        selected = pinned,
+        onClick = function()
+            if sample then return end
+            local was = pinned()
+            if NS.db.char then NS.db.char[field] = not was and key or false end
+            NS.Debug("Click", "%s %s on the broker feed", was and "unpinned" or "pinned", key)
+            -- The feed's text reads the pin: redraw it now. A layout message alone never reached
+            -- the feed, which redraws on the data messages, so the pin waited for the next
+            -- skill-up to show (feedback round 2).
+            if NS.Broker and NS.Broker.Refresh then NS.Broker.Refresh() end
+            NS.Blocks.Changed()
+        end }
+end
+
 --- The row menu's rows (a ContextMenu row list; `value` names each for the suites).
 function I.MenuRows(row)
     local e = row.entry
     local rows = { { title = true, label = e.name or e.label } }
+    if row.kind == "stat" then rows[#rows + 1] = pinRow("pinnedStat", e.key) end
     if row.kind == "skill" then
-        local key = e.key
-        -- A test-mode or simulated row is the sample character's: pinning it would write the
-        -- sample's skill into this character's store (preview-mode: nothing of the live state is
-        -- written while either runs).
-        local sample = NS.IsTestMode() or (NS.IsSimRunning ~= nil and NS.IsSimRunning())
-        -- A second click on a pinned row unpins it; nothing pinned is the default, and the feed then
-        -- reads "Professions and Skills" (owner feedback round 3).
-        local function pinned() return NS.db.char ~= nil and NS.db.char.pinned == key end
-        rows[#rows + 1] = { value = "pin", label = L["Pin to the broker feed"], radio = true, disabled = sample,
-            selected = pinned,
-            onClick = function()
-                if sample then return end
-                local was = pinned()
-                if NS.db.char then NS.db.char.pinned = not was and key or false end
-                NS.Debug("Click", "%s %s on the broker feed", was and "unpinned" or "pinned", key)
-                -- The feed's text reads the pin: redraw it now. A layout message alone never reached
-                -- the feed, which redraws on the data messages, so the pin waited for the next
-                -- skill-up to show (feedback round 2).
-                if NS.Broker and NS.Broker.Refresh then NS.Broker.Refresh() end
-                NS.Blocks.Changed()
-            end }
+        rows[#rows + 1] = pinRow("pinned", e.key)
         local trainer = trainerOf(e)
         rows[#rows + 1] = { value = "waypoint", label = L["Set a waypoint to the trainer"], disabled = trainer == nil,
             onClick = function() if trainer then NS.Waypoints:Set(trainer) end end }

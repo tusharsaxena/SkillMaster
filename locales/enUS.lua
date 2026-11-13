@@ -805,7 +805,7 @@ L["Rows"] = true
 L["Show and hide"] = true
 L["Hide %s in the LDB tooltip"] = true
 L["Leave this row out of the window and the detached blocks. The row menu's Hide sets it too."] = true
-L["Leave this row out of the LDB tooltip. The tooltip's row menu's Hide sets it too."] = true
+L["Leave this row out of the LDB tooltip: a skill out of the Skill Master feed's, a stat out of the Skill Master Stats feed's. The tooltip's row menu's Hide sets it too."] = true
 L["Every skill hidden from the window, as a set of keys."] = true
 L["Every stat hidden from the window, as a set of keys."] = true
 L["Every skill the LDB tooltip leaves out, as a set of keys."] = true
@@ -830,6 +830,11 @@ L["Width of the LDB tooltip in the Main window style, counted as Layout > Window
 L["Height (px)"] = true
 L["The tallest the LDB tooltip grows in the Main window style; past it, it scrolls (the mouse wheel or its scroll bar)."] = true
 L["Nothing to show in this tooltip."] = true
+
+-- ---- Round 6, R6-9: the Skill Master Stats feed (modules/Broker.lua, settings/Broker.lua) ----
+L["Skill Master Stats"] = true
+L["Stats feed sections"] = true
+L["Draw this stat block in the Skill Master Stats feed's tooltip."] = true
 
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.

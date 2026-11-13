@@ -230,7 +230,9 @@ local function layBody()
     end
     for _, row in ipairs(rowPool.active) do dressRow(row) end
     if y > 0 then return y end
-    frame.empty:SetText(skills and L["Nothing to show in this tooltip."] or L["No skills to show yet."])
+    local have = NS.Broker.Feed() == "stats" and stats or (NS.Broker.Feed() ~= "stats" and skills)
+    local none = NS.Broker.Feed() == "stats" and L["No stats to show yet."] or L["No skills to show yet."]
+    frame.empty:SetText(have and L["Nothing to show in this tooltip."] or none)
     return LINE_H + 12
 end
 

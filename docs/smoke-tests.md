@@ -19,7 +19,7 @@ the checks below that cover each item:
 | TomTom on and off | SM-DISP-7, SM-OPT-5, SM-SEAM-2 |
 | Each skin | SM-SKIN-1, SM-SKIN-2 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
-| Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4, SM-DISP-18, SM-DISP-39 |
+| Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4, SM-DISP-18, SM-DISP-39, SM-DISP-40 |
 
 ## Load
 
@@ -219,6 +219,14 @@ the checks below that cover each item:
   > LDB tooltip: Height 200, hover: the body scrolls with the wheel and its scroll bar. Tooltip
   style Classic: today's lines and mini bars, and the row menu over them is whole too. An existing
   profile from before this build opens on Classic.
+- **SM-DISP-40** (round 6, R6-9) In a broker display add the second feed, Skill Master Stats: it reads
+  `Stats`. Hover it: its tooltip lists the stat blocks (Base & Combat, Spell & Regen, Defense &
+  Resists, Utility) in the chosen Tooltip style, and the Skill Master feed's tooltip lists skills
+  only. Right-click Ranged Crit (in the window or the stats tooltip) > Pin to the broker feed: the
+  feed reads `Ranged Crit 9.1%` (your value) at once; log on an alt: its feed reads `Stats`; pin again
+  to unpin. Left-click the stats feed: the window toggles; right-click: the Broker page. Broker >
+  Tooltip > Stats feed sections: turn Utility off: the stats tooltip leaves it out. Rows: a stat's
+  LDB tooltip eye leaves it out of the stats feed's tooltip.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon with TomTom loaded,
   then without it: the primary button reads `Set waypoint` both times (no `(TomTom)`, `(map pin)` or
   `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
@@ -318,11 +326,12 @@ the checks below that cover each item:
 - **SM-LDB-1** The minimap button shows the logo. Left-click opens the settings; right-click shows
   Enabled, Locked, Test mode, Sim mode, Show window. Hovering shows the status tooltip.
 - **SM-LDB-2** In a broker display (Titan Panel, ChocolateBar or Bazooka), add the one Skill Master
-  feed ("Skill Master"; no All, Professions, Weapons or Stats feed is offered): it shows its
+  feed ("Skill Master"; no All, Professions or Weapons feed is offered; the stats have their own
+  feed, SM-DISP-40): it shows its
   template's text. Gain a skill point: the feed reads `^ <skill> <new>` for five seconds, with the
-  up chevron. Hover it: the tooltip lists Primary, Secondary, Weapon and Other with mini bars, no
-  Stats; it wears the skin (backdrop, border, fonts). Broker > Tooltip: turn Stats on and Weapon
-  off, hover again: stats show, weapons do not. Rows: Cooking's LDB tooltip eye; the tooltip leaves it
+  up chevron. Hover it (Tooltips > Tooltip style Classic): the tooltip lists Primary, Secondary, Weapon and Other with mini bars, no
+  Stats; it wears the skin (backdrop, border, fonts). Broker > Tooltip: turn Weapon
+  off, hover again: weapons do not show. Rows: Cooking's LDB tooltip eye; the tooltip leaves it
   out and the main window still shows it. Turn *Apply skin to the tooltip* off: the plain tooltip;
   hover a unit or item afterwards, its GameTooltip is the game's own look.
 - **SM-CFG-1** Settings → AddOns → Ka0s Skill Master: the landing page lists the slash commands; General

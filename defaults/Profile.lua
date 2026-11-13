@@ -241,7 +241,10 @@ NS.defaults = {
             -- main window's skills.hidden / stats.hidden) and whether it wears the skin (FB-13).
             tooltip = {
                 skin     = true,
-                sections = { primary = true, secondary = true, weapon = true, other = true, stats = false },
+                -- The skills feed's four sections and the stats feed's four (round 6, R6-9: the Stats
+                -- section moved to its own feed; schemaVersion 9 dropped a stored `stats`).
+                sections = { primary = true, secondary = true, weapon = true, other = true,
+                             stats_base = true, stats_spell = true, stats_defense = true, stats_utility = true },
                 hiddenSkills = {},
                 hiddenStats  = {},
             },
@@ -253,5 +256,6 @@ NS.defaults = {
     global = { schemaVersion = 0, minimap = { hide = false }, characters = {} },
     -- Per character: the pinned skill the broker's {pinned} token shows (design §7), set from the
     -- row menu (T3.3), and the session log's ring (modules/SessionLog.lua).
-    char = { pinned = false, log = {} },
+    -- pinnedStat (round 6, R6-9): the stat the Skill Master Stats feed shows, from a stat row's menu.
+    char = { pinned = false, pinnedStat = false, log = {} },
 }

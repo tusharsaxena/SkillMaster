@@ -11,7 +11,7 @@ login; each page body builds on its first show.
 | Bars | Bar, Colors, Text, Marks, Icons | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom) and position; Rank tier colors (each tier a darker shade of the category color, By category only), thresholds in the window (off by default) and in the row tooltip (on; round 6, R6-4), timer and spark (off by default); the rows' icons (show, size, zoom, and the composed border on the icon family with Use the row's color). No preview bar: the open window restyles live (owner feedback round 4) |
 | Skills | General | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default) |
 | Rows | Show and hide | Every catalog skill and stat once, under the window's block headings in its block order: a boxed row (icon, name) with two eyes, the main window's Hide (`skills.hidden.<key>`, `stats.hidden.<key>`) and the LDB tooltip's (`broker.tooltip.hiddenSkills.<key>`, `hiddenStats.<key>`); a Window / LDB tooltip caption line on top; each heading's two eyes show that group's hidden rows again (round 5, R5-11..R5-13) |
-| Broker | Feed, Tooltip | The feed's text template (a presets dropdown plus Custom) and the skill-up flash; the five section switches |
+| Broker | Feed, Tooltip | The feed's text template (a presets dropdown plus Custom) and the skill-up flash; the Skill Master feed's four section switches and the Skill Master Stats feed's four (round 6, R6-9) |
 | Tooltips | Main window tooltip, LDB tooltip | Each tooltip's bar width, bar height, row height and font size; Apply skin to the tooltip (the LDB tooltip). The heights keep their `bars.*` paths and the skin row `broker.tooltip.skin`; the widths and font sizes are `tooltips.row.*` / `tooltips.ldb.*` (owner feedback round 4). The LDB tooltip's *Tooltip style* (`tooltips.ldb.style`: *Main window*, a new profile's default, or *Classic*, round 6, R6-10) with its *Width (px)* (`tooltips.ldb.width`, 420, counted as Layout > Window width) and *Height (px)* (`tooltips.ldb.height`, 560, the tallest it grows before it scrolls), both dimmed in Classic; *Apply skin to the tooltip*, the LDB *Bar width*, *Row height* and *Font size* are Classic's and dimmed in Main window (*Bar height* stays live: the Journal's Alts bars read it too) |
 | Alerts | Alerts, Muted weapons | The rank-cap and weapon-gap alerts, the gap, the sound; the skill-up alert, which skills it reads and its own sound (round 4) |
 | Journal | Journal | Skill-ups kept per character, the Log tab's range (the window's own picker writes the same row), the Alts sub-tab on open |
@@ -143,8 +143,13 @@ The feed's right-click opens this page by its key (`NS.Broker.SETTINGS_PAGE = "b
   (`broker.flashSeconds`).
 - **Tooltip**: *Look*, *Apply skin to the tooltip* (`broker.tooltip.skin`, on): the tooltip is the
   feed's own frame in the skin's backdrop, border and fonts; off, the game's plain GameTooltip.
-  The switch takes a shown tooltip down. *Sections*: one switch per section
-  (`broker.tooltip.sections.<primary|secondary|weapon|other|stats>`), Stats off by default.
+  The switch takes a shown tooltip down (it moved to the Tooltips page, round 4). *Sections*: one
+  switch per skill section of the Skill Master feed (`broker.tooltip.sections.<primary|secondary|weapon|other>`);
+  *Stats feed sections*: one per stat block of the Skill Master Stats feed
+  (`broker.tooltip.sections.<stats_base|stats_spell|stats_defense|stats_utility>`), all on by default
+  (round 6, R6-9: the old Stats switch went with schemaVersion 9). The stats feed has no template:
+  its text is the stat pinned from a stat row's menu (*Pin to the broker feed*), its label and value,
+  or "Stats" with none.
 
 The tooltip's Hide rows moved to the [Rows](#rows) page (round 5, R5-13), same paths.
 

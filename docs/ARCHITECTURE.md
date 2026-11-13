@@ -50,7 +50,7 @@ overlays, the click map `NS.Interact`, the row tooltip, the trainer popup and `N
 model (`StatData`), the trainer lookups (`Trainers`), the skill helpers (`NS.SkillHelpers`,
 `modules/Helpers.lua`), the session log (`NS.SessionLog`), the alt snapshots (`NS.Alts`), the
 Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), the broker feed
-(`NS.Template`, `NS.Broker`, and `NS.BrokerPanel`, its tooltip in the main window's style), test mode's data swap (`NS.Preview`), the simulator (`NS.Sim`,
+(`NS.Template`, `NS.Broker`: the Skill Master and Skill Master Stats feeds; `NS.BrokerPanel`, their tooltip in the main window's style), test mode's data swap (`NS.Preview`), the simulator (`NS.Sim`,
 `NS.SimHost`) and the diagnostics sections;
 `settings/` holds the schema,
 the slash table and the settings pages.
@@ -166,9 +166,10 @@ top-left; a window with no candidate just keeps its saved drop point. A lock ref
 start; in combat the frame still moves and the merge or split waits on `AfterCombat`. A stand-down
 mid-drag cancels it (`NS.Groups.StandDown`). Secret or unanswered geometry gives no candidate.
 
-`char.pinned`, the skill the broker's `{pinned}` shows, is named non-setting state: its one writer
-is the row menu's Pin (`I.MenuRows` in `modules/Interact.lua`), disabled while test mode or a
-simulation runs so a sample skill never lands in it.
+`char.pinned`, the skill the broker's `{pinned}` shows, and `char.pinnedStat`, the stat the Skill
+Master Stats feed shows (round 6, R6-9), are named non-setting state: their one writer is the row
+menu's Pin (`I.MenuRows` in `modules/Interact.lua`, a skill row's and a stat row's), disabled while
+test mode or a simulation runs so a sample row never lands in them.
 
 HUD colors follow the skin (skinning-§6): every `*FromSkin` companion, the palette's
 `bars.colors.fromSkin` included, defaults true; while the palette follows, the categories and

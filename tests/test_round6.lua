@@ -743,7 +743,6 @@ local function withFeedTip(style, fn)
     Br.source = savedSource
     p.tooltips.ldb.style, p.tooltips.ldb.height = savedStyle, savedHeight
     p.layout.blocks.weapon.filter, p.layout.blocks.weapon.collapsed = "all", false
-    p.broker.tooltip.sections.stats = NS.defaults.profile.broker.tooltip.sections.stats
     if NS.Widgets.CloseMenu then NS.Widgets.CloseMenu() end
     if not ok then error(err, 0) end
 end
@@ -790,9 +789,10 @@ test("round6 ldb look: the window's headers and rows, the bar with its text insi
         assertTrue(row.act:IsShown(), "the row's mark")
         assertEqual(row.baseH, NS.db.profile.bars.rowHeight, "the window's row height")
         assertTrue(row:GetParent() == BP.Frame().content, "in the panel's scrolled body")
-        NS.db.profile.broker.tooltip.sections.stats = true
+        assertTrue(panelRow("rangedCrit") == nil, "no stats in the skills feed (R6-9)")
+        Br.OnEnter(M.UIParent, "stats")
+        assertTrue(panelRow("rangedCrit") ~= nil, "the stats feed draws the stat blocks")
         Br.OnEnter(M.UIParent)
-        assertTrue(panelRow("rangedCrit") ~= nil, "the Stats section draws the stat blocks")
     end)
 end)
 
@@ -919,4 +919,90 @@ test("round6 ldb look: schemaVersion 8 keeps every stored profile on Classic; a 
     NS:RunMigrations()
     assertTrue(sv.profiles["R6-New"].tooltips == nil, "a fresh install starts on the Main window style")
     for _, k in ipairs({ "R6-Old", "R6-Chose", "R6-Empty", "R6-New" }) do sv.profiles[k] = nil end
+end)
+
+-- ── R6-9: the Skill Master Stats feed ────────────────────────────────────────────────────────
+
+local function statsTip()
+    local lines = {}
+    local tip = M.CreateFrame("GameTooltip", "SkillMasterR6StatsTip", M.UIParent)
+    function tip:AddLine(t) lines[#lines + 1] = t end
+    function tip:AddDoubleLine(l, r) lines[#lines + 1] = l .. " " .. tostring(r) end
+    function tip:NumLines() return #lines end
+    return tip, lines
+end
+
+test("round6 stats feed: a second data source, its tooltip the four stat blocks, its clicks the skills feed's", function()
+    local obj = M.__ldbObjects[Br.STATS_NAME]
+    assertTrue(obj ~= nil and obj == Br.StatsObject(), "Skill Master Stats is registered")
+    assertEqual(obj.type, "data source")
+    assertEqual(obj.label, "Skill Master Stats")
+    assertTrue(obj.OnClick == Br.OnClick, "the same label clicks")
+    assertEqual(table.concat(Br.STAT_SECTIONS, ","), "stats_base,stats_spell,stats_defense,stats_utility")
+    for _, id in ipairs(Br.STAT_SECTIONS) do
+        assertEqual(NS.defaults.profile.broker.tooltip.sections[id], true, id .. " on by default")
+    end
+    withFeedTip("window", function()
+        obj.OnEnter(M.UIParent)
+        assertEqual(Br.Feed(), "stats")
+        assertEqual(BP.Frame().title:GetText(), "Skill Master Stats")
+        local ids = {}
+        for _, h in ipairs(BP.Headers()) do ids[#ids + 1] = h.id end
+        assertEqual(table.concat(ids, ","), "stats_base", "the stat blocks with rows, no skill block")
+        assertTrue(panelRow("tailoring") == nil, "no skills in the stats feed")
+        M.__ldbObjects[Br.NAME].OnEnter(M.UIParent)
+        assertEqual(Br.Feed(), "skills", "the skills feed's hover takes it back")
+    end)
+    withFeedTip("classic", function()
+        local tip, lines = statsTip()
+        Br.FillTooltip(tip, "stats")
+        local text = table.concat(lines, "\n")
+        assertTrue(text:find("Skill Master Stats", 1, true) ~= nil and text:find("Ranged Crit", 1, true) ~= nil, text)
+        assertTrue(text:find("Tailoring", 1, true) == nil, "Classic: no skills either")
+        NS.db.profile.broker.tooltip.hiddenStats = { rangedCrit = true }   -- the Rows page's LDB tooltip eye
+        tip, lines = statsTip()
+        Br.FillTooltip(tip, "stats")
+        NS.db.profile.broker.tooltip.hiddenStats = {}
+        assertTrue(table.concat(lines, "\n"):find("Ranged Crit", 1, true) == nil, "a stat's tooltip Hide reaches the stats feed")
+        Br.FillTooltip(statsTip(), "skills")
+    end)
+end)
+
+test("round6 stats feed: a stat row's menu pins its stat to the feed per character; with none it reads Stats", function()
+    local crit = tipModels().statIndex.rangedCrit
+    NS.bus:SendMessage(NS.MSG.STATS_UPDATED, { base = { crit }, spell = {}, defense = {}, utility = {} })
+    local saved = NS.db.char.pinnedStat
+    NS.db.char.pinnedStat = false
+    Br.Refresh()
+    assertEqual(Br.StatsText(), "Stats", "nothing pinned")
+    local pin
+    for _, r in ipairs(NS.Interact.MenuRows({ kind = "stat", entry = crit })) do
+        if r.value == "pin" then pin = r end
+    end
+    assertTrue(pin ~= nil and pin.label == "Pin to the broker feed", "the stat row menu offers the pin")
+    assertFalse(pin.selected(), "not pinned yet")
+    pin.onClick()
+    assertEqual(NS.db.char.pinnedStat, "rangedCrit", "stored per character")
+    assertEqual(Br.StatsText(), "Ranged Crit 9.1%", "the feed shows the pinned stat at once")
+    assertTrue(pin.selected(), "ticked")
+    assertTrue(NS.db.char.pinned ~= "rangedCrit", "the skills feed's pin is apart")
+    pin.onClick()
+    assertEqual(Br.StatsText(), "Stats", "a second click unpins")
+    NS.db.char.pinnedStat = saved
+    Br.Refresh()
+end)
+
+test("round6 stats feed: schemaVersion 9 drops a stored Stats section switch, the stat blocks' switches answer", function()
+    local sv = rawget(_G, "SkillMasterDB")
+    sv.profiles = sv.profiles or {}
+    sv.profiles["R6-Stats"] = { broker = { tooltip = { sections = { stats = true, weapon = false } } } }
+    sv.profiles["R6-Fresh9"] = {}
+    NS.db.global.schemaVersion = 8
+    NS:RunMigrations()
+    assertTrue(NS.SCHEMA_VERSION >= 9, "step 9 is in the ladder")
+    local sections = sv.profiles["R6-Stats"].broker.tooltip.sections
+    assertTrue(sections.stats == nil, "the old switch goes")
+    assertEqual(sections.weapon, false, "the rest is kept")
+    assertTrue(next(sv.profiles["R6-Fresh9"]) == nil, "a fresh profile passes through")
+    sv.profiles["R6-Stats"], sv.profiles["R6-Fresh9"] = nil, nil
 end)
