@@ -8,9 +8,12 @@ local addonName, NS = ...
 --
 -- Owner feedback round 4 (the mockup "Skill Master alert toasts"): a skill-up toast on every point
 -- (alerts.skillUp, alerts.skillUpScope), green, short-lived (A.SKILLUP_SECONDS), its own sound
--- switch; skill-ups within A.FOLD_SECONDS of the last share one toast. The weapon-gap toast is
--- restyled red. Each kind wears a tint and an edge of its semantic color (A.KIND_TOKEN) over the
--- skin's toast shell, a small uppercase label, and its numbers in that color.
+-- switch; skill-ups within A.FOLD_SECONDS of the last share one toast.
+--
+-- Owner feedback round 6 (R6-1): every kind wears the cap toast's look, the skin's toast shell, its
+-- body text and the cap toast's icon size, with no tint or edge of its own. The weapon-gap and
+-- skill-up toasts keep a small uppercase label and their numbers in the kind's semantic color
+-- (A.KIND_TOKEN), the delta in brackets: "Daggers 74 / 110 (-36)", "Bows 81 / 110 (+1)".
 --
 -- Reads the model through NS.SkillData:Get / the SKILLS_UPDATED payload and the next rank through
 -- NS.Trainers:NextRank, both at call time. The toast frames are plain (never protected), so they
@@ -24,7 +27,7 @@ local Toast = LibStub and LibStub("LibKa0s-Toast-1.0", true)
 
 A.WIDTH = 420
 A.PAD_X, A.PAD_Y = 14, 12
-A.ICON, A.ICON_SMALL = 36, 28
+A.ICON = 36   -- every kind's icon (round 6: the cap toast's size)
 A.GAP = 12
 A.CLOSE_CLEAR = 26   -- the toast's close mark: 18 px, 4 px in, plus a margin
 A.STACK = 3          -- test mode shows a cap, a weapon-gap and a skill-up toast together (round 5)
@@ -33,9 +36,9 @@ A.UNTRAINED = 5   -- a weapon at this many points or fewer was never really used
 
 A.SKILLUP_SECONDS = 4   -- a skill-up toast's life (the others keep the library's 8)
 A.FOLD_SECONDS = 5      -- skill-ups this close together share one toast
--- The semantic color each kind wears (the skin's tokens): skill up green, weapon gap red.
+-- The semantic color each kind's label and numbers take (the skin's tokens): skill up green,
+-- weapon gap red. The toast itself is the skin's shell, as the cap toast's (round 6).
 A.KIND_TOKEN = { skillup = "sem.good", weapon = "sem.bad" }
-A.TINT_ALPHA, A.EDGE_ALPHA = 0.12, 0.55
 
 local shownCap, shownGap, lastMax = {}, {}, {}
 local recentUps, lastUpAt = {}, nil   -- the skill-ups the open skill-up toast folds
@@ -300,8 +303,8 @@ function A.OnToastClick(payload)
 end
 
 -- ---------------------------------------------------------------------------------------------
--- The toast (Detached.dc.html): an icon square, a title, a detail and a hint for the cap; a small
--- square and one line for the weapon gap. Colors are the skin's roles and tokens.
+-- The toast (Detached.dc.html): an icon square, a title, a detail and a hint for the cap; the same
+-- square, a small label, the title and one line for the others. Colors are the skin's roles and tokens.
 -- ---------------------------------------------------------------------------------------------
 
 local function colorCode(token)
@@ -328,23 +331,14 @@ local function onMouseUp(frame, button)
     end
 end
 
---- The kind's tint and edge over the skin's shell (owner feedback round 4), or none (the cap toast).
-local function paintKind(frame, kind)
-    local token = A.KIND_TOKEN[kind]
-    local r, g, b
-    if token then r, g, b = NS.Skin.Color(token) end   -- not `token and ...`: that keeps one value
-    if not r then
-        frame.skmTint:Hide()
-        for _, t in ipairs(frame.skmEdges) do t:Hide() end
-        return nil
-    end
-    frame.skmTint:SetColorTexture(r, g, b, A.TINT_ALPHA)
-    frame.skmTint:Show()
-    for _, t in ipairs(frame.skmEdges) do
-        t:SetColorTexture(r, g, b, A.EDGE_ALPHA)
-        t:Show()
-    end
-    return token
+--- "Daggers 74 / 110 (-36)": the name in the title's role, the numbers and the bracketed delta in
+--- `token`'s color (the kind's semantic one).
+function A.KindTitle(p, token)
+    local open, close = colorCode(token)
+    local delta = (p.delta and p.delta ~= "") and (" (%s)"):format(p.delta) or ""
+    local name, nums = (p.title or ""):match("^(.-) (%d+ / %d+)$")
+    if name then return ("%s %s%s%s%s"):format(name, open, nums, delta, close) end
+    return ("%s%s%s%s"):format(p.title or "", open, delta, close)
 end
 
 local function rows(frame)
@@ -357,12 +351,6 @@ local function rows(frame)
     icon.art:SetPoint("BOTTOMRIGHT", icon, "BOTTOMRIGHT", -1, 1)
     icon.art:SetTexCoord(unpack(NS.Rows.ICON_TRIM))
     frame.skmIcon = icon
-    -- The kind's tint over the shell's backdrop and under the text, and a 1 px edge of its color.
-    frame.skmTint = frame:CreateTexture(nil, "BORDER", nil, 1)
-    frame.skmTint:SetAllPoints(frame)
-    frame.skmTint:Hide()
-    frame.skmEdges = NS.Bar.MakeEdges(frame, "BORDER")
-    for _, t in ipairs(frame.skmEdges) do t:Hide() end
     frame.skmLabel = text(frame, "body", 10)
     frame.skmTitle = text(frame, "heading", 13)
     frame.skmDetail = text(frame, "body")
@@ -375,8 +363,7 @@ end
 
 local function layout(frame, p)
     local cap = p.kind == "cap"
-    local size = cap and A.ICON or A.ICON_SMALL
-    local padY = cap and A.PAD_Y or A.PAD_Y - 2
+    local size, padY = A.ICON, A.PAD_Y
     local icon, title, detail = frame.skmIcon, frame.skmTitle, frame.skmDetail
     icon:SetSize(size, size)
     icon:ClearAllPoints()
@@ -411,19 +398,16 @@ function A.Build(frame, p)
     local size, padY = layout(frame, p)
     local cap = p.kind == "cap"
     A.lastKind = p.kind   -- the duration and sound getters run right after the build
-    local token = paintKind(frame, p.kind)
     frame.skmDetail:SetText(p.detail or "")
     frame.skmDetail:Show()
     frame.skmHint:SetShown(cap)
     if cap then
         frame.skmTitle:SetText(p.title)
     else
-        -- The label and the numbers in the kind's color: "Bows 81 / 130 +1", "Crossbows 97 / 130 -33".
+        -- The label and the numbers in the kind's color: "Bows 81 / 130 (+1)", "Crossbows 97 / 130 (-33)".
+        local token = A.KIND_TOKEN[p.kind]
         local open, close = colorCode(token)
-        local name, nums = p.title:match("^(.-) (%d+ / %d+)$")
-        local title = name and ("%s %s%s %s%s"):format(name, open, nums, p.delta or "", close)
-            or ("%s %s%s%s"):format(p.title, open, p.delta or "", close)
-        frame.skmTitle:SetText(title)
+        frame.skmTitle:SetText(A.KindTitle(p, token))
         frame.skmLabel:SetText(open .. (p.label or ""):upper() .. close)
     end
     local h = frame.skmTitle:GetStringHeight() or 0

@@ -310,10 +310,14 @@ the checks below that cover each item:
   Skills header (and on the block's band when detached), its tip "2 hidden rows"; click it: both rows
   come back and the mark goes. A hidden Secondary row stays hidden.
 - **SM-ALR-2** (round 4) Gain a skill point: a green "SKILL UP" toast names the skill, its numbers
-  and "+1", with this session's points, the points to cap and an ETA, for about 4 seconds. Two skill
+  and "(+1)", with this session's points, the points to cap and an ETA, for about 4 seconds. Two skill
   points on different skills within 5 s share one toast ("Skill up · 2 skills"). A weapon 25 or more
-  behind toasts red "WEAPON SKILL GAP" with "-N". Alerts > Skill-up alerts for: Professions only
+  behind toasts red "WEAPON SKILL GAP" with "(-N)". Alerts > Skill-up alerts for: Professions only
   stops the weapon skill-ups; Play a sound on skill up plays the sound on skill-ups alone.
+- **SM-ALR-3** (round 6, R6-1) `/sm test`: the weapon-gap and skill-up toasts wear the cap toast's
+  look (the skin's background, border and text, the same icon size, no red or green wash or edge).
+  Only the small label ("WEAPON SKILL GAP", "SKILL UP") and the numbers keep red and green, the
+  delta in brackets: "Daggers 74 / 110 (-36)", "Bows 81 / 110 (+1)". Switch skins: all three follow.
 - **SM-OPT-1** Open Bars: no preview bar sits above the tabs (round 4). Drag Bar height and change
   Color mode to Flat with Use the skin's color off: the open window restyles at once.
 - **SM-OPT-2** Bars > Bar > Border: turn Use the skin's border off, pick a non-Solid style and a
@@ -378,8 +382,8 @@ the checks below that cover each item:
   reads "Ember Ironsong · Lv 22 · Dwarf Hunter" behind the Hunter icon and the strip says the data is sample data. `/sm test` again: your
   own character everywhere.
 - **SM-TEST-2** (round 5, R5-1) With the main window and the Journal closed, `/sm test`: both open,
-  and three toasts stack: the Leatherworking 150 / 150 cap toast (its next rank and trainer), a red weapon-gap
-  toast for Daggers and a green skill-up toast for Bows. They stay up (no countdown) and drag as one
+  and three toasts stack: the Leatherworking 150 / 150 cap toast (its next rank and trainer), a weapon-gap
+  toast for Daggers (red numbers) and a skill-up toast for Bows (green numbers). They stay up (no countdown) and drag as one
   stack. `/sm test` again: the toasts go and both windows close. Open the Journal first, then
   `/sm test` twice: the Journal stays open. Enter combat in test mode: the toasts go with it.
 - **SM-SIM-1** Tick General → Master controls → Sim mode: the step panel opens beside the window and
