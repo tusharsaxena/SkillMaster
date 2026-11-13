@@ -48,7 +48,6 @@ P.APIS = {
     { "SkillFrame_SetSelection",       function() return SkillFrame_SetSelection end },
     { "SkillFrame_UpdateSkills",       function() return SkillFrame_UpdateSkills end },
 }
-local TOMTOM = 'IsAddOnLoaded("TomTom")'
 
 -- A nil inside a return list cannot travel through a JSON array, so it is written as this string.
 P.NIL = "<nil>"
@@ -61,12 +60,6 @@ local function pack(...)
         out[i] = v
     end
     return out
-end
-
-local function addonLoaded(name)
-    local fn = (C_AddOns and C_AddOns.IsAddOnLoaded) or IsAddOnLoaded
-    if type(fn) ~= "function" then return false end
-    return fn(name) and true or false
 end
 
 --- The skill-list API this client has: the C_SkillInfo namespace the kit's Forever API set lists,
@@ -183,7 +176,6 @@ function P.Run()
     }
     readSkills(report)
     for _, api in ipairs(P.APIS) do report.apis[api[1]] = type(api[2]()) == "function" end
-    report.apis[TOMTOM] = addonLoaded("TomTom")
     readEnchant(report)
     NS.Debug("Probe", "%d skill lines, %d headers", #report.skillLines, #report.headers)
     return report
@@ -193,11 +185,11 @@ end
 --- this client has and its visible line count, and which probed globals are present. Unlike Run()
 --- it never expands a header, so it touches no client state.
 --- @return table { source = "C_SkillInfo"|"global"|"none", lines = n, present = n, total = n,
----   missing = { names }, tomtom = bool }
+---   missing = { names } }
 function P.Summary()
     local api = skillApi()
     local out = { source = api and api.source or "none", lines = api and lineCount(api) or 0,
-                  present = 0, total = #P.APIS, missing = {}, tomtom = addonLoaded("TomTom") }
+                  present = 0, total = #P.APIS, missing = {} }
     for _, entry in ipairs(P.APIS) do
         if type(entry[2]()) == "function" then out.present = out.present + 1
         else out.missing[#out.missing + 1] = entry[1] end

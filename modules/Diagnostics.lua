@@ -76,7 +76,7 @@ end
 local function probe(out)
     local p = NS.Probe.Summary()
     out:add(TAG, "probe skill api=%s lines=%s", p.source, p.lines)
-    out:add(TAG, "probe apis present=%s/%s TomTom=%s", p.present, p.total, yesNo(p.tomtom))
+    out:add(TAG, "probe apis present=%s/%s", p.present, p.total)
     out:list(TAG, "probe apis missing:", p.missing)
 end
 

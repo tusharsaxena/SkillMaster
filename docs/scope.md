@@ -10,7 +10,7 @@ Skill Master shows a WoW Forever character's skills and stats as bars the player
   segment, a text suffix, a tooltip breakdown and an expiry timer;
 - character stats in four groups (base and melee/ranged, spell and regen, defense and resists,
   utility including movement speed), each scaled against its own reference with threshold markers;
-- trainer directions for unlearned skills and the next rank, with a TomTom, map-pin or chat waypoint;
+- trainer directions for unlearned skills and the next rank, with a map-pin or chat waypoint (no TomTom, round 7);
 - one LibDataBroker feed (skills and stats, its tooltip sectioned and skinned), alerts, a session log with ETA, an alt overview and gathering helpers.
 
 Each piece of the window is a setting: bar sizes, fill direction, colors (the skin's or the

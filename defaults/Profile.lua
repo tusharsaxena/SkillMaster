@@ -190,9 +190,11 @@ NS.defaults = {
         },
         -- T5.1 the Trainers and Waypoints page (modules/Waypoints.lua, modules/TrainerPopup.lua).
         waypoints = {
-            method   = "auto",   -- "auto" (TomTom, else the map pin, else chat) | "tomtom" | "native" | "chat"
+            -- "auto" (the map pin, else chat) | "chat". Round 7, R7-7: no TomTom; schemaVersion 11
+            -- folded a stored "tomtom" or "native" into "auto".
+            method   = "auto",
             announce = true,     -- say in chat where a waypoint was set
-            -- Round 6, R6-11: without TomTom the native pin comes with Skill Master's own arrow
+            -- Round 6, R6-11: the native pin comes with Skill Master's own arrow
             -- (modules/WaypointArrow.lua) and is not super-tracked; off, the client's arrow again.
             arrow      = true,
             arrowScale = 1,      -- the arrow frame's scale (0.5 .. 2)

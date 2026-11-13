@@ -23,7 +23,7 @@ read_globals = {
   "Settings", "StaticPopup_Show", "YES", "NO",
   -- the probe's reads (modules/Probe.lua): the skill list, the build, and every API it reports on
   "GetBuildInfo", "GetLocale", "GetNumSkillLines", "GetSkillLineInfo", "ExpandSkillHeader",
-  "CollapseSkillHeader", "GetWeaponEnchantInfo", "IsAddOnLoaded", "C_Map", "GetUnitSpeed",
+  "CollapseSkillHeader", "GetWeaponEnchantInfo", "C_Map", "GetUnitSpeed",
   "GetSpellBonusDamage", "GetSpellCritChance", "GetHitModifier", "GetSpellHitModifier",
   "GetCombatRating", "GetCritChance", "GetRangedCritChance", "GetDodgeChance", "GetParryChance",
   "GetBlockChance", "UnitResistance", "CastSpellByName", "C_SkillInfo", "C_Item", "Enum", "INVSLOT_MAINHAND",
@@ -34,13 +34,13 @@ read_globals = {
   -- T2.2 Bonuses (modules/Bonuses.lua): the clock, the race, tooltips and buffs
   "C_TooltipInfo", "C_UnitAuras", "issecretvalue",
   -- M3 the display (modules/Chrome.lua .. modules/Waypoints.lua): the tooltip, the character frame,
-  -- chat linking, the modifier keys and the waypoint providers (TomTom, the native user waypoint)
+  -- chat linking, the modifier keys and the native user waypoint
   "GameTooltip", "ToggleCharacter",
   -- owner feedback round 4: Forever's character panel (Camelot), opened by its micro button
   "CharacterMicroButton", "CharacterFrame", "PaperDollFrame", "SkillsFrame", "EventRegistry",
   "C_SpellBook",                 -- a profession's trade link (core/Compat.lua TradeSkillLink)
   "ChatEdit_InsertLink", "ChatFrame_OpenChat", "IsShiftKeyDown",
-  "TomTom", "UiMapPoint", "C_SuperTrack",
+  "UiMapPoint", "C_SuperTrack",
   -- round 6, R6-11: the player's facing, for Skill Master's own arrow (modules/WaypointArrow.lua)
   "GetPlayerFacing",
   -- round 5, R5-15: the map point a world position is read for (core/Compat.lua MapWorldPos)

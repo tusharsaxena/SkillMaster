@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 10
+NS.SCHEMA_VERSION = 11
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -131,6 +131,15 @@ local function statsCollapseKept(_, profile, from)
     end
 end
 
+--- 10 -> 11 (owner feedback round 7, R7-7): no TomTom. `waypoints.method` keeps two values, "auto"
+--- (the map pin, else chat) and "chat"; a stored "tomtom" or "native" meant the map pin without
+--- TomTom, so it goes and the default "auto" answers (AceDB strips the default anyway).
+local RETIRED_METHOD = { tomtom = true, native = true }
+local function waypointMethodFolded(_, profile)
+    local w = type(profile) == "table" and profile.waypoints
+    if type(w) == "table" and RETIRED_METHOD[rawget(w, "method")] then w.method = nil end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
 -- is the stamp the run started at (0 on a fresh install).
@@ -145,6 +154,7 @@ local STEPS = {
     { to = 8, run = classicTooltipKept, perProfile = true },
     { to = 9, run = statsSectionRetired, perProfile = true },
     { to = 10, run = statsCollapseKept, perProfile = true },
+    { to = 11, run = waypointMethodFolded, perProfile = true },
 }
 
 function NS:InitDB()

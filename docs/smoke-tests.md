@@ -16,7 +16,7 @@ the checks below that cover each item:
 | Each category | SM-DISP-1, SM-TEST-1 |
 | The lure timer | SM-DISP-2, SM-SIM-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8 |
-| TomTom on and off | SM-DISP-7, SM-OPT-5, SM-SEAM-2 |
+| Waypoints (no TomTom, round 7) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47 |
 | Each skin | SM-SKIN-1, SM-SKIN-2 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
 | Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4, SM-DISP-18, SM-DISP-39, SM-DISP-40 |
@@ -68,7 +68,7 @@ the checks below that cover each item:
   combat: no error, and no invisible button is left where the rows were after combat.
 - **SM-DISP-7** An unlearned weapon row reads `Not learned · <trainer>, <city> · 10s`. A click on
   the row (its action mark included) opens the trainer popup: the faction's weapon masters, the unverified warning. Set
-  waypoint with TomTom loaded (a TomTom arrow), without it (a map pin), and Print to chat.
+  waypoint (a map pin and Skill Master's arrow), and Print to chat.
 - **SM-DISP-8** Open the window and the Journal over it, then click the window: it comes to the
   front and a crafting row still opens its profession (the overlay was re-leveled above the rows).
   Drag the window by its title: no invisible button is left at the old place, and at the drop
@@ -205,8 +205,8 @@ the checks below that cover each item:
   unlearned weapon: each weapon master in a city on your continent shows `N yd` under its cost, the
   nearest first; one on the other continent, or without coordinates, shows none and comes last.
   Walk towards another trainer with the popup open: within about a second the yards change and the
-  cards reorder; the trainer you selected stays selected. Compare one card's yards with TomTom's arrow
-  (roughly equal: a straight line). Enter an instance (or a battleground) with the popup open: no
+  cards reorder; the trainer you selected stays selected. Compare one card's yards with Skill Master's
+  arrow (roughly equal: a straight line). Enter an instance (or a battleground) with the popup open: no
   distances, no error.
 - **SM-DISP-39** (round 6, R6-10) On a new profile, hover the broker feed: the tooltip looks like the
   main window, as wide as it, in the skin's shell with the title band (Skill Master, the session's
@@ -232,9 +232,9 @@ the checks below that cover each item:
   right-click the amber strip at the top of its tooltip: the End test menu draws whole, over the
   tooltip, and the tooltip stays while it is open; click End test: test mode ends. A profile from
   before this build that never changed a setting opens the feed tooltip on Classic.
-- **SM-DISP-42** (round 6, review) Open the trainer popup on a weapon master with TomTom or the map
-  pin available: hover Set waypoint: its label takes the skin's hover color, as Print to chat's does.
-- **SM-DISP-43** (round 6, R6-11) TomTom disabled. Open the trainer popup on an unlearned weapon,
+- **SM-DISP-42** (round 6, review) Open the trainer popup on a weapon master with the map pin
+  available: hover Set waypoint: its label takes the skin's hover color, as Print to chat's does.
+- **SM-DISP-43** (round 6, R6-11) Open the trainer popup on an unlearned weapon,
   pick a weapon master in your city and click Set waypoint: the map pin is set, the game's own arrow
   does not show, and Skill Master's solid chevron shows above the screen's center with the yards
   under it in the skin's body font. Turn on the spot: the chevron turns to keep pointing at the
@@ -250,17 +250,21 @@ the checks below that cover each item:
   shows alone, dimmed. Enter combat: it stays.
 - **SM-DISP-45** (round 6, R6-11) Trainers and Waypoints: Arrow scale 1.5: the arrow grows at once.
   Untick Show Skill Master's arrow with it up: it goes and the game's own arrow points at the pin;
-  set a waypoint again: the game's arrow, no Skill Master arrow. Tick it again. Enable TomTom and
-  `/reload`: Set waypoint gives TomTom's arrow and never Skill Master's.
-- **SM-DISP-46** (the R6-11 review) TomTom disabled, a waypoint set and Skill Master's arrow up. Press
+  set a waypoint again: the game's arrow, no Skill Master arrow. Tick it again.
+- **SM-DISP-46** (the R6-11 review) A waypoint set and Skill Master's arrow up. Press
   Alt+Z twice: the arrow comes back and still turns as you turn and counts the yards down (walk in:
   `You have arrived` still prints). Make a second profile with Show Skill Master's arrow off and
   switch to it with the arrow up: it goes and the game's own arrow points at the pin. Switch back,
   set the waypoint, then switch to a profile whose arrow is at scale 2 and dragged elsewhere: the
   arrow takes that scale and place at once.
-- **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon with TomTom loaded,
-  then without it: the primary button reads `Set waypoint` both times (no `(TomTom)`, `(map pin)` or
-  `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
+- **SM-DISP-47** (round 7, R7-7: no TomTom) With TomTom, or an addon that answers TomTom's API (the
+  owner's case), loaded: Set waypoint on a weapon master gives the map pin and Skill Master's solid
+  chevron, never TomTom's arrow; `/sm test` shows the sample chevron too. Untick Show Skill Master's
+  arrow and set it again: the map pin with the game's own arrow. Trainers and Waypoints > Waypoint
+  method offers Map pin and Chat only, no TomTom entry. A profile that had TomTom first or Map pin
+  stored reads Map pin after the upgrade.
+- **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
+  reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed
   in the skin's disabled look and does nothing; hover it: `No map coordinates for this trainer yet;
   Print to chat gives directions.` Print to chat prints them. Trainers and Waypoints > Waypoint method
@@ -345,7 +349,7 @@ the checks below that cover each item:
   click Leatherworking in its tooltip: the window opens, Primary expands and the body scrolls to
   the row. Click an unlearned weapon in the feed tooltip's Weapon section: the trainer popup opens on that skill.
 - **SM-SEAM-2** The broker tooltip's and the Journal's mini bars match the window's bar colors;
-  switch skins and reopen both: they follow. Click the cap toast with TomTom loaded: an arrow.
+  switch skins and reopen both: they follow. Click the cap toast: a map pin and Skill Master's arrow.
 - **SM-SEAM-3** Click the main window's journal mark: the Journal opens; again: it closes.
 - **SM-SEAM-4** Hover a feed, then move straight onto another addon's tooltip owner (a bag item):
   the other tooltip stays up (the feed's leave check hides only its own). The feed tooltip's footer
@@ -415,7 +419,7 @@ the checks below that cover each item:
 - **SM-OPT-4** Hide a skill from its row menu, then open Rows: its Window eye is dimmed; click it
   and the row comes back.
 - **SM-OPT-5** Trainers and Waypoints: Waypoint method Chat only, click an unlearned row's Go: only
-  the chat line, no TomTom arrow. Turn Mark unverified trainers off: no "(unverified)".
+  the chat line, no map pin and no arrow. Turn Mark unverified trainers off: no "(unverified)".
 - **SM-OPT-6** A fresh profile: no bar draws a border under any skin, Azeroth, High Contrast and
   WoW Midnight included (Show border and Use the skin's border are both off by default). Tick Use
   the skin's border under High Contrast: its edge draws. Set Bars > Main window tooltip bar height to 12, hover a Defense or Other row, then hover the
@@ -478,11 +482,11 @@ the checks below that cover each item:
   nothing overlaps. Hover the LDB feed: the same line sits under the tooltip's title. `/sm test`
   again: the strip and the line go and the Journal's tabs move back up. Right-click the Journal's
   strip: End test ends test mode.
-- **SM-TEST-4** (round 6, R6-11) Without TomTom, `/sm test`: Skill Master's waypoint arrow shows,
+- **SM-TEST-4** (round 6, R6-11) `/sm test`: Skill Master's waypoint arrow shows,
   pointing up and to the left at a sample weapon master with `240 yd` under it; no map pin is set.
   Drag it where you want it. `/sm test` again: it goes (a waypoint you had set before test mode comes
   back). Enter combat in test mode: it goes with the rest.
-- **SM-TEST-5** (the R6-11 review) Without TomTom, set a trainer waypoint (the arrow points at it),
+- **SM-TEST-5** (the R6-11 review) Set a trainer waypoint (the arrow points at it),
   then `/sm test` and right-click the sample arrow: the sample goes and the arrow points at the real
   trainer again, the map pin kept. `/sm test` again: the real arrow stays.
 - **SM-SIM-1** Tick General → Master controls → Sim mode: the step panel opens beside the window and

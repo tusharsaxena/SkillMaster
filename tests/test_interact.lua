@@ -31,7 +31,7 @@ end
 NS.db.char = NS.db.char or { pinned = false }
 
 local SWAPPED = { "UnitFactionGroup", "UnitRace", "UnitLevel", "InCombatLockdown", "CreateFrame", "ToggleCharacter",
-                  "TomTom", "C_Map", "UiMapPoint", "GetZoneText", "IsShiftKeyDown", "ChatEdit_InsertLink",
+                  "C_Map", "UiMapPoint", "GetZoneText", "IsShiftKeyDown", "ChatEdit_InsertLink",
                   "GetCursorPosition" }
 
 --- A world: the fixture as the blocks' source, an Alliance Dwarf at 22, every secure button's
@@ -389,7 +389,7 @@ end)
 test("trainer popup: the faction's trainers, the selection and the waypoint button", function()
     withWorld(function()
         local P = NS.TrainerPopup
-        M.TomTom, M.C_Map = nil, nil
+        M.C_Map = nil
         P.Show("fistWeapons")
         local f = P.Frame()
         assertTrue(f:IsShown())
@@ -403,7 +403,7 @@ test("trainer popup: the faction's trainers, the selection and the waypoint butt
         assertEqual(P.Selected(), list[2])
         assertTrue(f.warning:IsShown(), "unverified coordinates are flagged")
         assertEqual(f.waypoint.text:GetText(), "Set waypoint", "the label names no provider (R6-6)")
-        assertFalse(f.waypoint:IsEnabled(), "no TomTom, no native pin: only chat, so disabled (R6-6)")
+        assertFalse(f.waypoint:IsEnabled(), "no native pin: only chat, so disabled (R6-6)")
         M.__resetPrinted()
         f.print:GetScript("OnClick")(f.print)
         assertTrue(#M.__printed() >= 1, "Print to chat prints the directions")
@@ -414,31 +414,26 @@ test("trainer popup: the faction's trainers, the selection and the waypoint butt
     end)
 end)
 
-test("test_waypoints_fallback_order: TomTom, then the native pin, then chat", function()
-    -- red under: any reordering of the three, or a native pin tried without coordinates.
+test("test_waypoints_fallback_order: the native pin, then chat", function()
+    -- red under: chat while the pin works, or a native pin tried without coordinates.
     withWorld(function()
         local Wp = NS.Waypoints
         local trainer = NS.Trainers:For("fistWeapons")[1]
-        local tt, native = {}, {}
-        M.TomTom = { AddWaypoint = function(_, ...) tt[#tt + 1] = { ... } return {} end }
+        local native = {}
         M.C_Map = { SetUserWaypoint = function(p) native[#native + 1] = p end,
                     CanSetUserWaypointOnMap = function() return true end }
         M.UiMapPoint = { CreateFromCoordinates = function(id, x, y) return { id = id, x = x, y = y } end }
-        assertEqual(Wp:Set(trainer), "tomtom")
-        assertEqual(tt[1][1], trainer.mapID)
-        assertTrue(math.abs(tt[1][2] - trainer.x / 100) < 1e-9, "TomTom takes 0..1 coordinates")
-        assertEqual(#native, 0)
-        M.TomTom = nil
         assertEqual(Wp:Set(trainer), "native")
         assertEqual(native[1].id, trainer.mapID)
+        assertTrue(math.abs(native[1].x - trainer.x / 100) < 1e-9, "the pin takes 0..1 coordinates")
+        local noCoords = { name = "Ultham Ironhorn", city = "Amberstill Ranch", mapName = "Dun Morogh", mapID = 1426 }
+        assertEqual(Wp:Set(noCoords), "chat", "no coordinates: directions in chat, never a guessed pin")
+        assertEqual(#native, 1)
+        NS.WaypointArrow.StandDown()
         M.C_Map, M.UiMapPoint = nil, nil
         M.__resetPrinted()
         assertEqual(Wp:Set(trainer), "chat")
         assertTrue(M.__printed()[1]:find("Buliwyf Stonehand", 1, true) ~= nil, M.__printed()[1])
-        M.TomTom = { AddWaypoint = function() error("must not be called") end }
-        local noCoords = { name = "Ultham Ironhorn", city = "Amberstill Ranch", mapName = "Dun Morogh", mapID = 1426 }
-        assertEqual(Wp:Set(noCoords), "chat", "no coordinates: directions in chat, never a guessed pin")
-        assertEqual(Wp:Method(trainer), "tomtom")
     end)
 end)
 

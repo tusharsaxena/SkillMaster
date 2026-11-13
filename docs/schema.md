@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (10)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (11)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "PvP-Traxex Silentshot" (forever-quirks-§4);
@@ -135,8 +135,10 @@ SkillMasterDB
                                  -- "professions" / "weapons" reads as primary / weapon)
                                  -- point and size ({ w, h }, the resize grip): drag state, written
                                  -- only by modules/Journal.lua; keep and filter: the Journal page
-    waypoints = { method = "auto", announce = true,    -- method: "auto" | "tomtom" | "native" | "chat"
-                  arrow = true, arrowScale = 1,        -- Skill Master's own arrow, no TomTom (R6-11);
+    waypoints = { method = "auto", announce = true,    -- method: "auto" (the map pin, else chat) | "chat";
+                                                       -- schemaVersion 11 folded a stored "tomtom"
+                                                       -- or "native" into "auto" (R7-7, no TomTom)
+                  arrow = true, arrowScale = 1,        -- Skill Master's own arrow (R6-11);
                                                        -- scale 0.5 .. 2
                   arrowFrame = { point = false } }     -- its drop point: drag state, written only
                                                        -- by modules/WaypointArrow.lua
@@ -192,10 +194,12 @@ LibDBIcon's own.
 | 7 → 8 | `classicTooltipKept`, per profile | the LDB tooltip's style (round 6, R6-10), `tooltips.ldb.style`, a new key whose default `"window"` is for new profiles only: every profile an earlier install stored gets `"classic"`, today's look, unless it already holds a style, an empty stored profile included (AceDB keeps a never-customized profile as `{}`, and the step runs at OnInitialize, before any new profile exists; the round's review); only a fresh install (the run starts at stamp 0) passes through. The runner hands each step `(sv, profile, from)` for this |
 | 8 → 9 | `statsSectionRetired`, per profile | the stat blocks moved to their own feed, Skill Master Stats (round 6, R6-9), with a switch per stat block (`broker.tooltip.sections.stats_*`, new keys defaulting on): a stored `broker.tooltip.sections.stats` goes; nothing carries over |
 | 9 → 10 | `statsCollapseKept`, per profile | Spell and Defense default to expanded on a new profile (round 6, R6-8; added by the round's review): a profile stored before R6-8 (the run starts at stamp 1 to 6) gets `layout.blocks.stats_spell.collapsed` and `stats_defense.collapsed = true`, the old default AceDB stripped, where none is stored; a stored value stays; a fresh install and a build already on the new default (stamp 7 or later) pass through |
+| 10 → 11 | `waypointMethodFolded`, per profile | no TomTom (round 7, R7-7): `waypoints.method` keeps `"auto"` (the map pin, else chat) and `"chat"`; a stored `"tomtom"` or `"native"` meant the map pin once TomTom is gone, so it goes and the default `"auto"` answers; `"chat"` stays |
 
 No step for the waypoint arrow's keys (round 6, R6-11): `waypoints.arrow`, `waypoints.arrowScale` and
 `waypoints.arrowFrame` are new keys and nothing stored reshapes, so the defaults answer on every
-profile, an existing one included: the arrow is on for everyone without TomTom (the owner's call).
+profile, an existing one included: the arrow is on for everyone (the owner's call; since round 7,
+R7-7, no TomTom check holds it back).
 
 No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
 companion defaulting on, so no stored profile predates the companions and none has to be moved

@@ -10,15 +10,16 @@ local PAGE, GROUP = "trainers", L["Trainers and waypoints"]
 NS.RegisterSchemaRows(NS.Live({
     { path = "waypoints.method", page = PAGE, group = GROUP, type = "string", default = PW.method,
       label = L["Waypoint method"],
-      desc = L["Where a trainer's waypoint goes: Automatic tries TomTom, then the map pin, then chat. A trainer with no coordinates is always written to chat."],
-      values = { { value = "auto", text = L["Automatic"] }, { value = "tomtom", text = L["TomTom first"] },
-                 { value = "native", text = L["Map pin"] }, { value = "chat", text = L["Chat only"] } } },
+      desc = L["Where a trainer's waypoint goes: Map pin places one on the map, Chat only writes the directions. A trainer with no coordinates, or a client with no map pin, is always written to chat."],
+      -- Round 7, R7-7: no TomTom, so "auto" is the map pin, else chat (schemaVersion 11 folded a
+      -- stored "tomtom" or "native" into it).
+      values = { { value = "auto", text = L["Map pin"] }, { value = "chat", text = L["Chat only"] } } },
     { path = "waypoints.announce", page = PAGE, group = GROUP, type = "bool", default = PW.announce,
       label = L["Say where in chat"], desc = L["Print a chat line naming the trainer when a waypoint is set."] },
     -- Round 6, R6-11: Skill Master's own arrow (modules/WaypointArrow.lua).
     { path = "waypoints.arrow", page = PAGE, group = GROUP, type = "bool", default = PW.arrow,
       label = L["Show Skill Master's arrow"],
-      desc = L["Without TomTom, a map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin."],
+      desc = L["A map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin."],
       onChange = function() if NS.WaypointArrow then NS.WaypointArrow.ApplySettings() end end },
     { path = "waypoints.arrowScale", page = PAGE, group = GROUP, type = "number", default = PW.arrowScale,
       min = 0.5, max = 2, step = 0.05, commitOn = "change", label = L["Arrow scale"],

@@ -357,15 +357,17 @@ same tainted `OnShow` error (Known Limitations).
   masters' x and y), one on another continent, or a player the client gives no position (inside an
   instance, a secret) shows no distance and sorts after the measured ones, in the data's order. The
   cards can reorder under the pointer as the player moves (once a second); the selected trainer stays
-  selected. Not TomTom's distance (the owner's call: computed here). Unverified in game.
+  selected. Computed here, not by another addon (the owner's call). Unverified in game.
 - The trainer popup's Set waypoint button (round 6, R6-6) reads `Set waypoint` alone and is disabled
   whenever a waypoint could only go to chat (`NS.Waypoints:Blocked`): the data has no coordinates for
-  the trainer (every profession trainer today), Waypoint method is Chat only, or neither TomTom nor the
-  native pin API is there. Its tooltip says which; Print to chat always works. A disabled button's
+  the trainer (every profession trainer today), Waypoint method is Chat only, or the native pin API is
+  not there. Its tooltip says which; Print to chat always works. A disabled button's
   tooltip needs `SetMotionScriptsWhileDisabled`, called when the client has it. Unverified in game.
-- Skill Master's waypoint arrow (round 6, R6-11) shows only without TomTom and only with a native
-  pin set (`C_Map.SetUserWaypoint` on a map that takes one); with TomTom loaded it never shows, even
-  under Waypoint method Map pin (the game's arrow then points, as before). Its pin is set with
+- Skill Master's waypoint arrow (round 6, R6-11) shows only with a native pin set
+  (`C_Map.SetUserWaypoint` on a map that takes one) and Show Skill Master's arrow on; off, the pin is
+  super-tracked and the game's arrow points. No TomTom (round 7, R7-7): another addon answering
+  TomTom's API hid this arrow in the owner's game, so none is looked for and TomTom's own arrow never
+  shows for a Skill Master waypoint. Its pin is set with
   `C_SuperTrack.SetSuperTrackedUserWaypoint(false)`, not just without the `true` call, so a pin the
   game was super-tracking loses its arrow too. The bearing assumes `GetWorldPosFromMapPos` answers x
   north and y west and `GetPlayerFacing` radians counter-clockwise from north (the retail

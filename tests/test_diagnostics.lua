@@ -87,7 +87,7 @@ test("diagnostics: probe summarizes the skill API and the probed globals without
     M.C_SkillInfo = realNs
     assertTrue(text:find("probe skill api=global lines=4", 1, true) ~= nil, text)
     assertTrue(text:find("probe apis present=", 1, true) ~= nil, text)
-    assertTrue(text:find("TomTom=", 1, true) ~= nil, text)
+    assertTrue(text:find("TomTom", 1, true) == nil, "no TomTom line (round 7, R7-7): " .. text)
     assertEqual(expanded, 0, "the diagnostics expanded a Skills-tab header (it reads, never acts)")
 end)
 

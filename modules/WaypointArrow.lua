@@ -1,8 +1,9 @@
 local _, NS = ...
 -- modules/WaypointArrow.lua — Skill Master's own waypoint arrow (owner feedback round 6, R6-11;
--- mockup A, the solid chevron): without TomTom, a trainer's native map pin (NS.Waypoints) is no
--- longer super-tracked, so the client's own arrow stays away, and this small movable frame points
--- the way instead, with the distance under it. TomTom loaded: never shown (TomTom has its own).
+-- mockup A, the solid chevron): a trainer's native map pin (NS.Waypoints) is no longer
+-- super-tracked, so the client's own arrow stays away, and this small movable frame points the way
+-- instead, with the distance under it. Shown whenever Show Skill Master's arrow is on: no other
+-- addon's arrow is looked for (owner feedback round 7, R7-7, TomTom support removed).
 --
 -- NS.WaypointArrow.Show(trainer) / .Hide() / .Clear() / .IsShown() / .Frame() / .Target() /
 -- .Wanted() / .Update() / .ShowTest() / .HideTest() / .ApplySettings() / .OnWaypointUpdated() /
@@ -57,13 +58,9 @@ local function profile()
     return (NS.db and NS.db.profile.waypoints) or NS.defaults.profile.waypoints
 end
 
-local function tomtomLoaded()
-    return type(TomTom) == "table" and type(TomTom.AddWaypoint) == "function"
-end
-
---- Whether a native pin comes with this arrow: Show Skill Master's arrow on and no TomTom.
+--- Whether a native pin comes with this arrow: Show Skill Master's arrow on.
 function WA.Wanted()
-    return profile().arrow ~= false and not tomtomLoaded()
+    return profile().arrow ~= false
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -325,7 +322,7 @@ function WA.Clear()
 end
 
 --- Test mode (preview-mode): the arrow on a sample trainer, at a sample distance and angle. Nothing
---- is written. Shown only where a real pin would show it (Show Skill Master's arrow on, no TomTom).
+--- is written. Shown only where a real pin would show it (Show Skill Master's arrow on).
 function WA.ShowTest()
     if not WA.Wanted() then return end
     local list = NS.Trainers:For("swords")

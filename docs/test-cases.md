@@ -483,8 +483,8 @@ Total.
 - round6 review: schemaVersion 10 keeps Spell and Defense collapsed on a profile from before R6-8
 - round6 arrow: the rotation is bearing minus facing, counter-clockwise from north (x north, y west)
 - round6 arrow: the fill blends from the skin's accent at 300 yd to its sem.good at 30 yd
-- round6 arrow: without TomTom a waypoint sets the native pin unsuper-tracked and shows the arrow on it
-- round6 arrow: Show Skill Master's arrow off, or TomTom loaded, keeps the old behavior
+- round6 arrow: a waypoint sets the native pin unsuper-tracked and shows the arrow on it
+- round6 arrow: Show Skill Master's arrow off keeps the old behavior
 - round6 arrow: the arrow follows the player's facing and place, throttled, and turns color by distance
 - round6 arrow: no facing hides the art and keeps the distance; no distance shows the name alone, dim
 - round6 arrow: within 5 yd the arrow hides, the pin clears and chat says you have arrived
@@ -497,6 +497,14 @@ Total.
 - round6 arrow review: a profile switch to one with the arrow off hands the pin back to the game's arrow
 - round6 arrow review: a profile switch re-applies the shown arrow's scale and position
 - round6 arrow review: right-clicking test mode's sample over a real waypoint brings the real arrow back
+
+### test_round7.lua (5)
+
+- round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Skill Master's arrow always
+- round7 no TomTom: the arrow off super-tracks the pin (the client's arrow)
+- round7 no TomTom: /sm test shows the sample arrow while the arrow setting is on
+- round7 no TomTom: Waypoint method offers the map pin and chat only, no TomTom label
+- round7 no TomTom: schemaVersion 11 folds a stored tomtom or native method into auto
 
 ### test_blocks.lua (10)
 
@@ -525,7 +533,7 @@ Total.
 - rowtooltip: skinning names the mob level and the next breakpoint; a weapon its cap gap
 - rowtooltip: Show draws on GameTooltip with the bar, Hide gives it back
 - trainer popup: the faction's trainers, the selection and the waypoint button
-- test_waypoints_fallback_order: TomTom, then the native pin, then chat
+- test_waypoints_fallback_order: the native pin, then chat
 - interact: shift-click on a profession row inserts its trade link, as the spellbook icon does
 - panel overlay: a weapon row's mark opens the panel by the micro button, then the Skills tab on its line
 - panel overlay: a stat row's mark opens the paper doll; from another tab it reopens there
@@ -910,6 +918,7 @@ Total.
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
 | test_round6.lua | 54 |
+| test_round7.lua | 5 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -940,4 +949,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **678** |
+| **Total** | **683** |

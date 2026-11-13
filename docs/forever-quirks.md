@@ -280,7 +280,6 @@ below on both clients.
 | `C_Map.GetPlayerMapPosition(mapID, "player")`, `C_Map.GetWorldPosFromMapPos(mapID, CreateVector2D(x, y))` | a Vector2D (0..1) or nil (inside an instance); `instanceID, Vector2D` in world yards; either may be secret | listed (inherited from live); shape assumed, not measured; the catalog's uiMapIDs (1453 Stormwind, ...) unverified (SM-DISP-31) | TrainerPopup distances via Compat (round 5, R5-15) |
 | `GetPlayerFacing()`, `C_Map.ClearUserWaypoint`, `C_Map.HasUserWaypoint`, `C_Map.GetUserWaypoint`, `C_SuperTrack.SetSuperTrackedUserWaypoint(false)`, `USER_WAYPOINT_UPDATED` | radians counter-clockwise from north, nil or secret in some places (instances, indoors); the pin cleared, answered, read; the client arrow dropped for a pin set with `false`; the event on any pin change. World yards from `GetWorldPosFromMapPos`: x north, y west | listed (inherited from live); every shape and the axis order assumed, not measured (SM-DISP-43) | WaypointArrow (round 6, R6-11) |
 | `CastSpellByName(name)` | protected from insecure code in combat | listed; protection unknown | the crafting rows' secure overlay (T3.3) |
-| `C_AddOns.IsAddOnLoaded("TomTom")` | true when TomTom is loaded; the bare `IsAddOnLoaded` is in neither set | listed | Waypoints (T3.3) |
 
 "Listed" means present in the kit's generated name set, which is best-effort for Forever (the set
 can list a name the client lacks); it is not a measurement. *Source:* this addon's design

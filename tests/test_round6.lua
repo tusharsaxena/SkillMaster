@@ -491,12 +491,11 @@ end)
 
 local TP = NS.TrainerPopup
 
---- The popup on `key` with TomTom or not, the native pin API or not, then everything back.
+--- The popup on `key` with the native pin API or not, then everything back.
 local function withTrainerPopup(key, opts, fn)
-    local saved = { TomTom = M.TomTom, C_Map = M.C_Map, UiMapPoint = M.UiMapPoint }
+    local saved = { C_Map = M.C_Map, UiMapPoint = M.UiMapPoint }
     local savedFaction = M.UnitFactionGroup
     M.UnitFactionGroup = function() return "Alliance", "Alliance" end
-    M.TomTom = opts.tomtom and { AddWaypoint = function() return {} end } or nil
     if opts.native then
         M.C_Map = { SetUserWaypoint = function() end, CanSetUserWaypointOnMap = function() return true end }
         M.UiMapPoint = { CreateFromCoordinates = function(id, x, y) return { id = id, x = x, y = y } end }
@@ -506,7 +505,7 @@ local function withTrainerPopup(key, opts, fn)
     TP.Show(key)
     local ok, err = pcall(fn, TP.Frame())
     TP.Hide()
-    M.TomTom, M.C_Map, M.UiMapPoint = saved.TomTom, saved.C_Map, saved.UiMapPoint
+    M.C_Map, M.UiMapPoint = saved.C_Map, saved.UiMapPoint
     M.UnitFactionGroup = savedFaction
     NS.SetByPath("waypoints.method", NS.defaults.profile.waypoints.method)
     if not ok then error(err, 0) end
@@ -524,20 +523,16 @@ local function tipText(owner)
 end
 
 test("round6 waypoint: the button reads Set waypoint whatever the provider, and no footer is left", function()
-    withTrainerPopup("fistWeapons", { tomtom = true }, function(f)
-        assertEqual(f.waypoint.text:GetText(), "Set waypoint", "TomTom loaded: no provider in brackets")
-        assertTrue(f.waypoint:IsEnabled(), "a trainer with coordinates and TomTom: enabled")
+    withTrainerPopup("fistWeapons", { native = true }, function(f)
+        assertEqual(f.waypoint.text:GetText(), "Set waypoint", "the map pin: no provider in brackets")
+        assertTrue(f.waypoint:IsEnabled(), "the native pin: enabled")
         assertTrue(f.footer == nil, "no Waypoint order footer")
         assertEqual(tipText(f.waypoint), "", "no tooltip while it works")
-    end)
-    withTrainerPopup("fistWeapons", { native = true }, function(f)
-        assertEqual(f.waypoint.text:GetText(), "Set waypoint", "the map pin: the same label")
-        assertTrue(f.waypoint:IsEnabled(), "the native pin: enabled")
     end)
 end)
 
 test("round6 waypoint: a trainer without coordinates disables the button and its tooltip says why", function()
-    withTrainerPopup("fishing", { tomtom = true, native = true }, function(f)
+    withTrainerPopup("fishing", { native = true }, function(f)
         local t = TP.Selected()
         assertTrue(t ~= nil and t.x == nil, "the fishing trainers carry no coordinates")
         assertEqual(f.waypoint.text:GetText(), "Set waypoint", "never Set waypoint (chat)")
@@ -545,20 +540,20 @@ test("round6 waypoint: a trainer without coordinates disables the button and its
         assertEqual(tipText(f.waypoint), "No map coordinates for this trainer yet; Print to chat gives directions.")
         assertTrue(f.print:IsEnabled(), "Print to chat still works")
     end)
-    withTrainerPopup("fistWeapons", { tomtom = true }, function(f)
+    withTrainerPopup("fistWeapons", { native = true }, function(f)
         NS.SetByPath("waypoints.method", "chat")
         TP.Select(1)
         assertFalse(f.waypoint:IsEnabled(), "Waypoint method Chat only: disabled")
         assertTrue(tipText(f.waypoint):find("Chat only", 1, true) ~= nil, "its tooltip names the setting")
     end)
     withTrainerPopup("fistWeapons", {}, function(f)
-        assertFalse(f.waypoint:IsEnabled(), "no TomTom and no map pin: disabled")
-        assertTrue(tipText(f.waypoint):find("No TomTom", 1, true) ~= nil, "its tooltip says so")
+        assertFalse(f.waypoint:IsEnabled(), "no map pin: disabled")
+        assertTrue(tipText(f.waypoint):find("No map pin", 1, true) ~= nil, "its tooltip says so")
     end)
 end)
 
 test("round6 waypoint: the window ends a pad under the buttons, shorter by the old footer", function()
-    withTrainerPopup("fistWeapons", { tomtom = true }, function(f)
+    withTrainerPopup("fistWeapons", { native = true }, function(f)
         local h, y
         f.SetHeight = function(_, v) h = v end
         f.waypoint.SetPoint = function(_, point, _, _, _, oy) if point == "TOPLEFT" then y = oy end end
@@ -1039,7 +1034,7 @@ test("round6 review: the Main window style's test strip opens its menu above the
 end)
 
 test("round6 review: the Set waypoint button keeps the skin's hover look beside its own tooltip", function()
-    withTrainerPopup("fistWeapons", { tomtom = true }, function(f)
+    withTrainerPopup("fistWeapons", { native = true }, function(f)
         local function rgb(b) local r, g, bl = b.text:GetTextColor() return ("%.3f,%.3f,%.3f"):format(r, g, bl) end
         f.waypoint:GetScript("OnLeave")(f.waypoint)   -- the rest look (the mock fires no OnEnable)
         local rest = rgb(f.waypoint)
@@ -1103,12 +1098,11 @@ end)
 local WA, Wp = NS.WaypointArrow, NS.Waypoints
 
 --- A trainer at (50, 50) on map 1453, whose world rect is 1000 x 1000 yards from the origin, the
---- native pin API recorded, no TomTom, and the player at `player` (0..1 on 1453); then all back.
+--- native pin API recorded, and the player at `player` (0..1 on 1453); then all back.
 local function withArrow(player, fn)
-    local saved = { TomTom = M.TomTom, C_Map = M.C_Map, map = M.__map, UiMapPoint = M.UiMapPoint,
+    local saved = { C_Map = M.C_Map, map = M.__map, UiMapPoint = M.UiMapPoint,
                     C_SuperTrack = M.C_SuperTrack, facing = M.__facing, wp = NS.db.profile.waypoints }
     local rec = { set = 0, cleared = 0, superTrack = {}, has = true }
-    M.TomTom = nil
     M.__map = { player = player, worlds = { [1453] = { instance = 0, ox = 0, oy = 0, w = 1000, h = 1000 } } }
     M.C_Map = M.__newMapApi()
     M.C_Map.SetUserWaypoint = function(point) rec.set = rec.set + 1 rec.point = point rec.has = true end
@@ -1126,7 +1120,7 @@ local function withArrow(player, fn)
                       mapID = 1453, x = 50, y = 50, teaches = { "swords" }, verified = true }
     local ok, err = pcall(fn, trainer, rec)
     WA.StandDown()
-    M.TomTom, M.C_Map, M.__map, M.UiMapPoint = saved.TomTom, saved.C_Map, saved.map, saved.UiMapPoint
+    M.C_Map, M.__map, M.UiMapPoint = saved.C_Map, saved.map, saved.UiMapPoint
     M.C_SuperTrack, M.__facing, NS.db.profile.waypoints = saved.C_SuperTrack, saved.facing, saved.wp
     if not ok then error(err, 0) end
 end
@@ -1157,7 +1151,7 @@ test("round6 arrow: the fill blends from the skin's accent at 300 yd to its sem.
     end
 end)
 
-test("round6 arrow: without TomTom a waypoint sets the native pin unsuper-tracked and shows the arrow on it", function()
+test("round6 arrow: a waypoint sets the native pin unsuper-tracked and shows the arrow on it", function()
     withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t, rec)
         assertEqual(Wp:Set(t), "native")
         assertEqual(rec.set, 1, "the native pin is still set")
@@ -1176,7 +1170,7 @@ test("round6 arrow: without TomTom a waypoint sets the native pin unsuper-tracke
     end)
 end)
 
-test("round6 arrow: Show Skill Master's arrow off, or TomTom loaded, keeps the old behavior", function()
+test("round6 arrow: Show Skill Master's arrow off keeps the old behavior", function()
     withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t, rec)
         NS.db.profile.waypoints.arrow = false
         assertEqual(Wp:Set(t), "native")
@@ -1185,12 +1179,6 @@ test("round6 arrow: Show Skill Master's arrow off, or TomTom loaded, keeps the o
         NS.db.profile.waypoints.arrow = true
         assertEqual(Wp:Set(t), "native")
         assertTrue(WA.IsShown())
-        M.TomTom = { AddWaypoint = function() return {} end }
-        assertEqual(Wp:Set(t), "tomtom")
-        assertFalse(WA.IsShown(), "TomTom's arrow points: ours hides")
-        assertFalse(WA.Wanted(), "and is never wanted while TomTom is loaded")
-        WA.ShowTest()
-        assertFalse(WA.IsShown(), "not even in test mode")
     end)
 end)
 

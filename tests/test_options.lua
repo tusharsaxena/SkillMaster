@@ -134,13 +134,14 @@ end)
 test("options: the waypoint method preference decides the provider", function()
     local Wp = NS.Waypoints
     local t = { name = "Woo Ping", city = "Stormwind", mapID = 1453, x = 57.1, y = 57.7 }
-    local savedTomTom = rawget(_G, "TomTom")
-    rawset(_G, "TomTom", { AddWaypoint = function() end })
-    assertEqual(Wp:Method(t), "tomtom", "auto prefers TomTom")
+    local saved = { C_Map = M.C_Map, UiMapPoint = M.UiMapPoint }
+    M.C_Map = { SetUserWaypoint = function() end, CanSetUserWaypointOnMap = function() return true end }
+    M.UiMapPoint = { CreateFromCoordinates = function(id, x, y) return { id = id, x = x, y = y } end }
+    assertEqual(Wp:Method(t), "native", "auto is the map pin")
     NS.SetByPath("waypoints.method", "chat")
     assertEqual(Wp:Method(t), "chat", "chat only")
     NS.SetByPath("waypoints.method", "auto")
-    rawset(_G, "TomTom", savedTomTom)
+    M.C_Map, M.UiMapPoint = saved.C_Map, saved.UiMapPoint
 end)
 
 test("options: the unverified mark follows its row", function()

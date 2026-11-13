@@ -2,8 +2,8 @@ local _, NS = ...
 -- modules/TrainerPopup.lua — "where do I learn this" (design §2 goal 7, mockup "Tooltips" artboard,
 -- plan Task 3.3): the trainers for the player's faction who teach an unlearned skill, or who train a
 -- learned one's next rank, one selectable card each (name, cost, city · subzone (x, y), what else
--- they teach), the unverified-data warning, and two actions: set a waypoint (TomTom, the native
--- pin or chat, NS.Waypoints) and print the directions. A window opened on demand from the MEDIUM
+-- they teach), the unverified-data warning, and two actions: set a waypoint (the native pin or
+-- chat, NS.Waypoints) and print the directions. A window opened on demand from the MEDIUM
 -- main window, so HIGH (frame-layering-§1/§4), toplevel, clamped, Escape closes it, and it closes
 -- with the window.
 --
@@ -398,7 +398,7 @@ end
 local BLOCKED_TEXT = {
     nocoords = L["No map coordinates for this trainer yet; Print to chat gives directions."],
     chat = L["Waypoint method is Chat only (Trainers and Waypoints page); Print to chat gives directions."],
-    noprovider = L["No TomTom and no map pin on this client; Print to chat gives directions."],
+    noprovider = L["No map pin on this client; Print to chat gives directions."],
 }
 
 local function refreshActions()

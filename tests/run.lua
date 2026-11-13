@@ -170,6 +170,7 @@ Kit.run{
         "test_round5_snap",
         "test_round5_followups",
         "test_round6",
+        "test_round7",
         "test_blocks",
         "test_interact",
         "test_sessionlog",

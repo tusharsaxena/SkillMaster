@@ -387,7 +387,7 @@ L["Print to chat"] = true
 L["End test"] = true
 L["No map coordinates for this trainer yet; Print to chat gives directions."] = true
 L["Waypoint method is Chat only (Trainers and Waypoints page); Print to chat gives directions."] = true
-L["No TomTom and no map pin on this client; Print to chat gives directions."] = true
+L["No map pin on this client; Print to chat gives directions."] = true
 L["Train: %s (%s)"] = true
 L["Trainers for your faction (%s) who train %s to %s (%d):"] = true
 L["Trainers for your faction (%s) who train %s to %s (%d) or higher:"] = true
@@ -395,7 +395,6 @@ L["%s (%d)"] = true
 L["Learn: %s"] = true
 L["Trainers for your faction (%s) who teach %s:"] = true
 L["No trainer for your faction is recorded for this skill."] = true
-L["Waypoint set (TomTom): %s"] = true
 L["Map pin set: %s"] = true
 
 -- ---- T4.1: the broker feed (modules/Broker.lua) ----
@@ -625,9 +624,7 @@ L["Alts tab opens on"] = true
 L["Restore every Journal setting on this profile to its default. The log itself is kept."] = true
 L["Trainers and waypoints"] = true
 L["Waypoint method"] = true
-L["Where a trainer's waypoint goes: Automatic tries TomTom, then the map pin, then chat. A trainer with no coordinates is always written to chat."] = true
-L["Automatic"] = true
-L["TomTom first"] = true
+L["Where a trainer's waypoint goes: Map pin places one on the map, Chat only writes the directions. A trainer with no coordinates, or a client with no map pin, is always written to chat."] = true
 L["Map pin"] = true
 L["Chat only"] = true
 L["Say where in chat"] = true
@@ -839,7 +836,7 @@ L["Draw this stat block in the Skill Master Stats feed's tooltip."] = true
 
 -- ---- Round 6, R6-11: Skill Master's waypoint arrow (modules/WaypointArrow.lua, settings/Trainers.lua) ----
 L["Show Skill Master's arrow"] = true
-L["Without TomTom, a map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin."] = true
+L["A map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin."] = true
 L["Arrow scale"] = true
 L["Size of Skill Master's waypoint arrow."] = true
 L["Right-click to clear the waypoint. Drag to move the arrow."] = true
