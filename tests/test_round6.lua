@@ -1340,3 +1340,86 @@ test("round6 arrow: turning the arrow off hands the pin back to the game's arrow
         assertEqual(rec.superTrack[#rec.superTrack], true, "and the native pin is super-tracked again")
     end)
 end)
+
+-- ── R6-11 review ─────────────────────────────────────────────────────────────────────────────
+
+test("round6 arrow review: a hide and show of its parent (Alt-Z, a cinematic) leaves the arrow ticking", function()
+    -- red under: an OnHide that removes the OnUpdate, with no OnShow putting it back. The client
+    -- fires OnHide on a shown child when UIParent hides; the frame is still IsShown() after.
+    withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t)
+        Wp:Set(t)
+        local f = WA.Frame()
+        f:__fire("OnHide")
+        f:__fire("OnShow")
+        assertTrue(f:GetScript("OnUpdate") ~= nil, "the OnUpdate still runs once the parent is back")
+        M.__facing = math.pi / 2
+        tick()
+        assertTrue(near(f.fill:GetRotation(), -math.pi / 2), "and the arrow still turns with the player")
+    end)
+end)
+
+-- A scratch profile seeded with `waypoints` (the skin picker already closed); the active profile
+-- comes back whatever happens.
+local function withWaypointProfile(name, waypoints, fn)
+    local db = NS.db
+    local before = db:GetCurrentProfile()
+    db.sv.profiles[name] = { skin = { pickerSeen = true }, waypoints = waypoints }
+    local ok, err = pcall(fn, db)
+    db:SetProfile(before)
+    db.sv.profiles[name] = nil
+    NS.HideSkinPicker()
+    if not ok then error(err, 0) end
+end
+
+test("round6 arrow review: a profile switch to one with the arrow off hands the pin back to the game's arrow", function()
+    -- red under: a reloadProfile that never calls NS.WaypointArrow.ApplySettings.
+    withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t, rec)
+        Wp:Set(t)
+        assertTrue(WA.IsShown())
+        withWaypointProfile("R6-ArrowOff", { arrow = false }, function(db)
+            db:SetProfile("R6-ArrowOff")
+            assertFalse(WA.IsShown(), "the new profile's arrow is off: ours hides")
+            assertEqual(rec.superTrack[#rec.superTrack], true, "and the native pin is super-tracked")
+        end)
+    end)
+end)
+
+test("round6 arrow review: a profile switch re-applies the shown arrow's scale and position", function()
+    -- red under: a reloadProfile that never calls NS.WaypointArrow.ApplySettings, or an
+    -- ApplySettings that sets the scale but not the point.
+    withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t)
+        Wp:Set(t)
+        local f = WA.Frame()
+        local scale, placed
+        f.SetScale = function(_, v) scale = v end
+        f.SetPoint = function(_, point) placed = point end
+        local ok, err = pcall(withWaypointProfile, "R6-ArrowPlace",
+            { arrow = true, arrowScale = 2,
+              arrowFrame = { point = { point = "TOPLEFT", relPoint = "TOPLEFT", x = 40, y = -60 } } },
+            function(db)
+                db:SetProfile("R6-ArrowPlace")
+                assertTrue(WA.IsShown(), "the arrow stays up")
+                assertEqual(scale, 2, "the new profile's scale")
+                assertEqual(placed, "TOPLEFT", "and its saved point")
+            end)
+        f.SetScale, f.SetPoint = nil, nil
+        if not ok then error(err, 0) end
+    end)
+end)
+
+test("round6 arrow review: right-clicking test mode's sample over a real waypoint brings the real arrow back", function()
+    -- red under: a Clear that drops the sample and takes the frame down with the real target still
+    -- set, so HideTest (state.test already nil) returns before pointing at it again.
+    withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t, rec)
+        Wp:Set(t)
+        WA.ShowTest()
+        assertTrue(WA.Target() ~= t, "the sample shows over the real waypoint")
+        WA.Frame():__fire("OnMouseUp", "RightButton")
+        assertEqual(rec.cleared, 0, "the sample's right-click clears no pin")
+        assertTrue(WA.IsShown(), "the real waypoint's arrow comes back")
+        assertEqual(WA.Target(), t, "pointing at the real trainer")
+        WA.HideTest()
+        assertTrue(WA.IsShown() and WA.Target() == t, "test mode's end keeps it")
+        assertTrue(WA.Frame():GetScript("OnUpdate") ~= nil, "and ticking")
+    end)
+end)

@@ -252,6 +252,12 @@ the checks below that cover each item:
   Untick Show Skill Master's arrow with it up: it goes and the game's own arrow points at the pin;
   set a waypoint again: the game's arrow, no Skill Master arrow. Tick it again. Enable TomTom and
   `/reload`: Set waypoint gives TomTom's arrow and never Skill Master's.
+- **SM-DISP-46** (the R6-11 review) TomTom disabled, a waypoint set and Skill Master's arrow up. Press
+  Alt+Z twice: the arrow comes back and still turns as you turn and counts the yards down (walk in:
+  `You have arrived` still prints). Make a second profile with Show Skill Master's arrow off and
+  switch to it with the arrow up: it goes and the game's own arrow points at the pin. Switch back,
+  set the waypoint, then switch to a profile whose arrow is at scale 2 and dragged elsewhere: the
+  arrow takes that scale and place at once.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon with TomTom loaded,
   then without it: the primary button reads `Set waypoint` both times (no `(TomTom)`, `(map pin)` or
   `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
@@ -476,6 +482,9 @@ the checks below that cover each item:
   pointing up and to the left at a sample weapon master with `240 yd` under it; no map pin is set.
   Drag it where you want it. `/sm test` again: it goes (a waypoint you had set before test mode comes
   back). Enter combat in test mode: it goes with the rest.
+- **SM-TEST-5** (the R6-11 review) Without TomTom, set a trainer waypoint (the arrow points at it),
+  then `/sm test` and right-click the sample arrow: the sample goes and the arrow points at the real
+  trainer again, the map pin kept. `/sm test` again: the real arrow stays.
 - **SM-SIM-1** Tick General → Master controls → Sim mode: the step panel opens beside the window and
   the box stays ticked. Start the fishing trip: every 3 s a step plays; a skill-up flashes the broker
   and adds a Journal line, the lure puts a teal segment on Fishing, the mount moves Run Speed to

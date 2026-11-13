@@ -441,7 +441,7 @@ Total.
 - round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once
 - round5 review: a block reorder redraws the Rows page in the new order, shown or hidden
 
-### test_round6.lua (50)
+### test_round6.lua (54)
 
 - round6 toast: the gap and skill-up toasts wear the cap toast's skin shell, no tint or edge of their own
 - round6 toast: the value stays red or green and carries its delta in brackets
@@ -493,6 +493,10 @@ Total.
 - round6 arrow: test mode shows it on a sample trainer at a sample distance, writes nothing, and takes it down
 - round6 arrow: /sm test raises and lowers the arrow with test mode's other surfaces
 - round6 arrow: turning the arrow off hands the pin back to the game's arrow; the scale applies at once
+- round6 arrow review: a hide and show of its parent (Alt-Z, a cinematic) leaves the arrow ticking
+- round6 arrow review: a profile switch to one with the arrow off hands the pin back to the game's arrow
+- round6 arrow review: a profile switch re-applies the shown arrow's scale and position
+- round6 arrow review: right-clicking test mode's sample over a real waypoint brings the real arrow back
 
 ### test_blocks.lua (10)
 
@@ -905,7 +909,7 @@ Total.
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
-| test_round6.lua | 50 |
+| test_round6.lua | 54 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -936,4 +940,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **674** |
+| **Total** | **678** |

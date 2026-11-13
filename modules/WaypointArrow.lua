@@ -177,7 +177,10 @@ local function onMouseUp(_, button)
     if button == "RightButton" then WA.Clear() end
 end
 
-local onUpdate   -- defined below; armed on show, disarmed on hide
+-- Defined below; armed by present(), disarmed by takeDown(). No OnHide disarms it: the client
+-- fires OnHide on a shown child when its parent hides (Alt-Z, a cinematic) and none of ours re-arms
+-- on the way back, while a hidden frame runs no OnUpdate anyway (R6-11 review).
+local onUpdate
 
 local function build()
     frame = CreateFrame("Frame", WA.FRAME_NAME, UIParent)
@@ -192,7 +195,6 @@ local function build()
     frame:SetScript("OnMouseUp", onMouseUp)
     frame:SetScript("OnEnter", onEnter)
     frame:SetScript("OnLeave", onLeave)
-    frame:SetScript("OnHide", function(self) self:SetScript("OnUpdate", nil) end)
     -- The outline under the fill, one sublevel apart; both white art tinted by SetVertexColor.
     frame.outline = frame:CreateTexture(nil, "ARTWORK", nil, 1)
     frame.outline:SetTexture(WA.OUTLINE_TEXTURE)
@@ -288,7 +290,7 @@ end
 -- Show, hide, clear
 -- ---------------------------------------------------------------------------------------------
 
--- The frame down and its OnUpdate disarmed (not left to OnHide: a hidden parent fires none).
+-- The frame down and its OnUpdate disarmed, explicitly: this is the one place it is disarmed.
 local function takeDown()
     if not frame then return end
     frame:SetScript("OnUpdate", nil)
@@ -310,10 +312,11 @@ function WA.Hide()
 end
 
 --- Right-click: the waypoint goes, the native pin with it, and the arrow hides. In test mode the
---- sample only hides (no pin was set for it).
+--- sample only goes (no pin was set for it): a real waypoint under it is pointed at again.
 function WA.Clear()
     if state.test then
         state.test = nil
+        if state.target and WA.Wanted() then return present() end
         takeDown()
         return
     end
@@ -343,10 +346,14 @@ function WA.HideTest()
     takeDown()
 end
 
---- The page's two rows: the scale applies at once; turning the arrow off hides it and hands the
---- live native pin back to the client's own arrow (the old behavior).
+--- The page's two rows, and a profile switch, copy or reset: the scale (and, while shown, the saved
+--- point) applies at once; the arrow off hides it and hands the live native pin back to the
+--- client's own arrow (the old behavior).
 function WA.ApplySettings()
-    if frame then frame:SetScale(profile().arrowScale or 1) end
+    if frame then
+        frame:SetScale(profile().arrowScale or 1)
+        if frame:IsShown() then applyPoint() end
+    end
     if WA.Wanted() then return end
     local had = state.target ~= nil
     state.test = nil
