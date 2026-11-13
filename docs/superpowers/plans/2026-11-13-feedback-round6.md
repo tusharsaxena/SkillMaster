@@ -63,5 +63,5 @@ Milestones: M1 = R6-1..R6-8, M2 = R6-10, R6-9; M3 = R6-11 (after the mockup pick
 | R6-7 | done | 69d0716 |
 | R6-10 | done | 380c10a |
 | R6-9 | done | 8efb5df |
-| R6 review | done | (this commit) |
+| R6 review | done | ecef52c |
 | R6-11 | waiting on the owner's mockup pick | |
