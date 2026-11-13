@@ -624,6 +624,15 @@ local function fillSections(tip, rows)
     end
 end
 
+--- Test mode's line (owner feedback round 6, R6-2): the main window's strip text in the skin's
+--- warning color, added to `tip` while test mode is on. Answers whether it added the line. Any
+--- tooltip this addon fills calls it right under its title.
+function B.AddTestModeLine(tip)
+    if not NS.IsTestMode() then return false end
+    tip:AddLine(colored("sem.warn", L["Test mode: the skills shown are sample data."]))
+    return true
+end
+
 --- Fill `tip` (the feed's tooltip, or a stand-in) with the shown sections. Answers the clickable
 --- rows, each { line, kind = "skill" | "stat", key }.
 function B.FillTooltip(tip)
@@ -633,6 +642,7 @@ function B.FillTooltip(tip)
     if tip.SetMinimumWidth then tip:SetMinimumWidth(B.MinWidth()) end
     tip:AddDoubleLine(colored("gtip.title", B.LABEL),
         colored("gtip.muted", L["+%d this session"]:format(view().gains.total)))
+    B.AddTestModeLine(tip)
     if NS.IsStoodDown() then
         tip:AddLine(colored("gtip.muted", L["Ka0s Skill Master is disabled."]))
         return rows

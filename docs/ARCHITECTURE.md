@@ -309,6 +309,9 @@ same tainted `OnShow` error (Known Limitations).
   `test:cap`, `test:weapon`, `test:skillup`); turning it off takes the toasts down and hides each
   window test mode opened. The first-run skin picker previews through test mode, so it shows them too.
   The toast stack holds three (`A.STACK`).
+- While test mode is on (round 6) every surface says so: the main window and the Journal carry the
+  amber test-mode strip under their titles (the Journal's tabs and body move down by its height), and
+  the LDB tooltip carries the same line in `sem.warn` right under its title (`NS.Broker.AddTestModeLine`).
 - Test mode's lure timer counts from when test mode turned on and is redrawn on the next repaint,
   not every second (the live ticker follows only live temp bonuses).
 - On a client that is not enUS, the skill lines are matched on their skill-line ID when the

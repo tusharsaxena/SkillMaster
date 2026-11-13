@@ -441,11 +441,13 @@ Total.
 - round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once
 - round5 review: a block reorder redraws the Rows page in the new order, shown or hidden
 
-### test_round6.lua (3)
+### test_round6.lua (5)
 
 - round6 toast: the gap and skill-up toasts wear the cap toast's skin shell, no tint or edge of their own
 - round6 toast: the value stays red or green and carries its delta in brackets
 - round6 toast: test mode's gap and skill-up toasts take the same look
+- round6 test mode: the Journal shows the main window's strip and its body moves down under it
+- round6 test mode: the LDB tooltip says test mode under its title while it is on
 
 ### test_blocks.lua (10)
 
@@ -858,7 +860,7 @@ Total.
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
-| test_round6.lua | 3 |
+| test_round6.lua | 5 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -889,4 +891,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **627** |
+| **Total** | **629** |

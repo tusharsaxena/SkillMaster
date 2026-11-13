@@ -90,3 +90,96 @@ test("round6 toast: test mode's gap and skill-up toasts take the same look", fun
     NS.Preview.Apply(false)
     if not ok then error(err, 0) end
 end)
+
+-- ── R6-2: test mode's cues on the Journal and the LDB tooltip ────────────────────────────────
+
+local J, B = NS.Journal, NS.Broker
+local STRIP_TEXT = NS.L["Test mode: the skills shown are sample data."]
+
+--- Record the y of `region`'s TOPLEFT anchor as production sets it (the kit records a frame's
+--- points only on a texture): answers a reader of the last one set, and an undo.
+local function spyTop(region)
+    local y
+    rawset(region, "SetPoint", function(_, point, _, _, _, dy) if point == "TOPLEFT" then y = dy end end)
+    return function() return y end, function() rawset(region, "SetPoint", nil) end
+end
+
+--- Test mode on and off around fn, from a clean state; whatever fn raised is raised after.
+local function withTestMode(fn)
+    if NS.IsTestMode() then NS.ToggleTestMode() end
+    NS.ToggleTestMode()
+    local ok, err = pcall(fn)
+    if NS.IsTestMode() then NS.ToggleTestMode() end
+    M.__fireTimers()
+    if not ok then error(err, 0) end
+end
+
+test("round6 test mode: the Journal shows the main window's strip and its body moves down under it", function()
+    J.Show()
+    local f = J.Frame()
+    local rows = J.VisibleLogRows()
+    local tabY, undoTab = spyTop(f.tabs.log)
+    local panelY, undoPanel = spyTop(f.logPanel)
+    local ok, err = pcall(function()
+        assertTrue(not (f.strip and f.strip:IsShown()), "no strip outside test mode")
+        local onTab, onPanel
+        withTestMode(function()
+            assertTrue(J.IsShown(), "the Journal, open before, stays open")
+            assertTrue(f.strip ~= nil and f.strip:IsShown(), "the strip shows")
+            assertEqual(f.strip.text:GetText(), STRIP_TEXT)
+            onTab, onPanel = tabY(), panelY()
+            assertTrue(onTab ~= nil and onPanel ~= nil, "the tabs and the body are placed again")
+            assertTrue(J.VisibleLogRows() < rows, "the log fits the rows left under it")
+        end)
+        assertFalse(f.strip:IsShown(), "test mode off: the strip goes")
+        local h = NS.Widgets.TEST_STRIP.HEIGHT
+        assertEqual(onTab, tabY() - h, "the tabs sat the strip's height lower, and move back")
+        assertEqual(onPanel, panelY() - h, "the body too")
+        assertEqual(J.VisibleLogRows(), rows, "and the log's rows")
+    end)
+    undoTab()
+    undoPanel()
+    J.Hide()
+    if not ok then error(err, 0) end
+end)
+
+--- A tooltip that records its lines (tests/test_broker.lua's shape): tip.lines[n] = { left, right }.
+local function recordingTip()
+    local tip = M.CreateFrame("GameTooltip", "SkillMasterRound6Tip", M.UIParent)
+    tip.lines = {}
+    function tip:GetName() return "SkillMasterRound6Tip" end
+    function tip:NumLines() return #self.lines end
+    function tip:ClearLines() self.lines = {} end
+    local function region(n)
+        local name = "SkillMasterRound6TipTextLeft" .. n
+        _G[name] = _G[name] or M.CreateFrame("Frame", name, tip)
+    end
+    function tip:AddLine(text) self.lines[#self.lines + 1] = { text } region(#self.lines) end
+    function tip:AddDoubleLine(l, r) self.lines[#self.lines + 1] = { l, r } region(#self.lines) end
+    return tip
+end
+
+local function tipLines(tip)
+    local out = {}
+    for _, l in ipairs(tip.lines) do out[#out + 1] = l[1] or "" end
+    return out
+end
+
+test("round6 test mode: the LDB tooltip says test mode under its title while it is on", function()
+    local tip = recordingTip()
+    B.FillTooltip(tip)
+    for _, line in ipairs(tipLines(tip)) do
+        assertTrue(line:find(STRIP_TEXT, 1, true) == nil, "no test-mode line outside test mode")
+    end
+    tip:ClearLines()
+    withTestMode(function()
+        B.FillTooltip(tip)
+        local lines = tipLines(tip)
+        assertTrue((lines[2] or ""):find(STRIP_TEXT, 1, true) ~= nil, "the line right under the title: " .. tostring(lines[2]))
+        tip:ClearLines()
+        assertTrue(B.AddTestModeLine(tip) == true, "the helper adds it")
+        assertEqual(tip:NumLines(), 1)
+    end)
+    tip:ClearLines()
+    assertTrue(B.AddTestModeLine(tip) == false and tip:NumLines() == 0, "off: the helper adds nothing")
+end)

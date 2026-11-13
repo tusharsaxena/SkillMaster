@@ -14,7 +14,9 @@ local addonName, NS = ...
 -- then (saveSize, its one writer). A grab first pins the frame by its top-left corner (pinTopLeft),
 -- so the grip's corner follows the cursor rather than the frame growing about its center (FB-33).
 -- A display: it reads NS.SessionLog and NS.Alts through NS.Preview.Log() / .Alts() (test mode's
--- sample while it is on, T5.2) and repaints on SKILLS_UPDATED and LAYOUT_CHANGED.
+-- sample while it is on, T5.2) and repaints on SKILLS_UPDATED and LAYOUT_CHANGED. While test mode
+-- is on it shows the main window's test-mode strip under its title, the tabs and the body moved down
+-- by the strip's height (owner feedback round 6, R6-2; J.Render syncs it).
 
 NS.Journal = {}
 local J = NS.Journal
@@ -215,7 +217,7 @@ end
 
 local function panel()
     local p = CreateFrame("Frame", nil, frame)
-    p:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -BODY_TOP)
+    p:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -BODY_TOP)   -- placeTop moves it under a strip
     p:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -PAD, PAD)
     p:EnableMouseWheel(true)
     p.pool = Pool.New()
@@ -837,12 +839,26 @@ local function buildTabs()
     NS.Skin.Divider(frame.rule)
 end
 
+-- The test-mode strip (round 6, R6-2): the main window's own, under the title while test mode is on.
+local function buildStrip()
+    frame.strip = NS.Widgets.TestStrip(frame, {
+        text  = L["Test mode: the skills shown are sample data."],
+        owner = addonName,
+        onEnd = function() NS.ToggleTestMode() end,
+    })
+    if not frame.strip then return end
+    frame.strip:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -TITLE_H)
+    frame.strip:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -TITLE_H)
+    frame.strip:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.OVERLAY)
+end
+
 local function buildChrome()
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.title:SetPoint("TOP", frame, "TOP", 0, -7)
     frame.title:SetText(L["Skill Master \194\183 Journal"])
     NS.Skin.Shell(frame)
     NS.Skin.Text(frame.title, "title")
+    buildStrip()
     local close = NS.MakeCloseButton(frame, function() J.Hide() end)
     if close then
         close:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -4)
@@ -879,6 +895,32 @@ local function onDragStop(self)
     savePoint()
 end
 
+-- ── the strip's shift ────────────────────────────────────────────────────────────────────────
+
+--- How far the tabs and the body sit below their place: the strip's height while it shows.
+local function shift()
+    if not (frame and frame.strip and frame.strip:IsShown()) then return 0 end
+    return NS.Widgets.TEST_STRIP and NS.Widgets.TEST_STRIP.HEIGHT or 18
+end
+
+--- Anchor the tabs, their rule and both panels `shift()` below their place.
+local function placeTop()
+    local dy = shift()
+    for i, key in ipairs({ "log", "alts" }) do
+        local tab = frame.tabs[key]
+        tab:ClearAllPoints()
+        tab:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD + (i - 1) * 112, -TITLE_H - 2 - dy)
+    end
+    frame.rule:ClearAllPoints()
+    frame.rule:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -TITLE_H - TAB_H - 2 - dy)
+    frame.rule:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -TITLE_H - TAB_H - 2 - dy)
+    for _, p in ipairs({ frame.logPanel, frame.altsPanel }) do
+        p:ClearAllPoints()
+        p:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -BODY_TOP - dy)
+        p:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -PAD, PAD)
+    end
+end
+
 -- ── sizing ───────────────────────────────────────────────────────────────────────────────────
 
 local function rowsFor(h, chrome, rowH)
@@ -903,8 +945,8 @@ end
 function J.Relayout(w, h)
     if not frame then return end
     h = h or frame:GetHeight()
-    state.logRows = rowsFor(h, LOG_CHROME_H, ROW_H)
-    state.altRows = rowsFor(h, ALT_CHROME_H, ALT_ROW_H)
+    state.logRows = rowsFor(h, LOG_CHROME_H + shift(), ROW_H)
+    state.altRows = rowsFor(h, ALT_CHROME_H + shift(), ALT_ROW_H)
     state.altCols = colsFor(w or frame:GetWidth())
     hideBeyond(frame.logPanel, state.logRows)
     hideBeyond(frame.altsPanel, state.altRows)
@@ -984,9 +1026,25 @@ end
 
 -- ── the surface ──────────────────────────────────────────────────────────────────────────────
 
+--- Show the strip while test mode is on (without the widgets library, the title says it), and move
+--- the tabs and the body when it comes or goes.
+local function syncStrip()
+    local on = NS.IsTestMode()
+    if not frame.strip then
+        local title = L["Skill Master \194\183 Journal"]
+        frame.title:SetText(on and L["%s - %s"]:format(title, L["Test mode"]) or title)
+        return
+    end
+    if frame.strip:IsShown() == on then return end
+    frame.strip:SetShown(on)
+    placeTop()
+    J.Relayout()
+end
+
 --- Draw the selected tab, one pass.
 function J.Render()
     if not frame then return end
+    syncStrip()
     frame.logPanel:SetShown(state.tab == "log")
     frame.altsPanel:SetShown(state.tab == "alts")
     for key, tab in pairs(frame.tabs) do NS.Skin.SetTabSelection(tab, key == state.tab) end

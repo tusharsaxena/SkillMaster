@@ -386,6 +386,11 @@ the checks below that cover each item:
   toast for Daggers (red numbers) and a skill-up toast for Bows (green numbers). They stay up (no countdown) and drag as one
   stack. `/sm test` again: the toasts go and both windows close. Open the Journal first, then
   `/sm test` twice: the Journal stays open. Enter combat in test mode: the toasts go with it.
+- **SM-TEST-3** (round 6, R6-2) Open the Journal, then `/sm test`: the amber strip "Test mode: the
+  skills shown are sample data." shows under the Journal's title, the tabs and the log below it, and
+  nothing overlaps. Hover the LDB feed: the same line sits under the tooltip's title. `/sm test`
+  again: the strip and the line go and the Journal's tabs move back up. Right-click the Journal's
+  strip: End test ends test mode.
 - **SM-SIM-1** Tick General → Master controls → Sim mode: the step panel opens beside the window and
   the box stays ticked. Start the fishing trip: every 3 s a step plays; a skill-up flashes the broker
   and adds a Journal line, the lure puts a teal segment on Fishing, the mount moves Run Speed to
