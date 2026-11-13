@@ -198,7 +198,7 @@ the checks below that cover each item:
 - **SM-DISP-30** (round 5, R5-14: the trainer popup's wrap) Open the trainer popup on an unlearned
   weapon (Fist Weapons, Staves): a weapon master's `Also teaches:` line wraps onto a second line
   inside its card instead of being cut off, the card is taller by that line and the window by every
-  such card; the buttons and the footer stay below the last card. Hover a card: a tooltip with the
+  such card; the buttons stay below the last card. Hover a card: a tooltip with the
   trainer's name, place and the whole `Also teaches` list.
 - **SM-DISP-31** (round 5, R5-15: the trainer distance) In Stormwind, open the trainer popup on an
   unlearned weapon: each weapon master in a city on your continent shows `N yd` under its cost, the
@@ -207,6 +207,13 @@ the checks below that cover each item:
   cards reorder; the trainer you selected stays selected. Compare one card's yards with TomTom's arrow
   (roughly equal: a straight line). Enter an instance (or a battleground) with the popup open: no
   distances, no error.
+- **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon with TomTom loaded,
+  then without it: the primary button reads `Set waypoint` both times (no `(TomTom)`, `(map pin)` or
+  `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
+  Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed
+  in the skin's disabled look and does nothing; hover it: `No map coordinates for this trainer yet;
+  Print to chat gives directions.` Print to chat prints them. Trainers and Waypoints > Waypoint method
+  Chat only: the button is disabled on a weapon master too, its tooltip naming the setting.
 - **SM-DISP-32** (R5-followups review) Open the trainer popup, press Alt+Z twice (the UI hides and
   comes back): walk towards another trainer; within about a second the yards change and the cards
   reorder, as before the Alt+Z.

@@ -4,8 +4,8 @@ local _, NS = ...
 -- the directions in chat. A trainer without coordinates (most profession trainers: the data never
 -- guesses a pin, defaults/Trainers_Forever.lua) always goes to chat.
 --
--- NS.Waypoints:Set(trainer) -> "tomtom"|"native"|"chat"; :Method(trainer); :Print(trainer);
--- :Directions(trainer)
+-- NS.Waypoints:Set(trainer) -> "tomtom"|"native"|"chat"; :Method(trainer); :Blocked(trainer);
+-- :Print(trainer); :Directions(trainer)
 
 NS.Waypoints = {}
 local Wp = NS.Waypoints
@@ -41,6 +41,17 @@ function Wp:Method(t)
     if pref ~= "native" and tomtomReady() then return "tomtom" end
     if nativeReady(t) then return "native" end
     return "chat"
+end
+
+--- Why a Set for `t` could only print to chat (owner feedback round 6, R6-6: the trainer popup's
+--- Set waypoint button is disabled then): "nocoords" (the data has no coordinates for it),
+--- "chat" (Waypoint method is Chat only) or "noprovider" (no TomTom and no native pin here); nil
+--- when a Set would place a waypoint.
+function Wp:Blocked(t)
+    if not (t and hasCoords(t)) then return "nocoords" end
+    if Wp:Method(t) ~= "chat" then return nil end
+    if setting("waypoints.method", "auto") == "chat" then return "chat" end
+    return "noprovider"
 end
 
 --- The " (unverified)" mark for trainer data not checked on WoW Forever, unless the Trainers and

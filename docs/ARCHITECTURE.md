@@ -341,6 +341,11 @@ same tainted `OnShow` error (Known Limitations).
   instance, a secret) shows no distance and sorts after the measured ones, in the data's order. The
   cards can reorder under the pointer as the player moves (once a second); the selected trainer stays
   selected. Not TomTom's distance (the owner's call: computed here). Unverified in game.
+- The trainer popup's Set waypoint button (round 6, R6-6) reads `Set waypoint` alone and is disabled
+  whenever a waypoint could only go to chat (`NS.Waypoints:Blocked`): the data has no coordinates for
+  the trainer (every profession trainer today), Waypoint method is Chat only, or neither TomTom nor the
+  native pin API is there. Its tooltip says which; Print to chat always works. A disabled button's
+  tooltip needs `SetMotionScriptsWhileDisabled`, called when the client has it. Unverified in game.
 - Every client API the data modules use is assumed until `/sm probe` confirms it
   ([forever-quirks.md](forever-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.

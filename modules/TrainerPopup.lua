@@ -14,6 +14,12 @@ local _, NS = ...
 -- card grows by the wrapped height and the window by the cards; past P.MAX_HEIGHT every line falls
 -- back to one (the client's ellipsis), and the card's tooltip always carries the whole list.
 --
+-- Round 6, R6-6: the Set waypoint button always reads "Set waypoint" (no provider in brackets) and
+-- the "Waypoint order" footer is gone, the window shorter by it. When the selected trainer's
+-- waypoint could only go to chat (no coordinates in the data, Waypoint method Chat only, or no
+-- provider: NS.Waypoints:Blocked) the button is disabled, in the skin's disabled look, and its
+-- tooltip says why; Print to chat still gives the directions.
+--
 -- Round 5, R5-15: each card shows the trainer's distance from the player ("123 yd"), measured from
 -- world positions (NS.Compat.PlayerWorldPos / MapWorldPos, the map API, guarded) and compared only
 -- inside one instance (continent); none when unknown. The cards sort nearest first, the unmeasured
@@ -197,6 +203,8 @@ end
 local function button(parent, label, onClick, primary)
     local b = CreateFrame("Button", nil, parent)
     b:SetHeight(BUTTON_H)
+    -- A disabled button still shows its tooltip (the Set waypoint button says why it is disabled).
+    if b.SetMotionScriptsWhileDisabled then b:SetMotionScriptsWhileDisabled(true) end
     b.text = b:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     b.text:SetPoint("CENTER", b, "CENTER", 0, 0)
     b.text:SetText(label)
@@ -210,10 +218,14 @@ local function buildActions()
     frame.warning:SetText(L["Coordinates unverified on WoW Forever (flagged until the smoke pass)"])
     NS.Skin.Text(frame.warning, "sem.warn")
     frame.waypoint = button(frame, L["Set waypoint"], setWaypoint, true)
+    frame.waypoint:SetScript("OnEnter", function(self)
+        if not (GameTooltip and self.blockedText) then return end
+        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        tipLine(self.blockedText, "text.body", true)
+        GameTooltip:Show()
+    end)
+    frame.waypoint:SetScript("OnLeave", onCardLeave)
     frame.print = button(frame, L["Print to chat"], printDirections, false)
-    frame.footer = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    frame.footer:SetText(L["Waypoint order: TomTom, then a native map pin, then chat directions"])
-    NS.Skin.Text(frame.footer, "muted")
 end
 
 local function build()
@@ -272,7 +284,7 @@ end
 
 local function layout()
     local y, unverified = placeCards(ALSO_LINES)
-    if y + (unverified and 18 or 0) + BUTTON_H + 32 > P.MAX_HEIGHT then
+    if y + (unverified and 18 or 0) + BUTTON_H + PAD > P.MAX_HEIGHT then
         y, unverified = placeCards(1)   -- too tall: one line each, the tooltip has the rest
     end
     frame.warning:ClearAllPoints()
@@ -285,18 +297,22 @@ local function layout()
     frame.print:ClearAllPoints()
     frame.print:SetPoint("TOPLEFT", frame.waypoint, "TOPRIGHT", 8, 0)
     frame.print:SetPoint("RIGHT", frame, "RIGHT", -PAD, 0)
-    frame.footer:ClearAllPoints()
-    frame.footer:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -(y + BUTTON_H + 8))
-    frame:SetHeight(y + BUTTON_H + 32)
+    frame:SetHeight(y + BUTTON_H + PAD)   -- no footer under the buttons (R6-6)
 end
 
-local METHOD_LABEL = { tomtom = L["TomTom"], native = L["map pin"], chat = L["chat"] }
+-- Why the Set waypoint button is disabled, by NS.Waypoints:Blocked's answer (R6-6).
+local BLOCKED_TEXT = {
+    nocoords = L["No map coordinates for this trainer yet; Print to chat gives directions."],
+    chat = L["Waypoint method is Chat only (Trainers and Waypoints page); Print to chat gives directions."],
+    noprovider = L["No TomTom and no map pin on this client; Print to chat gives directions."],
+}
 
 local function refreshActions()
     local t = P.Selected()
-    local method = t and NS.Waypoints:Method(t) or "chat"
-    frame.waypoint.text:SetText(L["Set waypoint (%s)"]:format(METHOD_LABEL[method]))
-    frame.waypoint:SetEnabled(t ~= nil)
+    local blocked = t and NS.Waypoints:Blocked(t)
+    frame.waypoint.text:SetText(L["Set waypoint"])
+    frame.waypoint.blockedText = blocked and BLOCKED_TEXT[blocked] or nil
+    frame.waypoint:SetEnabled(t ~= nil and not blocked)
     frame.print:SetEnabled(t ~= nil)
 end
 

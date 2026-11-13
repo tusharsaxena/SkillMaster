@@ -484,3 +484,85 @@ test("round6 thresholds: schemaVersion 7 carries a stored false to both switches
     assertTrue(next(sv.profiles["R6-Fresh"]) == nil, "a fresh profile passes through")
     sv.profiles["R6-Off"], sv.profiles["R6-On"], sv.profiles["R6-Fresh"] = nil, nil, nil
 end)
+
+-- ── R6-6: the Set waypoint button ────────────────────────────────────────────────────────────
+
+local TP = NS.TrainerPopup
+
+--- The popup on `key` with TomTom or not, the native pin API or not, then everything back.
+local function withTrainerPopup(key, opts, fn)
+    local saved = { TomTom = M.TomTom, C_Map = M.C_Map, UiMapPoint = M.UiMapPoint }
+    local savedFaction = M.UnitFactionGroup
+    M.UnitFactionGroup = function() return "Alliance", "Alliance" end
+    M.TomTom = opts.tomtom and { AddWaypoint = function() return {} end } or nil
+    if opts.native then
+        M.C_Map = { SetUserWaypoint = function() end, CanSetUserWaypointOnMap = function() return true end }
+        M.UiMapPoint = { CreateFromCoordinates = function(id, x, y) return { id = id, x = x, y = y } end }
+    else
+        M.C_Map, M.UiMapPoint = nil, nil
+    end
+    TP.Show(key)
+    local ok, err = pcall(fn, TP.Frame())
+    TP.Hide()
+    M.TomTom, M.C_Map, M.UiMapPoint = saved.TomTom, saved.C_Map, saved.UiMapPoint
+    M.UnitFactionGroup = savedFaction
+    NS.SetByPath("waypoints.method", NS.defaults.profile.waypoints.method)
+    if not ok then error(err, 0) end
+end
+
+local function tipText(owner)
+    local saved = M.GameTooltip
+    local lines = {}
+    local tip = { SetOwner = function() end, Show = function() end, IsOwned = function() return false end,
+                  AddLine = function(_, s) lines[#lines + 1] = s end }
+    M.GameTooltip = tip
+    owner:GetScript("OnEnter")(owner)
+    M.GameTooltip = saved
+    return table.concat(lines, "\n")
+end
+
+test("round6 waypoint: the button reads Set waypoint whatever the provider, and no footer is left", function()
+    withTrainerPopup("fistWeapons", { tomtom = true }, function(f)
+        assertEqual(f.waypoint.text:GetText(), "Set waypoint", "TomTom loaded: no provider in brackets")
+        assertTrue(f.waypoint:IsEnabled(), "a trainer with coordinates and TomTom: enabled")
+        assertTrue(f.footer == nil, "no Waypoint order footer")
+        assertEqual(tipText(f.waypoint), "", "no tooltip while it works")
+    end)
+    withTrainerPopup("fistWeapons", { native = true }, function(f)
+        assertEqual(f.waypoint.text:GetText(), "Set waypoint", "the map pin: the same label")
+        assertTrue(f.waypoint:IsEnabled(), "the native pin: enabled")
+    end)
+end)
+
+test("round6 waypoint: a trainer without coordinates disables the button and its tooltip says why", function()
+    withTrainerPopup("fishing", { tomtom = true, native = true }, function(f)
+        local t = TP.Selected()
+        assertTrue(t ~= nil and t.x == nil, "the fishing trainers carry no coordinates")
+        assertEqual(f.waypoint.text:GetText(), "Set waypoint", "never Set waypoint (chat)")
+        assertFalse(f.waypoint:IsEnabled(), "disabled: it could only print to chat")
+        assertEqual(tipText(f.waypoint), "No map coordinates for this trainer yet; Print to chat gives directions.")
+        assertTrue(f.print:IsEnabled(), "Print to chat still works")
+    end)
+    withTrainerPopup("fistWeapons", { tomtom = true }, function(f)
+        NS.SetByPath("waypoints.method", "chat")
+        TP.Select(1)
+        assertFalse(f.waypoint:IsEnabled(), "Waypoint method Chat only: disabled")
+        assertTrue(tipText(f.waypoint):find("Chat only", 1, true) ~= nil, "its tooltip names the setting")
+    end)
+    withTrainerPopup("fistWeapons", {}, function(f)
+        assertFalse(f.waypoint:IsEnabled(), "no TomTom and no map pin: disabled")
+        assertTrue(tipText(f.waypoint):find("No TomTom", 1, true) ~= nil, "its tooltip says so")
+    end)
+end)
+
+test("round6 waypoint: the window ends a pad under the buttons, shorter by the old footer", function()
+    withTrainerPopup("fistWeapons", { tomtom = true }, function(f)
+        local h, y
+        f.SetHeight = function(_, v) h = v end
+        f.waypoint.SetPoint = function(_, point, _, _, _, oy) if point == "TOPLEFT" then y = oy end end
+        TP.Relayout()
+        f.SetHeight, f.waypoint.SetPoint = nil, nil
+        assertTrue(y ~= nil, "the buttons were placed")
+        assertEqual(h, -y + 26 + 10, "the buttons' top, their height and one pad")
+    end)
+end)
