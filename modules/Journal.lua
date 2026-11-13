@@ -125,7 +125,27 @@ end
 --- A vertical scroll bar for an offset-driven table (owner feedback round 4): `onScroll(offset)`
 --- when dragged. bar:Sync(maxOffset, offset) follows the table; it is shown only while the table
 --- has more rows than fit. Skinned through the facade (S.ScrollBar with the caller's track/thumb).
-local function makeScrollBar(parent, onScroll)
+--- `opts.alwaysShown` (the LDB panel, owner feedback round 7, R7-4: no empty gutter): the bar stays
+--- shown, and with nothing to scroll it is disabled, its thumb the corridor's whole length in the
+--- skin's `scroll.thumbOff` (the facade's disabled tint), as the main window's bar stays drawn with
+--- its arrows disabled.
+local THUMB_H = 36
+local function syncAlwaysShown(bar, maxOffset)
+    bar:Show()
+    local S = NS.Skin
+    if maxOffset > 0 then
+        bar:Enable()
+        bar.thumb:SetHeight(THUMB_H)
+        if S.Color("scroll.thumb") then bar.thumb:SetColorTexture(S.Color("scroll.thumb")) end
+    else
+        bar:Disable()
+        bar.thumb:SetHeight(math.max(1, tonumber(bar:GetHeight()) or THUMB_H))
+        if S.Color("scroll.thumbOff") then bar.thumb:SetColorTexture(S.Color("scroll.thumbOff")) end
+    end
+end
+
+local function makeScrollBar(parent, onScroll, opts)
+    local alwaysShown = type(opts) == "table" and opts.alwaysShown == true
     local bar = CreateFrame("Slider", nil, parent)
     bar:SetOrientation("VERTICAL")
     bar:SetWidth(SCROLL_W)
@@ -136,7 +156,7 @@ local function makeScrollBar(parent, onScroll)
     local track = bar:CreateTexture(nil, "BACKGROUND")
     track:SetAllPoints()   -- both filled by the skin's scroll.track / scroll.thumb (S.ScrollBar)
     local thumb = bar:CreateTexture(nil, "ARTWORK")
-    thumb:SetSize(SCROLL_W, 36)
+    thumb:SetSize(SCROLL_W, THUMB_H)
     bar:SetThumbTexture(thumb)
     bar.track, bar.thumb = track, thumb
     bar:SetScript("OnValueChanged", function(self, value)
@@ -148,10 +168,11 @@ local function makeScrollBar(parent, onScroll)
         self:SetMinMaxValues(0, maxOffset)
         self:SetValue(offset)
         self.syncing = false
-        self:SetShown(maxOffset > 0)
+        if alwaysShown then syncAlwaysShown(self, maxOffset) else self:SetShown(maxOffset > 0) end
         self.maxOffset, self.offset = maxOffset, offset
     end
     if NS.Skin.ScrollBar then NS.Skin.ScrollBar(bar, { track = track, thumb = thumb }) end
+    bar.alwaysShown = alwaysShown
     bar:Hide()
     return bar
 end

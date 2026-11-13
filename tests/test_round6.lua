@@ -851,7 +851,7 @@ test("round6 ldb look: past its Height the body scrolls, by the wheel and by the
         Br.OnEnter(M.UIParent)
         local f = BP.Frame()
         assertEqual(select(2, BP.Scroll()), 0, "the default Height fits the fixture")
-        assertFalse(f.scrollBar:IsShown(), "no scroll bar while it fits")
+        assertFalse(f.scrollBar:IsEnabled(), "while it fits the bar is drawn disabled (round 7, R7-4)")
         NS.db.profile.tooltips.ldb.height = 120
         Br.OnEnter(M.UIParent)
         local _, most = BP.Scroll()

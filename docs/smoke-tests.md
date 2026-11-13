@@ -271,6 +271,11 @@ the checks below that cover each item:
   Tooltip style: the titles read `Skill Master · Professions and Skills` and `Skill Master · Stats`
   (a middle dot). The broker display still shows both feeds where you had placed them (their names
   are unchanged) and their texts as before.
+- **SM-DISP-50** (round 7, R7-4) Tooltip style Main window, the default Height: hover either feed
+  when everything fits: the scroll bar is drawn at the right, disabled (one dim thumb the whole
+  height; dragging does nothing), and no empty gutter shows. Set Tooltips > LDB tooltip > Height to
+  200 and hover: the thumb is its normal size and color and drags the body. Switch skins: both looks
+  follow the skin.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

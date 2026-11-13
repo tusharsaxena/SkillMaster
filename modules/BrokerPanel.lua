@@ -131,7 +131,8 @@ local function buildBody()
     end)
     local J = NS.Journal
     if J and J.MakeScrollBar then
-        frame.scrollBar = J.MakeScrollBar(frame, function(offset) P.SetScroll(offset) end)
+        -- Always drawn, disabled while nothing scrolls (round 7, R7-4): the gutter is never empty.
+        frame.scrollBar = J.MakeScrollBar(frame, function(offset) P.SetScroll(offset) end, { alwaysShown = true })
         frame.scrollBar:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.OVERLAY)
     end
     frame.empty = frame.content:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")

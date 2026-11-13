@@ -375,6 +375,12 @@ same tainted `OnShow` error (Known Limitations).
   (another continent, an instance) the trainer's name shows alone, dim. Arrival is 5 yd, straight
   line. A pin replaced elsewhere is noticed only where the client answers `C_Map.GetUserWaypoint`
   and a world place for it. Unverified in game.
+- The Main window style LDB tooltip's scroll bar (round 7, R7-4) is always drawn: with nothing to
+  scroll it is disabled and its thumb spans the corridor in the skin's `scroll.thumbOff`, the
+  facade's disabled tint (the main window's template bar stays drawn with its arrows disabled; the
+  Journal's slider bar has no arrows, so the full-length dim thumb says the same). A skin switch while
+  the tooltip is up repaints the thumb in `scroll.thumb` until the next hover redraws it. Unverified
+  in game.
 - Every client API the data modules use is assumed until `/sm probe` confirms it
   ([forever-quirks.md](forever-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.

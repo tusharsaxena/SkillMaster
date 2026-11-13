@@ -1,6 +1,7 @@
 -- tests/test_round7.lua — the owner's round-7 feedback (2026-11-13): TomTom support removed, the
 -- native pin and Skill Master's own arrow always (R7-7); the icon border's row color off on a new
--- profile (R7-2); no header meta text (R7-3); the LDB tooltips' titles (R7-5).
+-- profile (R7-2); no header meta text (R7-3); the LDB tooltips' titles (R7-5); the LDB
+-- panel's scroll bar always drawn (R7-4).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -183,4 +184,46 @@ test("round7 titles: the two feeds' tooltips read Skill Master · Professions an
     assertEqual(Br.STATS_NAME, "Skill Master Stats")
     assertEqual(Br.Object().label, "Skill Master")
     assertEqual(Br.StatsObject().label, "Skill Master Stats")
+end)
+
+-- ── R7-4: the LDB panel's scroll bar is always drawn ─────────────────────────────────────────
+
+local function sameRGB(got, r, g, b)
+    return got ~= nil and math.abs(got[1] - r) < 1e-6 and math.abs(got[2] - g) < 1e-6 and math.abs(got[3] - b) < 1e-6
+end
+
+test("round7 scroll bar: an always-shown bar is drawn disabled while nothing scrolls, enabled once it does", function()
+    local bar = NS.Journal.MakeScrollBar(M.UIParent, function() end, { alwaysShown = true })
+    M.__paintFrame(bar)
+    bar:__setGeom(16, 300)
+    bar:Sync(0, 0)
+    assertTrue(bar:IsShown(), "nothing scrolls: still drawn, so the gutter is never empty")
+    assertFalse(bar:IsEnabled(), "and disabled")
+    assertEqual(select(2, bar.thumb:GetSize()), 300, "the thumb spans the whole corridor")
+    local off = { NS.Skin.Color("scroll.thumbOff") }
+    assertTrue(sameRGB(M.__paint(bar.thumb).color, off[1], off[2], off[3]), "in the skin's disabled thumb tint")
+    bar:Sync(120, 10)
+    assertTrue(bar:IsShown() and bar:IsEnabled(), "it scrolls: enabled")
+    assertEqual(select(2, bar.thumb:GetSize()), 36, "the thumb back to its size")
+    local on = { NS.Skin.Color("scroll.thumb") }
+    assertTrue(sameRGB(M.__paint(bar.thumb).color, on[1], on[2], on[3]), "in the skin's thumb color")
+    -- The Journal's and the trainer popup's bars keep hiding while nothing scrolls.
+    local plain = NS.Journal.MakeScrollBar(M.UIParent, function() end)
+    plain:Sync(0, 0)
+    assertFalse(plain:IsShown(), "a plain bar hides")
+end)
+
+test("round7 scroll bar: the LDB panel builds its bar always shown", function()
+    local p = NS.db.profile.tooltips.ldb
+    local savedStyle = p.style
+    p.style = "window"
+    NS.BrokerPanel.Fill()
+    local f = NS.BrokerPanel.Frame()
+    p.style = savedStyle
+    assertTrue(f.scrollBar ~= nil and f.scrollBar.alwaysShown == true, "the panel's bar is always shown")
+    assertTrue(f.scrollBar:IsShown(), "drawn after a fill")
+    if select(2, NS.BrokerPanel.Scroll()) == 0 then
+        assertFalse(f.scrollBar:IsEnabled(), "disabled while the body fits")
+    end
+    NS.Broker.HideTooltip()
 end)
