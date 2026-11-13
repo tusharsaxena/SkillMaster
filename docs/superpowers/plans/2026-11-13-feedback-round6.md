@@ -53,5 +53,10 @@ Milestones: M1 = R6-1..R6-8, M2 = R6-10, R6-9; M3 = R6-11 (after the mockup pick
 
 | Task | Status | Commit |
 |---|---|---|
-| R6-1..R6-10 | queued (workflow) | |
+| R6-1 | done | 3fc429d |
+| R6-2 | done | 7cb41aa |
+| R6-3 | done | 204d15b |
+| R6-5 | done | b953641 |
+| R6-8 | done | 8fe9ed7 |
+| R6-4, R6-6, R6-7, R6-9, R6-10 | queued (workflow) | |
 | R6-11 | waiting on the owner's mockup pick | |
