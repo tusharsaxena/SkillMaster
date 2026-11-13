@@ -214,6 +214,15 @@ the checks below that cover each item:
   in the skin's disabled look and does nothing; hover it: `No map coordinates for this trainer yet;
   Print to chat gives directions.` Print to chat prints them. Trainers and Waypoints > Waypoint method
   Chat only: the button is disabled on a weapon master too, its tooltip naming the setting.
+- **SM-DISP-38** (round 6, R6-7) An Alliance character with Fishing at 150 / 150: open its trainer
+  popup. The intro reads `Trainers for your faction (Alliance) who train Fishing to Expert (225) or
+  higher:`; under an `Expert (225)` heading Old Man Heming, under `Artisan (300)` Nat Pagle. With
+  Blacksmithing at 75 / 75: the Journeyman and Expert blacksmiths under `Journeyman (150)`, nearest
+  first (walk about: within a second they reorder inside the heading, never across it), no
+  `Expert (225)` heading, Brikk Keencraft under `Artisan (300)`. When a list passes the 600-unit
+  cap (most likely Blacksmithing or Leatherworking at 75 / 75 on a faction with many recorded
+  trainers): the window stops growing, a thin skin scroll bar shows at its right edge, the wheel and
+  the bar scroll the cards, the buttons stay put below. Every card's `Also teaches` line still wraps.
 - **SM-DISP-32** (R5-followups review) Open the trainer popup, press Alt+Z twice (the UI hides and
   comes back): walk towards another trainer; within about a second the yards change and the cards
   reorder, as before the Alt+Z.

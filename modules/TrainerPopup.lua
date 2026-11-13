@@ -7,12 +7,19 @@ local _, NS = ...
 -- main window, so HIGH (frame-layering-§1/§4), toplevel, clamped, Escape closes it, and it closes
 -- with the window.
 --
--- NS.TrainerPopup.Show(key) / .Hide() / .IsShown() / .Frame() / .Trainers() / .Select(i) / .Selected()
--- / .Relayout() / .TextHeight(fs) / .Distance(t) / .RefreshDistances() / .Ticking()
+-- NS.TrainerPopup.Show(key) / .Hide() / .IsShown() / .Frame() / .Trainers() / .Groups() / .Select(i)
+-- / .Selected() / .Relayout() / .TextHeight(fs) / .Distance(t) / .RefreshDistances() / .Ticking()
+-- / .Scroll() / .SetScroll(offset) / .Headings()
 --
 -- Round 5, R5-14: a card's "Also teaches" line wraps inside the card (up to ALSO_LINES lines), the
--- card grows by the wrapped height and the window by the cards; past P.MAX_HEIGHT every line falls
--- back to one (the client's ellipsis), and the card's tooltip always carries the whole list.
+-- card grows by the wrapped height and the window by the cards, and the card's tooltip always
+-- carries the whole list.
+--
+-- Round 6, R6-7: a learned skill's popup lists the trainers of its next rank and of every higher
+-- rank (an Artisan trainer trains Expert too; NS.Trainers:NextRank's groups), each rank under its
+-- heading ("Expert (225)"), the next rank first, nearest first inside a rank, a trainer once under
+-- the lowest rank it trains. Past P.MAX_HEIGHT the cards scroll inside the window (the wheel and a
+-- skin scroll bar, the Journal's NS.Journal.MakeScrollBar) instead of clipping (GitHub issue #4).
 --
 -- Round 6, R6-6: the Set waypoint button always reads "Set waypoint" (no provider in brackets) and
 -- the "Waypoint order" footer is gone, the window shorter by it. When the selected trainer's
@@ -32,22 +39,30 @@ local LAYERS = NS.Constants.LAYERS
 
 P.FRAME_NAME = "SkillMasterTrainerPopup"
 local WIDTH, TITLE_H, PAD, CARD_H, BUTTON_H = 380, 26, 10, 54, 26
--- The "Also teaches" line: the card's width less its 8-unit insets, the small font's line height
--- (the fallback when the client measures nothing), and the lines a card may wrap to.
-local ALSO_W, LINE_H, ALSO_LINES = WIDTH - 2 * PAD - 16, 12, 4
---- The popup's tallest: past it, the cards' "Also teaches" lines drop back to one line each.
+-- The small font's line height (the fallback when the client measures nothing), the lines a card's
+-- "Also teaches" line may wrap to (inside the card's 8-unit insets), a rank heading's line, the
+-- scroll bar's width and gap, and the wheel's step.
+local LINE_H, ALSO_LINES, HEAD_H = 12, 4, 18
+local SCROLL_W, SCROLL_GAP, WHEEL_STEP = 8, 4, 40
+--- The popup's tallest: past it, the cards scroll inside the window (R6-7).
 P.MAX_HEIGHT = 600
 
 local frame, cardPool, ticker
 local stopTicker, startTicker   -- defined with the distances below; the frame's OnHide / OnShow call them
--- base: the trainers in the data's order; list: the cards' order (nearest first); dist: yards each.
-local state = { key = nil, base = {}, list = {}, dist = {}, selected = 1 }
+-- groups: { rankName, cap, base (the data's order), list (nearest first) } per rank heading, or one
+-- unnamed group for a skill to learn; base: every trainer in the data's order; list: the cards'
+-- order (group by group); dist: yards each; offset: the cards' scroll, in units.
+local state = { key = nil, groups = {}, base = {}, list = {}, dist = {}, selected = 1, offset = 0 }
 --- Seconds between the distance re-measures while the popup is shown.
 P.TICK = 1
 
 function P.Frame() return frame end
 function P.IsShown() return frame ~= nil and frame:IsShown() == true end
 function P.Trainers() return state.list end
+--- The rank groups on show: { rankName, cap, list } each (rankName nil for a skill to learn).
+function P.Groups() return state.groups end
+--- The cards' scroll offset (units) and its most (0 when everything fits).
+function P.Scroll() return state.offset, state.maxOffset or 0 end
 function P.Selected() return state.list[state.selected] end
 --- Yards from the player to trainer `t` at the last measure, or nil when unknown.
 function P.Distance(t) return state.dist[t] end
@@ -134,7 +149,6 @@ local function buildCard(parent)
     NS.Skin.Text(c.where, "body")
     c.also = c:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     c.also:SetPoint("TOPLEFT", c.where, "BOTTOMLEFT", 0, -3)
-    c.also:SetWidth(ALSO_W)   -- an explicit width, so the wrapped height measures before layout
     c.also:SetJustifyH("LEFT")
     c.also:SetJustifyV("TOP")
     c.also:SetWordWrap(true)
@@ -168,8 +182,10 @@ local function paintName(fs)
     fs:SetTextColor(c[1], c[2], c[3], c[4] or 1)
 end
 
-local function fillCard(c, t, key, i, maxLines)
+local function fillCard(c, t, key, i, maxLines, width)
     c.index, c.trainer = i, t
+    c:SetWidth(width)
+    c.also:SetWidth(width - 16)   -- an explicit width, so the wrapped height measures before layout
     c.name:SetText(t.name)
     paintName(c.name)
     local cost = t.costByKey and t.costByKey[key] or t.cost
@@ -228,6 +244,27 @@ local function buildActions()
     frame.print = button(frame, L["Print to chat"], printDirections, false)
 end
 
+local setScroll   -- the cards' scroll, defined with the layout below
+
+-- The cards' viewport: a scroll frame whose child holds the rank headings and the cards, the wheel
+-- and a skin scroll bar (the Journal's) driving its offset (R6-7).
+local function buildList()
+    frame.list = CreateFrame("ScrollFrame", nil, frame)
+    frame.content = CreateFrame("Frame", nil, frame.list)
+    frame.content:SetSize(WIDTH - 2 * PAD, 1)
+    frame.list:SetScrollChild(frame.content)
+    frame.list:EnableMouseWheel(true)
+    frame.list:SetScript("OnMouseWheel", function(_, delta)
+        setScroll(state.offset - (tonumber(delta) or 0) * WHEEL_STEP)
+    end)
+    local J = NS.Journal
+    if J and J.MakeScrollBar then
+        frame.scrollBar = J.MakeScrollBar(frame, function(offset) setScroll(offset) end)
+        frame.scrollBar:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CONTENT)
+    end
+    frame.headings = {}
+end
+
 local function build()
     if frame then return frame end
     frame = CreateFrame("Frame", P.FRAME_NAME, UIParent, "BackdropTemplate")
@@ -254,6 +291,7 @@ local function build()
     frame.intro:SetJustifyH("LEFT")
     NS.Skin.Text(frame.intro, "muted")
     cardPool = NS.Pool.New()
+    buildList()
     buildActions()
     UISpecialFrames[#UISpecialFrames + 1] = P.FRAME_NAME
     frame:SetScript("OnHide", stopTicker)   -- Escape and the window's close hide it without P.Hide
@@ -264,29 +302,84 @@ local function build()
     return frame
 end
 
--- The cards, top down, each "Also teaches" line wrapping to `maxLines`; the y under the last.
-local function placeCards(maxLines)
+--- The rank headings on show, in order (the suites read them).
+function P.Headings()
+    local out = {}
+    for _, h in ipairs(frame and frame.headings or {}) do if h:IsShown() then out[#out + 1] = h end end
+    return out
+end
+
+local function heading(n)
+    local h = frame.headings[n]
+    if not h then
+        h = frame.content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        h:SetJustifyH("LEFT")
+        NS.Skin.Text(h, "heading")
+        frame.headings[n] = h
+    end
+    return h
+end
+
+-- The headings and cards, top down inside the scroll child, `width` wide, each "Also teaches" line
+-- wrapping to ALSO_LINES; the height they take.
+local function placeList(width)
     NS.Pool.ReleaseAll(cardPool)
-    local y = TITLE_H + 30
-    local unverified = false
-    for i, t in ipairs(state.list) do
-        local c = NS.Pool.Acquire(cardPool, function() return buildCard(frame) end)
-        c:ClearAllPoints()
-        c:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -y)
-        c:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -y)
-        local h = fillCard(c, t, state.key, i, maxLines)
-        c:Show()
-        y = y + h + 6
-        unverified = unverified or NS.Waypoints.UnverifiedMark(t) ~= ""
+    for _, h in ipairs(frame.headings) do h:Hide() end
+    local y, i, n, unverified = 0, 0, 0, false
+    for _, g in ipairs(state.groups) do
+        if g.rankName then
+            n = n + 1
+            local h = heading(n)
+            h:ClearAllPoints()
+            h:SetPoint("TOPLEFT", frame.content, "TOPLEFT", 2, -(y + 2))
+            h:SetText(L["%s (%d)"]:format(g.rankName, g.cap))
+            h:Show()
+            y = y + HEAD_H
+        end
+        for _, t in ipairs(g.list) do
+            i = i + 1
+            local c = NS.Pool.Acquire(cardPool, function() return buildCard(frame.content) end)
+            c:ClearAllPoints()
+            c:SetPoint("TOPLEFT", frame.content, "TOPLEFT", 0, -y)
+            local h = fillCard(c, t, state.key, i, ALSO_LINES, width)
+            c:Show()
+            y = y + h + 6
+            unverified = unverified or NS.Waypoints.UnverifiedMark(t) ~= ""
+        end
     end
     return y, unverified
 end
 
+--- Scroll the cards to `offset` units, clamped to what the list overflows by.
+function setScroll(offset)
+    local most = state.maxOffset or 0
+    offset = math.floor(math.max(0, math.min(tonumber(offset) or 0, most)) + 0.5)
+    state.offset = offset
+    if frame and frame.list then frame.list:SetVerticalScroll(offset) end
+    if frame and frame.scrollBar then frame.scrollBar:Sync(most, offset) end
+end
+P.SetScroll = function(offset) setScroll(offset) end
+
 local function layout()
-    local y, unverified = placeCards(ALSO_LINES)
-    if y + (unverified and 18 or 0) + BUTTON_H + PAD > P.MAX_HEIGHT then
-        y, unverified = placeCards(1)   -- too tall: one line each, the tooltip has the rest
+    local top = TITLE_H + 8 + math.ceil(P.TextHeight(frame.intro)) + 8
+    local full = WIDTH - 2 * PAD
+    local listH, unverified = placeList(full)
+    local room = P.MAX_HEIGHT - top - (unverified and 18 or 0) - BUTTON_H - PAD
+    local scrolls = listH > room and frame.scrollBar ~= nil
+    if scrolls then listH, unverified = placeList(full - SCROLL_W - SCROLL_GAP) end
+    local viewH = math.max(1, scrolls and room or listH)
+    frame.content:SetSize(scrolls and full - SCROLL_W - SCROLL_GAP or full, math.max(1, listH))
+    frame.list:ClearAllPoints()
+    frame.list:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -top)
+    frame.list:SetSize(full, viewH)
+    if frame.scrollBar then
+        frame.scrollBar:ClearAllPoints()
+        frame.scrollBar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -top)
+        frame.scrollBar:SetHeight(viewH)
     end
+    state.maxOffset = scrolls and math.ceil(listH - viewH) or 0
+    setScroll(state.offset)
+    local y = top + viewH
     frame.warning:ClearAllPoints()
     frame.warning:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -y)
     frame.warning:SetShown(unverified)
@@ -316,7 +409,8 @@ local function refreshActions()
     frame.print:SetEnabled(t ~= nil)
 end
 
---- The list and the lines for skill `key`: its teachers when unlearned, else its next rank's.
+--- The groups and the lines for skill `key`: its teachers when unlearned (one unnamed group), else
+--- its next rank's and every higher rank's, one group per rank (R6-7).
 local function resolve(key)
     local e = NS.SkillData and NS.SkillData.Get and NS.SkillData:Get(key)
     local B = NS.Blocks
@@ -328,12 +422,29 @@ local function resolve(key)
     if e and e.learned ~= false then
         local nr = NS.Trainers:NextRank(key, e.rank, e.max)
         if nr then
-            return nr.trainers, L["Train: %s (%s)"]:format(name, nr.rankName),
-                L["Trainers for your faction (%s) who train %s to %s (%d):"]:format(faction, name, nr.rankName, nr.cap)
+            local groups = {}
+            for i, g in ipairs(nr.groups or { { rankName = nr.rankName, cap = nr.cap, trainers = nr.trainers } }) do
+                groups[i] = { rankName = g.rankName, cap = g.cap, base = g.trainers }
+            end
+            local intro = nr.higher
+                and L["Trainers for your faction (%s) who train %s to %s (%d) or higher:"]
+                or L["Trainers for your faction (%s) who train %s to %s (%d):"]
+            return groups, L["Train: %s (%s)"]:format(name, nr.rankName),
+                intro:format(faction, name, nr.rankName, nr.cap)
         end
     end
-    return NS.Trainers:For(key), L["Learn: %s"]:format(name),
+    return { { base = NS.Trainers:For(key) } }, L["Learn: %s"]:format(name),
         L["Trainers for your faction (%s) who teach %s:"]:format(faction, name)
+end
+
+-- Every group's cards nearest first by state.dist, and the cards' order group by group.
+local function orderGroups()
+    local list = {}
+    for _, g in ipairs(state.groups) do
+        g.list = NS.Trainers.ByDistance(g.base, state.dist)
+        for _, t in ipairs(g.list) do list[#list + 1] = t end
+    end
+    return list
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -388,7 +499,7 @@ function P.RefreshDistances()
     if not P.IsShown() then return stopTicker() end
     local selected = P.Selected()
     state.dist = measure(state.base)
-    local list = NS.Trainers.ByDistance(state.base, state.dist)
+    local list = orderGroups()
     if sameOrder(list, state.list) then
         for _, c in ipairs(cardPool.active) do c.dist:SetText(distText(c.trainer)) end
         return
@@ -420,12 +531,14 @@ end
 function P.Show(key)
     build()
     frame:SetFrameStrata(P.Strata())   -- at each open: the openers' strata are the player's
-    local list, title, intro = resolve(key)
-    state.dist = measure(list)
-    state.key, state.base, state.selected = key, list, 1
-    state.list = NS.Trainers.ByDistance(list, state.dist)
+    local groups, title, intro = resolve(key)
+    local all = {}
+    for _, g in ipairs(groups) do for _, t in ipairs(g.base) do all[#all + 1] = t end end
+    state.key, state.groups, state.base, state.selected, state.offset = key, groups, all, 1, 0
+    state.dist = measure(all)
+    state.list = orderGroups()
     frame.title:SetText(title)
-    frame.intro:SetText(#list > 0 and intro or L["No trainer for your faction is recorded for this skill."])
+    frame.intro:SetText(#all > 0 and intro or L["No trainer for your faction is recorded for this skill."])
     layout()
     refreshActions()
     frame:Show()

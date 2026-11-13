@@ -272,7 +272,7 @@ test("round5 trainer popup: the Also teaches line wraps inside its card, and the
     end)
 end)
 
-test("round5 trainer popup: a secret or zero measure keeps the one-line card, and too tall a window drops to one line each", function()
+test("round5 trainer popup: a secret or zero measure keeps the one-line card, and too tall a window scrolls, still wrapped", function()
     withPopup(function()
         local c = TP.Cards()[1]
         local baseCard, baseFrame = c:GetHeight(), TP.Frame():GetHeight()
@@ -285,8 +285,11 @@ test("round5 trainer popup: a secret or zero measure keeps the one-line card, an
         measureAlso(3)
         TP.MAX_HEIGHT = baseFrame + 10
         TP.Relayout()
-        assertEqual(c.also:GetMaxLines(), 1, "past the cap each line is clipped to one")
-        assertEqual(TP.Frame():GetHeight(), baseFrame, "and the window keeps its one-line height")
+        -- Round 6 (R6-7, issue #4): past the cap the cards scroll; the wrap is kept.
+        assertTrue(c.also:GetMaxLines() > 1, "past the cap the line still wraps")
+        assertEqual(TP.Frame():GetHeight(), TP.MAX_HEIGHT, "the window stops at the cap")
+        local _, most = TP.Scroll()
+        assertTrue(most > 0, "and the cards scroll")
     end)
 end)
 

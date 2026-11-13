@@ -1,6 +1,7 @@
 -- tests/test_round6.lua — the owner's round-6 feedback (2026-11-13): the toasts in the cap toast's
 -- look, test mode's cues on the Journal and the LDB tooltip, the header marks at one size and one
--- vertical center, the sort mark's menu and every block expanded on a new profile.
+-- vertical center, the sort mark's menu, every block expanded on a new profile, the thresholds'
+-- two switches, the trainer popup's Set waypoint button and its next-rank-and-above trainers.
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -564,5 +565,141 @@ test("round6 waypoint: the window ends a pad under the buttons, shorter by the o
         f.SetHeight, f.waypoint.SetPoint = nil, nil
         assertTrue(y ~= nil, "the buttons were placed")
         assertEqual(h, -y + 26 + 10, "the buttons' top, their height and one pad")
+    end)
+end)
+
+-- ── R6-7: the next rank's trainers and every higher rank's ───────────────────────────────────
+
+local TR = NS.Trainers
+
+local function names(list)
+    local out = {}
+    for i, t in ipairs(list) do out[i] = t.name end
+    return table.concat(out, ",")
+end
+
+test("round6 trainer ranks: NextRank groups the next rank's trainers and every higher rank's, the next first", function()
+    local nr = TR:NextRank("fishing", 150, 150, 30, "Alliance", "Human")
+    assertEqual(nr.rankName, "Expert")
+    assertTrue(nr.higher, "Artisan is above Expert")
+    assertEqual(#nr.groups, 2, "Expert and Artisan")
+    assertEqual(nr.groups[1].rankName, "Expert"); assertEqual(nr.groups[1].cap, 225)
+    assertEqual(names(nr.groups[1].trainers), "Old Man Heming")
+    assertEqual(nr.groups[2].rankName, "Artisan"); assertEqual(nr.groups[2].cap, 300)
+    assertEqual(names(nr.groups[2].trainers), "Nat Pagle")
+    assertEqual(names(nr.trainers), "Old Man Heming", "the next rank's own list is unchanged")
+    local top = TR:NextRank("fishing", 225, 225, 40, "Alliance", "Human")
+    assertFalse(top.higher, "Artisan is the top")
+    assertEqual(#top.groups, 1)
+end)
+
+test("round6 trainer ranks: a trainer is listed once, under the lowest rank it trains, and an emptied rank goes", function()
+    local nr = TR:NextRank("blacksmithing", 75, 75, 20, "Alliance", "Human")
+    assertEqual(nr.rankName, "Journeyman")
+    local seen, ranks = {}, {}
+    for _, g in ipairs(nr.groups) do
+        ranks[#ranks + 1] = g.rankName
+        for _, t in ipairs(g.trainers) do
+            assertTrue(not seen[t], t.name .. " listed once")
+            seen[t] = true
+        end
+    end
+    -- The Journeyman and Expert blacksmiths both train 150: all under Journeyman; Expert is left empty.
+    assertEqual(table.concat(ranks, ","), "Journeyman,Artisan")
+    local therum
+    for _, t in ipairs(nr.groups[1].trainers) do if t.name == "Therum Deepforge" then therum = t end end
+    assertTrue(therum ~= nil, "an Expert blacksmith under Journeyman")
+    assertEqual(names(nr.groups[2].trainers), "Brikk Keencraft", "the Artisan teacher under Artisan")
+end)
+
+--- The popup on `key`, learned at `rank` / `max` (the blocks' model), then everything back.
+local function withRankPopup(key, rank, max, fn)
+    local Bl = NS.Blocks
+    local savedSource, savedFaction, savedRace, savedLevel = Bl.source, M.UnitFactionGroup, M.UnitRace, M.UnitLevel
+    local savedMax = TP.MAX_HEIGHT
+    local skills = { byKey = { [key] = { key = key, rank = rank, max = max, learned = true, category = "secondary" } },
+                     order = { primary = {}, secondary = { key }, weapon = {}, other = {} } }
+    Bl.source = function() return skills, { base = {}, spell = {}, defense = {}, utility = {} } end
+    M.UnitFactionGroup = function() return "Alliance", "Alliance" end
+    M.UnitRace = function() return "Human", "Human" end
+    M.UnitLevel = function() return 40 end
+    TP.Show(key)
+    local ok, err = pcall(fn, TP.Frame())
+    TP.Hide()
+    TP.MAX_HEIGHT = savedMax
+    Bl.source, M.UnitFactionGroup, M.UnitRace, M.UnitLevel = savedSource, savedFaction, savedRace, savedLevel
+    if not ok then error(err, 0) end
+end
+
+local function headingTexts()
+    local out = {}
+    for i, h in ipairs(TP.Headings()) do out[i] = h:GetText() end
+    return table.concat(out, ",")
+end
+
+test("round6 trainer ranks: the popup lists Expert and Artisan trainers under their headings, the intro says or higher", function()
+    withRankPopup("fishing", 150, 150, function(f)
+        assertEqual(f.title:GetText(), "Train: Fishing (Expert)")
+        assertEqual(f.intro:GetText(), "Trainers for your faction (Alliance) who train Fishing to Expert (225) or higher:")
+        assertEqual(headingTexts(), "Expert (225),Artisan (300)")
+        assertEqual(names(TP.Trainers()), "Old Man Heming,Nat Pagle", "the next rank first")
+        assertEqual(#TP.Cards(), 2, "one card each")
+    end)
+    withRankPopup("fishing", 225, 225, function(f)
+        assertEqual(f.intro:GetText(), "Trainers for your faction (Alliance) who train Fishing to Artisan (300):",
+            "no or higher at the top rank")
+        assertEqual(headingTexts(), "Artisan (300)")
+    end)
+end)
+
+test("round6 trainer ranks: nearest first inside each rank, the ranks kept in order, re-sorted each second", function()
+    local function t(name, x, y)
+        return { name = name, faction = "Alliance", city = "Stormwind", mapID = 1453, x = x, y = y,
+                 teaches = { "fishing" }, verified = true }
+    end
+    local far, close, artisan = t("Far", 50, 50), t("Near", 10, 10), t("ArtisanNear", 10, 11)
+    local savedNext, savedMap, savedApi = TR.NextRank, M.__map, M.C_Map
+    TR.NextRank = function()
+        return { rankName = "Expert", cap = 225, higher = true, trainers = { far, close },
+                 groups = { { rankName = "Expert", cap = 225, trainers = { far, close } },
+                            { rankName = "Artisan", cap = 300, trainers = { artisan } } } }
+    end
+    M.__map = { player = { mapID = 1453, x = 0.1, y = 0.12 },
+                worlds = { [1453] = { instance = 0, ox = 0, oy = 0, w = 1000, h = 1000 } } }
+    M.C_Map = M.__newMapApi()
+    local ok, err = pcall(withRankPopup, "fishing", 150, 150, function()
+        assertEqual(names(TP.Trainers()), "Near,Far,ArtisanNear", "the nearest Artisan trainer stays under Artisan")
+        TP.Select(2)   -- Far
+        M.__map.player = { mapID = 1453, x = 0.5, y = 0.52 }
+        M.__fireTimers()
+        assertEqual(names(TP.Trainers()), "Far,Near,ArtisanNear", "the player walked to Far: re-sorted inside Expert")
+        assertEqual(TP.Selected().name, "Far", "the selection follows its trainer")
+        assertEqual(TP.Cards()[1].dist:GetText(), NS.L["%d yd"]:format(20))
+    end)
+    TR.NextRank, M.__map, M.C_Map = savedNext, savedMap, savedApi
+    if not ok then error(err, 0) end
+end)
+
+test("round6 trainer ranks: past the max height the cards scroll under a skin scroll bar, the wheel and the bar drive it", function()
+    withRankPopup("blacksmithing", 75, 75, function(f)
+        local h
+        f.SetHeight = function(_, v) h = v end
+        TP.Relayout()
+        assertFalse(f.scrollBar:IsShown(), "everything fits: no scroll bar")
+        assertEqual(select(2, TP.Scroll()), 0)
+        TP.MAX_HEIGHT = 200
+        TP.Relayout()
+        f.SetHeight = nil
+        assertEqual(h, 200, "the window stops at the max height")
+        assertTrue(f.scrollBar:IsShown(), "the scroll bar shows")
+        local _, most = TP.Scroll()
+        assertTrue(most > 0, "the list overflows")
+        f.list:GetScript("OnMouseWheel")(f.list, -1)
+        assertEqual((TP.Scroll()), 40, "a wheel notch down scrolls")
+        TP.SetScroll(most + 500)
+        assertEqual((TP.Scroll()), most, "clamped to the overflow")
+        f.scrollBar:GetScript("OnValueChanged")(f.scrollBar, 3)
+        assertEqual((TP.Scroll()), 3, "the bar drives the offset")
+        assertTrue(f.scrollBar.track ~= nil and f.scrollBar.thumb ~= nil, "the Journal's skinned bar")
     end)
 end)

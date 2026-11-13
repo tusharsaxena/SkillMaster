@@ -421,7 +421,7 @@ Total.
 - round5 filter: a merged window's weapon sub-header carries the filter mark and the muted line
 - round5 filter: Equipped follows an equipment change in the main window at once
 - round5 trainer popup: the Also teaches line wraps inside its card, and the card and the window grow to fit
-- round5 trainer popup: a secret or zero measure keeps the one-line card, and too tall a window drops to one line each
+- round5 trainer popup: a secret or zero measure keeps the one-line card, and too tall a window scrolls, still wrapped
 - round5 trainer popup: a card's tooltip carries the whole Also teaches list
 - round5 distance: yards between two world positions, none across instances or without one
 - round5 distance: nearest first, the unmeasured last in their order, the input untouched
@@ -441,7 +441,7 @@ Total.
 - round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once
 - round5 review: a block reorder redraws the Rows page in the new order, shown or hidden
 
-### test_round6.lua (17)
+### test_round6.lua (22)
 
 - round6 toast: the gap and skill-up toasts wear the cap toast's skin shell, no tint or edge of their own
 - round6 toast: the value stays red or green and carries its delta in brackets
@@ -460,6 +460,11 @@ Total.
 - round6 waypoint: the button reads Set waypoint whatever the provider, and no footer is left
 - round6 waypoint: a trainer without coordinates disables the button and its tooltip says why
 - round6 waypoint: the window ends a pad under the buttons, shorter by the old footer
+- round6 trainer ranks: NextRank groups the next rank's trainers and every higher rank's, the next first
+- round6 trainer ranks: a trainer is listed once, under the lowest rank it trains, and an emptied rank goes
+- round6 trainer ranks: the popup lists Expert and Artisan trainers under their headings, the intro says or higher
+- round6 trainer ranks: nearest first inside each rank, the ranks kept in order, re-sorted each second
+- round6 trainer ranks: past the max height the cards scroll under a skin scroll bar, the wheel and the bar drive it
 
 ### test_blocks.lua (10)
 
@@ -872,7 +877,7 @@ Total.
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
-| test_round6.lua | 17 |
+| test_round6.lua | 22 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -903,4 +908,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **641** |
+| **Total** | **646** |

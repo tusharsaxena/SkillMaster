@@ -389,6 +389,8 @@ L["Waypoint method is Chat only (Trainers and Waypoints page); Print to chat giv
 L["No TomTom and no map pin on this client; Print to chat gives directions."] = true
 L["Train: %s (%s)"] = true
 L["Trainers for your faction (%s) who train %s to %s (%d):"] = true
+L["Trainers for your faction (%s) who train %s to %s (%d) or higher:"] = true
+L["%s (%d)"] = true
 L["Learn: %s"] = true
 L["Trainers for your faction (%s) who teach %s:"] = true
 L["No trainer for your faction is recorded for this skill."] = true

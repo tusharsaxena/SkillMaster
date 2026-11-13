@@ -332,8 +332,17 @@ same tainted `OnShow` error (Known Limitations).
   LDB tooltip is not filtered. A block its filter empties keeps its header and a muted line.
 - The trainer popup's "Also teaches" line (round 5, R5-14) wraps to four lines and the card grows by
   the line's measured height (`GetStringHeight`); a measure the client answers secret, nil or zero
-  reads as one line. A popup that would pass `NS.TrainerPopup.MAX_HEIGHT` (600) clips every card's
-  line to one, and the card's tooltip always carries the whole list. There is no scroll in the popup.
+  reads as one line. The card's tooltip always carries the whole list. Past
+  `NS.TrainerPopup.MAX_HEIGHT` (600) the window stops growing and the cards scroll inside it (round
+  6, R6-7, part of GitHub issue #4): a scroll frame, the mouse wheel (40 units a notch) and the
+  Journal's skin scroll bar (`NS.Journal.MakeScrollBar`, resolved when the popup is first built),
+  the cards narrowed by the bar's width while it shows; the wrap is kept.
+- The trainer popup on a learned skill (round 6, R6-7) lists its next rank's trainers and every
+  higher rank's, under one heading per rank (`Expert (225)`), the next rank first and nearest first
+  inside a rank; a trainer who trains several of those ranks is listed once, under the lowest, and
+  a rank with no trainer left has no heading. The data's rank lists decide who trains what
+  (`defaults/Trainers_Forever.lua`): Nat Pagle is recorded as training Artisan Fishing only, so he
+  shows under Artisan (300), not Expert. Unverified in game.
 - The trainer popup's distances (round 5, R5-15) are measured from the map API's world positions
   (`NS.Compat.PlayerWorldPos`, `MapWorldPos`), straight-line yards inside one instance (continent),
   not a path. A trainer without coordinates (most profession trainers: the data gives only the weapon
