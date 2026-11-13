@@ -1,7 +1,8 @@
 -- tests/test_round7.lua — the owner's round-7 feedback (2026-11-13): TomTom support removed, the
 -- native pin and Skill Master's own arrow always (R7-7); the icon border's row color off on a new
 -- profile (R7-2); no header meta text (R7-3); the LDB tooltips' titles (R7-5); the LDB
--- panel's scroll bar always drawn (R7-4).
+-- panel's scroll bar always drawn (R7-4); a filter on every block (R7-1); an LDB tooltip row opening
+-- from its go icon, the default, or the whole row (R7-6).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -462,5 +463,191 @@ test("round7 filters: both LDB tooltip styles honor every block's filter", funct
         Br.source, p.style = savedSource, savedStyle
         Br.FillTooltip(M.CreateFrame("GameTooltip", "SkillMasterR7FeedReset", M.UIParent), "skills")   -- the skills feed again
         if not ok then error(err, 0) end
+    end)
+end)
+
+-- ── R7-6: an LDB tooltip row opens from its go icon (the default) or the whole row ──────────
+-- Engineering is the crafting row: no other suite arms it, so its overlay (made once, never
+-- destroyed) is this file's alone.
+
+local Br6, BP6, SO6, I6 = NS.Broker, NS.BrokerPanel, NS.SecureOverlay, NS.Interact
+
+local function r6Source()
+    local byKey = {
+        engineering = sk("engineering", "Engineering", "primary", 120, 150),
+        cooking   = sk("cooking", "Cooking", "secondary", 60, 75),
+        swords    = sk("swords", "Swords", "weapon", 80, 110),
+    }
+    local model = { byKey = byKey, order = { primary = { "engineering" }, secondary = { "cooking" },
+                    weapon = { "swords" }, other = {} } }
+    return { model = model, statsModel = { base = {}, spell = {}, defense = {}, utility = {} },
+             statIndex = {}, gains = { total = 0, byKey = {} } }
+end
+
+--- The Main window style over a fixture source, `openFrom` set, out of combat, Shift up; every
+--- swapped global and setting put back, the panel hidden (its OnHide fired: the fake's Hide fires
+--- none) and the overlays synced.
+local function withGo(openFrom, fn)
+    local p = NS.db.profile.tooltips.ldb
+    local saved = { source = Br6.source, style = p.style, from = p.openFrom, combat = M.InCombatLockdown,
+                    shift = M.IsShiftKeyDown, open = Br6.OpenRow }
+    local v = r6Source()
+    Br6.source = function() return v end
+    p.style, p.openFrom = "window", openFrom
+    M.InCombatLockdown = function() return false end
+    M.IsShiftKeyDown = function() return false end
+    local ok, err = pcall(fn, v)
+    Br6.OpenRow = saved.open
+    local f = BP6.Frame()
+    Br6.HideTooltip()
+    f:__fire("OnHide")
+    Br6.source, p.style, p.openFrom = saved.source, saved.style, saved.from
+    M.InCombatLockdown, M.IsShiftKeyDown = saved.combat, saved.shift
+    SO6:Sync()
+    if NS.Widgets.CloseMenu then NS.Widgets.CloseMenu() end
+    if not ok then error(err, 0) end
+end
+
+local function goRow(key)
+    for _, row in ipairs(BP6.Rows()) do if row.entry and row.entry.key == key then return row end end
+end
+
+local function recordOpenRow()
+    local got = {}
+    Br6.OpenRow = function(r, button) got[#got + 1] = r.kind .. ":" .. r.key .. ":" .. tostring(button) end
+    return got
+end
+
+test("round7 go icon: Open a row from defaults to The go icon, Main window style only", function()
+    assertEqual(NS.defaults.profile.tooltips.ldb.openFrom, "icon", "every profile starts on the go icon")
+    local row = NS.FindSchemaRow("tooltips.ldb.openFrom")
+    assertTrue(row ~= nil, "the Tooltips > LDB tooltip row")
+    assertEqual(row.page, "tooltips")
+    assertEqual(row.default, "icon")
+    local values = {}
+    for _, val in ipairs(row.values) do values[#values + 1] = val.value end
+    assertEqual(table.concat(values, ","), "icon,row")
+    local p = NS.db.profile.tooltips.ldb
+    local style = p.style
+    p.style = "classic"
+    assertTrue(row.disabledIf() == true, "dimmed in the Classic style")
+    assertEqual(Br6.OpenFrom(), "row", "Classic rows always open from the whole row")
+    p.style = "window"
+    assertFalse(row.disabledIf() == true)
+    assertEqual(Br6.OpenFrom(), "icon")
+    p.style = style
+end)
+
+test("round7 go icon: the row's left click opens nothing; shift-click and right-click stay on the row", function()
+    withGo("icon", function()
+        Br6.OnEnter(M.UIParent)
+        local got = recordOpenRow()
+        local row = goRow("cooking")
+        row:__fire("OnClick", "LeftButton")
+        assertEqual(#got, 0, "a plain left click on the row opens nothing")
+        row:__fire("OnClick", "RightButton")
+        M.IsShiftKeyDown = function() return true end
+        row:__fire("OnClick", "LeftButton")
+        assertEqual(table.concat(got, ","), "skill:cooking:RightButton,skill:cooking:LeftButton", "the menu, then the link")
+        assertEqual(BP6.Frame().footer:GetText(), Br6.FooterText("icon"), "the footer says the go icon opens")
+        assertTrue(Br6.FooterText("icon"):find("go icon", 1, true) ~= nil)
+    end)
+end)
+
+test("round7 go icon: the whole row mode opens from the row, the icon a glyph, no overlay", function()
+    withGo("row", function()
+        local enabled = {}
+        Br6.OnEnter(M.UIParent)
+        local row = goRow("engineering")
+        rawset(row.act, "EnableMouse", function(_, on) enabled[#enabled + 1] = on end)
+        Br6.OnEnter(M.UIParent)
+        rawset(row.act, "EnableMouse", nil)
+        assertEqual(enabled[#enabled], false, "the icon takes no mouse")
+        local got = recordOpenRow()
+        row = goRow("engineering")
+        row:__fire("OnClick", "LeftButton")
+        assertEqual(table.concat(got, ","), "skill:engineering:LeftButton", "the whole row opens")
+        assertFalse(BP6.Armed(), "no overlay is laid over these rows")
+        row:__fire("OnEnter")
+        local b = SO6.Overlay("engineering")
+        assertTrue(b == nil or b.row ~= row or not b:IsShown(), "a hover arms nothing")
+        assertEqual(BP6.Frame().footer:GetText(), Br6.FooterText("row"))
+    end)
+end)
+
+test("round7 go icon: a hovered crafting row's icon gets the window's secure cast; the panel's hide disarms it", function()
+    withGo("icon", function()
+        local enabled = {}
+        Br6.OnEnter(M.UIParent)
+        local row = goRow("engineering")
+        rawset(row.act, "EnableMouse", function(_, on) enabled[#enabled + 1] = on end)
+        Br6.OnEnter(M.UIParent)
+        rawset(row.act, "EnableMouse", nil)
+        assertEqual(enabled[#enabled], true, "the go icon takes the mouse")
+        row = goRow("engineering")
+        assertTrue(BP6.Armed(), "the panel shows in the go icon mode")
+        row:__fire("OnEnter")
+        local b = SO6.Overlay("engineering")
+        assertTrue(b ~= nil and b:IsShown(), "armed on the hover")
+        assertTrue(b.row == row, "over the panel's row")
+        assertEqual(b.kind, "spell", "the crafting cast (type1 spell)")
+        assertEqual(b:GetFrameStrata(), "TOOLTIP", "the panel's strata, the top")
+        assertTrue(b:GetFrameLevel() > row:GetFrameLevel(), "above the row")
+        -- The overlay's right-click is the panel row's (its row menu over the tooltip).
+        local got = recordOpenRow()
+        b:GetScript("PostClick")(b, "RightButton", false)
+        assertEqual(table.concat(got, ","), "skill:engineering:RightButton", "the panel row's own menu")
+        -- A scroll re-lays it; the panel's hide takes it down.
+        local syncs, real = 0, SO6.Sync
+        SO6.Sync = function(...) syncs = syncs + 1 return real(...) end
+        BP6.SetScroll(0)
+        SO6.Sync = real
+        assertTrue(syncs > 0, "a scroll re-syncs the overlay")
+        local f = BP6.Frame()
+        f:Hide()
+        f:__fire("OnHide")
+        assertFalse(b:IsShown(), "never armed after the panel hides")
+        assertTrue(b.row == nil)
+    end)
+end)
+
+test("round7 go icon: in combat a hover arms nothing and the icon's click says why, as the window's", function()
+    withGo("icon", function()
+        Br6.OnEnter(M.UIParent)
+        M.__fireEvent("PLAYER_REGEN_DISABLED")
+        M.InCombatLockdown = function() return true end
+        local row = goRow("engineering")
+        local b = SO6.Overlay("engineering")
+        local moves = 0
+        if b then
+            for _, name in ipairs({ "SetPoint", "Show", "SetFrameLevel" }) do
+                local realFn = b[name]
+                rawset(b, name, function(...) moves = moves + 1 return realFn(...) end)
+            end
+        end
+        row:__fire("OnEnter")
+        assertEqual(moves, 0, "nothing moves or shows an overlay in combat")
+        assertTrue(b == nil or not b:IsShown(), "disarmed")
+        M.__resetPrinted()
+        row.act:__fire("OnClick", "LeftButton")
+        assertEqual(#M.__printed(), 1, "one line says why it cannot open in combat")
+        if b then for _, name in ipairs({ "SetPoint", "Show", "SetFrameLevel" }) do rawset(b, name, nil) end end
+        M.InCombatLockdown = function() return false end
+        M.__fireEvent("PLAYER_REGEN_ENABLED")
+        b = SO6.Overlay("engineering")
+        assertTrue(b ~= nil and b:IsShown() and b.row == row, "armed again after combat, the row still hovered")
+    end)
+end)
+
+test("round7 go icon: a tooltip row's shift-click links it into chat", function()
+    withGo("row", function()
+        Br6.OnEnter(M.UIParent)
+        local linked, real = {}, I6.Link
+        I6.Link = function(r) linked[#linked + 1] = r.kind .. ":" .. r.entry.key end
+        M.IsShiftKeyDown = function() return true end
+        local ok, err = pcall(Br6.OpenRow, { kind = "skill", key = "swords" }, "LeftButton")
+        I6.Link = real
+        if not ok then error(err, 0) end
+        assertEqual(table.concat(linked, ","), "skill:swords", "linked, not opened")
     end)
 end)

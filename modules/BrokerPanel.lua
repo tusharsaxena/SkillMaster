@@ -9,15 +9,24 @@ local addonName, NS = ...
 -- the tooltip's own Width and Height (tooltips.ldb.width / .height, the window's default size to
 -- start). The footer keeps the feed's click hints.
 --
--- It keeps the feed tooltip's interaction (owner decision): nothing on a header takes the pointer
--- (no collapse, sort, filter, detach or restore from here: they come from the window's blocks), and
--- a row's left click opens what it opens and its right click the row menu, NS.Broker.OpenRow, as a
--- classic tooltip row does. A row's mark is a glyph here, never a control, and no secure overlay is
--- ever laid over these rows (modules/SecureOverlay.lua syncs the window's and the detached rows only).
+-- Nothing on a header takes the pointer (owner decision: no collapse, sort, filter, detach or
+-- restore from here: they come from the window's blocks). A row's shift-click links it and its
+-- right click opens the row menu (NS.Broker.OpenRow) wherever it lands. Its left click follows
+-- Tooltips > Open a row from (round 7, R7-6; NS.Broker.OpenFrom):
+--   * "icon" (the default): the go icon opens it, as the main window's does. Out of combat the
+--     hovered row's go icon gets the window's secure overlay (modules/SecureOverlay.lua scans these
+--     rows while P.Armed(): a profession window by its cast, the character panel by the micro
+--     button); a click the overlay did not take reaches the icon, NS.Interact.Open (in combat it
+--     says why it cannot open, as the window's mark does). The row's own left click opens nothing,
+--     and the row takes the window's hover: the wash, the row tooltip, the icon lit under the pointer.
+--   * "row": the whole row opens it, NS.Broker.OpenRow, as a classic tooltip row does; the icon is a
+--     glyph the click goes through, and no overlay is laid over these rows.
+-- The overlay follows the rows: a scroll and the panel's hide re-sync it (out of combat; in combat
+-- Sync waits, every overlay disarmed at combat start), and a released row is forgotten (NS.Rows).
 --
 -- Shown, hidden and kept up by NS.Broker's showing machinery (OnEnter / OnLeave / HideTooltip):
 -- NS.Broker.Tip() answers this frame in this style. P.Frame() / P.Fill() / P.Scroll() / P.SetScroll(n)
--- / P.Rows() / P.Headers() / P.Width() / P.ContentWidth() / P.MaxHeight().
+-- / P.Rows() / P.Headers() / P.Width() / P.ContentWidth() / P.MaxHeight() / P.Armed().
 
 NS.BrokerPanel = {}
 local P = NS.BrokerPanel
@@ -64,20 +73,54 @@ end
 local function rowEnter(self) NS.Skin.ListRow(self, "hover") end
 local function rowLeave(self) NS.Skin.ListRow(self, self.stripe and "stripe" or "normal") end
 
-local function rowClick(self, button)
-    local e = self.entry
-    if e and NS.Broker then NS.Broker.OpenRow({ kind = self.kind, key = e.key }, button, self) end
+local function iconMode() return NS.Broker.OpenFrom() == "icon" end
+
+--- Whether the hovered row's go icon is armed with the secure overlay: the panel shows, in the go
+--- icon mode (modules/SecureOverlay.lua scans P.Rows() while it answers true).
+function P.Armed()
+    return frame ~= nil and frame:IsShown() == true and iconMode() and not NS.IsStoodDown()
 end
 
---- A pooled window row taken over once: the feed's clicks and the window's hover wash, no row
---- tooltip and no overlay arming; its mark a glyph the click goes through.
+local function isShift() return type(IsShiftKeyDown) == "function" and IsShiftKeyDown() end
+
+--- A row's click: the right button and a shift-click always (the row menu, the link); the plain left
+--- click only in the whole row mode (the go icon mode opens from the icon alone).
+local function rowClick(self, button)
+    local e = self.entry
+    if not (e and NS.Broker) then return end
+    if button ~= "RightButton" and not isShift() and iconMode() then return end
+    NS.Broker.OpenRow({ kind = self.kind, key = e.key }, button, self)
+end
+
+--- The go icon's own click (the overlay did not take it: in combat, a kind it has none for, or not
+--- yet synced): the window's mark action (NS.Interact.Open); the right button and shift as the row.
+local function actClick(row, button)
+    if not row.entry then return end
+    if button == "RightButton" or isShift() then return rowClick(row, button) end
+    if NS.RowTooltip then NS.RowTooltip.Hide(row) end
+    return NS.Interact.Open(row)
+end
+
+--- A pooled window row dressed for the panel on each fill, as Open a row from says: in the go icon
+--- mode the window's hover (NS.Rows.RowEnter / RowLeave: the overlay, the row tooltip, the icon's
+--- hot watch) and a live icon; in the whole row mode the wash alone and the icon a glyph.
 local function dressRow(row)
-    if row.skmPanel then return end
-    row.skmPanel = true
-    row:SetScript("OnEnter", rowEnter)
-    row:SetScript("OnLeave", rowLeave)
-    row:SetScript("OnClick", rowClick)
-    if row.act then row.act:EnableMouse(false) end
+    if not row.skmPanel then
+        row.skmPanel = true
+        row:SetScript("OnClick", rowClick)
+        row.overlayClick = rowClick   -- the overlay's right and shift clicks (SecureOverlay PostClick)
+        if row.act then row.act:SetScript("OnClick", function(_, button) actClick(row, button) end) end
+    end
+    local icon = iconMode()
+    row:SetScript("OnEnter", icon and NS.Rows.RowEnter or rowEnter)
+    row:SetScript("OnLeave", icon and NS.Rows.RowLeave or rowLeave)
+    if row.act then row.act:EnableMouse(icon) end
+end
+
+--- Re-lay the overlay over the hovered row after the rows moved (a scroll) or went (a hide).
+local function syncOverlay()
+    local SO = NS.SecureOverlay
+    if SO and SO.Sync then SO:Sync() end
 end
 
 -- A header's marks that act in the window; here nothing on a header takes the pointer.
@@ -108,6 +151,7 @@ function P.SetScroll(offset)
     if frame then
         frame.list:SetVerticalScroll(offset)
         if frame.scrollBar then frame.scrollBar:Sync(most, offset) end
+        if P.Armed() then syncOverlay() end   -- the armed icon moved with its row
     end
 end
 
@@ -116,7 +160,19 @@ function P.Scroll() return state.offset, state.maxOffset or 0 end
 
 local function release()
     if headerPool then NS.Blocks.ReleaseHeaders(headerPool) end
-    if rowPool then NS.Rows.ReleaseAll(rowPool) end
+    if rowPool then
+        for _, row in ipairs(rowPool.active) do
+            if NS.RowTooltip then NS.RowTooltip.Hide(row) end
+        end
+        NS.Rows.ReleaseAll(rowPool)   -- each released row forgotten by the overlay (NS.Rows park)
+    end
+end
+
+--- The panel hid: its rows go, and so does any overlay armed over one (out of combat; in combat
+--- every overlay was disarmed at its start and Sync waits).
+local function onHide()
+    release()
+    syncOverlay()
 end
 
 local function buildBody()
@@ -186,7 +242,7 @@ local function build()
     frame.footer = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.footer:SetJustifyH("LEFT")
     frame.footer:SetWordWrap(true)
-    frame:SetScript("OnHide", release)
+    frame:SetScript("OnHide", onHide)
     frame:Hide()
     return frame
 end

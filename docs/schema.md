@@ -135,7 +135,10 @@ SkillMasterDB
       ldb = { style = "window",  -- "window" (modules/BrokerPanel.lua) | "classic" (round 6, R6-10;
                                  -- schemaVersion 8 kept earlier profiles on "classic")
               width = 420, height = 560,   -- the Main window style's size (the window's defaults)
-              barWidth = 128, fontSize = 12 },   -- the Classic style's
+              barWidth = 128, fontSize = 12,   -- the Classic style's
+              openFrom = "icon" },   -- Main window style: a row opens from its go icon ("icon") or the
+                                     -- whole row ("row"); round 7, R7-6, a new key, no migration:
+                                     -- every profile, stored or new, takes the go icon
     }
     journal = { point = false, size = false, keep = 500, range = "session", filter = "primary" }
                                  -- range: session | 1d | 3d | 7d | 30d | all (the Log tab, FB-32);

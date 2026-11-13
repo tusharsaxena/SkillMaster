@@ -3,7 +3,8 @@ local _, NS = ...
 -- Review Focus 3) and the addon's combat queue (events-frames-taint-§2).
 --
 -- Two kinds, each laid over the hovered row's ACTION MARK alone (owner feedback round 4: a row's
--- own click opens nothing, the mark is the action):
+-- own click opens nothing, the mark is the action), on the main window's, the detached frames', the
+-- merged windows' and (round 7, R7-6) the LDB panel's rows while it opens rows from the go icon:
 --   * "spell": one SecureActionButtonTemplate per profession that opens a window by a cast (catalog
 --     `openSpell`: the crafts, Cooking, First Aid, Smelting for Mining), `type1 = "spell"`, `spell =`
 --     the localized spell name.
@@ -25,8 +26,10 @@ local _, NS = ...
 --     nothing invisible stays mouse-live, and a crafting click in combat reaches the plain row,
 --     which says why it cannot open (design §6.5: disabled in combat).
 --   * PLAYER_REGEN_ENABLED runs the queued work (AfterCombat), then re-syncs.
--- A shift-click and a right-click pass through to the row's own handlers (PostClick); only a
--- plain left click is secure.
+-- A shift-click and a right-click pass through to the row's own handlers (PostClick; a row's
+-- `overlayClick` when it has one, the LDB panel's); only a plain left click is secure. Over the LDB
+-- panel (TOOLTIP strata, the top: STRATA_ABOVE has no row for it) the overlay stays in TOOLTIP, a
+-- level band above the panel's rows; the panel is no toplevel window.
 --
 -- An overlay sits ONE STRATA ABOVE its host (LAYERS.STRATA_ABOVE), a documented deviation from
 -- frame-layering-§1 (docs/ARCHITECTURE.md, Documented deviations). The hosts are toplevel windows,
@@ -175,7 +178,9 @@ local function postClick(self, button, down)
     end
     if button == "LeftButton" and self.kind == "spell" then NS.Debug("Click", "crafting overlay %s cast %s", tostring(self.key), tostring(self:GetAttribute("spell"))) end
     if button == "RightButton" or (type(IsShiftKeyDown) == "function" and IsShiftKeyDown()) then
-        NS.Interact.OnRowClick(self.row, button)
+        -- A row with its own click (the LDB panel's, R7-6: its row menu over the tooltip) takes it.
+        local onRow = self.row.overlayClick or NS.Interact.OnRowClick
+        onRow(self.row, button)
     end
 end
 
@@ -264,6 +269,11 @@ local function wanted()
         local f = G.Frame(gid)
         if not moving[f] then scan(G.Rows(gid), f, nil) end
     end
+    -- The LDB tooltip's Main window style in its go icon mode (round 7, R7-6): its rows, clipped to
+    -- its scrolled body, while it shows.
+    local P = NS.BrokerPanel
+    local pf = P and P.Armed and P.Armed() and P.Frame()
+    if pf then scan(P.Rows(), pf, pf.list) end
     return out
 end
 

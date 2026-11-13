@@ -851,6 +851,13 @@ L["Which of the block's rows show, here, in its detached frame, in a merged wind
 L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, the skills you have learned, or the learned skills still below their cap. The filter mark on its header picks it."] = true
 L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, or only the stats whose value is not 0. The filter mark on its header picks it."] = true
 
+-- ---- Round 7, R7-6: open an LDB tooltip row from its go icon or the whole row (settings/Tooltips.lua) ----
+L["Open a row from"] = true
+L["The go icon"] = true
+L["The whole row"] = true
+L["Main window style: what a left click on an LDB tooltip row opens from. The go icon opens it as the main window's go icon does (a profession window, the character panel, the trainers), and the rest of the row only links (shift-click) and opens the row menu (right-click). The whole row opens it from anywhere on the row. Classic style rows always open from the whole row."] = true
+L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click the go icon to open, shift-click to link, right-click for the menu"] = true
+
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

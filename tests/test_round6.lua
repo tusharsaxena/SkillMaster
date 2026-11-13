@@ -730,14 +730,14 @@ end
 --- The feed's tooltip shown in `style` over a fixture source, then everything put back.
 local function withFeedTip(style, fn)
     local savedSource, p = Br.source, NS.db.profile
-    local savedStyle, savedHeight = p.tooltips.ldb.style, p.tooltips.ldb.height
+    local savedStyle, savedHeight, savedFrom = p.tooltips.ldb.style, p.tooltips.ldb.height, p.tooltips.ldb.openFrom
     local v = tipModels()
     Br.source = function() return v end
     p.tooltips.ldb.style = style
     local ok, err = pcall(fn, v)
     Br.HideTooltip()
     Br.source = savedSource
-    p.tooltips.ldb.style, p.tooltips.ldb.height = savedStyle, savedHeight
+    p.tooltips.ldb.style, p.tooltips.ldb.height, p.tooltips.ldb.openFrom = savedStyle, savedHeight, savedFrom
     p.layout.blocks.weapon.filter, p.layout.blocks.weapon.collapsed = "all", false
     if NS.Widgets.CloseMenu then NS.Widgets.CloseMenu() end
     if not ok then error(err, 0) end
@@ -813,6 +813,7 @@ end)
 
 test("round6 ldb look: a row's left click opens and its right click opens the row menu, as the classic rows do", function()
     withFeedTip("window", function()
+        NS.db.profile.tooltips.ldb.openFrom = "row"   -- round 7, R7-6: the whole row mode (the go icon's: test_round7)
         Br.OnEnter(M.UIParent)
         local saved, got = Br.OpenRow, {}
         Br.OpenRow = function(r, button) got[#got + 1] = r.kind .. ":" .. r.key .. ":" .. tostring(button) end

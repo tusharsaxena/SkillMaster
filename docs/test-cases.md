@@ -497,7 +497,7 @@ Total.
 - round6 arrow review: a profile switch re-applies the shown arrow's scale and position
 - round6 arrow review: right-clicking test mode's sample over a real waypoint brings the real arrow back
 
-### test_round7.lua (18)
+### test_round7.lua (24)
 
 - round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Skill Master's arrow always
 - round7 no TomTom: the arrow off super-tracks the pin (the client's arrow)
@@ -517,6 +517,12 @@ Total.
 - round7 filters: every window header carries the funnel, accent while it narrows, and its menu
 - round7 filters: a detached stat frame and a merged section carry the mark and follow the filter
 - round7 filters: both LDB tooltip styles honor every block's filter
+- round7 go icon: Open a row from defaults to The go icon, Main window style only
+- round7 go icon: the row's left click opens nothing; shift-click and right-click stay on the row
+- round7 go icon: the whole row mode opens from the row, the icon a glyph, no overlay
+- round7 go icon: a hovered crafting row's icon gets the window's secure cast; the panel's hide disarms it
+- round7 go icon: in combat a hover arms nothing and the icon's click says why, as the window's
+- round7 go icon: a tooltip row's shift-click links it into chat
 
 ### test_blocks.lua (10)
 
@@ -930,7 +936,7 @@ Total.
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
 | test_round6.lua | 54 |
-| test_round7.lua | 18 |
+| test_round7.lua | 24 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -961,4 +967,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **695** |
+| **Total** | **701** |

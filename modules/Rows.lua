@@ -15,7 +15,8 @@ local _, NS = ...
 -- The optional gathering hint (profile.skills.helperHint, design §12 item 4) is one muted line
 -- under a Skinning, Mining, Herbalism or Fishing row, read from NS.SkillHelpers; the row grows by
 -- R.HINT_H while it shows.
--- Clicks and hover go to NS.Interact and NS.RowTooltip (T3.3) when they are loaded.
+-- Clicks and hover go to NS.Interact and NS.RowTooltip (T3.3) when they are loaded; R.RowEnter /
+-- R.RowLeave are the row's own hover handlers (the LDB panel's go icon mode takes them, R7-6).
 
 NS.Rows = {}
 local R = NS.Rows
@@ -397,6 +398,10 @@ local function onLeave(self)
     stopAct(self)
     unhoverOverlay(self)
 end
+
+-- The window's row hover, for the LDB panel's rows in its go icon mode (round 7, R7-6): the
+-- overlay arming, the wash, the row tooltip and the mark's hot watch, as a window row has them.
+R.RowEnter, R.RowLeave = onEnter, onLeave
 
 local function onClick(self, button)
     if NS.Interact and self.entry then NS.Interact.OnRowClick(self, button) end

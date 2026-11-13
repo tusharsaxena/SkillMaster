@@ -289,6 +289,21 @@ the checks below that cover each item:
   Hover each feed in both Tooltip styles: the sections follow their filters, and the Main window
   style's headers show the funnel (accent while it narrows) without taking a click. `/reload` and a
   profile switch: each filter is the profile's.
+- **SM-DISP-52** (round 7, R7-6: open from the go icon) Tooltip style Main window, Tooltips > LDB
+  tooltip > Open a row from at its default, The go icon (an existing profile too). Hover the Skill
+  Master feed: the footer reads `Rows: click the go icon to open, shift-click to link, right-click for
+  the menu`. Click a row's name or bar: nothing opens. Hover a crafting row (Tailoring): the row
+  washes, its row tooltip shows beside it and the go icon lights under the pointer; click the go
+  icon: the profession window opens (the cast, as the main window's). A weapon row's go icon opens
+  Character > Skills on its line, a stat row's (Skill Master Stats) the paper doll, with no Lua error.
+  Shift-click a row: its link goes into chat; right-click a row and its go icon: the row menu, above
+  the tooltip. Scroll a long tooltip (Height 200) and click a go icon: the row under the pointer
+  opens. Move off the tooltip so it hides, then click where a go icon was: nothing happens. In
+  combat: hover a crafting row and click its go icon: one chat line says profession windows open out
+  of combat, nothing opens, no error; after combat it opens again. Set Open a row from to The whole
+  row: a click anywhere on a row opens it as before and the footer reads `Rows: click to open,
+  right-click for the menu`. Tooltip style Classic: the setting is dimmed and a row opens from
+  anywhere on it.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

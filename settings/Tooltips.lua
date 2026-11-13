@@ -5,7 +5,8 @@ local _, NS = ...
 --   Main window tooltip   the tooltip of a main window or detached row (modules/RowTooltip.lua):
 --                         bar width, bar height, row height, font size
 --   LDB tooltip           the broker feed's tooltip (modules/Broker.lua, modules/BrokerPanel.lua):
---                         Tooltip style, width and height (Main window style), Apply skin to the
+--                         Tooltip style, Open a row from (Main window style, round 7, R7-6), width
+--                         and height (Main window style), Apply skin to the
 --                         tooltip, bar width, bar height, row height, font size (Classic style)
 --
 -- The heights keep their paths (bars.tooltipHeight / tooltipRowHeight, bars.miniHeight /
@@ -58,6 +59,12 @@ local ldbRows = NS.Live({
       label = L["Tooltip style"],
       desc = L["Main window draws the LDB tooltip as the main window: its block headers, rows, bars and fonts, the window's collapse, sort and filter, at the Width and Height below. Classic is the tooltip lines with mini bars."],
       values = { { value = "window", text = L["Main window"] }, { value = "classic", text = L["Classic"] } } },
+    -- Round 7, R7-6: the Main window style's rows open from the go icon (the default) or the whole row.
+    onlyIn({ path = "tooltips.ldb.openFrom", page = PAGE, group = LDB, type = "string", default = PT.ldb.openFrom,
+      label = L["Open a row from"],
+      desc = L["Main window style: what a left click on an LDB tooltip row opens from. The go icon opens it as the main window's go icon does (a profession window, the character panel, the trainers), and the rest of the row only links (shift-click) and opens the row menu (right-click). The whole row opens it from anywhere on the row. Classic style rows always open from the whole row."],
+      values = { { value = "icon", text = L["The go icon"] }, { value = "row", text = L["The whole row"] } } },
+      classic),
     onlyIn(px("tooltips.ldb.width", LDB, L["Width (px)"],
         L["Width of the LDB tooltip in the Main window style, counted as Layout > Window width is."],
         PT.ldb.width, 300, 800), classic),

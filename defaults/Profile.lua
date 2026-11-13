@@ -189,7 +189,9 @@ NS.defaults = {
             -- window's default size to start), or "classic", the tooltip lines with mini bars (barWidth,
             -- 128 keeps its old 380 px, and fontSize, read by that style only). A new profile starts on
             -- "window"; schemaVersion 8 kept every profile that existed before on "classic".
-            ldb = { style = "window", width = 420, height = 560, barWidth = 128, fontSize = 12 },
+            -- openFrom (round 7, R7-6): "icon", a Main window style row opens from its go icon alone
+            -- (the window's), or "row", from anywhere on it. New key: every profile gets "icon".
+            ldb = { style = "window", width = 420, height = 560, barWidth = 128, fontSize = 12, openFrom = "icon" },
         },
         -- T5.1 the Trainers and Waypoints page (modules/Waypoints.lua, modules/TrainerPopup.lua).
         waypoints = {

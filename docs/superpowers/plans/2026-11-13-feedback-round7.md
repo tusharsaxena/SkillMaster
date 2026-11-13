@@ -43,4 +43,4 @@ Milestones: M1 = R7-7, R7-2, R7-3, R7-5, R7-4, R7-8; M2 = R7-1; M3 = R7-6.
 | R7-4 | done (uncommitted) | |
 | R7-8 | done (uncommitted) | |
 | R7-1 | done (uncommitted: shares files with the uncommitted M1 work, commits after it) | |
-| R7-6 | queued (workflow) | |
+| R7-6 | done (uncommitted: shares files with the uncommitted M1 and R7-1 work, commits after R7-1) | |

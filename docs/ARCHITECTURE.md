@@ -271,18 +271,38 @@ collapse, and a merge, split or unmerge of merged windows wait there, Review Foc
 The overlays scan the merged windows' rows too and follow each merged window (`SO:Follow`, and
 `SetMoving` while its band drags it). A mark click in combat reaches the plain mark
 and prints one line (a profession, or the character panel). Shift- and right-clicks pass through the overlay (`PostClick`) to the row's
-handlers. The broker feed (`modules/Broker.lua`, T4.1) is never secure: its tooltip rows are
+handlers. The broker feed (`modules/Broker.lua`, T4.1) is never secure itself: its tooltip rows are
 plain buttons parented to the tooltip frame (its own, or GameTooltip with the skin off) that open windows (the main window, the character frame), and
 a crafting row opens the main window scrolled to it rather than casting (design §6.5). Its
 character-panel clicks still call `ToggleCharacter` from the addon, so on Forever they can raise the
-same tainted `OnShow` error (Known Limitations).
+same tainted `OnShow` error (Known Limitations). The exception is the Main window style with
+Tooltips > LDB tooltip > *Open a row from* on *The go icon* (`tooltips.ldb.openFrom = "icon"`, the
+default; round 7, R7-6): its rows are the window's, and the overlays scan them too while the panel
+shows (`NS.BrokerPanel.Armed`), so the hovered row's go icon gets the window's own spell cast or
+micro-button macro. Over the panel (TOOLTIP, the top strata, which `STRATA_ABOVE` has no row for)
+the overlay stays in TOOLTIP, `LEVEL.SECURE` above the panel, which is not a toplevel window. The
+panel's scroll and its hide re-sync the overlays (out of combat; at combat start every overlay is
+disarmed as ever), its released rows are forgotten, and the overlay's shift- and right-clicks go to
+the panel row's own handler (`row.overlayClick`: the link and the row menu lifted over the tooltip).
+The row's own left click opens nothing in that mode; a go icon click the overlay did not take is
+`NS.Interact.Open`, so in combat it says why it cannot open, as the window's mark does. In
+*The whole row* mode, and always in the Classic style (no go icon), the row's click opens as
+before and no overlay is laid. A tooltip row's shift-click links it into chat in both modes and
+both styles (`NS.Broker.OpenRow`).
 
 ## Known Limitations
 
 - The broker tooltip's stat and Skills-tab clicks open the character panel with a plain
   `ToggleCharacter` call, which on WoW Forever taints `CharacterFrame:OnShow` (the PlayerFrame
   status-bar secret compare, docs/forever-quirks.md, "The character panel and secret geometry"). The main window's marks go through the
-  micro button instead; the tooltip's rows have no secure overlay.
+  micro button instead, and so do the Main window style's go icons while *Open a row from* is *The
+  go icon* (the default, round 7, R7-6); the whole row mode's and the Classic style's rows have no
+  secure overlay.
+- The Main window style's go icon mode (round 7, R7-6) shows the window's row tooltip on the shared
+  GameTooltip, anchored to the right of the hovered row; both it and the panel sit at TOOLTIP, and
+  which one draws on top where they overlap (the panel's scroll-bar gutter) is the client's frame
+  level order. The overlay over a panel row is laid at the hover and re-laid on a scroll; the panel
+  never moves while it shows. Unverified in game.
 - The Skills tab's switch and redraw after the secure open (`NS.Interact.ShowSkillsTab`,
   `NS.Compat.RefreshSkillsTab`) run tainted: `SkillsFrame:OnShow` reads the skill list under the
   addon's taint. Unverified in game whether any of its reads come back secret.

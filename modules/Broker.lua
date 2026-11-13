@@ -13,8 +13,10 @@ local addonName, NS = ...
 -- it is the shared GameTooltip exactly as before. The shared GameTooltip is never painted.
 --
 -- These are NOT the launcher: core/LauncherSetup.lua's one "launcher" object stays the only click
--- and menu implementation for the addon (launcher-§1). Nothing here is secure: a feed row never
--- casts, it opens a window (design §6.5, Feed row).
+-- and menu implementation for the addon (launcher-§1). Nothing here is secure: a feed row's click
+-- never casts, it opens a window (design §6.5, Feed row). In the Main window style with Tooltips >
+-- Open a row from on The go icon (round 7, R7-6, the default) a row opens from its go icon alone,
+-- through the main window's secure overlay (modules/BrokerPanel.lua, modules/SecureOverlay.lua).
 --
 -- Consumes SKILLS_UPDATED, SKILL_UP, STATS_UPDATED and BONUSES_UPDATED on its own bus target. The
 -- one client read is the main-hand weapon class for {equippedWeapon}, feature-detected.
@@ -687,8 +689,19 @@ function B.AddTestModeLine(tip)
     return true
 end
 
---- The tooltip's footer: what the label and the rows do on a click.
-function B.FooterText()
+--- Whether a Main window style row opens from its go icon alone (Tooltips > Open a row from, round
+--- 7, R7-6): "icon", the default, or "row". The Classic style has no go icon: always "row".
+function B.OpenFrom()
+    if B.Style() ~= "window" then return "row" end
+    return tipSettings().openFrom == "row" and "row" or "icon"
+end
+
+--- The tooltip's footer: what the label and the rows do on a click, the rows' as `openFrom` ("icon" |
+--- "row"; B.OpenFrom() when nil) says. The Classic lines (B.FillTooltip) always pass "row".
+function B.FooterText(openFrom)
+    if (openFrom or B.OpenFrom()) == "icon" then
+        return L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click the go icon to open, shift-click to link, right-click for the menu"]
+    end
     return L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, right-click for the menu"]
 end
 
@@ -729,7 +742,7 @@ function B.FillTooltip(tip, which)
     end
     fillSections(tip, rows)
     fitBars(tip)
-    tip:AddLine(colored("gtip.footer", B.FooterText()))
+    tip:AddLine(colored("gtip.footer", B.FooterText("row")))   -- Classic rows open from the whole row
     return rows
 end
 
@@ -808,20 +821,31 @@ end
 --- The row menu for a tooltip row (owner feedback round 3): the window's own (NS.Interact.Menu,
 --- pin, waypoint, trainers, hide) on the tooltip row's entry, drawn above the tooltip. Answers the
 --- menu, or nil.
+--- A tooltip row's entry in the models drawn now (the live one, or test mode's sample).
+local function entryOf(row)
+    local v = view()
+    if row.kind == "skill" then return v.model and v.model.byKey[row.key] end
+    if row.kind == "stat" then return v.statIndex and v.statIndex[row.key] end
+    return nil
+end
+
 function B.RowMenu(row, anchor)
-    local I, v = NS.Interact, view()
-    local e
-    if row.kind == "skill" then e = v.model and v.model.byKey[row.key]
-    elseif row.kind == "stat" then e = v.statIndex and v.statIndex[row.key] end
+    local I, e = NS.Interact, entryOf(row)
     if not (I and e) then return nil end
     local m = I.Menu({ kind = row.kind, entry = e, frame = anchor, surface = "broker" })
     return B.RaiseMenu(m, current)
 end
 
---- One tooltip row's click: left opens what the row opens, right the row menu.
+--- One tooltip row's click: left opens what the row opens, shift-left links it into chat (as a
+--- window row does, round 7, R7-6), right the row menu.
 function B.OpenRow(row, button, anchor)
     if type(row) ~= "table" then return end
     if button == "RightButton" then return B.RowMenu(row, anchor) end
+    if type(IsShiftKeyDown) == "function" and IsShiftKeyDown() then
+        local e = entryOf(row)
+        if e and NS.Interact then NS.Interact.Link({ kind = row.kind, entry = e }) end
+        return
+    end
     if row.kind == "stat" then return openCharacter("PaperDollFrame") end
     if row.kind == "skill" then return openSkillRow(row.key) end
 end
