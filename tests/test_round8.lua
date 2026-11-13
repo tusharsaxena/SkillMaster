@@ -1,7 +1,8 @@
 -- tests/test_round8.lua — the owner's round-8 feedback (2026-11-14): the header marks of a detached
 -- or merged window in the main window header's color (R8-3); the LDB tooltip's headers without
 -- their sort and filter marks (R8-4); the active filter as a filled badge (R8-2); Open a row from,
--- Full row or Go icon only, on the main window and the LDB tooltip (R8-1).
+-- Full row or Go icon only, on the main window and the LDB tooltip (R8-1); the waypoint arrow on
+-- LibKa0s-WaypointArrow-1.0, its five looks and its colors (R8-5).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -606,4 +607,181 @@ test("round8 open a row from: the LDB tooltip's Go icon only keeps the cast on t
         assertEqual(table.concat(world.opened, ","), "SkillsFrame", "its go icon does")
         assertEqual(BP.Frame().footer:GetText(), Br.FooterText("icon"))
     end)
+end)
+
+-- ── R8-5: the waypoint arrow on LibKa0s-WaypointArrow-1.0 ────────────────────────────────────
+
+local WA8, Wp8 = NS.WaypointArrow, NS.Waypoints
+local ARROW_MEDIA = "Interface\\AddOns\\SkillMaster\\libs\\LibKa0s\\media\\waypoint\\"
+
+local function close(a, b) return type(a) == "number" and type(b) == "number" and math.abs(a - b) < 1e-3 end
+
+--- A trainer at (50, 50) on map 1453 (1000 x 1000 yards from the origin), the player at `player`
+--- (0..1 on 1453), the native pin API recorded and the waypoint settings at their defaults with
+--- `over` laid on; then all back.
+local function withArrow8(player, over, fn)
+    local saved = { C_Map = M.C_Map, map = M.__map, UiMapPoint = M.UiMapPoint, C_SuperTrack = M.C_SuperTrack,
+                    facing = M.__facing, wp = NS.db.profile.waypoints }
+    local rec = { cleared = 0 }
+    M.__map = { player = player, worlds = { [1453] = { instance = 0, ox = 0, oy = 0, w = 1000, h = 1000 } } }
+    M.C_Map = M.__newMapApi()
+    M.C_Map.SetUserWaypoint = function(point) rec.point = point end
+    M.C_Map.CanSetUserWaypointOnMap = function() return true end
+    M.C_Map.ClearUserWaypoint = function() rec.cleared = rec.cleared + 1 end
+    M.C_Map.HasUserWaypoint = function() return true end
+    M.C_Map.GetUserWaypoint = function() return rec.point end
+    M.UiMapPoint = { CreateFromCoordinates = function(mapID, x, y)
+        return { uiMapID = mapID, position = M.CreateVector2D(x, y) } end }
+    M.C_SuperTrack = { SetSuperTrackedUserWaypoint = function() end }
+    M.__facing = 0
+    local wp = {}
+    for k, v in pairs(NS.defaults.profile.waypoints) do wp[k] = v end
+    wp.announce, wp.arrowFrame = false, { point = false }
+    for k, v in pairs(over or {}) do wp[k] = v end
+    NS.db.profile.waypoints = wp
+    local trainer = { name = "Woo Ping", city = "Stormwind", mapID = 1453, x = 50, y = 50,
+                      teaches = { "swords" }, verified = true }
+    local ok, err = pcall(fn, trainer, rec)
+    WA8.StandDown()
+    M.C_Map, M.__map, M.UiMapPoint = saved.C_Map, saved.map, saved.UiMapPoint
+    M.C_SuperTrack, M.__facing, NS.db.profile.waypoints = saved.C_SuperTrack, saved.facing, saved.wp
+    WA8.ApplySettings()
+    if not ok then error(err, 0) end
+end
+
+--- The arrow's art regions by draw sublevel: shadow 0, body 1, overlay 2.
+local function arrowParts()
+    local box = WA8.Frame():GetChildren()
+    local out = {}
+    for _, r in ipairs({ box:GetRegions() }) do
+        local _, sub = r:GetDrawLayer()
+        if sub == 0 then out.shadow = r elseif sub == 1 then out.body = r elseif sub == 2 then out.overlay = r end
+    end
+    return out
+end
+
+local function arrowTick() WA8.Frame():__fire("OnUpdate", WA8.THROTTLE + 0.001) end
+
+test("round8 arrow: the profile's arrow defaults are the library's, Raised and the skin's colors", function()
+    local D, PW = WA8.lib.DEFAULTS, NS.defaults.profile.waypoints
+    assertEqual(PW.arrowStyle, "raised", "Raised by default")
+    assertEqual(PW.arrowStyle, D.style)
+    assertEqual(PW.arrowSkinColors, true, "the skin's colors on by default")
+    assertEqual(PW.arrowScale, D.scale)
+    for i = 1, 4 do
+        assertTrue(close(PW.arrowFar[i], D.farColor[i]), "the far swatch is the library's default")
+        assertTrue(close(PW.arrowNear[i], D.nearColor[i]), "the near swatch is the library's default")
+    end
+end)
+
+test("round8 arrow: the Waypoint arrow subgroup is the library's settings block at Skill Master's paths", function()
+    local want = {
+        { "waypoints.arrowStyle", "string" }, { "waypoints.arrowSkinColors", "bool" },
+        { "waypoints.arrowFar", "color" }, { "waypoints.arrowNear", "color" }, { "waypoints.arrowScale", "number" },
+    }
+    local at = {}
+    for i, row in ipairs(NS.Schema) do at[row.path] = { row = row, i = i } end
+    local show = at["waypoints.arrow"]
+    assertTrue(show ~= nil and show.row.subgroup == NS.L["Waypoint arrow"], "Show Skill Master's arrow heads the subgroup")
+    for n, w in ipairs(want) do
+        local hit = at[w[1]]
+        assertTrue(hit ~= nil, w[1] .. " is a schema row")
+        assertEqual(hit.row.type, w[2], w[1])
+        assertEqual(hit.row.page, "trainers", w[1] .. " on the Trainers and Waypoints page")
+        assertEqual(hit.row.subgroup, NS.L["Waypoint arrow"], w[1] .. " in the Waypoint arrow subgroup")
+        assertEqual(hit.i, show.i + n, w[1] .. " in the library's order, under the switch")
+    end
+    local style = at["waypoints.arrowStyle"].row
+    assertEqual(style.default, "raised")
+    local values = {}
+    for _, v in ipairs(style.values) do values[#values + 1] = v.value end
+    assertEqual(table.concat(values, ","), "flat,ridge,raised,faceted,ground", "the five looks")
+    assertEqual(style.values[5].text, NS.L["On the ground"], "named through Skill Master's locale")
+    assertEqual(at["waypoints.arrowFar"].row.disabledIf, "waypoints.arrowSkinColors", "grayed while the skin's are drawn")
+    assertEqual(at["waypoints.arrowNear"].row.disabledIf, "waypoints.arrowSkinColors")
+    local scale = at["waypoints.arrowScale"].row
+    assertTrue(scale.min == 0.5 and scale.max == 2 and scale.step == 0.05, "the scale's range is unchanged")
+end)
+
+test("round8 arrow: each of the five looks reaches the shown arrow through its setting", function()
+    withArrow8({ mapID = 1453, x = 0.4, y = 0.5 }, nil, function(t)
+        Wp8:Set(t)
+        local overlay = { flat = "flat-overlay", ridge = "ridge-overlay", raised = "raised-overlay",
+                          faceted = "faceted-overlay", ground = "ground-overlay" }
+        for _, style in ipairs({ "flat", "ridge", "faceted", "ground", "raised" }) do
+            NS.SetByPath("waypoints.arrowStyle", style)
+            arrowTick()
+            local p = arrowParts()
+            assertEqual(WA8.Instance():Get("style"), style, style .. ": configured")
+            assertEqual(p.overlay:GetTexture(), ARROW_MEDIA .. overlay[style], style .. ": its overlay")
+            assertEqual(p.body:GetTexture(), ARROW_MEDIA .. (style == "ground" and "ground-body" or "arrow-fill"),
+                style .. ": its body")
+            assertEqual(p.shadow:IsShown() == true, style == "raised", style .. ": the shadow is Raised's alone")
+            if style == "ground" then
+                assertEqual(WA8.Instance():Stats().frameIndex, 0, "the ground look picks a sheet frame (straight ahead)")
+            end
+        end
+    end)
+end)
+
+test("round8 arrow: the skin's colors off draws the far and near swatches, faded by distance", function()
+    withArrow8({ mapID = 1453, x = 0.2, y = 0.5 },
+        { arrowSkinColors = false, arrowFar = { 0.9, 0.1, 0.2, 1 }, arrowNear = { 0.1, 0.2, 0.9, 1 } }, function(t)
+        Wp8:Set(t)                                              -- 300 yd: the far swatch
+        local r, g, b = arrowParts().body:GetVertexColor()
+        assertTrue(close(r, 0.9) and close(g, 0.1) and close(b, 0.2), "300 yd: the far color")
+        M.__map.player = { mapID = 1453, x = 0.48, y = 0.5 }    -- 20 yd: the near swatch
+        arrowTick()
+        r, g, b = arrowParts().body:GetVertexColor()
+        assertTrue(close(r, 0.1) and close(g, 0.2) and close(b, 0.9), "20 yd: the near color")
+        M.__map.player = { mapID = 1453, x = 0.335, y = 0.5 }   -- 165 yd: halfway
+        arrowTick()
+        r = arrowParts().body:GetVertexColor()
+        assertTrue(close(r, 0.5), "165 yd: halfway between")
+        NS.SetByPath("waypoints.arrowSkinColors", true)
+        arrowTick()
+        local accent = NS.Bar.Color("text.accent")
+        local good = NS.Bar.Color("sem.good")
+        r = arrowParts().body:GetVertexColor()
+        assertTrue(close(r, (accent[1] + good[1]) / 2), "the skin's colors on again: the accent to sem.good")
+    end)
+end)
+
+test("round8 arrow: a profile switch re-applies the arrow's look", function()
+    withArrow8({ mapID = 1453, x = 0.4, y = 0.5 }, nil, function(t)
+        Wp8:Set(t)
+        local db = NS.db
+        local before = db:GetCurrentProfile()
+        db.sv.profiles["R8-Ground"] = { skin = { pickerSeen = true }, waypoints = { arrow = true, arrowStyle = "ground" } }
+        local ok, err = pcall(function()
+            db:SetProfile("R8-Ground")
+            assertEqual(WA8.Instance():Get("style"), "ground", "the new profile's look")
+            assertEqual(arrowParts().overlay:GetTexture(), ARROW_MEDIA .. "ground-overlay")
+        end)
+        db:SetProfile(before)
+        db.sv.profiles["R8-Ground"] = nil
+        NS.HideSkinPicker()
+        if not ok then error(err, 0) end
+        assertEqual(WA8.Instance():Get("style"), "raised", "and back")
+    end)
+end)
+
+test("round8 arrow: the library carries every look's art; Skill Master's own copy is gone", function()
+    for _, name in ipairs({ "arrow-fill", "flat-overlay", "ridge-overlay", "raised-overlay", "raised-shadow",
+                            "faceted-overlay", "ground-body", "ground-overlay" }) do
+        local fh = io.open("libs/LibKa0s/media/waypoint/" .. name .. ".tga", "rb")
+        assertTrue(fh ~= nil, name .. ".tga is vendored")
+        if fh then fh:close() end
+    end
+    assertTrue(io.open("media/waypoint/arrow-fill.tga", "rb") == nil, "the round-6 art is removed")
+end)
+
+test("round8 arrow: a library-absent load has no arrow, so a map pin keeps the game's own", function()
+    local NS2 = dofile("tests/degraded_env.lua")()
+    assertTrue(NS2.WaypointArrow ~= nil, "the adapter still loads")
+    assertFalse(NS2.WaypointArrow.Wanted(), "no library, no arrow of ours")
+    assertTrue(NS2.WaypointArrow.Instance() == nil, "and no instance")
+    for _, row in ipairs(NS2.Schema) do
+        assertTrue(row.path ~= "waypoints.arrowStyle", "no settings block either")
+    end
 end)

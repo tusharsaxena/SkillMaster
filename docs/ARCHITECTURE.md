@@ -46,7 +46,7 @@ catalog, the class weapon lists, trainers, ranks, gathering, fishing, racials, s
 blocks `NS.Blocks`, the rows `NS.Rows`, the detached frames, the merged windows `NS.Groups` and their drags `NS.GroupsSnap`, the
 main window, the secure crafting
 overlays, the click map `NS.Interact`, the row tooltip, the trainer popup, `NS.Waypoints` and
-Skill Master's own waypoint arrow `NS.WaypointArrow`), the
+Skill Master's own waypoint arrow `NS.WaypointArrow`, an adapter on `LibKa0s-WaypointArrow-1.0`), the
 `/sm probe` report, the skills model (`SkillData`), the bonus breakdown (`Bonuses`), the stats
 model (`StatData`), the trainer lookups (`Trainers`), the skill helpers (`NS.SkillHelpers`,
 `modules/Helpers.lua`), the session log (`NS.SessionLog`), the alt snapshots (`NS.Alts`), the
@@ -91,8 +91,8 @@ grip's release); `char.log` is `modules/SessionLog.lua`'s and `global.characters
 is the same kind: its one owner is `modules/Alerts.lua`, whose toast descriptor's `setPosition` (a
 test-mode drag, or the toast's `ResetPosition`) is its only writer.
 `profile.waypoints.arrowFrame.point`, the waypoint arrow's drop point (round 6, R6-11), is the same
-kind: its one owner is `modules/WaypointArrow.lua`, whose `savePoint` (on `OnDragStop`; the profile's
-`locked` refuses the drag) is its only writer.
+kind: its one owner is `modules/WaypointArrow.lua`, whose `onMoved` (the library hands it the point on
+`OnDragStop`; the profile's `locked` refuses the drag through `canDrag`) is its only writer.
 
 `profile.layout.blocks[id].point` (T3.2) is named non-setting state, owned by `modules/Detached.lua`:
 its writers are `savePoint` (a detached frame's `OnDragStop`) and `D.StorePoint` (where a section
@@ -226,7 +226,7 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | (timer) | `NS.TrainerPopup.Show` | `P.RefreshDistances` every 1 s (AceTimer, `P.TICK`) while the trainer popup is shown; `P.Hide` and the frame's `OnHide` cancel it, the frame's `OnShow` restarts it (a UIParent hide and show, Alt+Z or a cinematic, runs both; the R5-followups review) (round 5, R5-15) | the player moves: the distances and the nearest-first order follow |
 | `PLAYER_LOGOUT` | `modules/Alts.lua` at load, on its own bus target | `Alts:Snapshot` | the last snapshot of the session |
 | `USER_WAYPOINT_UPDATED` | `modules/WaypointArrow.lua` at load, on its own bus target | `WaypointArrow.OnWaypointUpdated`: with an arrow up, `C_Map.HasUserWaypoint` false, or a pin whose world place lies more than 2 yd from the trainer's, hides it; a pin the client cannot place keeps it (round 6, R6-11) | the native pin was cleared or replaced elsewhere (the world map's own pin) |
-| (`OnUpdate`) | `NS.WaypointArrow` on show | one measure every `WA.THROTTLE` (0.03 s): the player's world place and facing against the trainer's, the art's rotation, color and the yards; armed on show, set to nil on every hide path (`takeDown`); no `OnHide` disarms it, since a UIParent hide and show (Alt+Z, a cinematic) fires `OnHide` and the arrow would come back frozen (round 6, R6-11; the R6-11 review) | the arrow follows the player |
+| (`OnUpdate`) | `LibKa0s-WaypointArrow-1.0` on show (round 8, R8-5: the adapter's `Show` and `ShowTest`) | one measure every `WA.THROTTLE` (0.03 s, the library's): the player's world place and facing against the trainer's, the art's rotation (a sheet frame for On the ground), color and the yards; armed on show, set to nil on every hide path (the library's `takeDown`); no `OnHide` disarms it, since a UIParent hide and show (Alt+Z, a cinematic) fires `OnHide` and the arrow would come back frozen (round 6, R6-11; the R6-11 review) | the arrow follows the player |
 
 The bus subscribers on their own targets: `modules/SessionLog.lua` hears `SKILL_UP` (one log entry,
 with the zone); `modules/Alts.lua` hears `SKILLS_UPDATED` (one snapshot 2 s after a burst);
@@ -406,7 +406,11 @@ modes and both styles.
   convention); with no facing (nil or secret) the art hides and the yards stay, and with no distance
   (another continent, an instance) the trainer's name shows alone, dim. Arrival is 5 yd, straight
   line. A pin replaced elsewhere is noticed only where the client answers `C_Map.GetUserWaypoint`
-  and a world place for it. Unverified in game.
+  and a world place for it. Unverified in game. Since round 8 (R8-5) the frame, the math and the art
+  are `LibKa0s-WaypointArrow-1.0`'s: whether its RLE TGAs load, which way `SetRotation` and the
+  ground sheet's `SetTexCoord` turn, how Raised's shadow offset and the five looks read at scales 0.5
+  to 2 are unverified in game. The outline is the library's fixed dark edge, baked into each look's
+  overlay; it no longer follows the skin's `bar.border` (round 6 tinted it).
 - The Main window style LDB tooltip's scroll bar (round 7, R7-4) is always drawn: with nothing to
   scroll it is disabled and its thumb spans the corridor in the skin's `scroll.thumbOff`, the
   facade's disabled tint (the main window's template bar stays drawn with its arrows disabled; the
@@ -477,6 +481,7 @@ and its status ledger) and `docs/investigations/`. Only `docs/superpowers/` and
 | options-ui-§16 | `bars.borderStyleFromSkin` (*Use the skin's border*, the bar border's style companion) defaults `false`, in `defaults/Profile.lua` and on its composed row; every other `*FromSkin` companion defaults `true`. | The owner wants no bar border by default under every skin. Azeroth, High Contrast and WoW Midnight state a real bar border style, which wins over *Show border* off while the companion is on (skinning-§6), so the companion on drew an edge the player had switched off. With it off, *Show border* decides; ticking it opts into the skin's border. No migration: AceDB stripped every stored `true` (the old default). | 2026-11-10, feedback round 2 follow-up | The standard lets a bar border companion default off, or makes a host's *Show border* off win over a skin's real style |
 | frame-layering-§1 | The crafting rows' secure overlays (`modules/SecureOverlay.lua`) sit one strata above their host window or detached block (`LAYERS.STRATA_ABOVE`), not in the host's strata at a level over it, and only the hovered crafting row's overlay is armed. | The hosts are toplevel (frame-layering-§4), and the client orders a raised toplevel window with everything in it as one group: an overlay in the host's strata lost the hit test to the row under it at any frame level, so no crafting click ever opened a profession (`GetMouseFoci` named the row alone, the overlay shown, placed and three levels higher). Arming only the hovered row keeps an invisible mouse-live frame a strata up from covering another window: a window over the row takes the pointer first, so the row is never hovered. | 2026-11-11, feedback round 2 | The standard gains a rule for secure click overlays over toplevel windows, or the client hit-tests a separate frame over a toplevel window's children by level |
 | frame-layering-§6 | The row menu (LibKa0s-Widgets-1.0 `ContextMenu`, a library-owned popup at FULLSCREEN_DIALOG) is lifted by the host to TOOLTIP strata, at the open LDB tooltip's level + `LAYERS.LEVEL.POPUP`, while it is open from that tooltip (`NS.Broker.RaiseMenu`: the row menu, and the Main window style's test-strip menu, round 6 review), and put back to FULLSCREEN_DIALOG (`LAYERS.STRATA.MENU`) as it hides. The standard names the library's tier as one this addon relies on, not one it moves; flagged in round 6 and accepted by the owner in round 7. | Both LDB tooltip styles sit at TOOLTIP, the strata every tooltip takes, so the menu opened from a row at FULLSCREEN_DIALOG drew under it and was half hidden (owner feedback round 6, R6-10, screenshot 59). The library offers no strata option for `ContextMenu`. | 2026-11-13, owner feedback round 6; owner-accepted 2026-11-13 (round 7, R7-8) | LibKa0s's `ContextMenu` takes a strata (or an opener frame whose strata it sits above) |
+| testing-§11 (documentation-§2 item 6) | The `CLAUDE.md` provenance line names a LibKa0s **commit** (`faa4621`, branch `feat/2026-11-14-waypoint-arrow`), not a `vX.Y.Z` tag, and `tests/test_vendor_sync.lua` passes the kit's gate a `provenancePattern` that reads a tag or a sha (`([v%x][%w%.]*)`), so the byte-identity gate compares both payloads against that commit in the sibling checkout. | Round 8 (R8-5): the waypoint arrow is a new LibKa0s major on an unmerged branch; the owner decided Skill Master vendors it from the branch, and the tag and a re-vendor from it wait for the merge go (plan `docs/superpowers/plans/2026-11-14-feedback-round8.md`). The gate still runs, against the commit. | 2026-11-14, owner decision (round 8) | LibKa0s's waypoint-arrow branch is merged and tagged: re-vendor from the tag, the line names it again and this row retires (the pattern can stay, it reads a tag) |
 | library-stack (LibKa0s `Core.ClassColor`) | The header's character name (FB-17) is colored from `RAID_CLASS_COLORS[classFile]` directly, not through `Core.ClassColor`. | The helper reads only the live unit, so test mode and the simulator's sample character would show the player's color; the Journal's alt rows already color this way. | 2026-11-10, feedback round 2 | LibKa0s's class-color helper accepts a class file |
 
 ### Files over the 1500-line cap

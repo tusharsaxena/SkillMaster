@@ -134,8 +134,11 @@ modules\Interact.lua
 modules\RowTooltip.lua
 modules\TrainerPopup.lua
 modules\Waypoints.lua
-# R6-11: Skill Master's own waypoint arrow; registers USER_WAYPOINT_UPDATED on its own bus target at
-# FILE SCOPE (after core\Bus.lua); reads NS.Compat, NS.Trainers and NS.Rows at CALL time.
+# R6-11, R8-5: Skill Master's waypoint arrow, an adapter on LibKa0s-WaypointArrow-1.0 (resolved at
+# FILE SCOPE, after libs\LibKa0s\LibKa0s.xml); registers USER_WAYPOINT_UPDATED on its own bus target at
+# FILE SCOPE (after core\Bus.lua); publishes NS.WaypointArrow.SettingsRows, read by settings\Trainers.lua
+# at FILE SCOPE (the # Modules -> # Settings order guarantees it); reads NS.Compat, NS.Trainers and
+# NS.Rows at CALL time.
 modules\WaypointArrow.lua
 # Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
 modules\MainWindow.lua

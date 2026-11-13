@@ -839,7 +839,21 @@ L["Draw this stat block in the Skill Master Stats feed's tooltip."] = true
 L["Show Skill Master's arrow"] = true
 L["A map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin."] = true
 L["Arrow scale"] = true
-L["Size of Skill Master's waypoint arrow."] = true
+-- Round 8, R8-5: the arrow's settings block, LibKa0s-WaypointArrow-1.0's SettingsRows (its
+-- SETTINGS_STRINGS, handed back through settings/Trainers.lua so a translation reaches them).
+L["Waypoint arrow"] = true
+L["Arrow style"] = true
+L["How the arrow is drawn. Raised floats over the world on a soft shadow; On the ground lies flat, tilted toward you."] = true
+L["Ridge"] = true
+L["Raised"] = true
+L["Faceted"] = true
+L["On the ground"] = true
+L["The arrow fades from the skin's accent color, far away, to its good color as you arrive. Off: your own two colors."] = true
+L["Far color"] = true
+L["The arrow's color 300 yards away or more. Not read while Use the skin's colors is on."] = true
+L["Near color"] = true
+L["The arrow's color 30 yards away or closer. Not read while Use the skin's colors is on."] = true
+L["The size of the arrow and its distance, 0.5 to 2."] = true
 L["Right-click to clear the waypoint. Drag to move the arrow."] = true
 L["You have arrived: %s"] = true
 

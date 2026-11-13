@@ -16,7 +16,7 @@ the checks below that cover each item:
 | Each category | SM-DISP-1, SM-TEST-1 |
 | The lure timer | SM-DISP-2, SM-SIM-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
-| Waypoints (no TomTom, round 7) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47 |
+| Waypoints (no TomTom, round 7) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58 |
 | Each skin | SM-SKIN-1, SM-SKIN-2 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
 | Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4, SM-DISP-18, SM-DISP-39, SM-DISP-40 |
@@ -236,8 +236,8 @@ the checks below that cover each item:
   available: hover Set waypoint: its label takes the skin's hover color, as Print to chat's does.
 - **SM-DISP-43** (round 6, R6-11) Open the trainer popup on an unlearned weapon,
   pick a weapon master in your city and click Set waypoint: the map pin is set, the game's own arrow
-  does not show, and Skill Master's solid chevron shows above the screen's center with the yards
-  under it in the skin's body font. Turn on the spot: the chevron turns to keep pointing at the
+  does not show, and Skill Master's arrow (Raised by default, round 8) shows above the screen's center with the yards
+  under it in the skin's body font. Turn on the spot: the arrow turns to keep pointing at the
   trainer (turn left and it turns right). Face the trainer: it points straight up. Far away (300 yd
   or more) it is the skin's accent; walk in: it shades into the skin's green by 30 yd. Within about
   5 yd it goes, the map pin clears and chat says `You have arrived: <trainer>`.
@@ -248,7 +248,7 @@ the checks below that cover each item:
   pin: the arrow goes. Set it again and pick another trainer's Set waypoint: the arrow points at the
   new one. Enter an instance (or ride to another continent): the art goes and the trainer's name
   shows alone, dimmed. Enter combat: it stays.
-- **SM-DISP-45** (round 6, R6-11) Trainers and Waypoints: Arrow scale 1.5: the arrow grows at once.
+- **SM-DISP-45** (round 6, R6-11) Trainers and Waypoints > Waypoint arrow: Arrow scale 1.5: the arrow grows at once.
   Untick Show Skill Master's arrow with it up: it goes and the game's own arrow points at the pin;
   set a waypoint again: the game's arrow, no Skill Master arrow. Tick it again.
 - **SM-DISP-46** (the R6-11 review) A waypoint set and Skill Master's arrow up. Press
@@ -258,8 +258,8 @@ the checks below that cover each item:
   set the waypoint, then switch to a profile whose arrow is at scale 2 and dragged elsewhere: the
   arrow takes that scale and place at once.
 - **SM-DISP-47** (round 7, R7-7: no TomTom) With TomTom, or an addon that answers TomTom's API (the
-  owner's case), loaded: Set waypoint on a weapon master gives the map pin and Skill Master's solid
-  chevron, never TomTom's arrow; `/sm test` shows the sample chevron too. Untick Show Skill Master's
+  owner's case), loaded: Set waypoint on a weapon master gives the map pin and Skill Master's
+  arrow, never TomTom's; `/sm test` shows the sample arrow too. Untick Show Skill Master's
   arrow and set it again: the map pin with the game's own arrow. Trainers and Waypoints > Waypoint
   method offers Map pin and Chat only, no TomTom entry. A profile that had TomTom first or Map pin
   stored reads Map pin after the upgrade.
@@ -346,6 +346,24 @@ the checks below that cover each item:
   follow. Hover the Skill Master feed (Main window style): a click anywhere on a row opens what its
   go icon opens (a crafting row its window, not the main window), and the footer names the
   shift-click link; set its Open a row from to Go icon only and SM-DISP-52 holds.
+- **SM-DISP-57** (round 8, R8-5: the arrow's five looks) A fresh profile: Trainers and Waypoints >
+  Waypoint arrow reads Show Skill Master's arrow, Arrow style Raised, Use the skin's colors ticked
+  (Far color and Near color grayed), Arrow scale 1. Set a weapon master's waypoint and pick each
+  Arrow style in turn, the arrow up: Flat (one even color, a dark edge), Ridge (a lit spine down the
+  middle), Raised (lit from the top left, a soft shadow down and to the right that stays there as you
+  turn), Faceted (four flat-shaded planes), On the ground (tilted flat, as if lying on the ground
+  ahead of you). Each changes at once, no `/reload`. In every look turn on the spot: the arrow points
+  at the trainer (turn left, it turns right) and On the ground steps round smoothly with no jump and no
+  frame drawn sideways. Arrow scale 0.5 and 2 in each look: the art stays crisp, Raised's shadow
+  scales with it, the yards stay under it. No Lua error, and no look draws as a blank or a green box
+  (a texture that failed to load).
+- **SM-DISP-58** (round 8, R8-5: the arrow's colors) The arrow up far away (300 yd or more): the
+  skin's accent; walk in: it shades into the skin's good color by 30 yd. Switch skins: it follows.
+  Untick Use the skin's colors: Far color and Near color light up; set Far to red and Near to blue:
+  far away it is red, it shades through purple as you walk in, blue by 30 yd. Tick it again: the
+  skin's colors are back. Make a second profile with On the ground and switch to it, the arrow up:
+  it lies on the ground at once; switch back: Raised. `/sm test`: the sample arrow draws in the chosen
+  look.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

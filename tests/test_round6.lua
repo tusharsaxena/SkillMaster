@@ -1133,27 +1133,50 @@ end
 
 local function tick() WA.Frame():__fire("OnUpdate", WA.THROTTLE + 0.001) end
 
+-- The arrow's regions by role (round 8, R8-5: the frame is LibKa0s-WaypointArrow-1.0's): the body
+-- the color tints (the old fill), the untinted overlay, raised's shadow and the distance text.
+local function parts()
+    local f = WA.Frame()
+    local box = f:GetChildren()
+    local out = { frame = f }
+    for _, r in ipairs({ box:GetRegions() }) do
+        local _, sub = r:GetDrawLayer()
+        if sub == 0 then out.shadow = r elseif sub == 1 then out.body = r elseif sub == 2 then out.overlay = r end
+    end
+    for _, r in ipairs({ f:GetRegions() }) do
+        if r.GetObjectType and r:GetObjectType() == "FontString" then out.text = r end
+    end
+    return out
+end
+
 test("round6 arrow: the rotation is bearing minus facing, counter-clockwise from north (x north, y west)", function()
-    assertTrue(near(WA.Rotation(0, 0, 100, 0, 0), 0), "target due north, facing north: straight ahead")
-    assertTrue(near(WA.Rotation(0, 0, 0, 100, 0), math.pi / 2), "target due west: a quarter turn left")
-    assertTrue(near(WA.Rotation(0, 0, 0, -100, 0), -math.pi / 2), "target due east: a quarter turn right")
-    assertTrue(near(WA.Rotation(0, 0, 100, 0, math.pi / 2), -math.pi / 2), "facing west, target north: to the right")
-    assertTrue(near(math.abs(WA.Rotation(0, 0, -100, 0, 0)), math.pi), "target due south: behind")
-    assertTrue(near(WA.Rotation(0, 0, 100, 0, 2 * math.pi - 0.1), 0.1), "kept inside one turn")
-    assertEqual(WA.Rotation(0, 0, 100, 0, nil), nil, "no facing: no rotation")
+    -- Round 8, R8-5: the math is the library's now; the same cases hold it.
+    local Rot = WA.lib.Rotation
+    assertTrue(near(Rot(0, 0, 100, 0, 0), 0), "target due north, facing north: straight ahead")
+    assertTrue(near(Rot(0, 0, 0, 100, 0), math.pi / 2), "target due west: a quarter turn left")
+    assertTrue(near(Rot(0, 0, 0, -100, 0), -math.pi / 2), "target due east: a quarter turn right")
+    assertTrue(near(Rot(0, 0, 100, 0, math.pi / 2), -math.pi / 2), "facing west, target north: to the right")
+    assertTrue(near(math.abs(Rot(0, 0, -100, 0, 0)), math.pi), "target due south: behind")
+    assertTrue(near(Rot(0, 0, 100, 0, 2 * math.pi - 0.1), 0.1), "kept inside one turn")
+    assertEqual(Rot(0, 0, 100, 0, nil), nil, "no facing: no rotation")
     local restore = T.kit.installSecretValue()
-    local ok, got = pcall(WA.Rotation, 0, 0, 100, 0, T.kit.secret(1))
+    local ok, got = pcall(Rot, 0, 0, 100, 0, T.kit.secret(1))
     restore()
     assertTrue(ok, "a secret facing must not raise: " .. tostring(got))
     assertEqual(got, nil, "a secret facing is no facing")
 end)
 
 test("round6 arrow: the fill blends from the skin's accent at 300 yd to its sem.good at 30 yd", function()
+    -- Round 8, R8-5: "Use the skin's colors" on (the default) draws these two, through the library.
     local far, good = NS.Bar.Color("text.accent"), NS.Bar.Color("sem.good")
+    local Lib = WA.lib
+    local cFar, cNear = WA.Instance():Colors()
+    local function blend(yards) return { Lib.Mix(cFar, cNear, Lib.Fade(yards)) } end
     for i = 1, 3 do
-        assertTrue(near(WA.Blend(300)[i], far[i]) and near(WA.Blend(4000)[i], far[i]), "the accent at 300 yd or more")
-        assertTrue(near(WA.Blend(30)[i], good[i]) and near(WA.Blend(3)[i], good[i]), "sem.good at 30 yd or less")
-        assertTrue(near(WA.Blend(165)[i], (far[i] + good[i]) / 2), "halfway between at 165 yd")
+        assertTrue(near(cFar[i], far[i]) and near(cNear[i], good[i]), "the skin's accent and sem.good")
+        assertTrue(near(blend(300)[i], far[i]) and near(blend(4000)[i], far[i]), "the accent at 300 yd or more")
+        assertTrue(near(blend(30)[i], good[i]) and near(blend(3)[i], good[i]), "sem.good at 30 yd or less")
+        assertTrue(near(blend(165)[i], (far[i] + good[i]) / 2), "halfway between at 165 yd")
     end
 end)
 
@@ -1164,15 +1187,18 @@ test("round6 arrow: a waypoint sets the native pin unsuper-tracked and shows the
         assertEqual(rec.superTrack[#rec.superTrack], false, "and not super-tracked: the game's arrow goes away")
         assertTrue(WA.IsShown(), "Skill Master's arrow shows")
         assertEqual(WA.Target(), t)
-        local f = WA.Frame()
+        local p = parts()
+        local f = p.frame
         assertTrue(f:GetScript("OnUpdate") ~= nil, "its OnUpdate runs while shown")
         assertEqual(f:GetFrameStrata(), "MEDIUM")
         assertTrue(f:IsClampedToScreen(), "clamped")
-        assertEqual(f.text:GetText(), NS.L["%d yd"]:format(100), "the yards under the art")
-        assertTrue(f.fill:IsShown() and near(f.fill:GetRotation(), 0), "target due north, facing north: up")
-        assertEqual(f.fill.__texture or f.fill:GetTexture(), WA.FILL_TEXTURE)
-        local o, edge = { f.outline:GetVertexColor() }, NS.Bar.Color("bar.border")
-        assertTrue(near(o[1], edge[1]) and near(o[2], edge[2]) and near(o[3], edge[3]), "the outline in bar.border")
+        assertEqual(p.text:GetText(), NS.L["%d yd"]:format(100), "the yards under the art")
+        assertTrue(p.body:IsShown() and near(p.body:GetRotation(), 0), "target due north, facing north: up")
+        -- Round 8, R8-5: the library's Raised look by default, its art under libs\LibKa0s.
+        local media = "Interface\\AddOns\\SkillMaster\\libs\\LibKa0s\\media\\waypoint\\"
+        assertEqual(p.body:GetTexture(), media .. "arrow-fill", "the tinted body")
+        assertEqual(p.overlay:GetTexture(), media .. "raised-overlay", "Raised's overlay")
+        assertTrue(p.shadow:IsShown(), "and its shadow")
     end)
 end)
 
@@ -1191,17 +1217,18 @@ end)
 test("round6 arrow: the arrow follows the player's facing and place, throttled, and turns color by distance", function()
     withArrow({ mapID = 1453, x = 0.5, y = 0.4 }, function(t)
         Wp:Set(t)
-        local f = WA.Frame()
-        assertTrue(near(f.fill:GetRotation(), math.pi / 2), "target due west: a quarter turn left")
+        local p = parts()
+        local f = p.frame
+        assertTrue(near(p.body:GetRotation(), math.pi / 2), "target due west: a quarter turn left")
         M.__facing = math.pi / 2
         f:__fire("OnUpdate", WA.THROTTLE / 2)
-        assertTrue(near(f.fill:GetRotation(), math.pi / 2), "inside the throttle: not re-measured")
+        assertTrue(near(p.body:GetRotation(), math.pi / 2), "inside the throttle: not re-measured")
         f:__fire("OnUpdate", WA.THROTTLE / 2 + 0.001)
-        assertTrue(near(f.fill:GetRotation(), 0), "facing west now: straight ahead")
+        assertTrue(near(p.body:GetRotation(), 0), "facing west now: straight ahead")
         M.__map.player = { mapID = 1453, x = 0.5, y = 0.48 }   -- 20 yd east of the trainer
         tick()
-        assertEqual(f.text:GetText(), NS.L["%d yd"]:format(20))
-        local c, good = { f.fill:GetVertexColor() }, NS.Bar.Color("sem.good")
+        assertEqual(p.text:GetText(), NS.L["%d yd"]:format(20))
+        local c, good = { p.body:GetVertexColor() }, NS.Bar.Color("sem.good")
         assertTrue(near(c[1], good[1]) and near(c[2], good[2]) and near(c[3], good[3]), "sem.good within 30 yd")
     end)
 end)
@@ -1209,23 +1236,23 @@ end)
 test("round6 arrow: no facing hides the art and keeps the distance; no distance shows the name alone, dim", function()
     withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t)
         Wp:Set(t)
-        local f = WA.Frame()
+        local p = parts()
         M.__facing = nil
         tick()
-        assertFalse(f.fill:IsShown() or f.outline:IsShown(), "no facing: no art")
-        assertEqual(f.text:GetText(), NS.L["%d yd"]:format(100), "the distance stays")
+        assertFalse(p.body:IsShown() or p.overlay:IsShown() or p.shadow:IsShown(), "no facing: no art")
+        assertEqual(p.text:GetText(), NS.L["%d yd"]:format(100), "the distance stays")
         local restore = T.kit.installSecretValue()
         M.__facing = T.kit.secret(1)
         local ok, err = pcall(tick)
         restore()
         assertTrue(ok, "a secret facing must not raise: " .. tostring(err))
-        assertFalse(f.fill:IsShown(), "a secret facing: no art")
+        assertFalse(p.body:IsShown(), "a secret facing: no art")
         M.__facing = 0
         M.__map.player = nil   -- an instance: the client knows no map
         tick()
-        assertFalse(f.fill:IsShown(), "no distance: no art")
-        assertEqual(f.text:GetText(), "Woo Ping", "the trainer's name alone")
-        local c, muted = { f.text:GetTextColor() }, NS.Bar.Color("text.muted")
+        assertFalse(p.body:IsShown(), "no distance: no art")
+        assertEqual(p.text:GetText(), "Woo Ping", "the trainer's name alone")
+        local c, muted = { p.text:GetTextColor() }, NS.Bar.Color("text.muted")
         assertTrue(near(c[1], muted[1]) and near(c[2], muted[2]) and near(c[3], muted[3]), "dim, in the muted role")
         assertTrue(WA.IsShown(), "the arrow stays up")
     end)
@@ -1300,10 +1327,11 @@ test("round6 arrow: test mode shows it on a sample trainer at a sample distance,
         assertTrue(WA.IsShown(), "the sample arrow shows")
         local sample = WA.Target()
         assertTrue(sample ~= nil and sample.mapID ~= nil and sample.x ~= nil, "on a sample trainer with coordinates")
-        local f = WA.Frame()
+        local p = parts()
+        local f = p.frame
         tick()
-        assertEqual(f.text:GetText(), NS.L["%d yd"]:format(WA.SAMPLE_YARDS), "at the sample distance")
-        assertTrue(f.fill:IsShown() and near(f.fill:GetRotation(), WA.SAMPLE_ROTATION), "at the sample angle")
+        assertEqual(p.text:GetText(), NS.L["%d yd"]:format(WA.lib.SAMPLE_YARDS), "at the sample distance")
+        assertTrue(p.body:IsShown() and near(p.body:GetRotation(), WA.lib.SAMPLE_ROTATION), "at the sample angle")
         assertEqual(NS.db.profile.waypoints.arrowFrame.point, before, "nothing written")
         WA.HideTest()
         assertFalse(WA.IsShown(), "test mode's end takes it down")
@@ -1342,13 +1370,14 @@ test("round6 arrow review: a hide and show of its parent (Alt-Z, a cinematic) le
     -- fires OnHide on a shown child when UIParent hides; the frame is still IsShown() after.
     withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t)
         Wp:Set(t)
-        local f = WA.Frame()
+        local p = parts()
+        local f = p.frame
         f:__fire("OnHide")
         f:__fire("OnShow")
         assertTrue(f:GetScript("OnUpdate") ~= nil, "the OnUpdate still runs once the parent is back")
         M.__facing = math.pi / 2
         tick()
-        assertTrue(near(f.fill:GetRotation(), -math.pi / 2), "and the arrow still turns with the player")
+        assertTrue(near(p.body:GetRotation(), -math.pi / 2), "and the arrow still turns with the player")
     end)
 end)
 

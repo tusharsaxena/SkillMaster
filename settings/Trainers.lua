@@ -1,7 +1,9 @@
 local _, NS = ...
 -- settings/Trainers.lua — the Trainers and Waypoints page (modules/Waypoints.lua): which waypoint a
--- trainer's Go button sets, whether chat says so, Skill Master's own arrow and its scale (round 6,
--- R6-11), the unverified-data mark, and the trainer popup's name color (a swatch on the skin's accent by default, with its class-color companion).
+-- trainer's Go button sets, whether chat says so, the unverified-data mark, Skill Master's own arrow
+-- (round 6, R6-11) and its look, colors and scale (round 8, R8-5: LibKa0s-WaypointArrow-1.0's
+-- settings block), and the trainer popup's name color (a swatch on the skin's accent by default,
+-- with its class-color companion).
 local H = NS.Helpers
 local L = NS.L
 local PW, PT = NS.defaults.profile.waypoints, NS.defaults.profile.trainers
@@ -16,19 +18,38 @@ NS.RegisterSchemaRows(NS.Live({
       values = { { value = "auto", text = L["Map pin"] }, { value = "chat", text = L["Chat only"] } } },
     { path = "waypoints.announce", page = PAGE, group = GROUP, type = "bool", default = PW.announce,
       label = L["Say where in chat"], desc = L["Print a chat line naming the trainer when a waypoint is set."] },
-    -- Round 6, R6-11: Skill Master's own arrow (modules/WaypointArrow.lua).
-    { path = "waypoints.arrow", page = PAGE, group = GROUP, type = "bool", default = PW.arrow,
-      label = L["Show Skill Master's arrow"],
-      desc = L["A map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin."],
-      onChange = function() if NS.WaypointArrow then NS.WaypointArrow.ApplySettings() end end },
-    { path = "waypoints.arrowScale", page = PAGE, group = GROUP, type = "number", default = PW.arrowScale,
-      min = 0.5, max = 2, step = 0.05, commitOn = "change", label = L["Arrow scale"],
-      desc = L["Size of Skill Master's waypoint arrow."],
-      onChange = function() if NS.WaypointArrow then NS.WaypointArrow.ApplySettings() end end },
     { path = "trainers.unverified", page = PAGE, group = GROUP, type = "bool", default = PT.unverified,
       label = L["Mark unverified trainers"],
       desc = L["Flag trainer data not yet checked on WoW Forever, in tooltips, the trainer popup and chat."] },
 }))
+
+-- The Waypoint arrow subgroup. Round 6, R6-11: Skill Master's own arrow (modules/WaypointArrow.lua),
+-- hand-written. Round 8, R8-5: then the library's settings block at NS.WaypointArrow.PATHS, in its
+-- order: Arrow style (Raised by default), Use the skin's colors (on), Far color and Near color
+-- (grayed while the skin's are drawn) and Arrow scale. Composed rows: a library-absent load has no
+-- arrow and none of the five (tests/test_options.lua counts them in the gap).
+local ARROW = L["Waypoint arrow"]
+NS.RegisterSchemaRows(NS.Live({
+    { path = "waypoints.arrow", page = PAGE, group = GROUP, subgroup = ARROW, type = "bool", default = PW.arrow,
+      label = L["Show Skill Master's arrow"],
+      desc = L["A map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin."],
+      onChange = function() if NS.WaypointArrow then NS.WaypointArrow.ApplySettings() end end },
+}))
+-- The library's words, keyed as its SETTINGS_STRINGS, through NS.L.
+local ARROW_WORDS = {
+    STYLE = L["Arrow style"],
+    STYLE_TIP = L["How the arrow is drawn. Raised floats over the world on a soft shadow; On the ground lies flat, tilted toward you."],
+    STYLE_FLAT = L["Flat"], STYLE_RIDGE = L["Ridge"], STYLE_RAISED = L["Raised"], STYLE_FACETED = L["Faceted"],
+    STYLE_GROUND = L["On the ground"],
+    USE_SKIN = L["Use the skin's colors"],
+    USE_SKIN_TIP = L["The arrow fades from the skin's accent color, far away, to its good color as you arrive. Off: your own two colors."],
+    FAR = L["Far color"], FAR_TIP = L["The arrow's color 300 yards away or more. Not read while Use the skin's colors is on."],
+    NEAR = L["Near color"], NEAR_TIP = L["The arrow's color 30 yards away or closer. Not read while Use the skin's colors is on."],
+    SCALE = L["Arrow scale"], SCALE_TIP = L["The size of the arrow and its distance, 0.5 to 2."],
+}
+if NS.WaypointArrow then
+    NS.RegisterSchemaRows(NS.WaypointArrow.SettingsRows({ page = PAGE, group = GROUP, subgroup = ARROW, L = ARROW_WORDS }))
+end
 
 -- The trainer popup's name line (feedback round 2, FB-11): one swatch, its class-color companion
 -- (options-ui-§17, the player's class: the trainer is no unit with one) and "Use the skin's color",

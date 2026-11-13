@@ -155,6 +155,11 @@ SkillMasterDB
                                                        -- or "native" into "auto" (R7-7, no TomTom)
                   arrow = true, arrowScale = 1,        -- Skill Master's own arrow (R6-11);
                                                        -- scale 0.5 .. 2
+                  arrowStyle = "raised",               -- R8-5, LibKa0s-WaypointArrow-1.0's block:
+                                                       -- flat | ridge | raised | faceted | ground
+                  arrowSkinColors = true,              -- the skin's accent and sem.good, else:
+                  arrowFar = { 1, 0.82, 0, 1 },        -- the far swatch (300 yd or more)
+                  arrowNear = { 0.35, 0.80, 0.45, 1 }, -- the near swatch (30 yd or closer)
                   arrowFrame = { point = false } }     -- its drop point: drag state, written only
                                                        -- by modules/WaypointArrow.lua
     trainers = { unverified = true,
@@ -188,7 +193,7 @@ writers: `profile.window.point`, owned by `modules/MainWindow.lua` (`savePoint` 
 grip's release); `global.characters`, owned by `modules/Alts.lua` (`Snapshot`, `Forget`);
 `char.log`, owned by `modules/SessionLog.lua` (`Add`, `Clear`); `profile.alerts.point`, owned by
 `modules/Alerts.lua` (the toast's `setPosition`); `profile.waypoints.arrowFrame.point`, owned by
-`modules/WaypointArrow.lua` (`savePoint` on drag stop, round 6, R6-11); `profile.layout.blocks.<id>.point`, owned by
+`modules/WaypointArrow.lua` (the library's `onMoved` on drag stop, round 6, R6-11; round 8, R8-5); `profile.layout.blocks.<id>.point`, owned by
 `modules/Detached.lua` (`savePoint` on drag stop, `StorePoint` for a section split or unmerged from a
 merged window); `profile.layout.groups`, owned by `modules/Groups.lua` (`Merge`, `Split`, `Unmerge`,
 `Leave`, the band drag's `savePoint`, the normalization on read); `char.pinned` and `char.pinnedStat`, owned by `modules/Interact.lua`
@@ -215,7 +220,10 @@ LibDBIcon's own.
 No step for the waypoint arrow's keys (round 6, R6-11): `waypoints.arrow`, `waypoints.arrowScale` and
 `waypoints.arrowFrame` are new keys and nothing stored reshapes, so the defaults answer on every
 profile, an existing one included: the arrow is on for everyone (the owner's call; since round 7,
-R7-7, no TomTom check holds it back).
+R7-7, no TomTom check holds it back). None for round 8's (R8-5) `waypoints.arrowStyle`,
+`arrowSkinColors`, `arrowFar` and `arrowNear` either: new keys, and the addon is unreleased (the
+owner's decision, 2026-11-14). Their defaults are `LibKa0s-WaypointArrow-1.0`'s `DEFAULTS`, and
+`tests/test_round8.lua` holds the two equal.
 
 No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
 companion defaulting on, so no stored profile predates the companions and none has to be moved

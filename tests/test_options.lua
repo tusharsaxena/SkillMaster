@@ -250,7 +250,11 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- the delta unmoved.
     -- Round 8 (R8-1): Layout > Window's Open a row from, hand-written: +1 in both counts, the delta
     -- unmoved.
-    assertEqual(full, 348, "the full schema (round 8: the main window's Open a row from)")
-    assertEqual(degraded, 295, "the library-absent schema")
-    assertEqual(full - degraded, 53, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3) and the detached background and border (9)")
+    -- Round 8 (R8-5): Trainers and Waypoints > Waypoint arrow takes LibKa0s-WaypointArrow-1.0's
+    -- settings block (Arrow style, Use the skin's colors, Far color, Near color, Arrow scale), five
+    -- composed rows, one of them the hand-written Arrow scale it replaces: +4 full, -1 degraded, the
+    -- delta +5.
+    assertEqual(full, 352, "the full schema (round 8: the waypoint arrow's settings block)")
+    assertEqual(degraded, 294, "the library-absent schema")
+    assertEqual(full - degraded, 58, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3), the detached background and border (9) and the waypoint arrow's block (5)")
 end)

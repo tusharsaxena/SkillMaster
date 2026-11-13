@@ -525,7 +525,7 @@ Total.
 - round7 go icon: in combat a hover arms nothing and the icon's click says why, as the window's
 - round7 go icon: a tooltip row's shift-click links it into chat
 
-### test_round8.lua (16)
+### test_round8.lua (23)
 
 - round8 header marks: a detached band's marks rest in the main window header's color
 - round8 header marks: a merged window's band and section sub-headers match the main window header
@@ -543,6 +543,13 @@ Total.
 - round8 open a row from: the row tooltip's click hint says the mode
 - round8 open a row from: the LDB tooltip's Full row arms the cast over the whole row and opens from anywhere
 - round8 open a row from: the LDB tooltip's Go icon only keeps the cast on the icon and the row inert
+- round8 arrow: the profile's arrow defaults are the library's, Raised and the skin's colors
+- round8 arrow: the Waypoint arrow subgroup is the library's settings block at Skill Master's paths
+- round8 arrow: each of the five looks reaches the shown arrow through its setting
+- round8 arrow: the skin's colors off draws the far and near swatches, faded by distance
+- round8 arrow: a profile switch re-applies the arrow's look
+- round8 arrow: the library carries every look's art; Skill Master's own copy is gone
+- round8 arrow: a library-absent load has no arrow, so a map pin keeps the game's own
 
 ### test_blocks.lua (10)
 
@@ -957,7 +964,7 @@ Total.
 | test_round5_followups.lua | 27 |
 | test_round6.lua | 54 |
 | test_round7.lua | 25 |
-| test_round8.lua | 16 |
+| test_round8.lua | 23 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -988,4 +995,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **718** |
+| **Total** | **725** |

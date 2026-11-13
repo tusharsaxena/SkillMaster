@@ -208,6 +208,14 @@ NS.defaults = {
             -- (modules/WaypointArrow.lua) and is not super-tracked; off, the client's arrow again.
             arrow      = true,
             arrowScale = 1,      -- the arrow frame's scale (0.5 .. 2)
+            -- Round 8, R8-5: the arrow is LibKa0s-WaypointArrow-1.0; these four seed its settings
+            -- block (the library's DEFAULTS; tests/test_round8.lua holds them equal). The look,
+            -- one of flat | ridge | raised | faceted | ground; the skin's accent and sem.good while
+            -- arrowSkinColors is on, else the far and near swatches, faded by distance.
+            arrowStyle      = "raised",
+            arrowSkinColors = true,
+            arrowFar        = { 1, 0.82, 0, 1 },
+            arrowNear       = { 0.35, 0.80, 0.45, 1 },
             -- Drag-only geometry, no control sets it: written by modules/WaypointArrow.lua alone
             -- (architecture-§5's named-owner rule; docs/ARCHITECTURE.md names the writer).
             arrowFrame = { point = false },
