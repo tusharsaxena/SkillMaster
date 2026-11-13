@@ -168,6 +168,12 @@ local function buildBand(f)
     f.restore = NS.Chrome.HeaderMark(f, "eye", "o", function() NS.Blocks.RestoreHidden(f.id) end)
     f.restore:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.restore:Hide()
+    -- Every mark at rest in the main window header's color, the title's (owner feedback round 8,
+    -- R8-3); under the pointer `icon.hot`, as there. The filter's own rest color is its badge's.
+    for _, b in ipairs({ f.dock, f.collapse, f.sort, f.filter, f.restore }) do
+        NS.Chrome.SetRestToken(b, "text.heading")
+    end
+    if f.filter then f.filter.baseToken = "text.heading" end
     f.dock:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.collapse:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.sort:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)

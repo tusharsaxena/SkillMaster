@@ -307,6 +307,12 @@ the checks below that cover each item:
   row: a click anywhere on a row opens it as before and the footer reads `Rows: click to open,
   right-click for the menu`. Tooltip style Classic: the setting is dimmed and a row opens from
   anywhere on it.
+- **SM-DISP-53** (round 8, R8-3: header mark colors) Detach Weapon Skills: the band's dock, collapse,
+  sort and filter marks (and the eye while it hides rows) rest in the title's color, as the main
+  window header's marks do, and turn the skin's hot color under the pointer. Merge two detached
+  blocks: the band's dock-all and collapse-all marks the same; each section sub-header's chevron,
+  funnel, sort and split marks look as the main window header's chevron, funnel, sort and detach.
+  Switch skins: every mark follows the new skin's title color.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

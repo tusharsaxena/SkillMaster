@@ -525,6 +525,11 @@ Total.
 - round7 go icon: in combat a hover arms nothing and the icon's click says why, as the window's
 - round7 go icon: a tooltip row's shift-click links it into chat
 
+### test_round8.lua (2)
+
+- round8 header marks: a detached band's marks rest in the main window header's color
+- round8 header marks: a merged window's band and section sub-headers match the main window header
+
 ### test_blocks.lua (10)
 
 - blocks: the eight blocks, four skill categories then four stat groups
@@ -938,6 +943,7 @@ Total.
 | test_round5_followups.lua | 27 |
 | test_round6.lua | 54 |
 | test_round7.lua | 25 |
+| test_round8.lua | 2 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -968,4 +974,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **702** |
+| **Total** | **704** |

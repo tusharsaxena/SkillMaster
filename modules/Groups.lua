@@ -623,6 +623,9 @@ local function buildBand(f)
     NS.Chrome.SetIcon(f.dockAll, "external-link", "-", true)
     f.collapseAll = NS.Chrome.HeaderMark(f, "chevron-down", "v", function() G.CollapseAll(f.gid) end,
         L["Collapse or expand every section"])
+    -- Both marks at rest in the main window header's color (owner feedback round 8, R8-3).
+    NS.Chrome.SetRestToken(f.dockAll, "text.heading")
+    NS.Chrome.SetRestToken(f.collapseAll, "text.heading")
     -- The band's own click target (under the marks): a right-click opens the menu, a drag moves the
     -- window as the frame's own does.
     f.band = CreateFrame("Button", nil, f)
