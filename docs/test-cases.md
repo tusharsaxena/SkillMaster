@@ -467,7 +467,7 @@ Total.
 - round6 ldb look: a new profile draws the Main window style on its own TOOLTIP frame, the window's size
 - round6 ldb look: the window's headers and rows, the bar with its text inside and the mark at its right
 - round6 ldb look: a block collapsed in the window is a collapsed header here, and nothing on a header acts
-- round6 ldb look: a row's left click opens and its right click opens the row menu, as the classic rows do
+- round6 ldb look: a row's left click opens and its right click opens the row menu
 - round6 ldb look: the window's weapon filter and sort reach both styles
 - round6 ldb look: past its Height the body scrolls, by the wheel and by the skin's scroll bar
 - round6 ldb look: the row menu draws above the tooltip in both styles, and goes back as it hides
@@ -518,14 +518,14 @@ Total.
 - round7 filters: every window header carries the funnel, the filled badge while it narrows, and its menu
 - round7 filters: a detached stat frame and a merged section carry the mark and follow the filter
 - round7 filters: both LDB tooltip styles honor every block's filter
-- round7 go icon: Open a row from defaults to The go icon, Main window style only
+- round7 go icon: Open a row from, Main window style only (Full row by default since round 8)
 - round7 go icon: the row's left click opens nothing; shift-click and right-click stay on the row
-- round7 go icon: the whole row mode opens from the row, the icon a glyph, no overlay
+- round7 go icon: the whole row mode (round 8: Full row) arms the cast over the row, the icon live
 - round7 go icon: a hovered crafting row's icon gets the window's secure cast; the panel's hide disarms it
 - round7 go icon: in combat a hover arms nothing and the icon's click says why, as the window's
 - round7 go icon: a tooltip row's shift-click links it into chat
 
-### test_round8.lua (6)
+### test_round8.lua (16)
 
 - round8 header marks: a detached band's marks rest in the main window header's color
 - round8 header marks: a merged window's band and section sub-headers match the main window header
@@ -533,6 +533,16 @@ Total.
 - round8 ldb tooltip: the main window's headers keep their sort and filter marks
 - round8 filter badge: the window header's funnel on a solid square while it narrows, hover readable
 - round8 filter badge: a detached band and a merged sub-header wear the same badge
+- round8 open a row from: Layout > Window's Open a row from, Full row by default; the LDB tooltip's too
+- round8 open a row from: Full row lays the crafting cast over the whole row, Go icon only over the icon
+- round8 open a row from: a Full row click opens what the go icon opens; Go icon only, the row opens nothing
+- round8 open a row from: shift-click links and right-click opens the menu in both modes, on the row and its overlay
+- round8 open a row from: the crafting overlay casts on a plain left click only, never in combat
+- round8 open a row from: in combat a Full row arms nothing and its click says why; armed again after
+- round8 open a row from: detached and merged windows follow the main window's setting
+- round8 open a row from: the row tooltip's click hint says the mode
+- round8 open a row from: the LDB tooltip's Full row arms the cast over the whole row and opens from anywhere
+- round8 open a row from: the LDB tooltip's Go icon only keeps the cast on the icon and the row inert
 
 ### test_blocks.lua (10)
 
@@ -947,7 +957,7 @@ Total.
 | test_round5_followups.lua | 27 |
 | test_round6.lua | 54 |
 | test_round7.lua | 25 |
-| test_round8.lua | 6 |
+| test_round8.lua | 16 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -978,4 +988,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **708** |
+| **Total** | **718** |

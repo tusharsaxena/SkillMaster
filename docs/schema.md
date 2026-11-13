@@ -43,6 +43,9 @@ SkillMasterDB
       width = 420, maxHeight = 560, blockGap = 0, summary = true,
       fitHeight = false,         -- off: the window stays maxHeight tall (owner feedback round 3)
       columns = 1,               -- 1 | 2 columns of docked blocks, each `width` wide
+      openFrom = "row",          -- Open a row from (round 8, R8-1): "row" (Full row: a left click
+                                 -- anywhere on a window, detached or merged row does what its go
+                                 -- icon does) | "icon" (Go icon only); a new key, no migration
       strata = "MEDIUM", detachedStrata = "MEDIUM",   -- BACKGROUND | LOW | MEDIUM | HIGH
       detached = {               -- Layout > Detached windows (round 5, R5-7): every detached window
         scale = 1, alpha = 1,    -- scale multiplies blocks.<id>.scale
@@ -136,9 +139,10 @@ SkillMasterDB
                                  -- schemaVersion 8 kept earlier profiles on "classic")
               width = 420, height = 560,   -- the Main window style's size (the window's defaults)
               barWidth = 128, fontSize = 12,   -- the Classic style's
-              openFrom = "icon" },   -- Main window style: a row opens from its go icon ("icon") or the
-                                     -- whole row ("row"); round 7, R7-6, a new key, no migration:
-                                     -- every profile, stored or new, takes the go icon
+              openFrom = "row" },    -- Main window style: a row opens from anywhere on it ("row", Full
+                                     -- row) or its go icon alone ("icon", Go icon only); round 7,
+                                     -- R7-6; "row" by default since round 8, R8-1 (unreleased: no
+                                     -- migration)
     }
     journal = { point = false, size = false, keep = 500, range = "session", filter = "primary" }
                                  -- range: session | 1d | 3d | 7d | 30d | all (the Log tab, FB-32);

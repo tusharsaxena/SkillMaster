@@ -406,7 +406,7 @@ L["Utility"] = true
 
 -- ---- BEGIN M5 polish (the M3/M4 review leftovers) ----
 -- The broker tooltip's footer (modules/Broker.lua), as the mockup writes it.
-L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, right-click for the menu"] = true
+L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, shift-click to link, right-click for the menu"] = true
 -- The one-line gathering hint under a row (modules/Rows.lua, profile.skills.helperHint).
 L["Gathers %s \194\183 next: %s at %d"] = true
 L["Gathers %s"] = true
@@ -851,11 +851,16 @@ L["Which of the block's rows show, here, in its detached frame, in a merged wind
 L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, the skills you have learned, or the learned skills still below their cap. The filter mark on its header picks it."] = true
 L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, or only the stats whose value is not 0. The filter mark on its header picks it."] = true
 
--- ---- Round 7, R7-6: open an LDB tooltip row from its go icon or the whole row (settings/Tooltips.lua) ----
+-- ---- Round 7, R7-6 / round 8, R8-1: open a row from the whole row or its go icon (settings/Tooltips.lua, settings/Layout.lua) ----
 L["Open a row from"] = true
-L["The go icon"] = true
-L["The whole row"] = true
-L["Main window style: what a left click on an LDB tooltip row opens from. The go icon opens it as the main window's go icon does (a profession window, the character panel, the trainers), and the rest of the row only links (shift-click) and opens the row menu (right-click). The whole row opens it from anywhere on the row. Classic style rows always open from the whole row."] = true
+L["Full row"] = true
+L["Go icon only"] = true
+L["Main window style: what a left click on an LDB tooltip row opens from. Full row: anywhere on the row does what its go icon does, as the main window's (a profession window, the character panel, the trainers). Go icon only: the go icon alone opens it, and the rest of the row only links (shift-click) and opens the row menu (right-click). Classic style rows always open from the whole row."] = true
+L["What a left click on a row of the main window, a detached window or a merged window opens from. Full row: anywhere on the row does what its go icon does (a profession window, the character panel, the trainers). Go icon only: the go icon alone opens it, and the rest of the row only links (shift-click) and opens the row menu (right-click)."] = true
+L["Click: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"] = true
+L["Click: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"] = true
+L["Click: trainers and waypoint \194\183 Right-click: menu"] = true
+L["Click: character panel \194\183 Shift-click: link \194\183 Right-click: menu"] = true
 L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click the go icon to open, shift-click to link, right-click for the menu"] = true
 
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`

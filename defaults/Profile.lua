@@ -25,6 +25,10 @@ NS.defaults = {
             blockGap  = 0,       -- px between two docked blocks
             summary   = true,    -- the strip under the title: level, session gains, next alert
             columns   = 1,       -- the window's body: 1 or 2 columns of docked blocks, each `width` wide
+            -- Open a row from (round 8, R8-1; NS.Rows.OpenFrom): "row" (Full row), a left click
+            -- anywhere on a main window, detached or merged window row does what its go icon does;
+            -- "icon" (Go icon only), the go icon alone opens it.
+            openFrom  = "row",
             -- The player's strata (frame-layering-§1: BACKGROUND, LOW, MEDIUM or HIGH): the main
             -- window's, and every detached block's. The crafting overlays take their host's.
             strata         = "MEDIUM",
@@ -189,9 +193,10 @@ NS.defaults = {
             -- window's default size to start), or "classic", the tooltip lines with mini bars (barWidth,
             -- 128 keeps its old 380 px, and fontSize, read by that style only). A new profile starts on
             -- "window"; schemaVersion 8 kept every profile that existed before on "classic".
-            -- openFrom (round 7, R7-6): "icon", a Main window style row opens from its go icon alone
-            -- (the window's), or "row", from anywhere on it. New key: every profile gets "icon".
-            ldb = { style = "window", width = 420, height = 560, barWidth = 128, fontSize = 12, openFrom = "icon" },
+            -- openFrom (round 7, R7-6): "row" (Full row), a Main window style row opens from anywhere
+            -- on it, doing what its go icon does, or "icon" (Go icon only), from its go icon alone.
+            -- "row" since round 8 (R8-1; unreleased, no migration).
+            ldb = { style = "window", width = 420, height = 560, barWidth = 128, fontSize = 12, openFrom = "row" },
         },
         -- T5.1 the Trainers and Waypoints page (modules/Waypoints.lua, modules/TrainerPopup.lua).
         waypoints = {

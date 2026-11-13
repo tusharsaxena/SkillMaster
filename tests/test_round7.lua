@@ -550,24 +550,26 @@ local function recordOpenRow()
     return got
 end
 
-test("round7 go icon: Open a row from defaults to The go icon, Main window style only", function()
-    assertEqual(NS.defaults.profile.tooltips.ldb.openFrom, "icon", "every profile starts on the go icon")
+test("round7 go icon: Open a row from, Main window style only (Full row by default since round 8)", function()
+    assertEqual(NS.defaults.profile.tooltips.ldb.openFrom, "row", "round 8, R8-1: every profile starts on Full row")
     local row = NS.FindSchemaRow("tooltips.ldb.openFrom")
     assertTrue(row ~= nil, "the Tooltips > LDB tooltip row")
     assertEqual(row.page, "tooltips")
-    assertEqual(row.default, "icon")
+    assertEqual(row.default, "row")
     local values = {}
     for _, val in ipairs(row.values) do values[#values + 1] = val.value end
-    assertEqual(table.concat(values, ","), "icon,row")
+    assertEqual(table.concat(values, ","), "row,icon")
     local p = NS.db.profile.tooltips.ldb
-    local style = p.style
-    p.style = "classic"
+    local style, from = p.style, p.openFrom
+    p.style, p.openFrom = "classic", "icon"
     assertTrue(row.disabledIf() == true, "dimmed in the Classic style")
     assertEqual(Br6.OpenFrom(), "row", "Classic rows always open from the whole row")
     p.style = "window"
     assertFalse(row.disabledIf() == true)
     assertEqual(Br6.OpenFrom(), "icon")
-    p.style = style
+    p.openFrom = nil
+    assertEqual(Br6.OpenFrom(), "row", "no stored choice: Full row")
+    p.style, p.openFrom = style, from
 end)
 
 test("round7 go icon: the row's left click opens nothing; shift-click and right-click stay on the row", function()
@@ -586,7 +588,7 @@ test("round7 go icon: the row's left click opens nothing; shift-click and right-
     end)
 end)
 
-test("round7 go icon: the whole row mode opens from the row, the icon a glyph, no overlay", function()
+test("round7 go icon: the whole row mode (round 8: Full row) arms the cast over the row, the icon live", function()
     withGo("row", function()
         local enabled = {}
         Br6.OnEnter(M.UIParent)
@@ -594,15 +596,16 @@ test("round7 go icon: the whole row mode opens from the row, the icon a glyph, n
         rawset(row.act, "EnableMouse", function(_, on) enabled[#enabled + 1] = on end)
         Br6.OnEnter(M.UIParent)
         rawset(row.act, "EnableMouse", nil)
-        assertEqual(enabled[#enabled], false, "the icon takes no mouse")
+        assertEqual(enabled[#enabled], true, "the icon still takes the mouse (its click is the row's)")
         local got = recordOpenRow()
         row = goRow("engineering")
-        row:__fire("OnClick", "LeftButton")
-        assertEqual(table.concat(got, ","), "skill:engineering:LeftButton", "the whole row opens")
-        assertFalse(BP6.Armed(), "no overlay is laid over these rows")
+        assertTrue(BP6.Armed(), "the overlay scans these rows too")
         row:__fire("OnEnter")
         local b = SO6.Overlay("engineering")
-        assertTrue(b == nil or b.row ~= row or not b:IsShown(), "a hover arms nothing")
+        assertTrue(b ~= nil and b:IsShown() and b.row == row, "a hover arms the cast")
+        assertTrue(SO6.CoverFor(row) == row, "over the whole row (round 8, R8-1)")
+        row:__fire("OnClick", "RightButton")
+        assertEqual(table.concat(got, ","), "skill:engineering:RightButton", "the right click: the row menu")
         assertEqual(BP6.Frame().footer:GetText(), Br6.FooterText("row"))
     end)
 end)

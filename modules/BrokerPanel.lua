@@ -13,15 +13,17 @@ local addonName, NS = ...
 -- Nothing on a header takes the pointer (owner decision: no collapse, sort, filter, detach or
 -- restore from here: they come from the window's blocks). A row's shift-click links it and its
 -- right click opens the row menu (NS.Broker.OpenRow) wherever it lands. Its left click follows
--- Tooltips > Open a row from (round 7, R7-6; NS.Broker.OpenFrom):
---   * "icon" (the default): the go icon opens it, as the main window's does. Out of combat the
---     hovered row's go icon gets the window's secure overlay (modules/SecureOverlay.lua scans these
---     rows while P.Armed(): a profession window by its cast, the character panel by the micro
---     button); a click the overlay did not take reaches the icon, NS.Interact.Open (in combat it
---     says why it cannot open, as the window's mark does). The row's own left click opens nothing,
---     and the row takes the window's hover: the wash, the row tooltip, the icon lit under the pointer.
---   * "row": the whole row opens it, NS.Broker.OpenRow, as a classic tooltip row does; the icon is a
---     glyph the click goes through, and no overlay is laid over these rows.
+-- Tooltips > Open a row from (round 7, R7-6; NS.Broker.OpenFrom), the main window's two choices
+-- (round 8, R8-1; each row's `openFrom`, read by NS.Rows.OpenFrom):
+--   * "row" (Full row, the default): anywhere on the row does what its go icon does, as a main window
+--     row in Full row: the hovered row's secure overlay (modules/SecureOverlay.lua scans these rows
+--     while P.Armed(): a profession window by its cast, the character panel by the micro button)
+--     covers the whole row; a click the overlay did not take reaches the row, NS.Interact.Open (in
+--     combat it says why it cannot open, as the window's mark does).
+--   * "icon" (Go icon only): the go icon opens it, its overlay over the icon alone, and the row's own
+--     left click opens nothing.
+-- Either way the row takes the window's hover: the wash, the row tooltip, the icon lit under the
+-- pointer.
 -- The overlay follows the rows: a scroll and the panel's hide re-sync it (out of combat; in combat
 -- Sync waits, every overlay disarmed at combat start), and a released row is forgotten (NS.Rows).
 --
@@ -97,27 +99,18 @@ end
 -- The rows and headers: the window's own, made still
 -- ---------------------------------------------------------------------------------------------
 
-local function rowEnter(self) NS.Skin.ListRow(self, "hover") end
-local function rowLeave(self) NS.Skin.ListRow(self, self.stripe and "stripe" or "normal") end
-
 local function iconMode() return NS.Broker.OpenFrom() == "icon" end
 
---- Whether the hovered row's go icon is armed with the secure overlay: the panel shows, in the go
---- icon mode (modules/SecureOverlay.lua scans P.Rows() while it answers true).
+--- Whether the hovered row is armed with the secure overlay (over its go icon or the whole row, as
+--- Open a row from says): the panel shows (modules/SecureOverlay.lua scans P.Rows() while it
+--- answers true).
 function P.Armed()
-    return frame ~= nil and frame:IsShown() == true and iconMode() and not NS.IsStoodDown()
+    return frame ~= nil and frame:IsShown() == true and NS.Broker.Style() == "window" and not NS.IsStoodDown()
 end
 
 local function isShift() return type(IsShiftKeyDown) == "function" and IsShiftKeyDown() end
 
---- A row's click: the right button and a shift-click always (the row menu, the link); the plain left
---- click only in the whole row mode (the go icon mode opens from the icon alone).
-local function rowClick(self, button)
-    local e = self.entry
-    if not (e and NS.Broker) then return end
-    if button ~= "RightButton" and not isShift() and iconMode() then return end
-    NS.Broker.OpenRow({ kind = self.kind, key = e.key }, button, self)
-end
+local rowClick
 
 --- The go icon's own click (the overlay did not take it: in combat, a kind it has none for, or not
 --- yet synced): the window's mark action (NS.Interact.Open); the right button and shift as the row.
@@ -128,20 +121,32 @@ local function actClick(row, button)
     return NS.Interact.Open(row)
 end
 
---- A pooled window row dressed for the panel on each fill, as Open a row from says: in the go icon
---- mode the window's hover (NS.Rows.RowEnter / RowLeave: the overlay, the row tooltip, the icon's
---- hot watch) and a live icon; in the whole row mode the wash alone and the icon a glyph.
+--- A row's click: the right button and a shift-click always (the row menu, the link); the plain left
+--- click in Full row what the go icon does (actClick), in Go icon only nothing.
+rowClick = function(self, button)
+    local e = self.entry
+    if not (e and NS.Broker) then return end
+    if button == "RightButton" or isShift() then
+        return NS.Broker.OpenRow({ kind = self.kind, key = e.key }, button, self)
+    end
+    if iconMode() then return end
+    return actClick(self, button)
+end
+
+--- A pooled window row dressed for the panel on each fill: the window's hover (NS.Rows.RowEnter /
+--- RowLeave: the overlay, the row tooltip, the icon's hot watch), a live icon, and the tooltip's
+--- Open a row from as the row's own (`openFrom`, which NS.Rows.OpenFrom and the overlay read).
 local function dressRow(row)
     if not row.skmPanel then
         row.skmPanel = true
         row:SetScript("OnClick", rowClick)
         row.overlayClick = rowClick   -- the overlay's right and shift clicks (SecureOverlay PostClick)
         if row.act then row.act:SetScript("OnClick", function(_, button) actClick(row, button) end) end
+        row:SetScript("OnEnter", NS.Rows.RowEnter)
+        row:SetScript("OnLeave", NS.Rows.RowLeave)
     end
-    local icon = iconMode()
-    row:SetScript("OnEnter", icon and NS.Rows.RowEnter or rowEnter)
-    row:SetScript("OnLeave", icon and NS.Rows.RowLeave or rowLeave)
-    if row.act then row.act:EnableMouse(icon) end
+    row.openFrom = NS.Broker.OpenFrom()
+    if row.act then row.act:EnableMouse(true) end
 end
 
 --- Re-lay the overlay over the hovered row after the rows moved (a scroll) or went (a hide).

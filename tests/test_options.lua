@@ -248,7 +248,9 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- in both counts, the delta unmoved.
     -- Round 7 (R7-6): Tooltips > LDB tooltip's Open a row from, hand-written: +1 in both counts,
     -- the delta unmoved.
-    assertEqual(full, 347, "the full schema (round 7: Show rows on every block, Open a row from)")
-    assertEqual(degraded, 294, "the library-absent schema")
+    -- Round 8 (R8-1): Layout > Window's Open a row from, hand-written: +1 in both counts, the delta
+    -- unmoved.
+    assertEqual(full, 348, "the full schema (round 8: the main window's Open a row from)")
+    assertEqual(degraded, 295, "the library-absent schema")
     assertEqual(full - degraded, 53, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3) and the detached background and border (9)")
 end)

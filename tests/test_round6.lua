@@ -811,20 +811,24 @@ test("round6 ldb look: a block collapsed in the window is a collapsed header her
     end)
 end)
 
-test("round6 ldb look: a row's left click opens and its right click opens the row menu, as the classic rows do", function()
+test("round6 ldb look: a row's left click opens and its right click opens the row menu", function()
     withFeedTip("window", function()
-        NS.db.profile.tooltips.ldb.openFrom = "row"   -- round 7, R7-6: the whole row mode (the go icon's: test_round7)
+        -- Round 8, R8-1: Full row opens as the go icon does (both modes: test_round7, test_round8).
+        NS.db.profile.tooltips.ldb.openFrom = "row"
         Br.OnEnter(M.UIParent)
         local saved, got = Br.OpenRow, {}
+        local savedOpen, opened = NS.Interact.Open, {}
         Br.OpenRow = function(r, button) got[#got + 1] = r.kind .. ":" .. r.key .. ":" .. tostring(button) end
+        NS.Interact.Open = function(r) opened[#opened + 1] = r.entry.key end
         local row = panelRow("tailoring")
         local ok, err = pcall(function()
             row:__fire("OnClick", "LeftButton")
             row:__fire("OnClick", "RightButton")
         end)
-        Br.OpenRow = saved
+        Br.OpenRow, NS.Interact.Open = saved, savedOpen
         if not ok then error(err, 0) end
-        assertEqual(table.concat(got, ","), "skill:tailoring:LeftButton,skill:tailoring:RightButton")
+        assertEqual(table.concat(opened, ","), "tailoring", "the left click opens what the go icon opens")
+        assertEqual(table.concat(got, ","), "skill:tailoring:RightButton", "the right click opens the row menu")
     end)
 end)
 

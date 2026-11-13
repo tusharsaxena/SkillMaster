@@ -6,7 +6,7 @@ local _, NS = ...
 -- markers and scale, and the click hints. Drawn on GameTooltip with one tooltip-style NS.Bar laid
 -- under its numbers line; GameTooltip is never re-skinned (Skin's Tooltip is for library tooltips).
 --
--- NS.RowTooltip.Lines(entry, kind) -> { { left, right, tone, rightTone } | { bar = true } |
+-- NS.RowTooltip.Lines(entry, kind, openFrom) -> { { left, right, tone, rightTone } | { bar = true } |
 --   { divider = true } }, pure; tones: body, muted, heading, accent, temp, perm, good, warn, bad.
 -- NS.RowTooltip.Show(row), .Hide(row), .Bar()
 
@@ -134,25 +134,37 @@ function HELPERS.fishing(out, e)
         ok and L["no fish escape"] or L["fish will escape"], "body", ok and "good" or "warn")
 end
 
+-- The click hint, as Open a row from says (round 8, R8-1): Go icon only names the arrow (the go
+-- icon), Full row a click anywhere on the row.
 local HINTS = {
-    secure = L["Arrow: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
-    tradeskill = L["Arrow: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
-    skills = L["Arrow: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"],
-    trainer = L["Arrow: trainers and waypoint \194\183 Right-click: menu"],
-    paperdoll = L["Arrow: character panel \194\183 Shift-click: link \194\183 Right-click: menu"],
+    icon = {
+        secure = L["Arrow: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
+        tradeskill = L["Arrow: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
+        skills = L["Arrow: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"],
+        trainer = L["Arrow: trainers and waypoint \194\183 Right-click: menu"],
+        paperdoll = L["Arrow: character panel \194\183 Shift-click: link \194\183 Right-click: menu"],
+    },
+    row = {
+        secure = L["Click: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
+        tradeskill = L["Click: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
+        skills = L["Click: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"],
+        trainer = L["Click: trainers and waypoint \194\183 Right-click: menu"],
+        paperdoll = L["Click: character panel \194\183 Shift-click: link \194\183 Right-click: menu"],
+    },
 }
 
-local function hint(out, kind, e)
+local function hint(out, kind, e, openFrom)
     out[#out + 1] = { divider = true }
-    line(out, HINTS[NS.Interact.Target({ kind = kind, entry = e })], nil, "muted")
+    local set = HINTS[openFrom == "icon" and "icon" or "row"]
+    line(out, set[NS.Interact.Target({ kind = kind, entry = e })], nil, "muted")
 end
 
-local function skillLines(e)
+local function skillLines(e, openFrom)
     local out = {}
     line(out, e.name, CATEGORY[e.category] or L["Other"], "heading", "muted")
     if e.learned == false then
         line(out, NS.Rows.UnlearnedText(e), nil, "muted")
-        hint(out, "skill", e)
+        hint(out, "skill", e, openFrom)
         return out
     end
     numbers(out, e)
@@ -162,7 +174,7 @@ local function skillLines(e)
     rankLines(out, e)
     if e.category == "weapon" or e.key == "defense" then weaponLines(out, e) end
     if HELPERS[e.key] and helpersOn() then HELPERS[e.key](out, e) end
-    hint(out, "skill", e)
+    hint(out, "skill", e, openFrom)
     return out
 end
 
@@ -170,7 +182,7 @@ end
 -- Stat lines
 -- ---------------------------------------------------------------------------------------------
 
-local function statLines(e)
+local function statLines(e, openFrom)
     local out = {}
     line(out, e.label, e.display, "heading", "body")
     out[#out + 1] = { bar = true }
@@ -180,14 +192,15 @@ local function statLines(e)
         line(out, ("\194\183 %s%s %s"):format(tostring(m.value or ""), pct, m.label or ""), nil, "muted")
     end
     if e.ref then line(out, L["Scale: vs %s"]:format(tostring(e.ref) .. pct), nil, "muted") end
-    hint(out, "stat", e)
+    hint(out, "stat", e, openFrom)
     return out
 end
 
---- The tooltip's lines for a skill or stat entry.
-function RT.Lines(e, kind)
-    if kind == "stat" then return statLines(e) end
-    return skillLines(e)
+--- The tooltip's lines for a skill or stat entry; `openFrom` ("row", the default, or "icon": the
+--- row's Open a row from, NS.Rows.OpenFrom) words the click hint.
+function RT.Lines(e, kind, openFrom)
+    if kind == "stat" then return statLines(e, openFrom) end
+    return skillLines(e, openFrom)
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -292,7 +305,7 @@ function RT.Show(row)
     GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
     local n = 0
     local barAt
-    for _, l in ipairs(RT.Lines(row.entry, row.kind)) do
+    for _, l in ipairs(RT.Lines(row.entry, row.kind, NS.Rows.OpenFrom(row))) do
         if l.bar then
             GameTooltip:AddLine(" ")
             n = n + 1

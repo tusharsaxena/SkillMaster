@@ -3,10 +3,13 @@ local _, NS = ...
 -- thin border of the row's color (FB-14), the name, the bar (NS.Bar) and its timer column, and the
 -- unlearned variant (dimmed, its icon gray, "Not learned · <trainer>, <city> · <cost>"). Every row,
 -- skill or stat, carries one action mark at its right end (owner feedback rounds 3 and 4): the mark is
--- the row's action, the row's own plain click opens nothing. Pooled (NS.Pool, ordered).
+-- the row's action. Open a row from (round 8, R8-1; R.OpenFrom) says whether a plain left click
+-- anywhere on the row does it too (Full row, the default) or the row's own opens nothing (Go icon
+-- only). Pooled (NS.Pool, ordered).
 --
 -- NS.Rows.NewPool() / Acquire(pool, parent, styleKey) / ReleaseAll(pool)
--- row:SetSkill(entry), row:SetStat(entry), row:SetStripe(index), row.entry, row.kind ("skill"|"stat")
+-- row:SetSkill(entry), row:SetStat(entry), row:SetStripe(index), row.entry, row.kind ("skill"|"stat"),
+-- R.OpenFrom(row) -> "row"|"icon" (row.openFrom, a host's own, else Layout > Window's)
 -- Pure helpers the tooltip, the broker and the journal reuse: SkillValues(entry), FillColor(entry),
 -- StatValues(entry), UnlearnedText(entry), TrainerFor(entry), Place(trainer), Money(copper),
 -- HelperHint(entry), Display() (Rows show: "both" | "bar" | "text", bars.rowDisplay),
@@ -403,8 +406,26 @@ end
 -- overlay arming, the wash, the row tooltip and the mark's hot watch, as a window row has them.
 R.RowEnter, R.RowLeave = onEnter, onLeave
 
+--- Where a left click on `row` opens it from (Layout > Window > Open a row from, round 8, R8-1):
+--- "row" (Full row, the default: anywhere on the row does what its go icon does) or "icon" (Go icon
+--- only: the row's own plain click opens nothing). A main window, detached or merged window row
+--- reads the window's setting; a row its host dressed with its own (`row.openFrom`, the LDB
+--- panel's: Tooltips > LDB tooltip > Open a row from) reads that.
+function R.OpenFrom(row)
+    local own = row and row.openFrom
+    if own then return own end
+    local lay = NS.db and NS.db.profile.layout
+    return (lay and lay.openFrom) == "icon" and "icon" or "row"
+end
+
+-- Full row: the row's click is its mark's (NS.Interact.OnMarkClick, the shift and right buttons as
+-- on the row); Go icon only: the row's own (the link and the menu, a plain left click nothing). A
+-- crafting or character-panel row's plain left click lands on its secure overlay first, which in
+-- Full row is laid over the whole row (modules/SecureOverlay.lua SO.CoverFor).
 local function onClick(self, button)
-    if NS.Interact and self.entry then NS.Interact.OnRowClick(self, button) end
+    if not (NS.Interact and self.entry) then return end
+    if R.OpenFrom(self) == "row" then return NS.Interact.OnMarkClick(self, button) end
+    NS.Interact.OnRowClick(self, button)
 end
 
 -- A click raises a toplevel window: the crafting overlays follow its new level (SecureOverlay).

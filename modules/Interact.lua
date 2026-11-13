@@ -1,6 +1,8 @@
 local addonName, NS = ...
 -- modules/Interact.lua — what a click on a row does (design §6.2, §6.5, plan Task 3.3):
---   left click   on the row itself: nothing (owner feedback round 4: a row opens no panel).
+--   left click   on the row itself: as Open a row from says (round 8, R8-1; NS.Rows.OpenFrom, the
+--                row's OnClick): Full row, the default, what its mark does (OnMarkClick); Go icon
+--                only, nothing (owner feedback round 4: OnRowClick).
 --                On its ACTION MARK (every row's, stat rows' too): a crafting profession: its window,
 --                through the mark's secure overlay (modules/SecureOverlay.lua; a click that reaches
 --                the plain mark means there is none, in combat or not yet synced); Skinning and

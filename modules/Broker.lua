@@ -14,9 +14,10 @@ local addonName, NS = ...
 --
 -- These are NOT the launcher: core/LauncherSetup.lua's one "launcher" object stays the only click
 -- and menu implementation for the addon (launcher-§1). Nothing here is secure: a feed row's click
--- never casts, it opens a window (design §6.5, Feed row). In the Main window style with Tooltips >
--- Open a row from on The go icon (round 7, R7-6, the default) a row opens from its go icon alone,
--- through the main window's secure overlay (modules/BrokerPanel.lua, modules/SecureOverlay.lua).
+-- never casts, it opens a window (design §6.5, Feed row). In the Main window style a row opens as a
+-- main window row does, through the window's secure overlay: from anywhere on it with Tooltips >
+-- Open a row from on Full row (round 8, R8-1, the default), from its go icon alone on Go icon only
+-- (round 7, R7-6) (modules/BrokerPanel.lua, modules/SecureOverlay.lua).
 --
 -- Consumes SKILLS_UPDATED, SKILL_UP, STATS_UPDATED and BONUSES_UPDATED on its own bus target. The
 -- one client read is the main-hand weapon class for {equippedWeapon}, feature-detected.
@@ -689,11 +690,12 @@ function B.AddTestModeLine(tip)
     return true
 end
 
---- Whether a Main window style row opens from its go icon alone (Tooltips > Open a row from, round
---- 7, R7-6): "icon", the default, or "row". The Classic style has no go icon: always "row".
+--- Where a Main window style row opens from (Tooltips > Open a row from, round 7, R7-6): "row"
+--- (Full row, the default since round 8, R8-1: anywhere on it does what its go icon does) or "icon"
+--- (Go icon only). The Classic style has no go icon: always "row" (its own row click, B.OpenRow).
 function B.OpenFrom()
     if B.Style() ~= "window" then return "row" end
-    return tipSettings().openFrom == "row" and "row" or "icon"
+    return tipSettings().openFrom == "icon" and "icon" or "row"
 end
 
 --- The tooltip's footer: what the label and the rows do on a click, the rows' as `openFrom` ("icon" |
@@ -702,7 +704,7 @@ function B.FooterText(openFrom)
     if (openFrom or B.OpenFrom()) == "icon" then
         return L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click the go icon to open, shift-click to link, right-click for the menu"]
     end
-    return L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, right-click for the menu"]
+    return L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, shift-click to link, right-click for the menu"]
 end
 
 --- The blocks the Main window style draws for the feed showing now, in the window's block order

@@ -2,9 +2,10 @@ local _, NS = ...
 -- modules/SecureOverlay.lua — the action marks' secure buttons (design §6.5, §11, plan Task 3.3,
 -- Review Focus 3) and the addon's combat queue (events-frames-taint-§2).
 --
--- Two kinds, each laid over the hovered row's ACTION MARK alone (owner feedback round 4: a row's
--- own click opens nothing, the mark is the action), on the main window's, the detached frames', the
--- merged windows' and (round 7, R7-6) the LDB panel's rows while it opens rows from the go icon:
+-- Two kinds, each laid over the hovered row's ACTION MARK alone in Open a row from's Go icon only
+-- (owner feedback round 4: the mark is the action), or over the WHOLE ROW in its Full row, the
+-- default (round 8, R8-1; SO.CoverFor), on the main window's, the detached frames', the merged
+-- windows' and (round 7, R7-6) the LDB panel's rows (its own Open a row from):
 --   * "spell": one SecureActionButtonTemplate per profession that opens a window by a cast (catalog
 --     `openSpell`: the crafts, Cooking, First Aid, Smelting for Mining), `type1 = "spell"`, `spell =`
 --     the localized spell name.
@@ -27,7 +28,8 @@ local _, NS = ...
 --     which says why it cannot open (design §6.5: disabled in combat).
 --   * PLAYER_REGEN_ENABLED runs the queued work (AfterCombat), then re-syncs.
 -- A shift-click and a right-click pass through to the row's own handlers (PostClick; a row's
--- `overlayClick` when it has one, the LDB panel's); only a plain left click is secure. Over the LDB
+-- `overlayClick` when it has one, the LDB panel's); only a plain left click is secure (a "spell"
+-- overlay's PreClick clears its cast for any other, as a "char" one's clears its macro). Over the LDB
 -- panel (TOOLTIP strata, the top: STRATA_ABOVE has no row for it) the overlay stays in TOOLTIP, a
 -- level band above the panel's rows; the panel is no toplevel window.
 --
@@ -49,7 +51,8 @@ local _, NS = ...
 --
 -- NS.SecureOverlay:Sync() / :AfterCombat(key, fn) -> ran / :Pending() / :StandDown() / .Overlay(key)
 -- NS.SecureOverlay:Follow(host) / :OnRaise() / :SetMoving(host, moving) / :Hover(row) / :Unhover(row)
--- NS.SecureOverlay.KindFor(row) -> "spell"|"char"|nil, .KeyFor(row), .CharMacro(target, key)
+-- NS.SecureOverlay.KindFor(row) -> "spell"|"char"|nil, .KeyFor(row), .CharMacro(target, key),
+-- .CoverFor(row) -> the row (Full row) or its mark (Go icon only)
 
 NS.SecureOverlay = {}
 local SO = NS.SecureOverlay
@@ -164,6 +167,15 @@ local function charPreClick(self, button, down)
         macro, tostring(switch))
 end
 
+--- A "spell" overlay's PreClick (insecure, out of combat: an overlay is never armed in combat): the
+--- cast on a plain left click only, so a shift-click links and opens nothing (round 8, R8-1: in Full
+--- row the overlay covers the whole row, where a shift-click is the common link gesture).
+local function spellPreClick(self, button)
+    if InCombatLockdown() then return end
+    local cast = button == "LeftButton" and not isShift()
+    self:SetAttribute("type1", cast and "spell" or nil)
+end
+
 local function postClick(self, button, down)
     NS.Debug("Click", "overlay %s PostClick %s down=%s", tostring(self.key), tostring(button), tostring(down))
     if self.kind == "char" and down then return end
@@ -202,6 +214,7 @@ local function make(key, want)
     if want.kind == "spell" then
         b:SetAttribute("type1", "spell")
         b:SetAttribute("spell", want.spell)
+        b:SetScript("PreClick", spellPreClick)
     else
         -- The macro is written on each press (charPreClick); the secure action runs on the press too,
         -- so the panel opens before PostClick's tab switch on the release.
@@ -269,8 +282,8 @@ local function wanted()
         local f = G.Frame(gid)
         if not moving[f] then scan(G.Rows(gid), f, nil) end
     end
-    -- The LDB tooltip's Main window style in its go icon mode (round 7, R7-6): its rows, clipped to
-    -- its scrolled body, while it shows.
+    -- The LDB tooltip's Main window style (round 7, R7-6; either Open a row from since round 8): its
+    -- rows, clipped to its scrolled body, while it shows.
     local P = NS.BrokerPanel
     local pf = P and P.Armed and P.Armed() and P.Frame()
     if pf then scan(P.Rows(), pf, pf.list) end
@@ -285,12 +298,19 @@ local function strataOver(host)
 end
 SO.StrataOver = strataOver   -- the suites read it
 
+--- The frame `row`'s overlay is laid over: the whole row in Open a row from's Full row (round 8,
+--- R8-1; NS.Rows.OpenFrom), else its action mark alone (owner feedback round 4), the row itself
+--- when it has none.
+function SO.CoverFor(row)
+    if NS.Rows.OpenFrom(row) == "row" then return row end
+    return row.act or row
+end
+
 local function arm(b, want)
     b.row = want.row
     b:SetFrameStrata(strataOver(want.host))
     b:SetFrameLevel(want.host:GetFrameLevel() + LAYERS.LEVEL.SECURE)
-    -- Over the row's action mark alone (owner feedback round 4); the row itself when it has none.
-    b:SetShown(place(b, want.row.act or want.row, want.clip))
+    b:SetShown(place(b, SO.CoverFor(want.row), want.clip))
 end
 
 local function disarm(b)

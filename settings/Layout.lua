@@ -38,6 +38,12 @@ local rows = NS.Live({
           values = { { value = 1, text = L["One column"] }, { value = 2, text = L["Two columns"] } },
           label = L["Columns"],
           desc = L["Lay the docked blocks in one column, or in two side by side. Each column is Window width wide."] }),
+    -- Round 8 (R8-1): where a left click opens a row (NS.Rows.OpenFrom); the detached and merged
+    -- windows follow it. Its onChange (NS.ApplyLook) re-lays the windows and their overlays.
+    row({ path = "layout.openFrom", group = WINDOW, type = "string", default = P.openFrom,
+          values = { { value = "row", text = L["Full row"] }, { value = "icon", text = L["Go icon only"] } },
+          label = L["Open a row from"],
+          desc = L["What a left click on a row of the main window, a detached window or a merged window opens from. Full row: anywhere on the row does what its go icon does (a profession window, the character panel, the trainers). Go icon only: the go icon alone opens it, and the rest of the row only links (shift-click) and opens the row menu (right-click)."] }),
 })
 
 -- The player's strata (frame-layering-§1): four values, and the library's one tooltip over them.

@@ -15,7 +15,7 @@ the checks below that cover each item:
 | The probe | SM-PROBE-1 |
 | Each category | SM-DISP-1, SM-TEST-1 |
 | The lure timer | SM-DISP-2, SM-SIM-1 |
-| Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8 |
+| Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
 | Waypoints (no TomTom, round 7) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47 |
 | Each skin | SM-SKIN-1, SM-SKIN-2 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
@@ -293,7 +293,8 @@ the checks below that cover each item:
   headers carry no funnel since round 8, SM-DISP-54). `/reload` and a profile switch: each filter is
   the profile's.
 - **SM-DISP-52** (round 7, R7-6: open from the go icon) Tooltip style Main window, Tooltips > LDB
-  tooltip > Open a row from at its default, The go icon (an existing profile too). Hover the Skill
+  tooltip > Open a row from set to Go icon only (Full row is the default since round 8: SM-DISP-56
+  covers it). Hover the Skill
   Master feed: the footer reads `Rows: click the go icon to open, shift-click to link, right-click for
   the menu`. Click a row's name or bar: nothing opens. Hover a crafting row (Tailoring): the row
   washes, its row tooltip shows beside it and the go icon lights under the pointer; click the go
@@ -303,10 +304,10 @@ the checks below that cover each item:
   the tooltip. Scroll a long tooltip (Height 200) and click a go icon: the row under the pointer
   opens. Move off the tooltip so it hides, then click where a go icon was: nothing happens. In
   combat: hover a crafting row and click its go icon: one chat line says profession windows open out
-  of combat, nothing opens, no error; after combat it opens again. Set Open a row from to The whole
-  row: a click anywhere on a row opens it as before and the footer reads `Rows: click to open,
-  right-click for the menu`. Tooltip style Classic: the setting is dimmed and a row opens from
-  anywhere on it.
+  of combat, nothing opens, no error; after combat it opens again. Set Open a row from to Full row:
+  a click anywhere on a row opens what its go icon opens (SM-DISP-56) and the footer reads `Rows:
+  click to open, shift-click to link, right-click for the menu`. Tooltip style Classic: the setting
+  is dimmed and a row opens from anywhere on it.
 - **SM-DISP-53** (round 8, R8-3: header mark colors) Detach Weapon Skills: the band's dock, collapse,
   sort and filter marks (and the eye while it hides rows) rest in the title's color, as the main
   window header's marks do, and turn the skin's hot color under the pointer. Merge two detached
@@ -329,6 +330,22 @@ the checks below that cover each item:
   detached blocks with a filter on one: the band's and the sub-header's funnels wear the same badge.
   Switch skins with a filter on: the square follows the new title color and the funnel the new
   background. `/reload`: the badge is still there.
+- **SM-DISP-56** (round 8, R8-1: open a row from) A fresh profile: Layout > Window > Open a row from
+  reads Full row, and so does Tooltips > LDB tooltip > Open a row from. In the main window click a
+  crafting row's name, its icon and its bar (Tailoring, Cooking): the profession window opens each
+  time, out of combat, with no "action blocked" or Lua error (`/sm debug` logs the overlay's
+  `PostClick` with no "no armed crafting overlay" line). Click a weapon row's name: Character > Skills
+  opens on its line; a stat row's: the paper doll, with no PlayerFrame secret-compare error. Hover a
+  row: its tooltip's last line starts `Click:` (`Arrow:` in Go icon only). Shift-click a crafting row
+  with the chat box open: its link goes in and its window does not open; right-click it: the row
+  menu. Drag the window by its title: it moves, and the rows still open after the drop. In combat
+  click a crafting row: one chat line says why, nothing opens; after combat the hovered row opens
+  again. Detach Weapon Skills and merge two detached blocks: their rows open from anywhere on them
+  too. Set Open a row from to Go icon only: a click on a row's name or bar opens nothing, its go icon
+  opens it, shift-click and right-click still work on the whole row; the detached and merged rows
+  follow. Hover the Skill Master feed (Main window style): a click anywhere on a row opens what its
+  go icon opens (a crafting row its window, not the main window), and the footer names the
+  shift-click link; set its Open a row from to Go icon only and SM-DISP-52 holds.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed
@@ -422,7 +439,7 @@ the checks below that cover each item:
 - **SM-SEAM-3** Click the main window's journal mark: the Journal opens; again: it closes.
 - **SM-SEAM-4** Hover a feed, then move straight onto another addon's tooltip owner (a bag item):
   the other tooltip stays up (the feed's leave check hides only its own). The feed tooltip's footer
-  reads `Click label: toggle window · Right-click label: options · Rows: click to open, right-click for the menu`;
+  reads `Click label: toggle window · Right-click label: options · Rows: click to open, shift-click to link, right-click for the menu`;
   right-click the feed opens the settings on the Broker page (the main page until it exists).
 
 ## Launcher and settings
