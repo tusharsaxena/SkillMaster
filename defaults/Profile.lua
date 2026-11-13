@@ -181,7 +181,12 @@ NS.defaults = {
         -- bars.miniHeight / brokerRowHeight (the LDB tooltip's), their rows moved to that page.
         tooltips = {
             row = { barWidth = 200, fontSize = 12 },   -- the tooltip of a main window or detached row
-            ldb = { barWidth = 128, fontSize = 12 },   -- the LDB (broker) tooltip; 128 keeps its old 380 px
+            -- The LDB (broker) tooltip. style (round 6, R6-10): "window", drawn as the main window (its
+            -- own frame, the window's headers, rows, bars and fonts; width and height its own, the main
+            -- window's default size to start), or "classic", the tooltip lines with mini bars (barWidth,
+            -- 128 keeps its old 380 px, and fontSize, read by that style only). A new profile starts on
+            -- "window"; schemaVersion 8 kept every profile that existed before on "classic".
+            ldb = { style = "window", width = 420, height = 560, barWidth = 128, fontSize = 12 },
         },
         -- T5.1 the Trainers and Waypoints page (modules/Waypoints.lua, modules/TrainerPopup.lua).
         waypoints = {

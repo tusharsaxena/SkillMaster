@@ -703,3 +703,220 @@ test("round6 trainer ranks: past the max height the cards scroll under a skin sc
         assertTrue(f.scrollBar.track ~= nil and f.scrollBar.thumb ~= nil, "the Journal's skinned bar")
     end)
 end)
+
+-- ── R6-10: the LDB tooltip in the main window's style ───────────────────────────────────────
+
+local Br, BP = NS.Broker, NS.BrokerPanel
+
+local function tipSkill(key, name, category, rank, max, learned)
+    return { key = key, name = name, category = category, rank = rank, max = max, modifier = 0,
+             tempPoints = 0, learned = learned ~= false }
+end
+
+local function tipModels()
+    local byKey = {
+        tailoring = tipSkill("tailoring", "Tailoring", "primary", 120, 150),
+        cooking   = tipSkill("cooking", "Cooking", "secondary", 60, 75),
+        bows      = tipSkill("bows", "Bows", "weapon", 80, 110),
+        swords    = tipSkill("swords", "Swords", "weapon", 0, 0, false),
+        defense   = tipSkill("defense", "Defense", "other", 100, 110),
+    }
+    local crit = { key = "rangedCrit", label = "Ranged Crit", value = 9.1, display = "9.1%", pct = 30, markers = {} }
+    local stats = { base = { crit }, spell = {}, defense = {}, utility = {} }
+    return {
+        model = { byKey = byKey, order = { primary = { "tailoring" }, secondary = { "cooking" },
+                  weapon = { "bows", "swords" }, other = { "defense" } } },
+        statsModel = stats, statIndex = { rangedCrit = crit },
+        gains = { total = 3, byKey = {} },
+    }
+end
+
+--- The feed's tooltip shown in `style` over a fixture source, then everything put back.
+local function withFeedTip(style, fn)
+    local savedSource, p = Br.source, NS.db.profile
+    local savedStyle, savedHeight = p.tooltips.ldb.style, p.tooltips.ldb.height
+    local v = tipModels()
+    Br.source = function() return v end
+    p.tooltips.ldb.style = style
+    local ok, err = pcall(fn, v)
+    Br.HideTooltip()
+    Br.source = savedSource
+    p.tooltips.ldb.style, p.tooltips.ldb.height = savedStyle, savedHeight
+    p.layout.blocks.weapon.filter, p.layout.blocks.weapon.collapsed = "all", false
+    p.broker.tooltip.sections.stats = NS.defaults.profile.broker.tooltip.sections.stats
+    if NS.Widgets.CloseMenu then NS.Widgets.CloseMenu() end
+    if not ok then error(err, 0) end
+end
+
+local function panelRow(key)
+    for _, row in ipairs(BP.Rows()) do
+        if row.entry and row.entry.key == key then return row end
+    end
+    return nil
+end
+
+test("round6 ldb look: a new profile draws the Main window style on its own TOOLTIP frame, the window's size", function()
+    local LD = NS.defaults.profile.tooltips.ldb
+    assertEqual(LD.style, "window", "new profiles start on the window's look")
+    assertEqual(LD.width, NS.defaults.profile.layout.width, "the window's default width")
+    assertEqual(LD.height, NS.defaults.profile.layout.maxHeight, "the window's default height")
+    withFeedTip("window", function()
+        assertEqual(Br.Style(), "window")
+        local f = Br.Tip()
+        assertTrue(f == BP.Frame(), "the panel is the tooltip")
+        assertTrue(f ~= M.GameTooltip and f ~= Br.OwnTip(), "never a GameTooltip")
+        assertEqual(f:GetFrameStrata(), "TOOLTIP")
+        assertEqual(BP.ContentWidth(), NS.MainWindow.ContentWidth(), "one Width draws the window's body")
+        Br.OnEnter(M.UIParent)
+        assertTrue(f:IsShown(), "it shows on the feed's hover")
+        assertEqual(f.title:GetText(), Br.LABEL)
+        assertEqual(f.footer:GetText(), Br.FooterText(), "the footer hints stay")
+    end)
+    withFeedTip("classic", function()
+        assertEqual(Br.Style(), "classic")
+        assertTrue(Br.Tip() ~= BP.Frame(), "Classic keeps the tooltip lines")
+    end)
+end)
+
+test("round6 ldb look: the window's headers and rows, the bar with its text inside and the mark at its right", function()
+    withFeedTip("window", function()
+        Br.OnEnter(M.UIParent)
+        local ids = {}
+        for _, h in ipairs(BP.Headers()) do ids[#ids + 1] = h.id end
+        assertEqual(table.concat(ids, ","), "primary,secondary,weapon,other", "the shown sections, in the window's order")
+        local row = panelRow("tailoring")
+        assertTrue(row ~= nil, "a window row")
+        assertTrue(row.bar:IsShown(), "the shared bar")
+        assertTrue(row.act:IsShown(), "the row's mark")
+        assertEqual(row.baseH, NS.db.profile.bars.rowHeight, "the window's row height")
+        assertTrue(row:GetParent() == BP.Frame().content, "in the panel's scrolled body")
+        NS.db.profile.broker.tooltip.sections.stats = true
+        Br.OnEnter(M.UIParent)
+        assertTrue(panelRow("rangedCrit") ~= nil, "the Stats section draws the stat blocks")
+    end)
+end)
+
+test("round6 ldb look: a block collapsed in the window is a collapsed header here, and nothing on a header acts", function()
+    withFeedTip("window", function()
+        NS.db.profile.layout.blocks.weapon.collapsed = true
+        Br.OnEnter(M.UIParent)
+        local weapon
+        for _, h in ipairs(BP.Headers()) do if h.id == "weapon" then weapon = h end end
+        assertTrue(weapon ~= nil and weapon.collapsed == true, "the header says collapsed (chevron right)")
+        assertTrue(panelRow("bows") == nil, "and draws no rows")
+        assertFalse(weapon.detach:IsShown(), "no detach mark")
+        assertFalse(weapon.restore:IsShown(), "no restore mark")
+        -- A recorder on the pooled header's EnableMouse, then the tooltip drawn again.
+        local calls = {}
+        rawset(weapon, "EnableMouse", function(_, on) calls[#calls + 1] = on end)
+        Br.OnEnter(M.UIParent)
+        rawset(weapon, "EnableMouse", nil)
+        assertEqual(calls[1], false, "the header takes no click")
+    end)
+end)
+
+test("round6 ldb look: a row's left click opens and its right click opens the row menu, as the classic rows do", function()
+    withFeedTip("window", function()
+        Br.OnEnter(M.UIParent)
+        local saved, got = Br.OpenRow, {}
+        Br.OpenRow = function(r, button) got[#got + 1] = r.kind .. ":" .. r.key .. ":" .. tostring(button) end
+        local row = panelRow("tailoring")
+        local ok, err = pcall(function()
+            row:__fire("OnClick", "LeftButton")
+            row:__fire("OnClick", "RightButton")
+        end)
+        Br.OpenRow = saved
+        if not ok then error(err, 0) end
+        assertEqual(table.concat(got, ","), "skill:tailoring:LeftButton,skill:tailoring:RightButton")
+    end)
+end)
+
+test("round6 ldb look: the window's weapon filter and sort reach both styles", function()
+    withFeedTip("window", function()
+        NS.db.profile.layout.blocks.weapon.filter = "learned"
+        Br.OnEnter(M.UIParent)
+        assertTrue(panelRow("bows") ~= nil and panelRow("swords") == nil, "Main window: Learned leaves Swords out")
+    end)
+    withFeedTip("classic", function()
+        NS.db.profile.layout.blocks.weapon.filter = "learned"
+        local lines = {}
+        local tip = M.CreateFrame("GameTooltip", "SkillMasterR6Tip", M.UIParent)
+        function tip:AddLine(t) lines[#lines + 1] = t end
+        function tip:AddDoubleLine(l) lines[#lines + 1] = l end
+        function tip:NumLines() return #lines end
+        Br.FillTooltip(tip)
+        local text = table.concat(lines, "\n")
+        assertTrue(text:find("Bows", 1, true) ~= nil and text:find("Swords", 1, true) == nil, "Classic too: " .. text)
+    end)
+end)
+
+test("round6 ldb look: past its Height the body scrolls, by the wheel and by the skin's scroll bar", function()
+    withFeedTip("window", function()
+        Br.OnEnter(M.UIParent)
+        local f = BP.Frame()
+        assertEqual(select(2, BP.Scroll()), 0, "the default Height fits the fixture")
+        assertFalse(f.scrollBar:IsShown(), "no scroll bar while it fits")
+        NS.db.profile.tooltips.ldb.height = 120
+        Br.OnEnter(M.UIParent)
+        local _, most = BP.Scroll()
+        assertTrue(most > 0, "the body overflows")
+        assertTrue(f.scrollBar:IsShown(), "the scroll bar shows")
+        f.list:GetScript("OnMouseWheel")(f.list, -1)
+        assertEqual((BP.Scroll()), math.min(40, most), "a wheel notch scrolls")
+        f.scrollBar:GetScript("OnValueChanged")(f.scrollBar, 1)
+        assertEqual((BP.Scroll()), 1, "the bar drives the offset")
+    end)
+end)
+
+test("round6 ldb look: the row menu draws above the tooltip in both styles, and goes back as it hides", function()
+    for _, style in ipairs({ "window", "classic" }) do
+        withFeedTip(style, function()
+            Br.OnEnter(M.UIParent)
+            local tip = Br.Tip()
+            local m = Br.RowMenu({ kind = "skill", key = "tailoring" }, tip)
+            assertTrue(m ~= nil, style .. ": the menu opens")
+            assertEqual(m:GetFrameStrata(), "TOOLTIP", style .. ": in the tooltip's strata")
+            assertTrue(m:GetFrameLevel() > tip:GetFrameLevel(), style .. ": above the tooltip")
+            assertTrue(Br.MenuOpen(), style .. ": the tooltip stays up while the menu is open")
+            m:Hide()
+            m:__fire("OnHide")
+            assertEqual(m:GetFrameStrata(), "FULLSCREEN_DIALOG", style .. ": the library's strata again")
+            assertFalse(Br.MenuOpen())
+        end)
+    end
+end)
+
+test("round6 ldb look: the classic-only rows are dimmed in the Main window style, width and height in Classic", function()
+    local function row(path) return NS.FindSchemaRow(path) end
+    withFeedTip("window", function()
+        assertTrue(row("tooltips.ldb.fontSize").disabledIf(), "font size: Classic only")
+        assertTrue(row("tooltips.ldb.barWidth").disabledIf(), "bar width: Classic only")
+        assertTrue(row("broker.tooltip.skin").disabledIf(), "the skin switch: Classic only")
+        assertFalse(row("tooltips.ldb.width").disabledIf(), "width: this style's")
+    end)
+    withFeedTip("classic", function()
+        assertTrue(row("tooltips.ldb.height").disabledIf(), "height: the Main window style's")
+        assertFalse(row("tooltips.ldb.fontSize").disabledIf())
+    end)
+end)
+
+test("round6 ldb look: schemaVersion 8 keeps every stored profile on Classic; a fresh install and profile start on it new", function()
+    local sv = rawget(_G, "SkillMasterDB")
+    sv.profiles = sv.profiles or {}
+    sv.profiles["R6-Old"] = { bars = { height = 15 } }
+    sv.profiles["R6-Chose"] = { tooltips = { ldb = { style = "window" } } }
+    sv.profiles["R6-Empty"] = {}
+    NS.db.global.schemaVersion = 7
+    NS:RunMigrations()
+    assertEqual(NS.db.global.schemaVersion, NS.SCHEMA_VERSION)
+    assertTrue(NS.SCHEMA_VERSION >= 8, "step 8 is in the ladder")
+    assertEqual(sv.profiles["R6-Old"].tooltips.ldb.style, "classic", "an existing profile keeps today's look")
+    assertEqual(sv.profiles["R6-Chose"].tooltips.ldb.style, "window", "a stored style is kept")
+    assertTrue(next(sv.profiles["R6-Empty"]) == nil, "a fresh profile passes through")
+    -- A fresh install: no stamp was ever stored, so the step leaves its profiles to the new default.
+    sv.profiles["R6-New"] = { bars = { height = 15 } }
+    NS.db.global.schemaVersion = 0
+    NS:RunMigrations()
+    assertTrue(sv.profiles["R6-New"].tooltips == nil, "a fresh install starts on the Main window style")
+    for _, k in ipairs({ "R6-Old", "R6-Chose", "R6-Empty", "R6-New" }) do sv.profiles[k] = nil end
+end)

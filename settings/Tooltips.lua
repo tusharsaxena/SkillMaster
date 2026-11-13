@@ -4,8 +4,9 @@ local _, NS = ...
 --
 --   Main window tooltip   the tooltip of a main window or detached row (modules/RowTooltip.lua):
 --                         bar width, bar height, row height, font size
---   LDB tooltip           the broker feed's tooltip (modules/Broker.lua): Apply skin to the
---                         tooltip, bar width, bar height, row height, font size
+--   LDB tooltip           the broker feed's tooltip (modules/Broker.lua, modules/BrokerPanel.lua):
+--                         Tooltip style, width and height (Main window style), Apply skin to the
+--                         tooltip, bar width, bar height, row height, font size (Classic style)
 --
 -- The heights keep their paths (bars.tooltipHeight / tooltipRowHeight, bars.miniHeight /
 -- brokerRowHeight) and the skin row its own (broker.tooltip.skin): only their rows moved here, so no
@@ -41,20 +42,43 @@ NS.RegisterSchemaRows(NS.Live({
         PT.row.fontSize, 8, 20),
 }))
 
+-- The LDB tooltip's style (round 6, R6-10): Main window draws it as the main window, at its own Width
+-- and Height; Classic is the tooltip lines with mini bars, and only it reads the skin switch, the bar
+-- width, the row height and the font size below (each dimmed in the other style).
+local function classic() return NS.GetSetting("tooltips.ldb.style") == "classic" end
+local function windowStyle() return not classic() end
+
+local function onlyIn(row, off)
+    row.disabledIf = off
+    return row
+end
+
 local ldbRows = NS.Live({
-    { path = "broker.tooltip.skin", page = PAGE, group = LDB, type = "bool",
+    { path = "tooltips.ldb.style", page = PAGE, group = LDB, type = "string", default = PT.ldb.style,
+      label = L["Tooltip style"],
+      desc = L["Main window draws the LDB tooltip as the main window: its block headers, rows, bars and fonts, the window's collapse, sort and filter, at the Width and Height below. Classic is the tooltip lines with mini bars."],
+      values = { { value = "window", text = L["Main window"] }, { value = "classic", text = L["Classic"] } } },
+    onlyIn(px("tooltips.ldb.width", LDB, L["Width (px)"],
+        L["Width of the LDB tooltip in the Main window style, counted as Layout > Window width is."],
+        PT.ldb.width, 300, 800), classic),
+    onlyIn(px("tooltips.ldb.height", LDB, L["Height (px)"],
+        L["The tallest the LDB tooltip grows in the Main window style; past it, it scrolls (the mouse wheel or its scroll bar)."],
+        PT.ldb.height, 200, 1000), classic),
+    onlyIn({ path = "broker.tooltip.skin", page = PAGE, group = LDB, type = "bool",
       default = PBR.tooltip.skin, label = L["Apply skin to the tooltip"],
-      desc = L["Draw the feed's tooltip in the skin's backdrop, border and fonts. Off, it is the game's plain tooltip."] },
-    px("tooltips.ldb.barWidth", LDB, L["Bar width (px)"],
-        L["Width of the bars in the LDB (broker) tooltip. The tooltip widens to fit them; a wide value column can stretch them further."],
-        PT.ldb.barWidth, 60, 400),
+      desc = L["Draw the feed's tooltip in the skin's backdrop, border and fonts. Off, it is the game's plain tooltip. Classic style only: the Main window style always wears the skin."] },
+      windowStyle),
+    onlyIn(px("tooltips.ldb.barWidth", LDB, L["Bar width (px)"],
+        L["Width of the bars in the LDB (broker) tooltip, Classic style. The tooltip widens to fit them; a wide value column can stretch them further."],
+        PT.ldb.barWidth, 60, 400), windowStyle),
     px("bars.miniHeight", LDB, L["Bar height (px)"],
-        L["Height of the bars in the LDB (broker) tooltip, and in the Journal's Alts tab."], PB.miniHeight, 3, 16),
-    px("bars.brokerRowHeight", LDB, L["Row height (px)"],
-        L["Height of one skill or stat line in the LDB (broker) tooltip. Never shorter than its bar."],
-        PB.brokerRowHeight, 10, 40),
-    px("tooltips.ldb.fontSize", LDB, L["Font size"],
-        L["Size of the text in the LDB (broker) tooltip."], PT.ldb.fontSize, 8, 20),
+        L["Height of the bars in the LDB (broker) tooltip's Classic style, and in the Journal's Alts tab."], PB.miniHeight, 3, 16),
+    onlyIn(px("bars.brokerRowHeight", LDB, L["Row height (px)"],
+        L["Height of one skill or stat line in the LDB (broker) tooltip, Classic style. Never shorter than its bar."],
+        PB.brokerRowHeight, 10, 40), windowStyle),
+    onlyIn(px("tooltips.ldb.fontSize", LDB, L["Font size"],
+        L["Size of the text in the LDB (broker) tooltip, Classic style. The Main window style takes the window's fonts."],
+        PT.ldb.fontSize, 8, 20), windowStyle),
 })
 -- Any LDB look change closes the open tooltip, so the next hover draws it new.
 for _, r in ipairs(ldbRows) do

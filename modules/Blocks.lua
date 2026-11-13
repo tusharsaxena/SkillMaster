@@ -287,12 +287,12 @@ local function hidden(kind, key)
     return list and list[key] == true
 end
 
-local function skillEntries(skills, category)
+local function skillEntries(skills, category, isHidden)
     local out = {}
     local showUnlearned = not (NS.db and NS.db.profile.skills.showUnlearned == false)
     for _, key in ipairs(skills and skills.order[category] or {}) do
         local e = skills.byKey[key]
-        if e and not hidden("skills", key) and (e.learned ~= false or showUnlearned) then
+        if e and not isHidden("skills", key) and (e.learned ~= false or showUnlearned) then
             out[#out + 1] = { kind = "skill", entry = e }
         end
     end
@@ -353,10 +353,10 @@ function B.RestoreHidden(id)
     return #keys
 end
 
-local function statEntries(stats, group)
+local function statEntries(stats, group, isHidden)
     local out = {}
     for _, e in ipairs(stats and stats[group] or {}) do
-        if not hidden("stats", e.key) then out[#out + 1] = { kind = "stat", entry = e } end
+        if not isHidden("stats", e.key) then out[#out + 1] = { kind = "stat", entry = e } end
     end
     return out
 end
@@ -529,16 +529,18 @@ function B.FilterNote(entries, removed)
 end
 
 --- The rows block `id` shows, each { kind = "skill"|"stat", entry }, in its sort order, and how many
---- its filter took out.
-function B.Entries(id, skills, stats)
+--- its filter took out. `isHidden(kind, key)` (kind "skills" | "stats") answers which rows are left
+--- out: the window's hidden sets when nil, the LDB tooltip's own for the broker (round 6, R6-10).
+function B.Entries(id, skills, stats, isHidden)
     local d = NS.BlockDefs[id]
     if not d then return {}, 0 end
     if skills == nil and stats == nil then skills, stats = B.Data() end
+    isHidden = isHidden or hidden
     if d.source == "skills" then
-        local entries, removed = applyFilter(id, skillEntries(skills, d.filter))
+        local entries, removed = applyFilter(id, skillEntries(skills, d.filter, isHidden))
         return B.SortEntries(id, entries), removed
     end
-    return B.SortEntries(id, statEntries(stats, d.filter)), 0
+    return B.SortEntries(id, statEntries(stats, d.filter, isHidden)), 0
 end
 
 -- No counts beside a title (owner feedback round 4): only Base & Combat says what its bars scale to.

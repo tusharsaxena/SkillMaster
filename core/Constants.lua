@@ -40,9 +40,14 @@ C.MINIMAP_PATH = "global.minimap.shown"
 -- Library- and Blizzard-owned tiers this addon relies on (frame-layering-§6): the debug console
 -- and perf panel DIALOG, toplevel; the copy window FULLSCREEN; menus (the row menu,
 -- LibKa0s-Widgets-1.0 ContextMenu) FULLSCREEN_DIALOG; the Settings panel HIGH; GameTooltip TOOLTIP.
+--   T6 tooltip the LDB tooltip in the main window's style (modules/BrokerPanel.lua, round 6, R6-10),
+--              TOOLTIP, clamped, as the GameTooltip-template feed tooltip is; the row menu opened
+--              from either one is lifted to TOOLTIP over it while it is up (MENU is the library's
+--              own strata, put back when the menu hides)
 C.LAYERS = {
-    STRATA = { WINDOW = "MEDIUM", HUD = "MEDIUM", WINDOW_READ = "HIGH" },
-    LEVEL  = { CONTENT = 2, OVERLAY = 4, SECURE = 8, CHROME = 10 },
+    STRATA = { WINDOW = "MEDIUM", HUD = "MEDIUM", WINDOW_READ = "HIGH", TOOLTIP = "TOOLTIP",
+               MENU = "FULLSCREEN_DIALOG" },
+    LEVEL  = { CONTENT = 2, OVERLAY = 4, SECURE = 8, CHROME = 10, POPUP = 20 },
     -- A player-chosen strata offers these four only (frame-layering-§1, player-chosen strata).
     STRATA_CHOICES = { "BACKGROUND", "LOW", "MEDIUM", "HIGH" },
     -- The strata one above each choice: where a popup opened from it sits (frame-layering-§1).

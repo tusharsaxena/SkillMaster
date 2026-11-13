@@ -19,7 +19,7 @@ the checks below that cover each item:
 | TomTom on and off | SM-DISP-7, SM-OPT-5, SM-SEAM-2 |
 | Each skin | SM-SKIN-1, SM-SKIN-2 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
-| Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4, SM-DISP-18 |
+| Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4, SM-DISP-18, SM-DISP-39 |
 
 ## Load
 
@@ -207,6 +207,18 @@ the checks below that cover each item:
   cards reorder; the trainer you selected stays selected. Compare one card's yards with TomTom's arrow
   (roughly equal: a straight line). Enter an instance (or a battleground) with the popup open: no
   distances, no error.
+- **SM-DISP-39** (round 6, R6-10) On a new profile, hover the broker feed: the tooltip looks like the
+  main window, as wide as it, in the skin's shell with the title band (Skill Master, the session's
+  gains at the right): the window's block headers (chevron, title, the sort mark; the funnel on
+  Weapon Skills), its rows (icon, name, the bar with its text inside it, the action mark at the
+  right end), at the window's row height and fonts, the footer hints under them. Collapse Weapon
+  Skills in the window, hover again: its header shows the right chevron and no rows. Set the weapon
+  filter to Learned and the sort to Value, highest first: the tooltip follows both. Click a header,
+  its chevron or its marks: nothing happens. Left-click a weapon row: Skills opens; right-click it:
+  the row menu draws whole, over the tooltip, and the tooltip stays while the menu is open. Tooltips
+  > LDB tooltip: Height 200, hover: the body scrolls with the wheel and its scroll bar. Tooltip
+  style Classic: today's lines and mini bars, and the row menu over them is whole too. An existing
+  profile from before this build opens on Classic.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon with TomTom loaded,
   then without it: the primary button reads `Set waypoint` both times (no `(TomTom)`, `(map pin)` or
   `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.

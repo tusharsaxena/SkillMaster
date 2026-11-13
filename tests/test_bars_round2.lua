@@ -100,6 +100,7 @@ test("tooltip bar: hidden once GameTooltip is cleared for another owner, never c
         rawset(tip, "SetOwner", function(self) self:__fire("OnTooltipCleared") end)
         local ok, err = pcall(function()
             -- Apply skin to the tooltip off (FB-13): the feed draws on the shared GameTooltip.
+            NS.SetByPath("tooltips.ldb.style", "classic")   -- round 6: the Classic style draws on GameTooltip
             NS.SetByPath("broker.tooltip.skin", false)
             NS.RowTooltip.Show(windowRow("leatherworking"))
             local bar = NS.RowTooltip.Bar()
@@ -114,6 +115,7 @@ test("tooltip bar: hidden once GameTooltip is cleared for another owner, never c
         end)
         NS.Broker.HideTooltip()
         NS.SetByPath("broker.tooltip.skin", true)
+        NS.SetByPath("tooltips.ldb.style", NS.defaults.profile.tooltips.ldb.style)
         rawset(tip, "SetOwner", nil)
         if not ok then error(err, 0) end
     end)

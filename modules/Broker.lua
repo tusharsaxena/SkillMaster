@@ -36,6 +36,12 @@ local function tipSettings()
     return t and t.ldb or NS.defaults.profile.tooltips.ldb
 end
 
+--- The tooltip's look (Tooltips > Tooltip style, round 6, R6-10): "window", the main window's (its own
+--- frame, modules/BrokerPanel.lua), or "classic", this file's tooltip lines and mini bars.
+function B.Style()
+    return tipSettings().style == "classic" and "classic" or "window"
+end
+
 --- The tooltip's minimum width: the name column, Tooltips > Bar width and the value column. The
 --- bars stretch between the two columns, so the width is the least a bar draws.
 function B.MinWidth()
@@ -549,24 +555,35 @@ local function addTitle(tip, title)
     if c then band(tip, n, h, c[1], c[2], c[3], c[4]) end
 end
 
---- Section `id`'s entries in its block's sort order (NS.Blocks.SortEntries, owner feedback round 3).
-local function sorted(id, list)
-    return NS.Blocks.SortEntries(id, list, function(e) return e end)
+--- The tooltip's own Hide sets as NS.Blocks.Entries asks ("skills" | "stats", key).
+local function tipHidden(kind, key)
+    return B.HiddenInTooltip(kind == "stats" and "stat" or "skill", key)
 end
 
+--- The models the tooltip draws: the bus's, or test mode's sample (B.source).
+function B.Models()
+    local v = view()
+    return v.model, v.statsModel
+end
+
+--- Block `id`'s rows in the tooltip, each { kind, entry }, and how many its filter took out: the
+--- window's block as NS.Blocks.Entries lays it (its sort order, the weapon block's filter, owner
+--- feedback round 6, R6-10; unlearned rows as Skills > Show unlearned says), less the tooltip's own
+--- Hide sets in place of the window's.
+function B.TooltipEntries(id, skills, stats)
+    if skills == nil and stats == nil then return {}, 0 end
+    return NS.Blocks.Entries(id, skills, stats, tipHidden)
+end
+
+--- A section's header, then its rows; a section its filter emptied shows its header and the
+--- window's muted line.
 local function addSkillSection(tip, rows, section, m)
-    local i, list = 0, {}
-    for _, key in ipairs(m.order[section] or {}) do
-        if m.byKey[key] then list[#list + 1] = m.byKey[key] end
-    end
-    for _, e in ipairs(sorted(section, list)) do
-        local key = e.key
-        if not B.HiddenInTooltip("skill", key) then
-            if i == 0 then addTitle(tip, sectionTitle(section)) end
-            i = i + 1
-            rows[#rows + 1] = addSkillRow(tip, e, i)
-        end
-    end
+    local entries, removed = B.TooltipEntries(section, m, nil)
+    local note = NS.Blocks.FilterNote(entries, removed)
+    if #entries == 0 and not note then return end
+    addTitle(tip, sectionTitle(section))
+    for i, r in ipairs(entries) do rows[#rows + 1] = addSkillRow(tip, r.entry, i) end
+    if note then tip:AddLine(colored("gtip.muted", note)) end
 end
 
 local function addStatRow(tip, e, i)
@@ -590,15 +607,10 @@ local function addStatsSection(tip, rows)
         return
     end
     for _, group in ipairs(NS.StatData.GROUPS) do
-        local i, list = 0, {}
-        for n, e in ipairs(sm[group] or {}) do list[n] = e end
-        for _, e in ipairs(sorted("stats_" .. group, list)) do
-            if not B.HiddenInTooltip("stat", e.key) then
-                if i == 0 then addTitle(tip, sectionTitle("stats_" .. group)) end
-                i = i + 1
-                rows[#rows + 1] = addStatRow(tip, e, i)
-            end
-        end
+        local id = "stats_" .. group
+        local entries = B.TooltipEntries(id, nil, sm)
+        if #entries > 0 then addTitle(tip, sectionTitle(id)) end
+        for i, r in ipairs(entries) do rows[#rows + 1] = addStatRow(tip, r.entry, i) end
     end
 end
 
@@ -633,6 +645,34 @@ function B.AddTestModeLine(tip)
     return true
 end
 
+--- The tooltip's footer: what the label and the rows do on a click.
+function B.FooterText()
+    return L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, right-click for the menu"]
+end
+
+--- The blocks the Main window style draws, in the window's block order (NS.Blocks.Ordered): each
+--- shown section's block, the Stats section's four stat blocks.
+function B.ShownBlocks()
+    local want = {}
+    for _, section in ipairs(B.SECTIONS) do
+        if B.SectionShown(section) and section == "stats" then
+            for _, g in ipairs(NS.StatData.GROUPS) do want["stats_" .. g] = true end
+        elseif B.SectionShown(section) then
+            want[section] = true
+        end
+    end
+    local out = {}
+    for _, id in ipairs(NS.Blocks.Ordered()) do
+        if want[id] then out[#out + 1] = id end
+    end
+    return out
+end
+
+--- The tooltip's title and its session gains line.
+function B.Heading()
+    return B.LABEL, L["+%d this session"]:format(view().gains.total)
+end
+
 --- Fill `tip` (the feed's tooltip, or a stand-in) with the shown sections. Answers the clickable
 --- rows, each { line, kind = "skill" | "stat", key }.
 function B.FillTooltip(tip)
@@ -649,7 +689,7 @@ function B.FillTooltip(tip)
     end
     fillSections(tip, rows)
     fitBars(tip)
-    tip:AddLine(colored("gtip.footer", L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, right-click for the menu"]))
+    tip:AddLine(colored("gtip.footer", B.FooterText()))
     return rows
 end
 
@@ -695,15 +735,47 @@ local function openSkillRow(key)
     return openCharacter("SkillsFrame")   -- Forever's Skills tab (round 4)
 end
 
+local current   -- the frame the feed's tooltip is on now (the showing machinery, below)
+
+-- The row menu over the tooltip (owner feedback round 6, R6-10): the library's shared menu sits at
+-- FULLSCREEN_DIALOG, under a tooltip's TOOLTIP strata, so the tooltip hid half of it. While it is
+-- open from the tooltip it is lifted into the tooltip's strata above it; it goes back to its own
+-- strata as it hides, for the next host that opens it.
+local menuHooked, menuOpen = {}, nil
+
+local function lowerMenu(m)
+    m:SetFrameStrata(LAYERS.STRATA.MENU)
+    if menuOpen == m then menuOpen = nil end
+end
+
+function B.RaiseMenu(m, tip)
+    if not (m and tip and m.SetFrameStrata) then return m end
+    m:SetFrameStrata(LAYERS.STRATA.TOOLTIP)
+    m:SetFrameLevel((tonumber(tip:GetFrameLevel()) or 0) + LAYERS.LEVEL.POPUP)
+    if not menuHooked[m] and m.HookScript then
+        menuHooked[m] = true
+        m:HookScript("OnHide", lowerMenu)
+    end
+    menuOpen = m
+    return m
+end
+
+--- The row menu opened from the tooltip while it is still up (the tooltip stays while it is).
+function B.MenuOpen()
+    return menuOpen ~= nil and menuOpen:IsShown() == true
+end
+
 --- The row menu for a tooltip row (owner feedback round 3): the window's own (NS.Interact.Menu,
---- pin, waypoint, trainers, hide) on the tooltip row's entry. Answers the menu, or nil.
+--- pin, waypoint, trainers, hide) on the tooltip row's entry, drawn above the tooltip. Answers the
+--- menu, or nil.
 function B.RowMenu(row, anchor)
     local I, v = NS.Interact, view()
     local e
     if row.kind == "skill" then e = v.model and v.model.byKey[row.key]
     elseif row.kind == "stat" then e = v.statIndex and v.statIndex[row.key] end
     if not (I and e) then return nil end
-    return I.Menu({ kind = row.kind, entry = e, frame = anchor, surface = "broker" })
+    local m = I.Menu({ kind = row.kind, entry = e, frame = anchor, surface = "broker" })
+    return B.RaiseMenu(m, current)
 end
 
 --- One tooltip row's click: left opens what the row opens, right the row menu.
@@ -744,9 +816,17 @@ local function skinnedTip()
     return ownTip
 end
 
---- The frame the tooltip draws on now: the feed's own skinned frame while broker.tooltip.skin is
---- on, else the shared GameTooltip.
+--- The main window's style's frame (modules/BrokerPanel.lua), or nil without it.
+local function panel()
+    local P = NS.BrokerPanel
+    return type(P) == "table" and P.Frame and P or nil
+end
+
+--- The frame the tooltip draws on now: in the Main window style the panel (modules/BrokerPanel.lua);
+--- in the Classic style the feed's own skinned frame while broker.tooltip.skin is on, else the
+--- shared GameTooltip.
 function B.Tip()
+    if B.Style() == "window" and panel() then return panel().Frame() end
     if B.Skinned() then return skinnedTip() end
     return GameTooltip
 end
@@ -780,7 +860,7 @@ end
 -- Showing and hiding the tooltip: it stays while the pointer is on the cell or the tooltip
 -- ---------------------------------------------------------------------------------------------
 
-local hooked, owner, poll, current = {}, nil, nil, nil
+local hooked, owner, poll = {}, nil, nil   -- `current`: declared above B.RowMenu
 
 local function stopPoll()
     if poll then NS.addon:CancelTimer(poll) end
@@ -802,7 +882,7 @@ local function hookTooltip(tip)
 end
 
 local function anchor(tip, frame)
-    tip:SetOwner(frame, "ANCHOR_NONE")
+    if tip.SetOwner then tip:SetOwner(frame, "ANCHOR_NONE") end
     tip:ClearAllPoints()
     local _, y = frame:GetCenter()
     local top = y and UIParent:GetHeight() and y > UIParent:GetHeight() / 2
@@ -825,6 +905,11 @@ function B.OnEnter(frame)
     hookTooltip(tip)
     anchor(tip, frame)
     owner, current = frame, tip
+    if panel() and tip == panel().Frame() then
+        panel().Fill()
+        tip:Show()
+        return
+    end
     local rows = B.FillTooltip(tip)
     tip:Show()
     if tip == ownTip then paintTip(tip) end
@@ -835,7 +920,7 @@ function B.OnEnter(frame)
 end
 
 local function stillHovered(tip)
-    if tip:IsMouseOver() then return true end
+    if tip:IsMouseOver() or B.MenuOpen() then return true end
     return owner ~= nil and owner.IsMouseOver ~= nil and owner:IsMouseOver()
 end
 

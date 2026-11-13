@@ -118,6 +118,13 @@ SkillMasterDB
         hiddenStats  = { [key] = true },   -- left out of the tooltip only, apart from stats.hidden
       },
     }
+    tooltips = {                 -- the Tooltips page (owner feedback round 4)
+      row = { barWidth = 200, fontSize = 12 },   -- a main window or detached row's tooltip
+      ldb = { style = "window",  -- "window" (modules/BrokerPanel.lua) | "classic" (round 6, R6-10;
+                                 -- schemaVersion 8 kept earlier profiles on "classic")
+              width = 420, height = 560,   -- the Main window style's size (the window's defaults)
+              barWidth = 128, fontSize = 12 },   -- the Classic style's
+    }
     journal = { point = false, size = false, keep = 500, range = "session", filter = "primary" }
                                  -- range: session | 1d | 3d | 7d | 30d | all (the Log tab, FB-32);
                                  -- filter: an NS.BLOCKS id (the Alts sub-tab on open, FB-33; a stored
@@ -173,6 +180,7 @@ LibDBIcon's own.
 | 4 → 5 | `journalFilterToBlock`, per profile | the Alts sub-tabs became the main window's blocks (FB-33): a stored `journal.filter` of `"professions"` becomes `"primary"`, `"weapons"` becomes `"weapon"`; `"other"` stays |
 | 5 → 6 | `groupsNormalized`, per profile | merged detached windows (round 5, R5-6), `layout.groups`, a new key defaulting to `{}`: nothing carries over; a stored `layout.groups` that is not a table goes, a stored one is normalized against the profile's own blocks (a member that is not a detached block there, a repeat, an empty column and a group of fewer than two go); a profile with none passes through |
 | 6 → 7 | `markersSplit`, per profile | thresholds split per surface (round 6, R6-4): a stored `bars.markers = false` carries to both `bars.markersWindow` and `bars.markersTooltip`; any stored `bars.markers` goes, and otherwise the new defaults answer (window off, row tooltip on) |
+| 7 → 8 | `classicTooltipKept`, per profile | the LDB tooltip's style (round 6, R6-10), `tooltips.ldb.style`, a new key whose default `"window"` is for new profiles only: every non-empty profile an earlier install stored gets `"classic"`, today's look, unless it already holds a style; a fresh install (the run starts at stamp 0) and an empty stored profile pass through. The runner hands each step `(sv, profile, from)` for this |
 
 No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
 companion defaulting on, so no stored profile predates the companions and none has to be moved

@@ -452,8 +452,8 @@ L["Row height (px)"] = true
 L["Height of one skill or stat row, its bar included, in the main window and the detached blocks."] = true
 L["Height of the bar in the tooltip of a main window or detached row."] = true
 L["Height of the bar's line in the tooltip of a main window or detached row. Never shorter than its bar."] = true
-L["Height of the bars in the LDB (broker) tooltip, and in the Journal's Alts tab."] = true
-L["Height of one skill or stat line in the LDB (broker) tooltip. Never shorter than its bar."] = true
+L["Height of the bars in the LDB (broker) tooltip's Classic style, and in the Journal's Alts tab."] = true
+L["Height of one skill or stat line in the LDB (broker) tooltip, Classic style. Never shorter than its bar."] = true
 L["Fill"] = true
 L["The fill color while Color mode (Colors) is Flat. Not read while Use the skin's color is on."] = true
 L["The color behind the fill. Not read while Use the skin's color is on."] = true
@@ -605,7 +605,7 @@ L["How long the feed shows the skill that just went up (^ Bows 81) in place of i
 -- FB-12 / FB-13: the feed's tooltip (settings/Broker.lua)
 L["Tooltip"] = true
 L["Apply skin to the tooltip"] = true
-L["Draw the feed's tooltip in the skin's backdrop, border and fonts. Off, it is the game's plain tooltip."] = true
+L["Draw the feed's tooltip in the skin's backdrop, border and fonts. Off, it is the game's plain tooltip. Classic style only: the Main window style always wears the skin."] = true
 L["Sections"] = true
 L["Draw this section in the feed's tooltip."] = true
 L["Broker"] = true
@@ -733,8 +733,8 @@ L["Font size"] = true
 L["Tooltips"] = true
 L["Width of the bar in the tooltip of a main window or detached row."] = true
 L["Size of Skill Master's lines in the tooltip of a main window or detached row. The game's other tooltips keep theirs."] = true
-L["Width of the bars in the LDB (broker) tooltip. The tooltip widens to fit them; a wide value column can stretch them further."] = true
-L["Size of the text in the LDB (broker) tooltip."] = true
+L["Width of the bars in the LDB (broker) tooltip, Classic style. The tooltip widens to fit them; a wide value column can stretch them further."] = true
+L["Size of the text in the LDB (broker) tooltip, Classic style. The Main window style takes the window's fonts."] = true
 L["Restore every Tooltips setting on this profile to its default."] = true
 
 -- owner feedback round 4: the section header's restore mark (modules/Blocks.lua)
@@ -818,6 +818,18 @@ L["The first eye hides a row from the window and the detached blocks, the second
 L["Show every skill and stat again, in the window and in the LDB tooltip: both hidden sets are cleared, on this profile."] = true
 L["Restore every Skills setting on this profile to its default. Hidden rows stay hidden: the Rows page's Defaults shows them again."] = true
 L["Restore every Broker setting on this profile to its default. Hidden tooltip rows stay hidden: the Rows page's Defaults shows them again."] = true
+
+-- ---- Round 6, R6-10: the LDB tooltip in the main window's style (settings/Tooltips.lua,
+-- modules/BrokerPanel.lua) ----
+L["Tooltip style"] = true
+L["Main window draws the LDB tooltip as the main window: its block headers, rows, bars and fonts, the window's collapse, sort and filter, at the Width and Height below. Classic is the tooltip lines with mini bars."] = true
+L["Main window"] = true
+L["Classic"] = true
+L["Width (px)"] = true
+L["Width of the LDB tooltip in the Main window style, counted as Layout > Window width is."] = true
+L["Height (px)"] = true
+L["The tallest the LDB tooltip grows in the Main window style; past it, it scrolls (the mouse wheel or its scroll bar)."] = true
+L["Nothing to show in this tooltip."] = true
 
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.

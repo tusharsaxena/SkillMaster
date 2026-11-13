@@ -237,7 +237,9 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- the Skills, Stats and Broker pages one for one, same paths: neither count moves (delta 0).
     -- Round 6 (R6-4): Bars > Marks' Threshold markers split into a window and a row-tooltip switch,
     -- hand-written: +1 in both counts, the delta unmoved.
-    assertEqual(full, 331, "the full schema (round 6: the thresholds' two switches)")
-    assertEqual(degraded, 278, "the library-absent schema")
+    -- Round 6 (R6-10): Tooltips > LDB tooltip's Tooltip style, Width and Height, hand-written: +3 in
+    -- both counts, the delta unmoved.
+    assertEqual(full, 334, "the full schema (round 6: the LDB tooltip's style, width and height)")
+    assertEqual(degraded, 281, "the library-absent schema")
     assertEqual(full - degraded, 53, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3) and the detached background and border (9)")
 end)

@@ -86,8 +86,14 @@ local function skinLib() return M.LibStub("LibKa0s-Skin-1.0") end
 
 --- Run `fn` with the tooltip's sections, Hide sets and skin as `fn` leaves them, then put the
 --- shipped defaults back.
+-- The classic tooltip (round 6, R6-10: a new profile draws the Main window style, modules/BrokerPanel.lua;
+-- these cases pin the Classic style's lines, bars and frames).
 local function withTooltip(fn)
+    local ldb = NS.db.profile.tooltips.ldb
+    local style = ldb.style
+    ldb.style = "classic"
     local ok, err = pcall(fn)
+    ldb.style = style
     local tip, D = NS.db.profile.broker.tooltip, NS.defaults.profile.broker.tooltip
     for id, v in pairs(D.sections) do tip.sections[id] = v end
     tip.hiddenSkills, tip.hiddenStats, tip.skin = {}, {}, D.skin

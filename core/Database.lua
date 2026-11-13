@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 7
+NS.SCHEMA_VERSION = 8
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -85,8 +85,24 @@ local function markersSplit(_, profile)
     bars.markers = nil
 end
 
+--- 7 -> 8 (owner feedback round 6, R6-10): the LDB tooltip's style, `tooltips.ldb.style`, a new key
+--- whose default "window" is the main window's look, for new profiles only (owner: "as a default
+--- setting for new profiles, can be customized later"). Every profile an earlier install stored keeps
+--- the look it had: "classic", unless it already holds a style. A fresh install (`from` 0: no stamp
+--- was ever stored) and a fresh profile (an empty stored table: nothing chosen, nothing drawn yet)
+--- pass through, so they start on the new look.
+local function classicTooltipKept(_, profile, from)
+    if (from or 0) == 0 or type(profile) ~= "table" or next(profile) == nil then return end
+    if type(profile.tooltips) ~= "table" then profile.tooltips = {} end
+    local t = profile.tooltips
+    if type(t.ldb) ~= "table" then t.ldb = {} end
+    -- rawget: the active profile may already wear AceDB's defaults, whose "window" is no choice.
+    if rawget(t.ldb, "style") == nil then t.ldb.style = "classic" end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
--- `perProfile = true` and runs for every stored profile.
+-- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
+-- is the stamp the run started at (0 on a fresh install).
 local STEPS = {
     { to = 1, run = function() end },   -- 0 -> 1: pre-versioning, a no-op
     { to = 2, run = rowDisplayFromStats, perProfile = true },
@@ -95,6 +111,7 @@ local STEPS = {
     { to = 5, run = journalFilterToBlock, perProfile = true },
     { to = 6, run = groupsNormalized, perProfile = true },
     { to = 7, run = markersSplit, perProfile = true },
+    { to = 8, run = classicTooltipKept, perProfile = true },
 }
 
 function NS:InitDB()
@@ -107,9 +124,9 @@ function NS:RunMigrations()
     for _, step in ipairs(STEPS) do
         if (g.schemaVersion or 0) < step.to then
             if step.perProfile then
-                for _, profile in pairs(sv and sv.profiles or {}) do step.run(sv, profile) end
+                for _, profile in pairs(sv and sv.profiles or {}) do step.run(sv, profile, from) end
             else
-                step.run(sv)
+                step.run(sv, nil, from)
             end
             g.schemaVersion = step.to   -- the runner owns the stamp; reached only if the step returned
         end

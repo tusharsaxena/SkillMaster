@@ -441,7 +441,7 @@ Total.
 - round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once
 - round5 review: a block reorder redraws the Rows page in the new order, shown or hidden
 
-### test_round6.lua (22)
+### test_round6.lua (31)
 
 - round6 toast: the gap and skill-up toasts wear the cap toast's skin shell, no tint or edge of their own
 - round6 toast: the value stays red or green and carries its delta in brackets
@@ -465,6 +465,15 @@ Total.
 - round6 trainer ranks: the popup lists Expert and Artisan trainers under their headings, the intro says or higher
 - round6 trainer ranks: nearest first inside each rank, the ranks kept in order, re-sorted each second
 - round6 trainer ranks: past the max height the cards scroll under a skin scroll bar, the wheel and the bar drive it
+- round6 ldb look: a new profile draws the Main window style on its own TOOLTIP frame, the window's size
+- round6 ldb look: the window's headers and rows, the bar with its text inside and the mark at its right
+- round6 ldb look: a block collapsed in the window is a collapsed header here, and nothing on a header acts
+- round6 ldb look: a row's left click opens and its right click opens the row menu, as the classic rows do
+- round6 ldb look: the window's weapon filter and sort reach both styles
+- round6 ldb look: past its Height the body scrolls, by the wheel and by the skin's scroll bar
+- round6 ldb look: the row menu draws above the tooltip in both styles, and goes back as it hides
+- round6 ldb look: the classic-only rows are dimmed in the Main window style, width and height in Classic
+- round6 ldb look: schemaVersion 8 keeps every stored profile on Classic; a fresh install and profile start on it new
 
 ### test_blocks.lua (10)
 
@@ -877,7 +886,7 @@ Total.
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
-| test_round6.lua | 22 |
+| test_round6.lua | 31 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -908,4 +917,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **646** |
+| **Total** | **655** |

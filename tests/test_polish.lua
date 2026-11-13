@@ -90,6 +90,7 @@ test("broker: the leave poll hides GameTooltip only while the feed still owns it
     rawset(tip, "IsMouseOver", function() return false end)
     cell.IsMouseOver = function() return false end
     M.__fireTimers()
+    NS.SetByPath("tooltips.ldb.style", "classic")   -- round 6: the Classic style draws on GameTooltip
     NS.SetByPath("broker.tooltip.skin", false)   -- the plain tooltip is the shared GameTooltip
 
     B.OnEnter(cell)
@@ -112,6 +113,7 @@ test("broker: the leave poll hides GameTooltip only while the feed still owns it
     rawset(tip, "IsMouseOver", savedOver)
     tip:Hide()
     NS.SetByPath("broker.tooltip.skin", NS.defaults.profile.broker.tooltip.skin)
+    NS.SetByPath("tooltips.ldb.style", NS.defaults.profile.tooltips.ldb.style)
 end)
 
 -- ---------------------------------------------------------------------------------------------

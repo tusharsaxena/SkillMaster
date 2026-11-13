@@ -163,6 +163,8 @@ modules\Template.lua
 # T4.1 / FB-12: the one broker data feed; creates its LibDataBroker object and bus target at FILE SCOPE
 # (after core\Bus.lua, core\PoolSetup.lua and the # Libraries block); reads NS.StatData.GROUPS at call time.
 modules\Broker.lua
+# R6-10: the LDB tooltip in the main window's style; reads NS.Broker, NS.Blocks, NS.Rows and NS.Journal at CALL time.
+modules\BrokerPanel.lua
 # T5.2: test mode's data swap; builds its models through SkillData, StatData and Bonuses at CALL time.
 modules\Preview.lua
 # T5.2: the simulator. LOAD-BEARING: after every module whose handler it delivers to and after
