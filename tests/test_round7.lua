@@ -187,6 +187,39 @@ test("round7 titles: the two feeds' tooltips read Skill Master · Professions an
     assertEqual(Br.StatsObject().label, "Skill Master Stats")
 end)
 
+-- R7 review: the longer title must not draw over the gains text in the Main window style.
+test("round7 titles: the panel's title never overlaps its gains text, centered while it fits", function()
+    local p = NS.db.profile.tooltips.ldb
+    local savedStyle, savedWidth = p.style, p.width
+    p.style = "window"
+    local f = NS.BrokerPanel.Frame()
+    local tw, gw = 0, 0
+    f.title.GetStringWidth = function() return tw end
+    f.gains.GetStringWidth = function() return gw end
+    local function anchors(fs)
+        local out = {}
+        for i = 1, #fs.__points do out[#out + 1] = fs.__points[i][1] end
+        return table.concat(out, ",")
+    end
+    -- Width 300 (the minimum): the 235 px title and the 85 px gains cannot both fit centered.
+    p.width = 300
+    tw, gw = 235, 85
+    NS.BrokerPanel.Fill()
+    assertEqual(anchors(f.title), "TOPLEFT,RIGHT", "bound from the left edge to the gains text")
+    local _, rel, relPoint = f.title:GetPoint(2)
+    assertTrue(rel == f.gains and relPoint == "LEFT", "the title's right edge stops at the gains text")
+    assertEqual(f.title.__justifyH, "LEFT")
+    assertFalse(f.title.__wordWrap, "one line: a title too long for its room truncates")
+    -- A wide panel: the title centered over the frame, as the main window's.
+    p.width = 600
+    NS.BrokerPanel.Fill()
+    assertEqual(anchors(f.title), "TOP", "centered while it clears the gains text")
+    assertEqual(f.title.__justifyH, "CENTER")
+    p.style, p.width = savedStyle, savedWidth
+    f.title.GetStringWidth, f.gains.GetStringWidth = nil, nil
+    NS.Broker.HideTooltip()
+end)
+
 -- ── R7-4: the LDB panel's scroll bar is always drawn ─────────────────────────────────────────
 
 local function sameRGB(got, r, g, b)

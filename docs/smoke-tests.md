@@ -270,7 +270,10 @@ the checks below that cover each item:
 - **SM-DISP-49** (round 7, R7-5) Hover the Skill Master feed, then the Skill Master Stats feed, in each
   Tooltip style: the titles read `Skill Master · Professions and Skills` and `Skill Master · Stats`
   (a middle dot). The broker display still shows both feeds where you had placed them (their names
-  are unchanged) and their texts as before.
+  are unchanged) and their texts as before. In the Main window style, set Tooltips > LDB tooltip >
+  Width (px) to 300 and hover each feed: the title never draws over the `+N this session` text at the
+  top right (it moves to the left edge and truncates with an ellipsis if it must); back at 600 it is
+  centered again (the round 7 review).
 - **SM-DISP-50** (round 7, R7-4) Tooltip style Main window, the default Height: hover either feed
   when everything fits: the scroll bar is drawn at the right, disabled (one dim thumb the whole
   height; dragging does nothing), and no empty gutter shows. Set Tooltips > LDB tooltip > Height to

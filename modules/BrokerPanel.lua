@@ -58,6 +58,32 @@ function P.Width() return P.ContentWidth() + 4 + SCROLL_GUTTER end
 --- The tallest the tooltip grows; past it, the body scrolls.
 function P.MaxHeight() return tonumber(settings().height) or 560 end
 
+-- The least gap between the title and the gains text in the title band.
+local TITLE_GAP = 8
+
+local function textWidth(fs)
+    local w = fs:GetStringWidth()
+    if (type(issecretvalue) == "function" and issecretvalue(w)) or type(w) ~= "number" then return nil end
+    return w
+end
+
+--- Lay the title in the band: centered over the frame, as the main window's, while it clears the
+--- gains text at the top right; else from the left inset to the gains text's left edge, one line,
+--- truncated if even that is too narrow (round 7 review: the feeds' longer titles at Width 300).
+local function layTitle()
+    local title, gains = frame.title, frame.gains
+    local tw, gw = textWidth(title), textWidth(gains)
+    title:ClearAllPoints()
+    if tw and gw and (P.Width() + tw) / 2 <= P.Width() - PAD - gw - TITLE_GAP then
+        title:SetPoint("TOP", frame, "TOP", 0, -7)
+        title:SetJustifyH("CENTER")
+    else
+        title:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -7)
+        title:SetPoint("RIGHT", gains, "LEFT", -TITLE_GAP, 0)
+        title:SetJustifyH("LEFT")
+    end
+end
+
 local function textHeight(fs)
     local h = fs:GetStringHeight()
     if (type(issecretvalue) == "function" and issecretvalue(h)) or type(h) ~= "number" or h <= 0 then
@@ -221,7 +247,7 @@ local function build()
     frame:EnableMouse(true)
     frame:SetSize(P.Width(), TITLE_H * 3)
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    frame.title:SetPoint("TOP", frame, "TOP", 0, -7)
+    frame.title:SetWordWrap(false)   -- one line; P.Fill bounds it clear of the gains text
     frame.gains = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.gains:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -9)
     -- No onEnd: the library's strip menu opens at its own FULLSCREEN_DIALOG strata, under this
@@ -348,6 +374,7 @@ function P.Fill()
     S.Text(frame.title, "title")
     frame.gains:SetText(gains)
     S.Text(frame.gains, "muted")
+    layTitle()
     S.Text(frame.empty, "muted")
     if frame.strip then frame.strip:SetShown(NS.IsTestMode()) end
     frame.footer:SetText(NS.Broker.FooterText())
