@@ -999,7 +999,8 @@ test("round6 stats feed: schemaVersion 9 drops a stored Stats section switch, th
     local sections = sv.profiles["R6-Stats"].broker.tooltip.sections
     assertTrue(sections.stats == nil, "the old switch goes")
     assertEqual(sections.weapon, false, "the rest is kept")
-    assertTrue(next(sv.profiles["R6-Fresh9"]) == nil, "a fresh profile passes through")
+    -- Step 9 alone: a later step (12, R7-2) writes an existing profile's icon default.
+    assertTrue(sv.profiles["R6-Fresh9"].broker == nil, "a fresh profile passes step 9 through")
     sv.profiles["R6-Stats"], sv.profiles["R6-Fresh9"] = nil, nil
 end)
 

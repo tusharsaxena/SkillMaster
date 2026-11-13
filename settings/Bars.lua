@@ -177,7 +177,8 @@ add(rows, {
 -- Icons (feedback round 2): the rows' in-game icons in the window and the detached blocks. The
 -- border is the composed block (options-ui-§16) on the icon family (fromSkin = "icon": its style and
 -- thickness follow the skin's icon border while the companion is on); its color is the row's own
--- by default (Use the row's color), else the skin's, else the swatch.
+-- while Use the row's color is on (off on a new profile, round 7, R7-2), else the skin's, else the
+-- swatch.
 local ICON = L["Icon"]
 add(rows, {
     row({ path = "icons.show", group = ICONS, subgroup = ICON, type = "bool", default = PI.show,

@@ -1,5 +1,6 @@
 -- tests/test_round7.lua — the owner's round-7 feedback (2026-11-13): TomTom support removed, the
--- native pin and Skill Master's own arrow always (R7-7).
+-- native pin and Skill Master's own arrow always (R7-7); the icon border's row color off on a new
+-- profile (R7-2).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -100,4 +101,43 @@ test("round7 no TomTom: schemaVersion 11 folds a stored tomtom or native method 
     assertEqual(sv.profiles["R7-Chat"].waypoints.method, "chat", "Chat only is a choice and stays")
     assertTrue(sv.profiles["R7-None"].waypoints == nil, "a profile without one passes through")
     for _, k in ipairs({ "R7-TomTom", "R7-Native", "R7-Chat", "R7-None" }) do sv.profiles[k] = nil end
+end)
+
+-- ── R7-2: the icon border's row color, off on a new profile ──────────────────────────────────
+
+test("round7 icon border: Use the row's color is off on a new profile, so the skin's icon border draws", function()
+    assertEqual(NS.defaults.profile.icons.borderColorFromRow, false, "the default is off")
+    assertEqual(NS.FindSchemaRow("icons.borderColorFromRow").default, false, "the row's default too")
+    local saved = NS.db.profile.icons
+    NS.db.profile.icons = setmetatable({}, { __index = NS.defaults.profile.icons })
+    local rowColor = { 0.1, 0.9, 0.1, 1 }
+    local st = NS.Rows.IconStyle(rowColor, 20)
+    NS.db.profile.icons = saved
+    assertTrue(st.border ~= rowColor, "not the row's color on a new profile")
+    local r, g, b = NS.Skin.Color("icon.border")
+    if r then
+        assertTrue(math.abs(st.border[1] - r) < 1e-6 and math.abs(st.border[2] - g) < 1e-6
+            and math.abs(st.border[3] - b) < 1e-6, "the skin's icon border")
+    end
+end)
+
+test("round7 icon border: schemaVersion 12 keeps the row's color on every profile stored before", function()
+    local sv = rawget(_G, "SkillMasterDB")
+    sv.profiles = sv.profiles or {}
+    sv.profiles["R7-Old"] = { bars = { height = 15 } }
+    sv.profiles["R7-Off"] = { icons = { borderColorFromRow = false } }
+    sv.profiles["R7-Empty"] = {}
+    NS.db.global.schemaVersion = 11
+    NS:RunMigrations()
+    assertEqual(NS.db.global.schemaVersion, NS.SCHEMA_VERSION)
+    assertTrue(NS.SCHEMA_VERSION >= 12, "step 12 is in the ladder")
+    assertEqual(sv.profiles["R7-Old"].icons.borderColorFromRow, true, "an existing profile keeps the old default")
+    assertEqual(sv.profiles["R7-Off"].icons.borderColorFromRow, false, "a stored choice stays")
+    assertEqual(sv.profiles["R7-Empty"].icons.borderColorFromRow, true, "an empty stored profile is an existing one")
+    -- A fresh install: no stamp was ever stored, so its profiles start on the new default.
+    sv.profiles["R7-New"] = { bars = { height = 15 } }
+    NS.db.global.schemaVersion = 0
+    NS:RunMigrations()
+    assertTrue(sv.profiles["R7-New"].icons == nil, "a fresh install starts with the row's color off")
+    for _, k in ipairs({ "R7-Old", "R7-Off", "R7-Empty", "R7-New" }) do sv.profiles[k] = nil end
 end)

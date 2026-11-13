@@ -84,6 +84,8 @@ NS.defaults = {
         -- composed border. Its color is the row's own (the meaning color FB-14 chose, so it takes no
         -- skin companion, options-ui-§17) while borderColorFromRow is on; off, the skin's icon border
         -- while borderColorFromSkin is on, else the swatch through its class companion.
+        -- borderColorFromRow is off on a new profile (round 7, R7-2); schemaVersion 12 kept the old
+        -- true on every profile stored before.
         icons = {
             show                = true,
             size                = 16,
@@ -94,7 +96,7 @@ NS.defaults = {
             borderColor         = { 0.24, 0.22, 0.20, 1 },
             useClassColorBorder = false,
             borderStyleFromSkin = true,
-            borderColorFromRow  = true,
+            borderColorFromRow  = false,
             borderColorFromSkin = true,
         },
         bars = {

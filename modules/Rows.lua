@@ -116,7 +116,7 @@ local function icons() return (NS.db and NS.db.profile.icons) or NS.defaults.pro
 --- the row's own fill color, the border's color while Use the row's color is on.
 --- The icon border's color: the row's own, else the skin's icon border, else the swatch.
 local function iconBorderColor(p, rowColor)
-    if p.borderColorFromRow ~= false then return rowColor end
+    if p.borderColorFromRow == true then return rowColor end
     local S = NS.Skin
     if p.borderColorFromSkin ~= false and S.Color("icon.border") then return { S.Color("icon.border") } end
     return NS.Bar.WithClass(p.borderColor, p.useClassColorBorder)

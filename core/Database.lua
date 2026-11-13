@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 11
+NS.SCHEMA_VERSION = 12
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -140,6 +140,18 @@ local function waypointMethodFolded(_, profile)
     if type(w) == "table" and RETIRED_METHOD[rawget(w, "method")] then w.method = nil end
 end
 
+--- 11 -> 12 (owner feedback round 7, R7-2): Bars > Icons' Use the row's color
+--- (`icons.borderColorFromRow`, true -> false) defaults off for new profiles. AceDB stripped the old
+--- default true, so a profile stored before holds no value and would lose the row's color on
+--- upgrade: it is written the old true, an empty stored profile included (as step 8). A stored value
+--- is the player's choice and stays. A fresh install (`from` 0) passes through.
+local function iconRowColorKept(_, profile, from)
+    if (from or 0) == 0 or type(profile) ~= "table" then return end
+    if type(profile.icons) ~= "table" then profile.icons = {} end
+    -- rawget: the active profile may already wear AceDB's defaults, whose false is no choice.
+    if rawget(profile.icons, "borderColorFromRow") == nil then profile.icons.borderColorFromRow = true end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
 -- is the stamp the run started at (0 on a fresh install).
@@ -155,6 +167,7 @@ local STEPS = {
     { to = 9, run = statsSectionRetired, perProfile = true },
     { to = 10, run = statsCollapseKept, perProfile = true },
     { to = 11, run = waypointMethodFolded, perProfile = true },
+    { to = 12, run = iconRowColorKept, perProfile = true },
 }
 
 function NS:InitDB()

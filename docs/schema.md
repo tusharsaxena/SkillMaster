@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (11)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (12)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "PvP-Traxex Silentshot" (forever-quirks-§4);
@@ -71,7 +71,9 @@ SkillMasterDB
       show = true, size = 16, zoom = 7,   -- zoom: the % cropped from each side of the art
       border = true, borderStyle = "Solid", borderSize = 1, borderColor, useClassColorBorder,
       borderStyleFromSkin = true,         -- the style and thickness follow the skin's icon border
-      borderColorFromRow = true,          -- the row's own color (a meaning color: no skin companion)
+      borderColorFromRow = false,         -- the row's own color (a meaning color: no skin companion);
+                                          -- off on a new profile (R7-2), schemaVersion 12 kept the
+                                          -- old true on every profile stored before
       borderColorFromSkin = true,         -- off the row's: the skin's icon border, else the swatch
     }
     bars = {                     -- the Bars page (T5.1); defaults/Profile.lua comments each key
@@ -195,6 +197,7 @@ LibDBIcon's own.
 | 8 → 9 | `statsSectionRetired`, per profile | the stat blocks moved to their own feed, Skill Master Stats (round 6, R6-9), with a switch per stat block (`broker.tooltip.sections.stats_*`, new keys defaulting on): a stored `broker.tooltip.sections.stats` goes; nothing carries over |
 | 9 → 10 | `statsCollapseKept`, per profile | Spell and Defense default to expanded on a new profile (round 6, R6-8; added by the round's review): a profile stored before R6-8 (the run starts at stamp 1 to 6) gets `layout.blocks.stats_spell.collapsed` and `stats_defense.collapsed = true`, the old default AceDB stripped, where none is stored; a stored value stays; a fresh install and a build already on the new default (stamp 7 or later) pass through |
 | 10 → 11 | `waypointMethodFolded`, per profile | no TomTom (round 7, R7-7): `waypoints.method` keeps `"auto"` (the map pin, else chat) and `"chat"`; a stored `"tomtom"` or `"native"` meant the map pin once TomTom is gone, so it goes and the default `"auto"` answers; `"chat"` stays |
+| 11 → 12 | `iconRowColorKept`, per profile | Bars > Icons' Use the row's color (`icons.borderColorFromRow`) defaults off on a new profile (round 7, R7-2): every profile an earlier install stored gets the old `true`, which AceDB stripped, where none is stored, an empty stored profile included (as step 8); a stored value stays; only a fresh install (stamp 0) passes through |
 
 No step for the waypoint arrow's keys (round 6, R6-11): `waypoints.arrow`, `waypoints.arrowScale` and
 `waypoints.arrowFrame` are new keys and nothing stored reshapes, so the defaults answer on every

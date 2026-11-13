@@ -294,6 +294,9 @@ the checks below that cover each item:
 - **SM-OPT-15** (round 2) Bars > Icons: Icon size 24 (capped at the row's height), Icon zoom 20 (the
   art fills the well), Border thickness 2; untick Use the row's color and Use the skin's color and
   pick a swatch: every icon takes it. Untick Show icons: the names move left into the icons' place.
+- **SM-OPT-22** (round 7, R7-2) Make a new profile: Bars > Icons > Use the row's color is unticked and
+  the icons are edged in the skin's icon border. A profile from before this build still has it ticked
+  (its icons edged in their rows' colors) unless you had unticked it.
 - **SM-OPT-14** (round 2; the Rows page since round 5) Rows: one boxed row per skill, its
   icon and name, the eyes on the right; click the Window eye: the row dims and the skill leaves the window,
   click again to bring it back. Layout > Block order: the same boxes, a three-line handle on the

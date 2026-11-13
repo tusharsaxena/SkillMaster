@@ -84,7 +84,7 @@ end)
 test("round2 icons: the Icons tab's rows, their defaults the old fixed look", function()
     local P = NS.defaults.profile.icons
     assertTrue(P.show and P.size == 16 and P.zoom == 7 and P.border and P.borderSize == 1, "16 px, 7 % crop, 1 px edge")
-    assertTrue(P.borderColorFromRow, "edged in the row's own color by default")
+    assertEqual(P.borderColorFromRow, false, "the row's own color is off on a new profile (round 7, R7-2)")
     for _, path in ipairs({ "icons.show", "icons.size", "icons.zoom", "icons.border", "icons.borderStyle",
                             "icons.borderSize", "icons.borderColor", "icons.borderColorFromRow",
                             "icons.borderColorFromSkin", "icons.borderStyleFromSkin" }) do
@@ -96,6 +96,7 @@ end)
 
 test("round2 icons: size, zoom, border and its color reach the drawn icon; off hides it", function()
     withWorld(function()
+        set("icons.borderColorFromRow", true)
         local row = windowRow("leatherworking")
         local st = R.IconStyle(R.FillColor(row.entry), 20)
         assertEqual(st.size, 16)
