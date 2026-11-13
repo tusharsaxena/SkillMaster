@@ -49,7 +49,11 @@ SkillMasterDB
         borderFromSkin = true,
         titleBand = "always",    -- "always" | "hover" | "never"
       },
-      blocks.<id> = { shown = true, docked = true, order = n, collapsed, scale = 1, locked = false,
+      blocks.<id> = { shown = true, docked = true, order = n, collapsed = false, scale = 1, locked = false,
+                      -- collapsed: false for every block (round 6, R6-8: Spell and Defense were true);
+                      -- a default change only, no schemaVersion step: a profile that stored a value
+                      -- keeps it, and one that never toggled them (AceDB stores no default) reads
+                      -- the new default, expanded
                       point = false,    -- point: drag-only, written only by modules/Detached.lua
                       sort = "name" }   -- "name" | "value" | "valueAsc" | "progress" (round 3)
       blocks.weapon.belowCapOnly = false   -- the detached compact preset's filter (M5 polish)

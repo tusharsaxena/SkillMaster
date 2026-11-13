@@ -130,7 +130,7 @@ local function withDetached(fn)
         layout.blocks[id].docked, layout.blocks[id].collapsed, layout.blocks[id].point = true, false, false
         layout.blocks[id].locked = nil
     end
-    layout.blocks.stats_spell.collapsed, layout.blocks.stats_defense.collapsed = true, true
+    layout.blocks.stats_spell.collapsed, layout.blocks.stats_defense.collapsed = false, false
     M.InCombatLockdown = function() return false end
     D.Refresh()
     NS.Preview.Apply(false)

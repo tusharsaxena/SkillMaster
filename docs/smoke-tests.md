@@ -46,8 +46,8 @@ the checks below that cover each item:
 
 ## Display (M3)
 
-- **SM-DISP-1** Open the window: Primary, Secondary, Weapon and Other blocks, then the stat blocks
-  (Spell and Defense collapsed). Bars fill rank / max; profession bars show ticks at 75 / 150 / 225.
+- **SM-DISP-1** Open the window: Primary, Secondary, Weapon and Other blocks, then the stat blocks,
+  every one expanded on a new profile (round 6, R6-8). Bars fill rank / max; profession bars show ticks at 75 / 150 / 225.
 - **SM-DISP-2** Put on a fishing lure: the Fishing bar gains a teal segment, the text reads
   `rank +N / max`, a timer counts down beside it and the segment goes when the lure runs out. A
   Dwarf's Guns shows a blue (permanent) +5 segment that stops at the bar's end.
@@ -128,6 +128,9 @@ the checks below that cover each item:
 - **SM-DISP-34** (round 6, R6-5) Pop Weapon Skills out and merge it with another detached block: the
   band's sort mark and each sub-header's sort mark open the same menu, the current order ticked; a
   pick there reorders the main window's block too. Click the mark again with the menu open: it closes.
+- **SM-DISP-35** (round 6, R6-8) Create a new profile (Profiles > New) and switch to it: every block,
+  Spell and Defense included, is expanded in the window and in the LDB tooltip. Switch back to an
+  existing profile: a block you had collapsed there (by a click) stays collapsed.
 - **SM-DISP-22** (round 3) Collapse every block: the window keeps its height and its rows area goes
   empty. Layout > Shrink to fit the rows on: the window shrinks to its headers. The lock mark stands
   at the top right with the journal, settings, Expand / Collapse all and close marks; nothing left of

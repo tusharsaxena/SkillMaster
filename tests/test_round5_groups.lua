@@ -112,7 +112,7 @@ local function withMerged(fn)
     for _, id in ipairs(NS.BLOCKS) do
         layout.blocks[id].docked, layout.blocks[id].collapsed, layout.blocks[id].point = true, false, false
     end
-    layout.blocks.stats_spell.collapsed, layout.blocks.stats_defense.collapsed = true, true
+    layout.blocks.stats_spell.collapsed, layout.blocks.stats_defense.collapsed = false, false
     M.InCombatLockdown = function() return false end
     D.Refresh()
     NS.Preview.Apply(false)

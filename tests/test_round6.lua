@@ -389,3 +389,11 @@ test("round6 sort menu: the sort mark opens a menu of every order on the header,
     M.__fireTimers()
     if not ok then error(err, 0) end
 end)
+
+-- ── R6-8: every block expanded on a new profile ──────────────────────────────────────────────
+
+test("round6 expanded: a new profile has every block expanded, in the window and the LDB tooltip", function()
+    for _, id in ipairs(NS.BLOCKS) do
+        assertEqual(NS.defaults.profile.layout.blocks[id].collapsed, false, id .. " expanded by default")
+    end
+end)
