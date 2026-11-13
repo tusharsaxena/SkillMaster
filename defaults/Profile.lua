@@ -120,7 +120,12 @@ NS.defaults = {
             -- each tier a darker shade of the category's color (modules/Bar.lua Bar.TierShade). The
             -- tier ticks it replaced are gone (feedback round 2; schemaVersion 4 drops `ticks`).
             tierColors    = false,
-            markers       = true,        -- a stat's threshold markers (hit cap, resist cap)
+            -- A stat's threshold markers (hit cap, resist cap), one switch per surface (owner feedback
+            -- round 6, R6-4): off on the window's bars (the detached and merged windows', the LDB
+            -- tooltip's and the journal's too), on in the row tooltip's bar and lines. schemaVersion 7
+            -- carried a stored `markers = false` to both.
+            markersWindow  = false,
+            markersTooltip = true,
             timer         = true,        -- the temporary bonus's time left beside the bar
             colorMode     = "category",  -- "category" | "progress" | "likelihood" | "flat"
             -- T5.1 the composed blocks (options-ui-§16): the fill (the flat color mode's color),

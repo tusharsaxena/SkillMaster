@@ -56,7 +56,7 @@ the checks below that cover each item:
   its dock control puts it back in its old place.
 - **SM-DISP-4** Hover a row: the tooltip shows the numbers, the bar, the bonuses (a lure with its
   time left), the next rank and trainer, a weapon's cap gap, Skinning's mob level, the gathering
-  nodes and, for Fishing, the zone's need. Hover a stat: its markers and scale.
+  nodes and, for Fishing, the zone's need. Hover a stat: its markers (on its bar and as lines) and scale.
 - **SM-DISP-5** Click Leatherworking (or any craft, Cooking, First Aid, Mining's Smelting): its
   window opens. Click Skinning or Fishing: its own window (Camping) opens. Click a weapon, Defense or
   Riding: Character → Skills, with that skill selected (`/sm debug` logs `[Click] Skills tab for <key>:
@@ -128,6 +128,12 @@ the checks below that cover each item:
 - **SM-DISP-34** (round 6, R6-5) Pop Weapon Skills out and merge it with another detached block: the
   band's sort mark and each sub-header's sort mark open the same menu, the current order ticked; a
   pick there reorders the main window's block too. Click the mark again with the menu open: it closes.
+- **SM-DISP-36** (round 6, R6-4) On a new profile, Melee Hit's bar in the main window carries no
+  threshold mark and the footer legend shows no "threshold" entry; hover the row: the tooltip's bar
+  carries the marks and lists them. Bars > Marks > Thresholds in the window on: the marks show on the
+  window's, a detached block's and a merged window's bars and the legend gains "threshold".
+  Thresholds in the row tooltip off: the tooltip's bar and lines lose them. An old profile that had
+  Threshold markers off has both new switches off after the update.
 - **SM-DISP-35** (round 6, R6-8) Create a new profile (Profiles > New) and switch to it: every block,
   Spell and Defense included, is expanded in the window and in the LDB tooltip. Switch back to an
   existing profile: a block you had collapsed there (by a click) stays collapsed.

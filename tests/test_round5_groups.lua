@@ -550,7 +550,7 @@ test("round5 groups: schemaVersion 6 normalizes a stored layout.groups and drops
     NS.db.global.schemaVersion = 5
     NS:RunMigrations()
     assertEqual(NS.db.global.schemaVersion, NS.SCHEMA_VERSION, "the runner reaches the newest step")
-    assertEqual(NS.SCHEMA_VERSION, 6)
+    assertTrue(NS.SCHEMA_VERSION >= 6, "step 6 is in the ladder")
     local g = sv.profiles["Round5-Groups"].layout.groups
     assertEqual(cols(g.g1), "primary | secondary", "the docked weapon block dropped")
     assertTrue(g.g2 == nil, "a group of a docked block alone gone")

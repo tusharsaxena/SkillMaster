@@ -72,7 +72,8 @@ test("bar: Rank tier colors draw a tiered bar to its last tier, its fill one seg
 end)
 
 test("bar: markers keep the end and drop what is past it", function()
-    local bar = fresh()
+    -- The row tooltip's bar: thresholds on by default there (the window's are off, R6-4).
+    local bar = fresh("tooltip")
     bar:SetValues{ value = 22, max = 100, markers = { { at = 55.6, label = "5%" }, { at = 100, label = "9%" },
                                                        { at = 120, label = "past" } } }
     assertEqual(#bar.geom.markers, 2)

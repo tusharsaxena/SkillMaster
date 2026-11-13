@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 6
+NS.SCHEMA_VERSION = 7
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -74,6 +74,17 @@ local function groupsNormalized(_, profile)
     end)
 end
 
+--- 6 -> 7 (owner feedback round 6, R6-4): the one Threshold markers switch becomes two, the window's
+--- (`bars.markersWindow`, default off) and the row tooltip's (`bars.markersTooltip`, default on). A
+--- stored `bars.markers = false` is the player's choice (AceDB strips the old default true), so it
+--- carries to both; any other stored value goes and the new defaults answer.
+local function markersSplit(_, profile)
+    local bars = type(profile) == "table" and profile.bars
+    if type(bars) ~= "table" or bars.markers == nil then return end
+    if bars.markers == false then bars.markersWindow, bars.markersTooltip = false, false end
+    bars.markers = nil
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile.
 local STEPS = {
@@ -83,6 +94,7 @@ local STEPS = {
     { to = 4, run = retiredBarKeys, perProfile = true },
     { to = 5, run = journalFilterToBlock, perProfile = true },
     { to = 6, run = groupsNormalized, perProfile = true },
+    { to = 7, run = markersSplit, perProfile = true },
 }
 
 function NS:InitDB()

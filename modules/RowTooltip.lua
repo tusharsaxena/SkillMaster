@@ -175,7 +175,8 @@ local function statLines(e)
     line(out, e.label, e.display, "heading", "body")
     out[#out + 1] = { bar = true }
     local pct = tostring(e.display or ""):find("%%") and "%" or ""
-    for _, m in ipairs(e.markers or {}) do
+    -- The threshold lines follow Bars > Marks > Thresholds in the row tooltip, as its bar does (R6-4).
+    for _, m in ipairs(Bar.ShowMarkers("tooltip") and e.markers or {}) do
         line(out, ("\194\183 %s%s %s"):format(tostring(m.value or ""), pct, m.label or ""), nil, "muted")
     end
     if e.ref then line(out, L["Scale: vs %s"]:format(tostring(e.ref) .. pct), nil, "muted") end

@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (6)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (7)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "PvP-Traxex Silentshot" (forever-quirks-§4);
@@ -80,7 +80,11 @@ SkillMasterDB
       fontSize, textAnchor,
       fillDirection = "LEFT",    -- "LEFT" (left to right) | "RIGHT" (right to left)
       rowDisplay = "both",       -- Rows show, skill and stat rows alike: "both" | "bar" | "text"
-      textTemplate = "{rank} {bonus} / {max}", markers, timer, colorMode,
+      textTemplate = "{rank} {bonus} / {max}", timer, colorMode,
+      markersWindow = false,     -- a stat's thresholds on the window's bars (detached, merged, LDB
+                                 -- tooltip and journal too); round 6, R6-4
+      markersTooltip = true,     -- the row tooltip's bar and threshold lines (schemaVersion 7 split
+                                 -- the one `markers` switch into these two)
       spark = false,             -- off by default (feedback round 2)
       tierColors = false,        -- Rank tier colors (Color mode By category only): a profession's fill
                                  -- per tier on a scale to 300, each tier a darker shade of the category
@@ -168,6 +172,7 @@ LibDBIcon's own.
 | 3 → 4 | `retiredBarKeys`, per profile | drops a stored `bars.compactHeight` (a detached block takes the main window's heights) and `bars.ticks` (replaced by Rank tier colors); nothing carries over |
 | 4 → 5 | `journalFilterToBlock`, per profile | the Alts sub-tabs became the main window's blocks (FB-33): a stored `journal.filter` of `"professions"` becomes `"primary"`, `"weapons"` becomes `"weapon"`; `"other"` stays |
 | 5 → 6 | `groupsNormalized`, per profile | merged detached windows (round 5, R5-6), `layout.groups`, a new key defaulting to `{}`: nothing carries over; a stored `layout.groups` that is not a table goes, a stored one is normalized against the profile's own blocks (a member that is not a detached block there, a repeat, an empty column and a group of fewer than two go); a profile with none passes through |
+| 6 → 7 | `markersSplit`, per profile | thresholds split per surface (round 6, R6-4): a stored `bars.markers = false` carries to both `bars.markersWindow` and `bars.markersTooltip`; any stored `bars.markers` goes, and otherwise the new defaults answer (window off, row tooltip on) |
 
 No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
 companion defaulting on, so no stored profile predates the companions and none has to be moved

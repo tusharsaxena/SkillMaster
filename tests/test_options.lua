@@ -166,11 +166,14 @@ test("options: the bar text template and the timer and marker switches reach the
     bar:SetTimer(M.GetTime() + 60)
     assertFalse(bar.timer:IsShown(), "no timer while the switch is off")
     NS.SetByPath("bars.timer", true)
-    NS.SetByPath("bars.markers", false)
+    NS.SetByPath("bars.markersWindow", true)
+    bar:ApplyStyle(NS.Bar.ResolveStyle("row"))
+    bar:SetValues{ value = 50, max = 100, markers = { { at = 9, label = "cap" } } }
+    assertEqual(#bar.geom.markers, 1, "a marker while the window switch is on")
+    NS.SetByPath("bars.markersWindow", false)
     bar:ApplyStyle(NS.Bar.ResolveStyle("row"))
     bar:SetValues{ value = 50, max = 100, markers = { { at = 9, label = "cap" } } }
     assertEqual(#bar.geom.markers, 0, "no markers while the switch is off")
-    NS.SetByPath("bars.markers", true)
 end)
 
 test("options: the flat color mode draws the Bar color, or the skin's while its companion is on", function()
@@ -232,7 +235,9 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- Round 5 (R5-10): the weapon block's Show rows filter, one hand-written row in both counts.
     -- Round 5 (R5-11..R5-13): the Rows page took every Hide row and the four whole-set rows over from
     -- the Skills, Stats and Broker pages one for one, same paths: neither count moves (delta 0).
-    assertEqual(full, 330, "the full schema (round 5: the Detached windows tab's twelve rows, the weapon filter)")
-    assertEqual(degraded, 277, "the library-absent schema")
+    -- Round 6 (R6-4): Bars > Marks' Threshold markers split into a window and a row-tooltip switch,
+    -- hand-written: +1 in both counts, the delta unmoved.
+    assertEqual(full, 331, "the full schema (round 6: the thresholds' two switches)")
+    assertEqual(degraded, 278, "the library-absent schema")
     assertEqual(full - degraded, 53, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3) and the detached background and border (9)")
 end)

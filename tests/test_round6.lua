@@ -397,3 +397,90 @@ test("round6 expanded: a new profile has every block expanded, in the window and
         assertEqual(NS.defaults.profile.layout.blocks[id].collapsed, false, id .. " expanded by default")
     end
 end)
+
+-- ── R6-4: thresholds off in the window, on in the row tooltip ────────────────────────────────
+
+local function schemaRow(path)
+    for _, r in ipairs(NS.Schema) do if r.path == path then return r end end
+end
+
+test("round6 thresholds: two switches, off in the window and on in the row tooltip, on the Bars page", function()
+    local P = NS.defaults.profile.bars
+    assertEqual(P.markersWindow, false, "the window's default")
+    assertEqual(P.markersTooltip, true, "the row tooltip's default")
+    assertTrue(P.markers == nil and schemaRow("bars.markers") == nil, "the one old switch is gone")
+    for path, def in pairs({ ["bars.markersWindow"] = false, ["bars.markersTooltip"] = true }) do
+        local r = schemaRow(path)
+        assertTrue(r ~= nil, path .. " has a row")
+        assertEqual(r.page, "bars", path .. " on the Bars page, where the old switch was")
+        assertEqual(r.group, NS.L["Marks"], path .. " under Marks")
+        assertEqual(r.default, def, path .. "'s row default agrees")
+    end
+end)
+
+test("round6 thresholds: the tooltip bar follows its own switch, every other bar the window's", function()
+    local Bar = NS.Bar
+    NS.Helpers.RestoreDefaults("bars")
+    for _, k in ipairs({ "row", "compact", "mini" }) do
+        assertFalse(Bar.ResolveStyle(k).showMarkers, k .. ": off by default")
+    end
+    assertTrue(Bar.ResolveStyle("tooltip").showMarkers, "the row tooltip's bar: on by default")
+    NS.SetByPath("bars.markersWindow", true)
+    NS.SetByPath("bars.markersTooltip", false)
+    for _, k in ipairs({ "row", "compact", "mini" }) do
+        assertTrue(Bar.ResolveStyle(k).showMarkers, k .. ": the window switch on")
+    end
+    assertFalse(Bar.ResolveStyle("tooltip").showMarkers, "the row tooltip's switch off")
+    NS.Helpers.RestoreDefaults("bars")
+end)
+
+test("round6 thresholds: the row tooltip lists the thresholds only while its switch is on", function()
+    local e = { key = "hit", label = "Hit", display = "2.0%", pct = 22.2, ref = 9,
+                markers = { { at = 55.6, value = 5, label = "vs same level" } } }
+    local function joined()
+        local t = {}
+        for _, l in ipairs(NS.RowTooltip.Lines(e, "stat")) do t[#t + 1] = l.left or "" end
+        return table.concat(t, "\n")
+    end
+    assertTrue(joined():find("vs same level", 1, true) ~= nil, "listed by default")
+    NS.SetByPath("bars.markersTooltip", false)
+    assertTrue(joined():find("vs same level", 1, true) == nil, "gone with the switch off")
+    NS.Helpers.RestoreDefaults("bars")
+end)
+
+test("round6 thresholds: the window legend's threshold entry shows only with the window switch on", function()
+    NS.Helpers.RestoreDefaults("bars")
+    W.Show()
+    W.Render()
+    local lg = W.Frame().legend
+    assertFalse(lg.markerTex:IsShown(), "no threshold mark by default")
+    assertFalse(lg.markerLabel:IsShown(), "no threshold label by default")
+    NS.SetByPath("bars.markersWindow", true)
+    M.__fireTimers()
+    W.Render()
+    assertTrue(lg.markerTex:IsShown() and lg.markerLabel:IsShown(), "the entry with the switch on")
+    NS.Helpers.RestoreDefaults("bars")
+    M.__fireTimers()
+    W.Render()
+    W.Hide()
+end)
+
+test("round6 thresholds: schemaVersion 7 carries a stored false to both switches and drops the old key", function()
+    local sv = rawget(_G, "SkillMasterDB")
+    sv.profiles = sv.profiles or {}
+    sv.profiles["R6-Off"] = { bars = { markers = false, height = 21 } }
+    sv.profiles["R6-On"] = { bars = { markers = true } }
+    sv.profiles["R6-Fresh"] = {}
+    NS.db.global.schemaVersion = 6
+    NS:RunMigrations()
+    assertEqual(NS.db.global.schemaVersion, NS.SCHEMA_VERSION, "the runner reaches the newest step")
+    assertTrue(NS.SCHEMA_VERSION >= 7, "step 7 is in the ladder")
+    local off, on = sv.profiles["R6-Off"].bars, sv.profiles["R6-On"].bars
+    assertEqual(off.markersWindow, false, "off carries to the window")
+    assertEqual(off.markersTooltip, false, "off carries to the row tooltip")
+    assertTrue(off.markers == nil and on.markers == nil, "the old key goes")
+    assertEqual(off.height, 21, "the rest is kept")
+    assertTrue(on.markersWindow == nil and on.markersTooltip == nil, "the old default leaves the new defaults to answer")
+    assertTrue(next(sv.profiles["R6-Fresh"]) == nil, "a fresh profile passes through")
+    sv.profiles["R6-Off"], sv.profiles["R6-On"], sv.profiles["R6-Fresh"] = nil, nil, nil
+end)

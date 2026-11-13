@@ -165,7 +165,11 @@ end
 add(rows, {
     mark("tierColors", L["Rank tier colors"],
         L["Draw a profession's bar to 300 whatever its cap, its fill split by rank tier: Apprentice to 75 in its category's color, then Journeyman, Expert and Artisan each a shade darker. Works only while Color mode (Colors) is By category."]),
-    mark("markers", L["Threshold markers"], L["A stat's marks: the hit cap, the resist cap, crit immunity."]),
+    -- Two switches (owner feedback round 6, R6-4): thresholds off in the window, on in the row tooltip.
+    mark("markersWindow", L["Thresholds in the window"],
+        L["A stat's marks (the hit cap, the resist cap, crit immunity) on its bar in the main window, the detached and merged windows, the LDB tooltip and the journal."]),
+    mark("markersTooltip", L["Thresholds in the row tooltip"],
+        L["A stat's marks (the hit cap, the resist cap, crit immunity) on the bar and as lines in the tooltip shown when you hover a row."]),
     mark("timer", L["Expiry timer"], L["The time a temporary bonus has left, beside its bar."]),
     mark("spark", L["Spark"], L["A thin line riding the end of the fill."]),
 })

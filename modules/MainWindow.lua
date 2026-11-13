@@ -175,6 +175,10 @@ end
 
 local function paintLegend()
     local style = NS.Bar.ResolveStyle("row")
+    -- The threshold entry only while the window's bars draw thresholds (owner feedback round 6, R6-4).
+    local marks = style.showMarkers == true
+    frame.legend.markerTex:SetShown(marks)
+    frame.legend.markerLabel:SetShown(marks)
     for _, sw in ipairs(frame.legend.swatches) do
         local c = style[sw.key]
         if c then sw.tex:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
@@ -205,6 +209,7 @@ local function buildLegend()
     local marker, fs3 = legendMark(f, "marker", 2, L["threshold"])
     f.swatches = { { tex = t1, key = "bonusTemp" }, { tex = t2, key = "bonusPerm" }, marker }
     f.marks = { fs3 }
+    f.markerTex, f.markerLabel = marker.tex, fs3
     f.rule = f:CreateTexture(nil, "BORDER")
     f.rule:SetPoint("TOPLEFT", f, "TOPLEFT", 0, 0)
     f.rule:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, 0)

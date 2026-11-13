@@ -322,11 +322,11 @@ case("bars live: threshold markers hide on a stat's bar and come back", function
         if row.kind == "stat" and row.entry and #(row.entry.markers or {}) > 0 then bar = spy(row.bar) break end
     end
     assertTrue(bar ~= nil, "a stat row with a marker is on screen")
+    assertEqual(shownCount(bar.markerTextures), 0, "off in the window by default (R6-4)")
+    set("bars.markersWindow", true)
     assertTrue(shownCount(bar.markerTextures) > 0, "its marker shows")
-    set("bars.markers", false)
+    set("bars.markersWindow", false)
     assertEqual(shownCount(bar.markerTextures), 0, "no marker")
-    set("bars.markers", true)
-    assertTrue(shownCount(bar.markerTextures) > 0, "the marker is back")
 end)
 
 case("bars live: the expiry timer hides at once and comes back", function(bars)

@@ -127,6 +127,15 @@ function Bar.TooltipRowHeight(styleKey)
     return math.max(tonumber(p[k[1]]) or 14, tonumber(p[k[2]]) or 0)
 end
 
+--- Whether a `styleKey` bar draws a stat's threshold markers (owner feedback round 6, R6-4): the row
+--- tooltip's bar follows Bars > Marks > Thresholds in the row tooltip (on by default), every other
+--- bar Thresholds in the window (off by default).
+function Bar.ShowMarkers(styleKey)
+    local p = profileBars()
+    if styleKey == "tooltip" then return p.markersTooltip ~= false end
+    return p.markersWindow == true
+end
+
 --- The style one kind of bar draws with: the profile's sizes, switches, media and colors, each
 --- following the skin where its companion says so.
 function Bar.ResolveStyle(styleKey)
@@ -151,7 +160,7 @@ function Bar.ResolveStyle(styleKey)
         reverse = p.fillDirection == "RIGHT",   -- fills from the right edge (Bars > Fill direction)
         template = p.textTemplate,
         showText = styleKey ~= "mini" and styleKey ~= "tooltip",
-        showMarkers = p.markers ~= false, showTimer = p.timer ~= false,
+        showMarkers = Bar.ShowMarkers(styleKey), showTimer = p.timer ~= false,
     }
 end
 
