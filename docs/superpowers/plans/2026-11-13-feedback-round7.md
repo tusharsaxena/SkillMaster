@@ -36,12 +36,12 @@ Milestones: M1 = R7-7, R7-2, R7-3, R7-5, R7-4, R7-8; M2 = R7-1; M3 = R7-6.
 
 | Task | Status | Commit |
 |---|---|---|
-| R7-7 | done (uncommitted) | |
-| R7-2 | done (uncommitted) | |
-| R7-3 | done (uncommitted) | |
-| R7-5 | done (uncommitted) | |
-| R7-4 | done (uncommitted) | |
-| R7-8 | done (uncommitted) | |
-| R7-1 | done (uncommitted: shares files with the uncommitted M1 work, commits after it) | |
-| R7-6 | done (uncommitted: shares files with the uncommitted M1 and R7-1 work, commits after R7-1) | |
-| R7 review | done (uncommitted: the title is bounded clear of the gains text; commits after R7-6, whose files it shares) | |
+| R7-7 | done | c8c9880 |
+| R7-2 | done | 7429c68 |
+| R7-3 | done | a09958f |
+| R7-5 | done | 394a44a |
+| R7-4 | done | 6ee1d9c |
+| R7-8 | done | c459e0b |
+| R7-1 | done | e44346a |
+| R7-6 | done | 55d1523 |
+| R7 review | done: the LDB panel title bounded clear of the gains text (the requirements reviewer's one finding; the runtime reviewer found none) | 8a83ef8 |
