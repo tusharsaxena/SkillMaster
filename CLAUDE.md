@@ -37,6 +37,6 @@ profile only (also pinned in-repo by `tests/client_pin.lua`, so a bare run is Fo
 `luacheck` loads no kit, so it runs through the bounded runner (testing-§15). Never
 auto-stage/commit/push and never bump the version without an explicit instruction.
 
-Bundles [LibKa0s](https://github.com/tusharsaxena/LibKa0s) v1.99.0 (MIT).
+Bundles [LibKa0s](https://github.com/tusharsaxena/LibKa0s) v1.101.0 (MIT).
 LibKa0s icons: chevron-down, chevron-right, chevron-up, clear, close, confirm, copy, document, external-link, eye, fullscreen-enter, fullscreen-exit, info, list, lock, move, ph:funnel, ph:sign-in, ph:sort-descending, reset, segment, settings, sort-asc, sort-desc, unlock, volume-high.
 LibKa0s sounds: none.

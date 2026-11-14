@@ -69,10 +69,10 @@ LibKa0s branch `feat/2026-11-14-arrow-text-position-menu` (worktree `#Worktrees/
 | L3 | done | e017721 |
 | L4 | done | 880f4e9 |
 | L5 | done | 2ab06c2, ab6b2cc (review fixes) |
-| L-REL | pending | |
+| L-REL | done | v1.101.0 (`8c506bf`; release commit `25c3ecd`) |
 | R9-1 | done | 94ef109, 8f512d2 (review fixes) |
 | R9-2 | done | 94ef109, 8f512d2 |
 | R9-3 | done | 94ef109, 8f512d2 |
 | R9-4 | done | LibKa0s 37a9844 (OptionsWidgets minor 46); arrives with R9-RV |
 | R9-5 | done | (this commit) |
-| R9-RV | pending | |
+| R9-RV | done | (this commit) |
