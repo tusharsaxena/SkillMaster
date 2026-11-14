@@ -85,5 +85,5 @@ position says so beside its TOC line (toc-file-§5).
 (`SkillMasterToggleWindow`, `SkillMasterToggleJournal`), their labels and `NS.BINDINGS`.
 The waypoint arrow's art is the library's (`libs/LibKa0s/media/waypoint/`, round 8, R8-5); the
 round-6 `media/waypoint/` copy is gone.
-`libs/` and `tests/_kit/` are vendored from LibKa0s `faa4621` (branch `feat/2026-11-14-waypoint-arrow`,
-v1.97.0 plus the waypoint arrow, untagged; the root `CLAUDE.md` provenance line) and never edited.
+`libs/` and `tests/_kit/` are vendored from LibKa0s v1.99.0 (the root `CLAUDE.md` provenance line) and never
+edited.

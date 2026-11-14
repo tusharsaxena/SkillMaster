@@ -37,10 +37,6 @@ profile only (also pinned in-repo by `tests/client_pin.lua`, so a bare run is Fo
 `luacheck` loads no kit, so it runs through the bounded runner (testing-§15). Never
 auto-stage/commit/push and never bump the version without an explicit instruction.
 
-Bundles [LibKa0s](https://github.com/tusharsaxena/LibKa0s) faa4621 (MIT), untagged, from branch `feat/2026-11-14-waypoint-arrow` (v1.97.0 plus the waypoint arrow).
+Bundles [LibKa0s](https://github.com/tusharsaxena/LibKa0s) v1.99.0 (MIT).
 LibKa0s icons: chevron-down, chevron-right, chevron-up, clear, close, confirm, copy, document, external-link, eye, fullscreen-enter, fullscreen-exit, info, list, lock, move, ph:funnel, ph:sign-in, ph:sort-descending, reset, segment, settings, sort-asc, sort-desc, unlock, volume-high.
 LibKa0s sounds: none.
-
-The provenance line names a commit, not a tag, while the waypoint arrow waits for LibKa0s's merge
-and tag (owner decision 2026-11-14; `docs/ARCHITECTURE.md` → `## Documented deviations`). Re-vendor
-from the tag when it is cut, and the line names the tag again.
