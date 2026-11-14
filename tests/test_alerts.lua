@@ -17,6 +17,11 @@ local function recorder()
     function r.Show(_, payload, opts) r.shown[#r.shown + 1] = { payload = payload, key = opts and opts.key } return true end
     function r.Clear() r.cleared = r.cleared + 1 end
     function r.Refresh() r.refreshed = r.refreshed + 1 end
+    function r.Remove(_, key)
+        local n = 0
+        for i = #r.shown, 1, -1 do if r.shown[i].key == key then table.remove(r.shown, i) n = n + 1 end end
+        return n
+    end
     return r
 end
 
@@ -25,7 +30,8 @@ local function withAlerts(w, fn)
     local savedSkill, savedToast, savedWp = NS.SkillData, A.toast, NS.Waypoints
     local savedFaction, savedRace, savedLevel = M.UnitFactionGroup, M.UnitRace, M.UnitLevel
     local savedAlerts = NS.db.profile.alerts
-    NS.db.profile.alerts = { cap = true, weapon = true, weaponGap = 25, sound = false, point = false }
+    -- skillUp off: the cap and gap cases count their own toasts; the skill-up cases turn it on.
+    NS.db.profile.alerts = { cap = true, weapon = true, weaponGap = 25, sound = false, point = false, skillUp = false }
     for k, v in pairs(w.settings or {}) do NS.db.profile.alerts[k] = v end
     local skills = w.skills or {}
     NS.SkillData = { Get = function(_, key) return skills[key] end, Enable = function() end,
@@ -213,4 +219,75 @@ test("alerts: the defaults carry every alerts key", function()
     assertEqual(d.weaponGap, 25)
     assertEqual(d.sound, false)
     assertEqual(d.point, false)
+end)
+
+-- ── owner feedback round 4: the skill-up toast, and each kind's color ──────────────────────
+
+test("alerts: a skill point toasts Skill up with the session, the cap and the ETA; close ones fold", function()
+    -- red under: no skill-up alert (owner feedback round 4)
+    local skills = { bows = entry("bows", "Bows", "weapon", 81, 130), leatherworking = entry("leatherworking", "Leatherworking", "craft", 122, 150) }
+    withAlerts({ skills = skills, settings = { skillUp = true, weapon = false } }, function(toast)
+        local t = 100
+        local savedTime = M.GetTime
+        M.GetTime = function() return t end
+        local ok, err = pcall(function()
+            A.OnSkillUp("bows", 80, 81)
+            assertEqual(#toast.shown, 1)
+            local p = toast.shown[1].payload
+            assertEqual(toast.shown[1].key, "skillup")
+            assertEqual(p.kind, "skillup")
+            assertEqual(p.label, "Skill up")
+            assertEqual(p.title, "Bows 81 / 130")
+            assertTrue(p.detail:find("49 to cap", 1, true) ~= nil, p.detail)
+            t = t + 2
+            A.OnSkillUp("leatherworking", 121, 122)
+            assertEqual(#toast.shown, 1, "folded: the open toast was replaced, not stacked")
+            p = toast.shown[1].payload
+            assertEqual(p.label, "Skill up \194\183 2 skills")
+            assertEqual(p.title, "Leatherworking 122 / 150", "the newest titles it")
+            assertEqual(p.detail, "Also Bows 81")
+            t = t + 10
+            A.OnSkillUp("bows", 81, 82)
+            assertEqual(toast.shown[#toast.shown].payload.label, "Skill up", "past the fold window: a toast of its own")
+        end)
+        M.GetTime = savedTime
+        if not ok then error(err, 0) end
+    end)
+end)
+
+test("alerts: Skill-up alerts for narrows the skills; off reads none", function()
+    local skills = { bows = entry("bows", "Bows", "weapon", 81, 130), leatherworking = entry("leatherworking", "Leatherworking", "craft", 122, 150) }
+    withAlerts({ skills = skills, settings = { skillUp = true, skillUpScope = "professions", weapon = false } }, function(toast)
+        A.OnSkillUp("bows", 80, 81)
+        assertEqual(#toast.shown, 0, "a weapon under Professions only")
+        A.OnSkillUp("leatherworking", 121, 122)
+        assertEqual(#toast.shown, 1)
+        NS.db.profile.alerts.skillUpScope = "combat"
+        A.Reset()
+        assertTrue(A.SkillUpWatched(skills.bows) and not A.SkillUpWatched(skills.leatherworking))
+        NS.db.profile.alerts.skillUp = false
+        assertTrue(not A.SkillUpWatched(skills.bows), "off: nothing")
+    end)
+end)
+
+test("alerts: the real toast labels a skill up green and a weapon gap red, the cap toast neither", function()
+    local skills = { daggers = entry("daggers", "Daggers", "weapon", 40, 110) }
+    withAlerts({ skills = skills, settings = { skillUp = true } }, function()
+        A.toast = A.NewToast()
+        A.CheckSkillUp(skills.daggers)
+        local f = A.toast:FrameFor("skillup")
+        assertTrue(f ~= nil, "the skill-up toast is up")
+        local r, g, b = NS.Skin.Color("sem.good")
+        local good = ("|cff%02x%02x%02x"):format(r * 255, g * 255, b * 255)
+        assertTrue(f.skmLabel:GetText():find(good, 1, true) == 1, "sem.good on the label")
+        assertTrue(f.skmLabel:GetText():find("SKILL UP", 1, true) ~= nil, "the uppercase label")
+        assertEqual(A.lastKind, "skillup")
+        A.toast:Clear()
+        A.CheckGap(skills.daggers)
+        f = A.toast:FrameFor("weapon:daggers")
+        assertTrue(f ~= nil, "the gap toast is up")
+        assertTrue(f.skmLabel:GetText():find("WEAPON SKILL GAP", 1, true) ~= nil)
+        assertTrue(f.skmTitle:GetText():find("-", 1, true) ~= nil, "the gap in the title")
+        A.toast:Clear()
+    end)
 end)

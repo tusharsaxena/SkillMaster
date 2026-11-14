@@ -35,7 +35,7 @@ NS.COMMANDS = {
     {"show",        L["Show the Skill Master window"],            function() NS.MainWindow.Show() end},
     {"hide",        L["Hide the Skill Master window"],            function() NS.MainWindow.Hide() end},
     {"toggle",      L["Show or hide the Skill Master window"],    function() NS.MainWindow.Toggle() end},
-    {"journal",     L["Show or hide the Journal: the session log and your alts"],
+    {"journal",     L["Show or hide the Journal: the skill-up log and your alts"],
                                                                   function() NS.Journal.Toggle() end},
     {"lock",        L["Lock the window in place"],                function() setAndEcho("locked", true) end},
     {"unlock",      L["Unlock the window so it can be dragged"],  function() setAndEcho("locked", false) end},

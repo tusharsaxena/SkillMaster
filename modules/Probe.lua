@@ -1,7 +1,7 @@
 local addonName, NS = ...
 -- modules/Probe.lua — `/sm probe`: a one-shot report of the WoW Forever API shapes the data
 -- modules depend on (design §5.4). The owner runs it once in game and sends the JSON back; it
--- corrects the "assumed (1.12)" rows in docs/midnight-quirks.md.
+-- corrects the "assumed (1.12)" rows in docs/forever-quirks.md.
 --
 -- Read-only apart from one restored change: a collapsed header in the stock Skills tab hides its
 -- lines from GetSkillLineInfo, so the probe expands it, reads, and collapses it again.
@@ -41,8 +41,13 @@ P.APIS = {
     { "C_Map.SetUserWaypoint",   function() return C_Map and C_Map.SetUserWaypoint end },
     { "C_Map.GetBestMapForUnit", function() return C_Map and C_Map.GetBestMapForUnit end },
     { "CastSpellByName",         function() return CastSpellByName end },
+    -- Owner feedback round 3: Skinning / Fishing windows and the Skills tab's selection.
+    { "C_TradeSkillUI.OpenTradeSkill", function() return C_TradeSkillUI and C_TradeSkillUI.OpenTradeSkill end },
+    { "C_SkillInfo.SetSelectedSkill",  function() return C_SkillInfo and C_SkillInfo.SetSelectedSkill end },
+    { "SetSelectedSkill",              function() return SetSelectedSkill end },
+    { "SkillFrame_SetSelection",       function() return SkillFrame_SetSelection end },
+    { "SkillFrame_UpdateSkills",       function() return SkillFrame_UpdateSkills end },
 }
-local TOMTOM = 'IsAddOnLoaded("TomTom")'
 
 -- A nil inside a return list cannot travel through a JSON array, so it is written as this string.
 P.NIL = "<nil>"
@@ -55,12 +60,6 @@ local function pack(...)
         out[i] = v
     end
     return out
-end
-
-local function addonLoaded(name)
-    local fn = (C_AddOns and C_AddOns.IsAddOnLoaded) or IsAddOnLoaded
-    if type(fn) ~= "function" then return false end
-    return fn(name) and true or false
 end
 
 --- The skill-list API this client has: the C_SkillInfo namespace the kit's Forever API set lists,
@@ -177,7 +176,6 @@ function P.Run()
     }
     readSkills(report)
     for _, api in ipairs(P.APIS) do report.apis[api[1]] = type(api[2]()) == "function" end
-    report.apis[TOMTOM] = addonLoaded("TomTom")
     readEnchant(report)
     NS.Debug("Probe", "%d skill lines, %d headers", #report.skillLines, #report.headers)
     return report
@@ -187,11 +185,11 @@ end
 --- this client has and its visible line count, and which probed globals are present. Unlike Run()
 --- it never expands a header, so it touches no client state.
 --- @return table { source = "C_SkillInfo"|"global"|"none", lines = n, present = n, total = n,
----   missing = { names }, tomtom = bool }
+---   missing = { names } }
 function P.Summary()
     local api = skillApi()
     local out = { source = api and api.source or "none", lines = api and lineCount(api) or 0,
-                  present = 0, total = #P.APIS, missing = {}, tomtom = addonLoaded("TomTom") }
+                  present = 0, total = #P.APIS, missing = {} }
     for _, entry in ipairs(P.APIS) do
         if type(entry[2]()) == "function" then out.present = out.present + 1
         else out.missing[#out.missing + 1] = entry[1] end

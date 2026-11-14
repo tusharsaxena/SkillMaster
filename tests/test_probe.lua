@@ -8,7 +8,7 @@ local APIS = {
     "GetUnitSpeed", "GetSpellBonusDamage", "GetSpellCritChance", "GetHitModifier",
     "GetSpellHitModifier", "GetCombatRating", "GetWeaponEnchantInfo", "GetCritChance",
     "GetRangedCritChance", "GetDodgeChance", "GetParryChance", "GetBlockChance", "UnitResistance",
-    "C_Map.SetUserWaypoint", "C_Map.GetBestMapForUnit", "CastSpellByName", 'IsAddOnLoaded("TomTom")',
+    "C_Map.SetUserWaypoint", "C_Map.GetBestMapForUnit", "CastSpellByName",
 }
 
 -- A 1.12-shaped skill list: a header, two lines under it, a collapsed header hiding one line.

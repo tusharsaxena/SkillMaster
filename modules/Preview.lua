@@ -6,7 +6,7 @@ local _, NS = ...
 -- classification, references, markers and bonus attribution.
 --
 -- The swap: NS.Blocks.source (the window and the detached frames), NS.Bonuses.source (the bars'
--- bonus segments, the row tooltip's Bonuses), NS.Broker.source (the four feeds and their tooltips),
+-- bonus segments, the row tooltip's Bonuses), NS.Broker.source (the feed and its tooltip),
 -- and the readers below, which the Journal, the row tooltip, the summary strip and the broker ask
 -- at call time: P.Log() (the session log), P.Alts() (the alt grid), P.Skill(key) and
 -- P.Character() (the "Lv 22 · Dwarf Hunter" line and every level read a display makes). Apply(false)
@@ -81,17 +81,17 @@ local function catalogSkill(key, rank, max)
     return { name = cat and L[cat.name] or key, category = cat and cat.category or "other", rank = rank, max = max }
 end
 
-local function ownRecord(c, skills, now)
+local function ownRecord(c, skills, now, stats)
     local mine = {}
     for key, e in pairs(skills.byKey) do
         if e.learned then mine[key] = { name = e.name, category = e.category, rank = e.rank, max = e.max } end
     end
     return { name = c.name, class = c.classFile, className = L[c.class], race = L[c.race], level = c.level,
-             faction = c.faction, updated = now, skills = mine }
+             faction = c.faction, updated = now, skills = mine, stats = NS.Alts.StatsOf(stats) }
 end
 
-local function buildAlts(c, skills, now)
-    local list = { { key = c.realm .. "-" .. c.name, record = ownRecord(c, skills, now), isCurrent = true } }
+local function buildAlts(c, skills, now, stats)
+    local list = { { key = c.realm .. "-" .. c.name, record = ownRecord(c, skills, now, stats), isCurrent = true } }
     local others = {}
     for _, a in ipairs(fixture().alts or {}) do
         local s = {}
@@ -126,7 +126,7 @@ function P.Build()
     d.stats, d.statIndex = NS.StatData.Build(fixture().stats, c.level)
     d.candidates = buildCandidates(clock)
     d.log = buildLog(d.skills, now)
-    d.alts = buildAlts(c, d.skills, now)
+    d.alts = buildAlts(c, d.skills, now, d.stats)   -- the others carry no stats: a dash each (FB-33)
     d.broker = buildBroker(d)
     return d
 end
@@ -152,16 +152,17 @@ function P.Skill(key)
     return NS.SkillData and NS.SkillData:Get(key) or nil
 end
 
---- { level, race, class } of the character the displays draw. Live reads go through NS.Compat, so
---- a running simulation answers them too.
+--- { level, race, class, name, classFile } of the character the displays draw. Live reads go
+--- through NS.Compat, so a running simulation answers them too.
 function P.Character()
     if data then
         local c = data.character
-        return { level = c.level, race = L[c.race], class = L[c.class] }
+        return { level = c.level, race = L[c.race], class = L[c.class], name = c.name, classFile = c.classFile }
     end
     local race = NS.Compat.PlayerRace()
-    local class = NS.Compat.PlayerClass()
-    return { level = NS.Compat.PlayerLevel(), race = race or "", class = class or "" }
+    local class, classFile = NS.Compat.PlayerClass()
+    return { level = NS.Compat.PlayerLevel(), race = race or "", class = class or "",
+             name = NS.Compat.PlayerName() or "", classFile = classFile }
 end
 
 -- ── the switch ───────────────────────────────────────────────────────────────────────────────

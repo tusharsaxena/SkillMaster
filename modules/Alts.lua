@@ -3,8 +3,10 @@ local _, NS = ...
 -- §7, plan Task 4.3): on SKILLS_UPDATED (debounced) and at PLAYER_LOGOUT.
 --
 -- record = { name, class, className, race, level, faction, updated, skills = { [key] = { name,
---   category, rank, max } } }, learned rows only.
--- THE KEY (client-quirks-§5): "<realm>-<name>" from AceDB 40's db.keys, which is the ruleset
+--   category, rank, max } }, stats = { [key] = { group, value, display, pct } } }, learned rows only.
+-- `stats` (FB-33) mirrors the main window's four stat blocks; a snapshot taken before it existed has
+-- none, and the Journal draws a dash for every stat it does not know (no migration: absent = unknown).
+-- THE KEY (forever-quirks-§4): "<realm>-<name>" from AceDB 40's db.keys, which is the ruleset
 -- ("PvP") and the character's WHOLE two-word name ("Traxex Silentshot") on Forever. The store never
 -- derives them again: UnitName's second return is the surname there, not a realm.
 -- A.View(list): a read-only stand-in with List / Forget over `list` (test mode's sample alts).
@@ -44,6 +46,33 @@ local function learnedSkills()
     return any and out or nil
 end
 
+--- A stat model (NS.StatData's shape) as a snapshot's stats table, or nil for no model or no stat.
+--- Pure: the live snapshot and test mode's sample character both go through it.
+function A.StatsOf(m)
+    if type(m) ~= "table" then return nil end
+    local out, any = {}, false
+    for _, group in ipairs(NS.StatData and NS.StatData.GROUPS or {}) do
+        for _, e in ipairs(m[group] or {}) do
+            if e.key and type(e.value) == "number" then
+                out[e.key] = { group = group, value = e.value, display = e.display, pct = e.pct }
+                any = true
+            end
+        end
+    end
+    return any and out or nil
+end
+
+--- This character's stats for the snapshot; nil when there is no model yet (a read before the
+--- first scan must not wipe the last good snapshot). Read as the blocks read it (NS.Blocks.Data):
+--- the kept model, scanned once when nothing has scanned yet.
+local function statSnapshot()
+    local S = NS.StatData
+    if not S then return nil end
+    local m = type(S.Model) == "function" and S:Model() or nil
+    if not m and type(S.Scan) == "function" then m = S:Scan() end
+    return A.StatsOf(m)
+end
+
 --- Write this character's record now. Answers the record, or nil without a key.
 --- @param t number|nil epoch seconds (now)
 function A:Snapshot(t)
@@ -61,6 +90,7 @@ function A:Snapshot(t)
     rec.level = UnitLevel("player")
     rec.updated = tonumber(t) or time()
     rec.skills = learnedSkills() or rec.skills or {}
+    rec.stats = statSnapshot() or rec.stats
     chars[key] = rec
     return rec
 end

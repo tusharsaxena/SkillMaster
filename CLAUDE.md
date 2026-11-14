@@ -29,7 +29,7 @@ Start here, then read the docs:
   wiring, taint notes, known limitations, documented deviations. What this addon actually is.
 - **`docs/testing.md`** — how to verify: the headless harness, lint, and the green commit gate.
 - Topic detail in `docs/` as needed (`scope.md`, `module-map.md`, `schema.md`, `settings-panel.md`,
-  `data-flow.md`, `common-tasks.md`, `debug.md`, `midnight-quirks.md`, `smoke-tests.md`, …).
+  `data-flow.md`, `common-tasks.md`, `debug.md`, `forever-quirks.md`, `smoke-tests.md`, …).
 
 **WoW Forever only** (roster Clients `Forever`, clients-§9): the suite runs under the Forever kit
 profile only (also pinned in-repo by `tests/client_pin.lua`, so a bare run is Forever too). Green gate before every commit: `KA0S_KIT_CLIENT=forever lua tests/run.lua` and
@@ -37,5 +37,6 @@ profile only (also pinned in-repo by `tests/client_pin.lua`, so a bare run is Fo
 `luacheck` loads no kit, so it runs through the bounded runner (testing-§15). Never
 auto-stage/commit/push and never bump the version without an explicit instruction.
 
-Bundles [LibKa0s](https://github.com/tusharsaxena/LibKa0s) v1.94.0 (MIT).
-LibKa0s icons: chevron-down, chevron-right, chevron-up, clear, close, confirm, copy, document, external-link, fullscreen-exit, info, lock, map-marker, move, reset, settings, unlock, volume-high.
+Bundles [LibKa0s](https://github.com/tusharsaxena/LibKa0s) v1.99.0 (MIT).
+LibKa0s icons: chevron-down, chevron-right, chevron-up, clear, close, confirm, copy, document, external-link, eye, fullscreen-enter, fullscreen-exit, info, list, lock, move, ph:funnel, ph:sign-in, ph:sort-descending, reset, segment, settings, sort-asc, sort-desc, unlock, volume-high.
+LibKa0s sounds: none.

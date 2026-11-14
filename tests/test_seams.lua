@@ -85,15 +85,18 @@ test("test_seam_broker_unlearned_row_opens_trainer_popup: the popup gets the ski
 end)
 
 test("test_seam_alert_click_sets_waypoint: a cap toast's click goes through the real NS.Waypoints", function()
-    local savedTomTom = M.TomTom
+    local saved = { C_Map = M.C_Map, UiMapPoint = M.UiMapPoint }
     local added = {}
-    M.TomTom = { AddWaypoint = function(_, ...) added[#added + 1] = { ... } return {} end }
+    M.C_Map = { SetUserWaypoint = function(p) added[#added + 1] = p end,
+                CanSetUserWaypointOnMap = function() return true end }
+    M.UiMapPoint = { CreateFromCoordinates = function(id, x, y) return { id = id, x = x, y = y } end }
     local trainer = NS.Trainers:For("fistWeapons", "Alliance", "Dwarf")[1]
     M.__resetPrinted()
     NS.Alerts.OnToastClick({ kind = "cap", key = "fistWeapons", name = "Fist Weapons", trainer = trainer })
-    M.TomTom = savedTomTom
-    assertEqual(#added, 1, "TomTom got the trainer's waypoint")
-    assertEqual(added[1][1], trainer.mapID)
+    if NS.WaypointArrow then NS.WaypointArrow.StandDown() end
+    M.C_Map, M.UiMapPoint = saved.C_Map, saved.UiMapPoint
+    assertEqual(#added, 1, "the map pin got the trainer's waypoint")
+    assertEqual(added[1].id, trainer.mapID)
     assertTrue(M.__printed()[1]:find(trainer.name, 1, true) ~= nil, "and the confirmation names the trainer")
     -- A profession trainer has no coordinates: the same click prints the directions, never a pin.
     local nr = NS.Trainers:NextRank("leatherworking", 150, 150, 30, "Alliance", "Dwarf")
@@ -115,7 +118,7 @@ test("test_seam_mini_bars_are_the_bar_widget: the broker tooltip draws NS.Bar's 
             _G[name] = _G[name] or M.CreateFrame("Frame", name, tip)
         end
         tip.AddLine, tip.AddDoubleLine = function(_, ...) add(...) end, function(_, ...) add(...) end
-        Br.FillTooltip("weapons", tip)
+        Br.FillTooltip(tip)
         local bars = Br.Bars()
         assertTrue(#bars >= 2, "a bar per learned weapon row and Defense, drew " .. #bars)
         local guns

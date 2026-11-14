@@ -18,6 +18,9 @@ return function()
     -- bonus (Guns, a Dwarf's) reads them, whichever suite published the model (suites swap these).
     M.UnitRace = function() return "Human", "Human" end
     M.UnitFactionGroup = function() return "Alliance", "Alliance" end
+    -- The pointer in screen px (round 5, R5-6b: a section dragged out of a merged window).
+    M.__cursor = { 0, 0 }
+    M.GetCursorPosition = function() return M.__cursor[1], M.__cursor[2] end
     M.__popups = {}
     M.StaticPopup_Show = function(name) M.__popups[#M.__popups + 1] = name end
     -- The TOC fields the addon reads through NS.Meta.
@@ -68,6 +71,38 @@ return function()
         end
         return db
     end
+    -- Round 5, R5-15: the map reads behind the trainer popup's distances. CreateVector2D answers a
+    -- vector with GetXY; C_Map reads a model a suite fills in, `M.__map`: `player` = { mapID, x, y }
+    -- (0..1; nil: the client knows no map, as inside an instance) and `worlds[mapID]` = { instance,
+    -- ox, oy, w, h }, the map's world rect in yards. A map with no world rect answers nil.
+    -- `M.__newMapApi()` hands back a fresh C_Map over the model, for a suite that replaced it.
+    M.CreateVector2D = function(x, y)
+        return { x = x, y = y, GetXY = function(self) return self.x, self.y end }
+    end
+    M.__map = { player = nil, worlds = {} }
+    M.__newMapApi = function()
+        return {
+            GetBestMapForUnit = function(unit)
+                local p = M.__map.player
+                return unit == "player" and p and p.mapID or nil
+            end,
+            GetPlayerMapPosition = function(mapID, unit)
+                local p = M.__map.player
+                if unit ~= "player" or not p or p.mapID ~= mapID then return nil end
+                return M.CreateVector2D(p.x, p.y)
+            end,
+            GetWorldPosFromMapPos = function(mapID, pos)
+                local w = M.__map.worlds[mapID]
+                if not w then return nil end
+                local x, y = pos:GetXY()
+                return w.instance, M.CreateVector2D(w.ox + x * w.w, w.oy + y * w.h)
+            end,
+        }
+    end
+    M.C_Map = M.__newMapApi()
+    -- Round 6, R6-11: the player's facing, radians counter-clockwise from north (the arrow's turn).
+    M.__facing = 0
+    M.GetPlayerFacing = function() return M.__facing end
     installBindings(M)
     -- Frames answer strata and level (frame-layering-§5): the window sets both.
     installLayers(M)

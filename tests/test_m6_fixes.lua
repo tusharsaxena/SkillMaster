@@ -82,7 +82,7 @@ test("SM-01: the row menu's Hide is stored through NS.SetByPath", function()
     assertEqual(NS.db.profile.skills.hidden.guns, nil, "cleared, not stored as false")
 end)
 
-test("F-002: a hidden skill the catalog does not know is shown again by the Skills page Defaults", function()
+test("F-002: a hidden skill the catalog does not know is shown again by the Rows page Defaults", function()
     -- red under: no settings row reaching skills.hidden as a set (the key stays hidden until a profile reset)
     local row = { kind = "skill", entry = { key = "other:Jewelcrafting", name = "Jewelcrafting", rank = 1, max = 5 } }
     local hide
@@ -90,8 +90,8 @@ test("F-002: a hidden skill the catalog does not know is shown again by the Skil
     local paths = throughSeam(function() hide.onClick("hide", hide) end)
     assertTrue(NS.db.profile.skills.hidden["other:Jewelcrafting"], "hidden")
     assertTrue(#paths >= 1, "through the seam")
-    NS.SchemaRuntime.BulkRun("reset", "skills", function()
-        for _, r in ipairs(NS.SchemaForPage("skills")) do NS.ApplyDefault(r) end
+    NS.SchemaRuntime.BulkRun("reset", "rows", function()
+        for _, r in ipairs(NS.SchemaForPage("rows")) do NS.ApplyDefault(r) end
     end)
     assertEqual(NS.db.profile.skills.hidden["other:Jewelcrafting"], nil, "the page Defaults shows it again")
 end)
@@ -248,19 +248,24 @@ test("F-005: Clear log asks first, and only an accept clears the stored history"
 end)
 
 test("F-014: a log row from another day shows its date as well as its time", function()
-    -- red under: bindLogRow formatting every row as date("%H:%M")
+    -- red under: bindLogRow formatting every row as date("%H:%M"). Since FB-32 the date is a
+    -- column of its own, on every row, and the range picker must reach back to the older row.
     local J = NS.Journal
     local now = (M.time or os.time)()
     NS.db.char.log = { { t = now - 3 * 86400, key = "fishing", old = 1, new = 2 }, { t = now, key = "fishing", old = 2, new = 3 } }
+    NS.SetByPath("journal.range", "all")
     J.Show()
     J.SelectTab("log")
-    local texts = {}
-    for _, row in ipairs(J.Frame().logPanel.pool.active) do texts[#texts + 1] = row.cols[1]:GetText() end
+    local dates, times = {}, {}
+    for _, row in ipairs(J.Frame().logPanel.pool.active) do
+        dates[#dates + 1], times[#times + 1] = row.cols[1]:GetText(), row.cols[2]:GetText()
+    end
     J.Hide()
     NS.db.char.log = {}
-    local today, old = os.date("%H:%M", now), os.date(NS.L["%m/%d %H:%M"], now - 3 * 86400)
-    assertTrue(texts[1] == old or texts[2] == old, "the older row carries its date: " .. table.concat(texts, ", "))
-    assertTrue(texts[1] == today or texts[2] == today, "today's row its time alone")
+    NS.SetByPath("journal.range", "session")
+    local old = os.date(NS.L["%m/%d/%y"], now - 3 * 86400)
+    assertTrue(dates[1] == old or dates[2] == old, "the older row carries its date: " .. table.concat(dates, ", "))
+    assertTrue(times[1] == os.date("%H:%M", now) or times[2] == os.date("%H:%M", now), "every row its time")
 end)
 
 test("F-015: switching to a profile with a lower cap does not trim the stored log; lowering the setting does", function()

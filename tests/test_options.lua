@@ -56,14 +56,14 @@ test("options: every display default outside bars and layout has a row too", fun
 end)
 
 test("options: the pages register in the mockup's order, General first and Profiles last", function()
-    local want = { "General", "Layout", "Bars", "Skills", "Stats", "Broker", "Alerts", "Journal",
+    local want = { "General", "Layout", "Bars", "Skills", "Rows", "Broker", "Alerts", "Journal",
                    "Trainers and Waypoints" }
     for _, name in ipairs(want) do
         assertTrue(M.__subcategories[name] ~= nil, name .. " registered a subcategory")
     end
     local keys = {}
     for _, row in ipairs(NS.Schema) do keys[row.page] = true end
-    for _, page in ipairs({ "general", "layout", "bars", "skills", "stats", "broker", "alerts", "journal",
+    for _, page in ipairs({ "general", "layout", "bars", "skills", "rows", "broker", "alerts", "journal",
                             "trainers" }) do
         assertTrue(keys[page], page .. " declares rows")
     end
@@ -134,13 +134,14 @@ end)
 test("options: the waypoint method preference decides the provider", function()
     local Wp = NS.Waypoints
     local t = { name = "Woo Ping", city = "Stormwind", mapID = 1453, x = 57.1, y = 57.7 }
-    local savedTomTom = rawget(_G, "TomTom")
-    rawset(_G, "TomTom", { AddWaypoint = function() end })
-    assertEqual(Wp:Method(t), "tomtom", "auto prefers TomTom")
+    local saved = { C_Map = M.C_Map, UiMapPoint = M.UiMapPoint }
+    M.C_Map = { SetUserWaypoint = function() end, CanSetUserWaypointOnMap = function() return true end }
+    M.UiMapPoint = { CreateFromCoordinates = function(id, x, y) return { id = id, x = x, y = y } end }
+    assertEqual(Wp:Method(t), "native", "auto is the map pin")
     NS.SetByPath("waypoints.method", "chat")
     assertEqual(Wp:Method(t), "chat", "chat only")
     NS.SetByPath("waypoints.method", "auto")
-    rawset(_G, "TomTom", savedTomTom)
+    M.C_Map, M.UiMapPoint = saved.C_Map, saved.UiMapPoint
 end)
 
 test("options: the unverified mark follows its row", function()
@@ -166,11 +167,14 @@ test("options: the bar text template and the timer and marker switches reach the
     bar:SetTimer(M.GetTime() + 60)
     assertFalse(bar.timer:IsShown(), "no timer while the switch is off")
     NS.SetByPath("bars.timer", true)
-    NS.SetByPath("bars.markers", false)
+    NS.SetByPath("bars.markersWindow", true)
+    bar:ApplyStyle(NS.Bar.ResolveStyle("row"))
+    bar:SetValues{ value = 50, max = 100, markers = { { at = 9, label = "cap" } } }
+    assertEqual(#bar.geom.markers, 1, "a marker while the window switch is on")
+    NS.SetByPath("bars.markersWindow", false)
     bar:ApplyStyle(NS.Bar.ResolveStyle("row"))
     bar:SetValues{ value = 50, max = 100, markers = { { at = 9, label = "cap" } } }
     assertEqual(#bar.geom.markers, 0, "no markers while the switch is off")
-    NS.SetByPath("bars.markers", true)
 end)
 
 test("options: the flat color mode draws the Bar color, or the skin's while its companion is on", function()
@@ -186,25 +190,23 @@ test("options: the flat color mode draws the Bar color, or the skin's while its 
     M.__fireTimers()
 end)
 
-test("options: the Bars page draws a live preview bar from NS.Bar, restyled by a write", function()
+test("options: the Bars page has no preview bar (owner feedback round 4)", function()
+    -- red under: the pinned Fishing 107 +25 / 150 preview above the page's strip
     local panel = M.__subcategories["Bars"]
     assertTrue(panel ~= nil, "Bars registered")
     panel:Show()
     panel:__fire("OnShow")
-    local preview = NS.OptionsPreview and NS.OptionsPreview.bar
-    assertTrue(preview ~= nil, "the preview bar exists after the first show")
-    assertNear(preview.geom.fill, 107 / 150, 1e-9, "Fishing 107 / 150, the mockup's")
-    assertEqual(preview.values.bonusKind, "temp", "with the lure's temp bonus")
-    NS.SetByPath("bars.height", 22)
-    assertEqual(preview.style.height, 22, "a write restyles the preview at once")
-    NS.SetByPath("bars.height", NS.defaults.profile.bars.height)
+    assertTrue(NS.OptionsPreview == nil, "no preview module")
+    local page
+    for _, pg in ipairs(NS.SchemaPages or {}) do if pg.key == "bars" or pg.id == "bars" then page = pg end end
+    assertTrue(page == nil or page.header == nil, "no pinned header on the page")
     panel:Hide()
     panel:__fire("OnHide")
     M.__fireTimers()
 end)
 
 test("options: every new page renders on its first show without raising", function()
-    for _, name in ipairs({ "Layout", "Skills", "Stats", "Broker", "Alerts", "Journal", "Trainers and Waypoints" }) do
+    for _, name in ipairs({ "Layout", "Skills", "Rows", "Broker", "Alerts", "Journal", "Trainers and Waypoints" }) do
         local panel = M.__subcategories[name]
         local ok, err = pcall(function()
             panel:Show()
@@ -217,26 +219,42 @@ test("options: every new page renders on its first show without raising", functi
     M.__fireTimers()   -- the library's deferred repaints, so no timer outlives the case
 end)
 
-test("options: the journal's length and filter, and the stat display mode, are honored", function()
+test("options: the journal's length is honored", function()
     NS.SetByPath("journal.keep", 50)
     assertEqual(NS.SessionLog.Cap(), 50)
     NS.SetByPath("journal.keep", 500)
-    NS.SetByPath("stats.display", "text")
-    local row = NS.Rows.Acquire(NS.Rows.NewPool(), M.UIParent, "row")
-    row:SetStat({ key = "agility", label = "Agility", display = "112", pct = 100, markers = {} })
-    assertFalse(row.bar:IsShown(), "a text-only stat row draws no bar")
-    assertEqual(row.where:GetText(), "112")
-    NS.SetByPath("stats.display", "both")
-    row:SetStat({ key = "agility", label = "Agility", display = "112", pct = 100, markers = {} })
-    assertTrue(row.bar:IsShown())
 end)
 
 test("options: the library-absent load keeps every hand-written row; the composers' rows are the gap", function()
     -- options-ui-§1: pin the full count, the degraded count and the delta, attributed to the
-    -- composers (Master controls, and the Bars page's bar, background, border and font blocks).
+    -- composers (Master controls, the Bars page's bar, background, border and font blocks, the
+    -- Trainers page's name color pair, and Layout > Detached windows' background pair and border block).
     local NS2 = loadDegraded()
     local full, degraded = #NS.Schema, #NS2.Schema
-    assertEqual(full, 199, "the full schema")
-    assertEqual(degraded, 166, "the library-absent schema")
-    assertEqual(full - degraded, 33, "Master controls (8, Sim mode among them) and the Bars blocks (25)")
+    -- Round 5 (R5-7): Layout > Detached windows, three hand-written rows (scale, opacity, title band)
+    -- and nine composed (the background pair and its skin companion, the border block and its).
+    -- Round 5 (R5-10): the weapon block's Show rows filter, one hand-written row in both counts.
+    -- Round 5 (R5-11..R5-13): the Rows page took every Hide row and the four whole-set rows over from
+    -- the Skills, Stats and Broker pages one for one, same paths: neither count moves (delta 0).
+    -- Round 6 (R6-4): Bars > Marks' Threshold markers split into a window and a row-tooltip switch,
+    -- hand-written: +1 in both counts, the delta unmoved.
+    -- Round 6 (R6-10): Tooltips > LDB tooltip's Tooltip style, Width and Height, hand-written: +3 in
+    -- both counts, the delta unmoved.
+    -- Round 6 (R6-9): the Broker page's Stats section switch gave way to the stats feed's four stat
+    -- block switches, hand-written: -1 +4 = +3 in both counts, the delta unmoved.
+    -- Round 6 (R6-11): Trainers and Waypoints' Show Skill Master's arrow and Arrow scale,
+    -- hand-written: +2 in both counts, the delta unmoved.
+    -- Round 7 (R7-1): Layout > Blocks' Show rows filter on the seven other blocks, hand-written: +7
+    -- in both counts, the delta unmoved.
+    -- Round 7 (R7-6): Tooltips > LDB tooltip's Open a row from, hand-written: +1 in both counts,
+    -- the delta unmoved.
+    -- Round 8 (R8-1): Layout > Window's Open a row from, hand-written: +1 in both counts, the delta
+    -- unmoved.
+    -- Round 8 (R8-5): Trainers and Waypoints > Waypoint arrow takes LibKa0s-WaypointArrow-1.0's
+    -- settings block (Arrow style, Use the skin's colors, Far color, Near color, Arrow scale), five
+    -- composed rows, one of them the hand-written Arrow scale it replaces: +4 full, -1 degraded, the
+    -- delta +5.
+    assertEqual(full, 352, "the full schema (round 8: the waypoint arrow's settings block)")
+    assertEqual(degraded, 294, "the library-absent schema")
+    assertEqual(full - degraded, 58, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3), the detached background and border (9) and the waypoint arrow's block (5)")
 end)

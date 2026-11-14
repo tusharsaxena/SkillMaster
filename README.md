@@ -3,16 +3,16 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-406%2F406_passing-green)
+![Tests](https://img.shields.io/badge/Tests-725%2F725_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
 Skill Master puts every skill your character has into one window of bars you can style: each weapon skill, your primary and secondary professions, Defense, Lockpicking and Riding, with your character stats beside them. A bar shows your rank against its cap, and anything raising it (a racial, an item, a fishing lure, a buff) as its own colored segment with a timer when it runs out. Unlearned skills tell you where to train them.
 
-- Skills in four groups (Primary, Secondary, Weapon, Other) and stats in four more, each a block you can collapse, reorder, or pop out into its own frame.
+- Skills in four groups (Primary, Secondary, Weapon, Other) and stats in four more, each a block you can collapse, reorder, sort, filter (say, only the professions at their cap that need training, or only the stats that aren't zero), or pop out into its own frame.
 - Hover tooltips with the bonus breakdown, the next rank and its trainer, how far a weapon is behind its cap, and gathering and fishing hints.
-- Click a profession to open it, an unlearned skill for its trainers and a waypoint (TomTom, a map pin, or directions in chat).
-- Four broker feeds for Titan Panel and the like, alerts when a profession caps or a weapon falls behind, a Journal with this session's skill-ups and an overview of your alts.
+- Click a profession to open it, an unlearned skill for its trainers, nearest first with their distance in yards, and a waypoint (a map pin with Skill Master's own arrow pointing the way, or directions in chat).
+- Two broker feeds for Titan Panel and the like: Skill Master, its tooltip your skills, and Skill Master Stats, its tooltip your stat blocks and its text a stat you pin from a stat row's menu; alerts when a profession caps or a weapon falls behind, a Journal with this session's skill-ups and an overview of your alts.
 - Every part of the look is a setting: bar sizes, fill direction, colors, border, font, text, one or two columns, frame layering, and skins.
 
 You set it up in the game's Settings → AddOns → Ka0s Skill Master, or with `/sm`.
@@ -21,7 +21,7 @@ You set it up in the game's Settings → AddOns → Ka0s Skill Master, or with `
 
 Type `/sm toggle` to open or close the window, or bind a key to it. The game's Options → Keybindings → Ka0s Skill Master has two keys, *Toggle skills window* and *Toggle journal*, and the General page's Keybindings tab in this addon's settings sets the same two. The window remembers where you dropped it. `/sm lock` stops it from moving and `/sm unlock` lets you drag it again; the close button or Escape puts it away.
 
-Each block has a header. Click it to collapse the block, or use the mark on its right to pull the block out into a frame of its own that you can place anywhere; the same mark on the frame docks it again. Hover a row for the details. Click a profession to open its window (out of combat), click a weapon or Defense for the Skills tab, and click an unlearned skill to see its trainers and set a waypoint. Shift-click puts the skill into chat. Right-click gives you the row menu, where you can pin a skill to the broker feed or hide the row.
+Each block has a header. Click it to collapse the block, or use the mark on its right to pull the block out into a frame of its own that you can place anywhere; the same mark on the frame docks it again. Hover a row for the details. Click a profession to open its window (out of combat), click a weapon or Defense for the Skills tab, and click an unlearned skill to see its trainers and set a waypoint. Shift-click puts the skill into chat. Right-click gives you the row menu, where you can pin a skill (or a stat, to the Stats feed) to the broker feed or hide the row. A row opens from anywhere on it; to open it from its go icon only, set Layout → Window → *Open a row from* to *Go icon only* (the detached and merged windows follow it). The broker feeds' tooltips work the same way, with their own Tooltips → LDB tooltip → *Open a row from*.
 
 Test mode fills everything with a sample character, a level 22 Dwarf Hunter, so you can try a layout before your own character has the skills to show it. Turn it on with `/sm test`, from the minimap button's right-click menu, or with the Test mode box under General → Master controls; a band across the window says you are looking at sample data, and combat ends it. Sim mode plays a short fishing trip on the same character: a skill-up every few seconds, a lure going on and off, a mount changing your speed. Start it with `/sm sim` or the Sim mode box, and stopping it puts your own character back. Neither saves anything.
 
@@ -75,8 +75,10 @@ The backlog lives on GitHub: please file bugs and ideas at https://github.com/tu
 
 | Version | Date | Highlights |
 |---|---|---|
-| 1.0.0 | Unreleased | - Every weapon skill, profession, Defense, Lockpicking and Riding as bars, with your stats beside them<br>- Bonus segments with timers, and tooltips that break each bonus down<br>- Trainer directions and waypoints for unlearned skills and the next rank<br>- Blocks you can collapse, reorder, detach, and lay out in one or two columns<br>- Four broker feeds, cap and weapon alerts, the Journal and an alt overview<br>- Settings for every part of the look, skins, test mode and a sim mode<br>- Two key bindings and the minimap button |
+| 1.0.0 | Unreleased | - Every weapon skill, profession, Defense, Lockpicking and Riding as bars, with your stats beside them<br>- Bonus segments with timers, and tooltips that break each bonus down<br>- Trainer directions and waypoints for unlearned skills and the next rank<br>- Blocks you can collapse, reorder, detach, and lay out in one or two columns<br>- One broker feed, cap and weapon alerts, the Journal and an alt overview<br>- Settings for every part of the look, skins, test mode and a sim mode<br>- Two key bindings and the minimap button |
 
 ## Credits
 
 - Open Iconic by Waybury, MIT license, https://github.com/iconic/open-iconic (the window and console marks).
+- Phosphor Icons, MIT license, https://github.com/phosphor-icons/core (the action mark on every skill row, the Progress sort mark and every block's filter mark).
+- The waypoint arrow's five looks are original art made for the Ka0s addons, under the MIT license.

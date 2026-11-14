@@ -1,7 +1,7 @@
-local addonName, NS = ...
+local _, NS = ...
 -- settings/Layout.lua — the Layout page (design §6.6): the main window's size and summary strip,
--- one subsection per block (show, dock, collapse, lock, scale) and the block order, dragged through
--- LibKa0s-Widgets-1.0's ReorderList (options-ui-§18).
+-- one subsection per block (show, dock, collapse, lock, scale), the detached windows' shared style
+-- (round 5) and the block order, dragged through LibKa0s-Widgets-1.0's ReorderList (options-ui-§18).
 --
 -- `layout.blocks.<id>.docked`, `.collapsed` and `.order` are written only through NS.SetByPath
 -- (architecture-§5): the block header, the detached frame's buttons, the drag list and `/sm set`
@@ -24,8 +24,11 @@ local rows = NS.Live({
           label = L["Window width (px)"],
           desc = L["Width of the Skill Master window. Multiplied by Master scale on General > Master controls."] }),
     row({ path = "layout.maxHeight", group = WINDOW, type = "number", default = P.maxHeight, min = 200, max = 1200,
-          step = 10, label = L["Maximum window height (px)"],
-          desc = L["The window grows with its rows up to this height, then scrolls."] }),
+          step = 10, label = L["Window height (px)"],
+          desc = L["Height of the Skill Master window; the rows scroll inside it."] }),
+    row({ path = "layout.fitHeight", group = WINDOW, type = "bool", default = P.fitHeight,
+          label = L["Shrink to fit the rows"],
+          desc = L["Shrink the window when its rows take less than Window height, so it grows and shrinks as blocks expand and collapse."] }),
     row({ path = "layout.blockGap", group = WINDOW, type = "number", default = P.blockGap, min = 0, max = 20, step = 1,
           label = L["Block spacing (px)"], desc = L["Space between two docked blocks."] }),
     row({ path = "layout.summary", group = WINDOW, type = "bool", default = P.summary,
@@ -35,6 +38,12 @@ local rows = NS.Live({
           values = { { value = 1, text = L["One column"] }, { value = 2, text = L["Two columns"] } },
           label = L["Columns"],
           desc = L["Lay the docked blocks in one column, or in two side by side. Each column is Window width wide."] }),
+    -- Round 8 (R8-1): where a left click opens a row (NS.Rows.OpenFrom); the detached and merged
+    -- windows follow it. Its onChange (NS.ApplyLook) re-lays the windows and their overlays.
+    row({ path = "layout.openFrom", group = WINDOW, type = "string", default = P.openFrom,
+          values = { { value = "row", text = L["Full row"] }, { value = "icon", text = L["Go icon only"] } },
+          label = L["Open a row from"],
+          desc = L["What a left click on a row of the main window, a detached window or a merged window opens from. Full row: anywhere on the row does what its go icon does (a profession window, the character panel, the trainers). Go icon only: the go icon alone opens it, and the rest of the row only links (shift-click) and opens the row menu (right-click)."] }),
 })
 
 -- The player's strata (frame-layering-§1): four values, and the library's one tooltip over them.
@@ -54,12 +63,94 @@ end
 rows[#rows + 1] = row({ path = "layout.strata", group = WINDOW, type = "string", default = P.strata,
     values = strataValues, label = L["Window strata"], onChange = applyWindow,
     desc = strataDesc(L["The Skill Master window's layer."]) })
-rows[#rows + 1] = row({ path = "layout.detachedStrata", group = WINDOW, type = "string", default = P.detachedStrata,
-    values = strataValues, label = L["Detached block strata"],
-    desc = strataDesc(L["The layer every detached block's frame draws in."]) })
 NS.Live(rows)
 
+-- ---------------------------------------------------------------------------------------------
+-- The Detached windows tab (round 5, R5-7): one style for every detached window, and for a merged
+-- group's window (modules/Detached.lua D.ApplyStyle). Every row's onChange is NS.ApplyLook: the
+-- LAYOUT_CHANGED it sends re-renders every open detached window. The background is a background
+-- swatch and its class companion (options-ui-§16: a group over a background is not a bar group), the
+-- border the composed border block; each takes a "Use the skin's ..." companion, on by default
+-- (skinning-§6). The strata row moved here from the Window tab (same path, nothing migrated).
+-- ---------------------------------------------------------------------------------------------
+local DETACHED = L["Detached windows"]
+local PD = P.detached
+local DWIN = L["Window"]
+local classColor = { source = "player" }
+local function detached(t)
+    t.group, t.subgroup = DETACHED, t.subgroup or DWIN
+    return row(t)
+end
+-- Appended after the Blocks rows, so the tab follows the Blocks tab.
+local detachedRows = {}
+local function add(list)
+    for _, r in ipairs(list) do detachedRows[#detachedRows + 1] = r end
+end
+
+add(NS.Live({
+    detached({ path = "layout.detached.scale", type = "number", default = PD.scale, min = 0.5, max = 2, step = 0.05,
+               label = L["Window scale"], commitOn = "change",
+               desc = L["Scale of every detached window. Multiplies each block's own Block scale (Blocks tab)."] }),
+    detached({ path = "layout.detached.alpha", type = "number", default = PD.alpha, min = 0, max = 1, step = 0.05,
+               label = L["Window opacity"], commitOn = "change",
+               desc = L["Opacity of every detached window, its rows and title band included."] }),
+    detached({ path = "layout.detached.titleBand", type = "string", default = PD.titleBand,
+               label = L["Title band"],
+               desc = L["When a detached window shows its title band and its marks: always, only while the pointer is over the window, or never. With Never, a thin strip at the top stays the drag area; dock and collapse the block from the Blocks tab."],
+               values = { { value = "always", text = L["Always"] }, { value = "hover", text = L["On hover"] },
+                          { value = "never", text = L["Never"] } } }),
+    detached({ path = "layout.detachedStrata", type = "string", default = P.detachedStrata,
+               values = strataValues, label = L["Detached block strata"],
+               desc = strataDesc(L["The layer every detached block's frame draws in."]) }),
+}))
+
+--- A "Use the skin's ..." companion for a composed block's `extra` (skinning-§6).
+local function fromSkin(path, label, desc)
+    return { path = path, page = PAGE, type = "bool", default = true, label = label, desc = desc }
+end
+
+add(NS.Live(H.ColorPair({
+    prefix = "layout.detached.", page = PAGE, group = DETACHED, subgroup = L["Background"],
+    key = "bgColor", companionKey = "useClassColorBg", label = L["Background color"],
+    classColor = classColor,
+    tooltips = { bgColor = L["The fill behind a detached window's rows. Not read while Use the skin's background is on."] },
+    defaults = { bgColor = PD.bgColor, useClassColorBg = PD.useClassColorBg },
+    extra = { fromSkin("layout.detached.bgFromSkin", L["Use the skin's background"],
+        L["Fill every detached window as the skin fills its windows. Background color is not read while this is on."]) },
+})))
+
+add(NS.Live(H.BorderGroup({
+    prefix = "layout.detached.", page = PAGE, group = DETACHED, subgroup = L["Border"], show = true,
+    classColor = classColor, keys = { borderShow = "border" },
+    tooltips = { borderColor = L["The edge of a detached window. Not read while Use the skin's border is on."] },
+    defaults = { borderShow = PD.border, borderStyle = PD.borderStyle, borderSize = PD.borderSize,
+                 borderColor = PD.borderColor, useClassColorBorder = PD.useClassColorBorder },
+    extra = { fromSkin("layout.detached.borderFromSkin", L["Use the skin's border"],
+        L["Edge every detached window as the skin edges its windows. Border style, thickness and color are not read while this is on."]) },
+})))
+
 local B = NS.Blocks
+local sortValues = {}
+for i, m in ipairs(B.SORTS) do sortValues[i] = { value = m, text = B.SORT_LABEL[m] } end
+-- Each block's Show rows values: its own filter set (round 7, R7-1), in its header menu's order.
+local function filterValues(id)
+    local out = {}
+    for i, m in ipairs(B.FiltersOf(id)) do out[i] = { value = m, text = B.FILTER_LABEL[m] } end
+    return out
+end
+
+-- What each block's Show rows row says its filters keep, by the block's source and category.
+local FILTER_DESC = {
+    primary   = L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, the learned skills still below their rank's cap, or the learned skills at their cap with a higher rank to train. The filter mark on its header picks it."],
+    weapon    = L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, the skills you have learned, the weapons you have equipped (main hand, off hand, ranged), or the learned skills still below their cap. The filter mark on its header picks it."],
+    other     = L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, the skills you have learned, or the learned skills still below their cap. The filter mark on its header picks it."],
+    stats     = L["Which of the block's rows show, here, in its detached frame, in a merged window and in the LDB tooltip: all of them, or only the stats whose value is not 0. The filter mark on its header picks it."],
+}
+FILTER_DESC.secondary = FILTER_DESC.primary
+local function filterDesc(id)
+    local d = NS.BlockDefs[id]
+    return d.source == "stats" and FILTER_DESC.stats or FILTER_DESC[id]
+end
 
 local function blockRows(id)
     local d, def = NS.BlockDefs[id], P.blocks[id]
@@ -81,6 +172,9 @@ local function blockRows(id)
         row({ path = base .. "locked", group = BLOCKS, subgroup = d.title, type = "bool", default = def.locked,
               label = L["Lock this block"], desc = L["Stop the detached frame from being dragged."],
               onChange = NS.ApplyLook }),
+        row({ path = base .. "sort", group = BLOCKS, subgroup = d.title, type = "string", default = def.sort,
+              values = sortValues, label = L["Sort rows by"], onChange = B.Changed,
+              desc = L["The order of the block's rows, here, in its detached frame and in the LDB tooltip. The sort mark on its header opens a menu of every order."] }),
         row({ path = base .. "scale", group = BLOCKS, subgroup = d.title, type = "number", default = def.scale,
               min = 0.5, max = 2, step = 0.05, label = L["Block scale"],
               desc = L["Scale of the block's own frame while it is detached."], onChange = NS.ApplyLook }),
@@ -102,67 +196,59 @@ for _, id in ipairs(NS.BLOCKS) do
             desc = L["While detached, list only the weapons you have equipped and the skills still below their cap."],
             onChange = NS.ApplyLook })
     end
+    -- The header's filter mark (round 5, R5-10; every block, round 7, R7-1): the block's row filter.
+    if B.FILTERABLE[id] then
+        rows[#rows + 1] = row({ path = "layout.blocks." .. id .. ".filter", group = BLOCKS,
+            subgroup = NS.BlockDefs[id].title, type = "string", default = P.blocks[id].filter,
+            values = filterValues(id), label = L["Show rows"], onChange = B.Changed,
+            desc = filterDesc(id) })
+    end
 end
+for _, r in ipairs(detachedRows) do rows[#rows + 1] = r end
 NS.RegisterSchemaRows(rows)
 
 -- ---------------------------------------------------------------------------------------------
--- The Block order tab: one draggable row per block (options-ui-§18). The controller is canceled
--- before anything is drawn, and the rows hold nothing of their own on AceGUI's frames: the label is
--- a Label widget and the handle and box are the library's, given back by Cancel.
+-- The Block order tab: one boxed, draggable row per block (options-ui-§18), drawn as ConsumableMaster's
+-- Priority list is (settings/BoxList.lua, feedback round 2): the handle, the block's name, and an eye
+-- that shows or hides it (Blocks > Show this block). The controller is canceled before anything is
+-- drawn (the page's beforeRender).
 -- ---------------------------------------------------------------------------------------------
-local STRIDE, ROW_H, GUTTER = 30, 26, 36
 local Order = {}
 NS.OptionsBlockOrder = Order
 
-function Order.Cancel(ctx)
-    if ctx.skmReorder then ctx.skmReorder:Cancel() end
-    ctx.skmReorder = nil
-end
+function Order.Cancel(ctx) NS.OptionsList.Cancel(ctx) end
 
-local function widgets()
-    local W = LibStub and LibStub("LibKa0s-Widgets-1.0", true)
-    return W and W.ReorderList and W or nil
-end
-
-local function slot(AceGUI, scroll, text, dim)
-    local g = AceGUI:Create("SimpleGroup")
-    g:SetLayout("Flow")
-    g:SetFullWidth(true)
-    g:SetHeight(STRIDE)
-    local pad = AceGUI:Create("Label")
-    pad:SetWidth(GUTTER)
-    pad:SetText(" ")
-    g:AddChild(pad)
-    local label = AceGUI:Create("Label")
-    label:SetText(text)
-    local muted = dim and NS.Bar.Color("sm.muted")   -- a hidden block reads dimmed, in the skin's muted
-    if muted and label.SetColor then label:SetColor(muted[1], muted[2], muted[3]) end
-    g:AddChild(label)
-    scroll:AddChild(g)
-    return g
+local function toggleShown(ctx, id)
+    return function()
+        local path = "layout.blocks." .. id .. ".shown"
+        if NS.SetByPath(path, B.Settings(id).shown == false) then H.RefreshPanel(ctx, true) end
+    end
 end
 
 function Order.Render(ctx)
-    Order.Cancel(ctx)
-    local AceGUI = NS.AceGUI or (LibStub and LibStub("AceGUI-3.0", true))
     local scroll = H.EnsureScroll(ctx)
-    if not (AceGUI and scroll) then return end
-    H.TextRow(ctx, L["Drag a block by its handle to move it. Hidden blocks keep their place."])
-    local W = widgets()
-    local list = W and W.ReorderList({
-        stride = STRIDE, owner = addonName, handleIcon = NS.Icon and NS.Icon("move") or nil,
-        handleTooltip = L["Drag to reorder"],
+    if not scroll then return end
+    H.Section(ctx, ORDER)
+    H.TextRow(ctx, L["Drag a block by its handle to move it. The eye shows or hides it; a hidden block keeps its place."])
+    if H.AddSpacer then H.AddSpacer(scroll, 4) end
+    local list = NS.OptionsList.Begin(ctx, {
         onMove = function(from, to)
             if B:Move(from, to) then H.RefreshPanel(ctx, true) end
         end,
     })
-    ctx.skmReorder = list
+    local eye = NS.Icon and NS.Icon("eye")
     for _, id in ipairs(B.Ordered()) do
         local hidden = B.Settings(id).shown == false
-        local g = slot(AceGUI, scroll, NS.BlockDefs[id].title, hidden)
-        if list then list:AddRow(g.frame, { ghostText = NS.BlockDefs[id].title, height = ROW_H, dimmed = hidden }) end
+        NS.OptionsList.Row(scroll, list, {
+            text = NS.BlockDefs[id].title, dimmed = hidden,
+            actions = { {
+                image = eye, dimmed = hidden, onClick = toggleShown(ctx, id),
+                title = hidden and L["Show this block"] or L["Hide this block"],
+                tooltip = L["Show this block in the window, or in its own frame while detached."],
+            } },
+        })
     end
-    if list then list:Finish(scroll.content or scroll.frame) end
+    NS.OptionsList.Finish(list, scroll)
 end
 
 NS.RegisterSchemaPage(PAGE, L["Layout"], {

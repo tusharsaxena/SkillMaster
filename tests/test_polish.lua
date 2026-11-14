@@ -90,8 +90,10 @@ test("broker: the leave poll hides GameTooltip only while the feed still owns it
     rawset(tip, "IsMouseOver", function() return false end)
     cell.IsMouseOver = function() return false end
     M.__fireTimers()
+    NS.SetByPath("tooltips.ldb.style", "classic")   -- round 6: the Classic style draws on GameTooltip
+    NS.SetByPath("broker.tooltip.skin", false)   -- the plain tooltip is the shared GameTooltip
 
-    B.OnEnter("all", cell)
+    B.OnEnter(cell)
     assertTrue(tip:IsShown(), "the feed's tooltip shows")
     B.OnLeave()
     tip:SetOwner(other, "ANCHOR_RIGHT")   -- another addon takes GameTooltip before the poll runs
@@ -100,7 +102,7 @@ test("broker: the leave poll hides GameTooltip only while the feed still owns it
     M.__fireTimers()
     assertTrue(tip:IsShown(), "a tooltip another frame owns is left alone")
 
-    B.OnEnter("all", cell)
+    B.OnEnter(cell)
     B.OnLeave()
     M.__now = M.__now + 1
     M.__fireTimers()
@@ -110,6 +112,8 @@ test("broker: the leave poll hides GameTooltip only while the feed still owns it
     rawset(tip, "SetOwner", savedSet)
     rawset(tip, "IsMouseOver", savedOver)
     tip:Hide()
+    NS.SetByPath("broker.tooltip.skin", NS.defaults.profile.broker.tooltip.skin)
+    NS.SetByPath("tooltips.ldb.style", NS.defaults.profile.tooltips.ldb.style)
 end)
 
 -- ---------------------------------------------------------------------------------------------
@@ -122,24 +126,24 @@ test("broker: the footer reads as the mockup; a right-click opens the Broker set
     function tip:AddLine(t) lines[#lines + 1] = t end
     function tip:AddDoubleLine(l) lines[#lines + 1] = l end
     function tip:NumLines() return #lines end
-    B.FillTooltip("stats", tip)
+    B.FillTooltip(tip)
     local footer = lines[#lines]
-    assertTrue(footer:find("Click label: toggle window \194\183 Click row: open its window \194\183 Right-click: feed options",
+    assertTrue(footer:find("Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, shift-click to link, right-click for the menu",
         1, true) ~= nil, footer)
 
     local H, opened = NS.Helpers, {}
     local savedOpen, savedNS = H.OpenOptionsPanel, NS.OpenOptionsPanel
     rawset(H, "OpenOptionsPanel", function(page) opened[#opened + 1] = tostring(page) return true end)
     NS.OpenOptionsPanel = function() opened[#opened + 1] = "main" end
-    M.__ldbObjects.SkillMaster_All.OnClick(nil, "RightButton")
+    M.__ldbObjects["Skill Master"].OnClick(nil, "RightButton")
     assertEqual(table.concat(opened, ","), "broker", "the Broker page, by its page key")
 
     -- No page opener (the library absent): the main panel; no opener at all: nothing, no error.
     rawset(H, "OpenOptionsPanel", nil)
-    M.__ldbObjects.SkillMaster_All.OnClick(nil, "RightButton")
+    M.__ldbObjects["Skill Master"].OnClick(nil, "RightButton")
     assertEqual(table.concat(opened, ","), "broker,main")
     NS.OpenOptionsPanel = nil
-    M.__ldbObjects.SkillMaster_All.OnClick(nil, "RightButton")
+    M.__ldbObjects["Skill Master"].OnClick(nil, "RightButton")
     rawset(H, "OpenOptionsPanel", savedOpen)
     NS.OpenOptionsPanel = savedNS
     assertEqual(B.SETTINGS_PAGE, "broker")
@@ -266,6 +270,7 @@ test("secure overlay: raising the window re-levels its overlays above the rows (
     -- red under: an overlay left at the old level after the window is raised, or a re-level in combat.
     withWorld(function()
         W.Show()
+        rowIn(W.Rows(), "tailoring"):__fire("OnEnter")   -- only the hovered crafting row is armed
         local f, lw = W.Frame(), SO.Overlay("tailoring")
         assertTrue(lw ~= nil and lw:IsShown(), "armed")
         f:SetFrameLevel(40)               -- a toplevel window raised by a click
@@ -289,6 +294,7 @@ end)
 test("secure overlay: a row click raises too; a detached frame's mouse-down re-levels its overlays", function()
     withWorld(function()
         W.Show()
+        rowIn(W.Rows(), "tailoring"):__fire("OnEnter")
         local f, lw = W.Frame(), SO.Overlay("tailoring")
         f:SetFrameLevel(30)
         local row = rowIn(W.Rows(), "skinning")
@@ -298,6 +304,7 @@ test("secure overlay: a row click raises too; a detached frame's mouse-down re-l
         NS.db.profile.layout.blocks.primary.docked = false
         D.Refresh()
         local df = D.Frame("primary")
+        rowIn(D.Rows("primary"), "tailoring"):__fire("OnEnter")
         df:SetFrameLevel(12)
         df:__fire("OnMouseDown", "LeftButton")
         assertEqual(lw:GetFrameLevel(), 12 + LAYERS.LEVEL.SECURE, "over the detached frame's row")
@@ -308,6 +315,7 @@ test("secure overlay: a dragged window's overlays come down for the drag and bac
     -- red under: an overlay left live at the old place while its window moves (it trails the drag).
     withWorld(function()
         W.Show()
+        rowIn(W.Rows(), "tailoring"):__fire("OnEnter")
         local f, lw = W.Frame(), SO.Overlay("tailoring")
         assertTrue(lw:IsShown())
         NS.SetByPath("locked", false)
@@ -318,6 +326,7 @@ test("secure overlay: a dragged window's overlays come down for the drag and bac
 
         NS.Blocks:Detach("primary")   -- LAYOUT_CHANGED: the window lets go of the rows too
         local df = D.Frame("primary")
+        rowIn(D.Rows("primary"), "tailoring"):__fire("OnEnter")   -- the detached frame's own row
         assertTrue(lw:IsShown() and lw.row.entry.key == "tailoring")
         df:GetScript("OnDragStart")(df)
         assertFalse(lw:IsShown(), "a detached frame's too")
@@ -339,7 +348,7 @@ test("journal: a grip drag lays out at most once per frame and redraws once, aft
     local grip = f.resizeGrip
     assertTrue(grip ~= nil, "the Journal has a resize grip")
     local minW, minH = f:GetResizeBounds()
-    assertEqual(minW, 640, "never narrower than its default")
+    assertEqual(minW, 720, "never narrower than its default (720 since round 4)")
     assertEqual(minH, 420, "never shorter")
     NS.db.profile.journal.size = false
 
@@ -386,7 +395,7 @@ test("journal: the saved size is restored, clamped to the minimum; locked refuse
     NS.db.profile.journal.size = { w = 800, h = 500 }
     J.ApplySize()
     rawset(f, "SetSize", nil)
-    assertEqual(table.concat(sizes, ","), "640x900,800x500")
+    assertEqual(table.concat(sizes, ","), "720x900,800x500")
 
     NS.SetByPath("locked", true)
     local before = f.__sizingCount

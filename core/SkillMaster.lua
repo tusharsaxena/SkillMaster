@@ -17,6 +17,29 @@ NS.Print = NS.Util.print   -- the reclaim: the same object every settings file c
 
 function NS.IsTestMode() return NS.State.testMode == true end
 
+-- Test mode's surfaces (owner feedback round 5, R5-1): turning it on shows the main window, the
+-- Journal and test mode's three toasts (NS.Alerts.ShowTestToasts); turning it off takes the toasts
+-- down and hides each window test mode opened, leaving one the player had open. Nothing is stored.
+local openedForTest   -- { window = bool, journal = bool }: which windows test mode put up
+
+local function showTestSurfaces()
+    local W, J = NS.MainWindow, NS.Journal
+    openedForTest = { window = W and not W.IsShown(), journal = J and not J.IsShown() }
+    if openedForTest.window then W.Show() end
+    if openedForTest.journal then J.Show() end
+    if NS.Alerts then NS.Alerts.ShowTestToasts() end
+    if NS.WaypointArrow then NS.WaypointArrow.ShowTest() end   -- R6-11: the arrow on a sample trainer
+end
+
+local function hideTestSurfaces()
+    if NS.Alerts then NS.Alerts.HideTestToasts() end
+    if NS.WaypointArrow then NS.WaypointArrow.HideTest() end
+    local opened = openedForTest or {}
+    openedForTest = nil
+    if opened.window then NS.MainWindow.Hide() end
+    if opened.journal then NS.Journal.Hide() end
+end
+
 --- Flip test mode. Refuses while stood down (the one refusal helper), and refuses to START in
 --- combat or while a simulation runs (the two modes are exclusive, H5). Answers the new state.
 function NS.ToggleTestMode()
@@ -36,6 +59,7 @@ function NS.ToggleTestMode()
     NS.Debug("Test", "test mode %s", NS.State.testMode and "on" or "off")
     if NS.Preview then NS.Preview.Apply(NS.State.testMode) end
     if NS.MainWindow then NS.MainWindow.Refresh() end
+    if NS.State.testMode then showTestSurfaces() else hideTestSurfaces() end
     if NS.Helpers and NS.Helpers.RefreshScalars then NS.Helpers.RefreshScalars() end
     return NS.State.testMode
 end
@@ -48,6 +72,7 @@ function addon:OnEnterCombat()
     NS.Debug("Test", "test mode ended by combat")
     if NS.Preview then NS.Preview.Apply(false) end
     if NS.MainWindow then NS.MainWindow.Refresh() end
+    hideTestSurfaces()
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -68,11 +93,13 @@ function NS.StandDown()
     -- The simulation stops FIRST (H6), so its cleanup runs before anything below tears down.
     if NS.Sim then NS.Sim:Stop("standDown") NS.Sim:HidePanel() end
     NS.State.testMode = false
+    openedForTest = nil   -- every window and toast comes down below
     if NS.Preview then NS.Preview.Apply(false) end
     if NS.MainWindow then NS.MainWindow.StandDown() end
     if NS.Detached then NS.Detached.StandDown() end
     if NS.SecureOverlay then NS.SecureOverlay:StandDown() end
     if NS.TrainerPopup then NS.TrainerPopup.Hide() end
+    if NS.WaypointArrow then NS.WaypointArrow.StandDown() end   -- R6-11: no arrow stays up
     if NS.Widgets and NS.Widgets.CloseMenu then NS.Widgets.CloseMenu() end   -- the row menu closes with us
     if NS.Journal then NS.Journal.StandDown() end
     if NS.Alerts then NS.Alerts.StandDown() end   -- T4.2: no toast stays up or waits
@@ -81,7 +108,7 @@ function NS.StandDown()
     NS.UnitEvents.StandDown()
     addon:CancelAllTimers()
     NS.BusStandDown()
-    if NS.Broker then NS.Broker.Refresh() end   -- the feeds read "Off" (T4.1)
+    if NS.Broker then NS.Broker.Refresh() end   -- the feed reads "Off" (T4.1)
 end
 
 --- Rebuild from current state.
@@ -106,6 +133,7 @@ local function reloadProfile()
     if NS.Sim and NS.Sim:IsActive() then NS.Sim:Stop("profile") end
     NS.HideSkinPicker()
     NS:RunMigrations()
+    if NS.ForgetCustomTemplates then NS.ForgetCustomTemplates() end   -- a Custom pick was the old profile's
     NS.SyncEnabledHold()
     NS.ApplySkinChoice()
     if NS.MainWindow then NS.MainWindow.ApplySettings() end
@@ -113,9 +141,13 @@ local function reloadProfile()
     -- values-only pass keeps the old profile's bar styles while the row set is unchanged), and the
     -- Bars page's preview and the Journal restyle on the same message.
     if NS.Blocks then NS.Blocks.Changed() end
-    if NS.Broker then NS.Broker.Refresh() end   -- the feeds' templates are per profile
+    if NS.Broker then NS.Broker.Refresh() end   -- the feed's template is per profile
     if NS.Alerts then NS.Alerts.Refresh() end   -- T4.2: the toast's position from the new profile
-    if NS.Journal then NS.Journal.ApplyGeometry() end   -- its drop point and size are per profile
+    if NS.WaypointArrow then NS.WaypointArrow.ApplySettings() end   -- R6-11: its switch, scale and point
+    if NS.Journal then
+        NS.Journal.ApplyGeometry()   -- its drop point and size are per profile
+        NS.Journal.ApplyLock()       -- and its lock mark (no `locked` reaction fires on a switch)
+    end
     if NS.Helpers and NS.Helpers.RefreshAllPanels then NS.Helpers.RefreshAllPanels() end
     NS.MaybeShowSkinPicker()
 end

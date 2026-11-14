@@ -6,7 +6,7 @@ local _, NS = ...
 -- markers and scale, and the click hints. Drawn on GameTooltip with one tooltip-style NS.Bar laid
 -- under its numbers line; GameTooltip is never re-skinned (Skin's Tooltip is for library tooltips).
 --
--- NS.RowTooltip.Lines(entry, kind) -> { { left, right, tone, rightTone } | { bar = true } |
+-- NS.RowTooltip.Lines(entry, kind, openFrom) -> { { left, right, tone, rightTone } | { bar = true } |
 --   { divider = true } }, pure; tones: body, muted, heading, accent, temp, perm, good, warn, bad.
 -- NS.RowTooltip.Show(row), .Hide(row), .Bar()
 
@@ -134,24 +134,37 @@ function HELPERS.fishing(out, e)
         ok and L["no fish escape"] or L["fish will escape"], "body", ok and "good" or "warn")
 end
 
+-- The click hint, as Open a row from says (round 8, R8-1): Go icon only names the arrow (the go
+-- icon), Full row a click anywhere on the row.
 local HINTS = {
-    secure = L["Click: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
-    skills = L["Click: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"],
-    trainer = L["Click: trainers and waypoint \194\183 Right-click: menu"],
-    paperdoll = L["Click: character panel \194\183 Shift-click: link \194\183 Right-click: menu"],
+    icon = {
+        secure = L["Arrow: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
+        tradeskill = L["Arrow: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
+        skills = L["Arrow: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"],
+        trainer = L["Arrow: trainers and waypoint \194\183 Right-click: menu"],
+        paperdoll = L["Arrow: character panel \194\183 Shift-click: link \194\183 Right-click: menu"],
+    },
+    row = {
+        secure = L["Click: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
+        tradeskill = L["Click: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"],
+        skills = L["Click: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"],
+        trainer = L["Click: trainers and waypoint \194\183 Right-click: menu"],
+        paperdoll = L["Click: character panel \194\183 Shift-click: link \194\183 Right-click: menu"],
+    },
 }
 
-local function hint(out, kind, e)
+local function hint(out, kind, e, openFrom)
     out[#out + 1] = { divider = true }
-    line(out, HINTS[NS.Interact.Target({ kind = kind, entry = e })], nil, "muted")
+    local set = HINTS[openFrom == "icon" and "icon" or "row"]
+    line(out, set[NS.Interact.Target({ kind = kind, entry = e })], nil, "muted")
 end
 
-local function skillLines(e)
+local function skillLines(e, openFrom)
     local out = {}
     line(out, e.name, CATEGORY[e.category] or L["Other"], "heading", "muted")
     if e.learned == false then
         line(out, NS.Rows.UnlearnedText(e), nil, "muted")
-        hint(out, "skill", e)
+        hint(out, "skill", e, openFrom)
         return out
     end
     numbers(out, e)
@@ -161,7 +174,7 @@ local function skillLines(e)
     rankLines(out, e)
     if e.category == "weapon" or e.key == "defense" then weaponLines(out, e) end
     if HELPERS[e.key] and helpersOn() then HELPERS[e.key](out, e) end
-    hint(out, "skill", e)
+    hint(out, "skill", e, openFrom)
     return out
 end
 
@@ -169,23 +182,25 @@ end
 -- Stat lines
 -- ---------------------------------------------------------------------------------------------
 
-local function statLines(e)
+local function statLines(e, openFrom)
     local out = {}
     line(out, e.label, e.display, "heading", "body")
     out[#out + 1] = { bar = true }
     local pct = tostring(e.display or ""):find("%%") and "%" or ""
-    for _, m in ipairs(e.markers or {}) do
+    -- The threshold lines follow Bars > Marks > Thresholds in the row tooltip, as its bar does (R6-4).
+    for _, m in ipairs(Bar.ShowMarkers("tooltip") and e.markers or {}) do
         line(out, ("\194\183 %s%s %s"):format(tostring(m.value or ""), pct, m.label or ""), nil, "muted")
     end
     if e.ref then line(out, L["Scale: vs %s"]:format(tostring(e.ref) .. pct), nil, "muted") end
-    hint(out, "stat", e)
+    hint(out, "stat", e, openFrom)
     return out
 end
 
---- The tooltip's lines for a skill or stat entry.
-function RT.Lines(e, kind)
-    if kind == "stat" then return statLines(e) end
-    return skillLines(e)
+--- The tooltip's lines for a skill or stat entry; `openFrom` ("row", the default, or "icon": the
+--- row's Open a row from, NS.Rows.OpenFrom) words the click hint.
+function RT.Lines(e, kind, openFrom)
+    if kind == "stat" then return statLines(e, openFrom) end
+    return skillLines(e, openFrom)
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -207,10 +222,45 @@ local tipBar
 
 function RT.Bar() return tipBar end
 
+-- The bar's line, sized to Bars > Main window tooltip row height; back to auto height (0) with
+-- the bar, since GameTooltip keeps a font string's height for whoever fills the line next.
+local sizedLine
+
+-- The tooltip's own settings (the Tooltips page, owner feedback round 4).
+local function tipSettings()
+    local t = NS.db and NS.db.profile.tooltips
+    return t and t.row or NS.defaults.profile.tooltips.row
+end
+
+local widened = false
+
+local function hideBar()
+    if tipBar then tipBar:Hide() end
+    if sizedLine then sizedLine:SetHeight(0) sizedLine = nil end
+    -- GameTooltip is shared: its lines' fonts and its minimum width go back for the next owner.
+    if GameTooltip then NS.Chrome.RestoreTooltipFonts(GameTooltip) end
+    if widened and GameTooltip and GameTooltip.SetMinimumWidth then GameTooltip:SetMinimumWidth(0) end
+    widened = false
+end
+
+--- The one tooltip bar, on GameTooltip. It goes with the tooltip's CONTENT, not only with the
+--- tooltip: SetOwner on a shown GameTooltip clears it (OnTooltipCleared) without hiding it, and a
+--- bar hidden by OnHide alone stayed on screen over whatever the tooltip showed next, the broker
+--- feed's rows among them (feedback round 2, FB-9).
+local hooked = false
+local function ensureHooks()
+    if hooked then return end
+    hooked = true
+    GameTooltip:HookScript("OnHide", hideBar)
+    if GameTooltip.HasScript and GameTooltip:HasScript("OnTooltipCleared") then
+        GameTooltip:HookScript("OnTooltipCleared", hideBar)
+    end
+end
+
 local function ensureBar()
+    ensureHooks()
     if tipBar then return tipBar end
     tipBar = Bar.Create(GameTooltip, "tooltip")
-    GameTooltip:HookScript("OnHide", function() tipBar:Hide() end)
     return tipBar
 end
 
@@ -223,26 +273,39 @@ local function addLine(l)
     end
 end
 
+local function sizeBarLine(n)
+    local fs = _G["GameTooltipTextLeft" .. n]
+    if not (fs and fs.SetHeight) then return end
+    fs:SetHeight(Bar.TooltipRowHeight("tooltip"))
+    sizedLine = fs
+end
+
 local function placeBar(row, n)
     local b = ensureBar()
     b:ApplyStyle(Bar.ResolveStyle("tooltip"))   -- each show, so a skin switch since the last one lands
     local anchor = _G["GameTooltipTextLeft" .. n]
     b:ClearAllPoints()
     if anchor then
+        local w = tonumber(tipSettings().barWidth) or 200   -- Tooltips > Bar width
         b:SetPoint("LEFT", anchor, "LEFT", 0, 0)
-        b:SetWidth(200)
+        b:SetWidth(w)
+        b.knownWidth = w   -- the width Layout uses when the tooltip answers its own as secret
     end
-    if row.kind == "stat" then b:SetValues(NS.Rows.StatValues(row.entry)) else b:SetValues((NS.Rows.SkillValues(row.entry))) end
+    local stat = row.kind == "stat"
+    local v = stat and NS.Rows.StatValues(row.entry) or (NS.Rows.SkillValues(row.entry))
+    v.color = NS.Rows.FillColor(row.entry, stat)   -- the row's own fill: Color mode, the palette, Bar > Fill
+    b:SetValues(v)
     b:Show()
 end
 
 --- Show `row`'s tooltip.
 function RT.Show(row)
     if not (GameTooltip and row.entry) then return end
+    hideBar()   -- shown again below only when this row's lines ask for it
     GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
     local n = 0
     local barAt
-    for _, l in ipairs(RT.Lines(row.entry, row.kind)) do
+    for _, l in ipairs(RT.Lines(row.entry, row.kind, NS.Rows.OpenFrom(row))) do
         if l.bar then
             GameTooltip:AddLine(" ")
             n = n + 1
@@ -254,6 +317,16 @@ function RT.Show(row)
             addLine(l)
             n = n + 1
         end
+    end
+    if barAt then sizeBarLine(barAt) end
+    -- Tooltips > Font size on this tooltip's lines, and room for Tooltips > Bar width (both undone
+    -- by hideBar when the tooltip clears or hides).
+    ensureHooks()
+    local t = tipSettings()
+    NS.Chrome.TooltipFontSize(GameTooltip, t.fontSize, 1)
+    if barAt and GameTooltip.SetMinimumWidth then
+        GameTooltip:SetMinimumWidth((tonumber(t.barWidth) or 200) + 20)
+        widened = true
     end
     GameTooltip:Show()
     if barAt then placeBar(row, barAt) end

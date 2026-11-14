@@ -46,6 +46,78 @@ function NS.Live(rows, onChange)
     return rows
 end
 
+-- ---------------------------------------------------------------------------------------------
+-- A text template as a presets dropdown plus "Custom" (feedback round 1, FB-2). A template row
+-- used to be a bare `type = "string"` row, which the library draws as a dropdown with nothing in it
+-- (LibKa0s Options' EMPTY_DROPDOWN). Two rows now stand for one stored template:
+--
+--   the picker  `presetPath`, session-only (nothing stored): its get answers the preset the stored
+--               template matches, else "custom"; its set writes the preset's template through
+--               NS.SetByPath, or, for "custom", remembers the choice for the session and writes
+--               nothing.
+--   the box     `path`, the stored template itself, drawn as an EditBox (`dialogControl`) and only
+--               while the picker reads "custom" (`shownWhen`, the library's switched sections).
+--
+-- The stored value is still the template string, so no SavedVariables shape changes: a string
+-- matching no preset reads as Custom, with its text in the box.
+-- ---------------------------------------------------------------------------------------------
+NS.CUSTOM_PRESET = "custom"
+local customChosen = {}   -- [path] = true once the player picks Custom this session
+
+local function presetOf(presets, value)
+    for _, p in ipairs(presets) do
+        if p.value == value then return p.value end
+    end
+    return nil
+end
+
+local function presetPicker(spec)
+    local values = {}
+    for i, p in ipairs(spec.presets) do values[i] = { value = p.value, text = p.text } end
+    values[#values + 1] = { value = NS.CUSTOM_PRESET, text = NS.L["Custom"] }
+    return {
+        path = spec.presetPath, page = spec.page, group = spec.group, subgroup = spec.subgroup,
+        type = "string", sessionOnly = true, wide = true, values = values,
+        default = spec.default, label = spec.label, desc = spec.desc,
+        get = function()
+            if customChosen[spec.path] then return NS.CUSTOM_PRESET end
+            return presetOf(spec.presets, NS.GetSetting(spec.path)) or NS.CUSTOM_PRESET
+        end,
+        set = function(v)
+            if v == NS.CUSTOM_PRESET then
+                customChosen[spec.path] = true
+                return
+            end
+            customChosen[spec.path] = nil
+            -- A reset (a page's Defaults, Reset all settings) writes the box row's own default in
+            -- the same walk; the picker only lets go of a Custom choice there.
+            local S = NS.SchemaRuntime
+            if S and S.InBulk and S.InBulk() then return end
+            NS.SetByPath(spec.path, v)
+        end,
+        -- The write above runs the box row's own onChange; the picker repaints nothing itself.
+        onChange = function() end,
+    }
+end
+
+--- The two rows of one template setting. `spec` = { path, presetPath, page, group, subgroup,
+--- default, label, desc, boxDesc, presets = { { value = <template>, text = <label> }, ... } }; the
+--- default must be one of the presets, so a fresh profile reads as that preset.
+function NS.TemplateRows(spec)
+    assert(presetOf(spec.presets, spec.default), "the default template is one of the presets: " .. spec.path)
+    return {
+        presetPicker(spec),
+        { path = spec.path, page = spec.page, group = spec.group, subgroup = spec.subgroup, type = "string",
+          dialogControl = "EditBox", wide = true, default = spec.default, label = NS.L["Custom text"],
+          desc = spec.boxDesc, shownWhen = { path = spec.presetPath, equals = NS.CUSTOM_PRESET } },
+    }
+end
+
+--- Forget this session's Custom choices (the suites start each case from the stored values).
+function NS.ForgetCustomTemplates()
+    for k in pairs(customChosen) do customChosen[k] = nil end
+end
+
 --- A schema page: a canvas subcategory drawn as a tab strip over its rows' groups (options-ui-§13),
 --- its Defaults button restoring the page. `spec` = { tabs, header, beforeRender, defaultsTooltip }:
 --- `tabs` the host tabs (RenderTabbedSchema's opts.tabs), `header` a PageHeader spec drawn above the

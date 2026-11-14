@@ -23,7 +23,7 @@ read_globals = {
   "Settings", "StaticPopup_Show", "YES", "NO",
   -- the probe's reads (modules/Probe.lua): the skill list, the build, and every API it reports on
   "GetBuildInfo", "GetLocale", "GetNumSkillLines", "GetSkillLineInfo", "ExpandSkillHeader",
-  "CollapseSkillHeader", "GetWeaponEnchantInfo", "IsAddOnLoaded", "C_Map", "GetUnitSpeed",
+  "CollapseSkillHeader", "GetWeaponEnchantInfo", "C_Map", "GetUnitSpeed",
   "GetSpellBonusDamage", "GetSpellCritChance", "GetHitModifier", "GetSpellHitModifier",
   "GetCombatRating", "GetCritChance", "GetRangedCritChance", "GetDodgeChance", "GetParryChance",
   "GetBlockChance", "UnitResistance", "CastSpellByName", "C_SkillInfo", "C_Item", "Enum", "INVSLOT_MAINHAND",
@@ -34,13 +34,28 @@ read_globals = {
   -- T2.2 Bonuses (modules/Bonuses.lua): the clock, the race, tooltips and buffs
   "C_TooltipInfo", "C_UnitAuras", "issecretvalue",
   -- M3 the display (modules/Chrome.lua .. modules/Waypoints.lua): the tooltip, the character frame,
-  -- chat linking, the modifier keys and the waypoint providers (TomTom, the native user waypoint)
-  "GameTooltip", "ToggleCharacter", "ChatEdit_InsertLink", "ChatFrame_OpenChat", "IsShiftKeyDown",
-  "TomTom", "UiMapPoint", "C_SuperTrack",
+  -- chat linking, the modifier keys and the native user waypoint
+  "GameTooltip", "ToggleCharacter",
+  -- owner feedback round 4: Forever's character panel (Camelot), opened by its micro button
+  "CharacterMicroButton", "CharacterFrame", "PaperDollFrame", "SkillsFrame", "EventRegistry",
+  "C_SpellBook",                 -- a profession's trade link (core/Compat.lua TradeSkillLink)
+  "ChatEdit_InsertLink", "ChatFrame_OpenChat", "IsShiftKeyDown",
+  "UiMapPoint", "C_SuperTrack",
+  -- round 5, R5-15: the map point a world position is read for (core/Compat.lua MapWorldPos)
+  "CreateVector2D",
+  -- the click debug (modules/SecureOverlay.lua SO.MouseFoci): the frames under the pointer
+  "GetMouseFoci",
+  -- round 5, R5-6b: the pointer a merged window's section drag follows (modules/GroupsSnap.lua)
+  "GetCursorPosition",
+  -- owner feedback round 3: Skinning / Fishing windows by line ID, the Skills tab's selection
+  "C_TradeSkillUI", "SetSelectedSkill", "SkillFrame", "SkillFrame_SetSelection", "SkillFrame_UpdateSkills",
   -- T4.1 Broker (modules/Broker.lua): the main hand's weapon class
   "GetInventoryItemLink", "GetItemInfoInstant",
   -- M6: a spell's localized name from its ID (core/Compat.lua SpellName, localization-§4)
   "C_Spell", "GetSpellInfo",
+  -- FB-14 / FB-17: a profession's spell icon, the player's name and the class icon's two sources
+  -- (core/Compat.lua SpellTexture, PlayerName, ClassIcon); the name's class color (MainWindow)
+  "GetSpellTexture", "UnitName", "C_Texture", "CLASS_ICON_TCOORDS", "RAID_CLASS_COLORS",
 }
 
 -- T4.3: the session log's clock and zone, the alt snapshot's identity reads, the Journal's popup,

@@ -94,22 +94,80 @@ local function ladderFor(key)
     return name and NS.Ranks_Forever and NS.Ranks_Forever[name]
 end
 
+--- The trainers of rank `from` and every rank above it on `ladder` (owner feedback round 6, R6-7: an
+--- Artisan trainer can train Expert too), one { rankName, cap, trainers } per rank, the lowest first.
+--- A trainer is listed once, under the lowest of those ranks it trains; a rank left with no trainer
+--- is dropped.
+local function rankGroups(ladder, from, key, faction, race)
+    local groups, seen = {}, {}
+    for _, step in ipairs(ladder) do
+        if step.cap >= from then
+            local g = { rankName = step.rankName, cap = step.cap, trainers = {} }
+            for _, rec in ipairs(collect(key, faction, race, step.cap)) do
+                if not seen[rec] then
+                    seen[rec] = true
+                    g.trainers[#g.trainers + 1] = rec
+                end
+            end
+            if #g.trainers > 0 then groups[#groups + 1] = g end
+        end
+    end
+    return groups
+end
+
 --- The rank above the skill's current cap `max`, or nil when there is none (top rank reached, or a
 --- skill with no ranks: weapons, Lockpicking). Answers { rankName, cap, minLevel, minSkill, cost,
---- canTrain, trainers }, where canTrain says `level` and `rank` meet the rank's gates.
+--- canTrain, trainers, groups, higher }, where canTrain says `level` and `rank` meet the rank's
+--- gates, trainers are the next rank's, groups that rank's and every higher rank's (rankGroups) and
+--- higher says the ladder has a rank above it.
 function Trainers:NextRank(key, rank, max, level, faction, race)
     local ladder = ladderFor(key)
     if not ladder then return nil end
     for _, step in ipairs(ladder) do
         if step.cap > (max or 0) then
             level = level or playerLevel()
+            faction, race = faction or playerFaction(), race or playerRace()
+            local top = ladder[#ladder]
             return {
                 rankName = step.rankName, cap = step.cap, minLevel = step.minLevel,
                 minSkill = step.minSkill, cost = step.cost,
                 canTrain = level >= step.minLevel and (rank or 0) >= step.minSkill,
-                trainers = collect(key, faction or playerFaction(), race or playerRace(), step.cap),
+                trainers = collect(key, faction, race, step.cap),
+                groups = rankGroups(ladder, step.cap, key, faction, race),
+                higher = top.cap > step.cap,
             }
         end
     end
     return nil
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- Round 5, R5-15: distances (pure math; the trainer popup measures the positions)
+-- ---------------------------------------------------------------------------------------------
+
+--- Yards between two world positions, each { instanceID, x, y } (NS.Compat.MapWorldPos's three
+--- returns); nil when either is missing or they lie in different instances (continents).
+function Trainers.Distance(a, b)
+    if type(a) ~= "table" or type(b) ~= "table" or a[1] == nil or a[1] ~= b[1] then return nil end
+    local dx, dy = a[2] - b[2], a[3] - b[3]
+    return math.sqrt(dx * dx + dy * dy)
+end
+
+--- A new list of `list`'s trainers, nearest first by `dist` (trainer record -> yards); a trainer with
+--- no distance comes after every measured one, the unmeasured keeping their order in `list`.
+function Trainers.ByDistance(list, dist)
+    local rank = {}
+    local out = {}
+    for i, t in ipairs(list) do rank[t], out[i] = i, t end
+    dist = dist or {}
+    table.sort(out, function(a, b)
+        local da, db = dist[a], dist[b]
+        if da and db then
+            if da ~= db then return da < db end
+        elseif da or db then
+            return da ~= nil
+        end
+        return rank[a] < rank[b]
+    end)
+    return out
 end

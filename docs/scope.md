@@ -10,8 +10,8 @@ Skill Master shows a WoW Forever character's skills and stats as bars the player
   segment, a text suffix, a tooltip breakdown and an expiry timer;
 - character stats in four groups (base and melee/ranged, spell and regen, defense and resists,
   utility including movement speed), each scaled against its own reference with threshold markers;
-- trainer directions for unlearned skills and the next rank, with a TomTom, map-pin or chat waypoint;
-- four LibDataBroker feeds, alerts, a session log with ETA, an alt overview and gathering helpers.
+- trainer directions for unlearned skills and the next rank, with a map-pin or chat waypoint (no TomTom, round 7);
+- one LibDataBroker feed (skills and stats, its tooltip sectioned and skinned), alerts, a session log with ETA, an alt overview and gathering helpers.
 
 Each piece of the window is a setting: bar sizes, fill direction, colors (the skin's or the
 player's), the border and the font, block order, docking, one or two columns, and the window's and
@@ -21,7 +21,7 @@ scripted session on it.
 ## What it deliberately does not do
 
 - **Retail.** The addon is Forever-only by owner decision; Retail does not list it (clients-§9).
-- **Per-item broker feeds.** The owner chose four category feeds.
+- **Per-item or per-category broker feeds.** The owner chose one feed whose tooltip shows and hides each section and row (feedback round 2, FB-12).
 - **Recipe browsing or a tradeskill-window replacement.** Skill Master opens the stock window.
 - **Armor proficiencies, languages and class spell-school lines.** Not selected for v1.
 - **Guessing.** A bonus it cannot attribute shows as "Other"; trainer coordinates and thresholds stay

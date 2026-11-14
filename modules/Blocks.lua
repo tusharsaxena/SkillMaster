@@ -1,14 +1,27 @@
-local _, NS = ...
+local addonName, NS = ...
 -- modules/Blocks.lua — the block engine (design §5.2 Display, §6.1, plan Task 3.2): the eight
 -- blocks, their persisted layout (docked, order, collapsed, point, scale, locked), the entries
 -- each one shows, the collapsible block header, and the one row layout pass the main window and
 -- the detached frames both draw with. Detach, Dock and a collapse send LAYOUT_CHANGED.
 --
--- NS.BLOCKS = { ids in default order }; NS.BlockDefs[id] = { id, title, source, filter }
+-- NS.BLOCKS = { ids in default order }; NS.BlockDefs[id] = { id, title, short, source, filter }
 -- profile.layout.blocks[id] = { docked, order, collapsed, point, scale, locked }
--- NS.Blocks:Detach(id) / :Dock(id) / :SetCollapsed(id, v) / :ToggleCollapsed(id) / :Move(from, to) /
---   :SetOrder(id, n) / .Ordered() (every block, shown or not, in its order)
--- NS.Blocks.Docked() / .Undocked() / .Entries(id) / .Meta(id, entries) / .Settings(id)
+-- NS.Blocks:Detach(id) / :Dock(id) / :SetCollapsed(id, v) / :ToggleCollapsed(id) / :SetAllCollapsed(v) /
+--   :Move(from, to) / :SetOrder(id, n) / .Ordered() (every block, shown or not, in its order) /
+--   :SetCollapsedFor(ids, v) / :DockAll(ids) (a merged window's Collapse all and Dock all, round 5)
+-- NS.Blocks.Docked() / .Undocked() / .Entries(id) / .Settings(id)
+-- NS.Blocks.SortOf(id) / :SetSort(id, mode) / .SortEntries(id, items, entryOf) / .SortMenu(id, anchor) /
+--   .PaintSort(mark, id): each block's row order
+--   (owner feedback round 3): "name" (the catalog's: skills by name, stats as defined), "value"
+--   (high first), "valueAsc" (low first) or "progress" (nearest its max first); the LDB tooltip
+--   sorts its sections the same way.
+-- NS.Blocks.FilterOf(id) / :SetFilter(id, mode) / .FiltersOf(id) / .OffersFilter(id, mode) /
+--   .FilterMenuRows(id) / .FilterMenu(id, anchor) / .PaintFilter(mark, id): each block's row filter
+--   (Weapon Skills', owner feedback round 5, R5-10; every block's, round 7, R7-1), its set in
+--   B.FILTER_SETS: the professions "all", "belowCap", "atCap" (a rank left to train); weapons "all",
+--   "learned", "equipped" (main hand, off hand, ranged), "belowCap"; other skills "all", "learned",
+--   "belowCap"; each stat section "all", "nonZero". Picked from the header's filter mark on every
+--   surface that draws the block; B.Entries answers the rows it took out second.
 -- NS.Blocks.source: nil for the live models, or fn() -> skills, stats (test mode's preview, T5.2;
 --   the suites' fixtures).
 
@@ -16,19 +29,21 @@ local L = NS.L
 
 NS.BLOCKS = { "primary", "secondary", "weapon", "other", "stats_base", "stats_spell", "stats_defense", "stats_utility" }
 
-local function def(id, title, source, filter)
-    return { id = id, title = title, source = source, filter = filter }
+-- `short`: the block's short name, the Journal's Alts sub-tab label and a merged window's title part
+-- (round 5, R5-6: "Primary \194\183 Secondary").
+local function def(id, title, short, source, filter)
+    return { id = id, title = title, short = short, source = source, filter = filter }
 end
 
 NS.BlockDefs = {
-    primary       = def("primary", L["Primary Professions"], "skills", "primary"),
-    secondary     = def("secondary", L["Secondary Skills"], "skills", "secondary"),
-    weapon        = def("weapon", L["Weapon Skills"], "skills", "weapon"),
-    other         = def("other", L["Defense \194\183 Lockpicking \194\183 Riding"], "skills", "other"),
-    stats_base    = def("stats_base", L["Stats \194\183 Base & Combat"], "stats", "base"),
-    stats_spell   = def("stats_spell", L["Stats \194\183 Spell & Regen"], "stats", "spell"),
-    stats_defense = def("stats_defense", L["Stats \194\183 Defense & Resists"], "stats", "defense"),
-    stats_utility = def("stats_utility", L["Stats \194\183 Utility"], "stats", "utility"),
+    primary       = def("primary", L["Primary Professions"], L["Primary"], "skills", "primary"),
+    secondary     = def("secondary", L["Secondary Skills"], L["Secondary"], "skills", "secondary"),
+    weapon        = def("weapon", L["Weapon Skills"], L["Weapons"], "skills", "weapon"),
+    other         = def("other", L["Other skills"], L["Other"], "skills", "other"),
+    stats_base    = def("stats_base", L["Stats \194\183 Base & Combat"], L["Base & Combat"], "stats", "base"),
+    stats_spell   = def("stats_spell", L["Stats \194\183 Spell & Regen"], L["Spell & Regen"], "stats", "spell"),
+    stats_defense = def("stats_defense", L["Stats \194\183 Defense & Resists"], L["Defense & Resists"], "stats", "defense"),
+    stats_utility = def("stats_utility", L["Stats \194\183 Utility"], L["Utility"], "stats", "utility"),
 }
 
 NS.Blocks = {}
@@ -73,7 +88,11 @@ function B.Docked() return pick(true) end
 --- The detached blocks.
 function B.Undocked() return pick(false) end
 
+-- While B:SetAllCollapsed writes, the collapses stay quiet: one click, one LAYOUT_CHANGED.
+local bulk = false
+
 function B.Changed()
+    if bulk then return end
     if NS.bus and NS.MSG then NS.bus:SendMessage(NS.MSG.LAYOUT_CHANGED) end
 end
 
@@ -97,6 +116,8 @@ function B.StoreDocked(id, docked)
     if not s then return false end
     lastRan = whenSafe("dock:" .. id, function()
         s.docked = docked and true or false
+        -- A block docked back in the window leaves its merged group (round 5, R5-6).
+        if s.docked and NS.Groups then NS.Groups.Leave(id) end
         B.Changed()
     end)
     return lastRan
@@ -120,6 +141,19 @@ local function seam(p, v)
     if not set then return false end
     lastRan = true
     return set(p, v) == true and lastRan ~= false
+end
+
+--- Give block `id` the sort order `mode` (its header's sort menu, round 6). Through the seam, so
+--- Layout > Blocks shows it.
+function B:SetSort(id, mode)
+    if not B.SORT_LABEL[mode] then return false end
+    return seam(path(id, "sort"), mode)
+end
+
+--- Give block `id` the row filter `mode` (its header's filter mark, round 5). Through the seam.
+function B:SetFilter(id, mode)
+    if not B.OffersFilter(id, mode) then return false end
+    return seam(path(id, "filter"), mode)
 end
 
 --- Pop block `id` out of the window into its own frame. Persisted; sends LAYOUT_CHANGED.
@@ -182,6 +216,56 @@ function B:SetOrder(id, n)
     return seam(path(id, "order"), math.floor(n))
 end
 
+--- Collapse (true) or expand (false) every docked block, each through the seam as its chevron's
+--- write is (the main window's Collapse all and Expand all, FB-16). A detached block keeps its own
+--- state: its frame has its own chevron. One bracket, one LAYOUT_CHANGED; in combat each write
+--- waits for the end of combat, as a chevron's does. Answers how many blocks it changed.
+function B:SetAllCollapsed(collapsed)
+    return B:SetCollapsedFor(B.Docked(), collapsed)
+end
+
+-- Run `write` inside one bulk bracket named `verb`: the seam logs it as one line and the writes'
+-- LAYOUT_CHANGED is sent once, after.
+local function bracket(verb, write)
+    local S = NS.SchemaRuntime
+    bulk = true
+    local ok, err = pcall(function()
+        if S and S.BulkRun then S.BulkRun(verb, "layout.blocks", write) else write() end
+    end)
+    bulk = false
+    if not ok then error(err, 0) end
+    B.Changed()
+end
+
+--- Collapse (true) or expand (false) the blocks `ids`, each through the seam (SetAllCollapsed's
+--- docked blocks, a merged window's Collapse all: round 5). One bracket, one LAYOUT_CHANGED.
+--- Answers how many blocks it changed.
+function B:SetCollapsedFor(ids, collapsed)
+    collapsed = collapsed and true or false
+    local todo = {}
+    for _, id in ipairs(ids) do
+        local s = B.Settings(id)
+        if s and (s.collapsed and true or false) ~= collapsed then todo[#todo + 1] = id end
+    end
+    if #todo == 0 then return 0 end
+    bracket(collapsed and "collapse" or "expand",
+        function() for _, id in ipairs(todo) do B:SetCollapsed(id, collapsed) end end)
+    return #todo
+end
+
+--- Dock every detached block of `ids` in the main window, each through the seam (a merged window's
+--- Dock all, round 5); each leaves its group. One bracket, one LAYOUT_CHANGED. Answers how many.
+function B:DockAll(ids)
+    local todo = {}
+    for _, id in ipairs(ids) do
+        local s = B.Settings(id)
+        if s and s.docked == false then todo[#todo + 1] = id end
+    end
+    if #todo == 0 then return 0 end
+    bracket("dock", function() for _, id in ipairs(todo) do B:Dock(id) end end)
+    return #todo
+end
+
 function B:ToggleCollapsed(id)
     local s = B.Settings(id)
     return s and B:SetCollapsed(id, not s.collapsed)
@@ -206,62 +290,313 @@ local function hidden(kind, key)
     return list and list[key] == true
 end
 
-local function skillEntries(skills, category)
+local function skillEntries(skills, category, isHidden)
     local out = {}
     local showUnlearned = not (NS.db and NS.db.profile.skills.showUnlearned == false)
     for _, key in ipairs(skills and skills.order[category] or {}) do
         local e = skills.byKey[key]
-        if e and not hidden("skills", key) and (e.learned ~= false or showUnlearned) then
+        if e and not isHidden("skills", key) and (e.learned ~= false or showUnlearned) then
             out[#out + 1] = { kind = "skill", entry = e }
         end
     end
     return out
 end
 
-local function statEntries(stats, group)
+--- The keys hidden from block `id` (skills.hidden / stats.hidden, set true): a skill whose
+--- catalog category, else model category, is the block's; a stat whose group is the block's.
+--- @return table keys, string "skills"|"stats"
+function B.HiddenKeys(id)
+    local d = NS.BlockDefs[id]
+    if not d then return {}, "skills" end
+    local kind = d.source == "skills" and "skills" or "stats"
+    local p = NS.db and NS.db.profile
+    local set = p and p[kind] and p[kind].hidden or {}
+    local groupOf = {}
+    if kind == "stats" then
+        for _, sd in ipairs(NS.STAT_DEFS or {}) do groupOf[sd.key] = sd.group end
+    end
+    local model = kind == "skills" and NS.SkillData and type(NS.SkillData.Model) == "function" and NS.SkillData:Model()
+    local out = {}
+    for key, on in pairs(set) do
+        if on == true then
+            local group
+            if kind == "stats" then
+                group = groupOf[key]
+            else
+                local cat = NS.SkillCatalog[key]
+                local e = model and model.byKey and model.byKey[key]
+                group = (cat and cat.category) or (e and e.category)
+            end
+            if group == d.filter then out[#out + 1] = key end
+        end
+    end
+    table.sort(out)
+    return out, kind
+end
+
+--- Show every row hidden from block `id` again, through the seam (owner feedback round 4: from
+--- the window, without the settings). A key with its own schema row is cleared there; any other
+--- (an "other:" line) through the whole set's row, as the row menu's Hide writes it.
+--- @return number how many rows came back
+function B.RestoreHidden(id)
+    local keys, kind = B.HiddenKeys(id)
+    if #keys == 0 then return 0 end
+    local rest = {}
+    for k, v in pairs(NS.db.profile[kind].hidden or {}) do rest[k] = v end
+    local whole = false
+    for _, key in ipairs(keys) do
+        local p = kind .. ".hidden." .. key
+        if NS.FindSchemaRow(p) then NS.SetByPath(p, false) else rest[key], whole = nil, true end
+    end
+    if whole then
+        for k in pairs(rest) do if NS.db.profile[kind].hidden[k] ~= true then rest[k] = nil end end
+        NS.SetByPath(kind .. ".hidden", rest)
+    end
+    NS.Debug("Click", "restored %d hidden row(s) in %s", #keys, id)
+    return #keys
+end
+
+local function statEntries(stats, group, isHidden)
     local out = {}
     for _, e in ipairs(stats and stats[group] or {}) do
-        if not hidden("stats", e.key) then out[#out + 1] = { kind = "stat", entry = e } end
+        if not isHidden("stats", e.key) then out[#out + 1] = { kind = "stat", entry = e } end
     end
     return out
 end
 
---- The rows block `id` shows, each { kind = "skill"|"stat", entry }.
-function B.Entries(id, skills, stats)
-    local d = NS.BlockDefs[id]
-    if not d then return {} end
-    if skills == nil and stats == nil then skills, stats = B.Data() end
-    if d.source == "skills" then return skillEntries(skills, d.filter) end
-    return statEntries(stats, d.filter)
-end
+-- ---------------------------------------------------------------------------------------------
+-- Sorting (owner feedback round 3): a block's rows in its stored order, cycled from its header
+-- ---------------------------------------------------------------------------------------------
 
-local function learnedCount(entries)
-    local n = 0
-    for _, r in ipairs(entries) do if r.entry.learned ~= false then n = n + 1 end end
-    return n
-end
-
-local META = {
-    primary = function(entries) return ("%d / 2"):format(learnedCount(entries)) end,
-    secondary = function(entries) return tostring(learnedCount(entries)) end,
-    weapon = function(entries)
-        local first = entries[1] and entries[1].entry
-        local cap = first and first.learned ~= false and first.max or 0
-        return cap > 0 and L["cap %d (5 \195\151 level)"]:format(cap) or ""
-    end,
-    other = function() return "" end,
-    stats_base = function() return L["vs highest primary"] end,
+B.SORTS = { "name", "value", "valueAsc", "progress" }
+B.SORT_ICON = { name = "list", value = "sort-desc", valueAsc = "sort-asc", progress = "ph:sort-descending" }
+B.SORT_LABEL = {
+    name = L["Default order"], value = L["Value, highest first"], valueAsc = L["Value, lowest first"],
+    progress = L["Progress to max, nearest first"],
 }
 
---- The muted line beside a block's title (the mockup's: "2 / 2", "cap 110 (5 × level)", a count).
-function B.Meta(id, entries)
-    local fn = META[id]
-    if fn then return fn(entries) end
-    return #entries > 0 and tostring(#entries) or ""
+--- Block `id`'s sort mode, "name" when unset or unknown.
+function B.SortOf(id)
+    local s = B.Settings(id)
+    local mode = s and s.sort
+    return B.SORT_LABEL[mode] and mode or "name"
+end
+
+local function numeric(e)
+    if e.rank ~= nil then return tonumber(e.rank) or 0 end
+    return tonumber(e.value) or tonumber(e.pct) or 0
+end
+
+local function progress(e)
+    if e.rank ~= nil then
+        local max = tonumber(e.max) or 0
+        return max > 0 and (tonumber(e.rank) or 0) / max or 0
+    end
+    return tonumber(e.pct) or 0
+end
+
+local KEY = { value = numeric, valueAsc = numeric, progress = progress }
+
+--- `items` in block `id`'s order, in place: `entryOf(item)` is the item's model entry (default
+--- item.entry). A not-learned row stays below the learned ones; a tie keeps the catalog's order.
+function B.SortEntries(id, items, entryOf)
+    local mode = B.SortOf(id)
+    local key = KEY[mode]
+    if not key then return items end
+    entryOf = entryOf or function(item) return item.entry end
+    local rank = {}
+    for i, item in ipairs(items) do
+        local e = entryOf(item)
+        rank[item] = { learned = e.learned ~= false, v = key(e), i = i }
+    end
+    table.sort(items, function(a, b)
+        local x, y = rank[a], rank[b]
+        if x.learned ~= y.learned then return x.learned end
+        if x.v ~= y.v then
+            if mode == "valueAsc" then return x.v < y.v end
+            return x.v > y.v
+        end
+        return x.i < y.i
+    end)
+    return items
+end
+
+--- The menu the sort mark opens (round 6, R6-5), the filter menu's shape: a title, then one radio
+--- row per order, the current one ticked.
+function B.SortMenuRows(id)
+    local rows = { { title = true, label = L["Sort rows by"] } }
+    for _, mode in ipairs(B.SORTS) do
+        rows[#rows + 1] = { value = mode, label = B.SORT_LABEL[mode], radio = true,
+            selected = function() return B.SortOf(id) == mode end,
+            onClick = function() B:SetSort(id, mode) end }
+    end
+    return rows
+end
+
+--- Open the sort menu on `anchor` (the mark); a second click on it closes the menu.
+function B.SortMenu(id, anchor)
+    if GameTooltip and GameTooltip:IsOwned(anchor) then GameTooltip:Hide() end
+    B.menu = NS.Widgets.ContextMenu(anchor, B.SortMenuRows(id), { owner = addonName })
+    return B.menu
+end
+
+--- The sort mark as block `id` has it: the order's icon, its tip naming the order. Shared by the
+--- window's header, a detached band and a merged window's sub-header.
+function B.PaintSort(mark, id)
+    if not mark then return end
+    local mode = B.SortOf(id)
+    NS.Chrome.SetIcon(mark, B.SORT_ICON[mode], "=")
+    mark.tip = L["Sorted: %s. Click to sort."]:format(B.SORT_LABEL[mode])
 end
 
 -- ---------------------------------------------------------------------------------------------
--- The block header: chevron, title, meta, detach (or dock) control
+-- Filtering (owner feedback round 5, R5-10; every block, round 7, R7-1): a block's rows narrowed
+-- from its header's filter mark, a menu of its own set (B.FILTER_SETS) with the current one ticked
+-- ---------------------------------------------------------------------------------------------
+
+-- Each block's filters, "all" first. A profession: below its rank's cap, or at it with a rank left
+-- to train. A stat section: the rows whose value is not 0 (or 0%).
+local SKILL_CAP = { "all", "belowCap", "atCap" }
+local STAT_SET = { "all", "nonZero" }
+B.FILTER_SETS = {
+    primary = SKILL_CAP, secondary = SKILL_CAP,
+    weapon = { "all", "learned", "equipped", "belowCap" },
+    other = { "all", "learned", "belowCap" },
+    stats_base = STAT_SET, stats_spell = STAT_SET, stats_defense = STAT_SET, stats_utility = STAT_SET,
+}
+B.FILTERABLE = {}
+for id in pairs(B.FILTER_SETS) do B.FILTERABLE[id] = true end
+B.FILTER_ICON = "ph:funnel"
+B.FILTER_LABEL = {
+    all = L["All"], learned = L["Learned"], equipped = L["Equipped"], belowCap = L["Below cap"],
+    atCap = L["At cap (needs training)"], nonZero = L["Non-zero"],
+}
+
+--- Block `id`'s filters in menu order ({ "all" } for an unknown block).
+function B.FiltersOf(id) return B.FILTER_SETS[id] or { "all" } end
+
+--- Whether `mode` is one of block `id`'s filters.
+function B.OffersFilter(id, mode)
+    for _, m in ipairs(B.FILTER_SETS[id] or {}) do if m == mode then return true end end
+    return false
+end
+
+--- Block `id`'s row filter: "all" for an unset value or one its set does not offer.
+function B.FilterOf(id)
+    local s = B.Settings(id)
+    local mode = s and s.filter
+    return B.OffersFilter(id, mode) and mode or "all"
+end
+
+local function learned(e) return e.learned ~= false end
+
+local function capped(e)
+    local max = tonumber(e.max) or 0
+    return learned(e) and max > 0, max
+end
+
+-- A stat's shown value is zero: its display has no digit but 0 ("0", "0.0%", "0 (0.0%)").
+local function zeroStat(e)
+    if e.display ~= nil then return not tostring(e.display):find("[1-9]") end
+    return (tonumber(e.value) or 0) == 0
+end
+
+-- An unlearned skill is in no filter but All (round 7).
+local KEEP = {
+    learned  = function(e) return learned(e) end,
+    equipped = function(e, ctx) return ctx.equipped()[e.key] == true end,
+    belowCap = function(e)
+        local on, max = capped(e)
+        return on and (tonumber(e.rank) or 0) < max
+    end,
+    atCap    = function(e)
+        local on, max = capped(e)
+        if not (on and (tonumber(e.rank) or 0) >= max) then return false end
+        return NS.Trainers ~= nil and NS.Trainers:NextRank(e.key, e.rank, max) ~= nil
+    end,
+    nonZero  = function(e) return not zeroStat(e) end,
+}
+
+--- `items` narrowed to block `id`'s filter, in place of a new list; answers it and how many left.
+local function applyFilter(id, items)
+    local keep = KEEP[B.FilterOf(id)]
+    if not keep then return items, 0 end
+    local eq
+    local ctx = { equipped = function()
+        eq = eq or NS.SkillHelpers.EquippedWeaponSkills()
+        return eq
+    end }
+    local out = {}
+    for _, r in ipairs(items) do
+        if keep(r.entry, ctx) then out[#out + 1] = r end
+    end
+    return out, #items - #out
+end
+
+--- The menu the filter mark opens: a title, then one radio row per filter, the current one ticked.
+function B.FilterMenuRows(id)
+    local rows = { { title = true, label = L["Show"] } }
+    for _, mode in ipairs(B.FiltersOf(id)) do
+        rows[#rows + 1] = { value = mode, label = B.FILTER_LABEL[mode], radio = true,
+            selected = function() return B.FilterOf(id) == mode end,
+            onClick = function() B:SetFilter(id, mode) end }
+    end
+    return rows
+end
+
+--- Open the filter menu on `anchor` (the mark); a second click on it closes the menu.
+function B.FilterMenu(id, anchor)
+    if not B.FILTERABLE[id] then return nil end
+    if GameTooltip and GameTooltip:IsOwned(anchor) then GameTooltip:Hide() end
+    B.menu = NS.Widgets.ContextMenu(anchor, B.FilterMenuRows(id), { owner = addonName })
+    return B.menu
+end
+
+--- The filter mark as block `id` has it: shown only on a block with a filter, the funnel alone in
+--- the surface's rest tint (`mark.baseToken`, the title's on every header since round 8, R8-3) on
+--- All, and while it narrows the rows the filled badge (round 8, R8-2: a solid square in that same
+--- tint, the funnel dark on it; NS.Chrome.SetBadge); its tip naming the current filter.
+function B.PaintFilter(mark, id)
+    if not mark then return end
+    local on = B.FILTERABLE[id] == true
+    mark:SetShown(on)
+    if not on then return end
+    local mode = B.FilterOf(id)
+    NS.Chrome.SetRestToken(mark, mark.baseToken)
+    NS.Chrome.SetBadge(mark, mode ~= "all" and (mark.baseToken or "icon.tint") or nil)
+    NS.Chrome.SetIcon(mark, B.FILTER_ICON, "Y")
+    mark.tip = L["Showing: %s. Click to filter."]:format(B.FILTER_LABEL[mode])
+end
+
+-- The muted line an emptied block shows under its header (round 5, R5-10).
+B.NOTE_H = 20
+
+--- The muted line under a block's header when its filter took every row out, else nil.
+function B.FilterNote(entries, removed)
+    if #entries == 0 and (removed or 0) > 0 then return L["No rows match this filter."] end
+    return nil
+end
+
+--- The rows block `id` shows, each { kind = "skill"|"stat", entry }, in its sort order, and how many
+--- its filter took out. `isHidden(kind, key)` (kind "skills" | "stats") answers which rows are left
+--- out: the window's hidden sets when nil, the LDB tooltip's own for the broker (round 6, R6-10).
+function B.Entries(id, skills, stats, isHidden)
+    local d = NS.BlockDefs[id]
+    if not d then return {}, 0 end
+    if skills == nil and stats == nil then skills, stats = B.Data() end
+    isHidden = isHidden or hidden
+    if d.source == "skills" then
+        local entries, removed = applyFilter(id, skillEntries(skills, d.filter, isHidden))
+        return B.SortEntries(id, entries), removed
+    end
+    local entries, removed = applyFilter(id, statEntries(stats, d.filter, isHidden))
+    return B.SortEntries(id, entries), removed
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- The block header: chevron, title, detach (or dock) control. Nothing beside the title: no counts
+-- (owner feedback round 4) and no scale note (round 7, R7-3: Base & Combat's "vs highest primary"
+-- went; the row tooltip's Scale line still says what a stat bar scales to).
 -- ---------------------------------------------------------------------------------------------
 
 local Header = {}
@@ -271,16 +606,41 @@ local function paintHeaderBg(h)
     if c then h.bg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
 end
 
-function Header:SetBlock(id, meta, collapsed, docked)
+function Header:SetBlock(id, collapsed, docked)
     self.id, self.collapsed = id, collapsed and true or false
     paintHeaderBg(self)   -- every layout, so a skin switch reaches a pooled header
     self.title:SetText(NS.BlockDefs[id].title)
-    self.meta:SetText(meta or "")
     NS.Chrome.SetIcon(self.chevron, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")
-    NS.Chrome.SetIcon(self.detach, docked and "external-link" or "fullscreen-exit", docked and "+" or "-")
+    -- Detach is the external-link mark; dock (attach) is the same mark turned 180 degrees.
+    NS.Chrome.SetIcon(self.detach, "external-link", docked and "+" or "-", not docked)
     self.detach.tip = docked and L["Detach this block into its own frame"] or L["Dock this block in the main window"]
+    B.PaintSort(self.sort, id)
+    self.sort:Show()   -- the LDB panel's headers hide it (round 8, R8-4); a header is a pool's own
     self.docked = docked
+    -- The filter mark (round 5, R5-10; every block, round 7, R7-1), left of sort; restore moves left
+    -- of whichever mark is the last one shown.
+    B.PaintFilter(self.filter, id)
+    local left = self.filter:IsShown() and self.filter or self.sort
+    self.restore:ClearAllPoints()
+    self.restore:SetPoint("RIGHT", left, "LEFT", -4, 0)
+    B.PaintRestore(self.restore, id)
+    self:SetNote(nil)
+end
+
+--- The muted line under the header (an emptied filter's, round 5), or none.
+function Header:SetNote(text)
+    self.note:SetText(text or "")
+    self.note:SetShown(text ~= nil)
+end
+
+--- The restore mark (owner feedback round 4): shown while block `id` has hidden rows, its tip
+--- saying how many. Shared by the window's header and the detached frame's band.
+function B.PaintRestore(mark, id)
+    local n = #(B.HiddenKeys(id))
+    mark:SetShown(n > 0)
+    mark.tip = n == 1 and L["1 hidden row. Click to show it again."]
+        or L["%d hidden rows. Click to show them again."]:format(n)
 end
 
 local function onHeaderClick(self) B:ToggleCollapsed(self.id) end
@@ -288,6 +648,16 @@ local function onHeaderClick(self) B:ToggleCollapsed(self.id) end
 local function onDetachClick(self)
     local h = self:GetParent()
     if h.docked then B:Detach(h.id) else B:Dock(h.id) end
+end
+
+local function onRestoreClick(self)
+    local h = self:GetParent()
+    if GameTooltip and GameTooltip:IsOwned(self) then GameTooltip:Hide() end   -- its tip names a count about to go
+    B.RestoreHidden(h.id)
+end
+
+local function onSortClick(self)
+    B.SortMenu(self:GetParent().id, self)
 end
 
 local function buildHeader(parent)
@@ -303,16 +673,36 @@ local function buildHeader(parent)
     h.rule:SetPoint("TOPRIGHT", h, "TOPRIGHT", 0, 0)
     h.rule:SetHeight(1)
     NS.Skin.Divider(h.rule)
-    h.chevron = NS.Chrome.IconButton(h, "chevron-down", "v", function() onHeaderClick(h) end)
+    h.chevron = NS.Chrome.HeaderMark(h, "chevron-down", "v", function() onHeaderClick(h) end)
     h.chevron:SetPoint("LEFT", h, "LEFT", 4, 0)
     h.title = h:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     h.title:SetPoint("LEFT", h.chevron, "RIGHT", 2, 0)
     NS.Skin.Text(h.title, "heading")
-    h.detach = NS.Chrome.IconButton(h, "external-link", "+", onDetachClick)
+    h.detach = NS.Chrome.HeaderMark(h, "external-link", "+", onDetachClick)
+    NS.Chrome.SetRestToken(h.detach, "text.heading")   -- the title's color at rest (round 2)
     h.detach:SetPoint("RIGHT", h, "RIGHT", -4, 0)
-    h.meta = h:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    h.meta:SetPoint("RIGHT", h.detach, "LEFT", -6, 0)
-    NS.Skin.Text(h.meta, "muted")
+    -- The sort mark (owner feedback round 3; its menu, round 6), left of detach in the same rest color.
+    h.sort = NS.Chrome.HeaderMark(h, "list", "=", onSortClick)
+    NS.Chrome.SetRestToken(h.sort, "text.heading")
+    h.sort:SetPoint("RIGHT", h.detach, "LEFT", -4, 0)
+    -- The filter mark (round 5, R5-10; on every block, round 7, R7-1), left of sort (B.PaintFilter).
+    h.filter = NS.Chrome.HeaderMark(h, B.FILTER_ICON, "Y", function(self) B.FilterMenu(h.id, self) end)
+    h.filter.baseToken = "text.heading"
+    NS.Chrome.SetRestToken(h.filter, h.filter.baseToken)
+    h.filter:SetPoint("RIGHT", h.sort, "LEFT", -4, 0)
+    h.filter:Hide()
+    -- The restore mark (owner feedback round 4), left of sort (or filter), only while the block hides rows.
+    h.restore = NS.Chrome.HeaderMark(h, "eye", "o", onRestoreClick)
+    NS.Chrome.SetRestToken(h.restore, "text.heading")
+    h.restore:SetPoint("RIGHT", h.sort, "LEFT", -4, 0)
+    h.restore:Hide()
+    -- An emptied filter's muted line, below the header in the space the window leaves for it.
+    h.note = h:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    h.note:SetPoint("TOPLEFT", h, "BOTTOMLEFT", 8, -4)
+    h.note:SetPoint("TOPRIGHT", h, "BOTTOMRIGHT", -8, -4)
+    h.note:SetJustifyH("LEFT")
+    NS.Skin.Text(h.note, "muted")
+    h.note:Hide()
     h:SetScript("OnClick", onHeaderClick)
     return h
 end
@@ -374,7 +764,9 @@ function B.UpdateSpeedWatch()
     if s.docked ~= false then
         onScreen = NS.MainWindow and NS.MainWindow.IsShown() and not s.collapsed
     else
-        local f = NS.Detached and NS.Detached.Frame("stats_utility")
+        -- Its own frame, or its merged window's (round 5).
+        local gid = NS.Groups and NS.Groups.Of("stats_utility")
+        local f = gid and NS.Groups.Frame(gid) or (NS.Detached and NS.Detached.Frame("stats_utility"))
         onScreen = f and f:IsShown() and not s.collapsed
     end
     NS.StatData:WatchSpeed(onScreen and true or false)
@@ -428,6 +820,11 @@ local function relayout()
     if NS.IsStoodDown and NS.IsStoodDown() then return end
     if NS.MainWindow then NS.MainWindow.Refresh(true) end
     if NS.Detached then NS.Detached.Refresh() end
+    -- The in-game check that a look write reached the bars (/sm debug): the bar height drawn now.
+    if NS.State.debug then
+        NS.Debug("Set", "relayout: %d window rows restyled, bar height %s",
+            NS.MainWindow and #NS.MainWindow.Rows() or 0, tostring(NS.Bar.ResolveStyle("row").height))
+    end
 end
 
 local function revalue()

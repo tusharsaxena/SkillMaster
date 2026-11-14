@@ -67,7 +67,10 @@ NS.MasterReactions = {
     enabled = function() NS.SyncEnabledHold() end,
     scale   = function() NS.MainWindow.ApplySettings() end,
     alpha   = function() NS.MainWindow.ApplySettings() end,
-    locked  = function() NS.MainWindow.ApplySettings() end,
+    locked  = function()
+        NS.MainWindow.ApplySettings()
+        NS.Journal.ApplyLock()   -- the Journal's lock mark (round 5, R5-2)
+    end,
 }
 
 local function minimapStore()

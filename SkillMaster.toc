@@ -120,6 +120,12 @@ modules\Rows.lua
 modules\Blocks.lua
 # Conventional: NS.Detached, a detached block's frame (T3.2); reads NS.Blocks at CALL time.
 modules\Detached.lua
+# Conventional: NS.Groups, the merged detached windows (round 5, R5-6); reads NS.Blocks and
+# NS.Detached at CALL time.
+modules\Groups.lua
+# Conventional: NS.GroupsSnap, the merged windows' drags (round 5, R5-6b); reads NS.Groups and
+# NS.Detached at CALL time.
+modules\GroupsSnap.lua
 # T3.3, each conventional (reached at CALL time): the combat queue and the crafting rows' secure
 # overlays (registers its two combat events on its own bus target at FILE SCOPE, after core\Bus.lua),
 # the click map, the row tooltip, the trainer popup and the waypoint providers.
@@ -128,6 +134,12 @@ modules\Interact.lua
 modules\RowTooltip.lua
 modules\TrainerPopup.lua
 modules\Waypoints.lua
+# R6-11, R8-5: Skill Master's waypoint arrow, an adapter on LibKa0s-WaypointArrow-1.0 (resolved at
+# FILE SCOPE, after libs\LibKa0s\LibKa0s.xml); registers USER_WAYPOINT_UPDATED on its own bus target at
+# FILE SCOPE (after core\Bus.lua); publishes NS.WaypointArrow.SettingsRows, read by settings\Trainers.lua
+# at FILE SCOPE (the # Modules -> # Settings order guarantees it); reads NS.Compat, NS.Trainers and
+# NS.Rows at CALL time.
+modules\WaypointArrow.lua
 # Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
 modules\MainWindow.lua
 # Conventional: `/sm probe`; reads core\ members only at FILE SCOPE (NS.Widgets, NS.Constants).
@@ -154,9 +166,11 @@ modules\Journal.lua
 modules\Alerts.lua
 # T4.1: NS.Template, pure; read by modules\Broker.lua at CALL time.
 modules\Template.lua
-# T4.1: the four broker data feeds; creates its LibDataBroker objects and bus target at FILE SCOPE
+# T4.1 / FB-12: the one broker data feed; creates its LibDataBroker object and bus target at FILE SCOPE
 # (after core\Bus.lua, core\PoolSetup.lua and the # Libraries block); reads NS.StatData.GROUPS at call time.
 modules\Broker.lua
+# R6-10: the LDB tooltip in the main window's style; reads NS.Broker, NS.Blocks, NS.Rows and NS.Journal at CALL time.
+modules\BrokerPanel.lua
 # T5.2: test mode's data swap; builds its models through SkillData, StatData and Bonuses at CALL time.
 modules\Preview.lua
 # T5.2: the simulator. LOAD-BEARING: after every module whose handler it delivers to and after
@@ -170,14 +184,19 @@ settings\Schema.lua
 settings\Slash.lua
 # LOAD-BEARING: NS.Helpers and NS.RegisterOptionsPage, called at FILE SCOPE by every page below.
 settings\OptionsSetup.lua
+# NS.OptionsList, the boxed list row the Layout and Rows pages draw at RENDER time.
+settings\BoxList.lua
 # LOAD-BEARING: General registers FIRST and Profiles LAST; page order IS registration order.
 settings\General.lua
-# T5.1 the display pages, in the sidebar's order (Skills.lua registers Skills, then Stats). Each reads
+# T5.1 the display pages, in the sidebar's order (Skills, then Rows). Each reads
 # NS.Blocks, NS.SkillCatalog, NS.STAT_DEFS and NS.Template at FILE SCOPE, all loaded above.
 settings\Layout.lua
 settings\Bars.lua
 settings\Skills.lua
+# R5-13 the Rows page: reads NS.SortedSkillKeys (Skills.lua) at FILE SCOPE.
+settings\Rows.lua
 settings\Broker.lua
+settings\Tooltips.lua
 settings\Alerts.lua
 settings\Journal.lua
 settings\Trainers.lua

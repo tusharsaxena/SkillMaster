@@ -18,7 +18,8 @@ local function identity(out)
 end
 
 local function settings(out)
-    out:nonDefaults(NS.Schema, NS.GetSetting, function(row) return row.default end, nil,
+    -- get(row) is handed the row: read its path (a bare NS.GetSetting read every row as nil).
+    out:nonDefaults(NS.Schema, function(row) return NS.GetSetting(row.path) end, function(row) return row.default end, nil,
         { always = { "enabled", "skin.source", "skin.skin" } })
 end
 
@@ -75,7 +76,7 @@ end
 local function probe(out)
     local p = NS.Probe.Summary()
     out:add(TAG, "probe skill api=%s lines=%s", p.source, p.lines)
-    out:add(TAG, "probe apis present=%s/%s TomTom=%s", p.present, p.total, yesNo(p.tomtom))
+    out:add(TAG, "probe apis present=%s/%s", p.present, p.total)
     out:list(TAG, "probe apis missing:", p.missing)
 end
 
@@ -115,6 +116,24 @@ local function frameState(id)
     return f:IsShown() and "shown" or "hidden"
 end
 
+-- The merged windows as stored (round 5, R5-6): read raw, never normalized (that is a write).
+local function groups(out, stored)
+    local Mo = NS.Groups.Model
+    local ids = Mo.Ids(type(stored) == "table" and stored or {})
+    out:add(TAG, "layout groups=%s", #ids)
+    for _, gid in ipairs(ids) do
+        local g = stored[gid]
+        local cols = {}
+        for c, col in ipairs(type(g) == "table" and type(g.columns) == "table" and g.columns or {}) do
+            cols[c] = table.concat(type(col) == "table" and col or {}, ",")
+        end
+        local f = NS.Groups.Frame(gid)
+        out:add(TAG, "group %s columns=%s point=%s frame=%s", gid, table.concat(cols, " | "),
+            type(g) == "table" and type(g.point) == "table" and "set" or "default",
+            f and (f:IsShown() and "shown" or "hidden") or "none")
+    end
+end
+
 local function layout(out)
     local p = NS.db.profile
     out:add(TAG, "layout window scale=%s alpha=%s locked=%s point=%s maxHeight=%s summary=%s columns=%s strata=%s",
@@ -123,11 +142,13 @@ local function layout(out)
     out:add(TAG, "layout detached strata=%s", p.layout.detachedStrata)
     for _, id in ipairs(NS.BLOCKS) do
         local b = NS.Blocks.Settings(id)
-        out:add(TAG, "block %s docked=%s order=%s collapsed=%s scale=%s locked=%s point=%s frame=%s", id,
-            b.docked, b.order, b.collapsed, b.scale, b.locked, b.point and "set" or "default", frameState(id))
+        out:add(TAG, "block %s docked=%s order=%s collapsed=%s scale=%s locked=%s point=%s frame=%s group=%s", id,
+            b.docked, b.order, b.collapsed, b.scale, b.locked, b.point and "set" or "default", frameState(id),
+            NS.Groups.Model.Find(type(p.layout.groups) == "table" and p.layout.groups or {}, id) or "-")
     end
     out:joined(TAG, "docked order:", NS.Blocks.Docked())
     out:joined(TAG, "detached:", NS.Blocks.Undocked())
+    groups(out, p.layout.groups)
 end
 
 -- The simulator (preview-mode, H8): the session, the step and the seam.

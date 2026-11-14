@@ -53,10 +53,9 @@ NS.SKIN_OWNER_TOKENS = {
     ["sm.cat.stats"]     = { default = { 0.788, 0.627, 0.478, 1 } },   -- #c9a07a
     ["sm.bonusTemp"]     = { default = { 0.498, 0.847, 0.769, 1 } },   -- #7fd8c4
     ["sm.bonusPerm"]     = { default = { 0.553, 0.722, 1, 1 } },       -- #8db8ff
-    -- T3.1 the bar's edges, tier ticks, threshold markers, spark and text; the row's timer, icon
+    -- T3.1 the bar's edges, threshold markers, spark and text; the row's timer, icon
     -- well and the unlearned row's muted line: what every skin draws.
     ["sm.barBorder"] = { default = { 0.24, 0.22, 0.20, 1 }, follow = "bar.border" },
-    ["sm.tick"]      = { default = { 1, 1, 1, 0.45 }, follow = "chart.marker" },
     ["sm.marker"]    = { default = { 0.95, 0.70, 0.24, 1 }, follow = "hud.label" },
     ["sm.spark"]     = { default = { 1, 1, 1, 0.6 }, follow = "hud.text" },
     ["sm.barText"]   = { default = { 1, 1, 1, 1 }, follow = "hud.text" },

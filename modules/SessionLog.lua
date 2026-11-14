@@ -73,19 +73,26 @@ local function newLog(store, start, entryOf)
     --- Start a new session at `t` (now): gains, rate and ETA count from here.
     function SL:NewSession(t) sessionStart = tonumber(t) or time() end
 
-    --- This session's entries, oldest first, optionally for one key.
-    local function sessionEntries(key)
+    --- The entries from `from` (epoch seconds; nil is this session's start), oldest first,
+    --- optionally for one key. The Journal's range picker reads through it (FB-32).
+    local function entriesSince(from, key)
+        from = tonumber(from) or sessionStart
         local out = {}
         for _, e in ipairs(SL:Entries()) do
-            if e.t >= sessionStart and (key == nil or e.key == key) then out[#out + 1] = e end
+            if e.t >= from and (key == nil or e.key == key) then out[#out + 1] = e end
         end
         return out
     end
+    local function sessionEntries(key) return entriesSince(nil, key) end
 
-    --- @return number the points gained this session, table points per key
-    function SL:Gains()
+    --- Every entry since `from` (nil: this session's start), oldest first, optionally for one key.
+    function SL:Since(from, key) return entriesSince(from, key) end
+
+    --- @param from number|nil epoch seconds the count starts at; nil is this session's start
+    --- @return number the points gained this session (or since `from`), table points per key
+    function SL:Gains(from)
         local total, byKey = 0, {}
-        for _, e in ipairs(sessionEntries()) do
+        for _, e in ipairs(entriesSince(from)) do
             local p = points(e)
             total = total + p
             byKey[e.key] = (byKey[e.key] or 0) + p
@@ -113,10 +120,11 @@ local function newLog(store, start, entryOf)
         return sum / span * 3600
     end
 
-    --- Seconds until `key` reaches its max at the rate its own gains this session set, nil with
-    --- fewer than two gains (one gain is no interval) or without a model entry; 0 at the cap.
-    function SL:ETA(key)
-        local list = sessionEntries(key)
+    --- Seconds until `key` reaches its max at the rate its own gains this session (or since
+    --- `from`) set, nil with fewer than two gains (one gain is no interval) or without a model
+    --- entry; 0 at the cap.
+    function SL:ETA(key, from)
+        local list = entriesSince(from, key)
         if #list < 2 then return nil end
         local entry = entryOf(key)
         if not (entry and entry.max) then return nil end

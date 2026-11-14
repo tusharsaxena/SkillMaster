@@ -21,8 +21,13 @@ unnormalized return shape the owner sends back, so it is the one reader outside 
 | `Compat.InventoryTooltipData(slot)` | `C_TooltipInfo.GetInventoryItem("player", slot)` | The data table and `true`, or `nil, false` without the API (the caller scans a tooltip) |
 | `Compat.UnitSpeed(unit)` | `GetUnitSpeed` | current, run, flight, swim in yards/s; `nil` without the API |
 | `Compat.SpellName(spellID)` | `C_Spell.GetSpellName`, then `GetSpellInfo` | the spell's localized name (the crafting overlay's cast, localization-§4); `nil` for an unknown ID or without either API |
+| `Compat.SpellTexture(spellID)` | `C_Spell.GetSpellTexture`, then `GetSpellTexture` | the spell's icon (a file ID or a path): a profession row's icon (FB-14); `nil` for an unknown ID or without either API, and the row falls back to the catalog's static `icon` |
+| `Compat.PlayerName()` | `UnitName("player")` | the player's name on the summary line (FB-17); `nil` without the API. The simulator answers the sample's |
+| `Compat.MapWorldPos(mapID, x, y)` | `C_Map.GetWorldPosFromMapPos(mapID, CreateVector2D(x, y))` | a map point's (`x`, `y` as 0..1) world position: `instanceID, x, y` in yards (round 5, R5-15, the trainer popup's distances); `nil` for a secret or non-number argument or return, a raise (pcall), or without either API |
+| `Compat.PlayerWorldPos()` | `C_Map.GetBestMapForUnit("player")`, `C_Map.GetPlayerMapPosition(mapID, "player")`, then `MapWorldPos` | the player's world position: `instanceID, x, y`; `nil` when the client knows no map or position (inside an instance), answers a secret, raises, or lacks an API |
+| `Compat.ClassIcon(classFile)` | `C_Texture.GetAtlasInfo("classicon-<class>")`, then `CLASS_ICON_TCOORDS` on `Interface\GLUES\CHARACTERCREATE\UI-CHARACTERCREATE-CLASSES` | `{ atlas }` where the client carries the atlas, else `{ file, coords }`, else `nil` (the summary line hides the icon). Pure: it reads no character, so the simulator passes it through |
 
-The last six (T5.2) exist for the simulator (preview-mode, H1): `core/SimSetup.lua` wraps the whole
+PlayerLevel to SpellName (T5.2) and PlayerName (FB-17) exist for the simulator (preview-mode, H1): `core/SimSetup.lua` wraps the whole
 table at load with LibKa0s-Sim-1.0's seam, and `modules/Simulator.lua` answers each one from its
 simulated world while a session runs. A module reads them as `NS.Compat.Member(...)` at call time,
 never through a captured local, and `tests/test_sim.lua` asserts `seam:Unwrapped()` is empty.
@@ -32,7 +37,7 @@ never through a captured local, and `tests/test_sim.lua` asserts `seam:Unwrapped
 The kit's Forever API set (`tests/_kit/client_globals_forever.lua`) lists the skill list as
 `C_SkillInfo.*` and none of the 1.12 globals. That set is best-effort, not a measurement, so the
 1.12 rung is not dead code under compat's dead-fallback-rung rule until `/sm probe` answers
-(`docs/midnight-quirks.md`, the addon's assumed-API table). When the probe confirms which API the
+(`docs/forever-quirks.md`, the addon's assumed-API table). When the probe confirms which API the
 client carries, delete the rung it rules out.
 
 Tests: `tests/test_skilldata.lua` (`compat:` cases) drive all three shapes, the struct through

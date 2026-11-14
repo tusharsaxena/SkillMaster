@@ -52,6 +52,10 @@ Kit.diagnostics = {
     console     = function() return NS.DebugLog end,
     setDebug    = function(on) NS.State.debug = on and true or false end,
     setDisabled = function(off) NS.SetByPath("enabled", not off) end,
+    -- A report runs past 300 lines (its Settings section walks every schema row), so the cases'
+    -- reports together reach the console's 3000-line cap, and the compaction past it drops the
+    -- begin markers the cases count. Each case starts on an empty console.
+    reset       = function() NS.DebugLog:Clear() end,
 }
 
 -- The typed-value gate (skinning-§1): nothing this addon draws needs an allow row yet.
@@ -72,6 +76,18 @@ Kit.skinSwitch = {
             return NS.Detached.Frame("other")
         end, reset = function()
             NS.db.profile.layout.blocks.other.docked = true
+            NS.Detached.Refresh()
+        end },
+        -- A merged window (round 5, R5-6): two detached blocks as one.
+        { name = "a merged window", build = function()
+            local b = NS.db.profile.layout.blocks
+            b.other.docked, b.secondary.docked = false, false
+            NS.Detached.Refresh()
+            return NS.Groups.Frame(NS.Groups.Merge("secondary", "other", "bottom"))
+        end, reset = function()
+            local b = NS.db.profile.layout.blocks
+            b.other.docked, b.secondary.docked = true, true
+            NS.db.profile.layout.groups = {}
             NS.Detached.Refresh()
         end },
         { name = "the journal", build = function()
@@ -99,20 +115,17 @@ Kit.skinSwitch = {
             mocks.GameTooltip:Hide()
             NS.MainWindow.Hide()
         end },
-        { name = "the broker feed tooltip's mini bars", build = function()
+        -- The feed's own tooltip frame (broker.tooltip.skin, on by default): its shell, its lines
+        -- and the pooled mini bars parented to it. The shared GameTooltip is never painted.
+        { name = "the broker feed tooltip", build = function()
             NS.Preview.Apply(true)   -- the sample character: learned skills to draw bars for
-            NS.Broker.OnEnter("all", mocks.UIParent)
-            return mocks.GameTooltip   -- its lines and the pooled mini bars parented to it
+            NS.Broker.OnEnter(mocks.UIParent)
+            return NS.Broker.Tip()
         end, paint = function()
-            NS.Broker.OnEnter("all", mocks.UIParent)
+            NS.Broker.OnEnter(mocks.UIParent)
         end, reset = function()
-            mocks.GameTooltip:Hide()
+            NS.Broker.HideTooltip()
             NS.Preview.Apply(false)
-        end },
-        { name = "the Bars page preview", scope = "panel", build = function()
-            local f = mocks.CreateFrame("Frame", nil, mocks.UIParent)
-            NS.OptionsPreview.Build(nil, f)
-            return f
         end },
         { name = "the debug console", build = function()
             NS.DebugLog:Show()
@@ -127,6 +140,8 @@ Kit.run{
         "test_loadorder",
         "test_schema",
         "test_options",
+        "test_template_rows",
+        "test_row_display",
         "test_database",
         "test_bus",
         "test_slash",
@@ -143,6 +158,20 @@ Kit.run{
         "test_bonuses",
         "test_statdata",
         "test_bar",
+        "test_bars_live",
+        "test_bars_round2",
+        "test_bars_sizes",
+        "test_round2_layout",
+        "test_round2_icons",
+        "test_round3",
+        "test_round5",
+        "test_round5_style",
+        "test_round5_groups",
+        "test_round5_snap",
+        "test_round5_followups",
+        "test_round6",
+        "test_round7",
+        "test_round8",
         "test_blocks",
         "test_interact",
         "test_sessionlog",
@@ -159,6 +188,7 @@ Kit.run{
         "test_m5_review",
         "test_m5_leftovers",
         "test_m6_fixes",
+        "test_fb2_chrome",
         "test_surface_parity",
         "test_vendor_sync",
         -- slash-commands-§7: drives OnEnable and full disable/enable cycles on the shared

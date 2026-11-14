@@ -31,7 +31,7 @@ end
 NS.db.char = NS.db.char or { pinned = false }
 
 local SWAPPED = { "UnitFactionGroup", "UnitRace", "UnitLevel", "InCombatLockdown", "CreateFrame", "ToggleCharacter",
-                  "TomTom", "C_Map", "UiMapPoint", "GetZoneText", "IsShiftKeyDown", "ChatEdit_InsertLink",
+                  "C_Map", "UiMapPoint", "GetZoneText", "IsShiftKeyDown", "ChatEdit_InsertLink",
                   "GetCursorPosition" }
 
 --- A world: the fixture as the blocks' source, an Alliance Dwarf at 22, every secure button's
@@ -99,6 +99,7 @@ test("test_secure_overlay_deferred_in_combat: crafting overlays are made and mov
     -- answers true; a detach that applies in combat; or a regen that does not replay the queue.
     withWorld(function(world, skills)
         W.Show()
+        rowFor("tailoring"):__fire("OnEnter")   -- only the hovered crafting row is armed
         local lw = SO.Overlay("tailoring")
         assertTrue(lw ~= nil, "a crafting row gets its overlay out of combat")
         assertEqual(lw.__template, "SecureActionButtonTemplate")
@@ -119,6 +120,7 @@ test("test_secure_overlay_deferred_in_combat: crafting overlays are made and mov
         skills.byKey.alchemy = skill("alchemy", "Alchemy", "primary", 40, 75)
         table.insert(skills.order.primary, 1, "alchemy")
         NS.bus:SendMessage(NS.MSG.SKILLS_UPDATED, skills)
+        rowFor("alchemy"):__fire("OnEnter")   -- a hover in combat arms nothing
         assertEqual(#world.secure, before, "no secure button is created in combat")
         assertTrue(SO.Overlay("alchemy") == nil)
         assertEqual(moves.count, 0, "nothing re-anchors, shows or re-levels an overlay in combat")
@@ -128,7 +130,7 @@ test("test_secure_overlay_deferred_in_combat: crafting overlays are made and mov
         assertTrue(NS.db.profile.layout.blocks.primary.docked, "still docked in combat")
 
         M.__resetPrinted()
-        local target = I.OnRowClick(rowFor("alchemy"), "LeftButton")
+        local target = I.OnMarkClick(rowFor("alchemy"), "LeftButton")
         assertEqual(target, "secure")
         assertEqual(#world.opened, 0, "the insecure path opens nothing")
         assertEqual(#M.__printed(), 1, "one line says why")
@@ -137,38 +139,115 @@ test("test_secure_overlay_deferred_in_combat: crafting overlays are made and mov
         M.__fireEvent("PLAYER_REGEN_ENABLED")
         assertFalse(NS.db.profile.layout.blocks.primary.docked, "the queued detach ran after combat")
         assertFalse(SO:Pending())
+        rowFor("alchemy"):__fire("OnEnter")   -- the row in the detached frame now
         local al = SO.Overlay("alchemy")
         assertTrue(al ~= nil and al:IsShown(), "the new crafting row got its overlay after combat")
         assertEqual(al.__attr.spell, "Alchemy")
         assertTrue(al.row == rowFor("alchemy"), "over the row in the detached frame")
-        assertTrue(lw:IsShown(), "re-armed")
+        rowFor("alchemy"):__fire("OnLeave")
+        assertFalse(al:IsShown(), "the pointer gone: disarmed")
+        rowFor("tailoring"):__fire("OnEnter")
+        assertTrue(lw:IsShown(), "re-armed on the next hover")
     end)
 end)
 
 test("secure overlay: hiding the window hides its overlays; the stand-down takes them down", function()
     withWorld(function()
         W.Show()
+        rowFor("tailoring"):__fire("OnEnter")
         local lw = SO.Overlay("tailoring")
         assertTrue(lw:IsShown())
         W.Hide()
         assertFalse(lw:IsShown(), "no overlay over a hidden window")
         assertTrue(lw.row == nil, "and none points at a parked row")
         W.Show()
+        assertFalse(lw:IsShown(), "a parked row is hovered no more: nothing armed on the re-show")
+        rowFor("tailoring"):__fire("OnEnter")
         assertTrue(lw:IsShown())
         SO:StandDown()
         assertFalse(lw:IsShown(), "the stand-down disarms")
     end)
 end)
 
+test("secure overlay: a click that reaches a crafting row logs its overlay's state, before and after the re-sync", function()
+    withWorld(function()
+        W.Show()
+        local row = rowFor("tailoring")
+        row:__fire("OnEnter")
+        local line = SO.Describe("tailoring", row)
+        assertTrue(line:find("overlay tailoring: shown=true", 1, true) ~= nil, line)
+        assertTrue(line:find("armedFor=true", 1, true) ~= nil, line)
+        assertTrue(line:find("level=", 1, true) ~= nil and line:find("rowRect=", 1, true) ~= nil, line)
+        assertTrue(line:find("clicks=", 1, true) ~= nil and line:find("propagate=", 1, true) ~= nil, line)
+        assertEqual(type(SO.MouseFoci()), "string", "the pointer's frames, as text on any client")
+        local none = SO.Describe("skinning", rowFor("skinning"))
+        assertTrue(none:find("none made", 1, true) ~= nil, none)
+        assertEqual(I.OnMarkClick(row, "LeftButton"), "secure", "the out-of-combat fall-through logs and re-syncs")
+    end)
+end)
+
+test("secure overlay: the pointer entering a crafting row lays its overlay before any press", function()
+    -- red under: an overlay laid only by the row's mouse-down. The client gives the click to the
+    -- frame under the press, so an overlay laid by that press missed it (feedback round 2: "nothing
+    -- happens when I click").
+    withWorld(function()
+        W.Show()
+        local row = rowFor("tailoring")
+        local lw = SO.Overlay("tailoring")
+        lw:Hide()
+        lw.row = nil
+        row:__fire("OnEnter")
+        assertTrue(lw:IsShown(), "armed by the hover")
+        assertTrue(lw.row == row, "over the hovered row")
+        row:__fire("OnLeave")
+    end)
+end)
+
+test("secure overlay: only the hovered crafting row is armed, one strata over its window, until the pointer leaves", function()
+    -- red under: every crafting row armed at once (an invisible mouse-live frame a strata up could
+    -- cover another window), an overlay in its host's own strata (a toplevel window's raised group
+    -- outranks it: feedback round 2), or the overlay's own appearance counted as leaving the row.
+    withWorld(function()
+        W.Show()
+        assertTrue(SO.Overlay("tailoring") == nil or not SO.Overlay("tailoring"):IsShown(), "nothing armed unhovered")
+        local row = rowFor("tailoring")
+        row:__fire("OnEnter")
+        local lw = SO.Overlay("tailoring")
+        assertTrue(lw:IsShown() and lw.row == row, "the hovered row is armed")
+        assertEqual(lw:GetFrameStrata(), NS.Constants.LAYERS.STRATA_ABOVE[W.Frame():GetFrameStrata()],
+            "one strata over its window")
+        -- The overlay appears under the pointer: the row's leave is not a leave.
+        rawset(lw, "IsMouseOver", function() return true end)
+        row:__fire("OnLeave")
+        assertTrue(lw:IsShown(), "still armed while the pointer is on the overlay")
+        -- The pointer leaves the overlay: its hook runs the row's leave.
+        rawset(lw, "IsMouseOver", function() return false end)
+        lw:__fire("OnLeave")
+        assertFalse(lw:IsShown(), "disarmed once the pointer is off both")
+        rawset(lw, "IsMouseOver", nil)
+    end)
+end)
+
 test("interact: the click map (design §6.5)", function()
     withWorld(function(world)
         W.Show()
-        assertEqual(I.OnRowClick(rowFor("skinning"), "LeftButton"), "skills")
-        assertEqual(world.opened[#world.opened], "SkillFrame")
-        assertEqual(I.OnRowClick(rowFor("guns"), "LeftButton"), "skills")
-        assertEqual(I.OnRowClick(rowFor("hit"), "LeftButton"), "paperdoll")
+        -- Skinning opens its own window by line ID; without the call, the Skills tab instead.
+        assertEqual(I.OnRowClick(rowFor("skinning"), "LeftButton"), "none", "the row itself opens nothing (round 4)")
+        assertEqual(#world.opened, 0)
+        assertEqual(I.OnMarkClick(rowFor("skinning"), "LeftButton"), "tradeskill")
+        assertEqual(world.opened[#world.opened], "SkillsFrame", "no OpenTradeSkill: the Skills tab")
+        local openedLine
+        M.C_TradeSkillUI = { OpenTradeSkill = function(id) openedLine = id return true end }
+        local before = #world.opened
+        assertEqual(I.OnMarkClick(rowFor("skinning"), "LeftButton"), "tradeskill")
+        assertEqual(openedLine, 393, "Skinning's window by its skill-line ID")
+        assertEqual(#world.opened, before, "and no Skills tab")
+        M.C_TradeSkillUI = nil
+        assertEqual(I.OnMarkClick(rowFor("guns"), "LeftButton"), "skills")
+        assertEqual(I.OnRowClick(rowFor("hit"), "LeftButton"), "none", "a stat row opens no panel (round 4)")
+        assertEqual(I.OnMarkClick(rowFor("hit"), "LeftButton"), "paperdoll")
         assertEqual(world.opened[#world.opened], "PaperDollFrame")
-        assertEqual(I.OnRowClick(rowFor("fistWeapons"), "LeftButton"), "trainer")
+        assertEqual(I.OnMarkClick(rowFor("fistWeapons"), "LeftButton"), "trainer")
         assertTrue(NS.TrainerPopup.IsShown(), "an unlearned row opens the trainer popup")
         assertEqual(I.Target(rowFor("tailoring")), "secure")
     end)
@@ -310,7 +389,7 @@ end)
 test("trainer popup: the faction's trainers, the selection and the waypoint button", function()
     withWorld(function()
         local P = NS.TrainerPopup
-        M.TomTom, M.C_Map = nil, nil
+        M.C_Map = nil
         P.Show("fistWeapons")
         local f = P.Frame()
         assertTrue(f:IsShown())
@@ -323,10 +402,11 @@ test("trainer popup: the faction's trainers, the selection and the waypoint butt
         P.Select(2)
         assertEqual(P.Selected(), list[2])
         assertTrue(f.warning:IsShown(), "unverified coordinates are flagged")
-        assertTrue(f.waypoint.text:GetText():find("chat", 1, true) ~= nil, "no TomTom, no native pin: chat")
+        assertEqual(f.waypoint.text:GetText(), "Set waypoint", "the label names no provider (R6-6)")
+        assertFalse(f.waypoint:IsEnabled(), "no native pin: only chat, so disabled (R6-6)")
         M.__resetPrinted()
-        f.waypoint:GetScript("OnClick")(f.waypoint)
-        assertTrue(#M.__printed() >= 1, "directions printed")
+        f.print:GetScript("OnClick")(f.print)
+        assertTrue(#M.__printed() >= 1, "Print to chat prints the directions")
         P.Hide()
         assertFalse(f:IsShown())
         P.Show("tailoring")
@@ -334,30 +414,157 @@ test("trainer popup: the faction's trainers, the selection and the waypoint butt
     end)
 end)
 
-test("test_waypoints_fallback_order: TomTom, then the native pin, then chat", function()
-    -- red under: any reordering of the three, or a native pin tried without coordinates.
+test("test_waypoints_fallback_order: the native pin, then chat", function()
+    -- red under: chat while the pin works, or a native pin tried without coordinates.
     withWorld(function()
         local Wp = NS.Waypoints
         local trainer = NS.Trainers:For("fistWeapons")[1]
-        local tt, native = {}, {}
-        M.TomTom = { AddWaypoint = function(_, ...) tt[#tt + 1] = { ... } return {} end }
+        local native = {}
         M.C_Map = { SetUserWaypoint = function(p) native[#native + 1] = p end,
                     CanSetUserWaypointOnMap = function() return true end }
         M.UiMapPoint = { CreateFromCoordinates = function(id, x, y) return { id = id, x = x, y = y } end }
-        assertEqual(Wp:Set(trainer), "tomtom")
-        assertEqual(tt[1][1], trainer.mapID)
-        assertTrue(math.abs(tt[1][2] - trainer.x / 100) < 1e-9, "TomTom takes 0..1 coordinates")
-        assertEqual(#native, 0)
-        M.TomTom = nil
         assertEqual(Wp:Set(trainer), "native")
         assertEqual(native[1].id, trainer.mapID)
+        assertTrue(math.abs(native[1].x - trainer.x / 100) < 1e-9, "the pin takes 0..1 coordinates")
+        local noCoords = { name = "Ultham Ironhorn", city = "Amberstill Ranch", mapName = "Dun Morogh", mapID = 1426 }
+        assertEqual(Wp:Set(noCoords), "chat", "no coordinates: directions in chat, never a guessed pin")
+        assertEqual(#native, 1)
+        NS.WaypointArrow.StandDown()
         M.C_Map, M.UiMapPoint = nil, nil
         M.__resetPrinted()
         assertEqual(Wp:Set(trainer), "chat")
         assertTrue(M.__printed()[1]:find("Buliwyf Stonehand", 1, true) ~= nil, M.__printed()[1])
-        M.TomTom = { AddWaypoint = function() error("must not be called") end }
-        local noCoords = { name = "Ultham Ironhorn", city = "Amberstill Ranch", mapName = "Dun Morogh", mapID = 1426 }
-        assertEqual(Wp:Set(noCoords), "chat", "no coordinates: directions in chat, never a guessed pin")
-        assertEqual(Wp:Method(trainer), "tomtom")
+    end)
+end)
+
+test("interact: shift-click on a profession row inserts its trade link, as the spellbook icon does", function()
+    -- red under: the row as text ("[Tailoring 146 / 150]") for a profession (owner feedback round 4)
+    withWorld(function()
+        W.Show()
+        local savedSB = M.C_SpellBook
+        local LINK = "|cffffd000|Htrade:Player-1-0001:3908:197|h[Tailoring]|h|r"
+        -- Forever's layout (owner's probe, 2026-11-13): the skill lines end at slot 4 here, and the
+        -- professions sit past them (slots 5-8), outside every line's range.
+        M.C_SpellBook = {
+            GetNumSpellBookSkillLines = function() return 2 end,
+            GetSpellBookSkillLineInfo = function(i)
+                return i == 1 and { itemIndexOffset = 0, numSpellBookItems = 2 }
+                    or { itemIndexOffset = 2, numSpellBookItems = 2 }
+            end,
+            GetSpellBookItemName = function(slot)
+                return ({ "Attack", "Auto Shot", "Arcane Shot", "Aimed Shot", "Tailoring", "Tailoring", "Fishing" })[slot]
+            end,
+            GetSpellBookItemTradeSkillLink = function(slot) return slot == 5 and LINK or nil end,
+        }
+        local linked
+        M.ChatEdit_InsertLink = function(text) linked = text return true end
+        M.IsShiftKeyDown = function() return true end
+        local ok, err = pcall(function()
+            assertEqual(I.OnRowClick(rowFor("tailoring"), "LeftButton"), "link")
+            assertEqual(linked, LINK, "the trade link from the book's Tailoring slot, past the skill lines")
+            I.OnRowClick(rowFor("fishing"), "LeftButton")
+            assertEqual(linked, "[Fishing 107 +25 / 150]", "no trade link for the slot: the row as text")
+            I.OnRowClick(rowFor("guns"), "LeftButton")
+            assertEqual(linked, "[Guns 105 +5 / 110]", "a weapon row stays text")
+        end)
+        M.IsShiftKeyDown = function() return false end
+        M.C_SpellBook = savedSB
+        if not ok then error(err, 0) end
+    end)
+end)
+
+-- ── owner feedback round 4: the character panel through the mark's secure overlay ────────────
+
+--- The Camelot character panel's globals: the micro button, the panel and its two tabs.
+local function withPanel(fn)
+    local saved = { M.CharacterMicroButton, M.CharacterFrame, M.PaperDollFrame, M.SkillsFrame }
+    local function frame(shown) return { shown = shown, IsShown = function(self) return self.shown end,
+                                          IsVisible = function(self) return self.shown end } end
+    local panel = { micro = { Click = function() end }, frame = frame(false), doll = frame(false), skills = frame(false) }
+    M.CharacterMicroButton, M.CharacterFrame, M.PaperDollFrame, M.SkillsFrame =
+        panel.micro, panel.frame, panel.doll, panel.skills
+    local ok, err = pcall(fn, panel)
+    M.CharacterMicroButton, M.CharacterFrame, M.PaperDollFrame, M.SkillsFrame = saved[1], saved[2], saved[3], saved[4]
+    if not ok then error(err, 0) end
+end
+
+test("panel overlay: a weapon row's mark opens the panel by the micro button, then the Skills tab on its line", function()
+    -- red under: ToggleCharacter("SkillFrame") from the addon (a name Forever's panel ignores, and a
+    -- tainted CharacterFrame:OnShow that raised the PlayerFrame secret compare, 2026-11-12)
+    withWorld(function(world)
+        withPanel(function(panel)
+            W.Show()
+            local selected
+            local savedSelect = I.SelectSkillLine
+            I.SelectSkillLine = function(key) selected = key return 3 end
+            local ok, err = pcall(function()
+                local row = rowFor("guns")
+                row:__fire("OnEnter")
+                local b = SO.Overlay("guns")
+                assertTrue(b ~= nil and b:IsShown(), "the hovered weapon row's mark is armed")
+                assertEqual(b.kind, "char")
+                assertEqual(b.__template, "SecureActionButtonTemplate")
+                b:GetScript("PreClick")(b, "LeftButton", true)
+                assertEqual(selected, "guns", "the line is selected before the panel shows")
+                assertEqual(b.__attr.type1, "macro")
+                assertEqual(b.__attr.macrotext1, "/click CharacterMicroButton", "the panel closed: one click opens it")
+                assertEqual(#world.opened, 0, "the addon shows nothing itself on the press")
+                b:GetScript("PostClick")(b, "LeftButton", true)
+                assertEqual(#world.opened, 0, "nothing on the press's PostClick")
+                panel.frame.shown, panel.doll.shown = true, true   -- the micro button opened the paper doll
+                b:GetScript("PostClick")(b, "LeftButton", false)
+                assertEqual(world.opened[#world.opened], "SkillsFrame", "the release switches to the Skills tab")
+                -- The tab already showing: no secure click at all, the selection redrawn.
+                panel.doll.shown, panel.skills.shown = false, true
+                local before = #world.opened
+                b:GetScript("PreClick")(b, "LeftButton", true)
+                assertEqual(b.__attr.type1, nil, "no click: the panel stays open")
+                b:GetScript("PostClick")(b, "LeftButton", false)
+                assertEqual(#world.opened, before, "and the tab is not toggled closed")
+                -- Shift and right clicks never run the secure action.
+                M.IsShiftKeyDown = function() return true end
+                b:GetScript("PreClick")(b, "LeftButton", true)
+                assertEqual(b.__attr.type1, nil, "a shift-click links, never opens")
+                M.IsShiftKeyDown = function() return false end
+                row:__fire("OnLeave")
+            end)
+            I.SelectSkillLine = savedSelect
+            if not ok then error(err, 0) end
+        end)
+    end)
+end)
+
+test("panel overlay: a stat row's mark opens the paper doll; from another tab it reopens there", function()
+    withWorld(function()
+        withPanel(function(panel)
+            W.Show()
+            local row = rowFor("hit")
+            row:__fire("OnEnter")
+            local b = SO.Overlay("stat:hit")
+            assertTrue(b ~= nil and b:IsShown(), "a stat row's mark is armed (round 4: stat rows get the mark)")
+            b:GetScript("PreClick")(b, "LeftButton", true)
+            assertEqual(b.__attr.macrotext1, "/click CharacterMicroButton")
+            panel.frame.shown, panel.skills.shown = true, true
+            b:GetScript("PreClick")(b, "LeftButton", true)
+            assertEqual(b.__attr.macrotext1, "/click CharacterMicroButton\n/click CharacterMicroButton",
+                "open on the Skills tab: closed and reopened on the paper doll, both secure")
+            row:__fire("OnLeave")
+        end)
+    end)
+end)
+
+test("panel overlay: no micro button, no overlay; a plain mark click in combat says why and opens nothing", function()
+    withWorld(function(world)
+        W.Show()
+        local row = rowFor("guns")
+        row:__fire("OnEnter")
+        assertTrue(SO.Overlay("guns") == nil or not SO.Overlay("guns"):IsShown(), "no micro button: the mark's own click")
+        row:__fire("OnLeave")
+        M.InCombatLockdown = function() return true end
+        M.__resetPrinted()
+        assertEqual(I.OnMarkClick(rowFor("hit"), "LeftButton"), "paperdoll")
+        assertEqual(#world.opened, 0, "never a tainted panel in combat")
+        assertEqual(#M.__printed(), 1, "one line says why")
+        M.InCombatLockdown = function() return false end
     end)
 end)

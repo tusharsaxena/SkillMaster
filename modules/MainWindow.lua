@@ -1,6 +1,7 @@
 local addonName, NS = ...
 -- modules/MainWindow.lua — the Skill Master window (standalone-windows, design §6.1, mockup "Main"):
--- its chrome (title band with lock, journal, settings and close), the optional summary strip, the
+-- its chrome (title band with lock, journal, settings, one Expand / Collapse all and close), the
+-- optional summary strip (the character's class icon and name, then its level line), the
 -- docked blocks in a scrolled body (NS.Blocks headers and NS.Rows rows), the bonus legend, the
 -- test-mode strip, the drag-only position, the one toggle handler and the Show window key binding.
 --
@@ -17,6 +18,11 @@ local LAYERS = NS.Constants.LAYERS
 W.FRAME_NAME = "SkillMasterMainWindow"
 W.SCROLL_NAME = "SkillMasterMainScroll"
 local TITLE_H, SUMMARY_H, FOOTER_H, MIN_H, SCROLLBAR_W = 28, 22, 22, 120, 16
+-- What the scroll bar takes past the body: UIPanelScrollFrameTemplate hangs its 16 px bar 6 px off
+-- the scroll frame's right edge, and 4 px keep it off the window's border. The window grows by this
+-- gutter rather than the body shrinking, so the rows stay Window width's (feedback round 2).
+local SCROLL_GUTTER = 6 + SCROLLBAR_W + 4
+W.CLASS_ICON = 14   -- the summary line's class icon, px
 
 local frame          -- built on first show
 local headerPool, rowPool
@@ -27,7 +33,7 @@ local COLUMN_GAP = 6   -- px between two columns of blocks
 
 local function layoutSettings() return (NS.db and NS.db.profile.layout) or NS.defaults.profile.layout end
 local function columns() return tonumber(layoutSettings().columns) == 2 and 2 or 1 end
-local function columnWidth() return (tonumber(layoutSettings().width) or 440) - 4 - SCROLLBAR_W end
+local function columnWidth() return (tonumber(layoutSettings().width) or 420) - 4 - SCROLLBAR_W end
 
 --- The scrolled body's width: Layout > Columns columns, each Window width's body wide.
 function W.ContentWidth()
@@ -35,8 +41,8 @@ function W.ContentWidth()
     return n * columnWidth() + (n - 1) * COLUMN_GAP
 end
 
---- The window's width: the body, its scroll bar and its edges.
-local function width() return W.ContentWidth() + 4 + SCROLLBAR_W end
+--- The window's width: the body, its scroll bar's whole gutter and its edges.
+local function width() return W.ContentWidth() + 4 + SCROLL_GUTTER end
 
 local function savePoint()
     local point, _, relPoint, x, y = frame:GetPoint(1)
@@ -76,6 +82,28 @@ local function openJournal()
     if NS.Journal and NS.Journal.Toggle then NS.Journal.Toggle() end
 end
 local function openSettings() NS.OpenOptionsPanel() end
+--- Whether any docked block that draws rows is expanded: the one Expand / Collapse all control
+--- then collapses, else it expands (the two are one control, feedback round 2).
+function W.AnyExpanded()
+    local skills, stats = NS.Blocks.Data()
+    for _, id in ipairs(NS.Blocks.Docked()) do
+        if not NS.Blocks.Settings(id).collapsed and #NS.Blocks.Entries(id, skills, stats) > 0 then return true end
+    end
+    return false
+end
+
+local function toggleAll() NS.Blocks:SetAllCollapsed(W.AnyExpanded()) end
+
+--- Show the control as what a click does now: Collapse all (inward arrows) while a block is open,
+--- Expand all (outward arrows) once every one is collapsed.
+local function paintToggleAll()
+    local b = frame and frame.toggleAllButton
+    if not b then return end
+    local collapse = W.AnyExpanded()
+    NS.Chrome.SetIcon(b, collapse and "fullscreen-exit" or "fullscreen-enter", collapse and "-" or "+")
+    b.tip = collapse and L["Collapse all blocks"] or L["Expand all blocks"]
+    b.collapses = collapse
+end
 
 local function controlLevel(b)
     if b then b:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CHROME) end
@@ -86,18 +114,28 @@ local function buildTitleControls()
     frame.lockButton = NS.Chrome.IconButton(frame, "lock", "L", toggleLock, L["Lock or unlock the window"])
     frame.journalButton = NS.Chrome.IconButton(frame, "document", "J", openJournal, L["Open the journal"])
     frame.settingsButton = NS.Chrome.IconButton(frame, "settings", "S", openSettings, L["Open the settings panel"])
+    -- Expand all and Collapse all (FB-16) are one control, between the settings mark and the close:
+    -- it shows what a click does now (paintToggleAll), never both at once (feedback round 2).
+    frame.toggleAllButton = NS.Chrome.IconButton(frame, "fullscreen-exit", "-", toggleAll, L["Collapse all blocks"])
     -- Each by name: frame.close is nil without the Core library, and ipairs would stop at that hole.
     controlLevel(frame.close)
     controlLevel(frame.lockButton)
+    controlLevel(frame.toggleAllButton)
     controlLevel(frame.journalButton)
     controlLevel(frame.settingsButton)
-    local right = { frame.settingsButton, frame.journalButton }
+    -- The lock stands with the other marks at the top right (owner feedback round 3).
+    local left = {}
+    local right = { frame.toggleAllButton, frame.settingsButton, frame.journalButton, frame.lockButton }
     if frame.close then table.insert(right, 1, frame.close) end
-    NS.Skin.Header(frame, { title = frame.title, align = "CENTER", left = { frame.lockButton }, right = right })
+    NS.Skin.Header(frame, { title = frame.title, align = "CENTER", left = left, right = right })
     if not frame.lockButton:GetPoint(1) then   -- no skin library: the same strip, anchored by hand
         frame.title:SetPoint("TOP", frame, "TOP", 0, -7)
-        frame.lockButton:SetPoint("TOPLEFT", frame, "TOPLEFT", 6, -5)
         local prev
+        for _, b in ipairs(left) do
+            if prev then b:SetPoint("LEFT", prev, "RIGHT", 4, 0) else b:SetPoint("TOPLEFT", frame, "TOPLEFT", 6, -5) end
+            prev = b
+        end
+        prev = nil
         for _, b in ipairs(right) do
             if prev then b:SetPoint("RIGHT", prev, "LEFT", -4, 0) else b:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -6, -5) end
             prev = b
@@ -106,6 +144,11 @@ local function buildTitleControls()
 end
 
 local function buildSummary()
+    -- The character (FB-17): its class icon, its name in its class color, then the level line.
+    frame.summaryIcon = frame:CreateTexture(nil, "ARTWORK")
+    frame.summaryIcon:SetSize(W.CLASS_ICON, W.CLASS_ICON)
+    frame.summaryName = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    frame.summaryName:SetWordWrap(false)
     frame.summary = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.summaryGains = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.summaryAlert = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
@@ -132,13 +175,17 @@ end
 
 local function paintLegend()
     local style = NS.Bar.ResolveStyle("row")
+    -- The threshold entry only while the window's bars draw thresholds (owner feedback round 6, R6-4).
+    local marks = style.showMarkers == true
+    frame.legend.markerTex:SetShown(marks)
+    frame.legend.markerLabel:SetShown(marks)
     for _, sw in ipairs(frame.legend.swatches) do
         local c = style[sw.key]
         if c then sw.tex:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
     end
 end
 
---- A legend mark: a thin line drawn as the bar draws it (a tick 1 px, a marker 2 px) in the bar's
+--- A legend mark: a thin line drawn as the bar draws it (a marker, 2 px) in the bar's
 --- own color, then its label, laid right to left from `anchor`. Drawn, never typed: no face has to
 --- carry a glyph for it (skinning-§4).
 local function legendMark(parent, colorKey, w, label, anchor)
@@ -159,10 +206,10 @@ local function buildLegend()
     f:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -1, 1)
     local t1, fs1 = swatch(f, "bonusTemp", L["temp bonus"])
     local t2, fs2 = swatch(f, "bonusPerm", L["permanent bonus"], fs1)
-    local marker, fs3, tex3 = legendMark(f, "marker", 2, L["threshold"])
-    local tick, fs4 = legendMark(f, "tick", 1, L["rank tier"], tex3)
-    f.swatches = { { tex = t1, key = "bonusTemp" }, { tex = t2, key = "bonusPerm" }, marker, tick }
-    f.marks = { fs4, fs3 }
+    local marker, fs3 = legendMark(f, "marker", 2, L["threshold"])
+    f.swatches = { { tex = t1, key = "bonusTemp" }, { tex = t2, key = "bonusPerm" }, marker }
+    f.marks = { fs3 }
+    f.markerTex, f.markerLabel = marker.tex, fs3
     f.rule = f:CreateTexture(nil, "BORDER")
     f.rule:SetPoint("TOPLEFT", f, "TOPLEFT", 0, 0)
     f.rule:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, 0)
@@ -271,22 +318,27 @@ end
 -- ---------------------------------------------------------------------------------------------
 
 local function plan(skills, stats)
-    local out, sig, total = {}, {}, 0
+    -- `laid` counts the blocks laid out, not their rows: a block its filter emptied shows its
+    -- header and note, so it is content and the window's empty message stays down (review, R5-followups).
+    local out, sig, laid = {}, {}, 0
     for _, id in ipairs(NS.Blocks.Docked()) do
-        local entries = NS.Blocks.Entries(id, skills, stats)
-        if #entries > 0 then
+        local entries, removed = NS.Blocks.Entries(id, skills, stats)
+        -- A block its filter emptied keeps its header and a muted line (round 5, R5-10).
+        local note = NS.Blocks.FilterNote(entries, removed)
+        if #entries > 0 or note then
             local collapsed = NS.Blocks.Settings(id).collapsed and true or false
-            out[#out + 1] = { id = id, entries = entries, collapsed = collapsed, meta = NS.Blocks.Meta(id, entries) }
-            sig[#sig + 1] = id .. (collapsed and "-" or "+")
+            out[#out + 1] = { id = id, entries = entries, collapsed = collapsed, note = note }
+            sig[#sig + 1] = id .. (collapsed and "-" or "+") .. NS.Blocks.SortOf(id) .. NS.Blocks.FilterOf(id)
+                .. (note and "!" or "")
             if not collapsed then
                 for _, r in ipairs(entries) do sig[#sig + 1] = r.entry.key end
             end
-            total = total + #entries
+            laid = laid + 1
         end
     end
     -- The gathering hint changes a row's height: turning it on or off is a new layout.
     sig[#sig + 1] = (NS.db and NS.db.profile.skills.helperHint) and "hint" or "-"
-    return out, table.concat(sig, ","), total
+    return out, table.concat(sig, ","), laid
 end
 
 local function bodyTop()
@@ -298,10 +350,14 @@ end
 
 local function placeSummary(top)
     local show = layoutSettings().summary ~= false
-    for _, fs in ipairs({ frame.summary, frame.summaryGains, frame.summaryAlert, frame.summaryRule }) do fs:SetShown(show) end
-    if not show then return top end
-    frame.summary:ClearAllPoints()
-    frame.summary:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, -(top + 5))
+    local parts = { frame.summaryName, frame.summary, frame.summaryGains, frame.summaryAlert, frame.summaryRule }
+    for _, fs in ipairs(parts) do fs:SetShown(show) end
+    if not show then
+        frame.summaryIcon:Hide()
+        return top
+    end
+    frame.summaryIcon:ClearAllPoints()
+    frame.summaryIcon:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, -(top + 4))
     frame.summaryGains:ClearAllPoints()
     frame.summaryGains:SetPoint("LEFT", frame.summary, "RIGHT", 10, 0)
     frame.summaryAlert:ClearAllPoints()
@@ -320,6 +376,46 @@ function W.SummaryParts(skills)
     local gains = NS.Blocks.SessionGains()
     local gainText = gains > 0 and L["+%d this session"]:format(gains) or ""
     return who, gainText, NS.Blocks.NextAlert(skills) or ""
+end
+
+--- The character the summary line names (FB-17): { name, classFile, icon }, the icon NS.Compat's
+--- ClassIcon source ({ atlas } or { file, coords }) or nil. The sample character in test mode.
+function W.Identity()
+    local c = NS.Preview.Character()
+    return { name = c.name or "", classFile = c.classFile, icon = NS.Compat.ClassIcon(c.classFile) }
+end
+
+local function paintClassIcon(tex, spec)
+    if spec and spec.atlas then
+        tex:SetAtlas(spec.atlas)
+        tex:SetTexCoord(0, 1, 0, 1)
+    elseif spec then
+        tex:SetTexture(spec.file)
+        tex:SetTexCoord(unpack(spec.coords))
+    end
+end
+
+--- The class icon, the name in its class color, then `who` after a separator; each anchored
+--- after the one before, the icon's place closed up when the client offers no icon.
+local function drawIdentity(who)
+    local id = W.Identity()
+    local icon, name = frame.summaryIcon, frame.summaryName
+    paintClassIcon(icon, id.icon)
+    icon:SetShown(layoutSettings().summary ~= false and id.icon ~= nil)
+    name:SetText(id.name)
+    NS.Skin.Text(name, "body")
+    local cc = type(RAID_CLASS_COLORS) == "table" and id.classFile and RAID_CLASS_COLORS[id.classFile]
+    if cc then name:SetTextColor(cc.r, cc.g, cc.b) end
+    name:ClearAllPoints()
+    if id.icon then name:SetPoint("LEFT", icon, "RIGHT", 4, 0) else name:SetPoint("LEFT", icon, "LEFT", 0, 0) end
+    frame.summary:ClearAllPoints()
+    if id.name ~= "" then
+        frame.summary:SetPoint("LEFT", name, "RIGHT", 4, 0)
+        who = L["\194\183 %s"]:format(who)
+    else
+        frame.summary:SetPoint("LEFT", name, "LEFT", 0, 0)
+    end
+    frame.summary:SetText(who)
 end
 
 --- Anchor the column hosts across the body: `n` columns of `colW`, the rest hidden.
@@ -345,10 +441,16 @@ local function layBlock(b, host, y)
     h:ClearAllPoints()
     h:SetPoint("TOPLEFT", host, "TOPLEFT", 0, -y)
     h:SetPoint("TOPRIGHT", host, "TOPRIGHT", 0, -y)
-    h:SetBlock(b.id, b.meta, b.collapsed, true)
+    h:SetBlock(b.id, b.collapsed, true)
     headers[b.id] = h
     y = y + NS.Blocks.HEADER_H
-    if not b.collapsed then y = NS.Blocks.LayRows(b.entries, host, rowPool, y, "row", 0) end
+    if not b.collapsed then
+        y = NS.Blocks.LayRows(b.entries, host, rowPool, y, "row", 0)
+        if b.note then
+            h:SetNote(b.note)
+            y = y + NS.Blocks.NOTE_H
+        end
+    end
     return y + (tonumber(layoutSettings().blockGap) or 0)
 end
 
@@ -373,11 +475,14 @@ end
 local function fit(top, y)
     frame.scroll:ClearAllPoints()
     frame.scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", 2, -(top + 1))
-    frame.scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(2 + SCROLLBAR_W), FOOTER_H + 2)
+    frame.scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(2 + SCROLL_GUTTER), FOOTER_H + 2)
     local maxH = layoutSettings().maxHeight or 560
     frame:SetWidth(width())
     frame.content:SetWidth(W.ContentWidth())
-    frame:SetHeight(math.max(MIN_H, math.min(top + y + FOOTER_H + 4, maxH)))
+    -- The window keeps Window height unless Shrink to fit is on: a block collapsing or expanding
+    -- never resizes it (owner feedback round 3).
+    local h = layoutSettings().fitHeight and math.min(top + y + FOOTER_H + 4, maxH) or maxH
+    frame:SetHeight(math.max(MIN_H, h))
 end
 
 local function renderTitle(test, sim)
@@ -407,7 +512,7 @@ function W.Render()
     local test, sim = NS.IsTestMode(), NS.IsSimRunning and NS.IsSimRunning() or false
     renderTitle(test, sim)
     local skills, stats = NS.Blocks.Data()
-    local blocks, sig, total = plan(skills, stats)
+    local blocks, sig, laid = plan(skills, stats)
     sig = sig .. "|" .. markerSig(test, sim)
     local SO = NS.SecureOverlay
     if sig == lastSig then
@@ -419,9 +524,10 @@ function W.Render()
         lastSig = sig
         if SO then SO:Sync() end
     end
-    frame.empty:SetShown(total == 0)
+    frame.empty:SetShown(laid == 0)
+    paintToggleAll()
     local who, gains, alert = W.SummaryParts(skills)
-    frame.summary:SetText(who)
+    drawIdentity(who)
     frame.summaryGains:SetText(gains)
     frame.summaryAlert:SetText(alert)
     paintLegend()
@@ -431,6 +537,7 @@ end
 
 --- The rows drawn this pass (the suites and the overlay sync read them).
 function W.Rows() return rowPool and rowPool.active or {} end
+function W.Headers() return headerPool and headerPool.active or {} end
 
 --- The header drawn for block `id` this pass, or nil.
 function W.HeaderFor(id) return headers[id] end
@@ -562,6 +669,6 @@ do
     rawset(_G, "BINDING_NAME_" .. journal, L["Toggle journal"])
     NS.BINDINGS = {
         { command = window,  tooltip = L["Shows or hides the Skill Master window."] },
-        { command = journal, tooltip = L["Shows or hides the Journal: the session log and your alts."] },
+        { command = journal, tooltip = L["Shows or hides the Journal: the skill-up log and your alts."] },
     }
 end
