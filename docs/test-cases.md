@@ -431,14 +431,14 @@ Total.
 - round5 distance: Escape (the frame's own hide) stops the re-measure too
 - round5 rows: the Stats page is gone (its General tab drew nothing) and the Rows page holds every hide row
 - round5 rows: the groups follow the window's block order, skills by category, stats by group
-- round5 rows: the page draws a column header, a heading per group and two eyes per row
+- round5 rows: a tab draws a column header, its block's heading and two eyes per row
 - round5 rows: a group heading's eyes show that group's hidden rows again, one column each
 - round5 rows: a hide written while the page is hidden (the row menu) redraws it on its next show
 - round5 rows: the Rows page's Defaults restores both hidden sets; the Skills and Broker pages' leave them
 - round5 review: a UIParent hide and show (Alt+Z, a cinematic) restarts the popup's re-measure
 - round5 review: a block its filter emptied is content, so the window's empty message stays hidden
 - round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once
-- round5 review: a block reorder redraws the Rows page in the new order, shown or hidden
+- round9 rows: one tab per block in the default block order, each drawing only its block
 
 ### test_round6.lua (54)
 

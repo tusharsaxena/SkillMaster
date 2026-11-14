@@ -16,6 +16,7 @@ the checks below that cover each item:
 | Each category | SM-DISP-1, SM-TEST-1 |
 | The lure timer | SM-DISP-2, SM-SIM-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
+| Rows page (round 9) | SM-DISP-59 |
 | Waypoints (no TomTom, round 7) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58 |
 | Each skin | SM-SKIN-1, SM-SKIN-2 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
@@ -364,6 +365,11 @@ the checks below that cover each item:
   skin's colors are back. Make a second profile with On the ground and switch to it, the arrow up:
   it lies on the ground at once; switch back: Raised. `/sm test`: the sample arrow draws in the chosen
   look.
+- **SM-DISP-59** (round 9: the Rows page's tabs) Open Settings > Rows: a tab strip reads Primary,
+  Secondary, Weapons, (Other, when a catalog skill is uncategorized,) Base & Combat, Spell & Regen,
+  Defense & Resists and Utility, each hovered tab naming its block in full. The first tab shows only
+  the primary professions; switching tabs and clicking eyes is quick, with no hitch. Hide Axes on the
+  Weapons tab: the window drops it at once and its eye dims; the heading's eye shows it again.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

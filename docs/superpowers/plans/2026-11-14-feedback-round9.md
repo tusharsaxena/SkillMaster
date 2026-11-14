@@ -49,6 +49,7 @@ LibKa0s branch `feat/2026-11-14-arrow-text-position-menu` (worktree `#Worktrees/
 | R9-2 | Menu: Skill Master's items (Show trainers, Arrow settings…, Hide arrow); the tooltip says right-click opens the menu; strings. |
 | R9-3 | Text: the trainer's name as the label line; localized distance formats for both units. |
 | R9-4 | The settings slider's edit box keeps junk text (`1.5awd` in the owner's screenshot): find the layer and fix it there, or record why not. |
+| R9-5 | The Rows settings page lagged (every skill and stat on one tab, redrawn on each eye click): one tab per block, each drawing only its block (owner request, 2026-11-14, mid-round). |
 | R9-RV | Re-vendor LibKa0s v1.101.0; gates; smoke rows. |
 
 ## Checkpoints
@@ -71,4 +72,5 @@ LibKa0s branch `feat/2026-11-14-arrow-text-position-menu` (worktree `#Worktrees/
 | R9-2 | pending | |
 | R9-3 | pending | |
 | R9-4 | pending | |
+| R9-5 | done | (this commit) |
 | R9-RV | pending | |

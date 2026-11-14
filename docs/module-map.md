@@ -73,7 +73,7 @@ position says so beside its TOC line (toc-file-§5).
 | `settings/Layout.lua` | the Layout page: window (Open a row from, `layout.openFrom`, round 8, R8-1), per-block rows, the Block order drag list on `NS.OptionsList` (handle, name, an eye for Show this block; `NS.OptionsBlockOrder`) | after General |
 | `settings/Bars.lua` | the Bars page | after Layout |
 | `settings/Skills.lua` | the Skills page (unlearned skills, the gathering hints); `NS.SortedSkillKeys`, the catalog in the window's order | after Bars |
-| `settings/Rows.lua` | the Rows page (round 5, R5-13, `NS.OptionsRows`): the window's and the LDB tooltip's Hide rows for every catalog skill and stat, the four whole-set rows, drawn as boxed rows with two eyes under the window's block headings (`Groups`, `Render`); every hide write and every block reorder (a `LAYOUT_CHANGED` listener, `Rows.events`) redraws it, a bracketed batch once on the next frame | after Skills |
+| `settings/Rows.lua` | the Rows page (round 5, R5-13, `NS.OptionsRows`): the window's and the LDB tooltip's Hide rows for every catalog skill and stat, the four whole-set rows, drawn as boxed rows with two eyes one tab per block (round 9: `tabs`, `TabKey`, `Group`, `Render(ctx, id)`); every hide write redraws it, a bracketed batch once on the next frame | after Skills |
 | `settings/Broker.lua` | the Broker page: feed templates, flash, the skills feed's four section switches and the stats feed's four (R6-9) | after Rows |
 | `settings/Alerts.lua` | the Alerts page | after Broker |
 | `settings/Journal.lua` | the Journal page: log length, the Log's range, the Alts sub-tab on open | after Alerts |

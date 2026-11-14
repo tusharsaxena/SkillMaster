@@ -798,7 +798,6 @@ L["Show rows"] = true
 
 -- The Rows page (round 5, R5-11..R5-13: settings/Rows.lua)
 L["Rows"] = true
-L["Show and hide"] = true
 L["Hide %s in the LDB tooltip"] = true
 L["Leave this row out of the window and the detached blocks. The row menu's Hide sets it too."] = true
 L["Leave this row out of the LDB tooltip: a skill out of the Skill Master feed's, a stat out of the Skill Master Stats feed's. The tooltip's row menu's Hide sets it too."] = true
