@@ -635,8 +635,12 @@ local function withArrow8(player, over, fn)
     M.C_SuperTrack = { SetSuperTrackedUserWaypoint = function() end }
     M.__facing = 0
     local wp = {}
-    for k, v in pairs(NS.defaults.profile.waypoints) do wp[k] = v end
-    wp.announce, wp.arrowFrame = false, { point = false }
+    -- Tables copied, never shared: a profile switch strips the values equal to the defaults in
+    -- place (AceDB), which would empty the defaults' own color tables.
+    for k, v in pairs(NS.defaults.profile.waypoints) do
+        wp[k] = type(v) == "table" and { unpack(v) } or v
+    end
+    wp.announce = false
     for k, v in pairs(over or {}) do wp[k] = v end
     NS.db.profile.waypoints = wp
     local trainer = { name = "Woo Ping", city = "Stormwind", mapID = 1453, x = 50, y = 50,

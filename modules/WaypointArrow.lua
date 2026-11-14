@@ -4,18 +4,24 @@ local _, NS = ...
 -- (NS.Waypoints) is not super-tracked, so the client's own arrow stays away, and the library's
 -- small movable frame points the way instead, with the distance under it. This file is the thin
 -- adapter: the trainer it points at, the settings paths it is configured from, test mode's sample,
--- the profile reload, the native pin it clears and watches, and the tooltip and right-click.
+-- the profile reload, the native pin it clears and watches, the tooltip and the right-click menu's
+-- Skill Master items.
 --
 -- NS.WaypointArrow.Show(trainer) / .Hide() / .Clear() / .IsShown() / .Frame() / .Target() /
 -- .Wanted() / .Update() / .ShowTest() / .HideTest() / .ApplySettings() / .OnWaypointUpdated() /
--- .StandDown() / .Instance(); .PATHS and .SettingsRows(opts) for settings/Trainers.lua.
+-- .StandDown() / .Instance() / .ResetPosition() / .OpenSettings() / .ShowTrainers() / .HideArrow() /
+-- .TrainerKey(); .PATHS and .SettingsRows(opts) for settings/Trainers.lua.
 --
 -- What the library owns: the frame (never secure, so it stays shown in combat), the five looks
 -- (Flat, Ridge, Raised, Faceted, On the ground), the rotation and its secret-value guards, the
 -- distance fade between the far and near colors (the skin's accent and sem.good while "Use the
--- skin's colors" is on), the distance text, the scale and the drag, whose point it hands back here
--- to persist (waypoints.arrowFrame.point). Within 5 yards it calls onArrive: the native pin is
--- cleared and chat says so.
+-- skin's colors" is on), the distance text in the player's font on any side (round 9, R9-1/R9-3:
+-- the trainer's name as its optional second line, yards or compact units in Skill Master's words),
+-- the scale, the drag (which writes waypoints.arrowX / arrowY through NS.SetByPath, architecture-§5)
+-- and the arrow's own lock, and the right-click menu (round 9, R9-2: the library's Clear waypoint,
+-- Share in chat, Show on map, Lock / Unlock and Reset position, with Skill Master's Show trainers,
+-- Arrow settings... and Hide arrow added here). Within 5 yards it calls onArrive: the native pin is
+-- cleared and chat says so. /sm lock no longer holds the arrow: its own Lock does (round 9).
 --
 -- Without the library major (LibKa0s absent or older than the arrow) Wanted() answers false, so a
 -- map pin is super-tracked and the client's own arrow points: the behavior before R6-11.
@@ -40,12 +46,30 @@ WA.PATHS = {
     farColor = "waypoints.arrowFar",
     nearColor = "waypoints.arrowNear",
     scale = "waypoints.arrowScale",
+    -- Round 9, R9-1: the Text block ("Use the skin's font" sits at font .. "FromSkin") and the
+    -- Position block with the arrow's own lock.
+    font = "waypoints.arrowFont",
+    fontSize = "waypoints.arrowFontSize",
+    fontColor = "waypoints.arrowFontColor",
+    useClassColorFont = "waypoints.arrowFontClass",
+    fontFlags = "waypoints.arrowFontFlags",
+    fontShadow = "waypoints.arrowFontShadow",
+    textPosition = "waypoints.arrowTextPosition",
+    showLabel = "waypoints.arrowShowLabel",
+    distanceUnits = "waypoints.arrowUnits",
+    x = "waypoints.arrowX",
+    y = "waypoints.arrowY",
+    lock = "waypoints.arrowLock",
 }
+
+--- The settings page the menu's Arrow settings... opens (settings/Trainers.lua's).
+WA.SETTINGS_PAGE = "trainers"
 
 local inst
 -- target: the trainer pointed at; test: test mode's sample on show (the real target, if any,
--- waits under it, which the library keeps).
-local state = { target = nil, test = nil }
+-- waits under it, which the library keeps); key: the skill whose trainer popup set the waypoint
+-- (the menu's Show trainers reopens it).
+local state = { target = nil, test = nil, key = nil }
 
 local function isSecret(v) return type(issecretvalue) == "function" and issecretvalue(v) and true or false end
 
@@ -60,12 +84,6 @@ local function get(path)
         node = node[seg]
     end
     return node
-end
-
-local function savedPoint()
-    local saved = profile().arrowFrame
-    local p = type(saved) == "table" and saved.point
-    return type(p) == "table" and p or nil
 end
 
 --- Whether a native pin comes with this arrow: Show Skill Master's arrow on, and the library there.
@@ -107,7 +125,9 @@ local function onEnter(f)
     GameTooltip:SetOwner(f, "ANCHOR_RIGHT")
     tipLine(t.name, "text.accent")
     tipLine(placeText(t), "text.body")
-    tipLine(L["Right-click to clear the waypoint. Drag to move the arrow."], "text.muted")
+    local locked = inst ~= nil and inst:IsLocked()
+    tipLine(locked and L["Right-click for options."] or L["Right-click for options. Drag to move the arrow."],
+        "text.muted")
     GameTooltip:Show()
 end
 
@@ -115,17 +135,14 @@ local function onLeave(f)
     if GameTooltip and GameTooltip:IsOwned(f) then GameTooltip:Hide() end
 end
 
+-- Without the Widgets major (no menu) a right-click still clears, as before round 9.
 local function onClick(_, button)
     if button == "RightButton" then WA.Clear() end
 end
 
--- A drag ended: the point on the profile. Named non-setting state, this module its one writer
--- (docs/ARCHITECTURE.md). A reset (nil) puts the default back.
-local function onMoved(point)
-    if not NS.db then return end
-    local wp = NS.db.profile.waypoints
-    wp.arrowFrame = type(wp.arrowFrame) == "table" and wp.arrowFrame or {}
-    wp.arrowFrame.point = point or false
+-- The library writes a drag's offsets, the lock and Reset position here: the settings seam.
+local function setSetting(path, value)
+    if NS.SetByPath then NS.SetByPath(path, value) end
 end
 
 -- Arrived: the library has already forgotten the target and hidden the frame.
@@ -136,16 +153,51 @@ local function onArrive()
     if t then NS.Print(L["You have arrived: %s"]:format(t.name)) end
 end
 
+-- The library's words, keyed as its STRINGS (round 9, R9-2/R9-3): the distance in both units, the
+-- sample's fallback label and the menu.
+local ARROW_STRINGS = {
+    DISTANCE = L["%d yd"], DISTANCE_COMPACT = L["%.1fk yd"], SAMPLE = L["Waypoint"],
+    MENU_CLEAR = L["Clear waypoint"], MENU_SHARE = L["Share in chat"], MENU_MAP = L["Show on map"],
+    MENU_LOCK = L["Lock the arrow"], MENU_UNLOCK = L["Unlock the arrow"], MENU_RESET = L["Reset position"],
+    MENU_SHARE_TIP = L["Opens the chat box with a /way line for this waypoint. Press Enter to send it to the channel the box is set to, or edit it first. Nothing is sent until you do."],
+    MENU_NO_MAP = L["This waypoint has no map point to share or show."],
+    MENU_COMBAT = L["Not available in combat."],
+}
+
+-- The position of the stock item `id` in `items`, or nil.
+local function indexOf(items, id)
+    for i, row in ipairs(items) do if row.id == id then return i end end
+    return nil
+end
+
+-- The menu's rows: the library's, with Show trainers after Show on map and Arrow settings... and
+-- Hide arrow last (the owner's order, round 9).
+local function menuItems(items)
+    local key = WA.TrainerKey()
+    table.insert(items, (indexOf(items, "map") or #items) + 1, {
+        id = "trainers", label = L["Show trainers"], disabled = key == nil,
+        tooltip = L["Open Skill Master's trainer popup for this trainer's skill."],
+        onClick = function() WA.ShowTrainers() end })
+    items[#items + 1] = { id = "settings", label = L["Arrow settings..."],
+        tooltip = L["Open Trainers and Waypoints, where the arrow's look, text and position are set."],
+        onClick = function() WA.OpenSettings() end }
+    items[#items + 1] = { id = "hide", label = L["Hide arrow"],
+        tooltip = L["Turn off Show Skill Master's arrow: the game's own arrow points to the map pin. Trainers and Waypoints turns it back on."],
+        onClick = function() WA.HideArrow() end }
+    return items
+end
+
 --- The library instance, built on first use (nil without the library).
 function WA.Instance()
     if inst or not Arrow then return inst end
     inst = Arrow:New({
         addon = NS.name, name = WA.FRAME_NAME, strata = LAYERS.STRATA.HUD, skin = NS.name,
-        point = savedPoint(),
-        onMoved = onMoved,
-        canDrag = function() return not (NS.GetSetting and NS.GetSetting("locked")) end,   -- /sm lock
+        -- Round 9, R9-1: the drag, the lock and Reset position write the settings paths; the
+        -- arrow's own Lock is its one drag gate (no canDrag: /sm lock is the windows').
+        paths = WA.PATHS, set = setSetting,
         onClick = onClick, onEnter = onEnter, onLeave = onLeave, onArrive = onArrive,
-        format = function(yards) return L["%d yd"]:format(math.floor(yards + 0.5)) end,
+        onClear = function() WA.Clear() end, onSampleClear = function() WA.Clear() end,
+        menuItems = menuItems, strings = ARROW_STRINGS,
         debug = function(_, msg) if NS.Debug then NS.Debug("Arrow", "%s", tostring(msg)) end end,
     })
     inst:ConfigureFrom(get, WA.PATHS)
@@ -163,10 +215,9 @@ function WA.IsShown() return inst ~= nil and inst:IsShown() end
 --- One measure now (a shown arrow measures on its own every THROTTLE seconds).
 function WA.Update() if inst then inst:Update() end end
 
--- The profile's settings and point onto the instance, before it shows.
+-- The profile's settings (the position among them) onto the instance, before it shows.
 local function configure(a)
     a:ConfigureFrom(get, WA.PATHS)
-    a:SetPosition(savedPoint())
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -177,12 +228,32 @@ local function spec(t)
     return { mapID = t.mapID, x = t.x / 100, y = t.y / 100, label = t.name }
 end
 
+-- The skill the menu's Show trainers opens for `t`: the open trainer popup's when it lists `t`
+-- (its Set waypoint set this one), else the first skill `t` teaches.
+local function keyFor(t)
+    local P = NS.TrainerPopup
+    if P and P.IsShown() and P.Key then
+        for _, row in ipairs(P.Trainers() or {}) do
+            if row == t then return P.Key() end
+        end
+    end
+    return type(t.teaches) == "table" and t.teaches[1] or nil
+end
+
+--- The skill key the menu's Show trainers opens the trainer popup on, or nil.
+function WA.TrainerKey()
+    local t = WA.Target()
+    if not t then return nil end
+    if t == state.target and state.key then return state.key end
+    return keyFor(t)
+end
+
 --- Point the arrow at trainer `t` (its native pin was just set), retargeting a shown arrow.
 function WA.Show(t)
     if not (t and t.mapID and t.x and t.y) then return end
     local a = WA.Instance()
     if not a then return end
-    state.target = t
+    state.target, state.key = t, keyFor(t)
     configure(a)
     a:SetTarget(spec(t))
 end
@@ -190,12 +261,13 @@ end
 --- Hide the arrow and forget the target (the native pin, if any, stays). Test mode's sample stays
 --- until test mode ends.
 function WA.Hide()
-    state.target = nil
+    state.target, state.key = nil, nil
     if inst then inst:Clear() end
 end
 
---- Right-click: the waypoint goes, the native pin with it, and the arrow hides. In test mode the
---- sample only goes (no pin was set for it): a real waypoint under it is pointed at again.
+--- The menu's Clear waypoint (and a right-click without the menu): the waypoint goes, the native
+--- pin with it, and the arrow hides. In test mode the sample only goes (no pin was set for it): a
+--- real waypoint under it is pointed at again.
 function WA.Clear()
     if state.test then return WA.HideTest() end
     if state.target then clearNativePin() end
@@ -226,8 +298,8 @@ function WA.HideTest()
     inst:HideSample()
 end
 
---- A settings row, and a profile switch, copy or reset: the style, colors and scale (and the saved
---- point) apply at once; the arrow off hides it and hands the live native pin back to the client's
+--- A settings row, and a profile switch, copy or reset: the look, text, scale and position apply
+--- at once; the arrow off hides it and hands the live native pin back to the client's
 --- own arrow (the old behavior).
 function WA.ApplySettings()
     if inst then configure(inst) end
@@ -241,16 +313,51 @@ function WA.ApplySettings()
     end
 end
 
---- The library's settings block (style, the skin's colors, far, near, scale) at WA.PATHS, each
---- row's change re-applying the settings; no rows without the library. `opts` carries page,
---- group, subgroup and L as the library takes them.
+--- The menu's and the settings page's Reset position: the default offsets, written through the
+--- settings seam by the library.
+function WA.ResetPosition()
+    local a = WA.Instance()
+    if a then a:ResetPosition() end
+end
+
+--- The menu's Arrow settings...: the Trainers and Waypoints page, where the Waypoint arrow, Arrow
+--- text and Arrow position subgroups sit (the options library's page opener, else the main panel).
+function WA.OpenSettings()
+    local H = NS.Helpers
+    if type(H) == "table" and type(H.OpenOptionsPanel) == "function" then
+        return H.OpenOptionsPanel(WA.SETTINGS_PAGE)
+    end
+    if type(NS.OpenOptionsPanel) == "function" then return NS.OpenOptionsPanel() end
+    return nil
+end
+
+--- The menu's Show trainers: Skill Master's trainer popup on the target trainer's skill.
+function WA.ShowTrainers()
+    local key = WA.TrainerKey()
+    if key and NS.TrainerPopup then NS.TrainerPopup.Show(key) end
+end
+
+--- The menu's Hide arrow: Show Skill Master's arrow off, through its setting, whose change hides
+--- the arrow and hands the map pin to the game's own arrow.
+function WA.HideArrow()
+    setSetting("waypoints.arrow", false)
+end
+
+--- The library's settings blocks (the look; round 9, the Text and Position blocks) at WA.PATHS,
+--- each row's change re-applying the settings, composed by Skill Master's options instance
+--- (`opts.options`, NS.Helpers by default). Answers the rows and the afterSubgroup hooks (the
+--- Position block's Reset position button); `{}, {}` without the library. `opts` carries page,
+--- group, subgroup, textSubgroup, positionSubgroup and L as the library takes them.
 function WA.SettingsRows(opts)
-    if not (Arrow and type(Arrow.SettingsRows) == "function") then return {} end
+    if not (Arrow and type(Arrow.SettingsRows) == "function") then return {}, {} end
     local o = {}
     for k, v in pairs(opts or {}) do o[k] = v end
     o.paths = WA.PATHS
+    if o.options == nil then o.options = NS.Helpers end
     o.onChange = function() WA.ApplySettings() end
-    return Arrow.SettingsRows(o)
+    o.onResetPosition = function() WA.ResetPosition() end
+    local rows, hooks = Arrow.SettingsRows(o)
+    return rows, hooks or {}
 end
 
 -- ---------------------------------------------------------------------------------------------

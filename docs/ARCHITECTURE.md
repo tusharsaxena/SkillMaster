@@ -90,9 +90,11 @@ grip's release); `char.log` is `modules/SessionLog.lua`'s and `global.characters
 `modules/Alts.lua`'s ([schema.md](schema.md)). `profile.alerts.point`, the alert toasts' drop point,
 is the same kind: its one owner is `modules/Alerts.lua`, whose toast descriptor's `setPosition` (a
 test-mode drag, or the toast's `ResetPosition`) is its only writer.
-`profile.waypoints.arrowFrame.point`, the waypoint arrow's drop point (round 6, R6-11), is the same
-kind: its one owner is `modules/WaypointArrow.lua`, whose `onMoved` (the library hands it the point on
-`OnDragStop`; the profile's `locked` refuses the drag through `canDrag`) is its only writer.
+The waypoint arrow keeps no named non-setting state since round 9 (R9-1): its drop point
+(`profile.waypoints.arrowFrame.point`, round 6) is gone, and a drag, the arrow's Lock and Reset
+position write the `waypoints.arrowX`, `arrowY` and `arrowLock` settings through `NS.SetByPath`
+(the library's `d.set`), so the Position block's sliders follow the drag. The arrow's own Lock is
+its only drag gate; `/sm lock` holds the windows and no longer the arrow.
 
 `profile.layout.blocks[id].point` (T3.2) is named non-setting state, owned by `modules/Detached.lua`:
 its writers are `savePoint` (a detached frame's `OnDragStop`) and `D.StorePoint` (where a section
@@ -410,7 +412,13 @@ modes and both styles.
   are `LibKa0s-WaypointArrow-1.0`'s: whether its RLE TGAs load, which way `SetRotation` and the
   ground sheet's `SetTexCoord` turn, how Raised's shadow offset and the five looks read at scales 0.5
   to 2 are unverified in game. The outline is the library's fixed dark edge, baked into each look's
-  overlay; it no longer follows the skin's `bar.border` (round 6 tinted it).
+  overlay; it no longer follows the skin's `bar.border` (round 6 tinted it). Round 9 (R9-1..R9-3,
+  `LibKa0s-WaypointArrow-1.0` version 2.2): the art is 1.25x the round-8 size at scale 1; the text
+  takes the player's Font block rather than the skin's body and muted roles (the name alone is
+  dimmed by alpha); the Share in chat line's shape (` /way <zone> x, y <trainer>`, a leading space
+  so Enter posts it rather than running it as a command) is the library's and open for the owner,
+  since the zone name is localized and not unique; the right-click menu, the Text block's faces and
+  the position offsets at every scale are unverified in game (SM-DISP-60 to 63).
 - The Main window style LDB tooltip's scroll bar (round 7, R7-4) is always drawn: with nothing to
   scroll it is disabled and its thumb spans the corridor in the skin's `scroll.thumbOff`, the
   facade's disabled tint (the main window's template bar stays drawn with its arrows disabled; the

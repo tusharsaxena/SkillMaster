@@ -9,7 +9,7 @@ local _, NS = ...
 --
 -- NS.TrainerPopup.Show(key) / .Hide() / .IsShown() / .Frame() / .Trainers() / .Groups() / .Select(i)
 -- / .Selected() / .Relayout() / .TextHeight(fs) / .Distance(t) / .RefreshDistances() / .Ticking()
--- / .Scroll() / .SetScroll(offset) / .Headings()
+-- / .Scroll() / .SetScroll(offset) / .Headings() / .Key()
 --
 -- Round 5, R5-14: a card's "Also teaches" line wraps inside the card (up to ALSO_LINES lines), the
 -- card grows by the wrapped height and the window by the cards, and the card's tooltip always
@@ -59,6 +59,8 @@ P.TICK = 1
 function P.Frame() return frame end
 function P.IsShown() return frame ~= nil and frame:IsShown() == true end
 function P.Trainers() return state.list end
+--- The skill key the popup was opened on (round 9: the waypoint arrow's Show trainers), or nil.
+function P.Key() return state.key end
 --- The rank groups on show: { rankName, cap, list } each (rankName nil for a skill to learn).
 function P.Groups() return state.groups end
 --- The cards' scroll offset (units) and its most (0 when everything fits).

@@ -853,8 +853,63 @@ L["The arrow's color 300 yards away or more. Not read while Use the skin's color
 L["Near color"] = true
 L["The arrow's color 30 yards away or closer. Not read while Use the skin's colors is on."] = true
 L["The size of the arrow and its distance, 0.5 to 2."] = true
-L["Right-click to clear the waypoint. Drag to move the arrow."] = true
 L["You have arrived: %s"] = true
+-- Round 9, R9-1..R9-3: the arrow's Text and Position blocks (LibKa0s-WaypointArrow-1.0's
+-- SETTINGS_STRINGS through settings/Trainers.lua), its STRINGS (the distance in both units, the
+-- right-click menu) and Skill Master's menu items and tooltip (modules/WaypointArrow.lua).
+L["%.1fk yd"] = true
+L["Waypoint"] = true
+L["Right-click for options."] = true
+L["Right-click for options. Drag to move the arrow."] = true
+L["Clear waypoint"] = true
+L["Share in chat"] = true
+L["Show on map"] = true
+L["Lock the arrow"] = true
+L["Unlock the arrow"] = true
+L["Reset position"] = true
+L["Opens the chat box with a /way line for this waypoint. Press Enter to send it to the channel the box is set to, or edit it first. Nothing is sent until you do."] = true
+L["This waypoint has no map point to share or show."] = true
+L["Not available in combat."] = true
+L["Open Skill Master's trainer popup for this trainer's skill."] = true
+L["Arrow settings..."] = true
+L["Open Trainers and Waypoints, where the arrow's look, text and position are set."] = true
+L["Hide arrow"] = true
+L["Turn off Show Skill Master's arrow: the game's own arrow points to the map pin. Trainers and Waypoints turns it back on."] = true
+L["Arrow text"] = true
+L["The face the arrow's distance is drawn in."] = true
+L["Height of the arrow's distance, in points."] = true
+L["The color the arrow's distance is drawn in."] = true
+L["Use class color"] = true
+L["Draw the arrow's distance in your class color instead of the swatch beside it."] = true
+L["Not read while Use class color is on, except for its opacity, which always applies."] = true
+L["Font flags"] = true
+L["Outline and monochrome rendering. From skin follows the Font outline setting on Skill Master's Skin tab; any other choice is drawn as picked."] = true
+L["From skin"] = true
+L["None"] = true
+L["Outline"] = true
+L["Thick outline"] = true
+L["Monochrome"] = true
+L["Monochrome outline"] = true
+L["Draw a soft shadow behind the arrow's distance, for legibility over bright art."] = true
+L["Use the skin's font"] = true
+L["Draw the arrow's distance in the skin's font. The font picker is not read while this is on."] = true
+L["Where the distance sits beside the arrow, or Hidden for the arrow alone."] = true
+L["Below"] = true
+L["Above"] = true
+L["Hidden"] = true
+L["Show the trainer's name"] = true
+L["A second line under the distance with the name of the trainer the arrow points to."] = true
+L["Distance units"] = true
+L["Yards, or compact: thousands of yards shortened, as 4.2k yd."] = true
+L["Yards"] = true
+L["Compact (4.2k yd)"] = true
+L["Arrow position"] = true
+L["X offset"] = true
+L["How far right of the screen's center the arrow sits; the Arrow scale does not move it. Dragging the arrow sets it."] = true
+L["Y offset"] = true
+L["How far above the screen's center the arrow sits; the Arrow scale does not move it. Dragging the arrow sets it."] = true
+L["While on, the arrow cannot be dragged. Its right-click menu still opens. /sm lock does not hold the arrow."] = true
+L["Put the arrow back at its default position."] = true
 
 -- ---- Round 7, R7-1: a filter on every block (modules/Blocks.lua B.FILTER_SETS, settings/Layout.lua) ----
 L["At cap (needs training)"] = true

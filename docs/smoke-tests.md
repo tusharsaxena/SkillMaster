@@ -17,7 +17,7 @@ the checks below that cover each item:
 | The lure timer | SM-DISP-2, SM-SIM-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
 | Rows page (round 9) | SM-DISP-59 |
-| Waypoints (no TomTom, round 7) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58 |
+| Waypoints (no TomTom, round 7) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58, SM-DISP-60, SM-DISP-61, SM-DISP-62, SM-DISP-63 |
 | Each skin | SM-SKIN-1, SM-SKIN-2 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
 | Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4, SM-DISP-18, SM-DISP-39, SM-DISP-40 |
@@ -242,9 +242,9 @@ the checks below that cover each item:
   trainer (turn left and it turns right). Face the trainer: it points straight up. Far away (300 yd
   or more) it is the skin's accent; walk in: it shades into the skin's green by 30 yd. Within about
   5 yd it goes, the map pin clears and chat says `You have arrived: <trainer>`.
-- **SM-DISP-44** (round 6, R6-11) With the arrow up: hover it: the tooltip names the trainer and the
-  place with `Right-click to clear the waypoint. Drag to move the arrow.` Drag it elsewhere, `/reload`
-  and set a waypoint again: it shows where you left it. `/sm lock`: it no longer drags. Right-click it:
+- **SM-DISP-44** (round 6, R6-11; round 9) With the arrow up: hover it: the tooltip names the trainer and the
+  place with `Right-click for options. Drag to move the arrow.` Drag it elsewhere, `/reload`
+  and set a waypoint again: it shows where you left it. Right-click it and pick Clear waypoint:
   it goes and the map pin clears. Set it again and click elsewhere on the world map to place your own
   pin: the arrow goes. Set it again and pick another trainer's Set waypoint: the arrow points at the
   new one. Enter an instance (or ride to another continent): the art goes and the trainer's name
@@ -370,6 +370,34 @@ the checks below that cover each item:
   Defense & Resists and Utility, each hovered tab naming its block in full. The first tab shows only
   the primary professions; switching tabs and clicking eyes is quick, with no hitch. Hide Axes on the
   Weapons tab: the window drops it at once and its eye dims; the heading's eye shows it again.
+- **SM-DISP-60** (round 9, R9-1/R9-3: the arrow's text) Set a weapon master's waypoint: the arrow
+  is about a quarter larger than before at Arrow scale 1, the yards under it in the skin's font,
+  white. Trainers and Waypoints > Arrow text: untick Use the skin's font and pick another Font: the
+  yards change face at once; Font size 20, Font color red, Use class color (your class color), Font
+  flags Thick outline, Font shadow off: each applies at once. Text position Above, Left, Right:
+  the yards move round the arrow and the arrow itself stays put; Hidden: the arrow alone. Tick Show
+  the trainer's name: the trainer's name sits under the yards. Distance units Compact, with the
+  trainer 1000 yd or more away (another zone of the continent): `4.2k yd`-style. Switch skins with
+  Use the skin's font on: the face follows the skin.
+- **SM-DISP-61** (round 9, R9-1: the arrow's position) Trainers and Waypoints > Arrow position:
+  X offset 300: the arrow moves right at once; Y offset 0: it sits at the screen's center. Drag the
+  arrow: both sliders follow when you drop it. Arrow scale 2: it grows where it is. Click Reset
+  position: it goes back above the center and the sliders read 0 and 200. Tick Lock the arrow: it no
+  longer drags, and its tooltip drops the drag hint; `/sm lock` and `/sm unlock` do not change
+  whether it drags. Untick it.
+- **SM-DISP-62** (round 9, R9-2: the arrow's menu) Right-click the arrow: a menu at the pointer, in
+  the skin, reads Clear waypoint, Share in chat, Show on map, Show trainers, Lock the arrow, Reset
+  position, Arrow settings..., Hide arrow. Share in chat: the chat box opens with a ` /way <zone>
+  xx.x, yy.y <trainer>` line and sends nothing until you press Enter. Show on map: the world map
+  opens on the trainer's zone (in combat the item is grayed, its tooltip saying why). Show trainers:
+  Skill Master's trainer popup opens on the skill whose Set waypoint you clicked. Lock the arrow:
+  it stops dragging and the next right-click reads Unlock the arrow. Reset position: back above the
+  center. Arrow settings...: the settings panel opens on Trainers and Waypoints. Hide arrow: the arrow
+  goes and the game's own arrow points to the pin; Show Skill Master's arrow is unticked there.
+  Tick it again. Click elsewhere: an open menu closes; walk into the trainer with it open: it closes.
+- **SM-DISP-63** (round 9, R9-2: the sample's menu) A waypoint set, then `/sm test`: the sample
+  arrow shows over it. Right-click it, Clear waypoint: the sample goes, the real arrow is back and
+  the map pin stays. `/sm test` again to end test mode: the real arrow stays.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

@@ -551,6 +551,20 @@ Total.
 - round8 arrow: the library carries every look's art; Skill Master's own copy is gone
 - round8 arrow: a library-absent load has no arrow, so a map pin keeps the game's own
 
+### test_round9.lua (11)
+
+- round9 arrow: the Text and Position blocks sit under the look, at Skill Master's paths, on the library's defaults
+- round9 arrow: the Position block's Reset position is a hook on its subgroup, handed to the page
+- round9 arrow: a drag writes the X and Y offsets through the settings seam
+- round9 arrow: the arrow's own Lock holds the drag; /sm lock no longer does
+- round9 arrow: the menu is Clear first, the library's items, then Skill Master's, in the owner's order
+- round9 arrow: Clear waypoint clears the native pin, as the old right-click did
+- round9 arrow: Show trainers opens the trainer popup on the skill its waypoint came from
+- round9 arrow: Arrow settings opens Trainers and Waypoints; Hide arrow turns Skill Master's arrow off
+- round9 arrow: the tooltip says right-click opens the menu, and drops the drag hint while locked
+- round9 arrow: Show the trainer's name adds the trainer as the second line
+- round9 arrow: compact units read thousands of yards in Skill Master's words
+
 ### test_blocks.lua (10)
 
 - blocks: the eight blocks, four skill categories then four stat groups
@@ -965,6 +979,7 @@ Total.
 | test_round6.lua | 54 |
 | test_round7.lua | 25 |
 | test_round8.lua | 23 |
+| test_round9.lua | 11 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -995,4 +1010,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **725** |
+| **Total** | **736** |

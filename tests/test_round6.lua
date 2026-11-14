@@ -1120,8 +1120,7 @@ local function withArrow(player, fn)
         return { uiMapID = mapID, position = M.CreateVector2D(x, y) } end }
     M.C_SuperTrack = { SetSuperTrackedUserWaypoint = function(v) rec.superTrack[#rec.superTrack + 1] = v end }
     M.__facing = 0
-    NS.db.profile.waypoints = { method = "auto", announce = false, arrow = true, arrowScale = 1,
-                                arrowFrame = { point = false } }
+    NS.db.profile.waypoints = { method = "auto", announce = false, arrow = true, arrowScale = 1 }
     local trainer = { name = "Woo Ping", faction = "Alliance", city = "Stormwind", subzone = "Trade District",
                       mapID = 1453, x = 50, y = 50, teaches = { "swords" }, verified = true }
     local ok, err = pcall(fn, trainer, rec)
@@ -1252,8 +1251,9 @@ test("round6 arrow: no facing hides the art and keeps the distance; no distance 
         tick()
         assertFalse(p.body:IsShown(), "no distance: no art")
         assertEqual(p.text:GetText(), "Woo Ping", "the trainer's name alone")
-        local c, muted = { p.text:GetTextColor() }, NS.Bar.Color("text.muted")
-        assertTrue(near(c[1], muted[1]) and near(c[2], muted[2]) and near(c[3], muted[3]), "dim, in the muted role")
+        -- Round 9 (LibKa0s WaypointArrow 2.2): the name alone is dimmed by alpha, in the player's
+        -- own font color, no longer in the skin's muted role.
+        assertTrue(near(p.text:GetAlpha(), 0.6), "dim")
         assertTrue(WA.IsShown(), "the arrow stays up")
     end)
 end)
@@ -1273,10 +1273,17 @@ test("round6 arrow: within 5 yd the arrow hides, the pin clears and chat says yo
     end)
 end)
 
+-- Round 9 (R9-2): the right-click opens the library's menu; its first item, Clear waypoint, clears.
+local function menuClear()
+    local items = WA.Instance():MenuItems()
+    assertEqual(items[1].id, "clear", "Clear waypoint heads the menu")
+    items[1].onClick()
+end
+
 test("round6 arrow: right-click clears the waypoint; a cleared or replaced native pin hides the arrow", function()
     withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t, rec)
         Wp:Set(t)
-        WA.Frame():__fire("OnMouseUp", "RightButton")
+        menuClear()
         assertFalse(WA.IsShown(), "right-click hides it")
         assertEqual(rec.cleared, 1, "and clears the native pin")
         Wp:Set(t)
@@ -1297,32 +1304,38 @@ test("round6 arrow: right-click clears the waypoint; a cleared or replaced nativ
 end)
 
 test("round6 arrow: a drag saves the point on the profile; the profile's lock refuses it", function()
+    -- Round 9 (R9-1): the drag writes the X and Y offsets from the screen's center, and the arrow's
+    -- own Lock (waypoints.arrowLock), not /sm lock, refuses it.
     withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t)
         Wp:Set(t)
         local f = WA.Frame()
         local placed
-        f.GetPoint = function() return "TOPLEFT", M.UIParent, "TOPLEFT", 40, -60 end
-        f.SetPoint = function(_, point) placed = point end
+        f.GetCenter = function() return 140, 340 end
+        M.UIParent.GetCenter = function() return 100, 400 end
+        f.SetPoint = function(_, point, _, _, x, y) placed = { point, x, y } end
         f:__fire("OnDragStart")
         f:__fire("OnDragStop")
-        local p = NS.db.profile.waypoints.arrowFrame.point
-        assertEqual(p.point, "TOPLEFT"); assertEqual(p.x, 40); assertEqual(p.y, -60)
-        local savedLock = NS.db.profile.locked
-        NS.db.profile.locked = true
+        f.GetCenter, M.UIParent.GetCenter = nil, nil
+        local wp = NS.db.profile.waypoints
+        assertEqual(wp.arrowX, 40); assertEqual(wp.arrowY, -60)
+        NS.SetByPath("waypoints.arrowLock", true)
         f.__userPlaced = nil
         f:__fire("OnDragStart")
-        NS.db.profile.locked = savedLock
+        NS.SetByPath("waypoints.arrowLock", false)
         assertTrue(not f.__userPlaced, "locked: the drag never starts")
         f:Hide()
+        placed = nil
         WA.Show(t)
-        f.GetPoint, f.SetPoint = nil, nil
-        assertEqual(placed, "TOPLEFT", "the saved point is where it shows again")
+        f.SetPoint = nil
+        assertTrue(placed ~= nil and placed[1] == "CENTER" and placed[2] == 40 and placed[3] == -60,
+            "the saved offsets are where it shows again")
     end)
 end)
 
 test("round6 arrow: test mode shows it on a sample trainer at a sample distance, writes nothing, and takes it down", function()
     withArrow(nil, function()
-        local before = NS.db.profile.waypoints.arrowFrame.point
+        local wp = NS.db.profile.waypoints
+        local before = { wp.arrowX, wp.arrowY }
         WA.ShowTest()
         assertTrue(WA.IsShown(), "the sample arrow shows")
         local sample = WA.Target()
@@ -1332,7 +1345,7 @@ test("round6 arrow: test mode shows it on a sample trainer at a sample distance,
         tick()
         assertEqual(p.text:GetText(), NS.L["%d yd"]:format(WA.lib.SAMPLE_YARDS), "at the sample distance")
         assertTrue(p.body:IsShown() and near(p.body:GetRotation(), WA.lib.SAMPLE_ROTATION), "at the sample angle")
-        assertEqual(NS.db.profile.waypoints.arrowFrame.point, before, "nothing written")
+        assertTrue(wp.arrowX == before[1] and wp.arrowY == before[2], "nothing written")
         WA.HideTest()
         assertFalse(WA.IsShown(), "test mode's end takes it down")
         assertTrue(f:GetScript("OnUpdate") == nil, "its OnUpdate off")
@@ -1415,15 +1428,16 @@ test("round6 arrow review: a profile switch re-applies the shown arrow's scale a
         local f = WA.Frame()
         local scale, placed
         f.SetScale = function(_, v) scale = v end
-        f.SetPoint = function(_, point) placed = point end
+        f.SetPoint = function(_, point, _, _, x, y) placed = { point, x, y } end
         local ok, err = pcall(withWaypointProfile, "R6-ArrowPlace",
-            { arrow = true, arrowScale = 2,
-              arrowFrame = { point = { point = "TOPLEFT", relPoint = "TOPLEFT", x = 40, y = -60 } } },
+            { arrow = true, arrowScale = 2, arrowX = 40, arrowY = -60 },
             function(db)
                 db:SetProfile("R6-ArrowPlace")
                 assertTrue(WA.IsShown(), "the arrow stays up")
                 assertEqual(scale, 2, "the new profile's scale")
-                assertEqual(placed, "TOPLEFT", "and its saved point")
+                -- Round 9: the offsets are in UIParent's units, so the frame's own are halved at scale 2.
+                assertTrue(placed ~= nil and placed[1] == "CENTER" and placed[2] == 20 and placed[3] == -30,
+                    "and its saved offsets")
             end)
         f.SetScale, f.SetPoint = nil, nil
         if not ok then error(err, 0) end
@@ -1437,7 +1451,7 @@ test("round6 arrow review: right-clicking test mode's sample over a real waypoin
         Wp:Set(t)
         WA.ShowTest()
         assertTrue(WA.Target() ~= t, "the sample shows over the real waypoint")
-        WA.Frame():__fire("OnMouseUp", "RightButton")
+        menuClear()
         assertEqual(rec.cleared, 0, "the sample's right-click clears no pin")
         assertTrue(WA.IsShown(), "the real waypoint's arrow comes back")
         assertEqual(WA.Target(), t, "pointing at the real trainer")

@@ -254,7 +254,11 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- settings block (Arrow style, Use the skin's colors, Far color, Near color, Arrow scale), five
     -- composed rows, one of them the hand-written Arrow scale it replaces: +4 full, -1 degraded, the
     -- delta +5.
-    assertEqual(full, 352, "the full schema (round 8: the waypoint arrow's settings block)")
+    -- Round 9 (R9-1): the waypoint arrow's block grows by the library's Text block (the six Font
+    -- rows, Use the skin's font, Text position, Show the trainer's name, Distance units) and its
+    -- Position block (X offset, Y offset, Lock the arrow), thirteen composed rows: +13 full, the
+    -- degraded count unmoved, the delta +13.
+    assertEqual(full, 365, "the full schema (round 9: the waypoint arrow's text and position blocks)")
     assertEqual(degraded, 294, "the library-absent schema")
-    assertEqual(full - degraded, 58, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3), the detached background and border (9) and the waypoint arrow's block (5)")
+    assertEqual(full - degraded, 71, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3), the detached background and border (9) and the waypoint arrow's blocks (18)")
 end)

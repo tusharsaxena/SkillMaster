@@ -216,9 +216,25 @@ NS.defaults = {
             arrowSkinColors = true,
             arrowFar        = { 1, 0.82, 0, 1 },
             arrowNear       = { 0.35, 0.80, 0.45, 1 },
-            -- Drag-only geometry, no control sets it: written by modules/WaypointArrow.lua alone
-            -- (architecture-§5's named-owner rule; docs/ARCHITECTURE.md names the writer).
-            arrowFrame = { point = false },
+            -- Round 9, R9-1/R9-3: the library's Text block (the canonical Font block, options-ui-§16,
+            -- with its "Use the skin's font" companion at arrowFont .. "FromSkin", then Text position,
+            -- the trainer name line and Distance units: yards | compact).
+            arrowFont          = "Ka0s Prototype",
+            arrowFontFromSkin  = true,
+            arrowFontSize      = 12,
+            arrowFontColor     = { 1, 1, 1, 1 },
+            arrowFontClass     = false,
+            arrowFontFlags     = "@skin",
+            arrowFontShadow    = true,
+            arrowTextPosition  = "BELOW",   -- BELOW | ABOVE | LEFT | RIGHT | HIDDEN
+            arrowShowLabel     = false,
+            arrowUnits         = "yards",
+            -- Round 9, R9-1: the Position block, offsets from the screen's center in UIParent's units
+            -- (a drag writes them through NS.SetByPath), and the arrow's own lock. The round-6 drag
+            -- point (waypoints.arrowFrame.point) is gone, with no migration: the addon is unreleased.
+            arrowX    = 0,
+            arrowY    = 200,
+            arrowLock = false,
         },
         trainers = {
             unverified = true,   -- mark trainer data not yet checked on WoW Forever

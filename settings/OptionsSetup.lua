@@ -121,7 +121,8 @@ end
 --- A schema page: a canvas subcategory drawn as a tab strip over its rows' groups (options-ui-§13),
 --- its Defaults button restoring the page. `spec` = { tabs, header, beforeRender, defaultsTooltip }:
 --- `tabs` the host tabs (RenderTabbedSchema's opts.tabs), `header` a PageHeader spec drawn above the
---- strip, `beforeRender(ctx)` run before the first widget of a render (a reorder list's Cancel).
+--- strip, `beforeRender(ctx)` run before the first widget of a render (a reorder list's Cancel),
+--- `afterSubgroup` RenderRows' hooks keyed by subgroup (round 9: the waypoint arrow's Reset position).
 function NS.RegisterSchemaPage(key, title, spec)
     spec = spec or {}
     NS.RegisterOptionsPage(key, title, function(mainCategory)
@@ -137,7 +138,7 @@ function NS.RegisterSchemaPage(key, title, spec)
             if spec.beforeRender then spec.beforeRender(c) end
             H.ClearScroll(c)
             if spec.header then H.PageHeader(c, spec.header) end
-            H.RenderTabbedSchema(c, key, nil, nil, { tabs = spec.tabs })
+            H.RenderTabbedSchema(c, key, nil, nil, { tabs = spec.tabs, afterSubgroup = spec.afterSubgroup })
         end)
         return Settings.RegisterCanvasLayoutSubcategory(mainCategory, ctx.panel, title)
     end)
@@ -209,7 +210,7 @@ if not lib then
         "SessionCheckbox", "RefreshAllPanels", "RestoreDefaults", "PatchAlwaysShowScrollbar",
         "SetRenderer", "SetChromeHeight", "TabStrip", "PageHeader", "RenderTabbedSchema",
         "ChoiceGrid", "IdInput", "IdList", "SelectTab", "NavRail", "LabelFont", "HideSkinPicker",
-        "RefreshScalars",
+        "RefreshScalars", "SideTabs",
     }) do
         H[name] = function() end
     end

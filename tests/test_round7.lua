@@ -27,8 +27,7 @@ local function withTomTomShaped(fn)
     M.UiMapPoint = { CreateFromCoordinates = function(mapID, x, y)
         return { uiMapID = mapID, position = M.CreateVector2D(x, y) } end }
     M.C_SuperTrack = { SetSuperTrackedUserWaypoint = function(v) rec.superTrack[#rec.superTrack + 1] = v end }
-    NS.db.profile.waypoints = { method = "auto", announce = false, arrow = true, arrowScale = 1,
-                                arrowFrame = { point = false } }
+    NS.db.profile.waypoints = { method = "auto", announce = false, arrow = true, arrowScale = 1 }
     local trainer = { name = "Woo Ping", faction = "Alliance", city = "Stormwind", mapID = 1453,
                       x = 50, y = 50, teaches = { "swords" }, verified = true }
     local ok, err = pcall(fn, trainer, rec)
