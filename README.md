@@ -23,6 +23,8 @@ Type `/sm toggle` to open or close the window, or bind a key to it. The game's O
 
 Each block has a header. Click it to collapse the block, or use the mark on its right to pull the block out into a frame of its own that you can place anywhere; the same mark on the frame docks it again. Hover a row for the details. Click a profession to open its window (out of combat), click a weapon or Defense for the Skills tab, and click an unlearned skill to see its trainers and set a waypoint. Shift-click puts the skill into chat. Right-click gives you the row menu, where you can pin a skill (or a stat, to the Stats feed) to the broker feed or hide the row. A row opens from anywhere on it; to open it from its go icon only, set Layout → Window → *Open a row from* to *Go icon only* (the detached and merged windows follow it). The broker feeds' tooltips work the same way, with their own Tooltips → LDB tooltip → *Open a row from*.
 
+The waypoint arrow can be dragged wherever you want it. Right-click it to clear the waypoint, share it in chat, show it on the map, reopen the trainers, lock it or reset its position, open its settings, or hide it. Its look, text and position are on the Trainers and Waypoints page.
+
 Test mode fills everything with a sample character, a level 22 Dwarf Hunter, so you can try a layout before your own character has the skills to show it. Turn it on with `/sm test`, from the minimap button's right-click menu, or with the Test mode box under General → Master controls; a band across the window says you are looking at sample data, and combat ends it. Sim mode plays a short fishing trip on the same character: a skill-up every few seconds, a lure going on and off, a mount changing your speed. Start it with `/sm sim` or the Sim mode box, and stopping it puts your own character back. Neither saves anything.
 
 `/sm skin` opens the skin picker. While it is open the window shows in test mode so you can see each skin as you pick it, and the eye button turns that preview off and on. Press Apply to keep the skin. Closing the picker without applying puts everything back the way it was.
@@ -75,7 +77,7 @@ The backlog lives on GitHub: please file bugs and ideas at https://github.com/tu
 
 | Version | Date | Highlights |
 |---|---|---|
-| 1.0.0 | Unreleased | - Every weapon skill, profession, Defense, Lockpicking and Riding as bars, with your stats beside them<br>- Bonus segments with timers, and tooltips that break each bonus down<br>- Trainer directions and waypoints for unlearned skills and the next rank<br>- Blocks you can collapse, reorder, detach, and lay out in one or two columns<br>- One broker feed, cap and weapon alerts, the Journal and an alt overview<br>- Settings for every part of the look, skins, test mode and a sim mode<br>- Two key bindings and the minimap button |
+| 1.0.0 | Unreleased | - Every weapon skill, profession, Defense, Lockpicking and Riding as bars, with your stats beside them<br>- Bonus segments with timers, and tooltips that break each bonus down<br>- Trainer directions and waypoints for unlearned skills and the next rank<br>- Blocks you can collapse, reorder, detach, and lay out in one or two columns<br>- Two broker feeds (skills and stats), cap and weapon alerts, the Journal and an alt overview<br>- Settings for every part of the look, skins, test mode and a sim mode<br>- Two key bindings and the minimap button |
 
 ## Credits
 

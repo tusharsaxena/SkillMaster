@@ -26,6 +26,15 @@ unnormalized return shape the owner sends back, so it is the one reader outside 
 | `Compat.MapWorldPos(mapID, x, y)` | `C_Map.GetWorldPosFromMapPos(mapID, CreateVector2D(x, y))` | a map point's (`x`, `y` as 0..1) world position: `instanceID, x, y` in yards (round 5, R5-15, the trainer popup's distances); `nil` for a secret or non-number argument or return, a raise (pcall), or without either API |
 | `Compat.PlayerWorldPos()` | `C_Map.GetBestMapForUnit("player")`, `C_Map.GetPlayerMapPosition(mapID, "player")`, then `MapWorldPos` | the player's world position: `instanceID, x, y`; `nil` when the client knows no map or position (inside an instance), answers a secret, raises, or lacks an API |
 | `Compat.ClassIcon(classFile)` | `C_Texture.GetAtlasInfo("classicon-<class>")`, then `CLASS_ICON_TCOORDS` on `Interface\GLUES\CHARACTERCREATE\UI-CHARACTERCREATE-CLASSES` | `{ atlas }` where the client carries the atlas, else `{ file, coords }`, else `nil` (the summary line hides the icon). Pure: it reads no character, so the simulator passes it through |
+| `Compat.OpenTradeSkill(skillLineID)` | `C_TradeSkillUI.OpenTradeSkill` under pcall | Opens a profession's window by its skill line; `true` when the client took the call and did not answer `false`, `false` without the API. Unverified on WoW Forever |
+| `Compat.SelectSkillLine(i)` | `Compat.SKILL_SELECTORS` (`C_SkillInfo.SetSelectedSkill`, then `SetSelectedSkill`), first that exists, then `SkillFrame_SetSelection` / `SkillFrame_UpdateSkills` | Selects line `i` in Character -> Skills and lets the frame redraw; answers the name of the call that ran, or `nil`. Which selector Forever answers is unverified (`/sm probe` lists them) |
+| `Compat.RefreshSkillsTab()` | Forever's `SkillsFrame`, `CharacterFrame`'s right pane and `EventRegistry` | Opens the collapsed detail pane, fires `SkillsFrame.NewSkillLineSelected` and refreshes each entry's highlight after a selection made outside the tab; `false` on a client without `SkillsFrame` |
+| `Compat.TradeSkillLink(names)` | `C_SpellBook.GetSpellBookItemTradeSkillLink` by slot, with `GetNumSpellBookSkillLines` / `GetSpellBookSkillLineInfo` / `GetSpellBookItemName` | The trade link of the first spellbook spell named one of `names`, scanning past the skill lines' end until `Compat.PAST_LINES` (8) empty slots in a row, stopping at `Compat.MAX_BOOK_SLOT` (1000); `nil` when none is found or without the API |
+
+`Compat.WeaponEnchantInfo` rests on two public helpers: `Compat.WeaponSlotCandidates()` (the
+main-hand slot arguments to try, `Enum.WeaponSlot`'s first, then 16, 0 and 1; the first that does
+not error is kept) and `Compat.NormalizeEnchant(...)` (a `C_Item` record, an array of them or the
+1.12 positional list, returned in the 1.12 shape; `false` when there is no enchant).
 
 PlayerLevel to SpellName (T5.2) and PlayerName (FB-17) exist for the simulator (preview-mode, H1): `core/SimSetup.lua` wraps the whole
 table at load with LibKa0s-Sim-1.0's seam, and `modules/Simulator.lua` answers each one from its

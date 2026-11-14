@@ -4,8 +4,11 @@ AceDB-3.0 profiles are user-visible: the Profiles page (`settings/Profiles.lua`)
 
 - Every setting except the Minimap button lives in the profile; the Minimap button is per
   installation (`global.minimap`, launcher-§3), so a profile switch never moves or hides it.
-- A switch, copy or reset re-runs the migrations, moves the `disabled` hold to the new `enabled`,
-  applies the profile's skin, re-applies the window's scale, opacity, lock and position, refreshes
-  open panels and shows the first-run skin picker if that profile has not closed it yet.
+- A switch, copy or reset stops a running simulation, re-runs the migrations, forgets the old
+  profile's Custom template picks, moves the `disabled` hold to the new `enabled`, applies the
+  profile's skin, re-applies the window's scale, opacity, lock and position, relays out the window
+  and the detached blocks, refreshes the broker feed, re-reads the toast's position, the waypoint
+  arrow's settings and position, and the Journal's position, size and lock mark, refreshes open
+  panels and shows the first-run skin picker if that profile has not closed it yet.
 - The General page's Reset all settings is a profile reset (options-ui-§12): it empties the active
   profile and leaves the others alone.

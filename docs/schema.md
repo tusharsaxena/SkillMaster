@@ -144,8 +144,9 @@ SkillMasterDB
                                      -- R7-6; "row" by default since round 8, R8-1 (unreleased: no
                                      -- migration)
     }
-    journal = { point = false, size = false, keep = 500, range = "session", filter = "primary" }
-                                 -- range: session | 1d | 3d | 7d | 30d | all (the Log tab, FB-32);
+    journal = { point = false, size = false, keep = 500, range = "all", filter = "primary" }
+                                 -- range: session | 1d | 3d | 7d | 30d | all (the Log tab, FB-32;
+                                 -- all time by default, round 4);
                                  -- filter: an NS.BLOCKS id (the Alts sub-tab on open, FB-33; a stored
                                  -- "professions" / "weapons" reads as primary / weapon)
                                  -- point and size ({ w, h }, the resize grip): drag state, written
@@ -182,6 +183,9 @@ SkillMasterDB
       weaponMode = "untrained",  -- "untrained" (skip 5 points or fewer) | "equipped" | "all"
       weaponMuted = {},          -- weapons the gap alert never reads, a set of keys
       sound = false,             -- the toast's sound
+      skillUp = true,            -- the skill-up toast (owner feedback round 4)
+      skillUpScope = "all",      -- "all" | "professions" (primary and secondary) | "combat" (weapon and Other)
+      skillUpSound = false,      -- the skill-up toast's own sound
       point = false,             -- toast drop point, written only by modules/Alerts.lua
     }
 ```

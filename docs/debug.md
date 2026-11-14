@@ -8,8 +8,10 @@ LibKa0s-DebugLog-1.0's console (`core/DebugLogSetup.lua`). `/sm debug` toggles t
 bug can be reproduced with the console closed and read afterwards. Lines are tag-first:
 `[Set]` (the write seam), `[Test]` (test mode and its sample data), `[Sim]` (the simulator and its
 seam), `[Migrate]`, `[Bus]`, `[Click]` (a crafting overlay's cast, a click that found no armed
-overlay, a pin to the broker feed), plus the library's own `[Cmd]`,
-`[Cfg]`, `[Launcher]` and `[Lifecycle]` lines.
+overlay, a pin to the broker feed), `[Skills]` (a scan's line and row counts), `[Bonus]`,
+`[Alerts]`, `[Broker]`, `[Probe]`, `[Layout]` (a merge, split or snap drop), `[Combat]` (an action
+queued until combat ends) and `[Arrow]` (the waypoint arrow's library lines), plus the library's own
+`[Cmd]`, `[Cfg]`, `[Launcher]` and `[Lifecycle]` lines.
 
 ## The diagnostics report
 
@@ -36,7 +38,7 @@ section. This addon writes the sections, in `modules/Diagnostics.lua`:
 | `model` | the live skill model's counts (total, learned, unlearned, rows per category), the stat count, the session log's entries and gains, the alts, whether test mode's preview source is on; stood down, a note that the last scan is kept |
 | `probe` | the probe's read-only half: the skill-list API (`C_SkillInfo`, `global` or `none`) and its visible line count, how many probed globals are present and the missing ones (capped) |
 | `bonuses` | each learned skill with a modifier as `key=+N (temp N)`, then the bonus cache as it stands (sources, items, buffs, whether the temp ticker runs) and each cached source; "bonus cache empty" before the first collect |
-| `layout` | the window's stored scale, opacity, lock, point, max height, summary strip, column count and strata, and the detached blocks' strata; each block's docked, order, collapsed, scale, lock, point and detached-frame state; the docked order and the detached blocks |
+| `layout` | the window's stored scale, opacity, lock, point, max height, summary strip, column count and strata, and the detached blocks' strata; each block's docked, order, collapsed, scale, lock, point, detached-frame state and merged-window group; the docked order and the detached blocks; then the merged windows (their count, and each one's columns, point and frame state) |
 | `sim` | the simulation's state (active, step panel, scenario, step, events), the seam's wrapped and unwrapped counts, whether test mode's sample data is on |
 | `rejected` | the events `SafeRegisterEvent` refused this session |
 

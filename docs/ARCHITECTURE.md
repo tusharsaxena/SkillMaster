@@ -120,17 +120,15 @@ entry), and one undrawn row per whole set (type `set`, default `{}`), which the 
 writes for a key with no row of its own (an `other:` skill) and the page's Defaults resets. The
 LDB tooltip's own sets (`broker.tooltip.hiddenSkills` / `hiddenStats`) follow the same pattern. All
 four sets live on one page, Rows (`settings/Rows.lua`, round 5, R5-11..R5-13): every skill and stat
-once, grouped under the window's block headings in `NS.Blocks.Ordered()`, one eye per set
-(Window, LDB tooltip) on `NS.OptionsList`'s two-column rows, and one show-all eye per column on each
+once, one tab per block since round 9 (R9-5: the block's short name, in the default `NS.BLOCKS` order,
+each tab drawing only its own group), one eye per set (Window, LDB tooltip) on `NS.OptionsList`'s two-column rows, and one show-all eye per column on each
 heading (`SetMany`, one act). It replaced the Skills page's Professions and Weapons tabs, the Stats
 page (gone: its General tab held only the undrawn set row) and the Broker page's Tooltip skills and
 Tooltip stats tabs. The paths did not move, so nothing migrated. Every hide write, from any actor
 (the page's eyes, the row menu, a header's restore eye, `/sm set`), goes through `H.RefreshPanel`:
 a page on screen renders at once, a hidden one is owed a render; writes inside a bracket (a
-heading's show-all, the page's Defaults) coalesce into one render on the next frame. A
-`LAYOUT_CHANGED` that changed `NS.Blocks.Ordered()` (a Block order drag, `/sm set`, a profile
-switch) redraws the page the same way, so its groups follow the window's order (the R5-followups
-review).
+heading's show-all, the page's Defaults) coalesce into one render on the next frame. A block
+reorder changes the window, not the page's tab strip (round 9).
 
 `profile.layout.detached` (round 5, R5-7) is one style for every detached window, set on Layout >
 Detached windows. `NS.Detached.ApplyStyle(frame)` paints it on each render: the scale (the frame's
@@ -191,17 +189,18 @@ No structural registry exists.
 ## Message Bus
 
 Six messages, each declared once in `core/Bus.lua` as `NS.MSG.<KEY>` through LibKa0s-Bus-1.0's
-strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDATED` and `SKILL_UP`,
+strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDATED` and `SKILL_UP`
+(the simulator's restoring stop re-sends `SKILLS_UPDATED` with the live model),
 `Bonuses` sends `BONUSES_UPDATED`, `StatData` sends `STATS_UPDATED` and `Blocks` sends
 `LAYOUT_CHANGED`; the simulator (`modules/Simulator.lua`) sends `SIM_TICK` after each step.
 
 | Constant | Wire name | Sender | Payload | Consumers |
 |---|---|---|---|---|
-| `SKILLS_UPDATED` | `Ka0s_SkillMaster_SkillsUpdated` | `modules/SkillData.lua` (T2.1) | the skills model | blocks, broker, alerts, alts, Journal |
+| `SKILLS_UPDATED` | `Ka0s_SkillMaster_SkillsUpdated` | `modules/SkillData.lua` (T2.1); the simulator's restoring stop (`modules/Simulator.lua`) re-sends the live model | the skills model | blocks, broker, alerts, alts, Journal |
 | `SKILL_UP` | `Ka0s_SkillMaster_SkillUp` | `modules/SkillData.lua` (T2.1) | key, old, new | blocks (session gains), broker flash, alerts, session log |
 | `STATS_UPDATED` | `Ka0s_SkillMaster_StatsUpdated` | `modules/StatData.lua` (T2.3) | the stats model | stat blocks, broker |
 | `BONUSES_UPDATED` | `Ka0s_SkillMaster_BonusesUpdated` | `modules/Bonuses.lua` (T2.2) | none | bars, tooltips, broker |
-| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse, collapse all, move); the skin owner's look-change hook; `NS.ApplyLook` (every display row's write, `settings/OptionsSetup.lua`) | none | `modules/Blocks.lua`, which repaints the window and the detached frames; the Journal |
+| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse, collapse all, move); the skin owner's look-change hook; `NS.ApplyLook` (every display row's write, `settings/OptionsSetup.lua`) | none | `modules/Blocks.lua`, which repaints the window and the detached frames; the Journal; the trainer popup (`modules/TrainerPopup.lua`, its trainer names' color while it is shown) |
 | `SIM_TICK` | `Ka0s_SkillMaster_SimTicked` | `modules/Simulator.lua` (T5.2), after each step | the step's kind | none yet (published for displays under simulation) |
 
 ## Slash Commands
@@ -222,15 +221,19 @@ one line. The table with each verb's handler and refusal: [slash-dispatch.md](sl
 | `CHAT_MSG_SKILL` | `NS.SkillData:Enable` | debounced `SkillData:Scan` | a skill-up line |
 | `PLAYER_LEVEL_UP` | `NS.SkillData:Enable` | debounced `SkillData:Scan`, with the new level as the weapon-cap floor (5 x level) | the list can still answer the old cap |
 | `UNIT_INVENTORY_CHANGED`, `UNIT_AURA` | `NS.UnitEvents` (`core/UnitEventsSetup.lua`), `RegisterUnitEvent` for `"player"` on its one frame, stood up from `NS.RegisterRuntime` | `addon:OnBonusesUnitChanged`: player only, debounced `Bonuses.Refresh` (0.2 s), which re-reads only the part the event touched (an aura change never re-reads the 19 item tooltips); a 1 s ticker while a temp bonus naming a skill is live | gear, lures and buffs change the breakdown |
+| `PLAYER_REGEN_ENABLED` | `modules/Bonuses.lua` at load, on its own bus target | `B.Schedule("buffs")` when a buff read was blocked as secret in combat | a buff read secret in combat can be read again (WoW Forever) |
 | `UNIT_STATS`, `UNIT_ATTACK_POWER`, `UNIT_RANGED_ATTACK_POWER`, `UNIT_RESISTANCES`, `UNIT_DAMAGE` | `NS.UnitEvents`, for `"player"` (recorded by `modules/StatData.lua` at load) | `StatData:Request`: one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
-| `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level |
+| `PLAYER_EQUIPMENT_CHANGED`, `UPDATE_INVENTORY_DURABILITY`, `PLAYER_LEVEL_UP`, `PLAYER_ENTERING_WORLD`, `PLAYER_REGEN_ENABLED` | `modules/StatData.lua` at load, on its own bus target (`NS.SafeRegisterEvents`) | `StatData:Request`: player only, one `STATS_UPDATED` 0.2 s after a burst | the stats model follows gear, buffs and level; leaving combat re-reads what combat answered secret |
 | `PLAYER_EQUIPMENT_CHANGED` | `modules/Detached.lua` at load, on its own bus target | `onEquipmentChanged`: re-render the detached weapon block (or the merged window it is a section of) and re-sync the overlays while it is shown; with the header's Equipped filter on a docked weapon block, refresh the main window at once (round 5, R5-10) | a weapon swap changes the weapon block's equipped-only list |
 | (timer) | `NS.TrainerPopup.Show` | `P.RefreshDistances` every 1 s (AceTimer, `P.TICK`) while the trainer popup is shown; `P.Hide` and the frame's `OnHide` cancel it, the frame's `OnShow` restarts it (a UIParent hide and show, Alt+Z or a cinematic, runs both; the R5-followups review) (round 5, R5-15) | the player moves: the distances and the nearest-first order follow |
 | `PLAYER_LOGOUT` | `modules/Alts.lua` at load, on its own bus target | `Alts:Snapshot` | the last snapshot of the session |
 | `USER_WAYPOINT_UPDATED` | `modules/WaypointArrow.lua` at load, on its own bus target | `WaypointArrow.OnWaypointUpdated`: with an arrow up, `C_Map.HasUserWaypoint` false, or a pin whose world place lies more than 2 yd from the trainer's, hides it; a pin the client cannot place keeps it (round 6, R6-11) | the native pin was cleared or replaced elsewhere (the world map's own pin) |
 | (`OnUpdate`) | `LibKa0s-WaypointArrow-1.0` on show (round 8, R8-5: the adapter's `Show` and `ShowTest`) | one measure every `WA.THROTTLE` (0.03 s, the library's): the player's world place and facing against the trainer's, the art's rotation (a sheet frame for On the ground), color and the yards; armed on show, set to nil on every hide path (the library's `takeDown`); no `OnHide` disarms it, since a UIParent hide and show (Alt+Z, a cinematic) fires `OnHide` and the arrow would come back frozen (round 6, R6-11; the R6-11 review) | the arrow follows the player |
 
-The bus subscribers on their own targets: `modules/SessionLog.lua` hears `SKILL_UP` (one log entry,
+The bus subscribers on their own targets: `modules/Blocks.lua` hears `SKILLS_UPDATED`,
+`STATS_UPDATED`, `BONUSES_UPDATED`, `LAYOUT_CHANGED` and `SKILL_UP` (repaint, revalue, relayout,
+session gains); `modules/TrainerPopup.lua` hears `LAYOUT_CHANGED` (the names' color while shown);
+`modules/SessionLog.lua` hears `SKILL_UP` (one log entry,
 with the zone); `modules/Alts.lua` hears `SKILLS_UPDATED` (one snapshot 2 s after a burst);
 `modules/Journal.lua` hears `SKILLS_UPDATED` and `LAYOUT_CHANGED` (a repaint while shown);
 `modules/Alerts.lua` hears `SKILL_UP` and `SKILLS_UPDATED` (the cap and weapon-gap checks);
@@ -281,7 +284,7 @@ handlers. The broker feed (`modules/Broker.lua`, T4.1) is never secure itself: i
 plain buttons parented to the tooltip frame (its own, or GameTooltip with the skin off) that open windows (the main window, the character frame), and
 a crafting row opens the main window scrolled to it rather than casting (design §6.5). Its
 character-panel clicks still call `ToggleCharacter` from the addon, so on Forever they can raise the
-same tainted `OnShow` error (Known Limitations). The exception is the Main window style (round 7,
+same tainted `OnShow` error ([known-limitations.md](known-limitations.md)). The exception is the Main window style (round 7,
 R7-6): its rows are the window's, and the overlays scan them too while the panel shows
 (`NS.BrokerPanel.Armed`, either *Open a row from*), so the hovered row gets the window's own spell
 cast or micro-button macro, over the whole row with Tooltips > LDB tooltip > *Open a row from* on
@@ -299,135 +302,10 @@ modes and both styles.
 
 ## Known Limitations
 
-- The broker tooltip's Classic style opens the character panel for a stat or Skills-tab row with a
-  plain `ToggleCharacter` call, which on WoW Forever taints `CharacterFrame:OnShow` (the PlayerFrame
-  status-bar secret compare, docs/forever-quirks.md, "The character panel and secret geometry"). The main window's rows go through the
-  micro button instead, and so do the Main window style's rows in either *Open a row from* (round 7,
-  R7-6; round 8, R8-1); the Classic style's rows have no secure overlay.
-- The Main window style (round 7, R7-6) shows the window's row tooltip on the shared
-  GameTooltip, anchored to the right of the hovered row; both it and the panel sit at TOOLTIP, and
-  which one draws on top where they overlap (the panel's scroll-bar gutter) is the client's frame
-  level order. The overlay over a panel row is laid at the hover and re-laid on a scroll; the panel
-  never moves while it shows. Unverified in game.
-- The Skills tab's switch and redraw after the secure open (`NS.Interact.ShowSkillsTab`,
-  `NS.Compat.RefreshSkillsTab`) run tainted: `SkillsFrame:OnShow` reads the skill list under the
-  addon's taint. Unverified in game whether any of its reads come back secret.
-- An overlay is placed when its row is laid out, shown, scrolled, hovered, raised or dropped; while its
-  window is being dragged it is taken down (`SecureOverlay:SetMoving`) and laid again at the drop,
-  so a crafting row cannot be cast from mid-drag. A raise re-levels it on the host's mouse-down,
-  `Raise` and `OnShow` and once more on the next frame; a window of the same strata raised above
-  the host (the Journal) does not re-level the host's overlays.
-  The hover lays it before the press, since the client gives a click to the frame under the press.
-- The gathering and fishing helpers are tooltip lines, switched by `skills.helperTooltip` (Skills >
-  General > Gathering and fishing hints), plus the optional one-line hint under the row,
-  `skills.helperHint` (Skills > General > Hint under the row, off by default; design §12 item 4).
-- No per-element font for the window, block headers, tooltips and toasts: they follow the skin and
-  the Skin tab's overrides. Only the bars have their own font block.
-- Two columns place each docked block in the shorter column so far, so the block order reads down
-  the columns by height rather than strictly left to right.
-- The launcher menu has no *Journal* entry yet (design §6.8): `LibKa0s-Launcher-1.0` minor 9 builds
-  only its fixed entries (Enabled, Locked, Test mode, Sim mode, Show window, Open settings), takes
-  no extra entry from the descriptor, and launcher-§2 forbids a host menu. It needs a library seam;
-  until then the Journal opens from `/sm journal` and the main window's title-bar journal mark.
-- Broker displays that only call a data object's `OnTooltipShow` show no feed tooltip: the feed
-  supplies `OnEnter` / `OnLeave` (its rows are clickable), not `OnTooltipShow`.
-- The Alts matrix shows five characters across at the default width (more as the window widens,
-  up to twelve); Shift + mouse wheel pages through the rest, the wheel alone through the rows.
-- The Log's ranges reach only as far back as the stored log: `char.log` is a ring of the newest
-  `journal.keep` skill-ups (500 by default, at most 2000), so *Last 30 days* and *All time* show
-  the newest that many, whatever their age.
-- The simulator plays one scenario (a fishing trip: six skill-ups, a lure on and off, a mount up
-  and down) on test mode's sample character. Only the reads the simulated character needs go
-  through the seam: the skill list, the player's level, class and race, the weapon enchant, the
-  main hand's tooltip and the speed. The other stats, the buffs and the zone stay live during a
-  session.
-- Turning test mode on (round 5) shows the main window, the Journal and three sticky toasts from the
-  sample character (a rank cap, a weapon gap, a skill up; `NS.Alerts.ShowTestToasts`, keys
-  `test:cap`, `test:weapon`, `test:skillup`); turning it off takes the toasts down and hides each
-  window test mode opened. The first-run skin picker previews through test mode, so it shows them too.
-  The toast stack holds three (`A.STACK`).
-- While test mode is on (round 6) every surface says so: the main window and the Journal carry the
-  amber test-mode strip under their titles (the Journal's tabs and body move down by its height), and
-  the LDB tooltip carries the same line in `sem.warn` right under its title (`NS.Broker.AddTestModeLine`).
-- Test mode's lure timer counts from when test mode turned on and is redrawn on the next repaint,
-  not every second (the live ticker follows only live temp bonuses).
-- On a client that is not enUS, the skill lines are matched on their skill-line ID when the
-  client's record carries one; a positional (1.12-shaped) record has none, and its lines and the
-  excluded headers are matched on the locale's strings, which only enUS ships today. Such a client
-  sorts its lines into Other until the locale files are translated (Documented deviations).
-- A merged window's drags (round 5, R5-6b) measure frames' rects and the pointer in UIParent units;
-  a rect the client answers secret, or not at all, gives no merge candidate, so such a drop is a plain
-  move. A section's ghost and the side highlight sit one strata above the detached windows' strata
-  (`LAYERS.STRATA_ABOVE`). A section dragged from a merged window can merge onto another window, but
-  never onto its own group (dragged onto it, it splits at the drop or holds inside the leeway); moving a
-  section within its own group is the menu's and the split mark's work, then a fresh merge. A sub-header
-  dragged is assumed to swallow its click (the client fires no `OnClick` after an `OnDragStart`);
-  unverified in game.
-- The Weapon Skills filter (round 5, R5-10) reads the main hand, off hand and ranged slots as the
-  equipped marker does (`NS.SkillHelpers.EquippedWeaponSkills`): an empty main hand is Unarmed, and
-  a weapon whose item info is not cached yet names no skill until the next equipment change. A block
-  its filter empties keeps its header and a muted line.
-- The professions' At cap (needs training) filter (round 7, R7-1) asks `NS.Trainers:NextRank` per
-  row, so it answers from the bundled rank ladders: a skill at its rank's cap with no ladder (none
-  ships for it) never shows there. Unlearned rows show under All only. A stat section's Non-zero
-  reads the row's shown value (no digit but 0: `0`, `0.0%`, `0 (0.0%)`), so a value that rounds to
-  zero counts as zero.
-- The trainer popup's "Also teaches" line (round 5, R5-14) wraps to four lines and the card grows by
-  the line's measured height (`GetStringHeight`); a measure the client answers secret, nil or zero
-  reads as one line. The card's tooltip always carries the whole list. Past
-  `NS.TrainerPopup.MAX_HEIGHT` (600) the window stops growing and the cards scroll inside it (round
-  6, R6-7, part of GitHub issue #4): a scroll frame, the mouse wheel (40 units a notch) and the
-  Journal's skin scroll bar (`NS.Journal.MakeScrollBar`, resolved when the popup is first built),
-  the cards narrowed by the bar's width while it shows; the wrap is kept.
-- The trainer popup on a learned skill (round 6, R6-7) lists its next rank's trainers and every
-  higher rank's, under one heading per rank (`Expert (225)`), the next rank first and nearest first
-  inside a rank; a trainer who trains several of those ranks is listed once, under the lowest, and
-  a rank with no trainer left has no heading. The data's rank lists decide who trains what
-  (`defaults/Trainers_Forever.lua`): Nat Pagle is recorded as training Artisan Fishing only, so he
-  shows under Artisan (300), not Expert. Unverified in game.
-- The trainer popup's distances (round 5, R5-15) are measured from the map API's world positions
-  (`NS.Compat.PlayerWorldPos`, `MapWorldPos`), straight-line yards inside one instance (continent),
-  not a path. A trainer without coordinates (most profession trainers: the data gives only the weapon
-  masters' x and y), one on another continent, or a player the client gives no position (inside an
-  instance, a secret) shows no distance and sorts after the measured ones, in the data's order. The
-  cards can reorder under the pointer as the player moves (once a second); the selected trainer stays
-  selected. Computed here, not by another addon (the owner's call). Unverified in game.
-- The trainer popup's Set waypoint button (round 6, R6-6) reads `Set waypoint` alone and is disabled
-  whenever a waypoint could only go to chat (`NS.Waypoints:Blocked`): the data has no coordinates for
-  the trainer (every profession trainer today), Waypoint method is Chat only, or the native pin API is
-  not there. Its tooltip says which; Print to chat always works. A disabled button's
-  tooltip needs `SetMotionScriptsWhileDisabled`, called when the client has it. Unverified in game.
-- Skill Master's waypoint arrow (round 6, R6-11) shows only with a native pin set
-  (`C_Map.SetUserWaypoint` on a map that takes one) and Show Skill Master's arrow on; off, the pin is
-  super-tracked and the game's arrow points. No TomTom (round 7, R7-7): another addon answering
-  TomTom's API hid this arrow in the owner's game, so none is looked for and TomTom's own arrow never
-  shows for a Skill Master waypoint. Its pin is set with
-  `C_SuperTrack.SetSuperTrackedUserWaypoint(false)`, not just without the `true` call, so a pin the
-  game was super-tracking loses its arrow too. The bearing assumes `GetWorldPosFromMapPos` answers x
-  north and y west and `GetPlayerFacing` radians counter-clockwise from north (the retail
-  convention); with no facing (nil or secret) the art hides and the yards stay, and with no distance
-  (another continent, an instance) the trainer's name shows alone, dim. Arrival is 5 yd, straight
-  line. A pin replaced elsewhere is noticed only where the client answers `C_Map.GetUserWaypoint`
-  and a world place for it. Unverified in game. Since round 8 (R8-5) the frame, the math and the art
-  are `LibKa0s-WaypointArrow-1.0`'s: whether its RLE TGAs load, which way `SetRotation` and the
-  ground sheet's `SetTexCoord` turn, how Raised's shadow offset and the five looks read at scales 0.5
-  to 2 are unverified in game. The outline is the library's fixed dark edge, baked into each look's
-  overlay; it no longer follows the skin's `bar.border` (round 6 tinted it). Round 9 (R9-1..R9-3,
-  `LibKa0s-WaypointArrow-1.0` version 2.2): the art is 1.25x the round-8 size at scale 1; the text
-  takes the player's Font block rather than the skin's body and muted roles (the name alone is
-  dimmed by alpha); the Share in chat line's shape (` /way <zone> x, y <trainer>`, a leading space
-  so Enter posts it rather than running it as a command) is the library's and open for the owner,
-  since the zone name is localized and not unique; the right-click menu, the Text block's faces and
-  the position offsets at every scale are unverified in game (SM-DISP-60 to 63).
-- The Main window style LDB tooltip's scroll bar (round 7, R7-4) is always drawn: with nothing to
-  scroll it is disabled and its thumb spans the corridor in the skin's `scroll.thumbOff`, the
-  facade's disabled tint (the main window's template bar stays drawn with its arrows disabled; the
-  Journal's slider bar has no arrows, so the full-length dim thumb says the same). A skin switch while
-  the tooltip is up repaints the thumb in `scroll.thumb` until the next hover redraws it. Unverified
-  in game.
-- Every client API the data modules use is assumed until `/sm probe` confirms it
-  ([forever-quirks.md](forever-quirks.md), the addon's own section). The kit's Forever API set
-  already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.
+What the addon does not do yet, and what is still unverified in game: [known-limitations.md](known-limitations.md).
+The main themes are the character panel opened from the Classic-style broker tooltip (a tainted `OnShow`),
+the secure overlays' placement and the Skills tab's tainted switch, the trainer popup's and the waypoint
+arrow's measurements, test mode and the simulator's reach, and the client APIs assumed until `/sm probe`.
 
 ## Documentation map
 
@@ -455,7 +333,7 @@ modes and both styles.
 | `perf-analysis/README.md` | Present | The performance harness is wired (`core/PerfSetup.lua`) |
 | `compat-layer.md` | Present | `core/Compat.lua` publishes three or more addon-specific shims (10 as measured on 2026-11-10: the skill list, the player, the weapon enchant, the item tooltip, the unit speed, the spell name) |
 | `message-bus.md` | Not applicable | More than ten messages (six as measured on 2026-11-10) |
-| `known-limitations.md` | Not applicable | Known Limitations is under 60 lines |
+| `known-limitations.md` | Present | Known Limitations ran past 60 lines (132 on 2026-11-15) |
 | `taint.md` | Not applicable | Taint Notes is under 60 lines |
 
 ### Verification and record (documentation-§3)
@@ -476,14 +354,14 @@ None yet.
 Frozen and generated material is out of the map and named once per directory (documentation-§3):
 `docs/audits/`, `docs/reviews/`, `docs/automated-tests/<run>/`, `docs/perf-analysis/<run>/`,
 `docs/revendor/<date>-v<tag>/`, `docs/superpowers/` (the v1 design spec, its mockup sources, the plan
-and its status ledger) and `docs/investigations/`. Only `docs/superpowers/` and
-`docs/automated-tests/<run>/` exist today.
+and its status ledger) and `docs/investigations/`. Of these, `docs/audits/`, `docs/reviews/`,
+`docs/revendor/`, `docs/superpowers/` and `docs/automated-tests/<run>/` exist today.
 
 ## Documented deviations
 
 | Rule | What differs | Why | Decided | Re-check trigger |
 |---|---|---|---|---|
-| localization-§4 | Three things still match on a localized name, through the locale keys (`NS.L`): a skill line whose record carries no skill-line ID (the 1.12 positional list), the three excluded Skills-tab headers (Class Skills, Armor Proficiencies, Languages) and the crafting spell when `NS.Compat.SpellName` answers nothing for its ID. Every record that carries an ID is matched on it first (`NS.SkillLineIDToKey`), and the crafting cast uses the name its spell ID resolves to. | The client hands no ID for a 1.12-shaped line or for a header, so the locale key is the only route; enUS ships the strings, the other locale files are stubs, so a non-enUS client on the positional shape sorts its lines into Other until they are translated (Known Limitations). | 2026-11-10, M6 review F-001 | `/sm probe` shows whether Forever's struct carries a skill-line ID (then only the headers remain), or the locale files gain the skill-line and header strings |
+| localization-§4 | Three things still match on a localized name, through the locale keys (`NS.L`): a skill line whose record carries no skill-line ID (the 1.12 positional list), the three excluded Skills-tab headers (Class Skills, Armor Proficiencies, Languages) and the crafting spell when `NS.Compat.SpellName` answers nothing for its ID. Every record that carries an ID is matched on it first (`NS.SkillLineIDToKey`), and the crafting cast uses the name its spell ID resolves to. | The client hands no ID for a 1.12-shaped line or for a header, so the locale key is the only route; enUS ships the strings, the other locale files are stubs, so a non-enUS client on the positional shape sorts its lines into Other until they are translated ([known-limitations.md](known-limitations.md)). | 2026-11-10, M6 review F-001 | `/sm probe` shows whether Forever's struct carries a skill-line ID (then only the headers remain), or the locale files gain the skill-line and header strings |
 
 | skinning (LibKa0s `S.Tooltip`) | The skinned broker tooltip (FB-13) is an addon-owned `GameTooltip` frame (`SkillMasterBrokerTooltip`) painted with `NS.Skin.Shell` and `NS.Skin.Text`, not the library's `S.Tooltip`. | `S.Tooltip` only recolors a backdrop the frame already has, and a modern `GameTooltipTemplate` frame draws its art through NineSlice, so there was nothing for it to recolor; the shared `GameTooltip` is never restyled. | 2026-11-10, feedback round 2 | LibKa0s ships a tooltip skin that paints an owned or template tooltip frame |
 | options-ui-§16 | `bars.borderStyleFromSkin` (*Use the skin's border*, the bar border's style companion) defaults `false`, in `defaults/Profile.lua` and on its composed row; every other `*FromSkin` companion defaults `true`. | The owner wants no bar border by default under every skin. Azeroth, High Contrast and WoW Midnight state a real bar border style, which wins over *Show border* off while the companion is on (skinning-§6), so the companion on drew an edge the player had switched off. With it off, *Show border* decides; ticking it opts into the skin's border. No migration: AceDB stripped every stored `true` (the old default). | 2026-11-10, feedback round 2 follow-up | The standard lets a bar border companion default off, or makes a host's *Show border* off win over a skin's real style |

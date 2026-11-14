@@ -7,7 +7,7 @@ login; each page body builds on its first show.
 |---|---|---|
 | Ka0s Skill Master (landing) | none | The logo, the tagline and the slash command list |
 | General | Master controls, Skin, Keybindings | Master controls, the skin, the key binding |
-| Layout | Window, Blocks, Detached windows, Block order | The window's width, maximum height, block spacing, summary strip, column count (one or two), where a row opens from (Full row or Go icon only, round 8) and frame strata; per block show, dock, collapse, lock, scale and Show rows (its header's filter, round 7); the weapon block's compact filter (equipped and below cap only); every detached window's scale, opacity, title band, strata, background and border; the block order, dragged |
+| Layout | Window, Blocks, Detached windows, Block order | The window's width, maximum height, block spacing, summary strip, column count (one or two), where a row opens from (Full row or Go icon only, round 8) and frame strata; per block show, dock, collapse, lock, sort (Sort rows by), scale and Show rows (its header's filter, round 7); the weapon block's compact filter (equipped and below cap only); every detached window's scale, opacity, title band, strata, background and border; the block order, dragged |
 | Bars | Bar, Colors, Text, Marks, Icons | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom) and position; Rank tier colors (each tier a darker shade of the category color, By category only), thresholds in the window (off by default) and in the row tooltip (on; round 6, R6-4), timer and spark (off by default); the rows' icons (show, size, zoom, and the composed border on the icon family with Use the row's color). No preview bar: the open window restyles live (owner feedback round 4) |
 | Skills | General | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default) |
 | Rows | Primary, Secondary, Weapons, Other, Base & Combat, Spell & Regen, Defense & Resists, Utility (one tab per block with rows, round 9) | Every catalog skill and stat once, each on its block's tab under the block's heading: a boxed row (icon, name) with two eyes, the main window's Hide (`skills.hidden.<key>`, `stats.hidden.<key>`) and the LDB tooltip's (`broker.tooltip.hiddenSkills.<key>`, `hiddenStats.<key>`); a Window / LDB tooltip caption line on top; each heading's two eyes show that group's hidden rows again (round 5, R5-11..R5-13) |
@@ -127,8 +127,8 @@ The Block order tab is a host tab keyed by its group (the rows `layout.blocks.<i
 `skipRender`): one boxed row per block in `NS.Blocks.Ordered()` on `NS.OptionsList`
 (`settings/BoxList.lua`, ConsumableMaster's Priority list look: a 28 px box, a 4 px gap, the `segment`
 handle), dragged through LibKa0s-Widgets-1.0's `ReorderList` (options-ui-§18); a drop calls
-`NS.Blocks:Move(from, to)`, and the row's eye writes `layout.blocks.<id>.shown`. The Rows page's one
-tab is a host tab keyed by its group the same way (see [Rows](#rows)). Each controller is canceled
+`NS.Blocks:Move(from, to)`, and the row's eye writes `layout.blocks.<id>.shown`. The Rows page's tabs,
+one per block with rows, are host tabs keyed by their group the same way (see [Rows](#rows)). Each controller is canceled
 before every render (`spec.beforeRender`).
 
 The Weapon skills subsection adds *Equipped and below cap only*
@@ -150,15 +150,14 @@ The feed's right-click opens this page by its key (`NS.Broker.SETTINGS_PAGE = "b
   pinned skill and gains (with nothing pinned, the feed reads Professions and Skills), pinned skill, lowest profession and gains, last skill-up and gains,
   equipped weapon and Defense, pinned skill and crit, crit and speed), and *Skill-up flash*
   (`broker.flashSeconds`).
-- **Tooltip**: *Look*, *Apply skin to the tooltip* (`broker.tooltip.skin`, on): the tooltip is the
-  feed's own frame in the skin's backdrop, border and fonts; off, the game's plain GameTooltip.
-  The switch takes a shown tooltip down (it moved to the Tooltips page, round 4). *Sections*: one
-  switch per skill section of the Skill Master feed (`broker.tooltip.sections.<primary|secondary|weapon|other>`);
+- **Tooltip**: *Sections*: one switch per skill section of the Skill Master feed
+  (`broker.tooltip.sections.<primary|secondary|weapon|other>`);
   *Stats feed sections*: one per stat block of the Skill Master Stats feed
   (`broker.tooltip.sections.<stats_base|stats_spell|stats_defense|stats_utility>`), all on by default
   (round 6, R6-9: the old Stats switch went with schemaVersion 9). The stats feed has no template:
   its text is the stat pinned from a stat row's menu (*Pin to the broker feed*), its label and value,
-  or "Stats" with none.
+  or "Stats" with none. *Apply skin to the tooltip* (`broker.tooltip.skin`) is not here: it moved
+  to the Tooltips page's LDB tooltip tab (round 4).
 
 The tooltip's Hide rows moved to the [Rows](#rows) page (round 5, R5-13), same paths.
 

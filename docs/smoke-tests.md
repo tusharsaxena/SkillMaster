@@ -567,8 +567,8 @@ the checks below that cover each item:
 - **SM-OPT-7** Open the trainer popup: each trainer's name is in the skin's accent, apart from the
   place line. Trainers and Waypoints > Trainer popup: turn Use the skin's color off and pick a color:
   the open popup's names take it; tick Use class color: the class's color, at the swatch's opacity.
-- **SM-OPT-6** Each page's Defaults button restores the page; the window repaints once.
-- **SM-OPT-6** (M5 integration) Right-click a broker feed: the Broker settings page opens, not
+- **SM-OPT-23** Each page's Defaults button restores the page; the window repaints once.
+- **SM-OPT-24** (M5 integration) Right-click a broker feed: the Broker settings page opens, not
   the landing page. Skills > General: tick Hint under the row and the Skinning, Mining, Herbalism and
   Fishing rows gain their hint line at once; untick Gathering and fishing hints and the tooltips lose
   their helper lines while the row hint stays. Detach Weapon Skills, then Layout > Blocks > Weapon
@@ -627,7 +627,7 @@ the checks below that cover each item:
   Drag it where you want it. `/sm test` again: it goes (a waypoint you had set before test mode comes
   back). Enter combat in test mode: it goes with the rest.
 - **SM-TEST-5** (the R6-11 review) Set a trainer waypoint (the arrow points at it),
-  then `/sm test` and right-click the sample arrow: the sample goes and the arrow points at the real
+  then `/sm test`, right-click the sample arrow and pick Clear waypoint: the sample goes and the arrow points at the real
   trainer again, the map pin kept. `/sm test` again: the real arrow stays.
 - **SM-SIM-1** Tick General → Master controls → Sim mode: the step panel opens beside the window and
   the box stays ticked. Start the fishing trip: every 3 s a step plays; a skill-up flashes the broker

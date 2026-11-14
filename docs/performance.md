@@ -7,7 +7,7 @@ The harness is LibKa0s-Perf-1.0 (`core/PerfSetup.lua`), with captures in `SkillM
 | Bucket | Bracketed in | Measures |
 |---|---|---|
 | `windowRender` | `modules/MainWindow.lua` `W.Render` | one pass over the window body |
-| `detachedRender` | `modules/Detached.lua` `D.Render` | one detached block's rows |
+| `detachedRender` | `modules/Detached.lua` `D.Render`, `modules/Groups.lua` `G.Render` | one detached block's rows, or one merged window |
 | `skillScan` | `modules/SkillData.lua` `SD:Scan` | reading the skill list and building the model, before its messages |
 | `statScan` | `modules/StatData.lua` `S:Scan` | reading every stat (the throttled flush, a speed change) |
 | `bonusRefresh` | `modules/Bonuses.lua` `B.Refresh` | the invalidate and live-temp check, before `BONUSES_UPDATED` |
@@ -38,6 +38,8 @@ during a performance capture." until it ends.
 
 ## Budget
 
-The design's anti-goal: nothing polls per frame except visible expiry timers; skills update on
-skill events, stats on throttled unit events (ARCHITECTURE.md, Event Subscriptions).
+The design's anti-goal: nothing polls per frame except visible expiry timers and the shown
+waypoint arrow (LibKa0s-WaypointArrow-1.0's OnUpdate, throttled to 0.03 s, disarmed when the arrow
+is taken down); skills update on skill events, stats on throttled unit events (plus a 0.5 s speed
+read while a speed display is on screen) (ARCHITECTURE.md, Event Subscriptions).
 In-game captures live in [perf-analysis/README.md](perf-analysis/README.md); none has been taken.

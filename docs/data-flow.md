@@ -11,11 +11,13 @@ UNIT_* stat events    StatData (T2.3)    STATS_UPDATED              alerts, sess
 
 - Only the data modules read the client API. Displays read models and messages, so test mode, the
   simulator and the headless suite drive them identically.
-- Data modules debounce their events (0.1 s) and publish one message per pass.
+- Data modules debounce their events (SkillData 0.1 s, StatData and Bonuses 0.2 s) and publish one message per pass.
 - Every message name is a constant in `core/Bus.lua`; each subscriber registers on its own bus target.
-- One display reads an event itself: the detached weapon block (`modules/Detached.lua`) hears
+- Two displays read an event themselves: the detached weapon block (`modules/Detached.lua`) hears
   `PLAYER_EQUIPMENT_CHANGED` on its own bus target and, while shown, re-renders its equipped-only
-  list (in its own frame, or in the merged window it is a section of) and re-syncs the overlays.
+  list (in its own frame, or in the merged window it is a section of) and re-syncs the overlays; the
+  waypoint arrow (`modules/WaypointArrow.lua`) hears `USER_WAYPOINT_UPDATED` and hides when the
+  native pin is cleared or replaced.
 - A detached block in a merged window (`modules/Groups.lua`, round 5) is drawn there: every
   `NS.Detached.Refresh` (a layout change or a data repaint) refreshes the merged windows with the
   same `anchor`, and `RefreshValues` and the stand-down reach them too.
@@ -64,7 +66,9 @@ profession at its cap whose `NS.Trainers:NextRank` answers a rank toasts once pe
 (`cap:<key>:<max>`) and prints one chat line naming the first trainer; a weapon skill
 `alerts.weaponGap` (25) or more below `max(max, 5 x level)` toasts once per skill per session
 (`weapon:<key>`), when `A.WeaponWatched` reads it: never a muted weapon (`alerts.weaponMuted`), and
-as `alerts.weaponMode` says (skip one at 5 points or fewer, the default; only the equipped; all). `SKILLS_UPDATED(model)` checks every weapon whose cap rose since the previous model
+as `alerts.weaponMode` says (skip one at 5 points or fewer, the default; only the equipped; all).
+Every `SKILL_UP` also toasts the skill-up itself (`alerts.skillUp`, on by default) for the skills
+`alerts.skillUpScope` names (all, professions, or combat), with its own sound (`alerts.skillUpSound`). `SKILLS_UPDATED(model)` checks every weapon whose cap rose since the previous model
 (a level-up); the first model only records the caps. A left-click on a cap toast hands its trainer
 to `NS.Waypoints:Set` when that module exists, else prints the directions. The stand-down clears
 the toast; a profile reload re-reads its position.
@@ -118,7 +122,7 @@ repaints once.
   hides, every event is unregistered and every timer canceled; standing up re-registers from
   current state.
 
-The README's `## How the window works` is the player-facing version of this page.
+The README's `## How the bars work` is the player-facing version of this page.
 
 ## The seams between the display and the M4 surfaces
 
@@ -132,7 +136,10 @@ The README's `## How the window works` is the player-facing version of this page
   Master's arrow on, the native pin is set unsuper-tracked and `NS.WaypointArrow.Show(trainer)`
   points at it (round 6, R6-11); off, the pin is super-tracked and the client's arrow points.
   `USER_WAYPOINT_UPDATED` (the pin cleared or replaced elsewhere) hides the arrow. No TomTom (round
-  7, R7-7).
+  7, R7-7). The arrow's drag writes `waypoints.arrowX` / `arrowY` through `NS.SetByPath`. Its
+  right-click menu (round 9, R9-2) clears the waypoint, shares it in chat, shows it on the map, locks
+  or resets the arrow, opens `NS.TrainerPopup.Show(key)` (Show trainers) or the Trainers and
+  Waypoints page (Arrow settings...), and Hide arrow unticks `waypoints.arrow`.
 - The broker tooltip and the Journal's alt grid draw `NS.Bar` in its `mini` style: the broker from
   `NS.Rows.SkillValues` / `StatValues` with `NS.Rows.FillColor`, the Journal from the snapshot's rank,
   cap and category. Both follow `profile.bars` (the colors, `miniHeight`, the broker tooltip's `brokerRowHeight`, the fill direction) as the

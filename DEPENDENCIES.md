@@ -15,6 +15,9 @@ marked as such rather than listed as a requirement.
 - **Nothing else.** Every library is vendored under `libs/` and committed (library-stack), so the
   player installs no separate library addon. `## OptionalDeps:` names the vendored libs for load
   ordering, not as things to download.
+- **Optional: EllesmereUI.** A third-party addon, not required and not vendored. `## OptionalDeps:`
+  also names it so it loads first when installed; with it present, the General page's Skin source
+  can take this addon's look from EllesmereUI instead of a Ka0s skin (`core/SkinSetup.lua`).
 
 ## Development — the contributor toolchain
 
@@ -24,6 +27,7 @@ marked as such rather than listed as a requirement.
 | `luacheck` | any recent | `luacheck .`, the other half of the green gate | `.luacheckrc` at the repo root |
 | `lizard` | any recent | the `complexity` suite of `tests/_kit/run-automated-tests.sh`, which runs it over a sanitized shadow (automated-tests-§3) | `lizard --version` |
 | `git` | any recent | vendoring; the kit's eol, prose, skin-values and client-globals suites read `git ls-files` | `tests/_kit/test_eol.lua` |
+| `ka0s-bounded` (dev-copilot plugin, `~/.claude/dev-copilot/bin/`) | the plugin's | runs `luacheck .` and `tests/_kit/run-automated-tests.sh` with bounds, as the green gate requires (testing-§15) | the CLAUDE.md gate line; `docs/testing.md` |
 | POSIX shell | any | the commands in this file and in `docs/testing.md` | — |
 
 **Lua 5.1 is a requirement, not a preference.** The harness sandboxes each source file with

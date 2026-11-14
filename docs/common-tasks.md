@@ -3,8 +3,9 @@
 ## Add a setting
 
 - Add its default to `defaults/Profile.lua`.
-- Add one row to the page file that owns it (`settings/General.lua` today) with `path`, `page`,
-  `group`, `type`, `label`, `desc`, `default` (read from `NS.defaults`) and `onChange`.
+- Add one row to the page file that owns it (`settings/<Page>.lua`: General, Layout, Bars, Skills,
+  Rows, Broker, Tooltips, Alerts, Journal or Trainers) with `path`, `page`, `group`, `type`,
+  `label`, `desc`, `default` (read from `NS.defaults`) and `onChange`.
 - Give the label and desc `enUS` keys in `locales/enUS.lua`.
 - Run the suite: `test_schema` checks the path resolves against the defaults and carries a group.
 
