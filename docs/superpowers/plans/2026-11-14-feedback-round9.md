@@ -26,6 +26,8 @@ LibKa0s branch `feat/2026-11-14-arrow-text-position-menu` (worktree `#Worktrees/
 - **Menu:** Clear waypoint first, then Share in chat (opens the chat box pre-filled, never sends),
   Show on map, Show trainers (Skill Master's trainer popup), Lock / Unlock, Reset position, Arrow
   settings…, Hide arrow.
+- **Share in chat** (2026-11-14, after review): the line is ` /way <zone> xx.x, yy.y <trainer>`, with a leading space so Enter posts it.
+- **Arrow lock** (2026-11-14): recorded as a slash-commands-§8 deviation in docs/ARCHITECTURE.md.
 - The addon is unreleased: no migration for the dropped `waypoints.arrowFrame.point` state.
 
 ## Tasks
@@ -62,15 +64,15 @@ LibKa0s branch `feat/2026-11-14-arrow-text-position-menu` (worktree `#Worktrees/
 
 | ID | Status | Commit |
 |---|---|---|
-| L1 | pending | |
-| L2 | pending | |
-| L3 | pending | |
-| L4 | pending | |
-| L5 | pending | |
+| L1 | done | 37a9844 (L0, slider box), 3875b37 |
+| L2 | done | 19b0ce0 |
+| L3 | done | e017721 |
+| L4 | done | 880f4e9 |
+| L5 | done | 2ab06c2, ab6b2cc (review fixes) |
 | L-REL | pending | |
-| R9-1 | pending | |
-| R9-2 | pending | |
-| R9-3 | pending | |
-| R9-4 | pending | |
+| R9-1 | done | 94ef109, 8f512d2 (review fixes) |
+| R9-2 | done | 94ef109, 8f512d2 |
+| R9-3 | done | 94ef109, 8f512d2 |
+| R9-4 | done | LibKa0s 37a9844 (OptionsWidgets minor 46); arrives with R9-RV |
 | R9-5 | done | (this commit) |
 | R9-RV | pending | |
