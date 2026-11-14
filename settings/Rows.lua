@@ -14,10 +14,14 @@ local _, NS = ...
 -- than storing it), and an undrawn whole-set row per set (type `set`) lets the page's Defaults clear
 -- a key with no row of its own (an "other:" skill the catalog does not know, review F-002). The row
 -- menu's Hide (modules/Interact.lua) writes the same rows.
+--
+-- Round 9: one tab per block (its short name, NS.BlockDefs[id].short), each drawing only its own
+-- group, in place of one tab drawing every skill and stat: a render (every eye's click redraws the
+-- page) built some hundred widgets and lagged. The tabs keep the blocks' default order
+-- (NS.BLOCKS); a block reorder changes the window, not this strip.
 local L = NS.L
 local H = NS.Helpers
 local PAGE = "rows"
-local GROUP = L["Show and hide"]
 
 local Rows = {}
 NS.OptionsRows = Rows
@@ -67,10 +71,13 @@ local function tipSet(setKey)
     return b and b.tooltip and b.tooltip[setKey]
 end
 
---- One entry's hide row in the set `setOf()` answers.
-local function memberRow(path, setOf, key, label, desc, onChange)
+--- The schema group (and tab) of block `id`: its short name.
+function Rows.TabKey(id) return NS.BlockDefs[id].short end
+
+--- One entry's hide row in the set `setOf()` answers, on its block's tab `group`.
+local function memberRow(path, group, setOf, key, label, desc, onChange)
     return {
-        path = path, page = PAGE, group = GROUP, type = "bool", default = false, label = label, desc = desc,
+        path = path, page = PAGE, group = group, type = "bool", default = false, label = label, desc = desc,
         get = function()
             local set = setOf()
             return set ~= nil and set[key] == true
@@ -83,34 +90,25 @@ local function memberRow(path, setOf, key, label, desc, onChange)
     }
 end
 
+-- The whole-set rows are undrawn (skipRender); they ride on the first tab's group.
 local function setRow(path, desc, onChange)
-    return { path = path, page = PAGE, group = GROUP, type = "set", default = {}, skipRender = true,
+    return { path = path, page = PAGE, group = Rows.TabKey(NS.BLOCKS[1]), type = "set", default = {}, skipRender = true,
              label = L["Hidden rows"], desc = desc, onChange = onChange }
 end
 
 local WINDOW_DESC = L["Leave this row out of the window and the detached blocks. The row menu's Hide sets it too."]
 local TIP_DESC = L["Leave this row out of the LDB tooltip: a skill out of the Skill Master feed's, a stat out of the Skill Master Stats feed's. The tooltip's row menu's Hide sets it too."]
 
-local function pair(rows, kind, key, name)
+local function pair(rows, group, kind, key, name)
     local winKind, tipKey = kind == "stat" and "stats" or "skills", kind == "stat" and "hiddenStats" or "hiddenSkills"
-    rows[#rows + 1] = memberRow(winKind .. ".hidden." .. key, function() return windowSet(winKind) end, key,
+    rows[#rows + 1] = memberRow(winKind .. ".hidden." .. key, group, function() return windowSet(winKind) end, key,
         L["Hide %s"]:format(name), WINDOW_DESC, windowChanged)
-    rows[#rows + 1] = memberRow("broker.tooltip." .. tipKey .. "." .. key, function() return tipSet(tipKey) end, key,
-        L["Hide %s in the LDB tooltip"]:format(name), TIP_DESC, brokerRefresh)
+    rows[#rows + 1] = memberRow("broker.tooltip." .. tipKey .. "." .. key, group, function() return tipSet(tipKey) end,
+        key, L["Hide %s in the LDB tooltip"]:format(name), TIP_DESC, brokerRefresh)
 end
 
-local rows = {
-    setRow("skills.hidden", L["Every skill hidden from the window, as a set of keys."], windowChanged),
-    setRow("stats.hidden", L["Every stat hidden from the window, as a set of keys."], windowChanged),
-    setRow("broker.tooltip.hiddenSkills", L["Every skill the LDB tooltip leaves out, as a set of keys."], brokerRefresh),
-    setRow("broker.tooltip.hiddenStats", L["Every stat the LDB tooltip leaves out, as a set of keys."], brokerRefresh),
-}
-for _, key in ipairs(NS.SortedSkillKeys) do pair(rows, "skill", key, L[NS.SkillCatalog[key].name]) end
-for _, def in ipairs(NS.STAT_DEFS) do pair(rows, "stat", def.key, def.label) end
-NS.RegisterSchemaRows(rows)
-
 -- ---------------------------------------------------------------------------------------------
--- The model: one group per block, in the window's block order
+-- The model: one group per block
 -- ---------------------------------------------------------------------------------------------
 local SKILL_CATS = { primary = true, secondary = true, weapon = true, other = true }
 local STAT_GROUPS = { base = true, spell = true, defense = true, utility = true }
@@ -122,10 +120,11 @@ local function entry(kind, key, name)
 end
 
 --- { { id, title, rows = { { kind, key, name, icon, windowPath, tipPath } ... } } ... }, one group per
---- block in NS.Blocks.Ordered(); a skill under its category's block, a stat under its group's.
-function Rows.Groups()
+--- block in `order` (default NS.Blocks.Ordered()); a skill under its category's block, a stat under
+--- its group's.
+function Rows.Groups(order)
     local out = {}
-    for _, id in ipairs(NS.Blocks.Ordered()) do
+    for _, id in ipairs(order or NS.Blocks.Ordered()) do
         local d = NS.BlockDefs[id]
         local g = { id = id, title = d.title, rows = {} }
         if d.source == "skills" then
@@ -146,6 +145,30 @@ function Rows.Groups()
     end
     return out
 end
+
+--- Block `id`'s group, or nil.
+function Rows.Group(id)
+    for _, g in ipairs(Rows.Groups()) do if g.id == id then return g end end
+end
+
+-- The rows, registered block by block in the default order, which is the tab strip's.
+local rows = {
+    setRow("skills.hidden", L["Every skill hidden from the window, as a set of keys."], windowChanged),
+    setRow("stats.hidden", L["Every stat hidden from the window, as a set of keys."], windowChanged),
+    setRow("broker.tooltip.hiddenSkills", L["Every skill the LDB tooltip leaves out, as a set of keys."], brokerRefresh),
+    setRow("broker.tooltip.hiddenStats", L["Every stat the LDB tooltip leaves out, as a set of keys."], brokerRefresh),
+}
+Rows.tabs = {}
+for _, g in ipairs(Rows.Groups(NS.BLOCKS)) do
+    local key = Rows.TabKey(g.id)
+    for _, r in ipairs(g.rows) do pair(rows, key, r.kind, r.key, r.name) end
+    if #g.rows > 0 then
+        local id = g.id
+        Rows.tabs[#Rows.tabs + 1] = { key = key, label = key, tooltip = NS.BlockDefs[id].title,
+                                      render = function(ctx) Rows.Render(ctx, id) end }
+    end
+end
+NS.RegisterSchemaRows(rows)
 
 -- ---------------------------------------------------------------------------------------------
 -- The render
@@ -187,52 +210,36 @@ local function rowMark(eye, path, name, was, where)
              title = (was and L["Show %s"] or L["Hide %s"]):format(name), tooltip = where }
 end
 
-function Rows.Render(ctx)
+--- Draw block `id`'s tab: the caption, the column header, the block's heading and its rows.
+function Rows.Render(ctx, id)
     Rows.ctx = ctx
-    Rows.order = table.concat(NS.Blocks.Ordered(), ",")
+    local g = Rows.Group(id)
     local scroll = H.EnsureScroll(ctx)
-    if not scroll then return end
+    if not (scroll and g) then return end
     H.TextRow(ctx, L["The first eye hides a row from the window and the detached blocks, the second from the LDB tooltip; a dimmed eye is hidden there. A row hidden from both is dimmed. A heading's eyes show its group's hidden rows again."])
     if H.AddSpacer then H.AddSpacer(scroll, 4) end
     local list = NS.OptionsList.Begin(ctx, { actionWidth = Rows.COLUMN_W, labelWidth = Rows.LABEL_W })
     local eye = NS.Icon and NS.Icon("eye")
     NS.OptionsList.Header(scroll, list, { text = "", columns = { { text = L["Window"] }, { text = L["LDB tooltip"] } } })
-    for _, g in ipairs(Rows.Groups()) do
-        NS.OptionsList.Header(scroll, list, { text = g.title, heading = true, columns = {
-            groupMark(eye, hiddenIn(g, "windowPath"), L["Show in the window"]),
-            groupMark(eye, hiddenIn(g, "tipPath"), L["Show in the LDB tooltip"]),
-        } })
-        for _, r in ipairs(g.rows) do
-            local inWin, inTip = hidden(r.windowPath), hidden(r.tipPath)
-            NS.OptionsList.Row(scroll, list, {
-                text = r.name, icon = r.icon, dimmed = inWin and inTip,
-                actions = {
-                    rowMark(eye, r.windowPath, r.name, inWin, WINDOW_DESC),
-                    rowMark(eye, r.tipPath, r.name, inTip, TIP_DESC),
-                },
-            })
-        end
+    NS.OptionsList.Header(scroll, list, { text = g.title, heading = true, columns = {
+        groupMark(eye, hiddenIn(g, "windowPath"), L["Show in the window"]),
+        groupMark(eye, hiddenIn(g, "tipPath"), L["Show in the LDB tooltip"]),
+    } })
+    for _, r in ipairs(g.rows) do
+        local inWin, inTip = hidden(r.windowPath), hidden(r.tipPath)
+        NS.OptionsList.Row(scroll, list, {
+            text = r.name, icon = r.icon, dimmed = inWin and inTip,
+            actions = {
+                rowMark(eye, r.windowPath, r.name, inWin, WINDOW_DESC),
+                rowMark(eye, r.tipPath, r.name, inTip, TIP_DESC),
+            },
+        })
     end
     NS.OptionsList.Finish(list, scroll)
 end
 
--- The groups follow the window's block order: a reorder (Layout > Block order's drag, `/sm set
--- layout.blocks.<id>.order`, a profile switch) redraws the page, shown now or hidden at its next
--- show (review, R5-followups). Every LAYOUT_CHANGED is checked; only a changed order renders.
-local function orderChanged()
-    if Rows.ctx and Rows.order ~= table.concat(NS.Blocks.Ordered(), ",") then
-        Rows.order = table.concat(NS.Blocks.Ordered(), ",")
-        H.RefreshPanel(Rows.ctx, true)
-    end
-end
-
-if NS.NewBusTarget then
-    Rows.events = NS.NewBusTarget()
-    if Rows.events then Rows.events:RegisterMessage(NS.MSG.LAYOUT_CHANGED, orderChanged) end
-end
-
 NS.RegisterSchemaPage(PAGE, L["Rows"], {
-    tabs = { { key = GROUP, label = GROUP, render = function(ctx) Rows.Render(ctx) end } },
+    tabs = Rows.tabs,
     beforeRender = NS.OptionsList.Cancel,
     defaultsTooltip = L["Show every skill and stat again, in the window and in the LDB tooltip: both hidden sets are cleared, on this profile."],
 })

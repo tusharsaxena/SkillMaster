@@ -478,13 +478,22 @@ local function drawn(from, types)
     return out
 end
 
-local function showRowsPage()
+-- Show the Rows page, on block `id`'s tab when given (round 9: one tab per block; the first,
+-- Primary, otherwise).
+local function showRowsPage(id)
     local panel = M.__subcategories[NS.L["Rows"]]
     assertTrue(panel ~= nil, "the Rows page is registered")
     local from = #aceGUI().__created
     panel:Show()
     panel:__fire("OnShow")
     M.__fireTimers()
+    if id then
+        local ctx = NS.OptionsRows.ctx
+        ctx.activeTab = NS.OptionsRows.TabKey(id)
+        from = #aceGUI().__created
+        NS.Helpers.RefreshPanel(ctx, true)
+        M.__fireTimers()
+    end
     return panel, from
 end
 
@@ -560,7 +569,7 @@ test("round5 rows: the groups follow the window's block order, skills by categor
     assertEqual(total, n, "every skill and stat once")
 end)
 
-test("round5 rows: the page draws a column header, a heading per group and two eyes per row", function()
+test("round5 rows: a tab draws a column header, its block's heading and two eyes per row", function()
     clearHidden()
     local panel, from = showRowsPage()
     local ok, err = pcall(function()
@@ -572,9 +581,8 @@ test("round5 rows: the page draws a column header, a heading per group and two e
     assertEqual(captions[1].text, NS.L["Window"])
     assertEqual(captions[2].text, NS.L["LDB tooltip"])
     local headings = createdOf(from, "SkillMasterListHeading")
-    local groups = NS.OptionsRows.Groups()
-    assertEqual(#headings, #groups, "a heading per group")
-    for i, g in ipairs(groups) do assertEqual(headings[i].text, g.title) end
+    assertEqual(#headings, 1, "the first tab draws its one block")
+    assertEqual(headings[1].text, NS.BlockDefs.primary.title)
     -- Per row: its label, then its window eye, then its tooltip eye.
     local seq = drawn(from, { SkillMasterListLabel = true, Icon = true })
     local lwAt
@@ -606,7 +614,7 @@ test("round5 rows: a group heading's eyes show that group's hidden rows again, o
     NS.SetByPath("skills.hidden.bows", true)
     NS.SetByPath("broker.tooltip.hiddenSkills.guns", true)
     NS.SetByPath("skills.hidden.fishing", true)   -- another group's
-    local panel, from = showRowsPage()
+    local panel, from = showRowsPage("weapon")
     local function weaponMarks(since)
         local seq = drawn(since, { SkillMasterListHeading = true, Icon = true })
         for i, w in ipairs(seq) do
@@ -709,7 +717,7 @@ end
 test("round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once", function()
     -- red under: stale() skipping the refresh while the page is shown
     clearHidden()
-    local panel = showRowsPage()
+    local panel = showRowsPage("weapon")
     local ok, err = pcall(function()
         local from = #aceGUI().__created
         NS.SetByPath("skills.hidden.axes", true)   -- the row menu's Hide, `/sm set`
@@ -727,35 +735,42 @@ test("round5 review: a hide written elsewhere while the Rows page is on screen r
         from = #aceGUI().__created
         showWin.callbacks.OnClick()
         M.__fireTimers()
-        assertEqual(#headingsSince(from), #NS.OptionsRows.Groups(), "one render for the whole show-all")
+        assertEqual(#headingsSince(from), 1, "one render for the whole show-all")
     end)
     clearHidden()
     hidePanel(panel)
     if not ok then error(err, 0) end
 end)
 
-test("round5 review: a block reorder redraws the Rows page in the new order, shown or hidden", function()
-    -- red under: nothing marking the page stale on a reorder
-    clearHidden()
-    local function indexOf(id)
-        for i, b in ipairs(NS.Blocks.Ordered()) do if b == id then return i end end
+test("round9 rows: one tab per block in the default block order, each drawing only its block", function()
+    -- red under: one tab drawing every skill and stat (the lag), or a tab without its block's rows
+    local tabs = NS.OptionsRows.tabs
+    local want = {}
+    for _, id in ipairs(NS.BLOCKS) do
+        local g = NS.OptionsRows.Group(id)
+        if g and #g.rows > 0 then want[#want + 1] = id end
     end
-    local was = indexOf("weapon")
-    local panel = showRowsPage()
-    hidePanel(panel)
+    assertEqual(#tabs, #want, "a tab per block with rows")
+    for i, id in ipairs(want) do
+        assertEqual(tabs[i].key, NS.BlockDefs[id].short, "tab " .. i)
+        assertEqual(tabs[i].tooltip, NS.BlockDefs[id].title)
+    end
+    for _, row in ipairs(NS.SchemaForPage("rows")) do
+        if row.type == "bool" then
+            local found = false
+            for _, t in ipairs(tabs) do if t.key == row.group then found = true end end
+            assertTrue(found, row.path .. " sits on a tab")
+        end
+    end
+    clearHidden()
+    local panel, from = showRowsPage("stats_defense")
     local ok, err = pcall(function()
-        NS.Blocks:Move(was, 1)
-        M.__fireTimers()
-        local from
-        panel, from = showRowsPage()
-        assertEqual(headingsSince(from)[1], NS.BlockDefs.weapon.title, "hidden: the next show draws the new order")
-        from = #aceGUI().__created
-        NS.Blocks:Move(1, was)
-        M.__fireTimers()
-        assertEqual(headingsSince(from)[1], NS.BlockDefs[NS.Blocks.Ordered()[1]].title, "shown: drawn again at once")
-        assertTrue(NS.Blocks.Ordered()[1] ~= "weapon", "back in place")
+        local headings = headingsSince(from)
+        assertEqual(#headings, 1)
+        assertEqual(headings[1], NS.BlockDefs.stats_defense.title)
+        local labels = createdOf(from, "SkillMasterListLabel")
+        assertEqual(#labels, #NS.OptionsRows.Group("stats_defense").rows, "only its block's rows")
     end)
-    if indexOf("weapon") ~= was then NS.Blocks:Move(indexOf("weapon"), was) end
     hidePanel(panel)
     if not ok then error(err, 0) end
 end)

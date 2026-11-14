@@ -160,8 +160,18 @@ SkillMasterDB
                   arrowSkinColors = true,              -- the skin's accent and sem.good, else:
                   arrowFar = { 1, 0.82, 0, 1 },        -- the far swatch (300 yd or more)
                   arrowNear = { 0.35, 0.80, 0.45, 1 }, -- the near swatch (30 yd or closer)
-                  arrowFrame = { point = false } }     -- its drop point: drag state, written only
-                                                       -- by modules/WaypointArrow.lua
+                  arrowFont = "Ka0s Prototype",        -- R9-1, the library's Text block: the Font
+                  arrowFontFromSkin = true,            -- block (options-ui-§16) with its Use the
+                  arrowFontSize = 12,                  -- skin's font companion, 6 .. 32
+                  arrowFontColor = { 1, 1, 1, 1 }, arrowFontClass = false,
+                  arrowFontFlags = "@skin", arrowFontShadow = true,
+                  arrowTextPosition = "BELOW",         -- BELOW | ABOVE | LEFT | RIGHT | HIDDEN
+                  arrowShowLabel = false,              -- the trainer's name as a second line (R9-3)
+                  arrowUnits = "yards",                -- yards | compact (4.2k yd)
+                  arrowX = 0, arrowY = 200,            -- R9-1, the Position block: offsets from the
+                                                       -- screen's center in UIParent's units,
+                                                       -- -2000 .. 2000; a drag writes them
+                  arrowLock = false }                  -- the arrow's own lock (not /sm lock)
     trainers = { unverified = true,
                  nameColor = { r, g, b, a }, useClassColorName = false,   -- the trainer popup's
                  nameColorFromSkin = true }   -- trainer name: the skin's accent while on (FB-11)
@@ -192,8 +202,7 @@ writers: `profile.window.point`, owned by `modules/MainWindow.lua` (`savePoint` 
 `modules/Journal.lua` (`savePoint` on drag stop and `J.ResetPosition`; `saveSize` on the resize
 grip's release); `global.characters`, owned by `modules/Alts.lua` (`Snapshot`, `Forget`);
 `char.log`, owned by `modules/SessionLog.lua` (`Add`, `Clear`); `profile.alerts.point`, owned by
-`modules/Alerts.lua` (the toast's `setPosition`); `profile.waypoints.arrowFrame.point`, owned by
-`modules/WaypointArrow.lua` (the library's `onMoved` on drag stop, round 6, R6-11; round 8, R8-5); `profile.layout.blocks.<id>.point`, owned by
+`modules/Alerts.lua` (the toast's `setPosition`); `profile.layout.blocks.<id>.point`, owned by
 `modules/Detached.lua` (`savePoint` on drag stop, `StorePoint` for a section split or unmerged from a
 merged window); `profile.layout.groups`, owned by `modules/Groups.lua` (`Merge`, `Split`, `Unmerge`,
 `Leave`, the band drag's `savePoint`, the normalization on read); `char.pinned` and `char.pinnedStat`, owned by `modules/Interact.lua`
@@ -224,6 +233,11 @@ R7-7, no TomTom check holds it back). None for round 8's (R8-5) `waypoints.arrow
 `arrowSkinColors`, `arrowFar` and `arrowNear` either: new keys, and the addon is unreleased (the
 owner's decision, 2026-11-14). Their defaults are `LibKa0s-WaypointArrow-1.0`'s `DEFAULTS`, and
 `tests/test_round8.lua` holds the two equal.
+None for round 9's (R9-1) Text and Position keys (`arrowFont` .. `arrowUnits`, `arrowX`, `arrowY`,
+`arrowLock`) either, and none for the drop point `waypoints.arrowFrame.point` it retires: the drag
+now writes `arrowX` and `arrowY` through `NS.SetByPath`, and a stored `arrowFrame` is left unread,
+with no step, because the addon is unreleased. Their defaults are the library's `DEFAULTS` too
+(`tests/test_round9.lua`).
 
 No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
 companion defaulting on, so no stored profile predates the companions and none has to be moved
