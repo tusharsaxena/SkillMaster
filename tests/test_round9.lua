@@ -238,6 +238,59 @@ test("round9 arrow: Arrow settings opens Trainers and Waypoints; Hide arrow turn
     end)
 end)
 
+test("round9 arrow review: under test mode's sample Show trainers is off, as the library's Show on map is", function()
+    -- red under: menuItems ignoring the library's target, so the sample's trainer opened the popup.
+    withArrow9({ mapID = 1453, x = 0.4, y = 0.5 }, nil, function(t)
+        Wp:Set(t)
+        WA.ShowTest()
+        assertTrue(WA.Target() ~= t, "the sample shows over the real waypoint")
+        assertEqual(item("map").disabled, true, "the library's Show on map is off")
+        assertEqual(item("trainers").disabled, true, "and so is Show trainers")
+        WA.HideTest()
+        assertFalse(item("trainers").disabled == true, "the real waypoint back: on again")
+    end)
+end)
+
+test("round9 arrow review: Arrow settings is off in combat, with the combat tooltip", function()
+    withArrow9({ mapID = 1453, x = 0.4, y = 0.5 }, nil, function(t)
+        Wp:Set(t)
+        local realCombat = M.InCombatLockdown
+        M.InCombatLockdown = function() return true end
+        local ok, row = pcall(item, "settings")
+        M.InCombatLockdown = realCombat
+        if not ok then error(row, 0) end
+        assertEqual(row.disabled, true, "off in combat")
+        assertEqual(row.tooltip, L["Not available in combat."], "and says why")
+        assertFalse(item("settings").disabled == true, "out of combat: on")
+    end)
+end)
+
+test("round9 arrow review: a drag, the menu's Lock and Reset position refresh the open settings panel", function()
+    -- red under: setSetting writing through NS.SetByPath alone, so the Position sliders kept the
+    -- old values until the page was shown again.
+    withArrow9({ mapID = 1453, x = 0.4, y = 0.5 }, nil, function(t)
+        Wp:Set(t)
+        local H, f = NS.Helpers, WA.Frame()
+        local refreshed, realRefresh = 0, H.RefreshScalars
+        H.RefreshScalars = function() refreshed = refreshed + 1 end
+        f.GetCenter = function() return 250, 500 end
+        M.UIParent.GetCenter = function() return 200, 400 end
+        local ok, err = pcall(function()
+            f:__fire("OnDragStart")
+            f:__fire("OnDragStop")
+            assertTrue(refreshed >= 1, "the drag refreshes the panel")
+            local n = refreshed
+            item("lock").onClick()
+            assertTrue(refreshed > n, "the menu's Lock does")
+            n = refreshed
+            item("reset").onClick()
+            assertTrue(refreshed > n, "and Reset position does")
+        end)
+        H.RefreshScalars, f.GetCenter, M.UIParent.GetCenter = realRefresh, nil, nil
+        if not ok then error(err, 0) end
+    end)
+end)
+
 test("round9 arrow: the tooltip says right-click opens the menu, and drops the drag hint while locked", function()
     withArrow9({ mapID = 1453, x = 0.4, y = 0.5 }, nil, function(t)
         Wp:Set(t)

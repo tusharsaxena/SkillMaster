@@ -140,9 +140,13 @@ local function onClick(_, button)
     if button == "RightButton" then WA.Clear() end
 end
 
--- The library writes a drag's offsets, the lock and Reset position here: the settings seam.
+-- The library writes a drag's offsets, the lock and Reset position here: the settings seam. The
+-- write came from no settings widget, so the open panel's widgets (the Position sliders, the Lock
+-- toggle) re-read their values here, as a widget's own set() would have them do.
 local function setSetting(path, value)
     if NS.SetByPath then NS.SetByPath(path, value) end
+    local H = NS.Helpers
+    if type(H) == "table" and type(H.RefreshScalars) == "function" then H.RefreshScalars() end
 end
 
 -- Arrived: the library has already forgotten the target and hidden the frame.
@@ -171,15 +175,19 @@ local function indexOf(items, id)
 end
 
 -- The menu's rows: the library's, with Show trainers after Show on map and Arrow settings... and
--- Hide arrow last (the owner's order, round 9).
-local function menuItems(items)
-    local key = WA.TrainerKey()
+-- Hide arrow last (the owner's order, round 9). `target` is the library's: nil under test mode's
+-- sample (or with no target), where Show trainers is off as the library's Show on map is; Arrow
+-- settings... is off in combat, where the options library refuses to open the panel.
+local function menuItems(items, target)
+    local key = target ~= nil and WA.TrainerKey() or nil
     table.insert(items, (indexOf(items, "map") or #items) + 1, {
         id = "trainers", label = L["Show trainers"], disabled = key == nil,
         tooltip = L["Open Skill Master's trainer popup for this trainer's skill."],
         onClick = function() WA.ShowTrainers() end })
-    items[#items + 1] = { id = "settings", label = L["Arrow settings..."],
-        tooltip = L["Open Trainers and Waypoints, where the arrow's look, text and position are set."],
+    local combat = InCombatLockdown and InCombatLockdown() or false
+    items[#items + 1] = { id = "settings", label = L["Arrow settings..."], disabled = combat,
+        tooltip = combat and L["Not available in combat."]
+            or L["Open Trainers and Waypoints, where the arrow's look, text and position are set."],
         onClick = function() WA.OpenSettings() end }
     items[#items + 1] = { id = "hide", label = L["Hide arrow"],
         tooltip = L["Turn off Show Skill Master's arrow: the game's own arrow points to the map pin. Trainers and Waypoints turns it back on."],

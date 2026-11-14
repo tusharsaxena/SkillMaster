@@ -392,11 +392,13 @@ the checks below that cover each item:
   opens on the trainer's zone (in combat the item is grayed, its tooltip saying why). Show trainers:
   Skill Master's trainer popup opens on the skill whose Set waypoint you clicked. Lock the arrow:
   it stops dragging and the next right-click reads Unlock the arrow. Reset position: back above the
-  center. Arrow settings...: the settings panel opens on Trainers and Waypoints. Hide arrow: the arrow
+  center. Arrow settings...: the settings panel opens on Trainers and Waypoints (in combat the item is
+  grayed, its tooltip saying why). Hide arrow: the arrow
   goes and the game's own arrow points to the pin; Show Skill Master's arrow is unticked there.
   Tick it again. Click elsewhere: an open menu closes; walk into the trainer with it open: it closes.
 - **SM-DISP-63** (round 9, R9-2: the sample's menu) A waypoint set, then `/sm test`: the sample
-  arrow shows over it. Right-click it, Clear waypoint: the sample goes, the real arrow is back and
+  arrow shows over it. Right-click it: Share in chat, Show on map and Show trainers are grayed.
+  Clear waypoint: the sample goes, the real arrow is back and
   the map pin stays. `/sm test` again to end test mode: the real arrow stays.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.

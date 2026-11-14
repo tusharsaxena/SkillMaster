@@ -487,8 +487,8 @@ Total.
 - round6 arrow: the arrow follows the player's facing and place, throttled, and turns color by distance
 - round6 arrow: no facing hides the art and keeps the distance; no distance shows the name alone, dim
 - round6 arrow: within 5 yd the arrow hides, the pin clears and chat says you have arrived
-- round6 arrow: right-click clears the waypoint; a cleared or replaced native pin hides the arrow
-- round6 arrow: a drag saves the point on the profile; the profile's lock refuses it
+- round6 arrow: the menu's Clear waypoint clears the waypoint; a cleared or replaced native pin hides the arrow
+- round6 arrow: a drag saves the offsets on the profile; the arrow's own lock refuses it
 - round6 arrow: test mode shows it on a sample trainer at a sample distance, writes nothing, and takes it down
 - round6 arrow: /sm test raises and lowers the arrow with test mode's other surfaces
 - round6 arrow: turning the arrow off hands the pin back to the game's arrow; the scale applies at once
@@ -551,7 +551,7 @@ Total.
 - round8 arrow: the library carries every look's art; Skill Master's own copy is gone
 - round8 arrow: a library-absent load has no arrow, so a map pin keeps the game's own
 
-### test_round9.lua (11)
+### test_round9.lua (14)
 
 - round9 arrow: the Text and Position blocks sit under the look, at Skill Master's paths, on the library's defaults
 - round9 arrow: the Position block's Reset position is a hook on its subgroup, handed to the page
@@ -561,6 +561,9 @@ Total.
 - round9 arrow: Clear waypoint clears the native pin, as the old right-click did
 - round9 arrow: Show trainers opens the trainer popup on the skill its waypoint came from
 - round9 arrow: Arrow settings opens Trainers and Waypoints; Hide arrow turns Skill Master's arrow off
+- round9 arrow review: under test mode's sample Show trainers is off, as the library's Show on map is
+- round9 arrow review: Arrow settings is off in combat, with the combat tooltip
+- round9 arrow review: a drag, the menu's Lock and Reset position refresh the open settings panel
 - round9 arrow: the tooltip says right-click opens the menu, and drops the drag hint while locked
 - round9 arrow: Show the trainer's name adds the trainer as the second line
 - round9 arrow: compact units read thousands of yards in Skill Master's words
@@ -979,7 +982,7 @@ Total.
 | test_round6.lua | 54 |
 | test_round7.lua | 25 |
 | test_round8.lua | 23 |
-| test_round9.lua | 11 |
+| test_round9.lua | 14 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -1010,4 +1013,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **736** |
+| **Total** | **739** |

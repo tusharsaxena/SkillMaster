@@ -1280,11 +1280,11 @@ local function menuClear()
     items[1].onClick()
 end
 
-test("round6 arrow: right-click clears the waypoint; a cleared or replaced native pin hides the arrow", function()
+test("round6 arrow: the menu's Clear waypoint clears the waypoint; a cleared or replaced native pin hides the arrow", function()
     withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t, rec)
         Wp:Set(t)
         menuClear()
-        assertFalse(WA.IsShown(), "right-click hides it")
+        assertFalse(WA.IsShown(), "Clear waypoint hides it")
         assertEqual(rec.cleared, 1, "and clears the native pin")
         Wp:Set(t)
         M.__fireEvent("USER_WAYPOINT_UPDATED")
@@ -1303,7 +1303,7 @@ test("round6 arrow: right-click clears the waypoint; a cleared or replaced nativ
     end)
 end)
 
-test("round6 arrow: a drag saves the point on the profile; the profile's lock refuses it", function()
+test("round6 arrow: a drag saves the offsets on the profile; the arrow's own lock refuses it", function()
     -- Round 9 (R9-1): the drag writes the X and Y offsets from the screen's center, and the arrow's
     -- own Lock (waypoints.arrowLock), not /sm lock, refuses it.
     withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t)
