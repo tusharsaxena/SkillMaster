@@ -12,4 +12,5 @@ ignore:
   - media/logos/*.png   # the editable logo source (layout-§4): committed, never loadable, never shipped
   - media/logos/*.jpg   # a .jpg render of the logo, for the project page; same reason
   - _dev
+  - tools            # dev-only: the seed validator (tools/seeds/), never loaded in game
   - "*.bak"

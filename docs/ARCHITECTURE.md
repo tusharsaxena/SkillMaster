@@ -349,13 +349,17 @@ arrow's measurements, test mode and the simulator's reach, and the client APIs a
 
 ### Addon-specific (documentation-§3, Tier 3)
 
-None yet.
+| Doc | Covers |
+|---|---|
+| `validate-seeds.md` | The seed-validation contract `/dev-copilot:validate-seeds SkillMaster forever` runs: `tools/seeds/seeds.py` re-checks the trainer, fishing-zone and skill-catalog seeds against WoW Forever's own DB2 (wago.tools `wowf`), with its rulings, precedent and gate |
 
 Frozen and generated material is out of the map and named once per directory (documentation-§3):
 `docs/audits/`, `docs/reviews/`, `docs/automated-tests/<run>/`, `docs/perf-analysis/<run>/`,
-`docs/revendor/<date>-v<tag>/`, `docs/superpowers/` (the v1 design spec, its mockup sources, the plan
-and its status ledger) and `docs/investigations/`. Of these, `docs/audits/`, `docs/reviews/`,
-`docs/revendor/`, `docs/superpowers/` and `docs/automated-tests/<run>/` exist today.
+`docs/revendor/<date>-v<tag>/`, `docs/seed-research/<date>-<flavor>/` (a seed-validation run's frozen
+bundle, [validate-seeds.md](validate-seeds.md)), `docs/superpowers/` (the v1 design spec, its mockup
+sources, the plan and its status ledger) and `docs/investigations/`. Of these, `docs/audits/`,
+`docs/reviews/`, `docs/revendor/`, `docs/seed-research/`, `docs/superpowers/` and
+`docs/automated-tests/<run>/` exist today.
 
 ## Documented deviations
 

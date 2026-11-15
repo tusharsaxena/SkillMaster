@@ -1,0 +1,270 @@
+{
+  "catalog:118": {
+    "reason": "Dual Wield is a proficiency, not one of the 16 vanilla weapon skill lines the catalog and design goal 1 carry",
+    "ruling": "reject"
+  },
+  "catalog:142": {
+    "reason": "Survival (SkillLine 142, Flags 0) is an unused vanilla line with no Skills-tab row",
+    "ruling": "reject"
+  },
+  "catalog:155": {
+    "reason": "Swimming (SkillLine 155, Flags 0) is an unused vanilla line with no Skills-tab row",
+    "ruling": "reject"
+  },
+  "catalog:3011": {
+    "reason": "needs owner review: a WoW Forever riding line (Flags 144 like the racial riding lines); it may belong in riding.aliasIDs, else it shows as an other: row",
+    "ruling": "reject"
+  },
+  "catalog:3012": {
+    "reason": "needs owner review: Comprehension is a WoW Forever secondary-category line (Flags 128) the design does not name",
+    "ruling": "reject"
+  },
+  "catalog:3014": {
+    "reason": "needs owner review: a WoW Forever weapon-category Feral Combat line (3014; the class line 134 is category 7) that the 16 vanilla weapon lines do not include",
+    "ruling": "reject"
+  },
+  "catalog:40": {
+    "reason": "needs owner review: the rogue Poisons line ranks like Lockpicking, which design goal 1 puts in Other; the catalog leaves it out, so today it shows as an other: row",
+    "ruling": "reject"
+  },
+  "fishing:1418": {
+    "reason": "needs owner review: a zone's fishing level is measured in game (Fishing_Forever.lua header), and DB2 holds none; vanilla Badlands, absent from the recalled 1.12 list",
+    "ruling": "reject"
+  },
+  "fishing:1419": {
+    "reason": "needs owner review: a zone's fishing level is measured in game (Fishing_Forever.lua header), and DB2 holds none; vanilla Blasted Lands, absent from the recalled 1.12 list",
+    "ruling": "reject"
+  },
+  "fishing:1427": {
+    "reason": "needs owner review: a zone's fishing level is measured in game (Fishing_Forever.lua header), and DB2 holds none; vanilla Searing Gorge, absent from the recalled 1.12 list",
+    "ruling": "reject"
+  },
+  "fishing:2482": {
+    "reason": "needs owner review: a zone's fishing level is measured in game (Fishing_Forever.lua header), and DB2 holds none; Mount Hyjal is a WoW Forever zone (UiMap 2482) with no recorded level",
+    "ruling": "reject"
+  },
+  "fishing:2521": {
+    "reason": "needs owner review: a zone's fishing level is measured in game (Fishing_Forever.lua header), and DB2 holds none; Zephras Isle is a WoW Forever zone (UiMap 2521) with no recorded level",
+    "ruling": "reject"
+  },
+  "fishing:2548": {
+    "reason": "needs owner review: a zone's fishing level is measured in game (Fishing_Forever.lua header), and DB2 holds none; Riverglades is a WoW Forever zone (UiMap 2548) with no recorded level",
+    "ruling": "reject"
+  },
+  "fishing:2652": {
+    "reason": "needs owner review: a zone's fishing level is measured in game (Fishing_Forever.lua header), and DB2 holds none; Shen'dralas is a WoW Forever zone (UiMap 2652) with no recorded level",
+    "ruling": "reject"
+  },
+  "fishing:2665": {
+    "reason": "needs owner review: a zone's fishing level is measured in game (Fishing_Forever.lua header), and DB2 holds none; a second Zephras Isle UiMap (System 1, no parent), likely the isle's own map shape; review with 2521",
+    "ruling": "reject"
+  },
+  "shipped:map-name:trainers:arnold_leland": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:betty_quin": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:dane_lindgren": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:gelman_stonehand": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:georgio_bolero": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:lawrence_schneider": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:lilliam_sparkspindle": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:lilyssia_nightbreeze": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:lucan_cordell": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:maris_granger": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:randal_worth": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:sellandus": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:shaina_fuller": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:shylamiir": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:simon_tanner": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:sprite_jumpsprocket": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:stephen_ryback": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:tannysa": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:tel_athir": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:therum_deepforge": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:map-name:trainers:woo_ping": {
+    "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:ansekhwa": {
+    "reason": "'Lower Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:archibald": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'War Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:armand_cromwell": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'Magic Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:aska_mistrunner": {
+    "reason": "'High Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:basil_frye": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'War Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:bena_winterhoof": {
+    "reason": "'Middle Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:brek_stonehoof": {
+    "reason": "'Lower Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:brom_killian": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'War Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:dan_golthas": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'Rogues' Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:eunice_burch": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'Trade Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:franklin_lloyd": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'Rogues' Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:graham_van_talen": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'Rogues' Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:james_van_brunt": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'War Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:josef_gregorian": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'Magic Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:kah_mistrunner": {
+    "reason": "'High Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:karn_stonehoof": {
+    "reason": "'Lower Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:killian_hagey": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'Rogues' Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:komin_winterhoof": {
+    "reason": "'Middle Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:kray": {
+    "reason": "'Middle Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:mak": {
+    "reason": "'Middle Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:mary_edras": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'Rogues' Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:mooranta": {
+    "reason": "'Middle Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:mot_dawnstrider": {
+    "reason": "'Middle Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:rhiannon_davis": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'Magic Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:tarn": {
+    "reason": "'Middle Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:teg_dawnstrider": {
+    "reason": "'Middle Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:tepa": {
+    "reason": "'Middle Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:thrag_stonehoof": {
+    "reason": "'Lower Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:una": {
+    "reason": "'Middle Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:vhan": {
+    "reason": "'Middle Rise' is the Blizzard City Tour's label; Thunder Bluff's AreaTable names only Elder, Spirit and Hunter Rise, so the client has no name to check it against",
+    "ruling": "keep"
+  },
+  "shipped:subzone:trainers:victor_ward": {
+    "reason": "needs owner review: the client's WMOAreaTable names this Undercity district 'Magic Quarter' (no 'The'); the row is right, the chat label could drop 'The' by hand",
+    "ruling": "keep"
+  }
+}
