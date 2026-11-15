@@ -1,0 +1,6 @@
+# The DB2 CSV exports seeds.py caches per build. Re-downloadable at any time and never part of the
+# repo: only the gzipped copies inside a dated docs/seed-research/ bundle are committed.
+.cache/
+
+# Left behind by the tests (test_seeds.py imports seeds.py).
+__pycache__/

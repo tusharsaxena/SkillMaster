@@ -59,3 +59,6 @@ function above CCN 15). The full four-suite record is `tests/_kit/run-automated-
 - [test-cases.md](test-cases.md) — the generated inventory, the authoritative pass count behind the
   README's tests badge. Regenerate it, and the badge, whenever the suite changes.
 - [smoke-tests.md](smoke-tests.md) — the in-game checks, run by the owner on WoW Forever.
+- [validate-seeds.md](validate-seeds.md) — the seed validation against WoW Forever's DB2. Its tool's own
+  tests, `python3 -m pytest -q -p no:cacheprovider tools/seeds`, run offline and sit outside the
+  green commit gate above; a seed-validation run gates on them.

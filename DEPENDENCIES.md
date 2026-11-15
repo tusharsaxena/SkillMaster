@@ -29,6 +29,8 @@ marked as such rather than listed as a requirement.
 | `git` | any recent | vendoring; the kit's eol, prose, skin-values and client-globals suites read `git ls-files` | `tests/_kit/test_eol.lua` |
 | `ka0s-bounded` (dev-copilot plugin, `~/.claude/dev-copilot/bin/`) | the plugin's | runs `luacheck .` and `tests/_kit/run-automated-tests.sh` with bounds, as the green gate requires (testing-§15) | the CLAUDE.md gate line; `docs/testing.md` |
 | POSIX shell | any | the commands in this file and in `docs/testing.md` | — |
+| `python3` | **3.8** or newer, standard library only | the seed validation, `tools/seeds/seeds.py`, which re-checks the trainer, fishing-zone and skill-catalog seeds against WoW Forever's DB2 tables from wago.tools (product `wowf`), and its tests; `/dev-copilot:validate-seeds SkillMaster forever` drives it through `docs/validate-seeds.md`. Not part of the green gate. Network access (https://wago.tools) only on a `derive` that is not `--replay` | `tools/seeds/seeds.py:1` is `#!/usr/bin/env python3`; it imports only the standard library (`argparse`, `csv`, `gzip`, `json`, `re`, `urllib`, …) |
+| `pytest` | any recent (optional) | runs `tools/seeds/test_seeds.py`; `python3 -m unittest discover -s tools/seeds` runs the same tests without it | `tools/seeds/test_seeds.py` is plain `unittest` |
 
 **Lua 5.1 is a requirement, not a preference.** The harness sandboxes each source file with
 `setfenv`, which was removed in 5.2.
