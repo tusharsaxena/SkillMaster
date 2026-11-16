@@ -579,13 +579,13 @@ local function buildSub(f)
     NS.Skin.Text(sh.title, "heading")
     sh.split = NS.Chrome.HeaderMark(sh, "fullscreen-enter", "^",
         function() G.Split(f.gid, sh.id) end, L["Split this section from the group"])
-    NS.Chrome.SetRestToken(sh.split, "text.heading")
+    NS.Chrome.SetRestToken(sh.split, NS.Chrome.REST)   -- every mark's rest (smoke round 1, ruling 4)
     sh.split:SetPoint("RIGHT", sh, "RIGHT", -4, 0)
     sh.sort = NS.Chrome.HeaderMark(sh, "list", "=", function(b) NS.Blocks.SortMenu(sh.id, b) end)
-    NS.Chrome.SetRestToken(sh.sort, "text.heading")
+    NS.Chrome.SetRestToken(sh.sort, NS.Chrome.REST)
     sh.sort:SetPoint("RIGHT", sh.split, "LEFT", -4, 0)
     sh.filter = NS.Chrome.HeaderMark(sh, NS.Blocks.FILTER_ICON, "Y", function(b) NS.Blocks.FilterMenu(sh.id, b) end)
-    sh.filter.baseToken = "text.heading"
+    sh.filter.baseToken = NS.Chrome.REST
     NS.Chrome.SetRestToken(sh.filter, sh.filter.baseToken)
     sh.filter:SetPoint("RIGHT", sh.sort, "LEFT", -4, 0)
     sh.filter:Hide()
@@ -603,6 +603,7 @@ local function setSub(sh, id)
     sh.title:SetText(NS.BlockDefs[id].title)
     local collapsed = NS.Blocks.Settings(id).collapsed
     NS.Chrome.SetIcon(sh.chevron, collapsed and "chevron-right" or "chevron-down", collapsed and ">" or "v")
+    sh.chevron.tip = collapsed and L["Expand this block"] or L["Collapse this block"]
     NS.Blocks.PaintSort(sh.sort, id)
     NS.Blocks.PaintFilter(sh.filter, id)
     sh.note:Hide()
@@ -623,9 +624,10 @@ local function buildBand(f)
     NS.Chrome.SetIcon(f.dockAll, "external-link", "-", true)
     f.collapseAll = NS.Chrome.HeaderMark(f, "chevron-down", "v", function() G.CollapseAll(f.gid) end,
         L["Collapse or expand every section"])
-    -- Both marks at rest in the main window header's color (owner feedback round 8, R8-3).
-    NS.Chrome.SetRestToken(f.dockAll, "text.heading")
-    NS.Chrome.SetRestToken(f.collapseAll, "text.heading")
+    -- Both marks at rest in the main window header's color (owner feedback round 8, R8-3): every
+    -- mark's `icon.tint` since smoke round 1's ruling 4.
+    NS.Chrome.SetRestToken(f.dockAll, NS.Chrome.REST)
+    NS.Chrome.SetRestToken(f.collapseAll, NS.Chrome.REST)
     -- The band's own click target (under the marks): a right-click opens the menu, a drag moves the
     -- window as the frame's own does.
     f.band = CreateFrame("Button", nil, f)

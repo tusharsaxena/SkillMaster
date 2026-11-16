@@ -315,7 +315,7 @@ Total.
 - round2 icons: the LDB tooltip draws the window's block titles on header bands and stripes every other row
 - round2 icons: a skill's name in the LDB tooltip is white, a weapon below its cap included
 - round2 icons: Pin to the broker feed redraws the feed at once
-- round2 header: the detach mark wears the title's color at rest and the hot color under the pointer
+- round2 header: the detach mark wears the marks' rest color at rest and the hot color under the pointer
 - round2 hammer: the action mark lights up while the pointer is on it, as the detach mark does
 
 ### test_round3.lua (10)
@@ -567,6 +567,19 @@ Total.
 - round9 arrow: the tooltip says right-click opens the menu, and drops the drag hint while locked
 - round9 arrow: Show the trainer's name adds the trainer as the second line
 - round9 arrow: compact units read thousands of yards in Skill Master's words
+
+### test_sr1.lua (10)
+
+- sr1 title-bar tips: every control of the main window shows its tooltip above it, in gtip.title
+- sr1 title-bar tips: every control of the journal shows its tooltip above it, in gtip.title
+- sr1 title-bar tips: every control of the trainer popup shows its tooltip above it, in gtip.title
+- sr1 title-bar tips: every control of a block header shows its tooltip above it, in gtip.title
+- sr1 title-bar tips: every control of a detached block's band shows its tooltip above it, in gtip.title
+- sr1 title-bar tips: every control of a merged window's band shows its tooltip above it, in gtip.title
+- sr1 title-bar tips: every control of a merged section's sub-header shows its tooltip above it, in gtip.title
+- sr1 title-bar colors: every mark icon.tint at rest and text.link hot, the close close.rest and close.hot, in Ka0s Default and every other skin
+- sr1 title-bar colors: a narrowing filter keeps its filled badge (a state color) at rest
+- sr1 header bands: sm.headerBg resolves to list.header.bg in every skin
 
 ### test_blocks.lua (10)
 
@@ -983,6 +996,7 @@ Total.
 | test_round7.lua | 25 |
 | test_round8.lua | 23 |
 | test_round9.lua | 14 |
+| test_sr1.lua | 10 |
 | test_blocks.lua | 10 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
@@ -1013,4 +1027,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **739** |
+| **Total** | **749** |

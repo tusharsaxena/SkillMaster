@@ -173,6 +173,7 @@ Kit.run{
         "test_round7",
         "test_round8",
         "test_round9",
+        "test_sr1",
         "test_blocks",
         "test_interact",
         "test_sessionlog",

@@ -168,12 +168,13 @@ local function buildBand(f)
     f.restore = NS.Chrome.HeaderMark(f, "eye", "o", function() NS.Blocks.RestoreHidden(f.id) end)
     f.restore:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.restore:Hide()
-    -- Every mark at rest in the main window header's color, the title's (owner feedback round 8,
-    -- R8-3); under the pointer `icon.hot`, as there. The filter's own rest color is its badge's.
+    -- Every mark at rest in the main window header's color (owner feedback round 8, R8-3), which is
+    -- now every mark's `icon.tint` (smoke round 1's ruling 4); under the pointer `text.link`, as
+    -- there. The filter's own rest color is its badge's.
     for _, b in ipairs({ f.dock, f.collapse, f.sort, f.filter, f.restore }) do
-        NS.Chrome.SetRestToken(b, "text.heading")
+        NS.Chrome.SetRestToken(b, NS.Chrome.REST)
     end
-    if f.filter then f.filter.baseToken = "text.heading" end
+    if f.filter then f.filter.baseToken = NS.Chrome.REST end
     f.dock:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.collapse:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.sort:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
@@ -373,6 +374,7 @@ function D.Render(id)
     local collapsed = settings(id).collapsed
     NS.Chrome.SetIcon(f.collapse, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")
+    f.collapse.tip = collapsed and NS.L["Expand this block"] or NS.L["Collapse this block"]
     NS.Blocks.PaintSort(f.sort, id)
     if f.filter then NS.Blocks.PaintFilter(f.filter, id) end
     f.ownScale = settings(id).scale or 1

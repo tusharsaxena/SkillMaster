@@ -410,7 +410,7 @@ test("round7 filters: every window header carries the funnel, the filled badge w
         for _, h in ipairs(W7.Headers()) do
             seen[#seen + 1] = h.id
             assertTrue(h.filter:IsShown(), h.id .. ": the filter mark")
-            assertEqual(h.filter.restToken, "text.heading", h.id .. ": the title's tint on All")
+            assertEqual(h.filter.restToken, "icon.tint", h.id .. ": the marks' tint on All (smoke round 1, ruling 4)")
         end
         assertEqual(#seen, #NS.BLOCKS, "every block drew a header")
         local opened
@@ -423,7 +423,7 @@ test("round7 filters: every window header carries the funnel, the filled badge w
         M.__fireTimers()
         assertEqual(NS.db.profile.layout.blocks.stats_utility.filter, "nonZero", "the pick is stored")
         for _, x in ipairs(W7.Headers()) do if x.id == "stats_utility" then h = x end end
-        assertEqual(h.filter.badgeToken, "text.heading", "the filled badge while it narrows (round 8, R8-2)")
+        assertEqual(h.filter.badgeToken, "icon.tint", "the filled badge while it narrows (round 8, R8-2)")
         assertTrue(h.note:IsShown() and h.note:GetText() == NS.L["No rows match this filter."], "the emptied stat block's muted line")
         assertTrue(h.filter.tip:find(NS.L["Non-zero"], 1, true) ~= nil, "the tip names it: " .. tostring(h.filter.tip))
     end)
@@ -446,7 +446,7 @@ test("round7 filters: a detached stat frame and a merged section carry the mark 
         assertTrue(sh.filter:IsShown(), "the merged sub-header's funnel")
         setF("primary", "atCap")
         M.__fireTimers()
-        assertEqual(G7.Section(gid, "primary").header.filter.badgeToken, "text.heading", "the filled badge (round 8, R8-2)")
+        assertEqual(G7.Section(gid, "primary").header.filter.badgeToken, "icon.tint", "the filled badge (round 8, R8-2)")
     end)
 end)
 
