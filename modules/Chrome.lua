@@ -23,6 +23,13 @@ local C = NS.Chrome
 
 C.SIZE, C.ART = 18, 13   -- one size and one pitch for every control strip
 
+-- Every title-bar and header-strip mark's colors (smoke round 1 of the LibKa0s v1.105.0 run,
+-- ruling 4, SR-L3): `icon.tint` at rest, as the library's close X (`close.rest` follows it) and its
+-- own header marks; `text.link` under the pointer. A control that is no title-bar mark (a row's
+-- action mark) names its own hot token (button.hotToken). The filled badge's square is the mark's
+-- rest color, so a narrowing filter still reads as a state.
+C.REST, C.HOT = "icon.tint", "text.link"
+
 -- A block header's marks (owner feedback round 6, R6-3): each catalog mark leaves its own margin in
 -- its 64 px square (the funnel 52 x 48 at the square's lower middle, the list mark 64 x 56 at its
 -- top, external-link the whole square), so drawn at one texture size they read at different sizes
@@ -82,6 +89,12 @@ function C.RestoreTooltipFonts(tip)
     savedFonts[tip] = nil
 end
 
+-- The hover tooltip (ruling 3, SR-L2): LibKa0s-Tooltip-1.0's AttachTitleTip, the library's own
+-- title-bar tooltip: one line, `button.tip` read on each hover, in the owner's `gtip.title`, placed
+-- above the control by PlaceAttached (below only without room). Without the library, the game's
+-- tooltip above the control.
+local function tipWords(self) return self.tip end
+
 local function showTip(self)
     if not (self.tip and GameTooltip) then return end
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
@@ -93,35 +106,42 @@ local function hideTip(self)
     if GameTooltip and GameTooltip:IsOwned(self) then GameTooltip:Hide() end
 end
 
+local function titleTipLib()
+    local Tip = LibStub and LibStub("LibKa0s-Tooltip-1.0", true)
+    return Tip and type(Tip.AttachTitleTip) == "function" and Tip or nil
+end
+
 --- The mark's tint at rest: on a badge the header's background, else the button's own token
 --- (C.SetRestToken), else the skin's icon tint.
 local function rest(b)
     if b.badgeToken then return { token = C.BADGE_INK_TOKEN } end
-    return b.restToken and { token = b.restToken } or nil
+    return { token = b.restToken or C.REST }
 end
+
+local function hotToken(b) return b.hotToken or C.HOT end
 
 --- Paint `b` hot (under the pointer) or at rest. A badged mark lights its square and keeps the mark
 --- dark on it, so it stays readable; any other mark lights itself.
-local function paint(b, hot)
+local function paint(b, isHot)
     if b.badgeToken and b.badge then
         -- The square's fill read through the seam at each paint (a skin switch repaints every header).
-        local r, g, bl, a = NS.Skin.Color(hot and "icon.hot" or b.badgeToken)
+        local r, g, bl, a = NS.Skin.Color(isHot and hotToken(b) or b.badgeToken)
         if r then b.badge:SetColorTexture(r, g, bl, a or 1) end
         if b.icon then NS.Skin.Mark(b.icon, rest(b)) end
     elseif b.icon then
-        NS.Skin.Mark(b.icon, hot and { token = "icon.hot" } or rest(b))
+        NS.Skin.Mark(b.icon, isHot and { token = hotToken(b) } or rest(b))
     end
-    if b.glyph then NS.Skin.Text(b.glyph, hot and "accent" or "muted") end
+    if b.glyph then NS.Skin.Text(b.glyph, isHot and hotToken(b) or (b.restToken or C.REST)) end
 end
 
 local function onEnter(self)
     paint(self, true)
-    showTip(self)
+    if not titleTipLib() then showTip(self) end
 end
 
 local function onLeave(self)
     paint(self, false)
-    hideTip(self)
+    if not titleTipLib() then hideTip(self) end
 end
 
 -- The texture coordinates (left, right, top, bottom): upright, and turned 180 degrees (both axes
@@ -178,11 +198,12 @@ function C.SetIcon(b, icon, glyph, turned)
     end
     b.glyph:SetText(glyph or "?")
     b.glyph:Show()
-    NS.Skin.Text(b.glyph, "muted")
+    NS.Skin.Text(b.glyph, b.restToken or C.REST)
 end
 
 --- Tint `b`'s mark with skin token `token` at rest (the block header's detach mark takes the
---- title's `text.heading`); under the pointer it is `icon.hot` as ever. nil goes back to `icon.tint`.
+--- title's `text.heading` until smoke round 1's ruling 4); under the pointer it is C.HOT. nil goes
+--- back to C.REST, `icon.tint`.
 function C.SetRestToken(b, token)
     b.restToken = token
     if b.icon then NS.Skin.Mark(b.icon, rest(b)) end
@@ -190,7 +211,7 @@ end
 
 --- The filled badge on `b` (owner feedback round 8, R8-2): with `token`, a solid C.BADGE_SIZE square
 --- in that skin token under the mark, the mark refitted to C.BADGE_INK and drawn in the header's
---- background (C.BADGE_INK_TOKEN); under the pointer the square is `icon.hot`. nil takes it off:
+--- background (C.BADGE_INK_TOKEN); under the pointer the square is C.HOT. nil takes it off:
 --- the mark at its own size and rest tint again. A mark drawn as a glyph (no art) wears no badge.
 function C.SetBadge(b, token)
     if not b.icon then token = nil end
@@ -208,14 +229,14 @@ function C.SetBadge(b, token)
     paint(b, false)
 end
 
---- Mark `b` hot (`icon.hot`) or at rest, as the pointer over it would: for a mark that takes no
+--- Mark `b` hot (its hot token) or at rest, as the pointer over it would: for a mark that takes no
 --- mouse itself (a crafting row's hammer, under the row's secure overlay).
-function C.SetHot(b, hot)
-    paint(b, hot)
+function C.SetHot(b, isHot)
+    paint(b, isHot)
 end
 
 --- One square control: the catalog mark (or the glyph), the skin's tint at rest and hot under the
---- pointer, `tip` as a one-line tooltip, `onClick(button, mouseButton)`.
+--- pointer, `tip` as a one-line tooltip (read on each hover), `onClick(button, mouseButton)`.
 local function newButton(parent, icon, glyph, onClick, tip, fit)
     local b = CreateFrame("Button", nil, parent)
     b:SetSize(C.SIZE, C.SIZE)
@@ -225,6 +246,8 @@ local function newButton(parent, icon, glyph, onClick, tip, fit)
     C.SetIcon(b, icon, glyph)
     b:SetScript("OnEnter", onEnter)
     b:SetScript("OnLeave", onLeave)
+    local Tip = titleTipLib()
+    if Tip then Tip.AttachTitleTip(b, tipWords, addonName) end
     if onClick then b:SetScript("OnClick", onClick) end
     return b
 end

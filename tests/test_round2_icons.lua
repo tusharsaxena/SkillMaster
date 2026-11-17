@@ -221,16 +221,18 @@ local function sameColor(got, want, what)
     for i = 1, 3 do assertNear(got[i], want[i], 1e-6, what) end
 end
 
-test("round2 header: the detach mark wears the title's color at rest and the hot color under the pointer", function()
+-- Re-pinned by smoke round 1's ruling 4 (LibKa0s v1.105.0 run, SR-L3): every header mark rests in
+-- `icon.tint` (round 2's title color retired) and lights `text.link` under the pointer.
+test("round2 header: the detach mark wears the marks' rest color at rest and the hot color under the pointer", function()
     withWorld(function()
         local h = W.Headers()[1]
         assertTrue(h ~= nil, "a block header")
-        local heading = { NS.Skin.Color("text.heading") }
-        sameColor(tint(h.detach.icon), heading, "at rest: the title's color")
+        local restC = { NS.Skin.Color("icon.tint") }
+        sameColor(tint(h.detach.icon), restC, "at rest: icon.tint")
         h.detach:__fire("OnEnter")
-        sameColor(tint(h.detach.icon), { NS.Skin.Color("icon.hot") }, "hovered: hot")
+        sameColor(tint(h.detach.icon), { NS.Skin.Color("text.link") }, "hovered: text.link")
         h.detach:__fire("OnLeave")
-        sameColor(tint(h.detach.icon), heading, "back to the title's color")
+        sameColor(tint(h.detach.icon), restC, "back to icon.tint")
     end)
 end)
 

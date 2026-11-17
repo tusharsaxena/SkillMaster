@@ -612,6 +612,7 @@ function Header:SetBlock(id, collapsed, docked)
     self.title:SetText(NS.BlockDefs[id].title)
     NS.Chrome.SetIcon(self.chevron, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")
+    self.chevron.tip = collapsed and L["Expand this block"] or L["Collapse this block"]
     -- Detach is the external-link mark; dock (attach) is the same mark turned 180 degrees.
     NS.Chrome.SetIcon(self.detach, "external-link", docked and "+" or "-", not docked)
     self.detach.tip = docked and L["Detach this block into its own frame"] or L["Dock this block in the main window"]
@@ -679,21 +680,23 @@ local function buildHeader(parent)
     h.title:SetPoint("LEFT", h.chevron, "RIGHT", 2, 0)
     NS.Skin.Text(h.title, "heading")
     h.detach = NS.Chrome.HeaderMark(h, "external-link", "+", onDetachClick)
-    NS.Chrome.SetRestToken(h.detach, "text.heading")   -- the title's color at rest (round 2)
+    -- Every header mark rests in the marks' one color, `icon.tint` (smoke round 1's ruling 4, which
+    -- retired round 2's title color here), and lights `text.link` under the pointer (NS.Chrome).
+    NS.Chrome.SetRestToken(h.detach, NS.Chrome.REST)
     h.detach:SetPoint("RIGHT", h, "RIGHT", -4, 0)
     -- The sort mark (owner feedback round 3; its menu, round 6), left of detach in the same rest color.
     h.sort = NS.Chrome.HeaderMark(h, "list", "=", onSortClick)
-    NS.Chrome.SetRestToken(h.sort, "text.heading")
+    NS.Chrome.SetRestToken(h.sort, NS.Chrome.REST)
     h.sort:SetPoint("RIGHT", h.detach, "LEFT", -4, 0)
     -- The filter mark (round 5, R5-10; on every block, round 7, R7-1), left of sort (B.PaintFilter).
     h.filter = NS.Chrome.HeaderMark(h, B.FILTER_ICON, "Y", function(self) B.FilterMenu(h.id, self) end)
-    h.filter.baseToken = "text.heading"
+    h.filter.baseToken = NS.Chrome.REST
     NS.Chrome.SetRestToken(h.filter, h.filter.baseToken)
     h.filter:SetPoint("RIGHT", h.sort, "LEFT", -4, 0)
     h.filter:Hide()
     -- The restore mark (owner feedback round 4), left of sort (or filter), only while the block hides rows.
     h.restore = NS.Chrome.HeaderMark(h, "eye", "o", onRestoreClick)
-    NS.Chrome.SetRestToken(h.restore, "text.heading")
+    NS.Chrome.SetRestToken(h.restore, NS.Chrome.REST)
     h.restore:SetPoint("RIGHT", h.sort, "LEFT", -4, 0)
     h.restore:Hide()
     -- An emptied filter's muted line, below the header in the space the window leaves for it.

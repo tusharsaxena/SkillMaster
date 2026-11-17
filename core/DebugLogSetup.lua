@@ -52,6 +52,22 @@ if not lib then
         MakeCloseButton = function() return nil end,
         RunDiagnostics  = function() return diagnosticsAbsent() end,
         BuildDiagnostics = function() return { lines = {}, dropped = 0, capped = false, capsHit = false } end,
+        -- Report and Serialize, new at LibKa0s v1.105.0 (DebugLog minor 23), the library's
+        -- suggested stub: with no console the report streams to chat with no pointer, and a
+        -- serialize answers one line. Nothing here calls either yet (adoption is LibKa0s#79).
+        Report          = function(_, _, _, fn)
+            local n = 0
+            if type(fn) == "function" then
+                fn(function(line)
+                    n = n + 1
+                    NS.Print(NS.SafeToString(line))
+                end)
+            end
+            return n
+        end,
+        Serialize       = function(_, v)
+            return { NS.SafeToString(type(v) == "table" and "<table>" or v) }
+        end,
         DebugVerb       = function(self, rest)
             local word = (((rest or ""):match("^%s*(%S*)")) or ""):lower()
             if word == "diagnostics" then diagnosticsAbsent() return true end

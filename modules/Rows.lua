@@ -481,6 +481,7 @@ local function buildAct(row)
         if NS.Interact and row.entry then NS.Interact.OnMarkClick(row, button) end
     end, nil)
     act:RegisterForClicks("AnyUp")
+    act.hotToken = "icon.hot"   -- a row's mark, not a title-bar one: its own hot (NS.Chrome.HOT is the bars')
     act:SetPoint("RIGHT", row, "RIGHT", -R.EDGE, 0)
     act:SetScript("OnEnter", function() local fn = row:GetScript("OnEnter") if fn then fn(row) end end)
     act:SetScript("OnLeave", function() local fn = row:GetScript("OnLeave") if fn then fn(row) end end)

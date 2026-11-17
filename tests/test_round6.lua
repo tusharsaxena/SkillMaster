@@ -1041,18 +1041,29 @@ end)
 
 test("round6 review: the Set waypoint button keeps the skin's hover look beside its own tooltip", function()
     withTrainerPopup("fistWeapons", { native = true }, function(f)
+        -- LibKa0s v1.105.0 (SR2-L5, SkinPaintControls minor 18): Set waypoint is a primary button, so its
+        -- hover look is its fill (btnPrimary.hoverBg) with the label kept; Print to chat is a plain button
+        -- and its hover repaints the label (btn.hover). The tooltip hook must keep both looks.
         local function rgb(b) local r, g, bl = b.text:GetTextColor() return ("%.3f,%.3f,%.3f"):format(r, g, bl) end
+        local function fill(b) local r, g, bl = b:GetBackdropColor() return ("%.3f,%.3f,%.3f"):format(r, g, bl) end
+        local function tok(name) return ("%.3f,%.3f,%.3f"):format(NS.Skin.Color(name)) end
         f.waypoint:GetScript("OnLeave")(f.waypoint)   -- the rest look (the mock fires no OnEnable)
-        local rest = rgb(f.waypoint)
+        local rest, restFill = rgb(f.waypoint), fill(f.waypoint)
+        assertEqual(restFill, tok("btnPrimary.bg"), "at rest: the primary fill")
         f.waypoint:GetScript("OnEnter")(f.waypoint)
-        assertTrue(rgb(f.waypoint) ~= rest, "the hover repaints the label, as Print to chat's does")
+        assertEqual(fill(f.waypoint), tok("btnPrimary.hoverBg"), "the hover repaints the fill to btnPrimary.hoverBg")
+        assertTrue(fill(f.waypoint) ~= restFill, "a fill the eye can tell from the rest one")
+        assertEqual(rgb(f.waypoint), rest, "and keeps the label, as a primary does")
         f.waypoint:GetScript("OnLeave")(f.waypoint)
-        assertEqual(rgb(f.waypoint), rest, "and leaving puts it back")
+        assertEqual(fill(f.waypoint), restFill, "and leaving puts the fill back")
+        assertEqual(rgb(f.waypoint), rest, "the label still at rest")
         f.print:GetScript("OnLeave")(f.print)
         local pRest = rgb(f.print)
         f.print:GetScript("OnEnter")(f.print)
-        assertTrue(rgb(f.print) ~= pRest, "Print to chat's hover, for the comparison")
+        assertTrue(rgb(f.print) ~= pRest, "Print to chat's hover repaints its label, for the comparison")
+        assertEqual(rgb(f.print), tok("btn.hover"), "to btn.hover")
         f.print:GetScript("OnLeave")(f.print)
+        assertEqual(rgb(f.print), pRest, "and leaving puts it back")
     end)
 end)
 

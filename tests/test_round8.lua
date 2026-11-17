@@ -54,19 +54,19 @@ test("round8 header marks: a detached band's marks rest in the main window heade
         M.__fireTimers()
         local f = D8.Frame("weapon")
         for _, k in ipairs({ "dock", "collapse", "sort", "filter", "restore" }) do
-            assertEqual(f[k].restToken, "text.heading", k .. ": the title's color at rest")
-            assertEqual(tintOf(f[k].icon), color("text.heading"), k .. ": drawn so")
+            assertEqual(f[k].restToken, "icon.tint", k .. ": the marks' rest color (smoke round 1, ruling 4)")
+            assertEqual(tintOf(f[k].icon), color("icon.tint"), k .. ": drawn so")
         end
-        assertEqual(f.filter.baseToken, "text.heading", "the filter's own rest color")
-        -- Hover as on the window: icon.hot under the pointer, the title's color again after.
+        assertEqual(f.filter.baseToken, "icon.tint", "the filter's own rest color")
+        -- Hover as on the window: text.link under the pointer (ruling 4), icon.tint again after.
         f.sort:__fire("OnEnter")
-        assertEqual(tintOf(f.sort.icon), color("icon.hot"), "hot under the pointer")
+        assertEqual(tintOf(f.sort.icon), color("text.link"), "hot under the pointer")
         f.sort:__fire("OnLeave")
-        assertEqual(tintOf(f.sort.icon), color("text.heading"), "back at rest")
+        assertEqual(tintOf(f.sort.icon), color("icon.tint"), "back at rest")
         -- A collapse and an expand repaint the chevron in the same color.
         B8:ToggleCollapsed("weapon")
         M.__fireTimers()
-        assertEqual(tintOf(D8.Frame("weapon").collapse.icon), color("text.heading"), "collapsed, the same")
+        assertEqual(tintOf(D8.Frame("weapon").collapse.icon), color("icon.tint"), "collapsed, the same")
     end)
 end)
 
@@ -79,8 +79,8 @@ test("round8 header marks: a merged window's band and section sub-headers match 
         assertTrue(gid ~= nil, "merged")
         local f = G8.Frame(gid)
         for _, k in ipairs({ "dockAll", "collapseAll" }) do
-            assertEqual(f[k].restToken, "text.heading", k .. ": the title's color at rest")
-            assertEqual(tintOf(f[k].icon), color("text.heading"), k .. ": drawn so")
+            assertEqual(f[k].restToken, "icon.tint", k .. ": the marks' rest color (smoke round 1, ruling 4)")
+            assertEqual(tintOf(f[k].icon), color("icon.tint"), k .. ": drawn so")
         end
         W8.Show()
         W8.Refresh(true)
@@ -90,7 +90,7 @@ test("round8 header marks: a merged window's band and section sub-headers match 
             assertEqual(sh[k].restToken, main[k].restToken, k .. ": the sub-header's as the window header's")
             assertEqual(tintOf(sh[k].icon), tintOf(main[k].icon), k .. ": drawn so")
         end
-        assertEqual(sh.split.restToken, "text.heading", "split, as the window header's detach")
+        assertEqual(sh.split.restToken, "icon.tint", "split, as the window header's detach")
     end)
 end)
 
@@ -210,7 +210,7 @@ test("round8 filter badge: the window header's funnel on a solid square while it
         assertBadge(mark, id)
         -- Under the pointer the square goes hot and the funnel stays dark on it.
         mark:__fire("OnEnter")
-        assertEqual(fillOf(mark.badge), color("icon.hot"), "the square hot under the pointer")
+        assertEqual(fillOf(mark.badge), color(C8.HOT), "the square hot (text.link, ruling 4) under the pointer")
         assertEqual(tintOf(mark.icon), color(C8.BADGE_INK_TOKEN), "the funnel still dark on it")
         mark:__fire("OnLeave")
         assertEqual(fillOf(mark.badge), color(mark.baseToken), "the square at rest again")
