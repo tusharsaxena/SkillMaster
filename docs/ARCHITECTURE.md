@@ -346,6 +346,57 @@ window's mark does. In the Classic style (no go icon) the row's click opens as b
 (`NS.Broker.OpenRow`) and no overlay is laid. A tooltip row's shift-click links it into chat in both
 modes and both styles.
 
+## Tooltip placement
+
+Every tooltip Skill Master places itself opens where its element sits in its window, never at the
+pointer and never off a corner of the control (WowAddonStandards standalone-windows, *Tooltip
+placement*; launcher-§7; LibKa0s#92, adopted as AD-92-SM). Each is owned at `ANCHOR_NONE`, filled,
+shown, and then placed by one of `NS.Chrome`'s three placers (`modules/Chrome.lua`), which read
+`LibKa0s-Tooltip-1.0` at call time. With the library absent, or geometry the library cannot read (a
+placer answers nil and places nothing), the tooltip attaches centered above its element, 2 px off, as
+the library's own fallback does. `tests/test_tooltips.lua` holds each site to its placer, checks the
+right-fits and right-does-not-fit layouts on the kit's fake screen, and guards the addon's Lua against
+any game anchor but `ANCHOR_NONE`.
+
+| Element | Class | Placer | Window group |
+|---|---|---|---|
+| A skill or stat row: main window, detached block, merged window, the LDB tooltip's Main window panel (`modules/RowTooltip.lua`) | body | `NS.Chrome.PlaceBeside` | `GroupOf(row)`: the row's outermost frame under UIParent (the window, the whole detached or merged HUD display, the panel) |
+| A Journal Alts column header (`modules/Journal.lua`) | body (a list's column-header row) | `NS.Chrome.PlaceBeside` | the Journal |
+| A trainer card (`modules/TrainerPopup.lua`) | body | `NS.Chrome.PlaceBeside` | the trainer popup |
+| The waypoint arrow (`modules/WaypointArrow.lua`, the host's `onEnter` on the library's frame) | body (a HUD display of one icon) | `NS.Chrome.PlaceBeside` | the arrow, the whole display |
+| The trainer popup's Set waypoint button, when disabled (its reason) | chrome (a modal dialog's control) | `NS.Chrome.PlaceAttached` | none: centered above the button |
+| The broker feeds' tooltip on a display's cell, both Tooltip styles (`modules/Broker.lua` `anchor`) | the launcher shape (launcher-§7) | `NS.Chrome.PlaceLauncher` | none: toward the screen's center, 2 px off the cell |
+| The library-absent rung of a title-bar or block-header mark (`modules/Chrome.lua` `showTip`) | chrome | attached above, by a relative point | none |
+
+Each was owned at a game anchor before: `ANCHOR_RIGHT` (a row, a card, the arrow), `ANCHOR_TOP` (the
+Set waypoint button, a mark without the library) and `ANCHOR_BOTTOM` (a column header). The broker
+feed's tooltip was already attached to its cell toward the screen's half; it now takes the launcher
+placer's horizontal side by screen third and its gap as well.
+
+**Left as they are, and why.**
+
+- **The title-bar marks, the closes and the block-header marks** (every window's header strip, a
+  detached or merged band, the main window's block headers). `LibKa0s-Tooltip-1.0`'s `AttachTitleTip`
+  places them above the control through `PlaceAttached` (`NS.Chrome.IconButton` / `HeaderMark`,
+  Widgets' `HeaderButtons`, `NS.MakeCloseButton`). The block headers' marks are treated as
+  header-strip controls, as smoke round 1's ruling 3 does for every header-strip mark
+  (`tests/test_sr1.lua`).
+- **The bonus scanner** (`modules/Bonuses.lua`, `SkillMasterScanTip`). A hidden tooltip owned by
+  UIParent at `ANCHOR_NONE` to read item lines. It is never shown, so it has no placement.
+- **The minimap button's status tooltip.** `LibKa0s-Launcher-1.0` draws it and re-places it through
+  `PlaceLauncher` (Launcher minor 11). No host code anchors it (launcher-§7).
+- **The launcher's options menu.** The client's own menu (`MenuUtil.CreateContextMenu`) places its
+  entries' tooltips (*What it does not bind*).
+- **Library windows and widgets**: the row menu (Widgets' `ContextMenu`), the docked test and sim
+  strips, the debug console, the sim and perf panels, the skin picker and the icon browser. Each is
+  placed in the library's own code (`docs/api/Tooltip/version-1-docs.md`, *The library's own sites*).
+- **The settings pages** in Blizzard's Settings canvas, the library's Options widgets among them.
+  options-ui governs them, and the tooltip-placement rule does not bind them.
+- **A broker display's own placement.** The feeds supply `OnEnter`, so the display does not place
+  their tooltip. Skill Master places it, as the row above describes. A display that ignores
+  `OnEnter` and calls `OnTooltipShow` would get no tooltip, because the feeds define no
+  `OnTooltipShow`.
+
 ## Known Limitations
 
 What the addon does not do yet, and what is still unverified in game: [known-limitations.md](known-limitations.md).

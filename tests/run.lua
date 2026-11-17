@@ -187,6 +187,7 @@ Kit.run{
         "test_sim",
         "test_window_chrome",
         "test_header_buttons",
+        "test_tooltips",
         "test_seams",
         "test_m5_seams",
         "test_m5_review",

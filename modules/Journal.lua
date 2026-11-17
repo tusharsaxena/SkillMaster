@@ -632,12 +632,15 @@ local function tipLine(s, token, wrap)
     GameTooltip:AddLine(s, c[1], c[2], c[3], wrap)
 end
 
---- The column header's tooltip: everything about the character the two lines leave out.
+--- The column header's tooltip: everything about the character the two lines leave out. A list's
+--- column header is a BODY element (standalone-windows, *Tooltip placement*, Terms; LibKa0s#92,
+--- AD-92-SM): beside the Journal, its window group, level with the header (NS.Chrome.PlaceBeside).
+--- It was owned at ANCHOR_BOTTOM, an edge offset of the header, over the rows under it.
 local function onHeadEnter(head)
     local item = head.item
     if not (GameTooltip and item) then return end
     local r = item.record
-    GameTooltip:SetOwner(head, "ANCHOR_BOTTOM")
+    GameTooltip:SetOwner(head, "ANCHOR_NONE")
     local c = classColor(r)
     if c then GameTooltip:AddLine(r.name or item.key, c.r, c.g, c.b) else tipLine(r.name or item.key, "text.heading") end
     local sub = L["Lv %d %s %s"]:format(r.level or 0, r.race or "", r.className or r.class or "")
@@ -651,6 +654,7 @@ local function onHeadEnter(head)
         tipLine(L["Right-click to forget this character."], "text.muted", true)
     end
     GameTooltip:Show()
+    NS.Chrome.PlaceBeside(GameTooltip, head, frame)
 end
 
 local function newHead(header, c)

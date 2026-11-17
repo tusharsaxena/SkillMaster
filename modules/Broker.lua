@@ -947,8 +947,16 @@ local function hookTooltip(tip)
     end
 end
 
+-- Where the feed's tooltip opens (launcher-§7; LibKa0s#92, AD-92-SM): attached to the display's
+-- cell, never the cursor, toward the screen's center, TIP_GAP off the cell, through
+-- LibKa0s-Tooltip-1.0's PlaceLauncher (the vertical side by the screen half, the horizontal by its
+-- third), which writes a relative point and so needs no size: the panel (Main window style) and
+-- the line tooltip (Classic) are placed before they fill. Without the library, or a cell whose
+-- geometry cannot be read, centered on the cell, below it in the screen's upper half and above it
+-- in the lower.
 local function anchor(tip, frame)
     if tip.SetOwner then tip:SetOwner(frame, "ANCHOR_NONE") end
+    if NS.Chrome.PlaceLauncher(tip, frame) then return end
     tip:ClearAllPoints()
     local _, y = frame:GetCenter()
     local top = y and UIParent:GetHeight() and y > UIParent:GetHeight() / 2

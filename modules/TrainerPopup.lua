@@ -120,14 +120,17 @@ local function tipLine(s, token, wrap)
     GameTooltip:AddLine(s, c[1], c[2], c[3], wrap)
 end
 
--- The card's tooltip: the whole card, the "Also teaches" list unclipped.
+-- The card's tooltip: the whole card, the "Also teaches" list unclipped. A card is a BODY element
+-- (LibKa0s#92, AD-92-SM): beside the popup, its window group, level with the card
+-- (NS.Chrome.PlaceBeside); it was owned at ANCHOR_RIGHT, the corner offset the rule retires.
 local function onCardEnter(self)
     if not (GameTooltip and self.trainer) then return end
-    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    GameTooltip:SetOwner(self, "ANCHOR_NONE")
     tipLine(self.trainer.name, "text.accent")
     tipLine(self.where:GetText() or "", "text.body")
     if self.alsoText and self.alsoText ~= "" then tipLine(self.alsoText, "text.muted", true) end
     GameTooltip:Show()
+    NS.Chrome.PlaceBeside(GameTooltip, self, frame)
 end
 
 local function onCardLeave(self)
@@ -237,11 +240,15 @@ local function buildActions()
     NS.Skin.Text(frame.warning, "sem.warn")
     frame.waypoint = button(frame, L["Set waypoint"], setWaypoint, true)
     -- Hooked, not set: NS.Skin.Button hooked its hover look on these scripts, and SetScript drops it.
+    -- The action buttons are the popup's CHROME (a modal dialog's controls, LibKa0s#92, AD-92-SM):
+    -- the reason attaches centered above the button (NS.Chrome.PlaceAttached), below it only
+    -- without room above.
     frame.waypoint:HookScript("OnEnter", function(self)
         if not (GameTooltip and self.blockedText) then return end
-        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:SetOwner(self, "ANCHOR_NONE")
         tipLine(self.blockedText, "text.body", true)
         GameTooltip:Show()
+        NS.Chrome.PlaceAttached(GameTooltip, self)
     end)
     frame.waypoint:HookScript("OnLeave", onCardLeave)
     frame.print = button(frame, L["Print to chat"], printDirections, false)

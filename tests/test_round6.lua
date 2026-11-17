@@ -517,8 +517,10 @@ end
 local function tipText(owner)
     local saved = M.GameTooltip
     local lines = {}
+    -- A real tooltip's points too: the reason is placed after Show (AD-92-SM, PlaceAttached).
     local tip = { SetOwner = function() end, Show = function() end, IsOwned = function() return false end,
-                  AddLine = function(_, s) lines[#lines + 1] = s end }
+                  AddLine = function(_, s) lines[#lines + 1] = s end,
+                  ClearAllPoints = function() end, SetPoint = function() end }
     M.GameTooltip = tip
     owner:GetScript("OnEnter")(owner)
     M.GameTooltip = saved

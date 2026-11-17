@@ -24,6 +24,11 @@ local addonName, NS = ...
 -- NS.Chrome.HeaderPitch() -> pad, gap / .SetTip(button, words)         the strip's pitch; a mark's words
 -- NS.Chrome.TooltipFontSize(tip, size, first) / .RestoreTooltipFonts(tip)   a tooltip's lines at a
 --                                                                      size (Tooltips page), and back
+-- NS.Chrome.PlaceBeside(tip, el, group) / .PlaceAttached(tip, el)    where a shown tooltip opens:
+--   / .PlaceLauncher(tip, cell)                                        beside the window group (a body
+--                                                                      element), above the control (a
+--                                                                      chrome one), toward the screen's
+--                                                                      center (the broker feed's cell)
 
 NS.Chrome = {}
 local C = NS.Chrome
@@ -99,14 +104,68 @@ end
 -- The hover tooltip (ruling 3, SR-L2): LibKa0s-Tooltip-1.0's AttachTitleTip, the library's own
 -- title-bar tooltip: one line, `button.tip` read on each hover, in the owner's `gtip.title`, placed
 -- above the control by PlaceAttached (below only without room). Without the library, the game's
--- tooltip above the control.
+-- tooltip attached centered above the control (attachAbove).
 local function tipWords(self) return self.tip end
 
+-- ---------------------------------------------------------------------------------------------
+-- Where a tooltip opens (LibKa0s#92, AD-92-SM; WowAddonStandards standalone-windows, *Tooltip
+-- placement*, and launcher-§7). Every tooltip this addon places itself is owned at ANCHOR_NONE,
+-- filled, shown (so its size is known) and then placed by one of these, which read
+-- LibKa0s-Tooltip-1.0 at call time:
+--   PlaceBeside    a BODY element (a row, a card, a column header, the HUD arrow): beside the
+--                  window group, right when it fits and otherwise left, top level with the element,
+--                  TIP_GAP out; `group` nil is the library's GroupOf (the outermost frame under
+--                  UIParent: the window, the detached or merged HUD, the broker panel);
+--   PlaceAttached  a CHROME element (a modal's action button): centered above it, below it only
+--                  without room above;
+--   PlaceLauncher  the broker feed's own tooltip on its display cell: toward the screen's center,
+--                  TIP_GAP off the cell (the launcher shape, launcher-§7).
+-- With the library absent, or the geometry unreadable (a placer answers nil, nothing placed), the
+-- tooltip attaches centered above its element by a relative point, as the library's own fallback
+-- does. Never the cursor, never a corner offset.
+-- ---------------------------------------------------------------------------------------------
+
+C.TIP_GAP = 2
+
+local function tipLib()
+    local Tip = LibStub and LibStub("LibKa0s-Tooltip-1.0", true)
+    return type(Tip) == "table" and type(Tip.PlaceBeside) == "function" and Tip or nil
+end
+
+local function attachAbove(tip, el)
+    tip:ClearAllPoints()
+    tip:SetPoint("BOTTOM", el, "TOP", 0, C.TIP_GAP)
+end
+
+--- Place the shown `tip` for the body element `el`, beside its window group (`group` as
+--- LibKa0s-Tooltip-1.0's PlaceBeside takes it; nil is GroupOf(el)).
+function C.PlaceBeside(tip, el, group)
+    local Tip = tipLib()
+    if Tip and Tip.PlaceBeside(tip, el, group) then return end
+    attachAbove(tip, el)
+end
+
+--- Place the shown `tip` for the chrome element `el`, centered above it.
+function C.PlaceAttached(tip, el)
+    local Tip = tipLib()
+    if Tip and type(Tip.PlaceAttached) == "function" and Tip.PlaceAttached(tip, el) then return end
+    attachAbove(tip, el)
+end
+
+--- Place `tip` on the broker display's cell, toward the screen's center; answers true when the
+--- library placed it (false: the caller keeps its own attached anchor).
+function C.PlaceLauncher(tip, cell)
+    local Tip = tipLib()
+    return (Tip and type(Tip.PlaceLauncher) == "function" and Tip.PlaceLauncher(tip, cell)) and true or false
+end
+
+-- Without the library: the game's tooltip, owned at ANCHOR_NONE, attached centered above the mark.
 local function showTip(self)
     if not (self.tip and GameTooltip) then return end
-    GameTooltip:SetOwner(self, "ANCHOR_TOP")
+    GameTooltip:SetOwner(self, "ANCHOR_NONE")
     GameTooltip:SetText(self.tip)
     GameTooltip:Show()
+    attachAbove(GameTooltip, self)
 end
 
 local function hideTip(self)

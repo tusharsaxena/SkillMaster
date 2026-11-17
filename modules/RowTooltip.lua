@@ -298,11 +298,15 @@ local function placeBar(row, n)
     b:Show()
 end
 
---- Show `row`'s tooltip.
+--- Show `row`'s tooltip. A row is a BODY element (standalone-windows, *Tooltip placement*;
+--- LibKa0s#92, AD-92-SM): owned at ANCHOR_NONE, filled, shown, then placed beside its window group
+--- (NS.Chrome.PlaceBeside, the group GroupOf: the main window, the detached or merged HUD, the
+--- broker panel), right when it fits and otherwise left, level with the row. It was owned at
+--- ANCHOR_RIGHT, the corner offset the rule retires. The bar is laid after the placement.
 function RT.Show(row)
     if not (GameTooltip and row.entry) then return end
     hideBar()   -- shown again below only when this row's lines ask for it
-    GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
+    GameTooltip:SetOwner(row, "ANCHOR_NONE")
     local n = 0
     local barAt
     for _, l in ipairs(RT.Lines(row.entry, row.kind, NS.Rows.OpenFrom(row))) do
@@ -329,6 +333,7 @@ function RT.Show(row)
         widened = true
     end
     GameTooltip:Show()
+    NS.Chrome.PlaceBeside(GameTooltip, row, nil)
     if barAt then placeBar(row, barAt) end
 end
 

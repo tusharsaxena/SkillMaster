@@ -769,6 +769,20 @@ Total.
 - AD-86 detached and merged bands: without a skin's header, every mark GAP inward of the one before
 - AD-86 degraded: without LibKa0s the main window and the Journal still build the strip, settings opening the panel
 
+### test_tooltips.lua (11)
+
+- tooltips: a main window row opens beside the window (PlaceBeside), never at ANCHOR_RIGHT
+- tooltips: a detached block's row opens beside the detached display (PlaceBeside, GroupOf)
+- tooltips: a Journal column header opens beside the Journal (PlaceBeside), never at ANCHOR_BOTTOM
+- tooltips: a trainer card opens beside the popup (PlaceBeside), never at ANCHOR_RIGHT
+- tooltips: the popup's disabled Set waypoint button attaches its reason above it (PlaceAttached), never ANCHOR_TOP
+- tooltips: the waypoint arrow opens beside itself, the whole HUD display (PlaceBeside), never ANCHOR_RIGHT
+- tooltips: the broker feed's tooltip is placed on its cell toward the screen's center (PlaceLauncher), in both styles
+- tooltips: on the fake screen a row's tooltip opens right of the window when it fits, its top level with the row
+- tooltips: on the fake screen a row's tooltip opens left of the window when the right does not fit
+- tooltips: without the library a mark's tooltip attaches centered above it, never at a game anchor
+- tooltips: the addon's own Lua names no game tooltip anchor but ANCHOR_NONE (no cursor, no corner offset)
+
 ### test_seams.lua (5)
 
 - test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
@@ -1040,6 +1054,7 @@ Total.
 | test_sim.lua | 12 |
 | test_window_chrome.lua | 15 |
 | test_header_buttons.lua | 9 |
+| test_tooltips.lua | 11 |
 | test_seams.lua | 5 |
 | test_m5_seams.lua | 7 |
 | test_m5_review.lua | 5 |
@@ -1059,4 +1074,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **773** |
+| **Total** | **784** |

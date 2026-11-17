@@ -58,6 +58,7 @@ the checks below that cover each item:
 - **SM-DISP-4** Hover a row: the tooltip shows the numbers, the bar, the bonuses (a lure with its
   time left), the next rank and trainer, a weapon's cap gap, Skinning's mob level, the gathering
   nodes and, for Fishing, the zone's need. Hover a stat: its markers (on its bar and as lines) and scale.
+  Where it opens is SM-TIP-1 (AD-92-SM: beside the window, no longer off the row's top-right corner).
 - **SM-DISP-5** Click Leatherworking (or any craft, Cooking, First Aid, Mining's Smelting): its
   window opens. Click Skinning or Fishing: its own window (Camping) opens. Click a weapon, Defense or
   Riding: Character → Skills, with that skill selected (`/sm debug` logs `[Click] Skills tab for <key>:
@@ -201,7 +202,7 @@ the checks below that cover each item:
   weapon (Fist Weapons, Staves): a weapon master's `Also teaches:` line wraps onto a second line
   inside its card instead of being cut off, the card is taller by that line and the window by every
   such card; the buttons stay below the last card. Hover a card: a tooltip with the
-  trainer's name, place and the whole `Also teaches` list.
+  trainer's name, place and the whole `Also teaches` list (beside the popup since AD-92-SM: SM-TIP-4).
 - **SM-DISP-31** (round 5, R5-15: the trainer distance) In Stormwind, open the trainer popup on an
   unlearned weapon: each weapon master in a city on your continent shows `N yd` under its cost, the
   nearest first; one on the other continent, or without coordinates, shows none and comes last.
@@ -243,7 +244,7 @@ the checks below that cover each item:
   or more) it is the skin's accent; walk in: it shades into the skin's green by 30 yd. Within about
   5 yd it goes, the map pin clears and chat says `You have arrived: <trainer>`.
 - **SM-DISP-44** (round 6, R6-11; round 9) With the arrow up: hover it: the tooltip names the trainer and the
-  place with `Right-click for options. Drag to move the arrow.` Drag it elsewhere, `/reload`
+  place with `Right-click for options. Drag to move the arrow.` (beside the arrow since AD-92-SM: SM-TIP-5) Drag it elsewhere, `/reload`
   and set a waypoint again: it shows where you left it. Right-click it and pick Clear waypoint:
   it goes and the map pin clears. Set it again and click elsewhere on the world map to place your own
   pin: the arrow goes. Set it again and pick another trainer's Set waypoint: the arrow points at the
@@ -405,7 +406,8 @@ the checks below that cover each item:
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed
   in the skin's disabled look and does nothing; hover it: `No map coordinates for this trainer yet;
   Print to chat gives directions.` Print to chat prints them. Trainers and Waypoints > Waypoint method
-  Chat only: the button is disabled on a weapon master too, its tooltip naming the setting.
+  Chat only: the button is disabled on a weapon master too, its tooltip naming the setting. The reason
+  opens centered above the button (AD-92-SM: SM-TIP-4).
 - **SM-DISP-38** (round 6, R6-7) An Alliance character with Fishing at 150 / 150: open its trainer
   popup. The intro reads `Trainers for your faction (Alliance) who train Fishing to Expert (225) or
   higher:`; under an `Expert (225)` heading Old Man Heming, under `Artisan (300)` Nat Pagle. With
@@ -441,6 +443,41 @@ the checks below that cover each item:
 - **SM-DISP-13** (FB-17) The summary line opens with the class icon, then the character's name in
   its class color, then `· Lv N · Race Class`. Note which icon source drew (the `classicon-<class>`
   atlas, or the class sheet), or none.
+## Tooltip placement (AD-92-SM, LibKa0s#92)
+
+Every tooltip Skill Master places itself opens where its element sits, never at the pointer and never
+off a corner of the control (standalone-windows, *Tooltip placement*; launcher-§7). The gap is 2 px.
+In each check, the tooltip's words are what they were before this change.
+
+- **SM-TIP-1** (a row is a body element) Open the main window near the screen's left: hover a row: its
+  tooltip opens right of the window, 2 px off its right edge, its top level with the row's top, and
+  covers no row. Drag the window to the screen's right edge and hover again: the tooltip opens left of
+  the window instead. Hover rows further down the list: each tooltip's top follows its row, never the
+  pointer. A row near the bottom of the screen: the tooltip slides up only as far as it must to stay
+  on screen. The row tooltip's bar still sits under its numbers line.
+- **SM-TIP-2** (detached and merged windows) Detach a block and hover one of its rows: the tooltip opens
+  beside the detached frame (right, or left at the screen's right edge), never over its rows. Merge two
+  detached blocks and hover a row in either section: the tooltip opens outside the whole merged window,
+  not between its sections.
+- **SM-TIP-3** (the Journal) Open the Journal on Alts and hover a character's column header: the
+  tooltip (name, level, realm, last seen) opens beside the Journal, its top level with the header,
+  no longer under the header over the skill rows.
+- **SM-TIP-4** (the trainer popup) Open the trainer popup on an unlearned weapon and hover a card: its
+  tooltip opens beside the popup, level with the card, the cards under it uncovered. Open it on
+  Fishing's next rank and hover the disabled Set waypoint: the reason opens centered above the button,
+  2 px off it (below it only when the popup sits at the very top of the screen).
+- **SM-TIP-5** (the waypoint arrow) With the arrow up, hover it: its tooltip opens beside the arrow
+  (right of it, or left of it when the arrow is near the screen's right edge), its top level with the
+  arrow's, never at the pointer. Drag the arrow elsewhere and hover again: it follows the arrow.
+- **SM-TIP-6** (the broker feed, launcher-§7) On a broker display (Titan Panel or the like) at the top of
+  the screen, hover the Skill Master feed in each Tooltip style (Main window, Classic): the tooltip
+  hangs 2 px under the feed's cell; with the cell in the screen's right third its right edge lines up
+  with the cell's right edge (it extends left), in the left third its left edge with the cell's, in the
+  middle third it is centered. A display at the bottom of the screen opens it 2 px above the cell. The
+  row tooltips inside the Main window style's panel open beside the panel (SM-TIP-1's rule).
+- **SM-TIP-7** (the title-bar marks, unchanged) Hover any title-bar or block-header mark: its one-line
+  tooltip still opens centered above the mark, as smoke round 1 ruled.
+
 ## Journal
 
 - **SM-JRN-1** `/sm journal` opens "Skill Master · Journal" with Log and Alts tabs; Escape and
