@@ -21,12 +21,9 @@ local LAYERS = NS.Constants.LAYERS
 W.FRAME_NAME = "SkillMasterMainWindow"
 W.SCROLL_NAME = "SkillMasterMainScroll"
 local SUMMARY_H, MIN_H, SCROLLBAR_W = 22, 120, 16
--- The footer's height, read where the library publishes it (FOOTER.HEIGHT, 24 px under every skin;
--- standalone-windows, *Window chrome geometry*), the same figure with no library.
-local function footerH()
-    local F = NS.Widgets.FOOTER
-    return (F and tonumber(F.HEIGHT)) or 24
-end
+-- The footer's height, read where the library publishes it (NS.Chrome.FooterHeight: FOOTER.HEIGHT,
+-- 24 px under every skin; standalone-windows, *Window chrome geometry*), the same figure with no library.
+local function footerH() return NS.Chrome.FooterHeight() end
 -- What the scroll bar takes past the body: UIPanelScrollFrameTemplate hangs its 16 px bar 6 px off
 -- the scroll frame's right edge, and 4 px keep it off the window's border. The window grows by this
 -- gutter rather than the body shrinking, so the rows stay Window width's (feedback round 2).
@@ -208,22 +205,12 @@ local function legendMark(parent, colorKey, w, label, anchor)
     return { tex = t, key = colorKey }, fs, t
 end
 
--- The window's footer (AD-89-SM, LibKa0s#89): the library's Footer, no fill, its hairline in the
--- skin's `divider` along its top, FOOTER.HEIGHT tall across the window's bottom edge, painted for
--- this addon's skin owner. Its words are the legend's, laid over it; its own left and right lines stay
--- empty. With no library, a bare frame of the same height and no hairline.
-local function buildFooter()
-    local foot = NS.Widgets.Footer and NS.Widgets.Footer(frame, { owner = addonName })
-    if foot then return foot end
-    foot = CreateFrame("Frame", nil, frame)
-    foot:SetHeight(footerH())
-    foot:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
-    foot:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
-    return foot
-end
-
+-- The window's footer (AD-89-SM, LibKa0s#89): NS.Chrome.Footer, the library's Footer, no fill, its
+-- hairline in the skin's `divider` along its top, FOOTER.HEIGHT tall across the window's bottom edge,
+-- painted for this addon's skin owner. Its words are the legend's, laid over it; its own left and right
+-- lines stay empty. With no library, a bare frame of the same height and no hairline.
 local function buildLegend()
-    local f = buildFooter()
+    local f = NS.Chrome.Footer(frame)
     local t1, fs1 = swatch(f, "bonusTemp", L["temp bonus"])
     local t2, fs2 = swatch(f, "bonusPerm", L["permanent bonus"], fs1)
     local marker, fs3 = legendMark(f, "marker", 2, L["threshold"])
@@ -362,7 +349,7 @@ end
 --- force's BodyOffset (0 with none showing).
 local function bodyTop()
     local C = NS.Chrome
-    return C.TITLE_BOTTOM + math.max(C.StripOffset(frame.strip), C.StripOffset(frame.simStrip))
+    return C.TitleBottom(frame) + math.max(C.StripOffset(frame.strip), C.StripOffset(frame.simStrip))
 end
 
 local function placeSummary(top)
@@ -510,8 +497,11 @@ local function renderTitle(test, sim)
     frame.title:SetText(word and L["%s - %s"]:format(L["Skill Master"], word) or L["Skill Master"])
 end
 
---- The marker state, part of the layout signature: a strip shown or hidden moves the body.
-local function markerSig(test, sim) return (test and "T" or "") .. (sim and "S" or "") end
+--- The marker state, part of the layout signature: a strip shown or hidden moves the body, and so
+--- does the title band's bottom (a skin whose band sits elsewhere, NS.Chrome.TitleBottom).
+local function markerSig(test, sim)
+    return (test and "T" or "") .. (sim and "S" or "") .. NS.Chrome.TitleBottom(frame)
+end
 
 --- Redraw the rows' values in place (a bonus tick, a stat or a rank change): no anchor moves.
 function W.RefreshValues()

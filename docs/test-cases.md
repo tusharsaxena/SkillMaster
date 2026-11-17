@@ -739,7 +739,7 @@ Total.
 - sim: combat stops a running session
 - sim: the window shows the simulation strip while a session runs
 
-### test_window_chrome.lua (6)
+### test_window_chrome.lua (15)
 
 - chrome AD-88: the main window's test and sim strips dock under its title bar (the skin's band)
 - chrome AD-88: the main window's body sits under the title bar and moves down by the strip's BodyOffset
@@ -747,6 +747,15 @@ Total.
 - chrome AD-89: the main window's body ends FOOTER.HEIGHT above its bottom edge, plus the gap
 - chrome AD-88: the Journal's strip docks under its title bar, the tabs moved down by BodyOffset
 - chrome AD-88: the Main window style tooltip's strip docks under its title band
+- chrome review: the title band's bottom is read from the band, 31 only with none measured
+- chrome review: the main window's body follows the band's own bottom
+- chrome review: the Journal's tabs follow the band's own bottom
+- chrome review: the LDB tooltip's body follows the band's own bottom
+- chrome review: the Journal's Alts hint is the library's Footer, shown with the Alts tab only
+- chrome review: the Alts panel ends FOOTER.HEIGHT plus the gap above the bottom, the Log panel at PAD
+- chrome degraded: with no skin library the title bar is a bare frame of the band's rect
+- chrome degraded: with no widgets library a footer is a bare frame of FOOTER.HEIGHT with its left line
+- chrome degraded: the main window and the Journal open without LibKa0s, their footers bare
 
 ### test_seams.lua (5)
 
@@ -1017,7 +1026,7 @@ Total.
 | test_polish.lua | 12 |
 | test_preview.lua | 6 |
 | test_sim.lua | 12 |
-| test_window_chrome.lua | 6 |
+| test_window_chrome.lua | 15 |
 | test_seams.lua | 5 |
 | test_m5_seams.lua | 7 |
 | test_m5_review.lua | 5 |
@@ -1037,4 +1046,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **755** |
+| **Total** | **764** |

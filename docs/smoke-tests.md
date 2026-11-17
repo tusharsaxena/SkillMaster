@@ -634,6 +634,10 @@ the checks below that cover each item:
   bottom edge. The footer has a thin hairline across its top and no darker band of its own (the
   window's background shows through), the legend text is in the muted color, and the last row
   scrolls clear above the hairline. Switch skins: the hairline takes the new skin's divider color.
+  Open the Journal on its Alts tab: the hint line ("Snapshots update on login, logout and every
+  skill change...") sits on the same 24 px footer along the window's bottom edge, with the hairline
+  over it and the text clear of the resize grip. On the Log tab the footer and its hairline are gone,
+  and the log's rows reach as far down as before. Drag the grip: it still resizes the window.
 - **SM-TEST-4** (round 6, R6-11) `/sm test`: Skill Master's waypoint arrow shows,
   pointing up and to the left at a sample weapon master with `240 yd` under it; no map pin is set.
   Drag it where you want it. `/sm test` again: it goes (a waypoint you had set before test mode comes

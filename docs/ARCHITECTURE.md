@@ -61,13 +61,29 @@ that shows test or simulated data (the main window, the Journal and the LDB tool
 style) docks its strip with LibKa0s Widgets' TestStrip (`dock = "title"`, Widgets minor 27) under its
 title bar, which is the skin's title band (`NS.Chrome.TitleBar`, `S.Band`). The library anchors the
 strip and places it again on every show, hide and resize. The host never anchors it. Everything
-below the title bar starts at `NS.Chrome.TITLE_BOTTOM` (the band's 1 px inset plus `title.height`, 30
-px) and moves down by the strip's `BodyOffset` while one shows (`NS.Chrome.StripOffset`), as
-preview-mode's *Where the strip sits* requires. The main window's footer, the bonus legend, is the
-library's `Footer`. It has no fill and the skin's `divider` hairline, and it is `FOOTER.HEIGHT` (24
-px) tall across the bottom edge with the legend's swatches laid over it. The body ends that far
-above the window's bottom edge, plus a 2 px gap (standalone-windows, *The footer* and *Window
-chrome geometry*). Without the library the window builds a bare frame of the same height.
+below the title bar starts at the band's own bottom edge, read from the band where the skin lays it
+(`NS.Chrome.TitleBottom`: its height plus its inset, which is `win.borderSize` for a flat border, as
+`modules/Detached.lua`'s `D.TitleHeight` reads its band). The fixed `NS.Chrome.TITLE_BOTTOM` (31: a
+1 px inset plus `title.height`, 30 px) is used only when no band is measured. A band that moves (a
+skin switch) lays the body out again. The body also moves down by the strip's `BodyOffset` while one
+shows (`NS.Chrome.StripOffset`), as preview-mode's *Where the strip sits* requires.
+
+Window footers are `NS.Chrome.Footer`, which is the library's `Footer`. It has no fill and the skin's
+`divider` hairline, and it is `FOOTER.HEIGHT` (24 px, `NS.Chrome.FooterHeight`) tall across the
+window's bottom edge (standalone-windows, *The footer* and *Window chrome geometry*). Without the
+library it is a bare frame of the same height with its left line and no hairline. There are two:
+
+- **The main window's footer** carries the bonus legend's swatches. The body ends `FOOTER.HEIGHT`
+  plus a 2 px gap above the bottom edge.
+- **The Journal's Alts footer** carries the hint line ("Snapshots update on login, logout and every
+  skill change..."). Its right side clears the resize grip in its corner. It shows only with the
+  Alts tab. The Alts body ends `FOOTER.HEIGHT` plus 8 px above the bottom edge, which keeps its row
+  count unchanged. The Log tab has no footer, so its body keeps the 12 px pad.
+
+The LDB tooltip's Main window style keeps its own footer, the hint lines from
+`NS.Broker.FooterText`, which wrap and are `textHeight + 8` tall. That footer is inside a tooltip and
+not along a window's bottom edge. The tooltip has no resize grip and no status line, so *The footer*
+does not cover it, and it stays as it is. The launcher is out of this adoption wave's scope.
 
 ### Per-client features
 

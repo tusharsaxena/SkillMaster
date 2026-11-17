@@ -40,7 +40,8 @@ local LAYERS = NS.Constants.LAYERS
 P.FRAME_NAME = "SkillMasterBrokerPanel"
 
 -- The main window's own measures (modules/MainWindow.lua), so one Width draws one body: the title
--- band's bottom (NS.Chrome.TITLE_BOTTOM), the scroll bar the body's width is counted without, and the
+-- band's bottom (NS.Chrome.TitleBottom, read from the band at each fill; TITLE_H, its no-band figure,
+-- sizes the frame before the first), the scroll bar the body's width is counted without, and the
 -- gutter the window grows by.
 local TITLE_H, SCROLLBAR_W = NS.Chrome.TITLE_BOTTOM, 16
 local SCROLL_GUTTER = 6 + SCROLLBAR_W + 4
@@ -275,6 +276,9 @@ local function build()
         frame.strip:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.OVERLAY)
     end
     buildBody()
+    -- The hint lines (NS.Broker.FooterText) stay a FontString of their own, wrapped and as tall as
+    -- they measure: this is a tooltip's footer, not a window's, with no resize grip and no status
+    -- line, so standalone-windows' *The footer* (Widgets' Footer) does not cover it (AD-89-SM review).
     frame.footer = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.footer:SetJustifyH("LEFT")
     frame.footer:SetWordWrap(true)
@@ -348,7 +352,7 @@ end
 
 --- Size the frame to its body, up to Height; past it, the body scrolls.
 local function fit(y)
-    local top = TITLE_H + NS.Chrome.StripOffset(frame.strip)
+    local top = NS.Chrome.TitleBottom(frame) + NS.Chrome.StripOffset(frame.strip)
     local w = P.Width()
     frame:SetWidth(w)
     frame.footer:SetWidth(w - 2 * PAD)

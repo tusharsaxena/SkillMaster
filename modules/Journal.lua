@@ -17,7 +17,8 @@ local addonName, NS = ...
 -- sample while it is on, T5.2) and repaints on SKILLS_UPDATED and LAYOUT_CHANGED. While test mode
 -- is on it shows the main window's test-mode strip, docked by the library directly under its title
 -- bar (Widgets' `dock = "title"`, AD-88-SM), the tabs and the body moved down by the strip's
--- BodyOffset (owner feedback round 6, R6-2; J.Render syncs it).
+-- BodyOffset (owner feedback round 6, R6-2; J.Render syncs it). The Alts tab's hint line rides a
+-- window footer along the bottom edge (NS.Chrome.Footer, the library's Footer; AD-89-SM).
 
 NS.Journal = {}
 local J = NS.Journal
@@ -56,17 +57,21 @@ local RANGE_LABEL = {
 function J.RangeLabel(range) return RANGE_LABEL[range] or range end
 
 -- 720 wide (owner feedback round 4): the Zone column took 150 px and the Skill column kept room.
--- TITLE_H is the title band's bottom edge (NS.Chrome.TITLE_BOTTOM): the tabs start under the bar the
--- skin paints, and the strip docks between the two (AD-88-SM).
+-- TITLE_H is the title band's bottom edge with no band measured (NS.Chrome.TITLE_BOTTOM): the tabs
+-- are laid under it, and shift() moves them by how far the band's own bottom (NS.Chrome.TitleBottom,
+-- read from the band the skin lays) differs from it. The strip docks between the bar and the tabs
+-- (AD-88-SM). The Alts tab's hint line rides a window footer (NS.Chrome.Footer, FOOTER.HEIGHT tall;
+-- standalone-windows, *The footer*), shown with that tab only, so the Log body keeps its PAD.
 local WIDTH, HEIGHT, TAB_H, PAD = 720, 420, 24, 12
 local TITLE_H = NS.Chrome.TITLE_BOTTOM
+local FOOT_GAP = 8   -- between the Alts body's bottom and its footer's hairline
 local SIDE_W, ROW_H, ALT_ROW_H, LABEL_W, ETA_LINES = 190, 18, 32, 150, 5
 local ALT_HEAD_H, CHIP_H, CHIP_GAP = 32, 20, 4
 local LOG_HEAD_H = 18   -- the Log table's header band (round 5), from the chrome's 4 px slack
 local SCROLL_W, SCROLL_GAP = 8, 4   -- the tables' scroll bars (owner feedback round 4)
 local BODY_TOP = TITLE_H + TAB_H + 8
 local LOG_CHROME_H = BODY_TOP + PAD + 20                     -- above and below the log's rows
-local ALT_CHROME_H = BODY_TOP + PAD + 26 + ALT_HEAD_H + 20   -- the chips, the names and the footnote
+local ALT_CHROME_H = BODY_TOP + 26 + ALT_HEAD_H + NS.Chrome.FooterHeight() + FOOT_GAP   -- chips, names, footer
 J.MIN_W, J.MIN_H = WIDTH, HEIGHT
 J.LOG_ROWS = floor((HEIGHT - LOG_CHROME_H) / ROW_H)
 J.ALT_ROWS = floor((HEIGHT - ALT_CHROME_H) / ALT_ROW_H)
@@ -240,10 +245,15 @@ local function makeButton(parent, label, onClick)
     return b
 end
 
-local function panel()
+--- How far above the window's bottom edge a panel ends: the Alts panel above its footer, the Log at PAD.
+local function panelBottom(alts)
+    return alts and NS.Chrome.FooterHeight() + FOOT_GAP or PAD
+end
+
+local function panel(alts)
     local p = CreateFrame("Frame", nil, frame)
     p:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -BODY_TOP)   -- placeTop moves it under a strip
-    p:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -PAD, PAD)
+    p:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -PAD, panelBottom(alts))
     p:EnableMouseWheel(true)
     p.pool = Pool.New()
     return p
@@ -819,7 +829,7 @@ local function layoutChips(p)
 end
 
 local function buildAlts()
-    local p = panel()
+    local p = panel(true)
     p.chips = {}
     for _, f in ipairs(J.FILTER_ORDER) do
         local chip = makeTab(p, J.FilterLabel(f), 40, CHIP_H, function() J.SelectFilter(f) end)
@@ -831,18 +841,13 @@ local function buildAlts()
     p.empty = text(p, "muted")
     p.empty:SetPoint("TOPLEFT", p.header, "BOTTOMLEFT", 8, -8)
     p.empty:SetText(L["No characters recorded yet."])
-    p.foot = text(p, "muted")
-    p.foot:SetPoint("BOTTOMLEFT", p, "BOTTOMLEFT", 0, 0)
-    p.foot:SetPoint("BOTTOMRIGHT", p, "BOTTOMRIGHT", -16, 0)   -- clear of the resize grip
-    p.foot:SetJustifyH("LEFT")
-    p.foot:SetText(L["Snapshots update on login, logout and every skill change. Right-click a character to forget it."])
     p:SetScript("OnMouseWheel", onAltsWheel)
     p.scroll = makeScrollBar(p, function(offset)
         state.altOffset = offset
         J.Render()
     end)
     p.scroll:SetPoint("TOPLEFT", p.header, "BOTTOMRIGHT", SCROLL_GAP, 0)
-    p.scroll:SetPoint("BOTTOMLEFT", p.foot, "TOPRIGHT", 16 + SCROLL_GAP, 4)
+    p.scroll:SetPoint("BOTTOMLEFT", p, "BOTTOMRIGHT", -SCROLL_W, 0)
     return p
 end
 
@@ -923,10 +928,13 @@ end
 
 -- ── the strip's shift ────────────────────────────────────────────────────────────────────────
 
---- How far the tabs and the body sit below their place: the docked strip's BodyOffset (its height
+--- How far the tabs and the body sit below their place: how far the title band's own bottom lies
+--- below TITLE_H (a skin whose band is not 31 px down), plus the docked strip's BodyOffset (its height
 --- while it shows, else 0).
 local function shift()
-    return frame and NS.Chrome.StripOffset(frame.strip) or 0
+    if not frame then return 0 end
+    local C = NS.Chrome
+    return (C.TitleBottom(frame) - TITLE_H) + C.StripOffset(frame.strip)
 end
 
 --- Anchor the tabs, their rule and both panels `shift()` below their place.
@@ -943,8 +951,9 @@ local function placeTop()
     for _, p in ipairs({ frame.logPanel, frame.altsPanel }) do
         p:ClearAllPoints()
         p:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -BODY_TOP - dy)
-        p:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -PAD, PAD)
+        p:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -PAD, panelBottom(p == frame.altsPanel))
     end
+    frame.placedShift = dy
 end
 
 -- ── sizing ───────────────────────────────────────────────────────────────────────────────────
@@ -1042,6 +1051,11 @@ local function build()
     buildTabs()
     frame.logPanel = buildLog()
     frame.altsPanel = buildAlts()
+    frame.altsFooter = NS.Chrome.Footer(frame, {
+        left = L["Snapshots update on login, logout and every skill change. Right-click a character to forget it."],
+        grip = true,   -- its right side clears the resize grip's corner
+    })
+    frame.altsFooter:Hide()
     UISpecialFrames[#UISpecialFrames + 1] = J.FRAME_NAME   -- Escape closes it
     frame:Hide()
     applyPoint()
@@ -1053,16 +1067,16 @@ end
 -- ── the surface ──────────────────────────────────────────────────────────────────────────────
 
 --- Show the strip while test mode is on (without the widgets library, the title says it), and move
---- the tabs and the body when it comes or goes.
+--- the tabs and the body when it comes or goes or the title band's bottom moves (a skin switch).
 local function syncStrip()
     local on = NS.IsTestMode()
     if not frame.strip then
         local title = L["Skill Master \194\183 Journal"]
         frame.title:SetText(on and L["%s - %s"]:format(title, L["Test mode"]) or title)
-        return
+    elseif frame.strip:IsShown() ~= on then
+        frame.strip:SetShown(on)
     end
-    if frame.strip:IsShown() == on then return end
-    frame.strip:SetShown(on)
+    if frame.placedShift == shift() then return end
     placeTop()
     J.Relayout()
 end
@@ -1073,6 +1087,7 @@ function J.Render()
     syncStrip()
     frame.logPanel:SetShown(state.tab == "log")
     frame.altsPanel:SetShown(state.tab == "alts")
+    frame.altsFooter:SetShown(state.tab == "alts")
     for key, tab in pairs(frame.tabs) do NS.Skin.SetTabSelection(tab, key == state.tab) end
     paintBand(frame.logPanel.header)
     paintBand(frame.altsPanel.header)

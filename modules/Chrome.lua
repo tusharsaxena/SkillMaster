@@ -17,6 +17,8 @@ local addonName, NS = ...
 -- NS.Chrome.MakeResizable(frame, spec) -> grip                         the one resize helper
 -- NS.Chrome.TitleBar(frame) -> frame / .StripOffset(strip) -> px       the bar a mode strip docks
 --                                                                      under, and the body's shift
+-- NS.Chrome.TitleBottom(frame) -> px                                   the band's bottom, read from it
+-- NS.Chrome.Footer(frame, opts) -> frame / .FooterHeight() -> px       a window's footer (Widgets')
 -- NS.Chrome.TooltipFontSize(tip, size, first) / .RestoreTooltipFonts(tip)   a tooltip's lines at a
 --                                                                      size (Tooltips page), and back
 
@@ -270,12 +272,13 @@ end
 -- sits*): LibKa0s Widgets' TestStrip with `dock = "title"` anchors itself under the frame it is
 -- handed, full width, and places itself again on every show, hide and resize. Each window hands it
 -- the skin's title band (S.Band), the frame the skin lays where it paints the bar in every skin, so
--- the strip sits under the bar the player sees. What sits below the bar starts C.TITLE_BOTTOM under
--- the window's top edge, plus the strip's BodyOffset while one shows, plus the window's own gap.
+-- the strip sits under the bar the player sees. What sits below the bar starts C.TitleBottom(frame)
+-- under the window's top edge, plus the strip's BodyOffset while one shows, plus the window's own gap.
 -- ---------------------------------------------------------------------------------------------
 
--- The title band's bottom edge below the window's top: its 1 px inset plus `title.height`, 30 px in
--- every skin (standalone-windows, *Window chrome geometry*; skinning-§4, geometry is skin-invariant).
+-- The title band's bottom edge below the window's top when no band is measured (no skin library, or
+-- a band not yet laid): the 1 px inset plus `title.height`, 30 px. A host copies no band height
+-- (standalone-windows, *Window chrome geometry*): C.TitleBottom reads the band where the skin lays it.
 C.TITLE_BOTTOM = 31
 
 --- The window's title bar as a frame: the skin's band, or with no skin library a bare frame of the
@@ -289,6 +292,51 @@ function C.TitleBar(frame)
     bar:SetHeight(C.TITLE_BOTTOM - 1)
     bar:EnableMouse(false)
     return bar
+end
+
+--- The title band's bottom edge below `frame`'s top now: the band's height plus its inset, read from
+--- `frame.titleBar` as the skin laid it (S.Band sits `win.borderSize` in for a flat border, 1 px for
+--- the others; modules/Detached.lua's D.TitleHeight reads its band the same way). C.TITLE_BOTTOM
+--- while no band is measured: no window, no title bar, or a band that answers no height yet.
+function C.TitleBottom(frame)
+    local band = type(frame) == "table" and frame.titleBar
+    if not (type(band) == "table" and band.GetHeight and band.GetPoint) then return C.TITLE_BOTTOM end
+    local h = tonumber(band:GetHeight()) or 0
+    if h <= 0 then return C.TITLE_BOTTOM end
+    local y = select(5, band:GetPoint(1))   -- the band's inset below the window's top edge
+    return h + math.abs(tonumber(y) or 0)
+end
+
+--- The window footer's height, read where the library publishes it (Widgets' FOOTER.HEIGHT, 24 px
+--- under every skin; standalone-windows, *Window chrome geometry*), the same figure with no library.
+function C.FooterHeight()
+    local F = NS.Widgets and NS.Widgets.FOOTER
+    return (F and tonumber(F.HEIGHT)) or 24
+end
+
+--- A window's footer (standalone-windows, *The footer*; AD-89-SM, LibKa0s#89): LibKa0s Widgets'
+--- Footer across `frame`'s bottom edge, no fill, the skin's `divider` hairline along its top, painted
+--- for this addon's skin owner. `opts` = { left = text, grip = bool } (`grip`: its right side clears
+--- the resize grip's corner). With no library, a bare frame of C.FooterHeight() and no hairline, its
+--- `left` line in the muted text role and `foot:SetLeft(text)` as the library's.
+function C.Footer(frame, opts)
+    opts = opts or {}
+    local W = NS.Widgets
+    local foot = W and W.Footer and W.Footer(frame, { owner = addonName, left = opts.left, grip = opts.grip })
+    if foot then return foot end
+    foot = CreateFrame("Frame", nil, frame)
+    foot:SetHeight(C.FooterHeight())
+    foot:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+    foot:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+    foot.left = foot:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    foot.left:SetPoint("LEFT", foot, "LEFT", 8, 0)
+    foot.left:SetPoint("RIGHT", foot, "RIGHT", opts.grip and -22 or -8, 0)
+    foot.left:SetJustifyH("LEFT")
+    foot.left:SetWordWrap(false)
+    NS.Skin.Text(foot.left, "muted")
+    foot.SetLeft = function(self, text) self.left:SetText(type(text) == "string" and text or "") end
+    foot:SetLeft(opts.left)
+    return foot
 end
 
 --- How far a docked strip moves the body down now: its BodyOffset while it shows, else 0 (an
