@@ -284,9 +284,17 @@ local function build()
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     NS.Skin.Shell(frame)
     NS.Skin.Text(frame.title, "title")
-    frame.close = NS.MakeCloseButton(frame, function() P.Hide() end)
-    if frame.close then frame.close:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CHROME) end
-    NS.Skin.Header(frame, { title = frame.title, align = "LEFT", right = { frame.close } })
+    -- The title-bar marks on LibKa0s Widgets' HeaderButtons (AD-86-SM, LibKa0s#86): settings, then
+    -- the close. The popup stands a strata over its openers, HIGH or DIALOG, over the settings panel
+    -- (HIGH), so the settings mark hides it first (hideOnSettings).
+    local hb = NS.Chrome.TitleMarks(frame, {
+        close = function() P.Hide() end,
+        settingsTip = L["Open the settings panel"],
+        hideOnSettings = frame,
+        level = LAYERS.LEVEL.CHROME,
+    })
+    frame.close, frame.settingsButton = hb.close, hb.settings
+    NS.Skin.Header(frame, { title = frame.title, align = "LEFT", right = hb.right, gap = select(2, NS.Chrome.HeaderPitch()) })
     if not frame.title:GetPoint(1) then frame.title:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -7) end
     frame.intro = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.intro:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -(TITLE_H + 8))

@@ -757,6 +757,17 @@ Total.
 - chrome degraded: with no widgets library a footer is a bare frame of FOOTER.HEIGHT with its left line
 - chrome degraded: the main window and the Journal open without LibKa0s, their footers bare
 
+### test_header_buttons.lua (8)
+
+- AD-86 main window: lock, journal, expand / collapse all, settings, close on HeaderButtons
+- AD-86 main window: the settings mark opens the settings through the launcher's opener
+- AD-86 main window: the expand / collapse all mark's tooltip follows what a click does
+- AD-86 journal: lock, settings, close on HeaderButtons, and settings opens the settings
+- AD-86 trainer popup: settings, close on HeaderButtons; settings hides the popup first
+- AD-86 detached and merged bands: a settings mark in the corner, opening the settings
+- AD-86 detached and merged bands: the skin's header places settings in the corner, the marks inward at the pitch
+- AD-86 degraded: without LibKa0s the main window and the Journal still build the strip, settings opening the panel
+
 ### test_seams.lua (5)
 
 - test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
@@ -828,7 +839,7 @@ Total.
 - fb14: Compat.SpellTexture reads C_Spell first, then the global, else nil
 - fb14: the row's icon is a trimmed texture, not two letters
 - fb15: the attach mark is the detach mark turned 180 degrees
-- fb16: one Expand / Collapse all control, between settings and close, showing what a click does
+- fb16: one Expand / Collapse all control, beside the settings mark (AD-86: inward of it), showing what a click does
 - fb16: SetAllCollapsed leaves the detached blocks alone and answers how many it changed
 - fb17: the class icon's source: the atlas where the client has it, else the class sheet
 - fb17: test mode's summary line names the sample character with its class icon
@@ -1027,6 +1038,7 @@ Total.
 | test_preview.lua | 6 |
 | test_sim.lua | 12 |
 | test_window_chrome.lua | 15 |
+| test_header_buttons.lua | 8 |
 | test_seams.lua | 5 |
 | test_m5_seams.lua | 7 |
 | test_m5_review.lua | 5 |
@@ -1046,4 +1058,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **764** |
+| **Total** | **772** |

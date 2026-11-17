@@ -640,9 +640,10 @@ local function buildBand(f)
     f.band:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CONTENT)
     f.dockAll:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.collapseAll:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
-    NS.Skin.Header(f, { title = f.title, align = "LEFT", right = { f.dockAll, f.collapseAll } })
+    -- The settings mark in the corner, the two marks inward of it (AD-86-SM; NS.Detached.BandMarks).
+    local gap = NS.Detached.BandMarks(f, { f.dockAll, f.collapseAll })
     if not f.dockAll:GetPoint(1) then
-        f.dockAll:SetPoint("TOPRIGHT", f, "TOPRIGHT", -NS.Detached.PAD, -2)
+        f.dockAll:SetPoint("RIGHT", f.settingsButton, "LEFT", -gap, 0)
         f.collapseAll:SetPoint("RIGHT", f.dockAll, "LEFT", -2, 0)
         f.title:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -5)
     end
@@ -667,7 +668,7 @@ local function build()
     NS.Skin.Shell(f)
     buildBand(f)
     f.ownScale = 1
-    f.bandParts = { f.title, f.dockAll, f.collapseAll }
+    f.bandParts = { f.title, f.settingsButton, f.dockAll, f.collapseAll }
     return f
 end
 

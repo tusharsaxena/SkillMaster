@@ -87,7 +87,6 @@ local function toggleLock() NS.SetByPath("locked", not NS.GetSetting("locked")) 
 local function openJournal()
     if NS.Journal and NS.Journal.Toggle then NS.Journal.Toggle() end
 end
-local function openSettings() NS.OpenOptionsPanel() end
 --- Whether any docked block that draws rows is expanded: the one Expand / Collapse all control
 --- then collapses, else it expands (the two are one control, feedback round 2).
 function W.AnyExpanded()
@@ -107,46 +106,31 @@ local function paintToggleAll()
     if not b then return end
     local collapse = W.AnyExpanded()
     NS.Chrome.SetIcon(b, collapse and "fullscreen-exit" or "fullscreen-enter", collapse and "-" or "+")
-    b.tip = collapse and L["Collapse all blocks"] or L["Expand all blocks"]
+    NS.Chrome.SetTip(b, collapse and L["Collapse all blocks"] or L["Expand all blocks"])
     b.collapses = collapse
 end
 
-local function controlLevel(b)
-    if b then b:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CHROME) end
-end
-
 local function buildTitleControls()
-    frame.close = NS.MakeCloseButton(frame, function() W.Hide() end)
-    frame.lockButton = NS.Chrome.IconButton(frame, "lock", "L", toggleLock, L["Lock or unlock the window"])
-    frame.journalButton = NS.Chrome.IconButton(frame, "document", "J", openJournal, L["Open the journal"])
-    frame.settingsButton = NS.Chrome.IconButton(frame, "settings", "S", openSettings, L["Open the settings panel"])
-    -- Expand all and Collapse all (FB-16) are one control, between the settings mark and the close:
-    -- it shows what a click does now (paintToggleAll), never both at once (feedback round 2).
-    frame.toggleAllButton = NS.Chrome.IconButton(frame, "fullscreen-exit", "-", toggleAll, L["Collapse all blocks"])
-    -- Each by name: frame.close is nil without the Core library, and ipairs would stop at that hole.
-    controlLevel(frame.close)
-    controlLevel(frame.lockButton)
-    controlLevel(frame.toggleAllButton)
-    controlLevel(frame.journalButton)
-    controlLevel(frame.settingsButton)
-    -- The lock stands with the other marks at the top right (owner feedback round 3).
-    local left = {}
-    local right = { frame.toggleAllButton, frame.settingsButton, frame.journalButton, frame.lockButton }
-    if frame.close then table.insert(right, 1, frame.close) end
-    NS.Skin.Header(frame, { title = frame.title, align = "CENTER", left = left, right = right })
-    if not frame.lockButton:GetPoint(1) then   -- no skin library: the same strip, anchored by hand
-        frame.title:SetPoint("TOP", frame, "TOP", 0, -7)
-        local prev
-        for _, b in ipairs(left) do
-            if prev then b:SetPoint("LEFT", prev, "RIGHT", 4, 0) else b:SetPoint("TOPLEFT", frame, "TOPLEFT", 6, -5) end
-            prev = b
-        end
-        prev = nil
-        for _, b in ipairs(right) do
-            if prev then b:SetPoint("RIGHT", prev, "LEFT", -4, 0) else b:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -6, -5) end
-            prev = b
-        end
-    end
+    -- The title-bar marks on LibKa0s Widgets' HeaderButtons (AD-86-SM, LibKa0s#86; standalone-windows,
+    -- *Title-bar controls*): left to right the lock, the journal and the one Expand / Collapse all
+    -- control (FB-16: it shows what a click does now, paintToggleAll, never both at once), then
+    -- settings, then the close in the corner. The lock stands with the other marks at the top right
+    -- (owner feedback round 3); Expand / Collapse all moves inward of settings, the rule's order.
+    local hb = NS.Chrome.TitleMarks(frame, {
+        close = function() W.Hide() end,
+        settingsTip = L["Open the settings panel"],
+        level = LAYERS.LEVEL.CHROME,
+        extras = {
+            { key = "lock", icon = "lock", glyph = "L", onClick = toggleLock, tip = L["Lock or unlock the window"] },
+            { key = "journal", icon = "document", glyph = "J", onClick = openJournal, tip = L["Open the journal"] },
+            { key = "toggleAll", icon = "fullscreen-exit", glyph = "-", onClick = toggleAll, tip = L["Collapse all blocks"] },
+        },
+    })
+    frame.close, frame.settingsButton = hb.close, hb.settings
+    frame.lockButton, frame.journalButton = hb.extras.lock, hb.extras.journal
+    frame.toggleAllButton = hb.extras.toggleAll
+    NS.Skin.Header(frame, { title = frame.title, align = "CENTER", right = hb.right, gap = select(2, NS.Chrome.HeaderPitch()) })
+    if not frame.title:GetPoint(1) then frame.title:SetPoint("TOP", frame, "TOP", 0, -7) end
 end
 
 local function buildSummary()

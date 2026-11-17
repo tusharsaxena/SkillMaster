@@ -86,8 +86,8 @@ the checks below that cover each item:
 - **SM-DISP-11** (FB-15) A docked block's header shows the detach mark (a box, its arrow out of the
   top right); a detached frame's dock control is the same mark turned round (the arrow into the
   bottom left). Both tint on hover.
-- **SM-DISP-12** (FB-16, round 2) At the top right, between the settings mark and the close: one
-  control. While any block is open it is Collapse all (inward arrows); click it and every block in
+- **SM-DISP-12** (FB-16, round 2; AD-86-SM moved it inward of the settings mark) At the top right,
+  just left of the settings mark: one control. While any block is open it is Collapse all (inward arrows); click it and every block in
   the window folds, and it turns into Expand all (outward arrows). `/reload` keeps it; a detached
   block keeps its own state. Only the lock stands left of the title. At the narrowest Window width
   (320) the title stays centered, and the scroll bar sits inside the window's border.
@@ -638,6 +638,26 @@ the checks below that cover each item:
   skill change...") sits on the same 24 px footer along the window's bottom edge, with the hairline
   over it and the text clear of the resize grip. On the Log tab the footer and its hairline are gone,
   and the log's rows reach as far down as before. Drag the grip: it still resizes the window.
+- **SM-TEST-8** (AD-86-SM, the main window's title marks) Open the main window. At the top right,
+  left to right: the lock, the journal mark, Expand / Collapse all, the settings gear, then the close
+  X in the corner, evenly spaced (6 px apart, the X 6 px from the edge), all the same size and gray at
+  rest. Hover each: its tooltip opens above it ("Lock or unlock the window", "Open the journal",
+  "Collapse all blocks", "Open the settings panel", "Close") and the mark lights in the skin's link
+  color, the X in red. Click the gear: the Skill Master settings open. The lock, the journal mark and
+  Expand / Collapse all still do what they did. Repeat under a second skin (for example WoW Midnight).
+- **SM-TEST-9** (AD-86-SM, the Journal's title marks) Open the Journal: at the top right, the lock,
+  the settings gear, then the close X in the corner, at the same spacing as the main window's. Hover
+  the gear: "Open the settings panel" above it, the gear in the link color. Click it: the settings
+  open. The lock still locks and unlocks both windows, and the X closes the Journal.
+- **SM-TEST-10** (AD-86-SM, the trainer popup's title marks) Open the trainer popup (click an
+  unlearned weapon row): its title bar carries the settings gear left of the close X. Click the gear:
+  the popup closes and the Skill Master settings open on top, not under it. The X still closes it.
+- **SM-TEST-11** (AD-86-SM, the detached and merged bands) Detach a block: its band carries a settings
+  gear in the top right corner, the dock, collapse, sort and filter marks to its left as before (the
+  eye left of them when rows are hidden), evenly spaced. Click the gear: the settings open. Merge two
+  detached blocks: the merged window's band shows the gear in the corner, then dock all and collapse
+  all. With Layout > Detached windows > Title band "On hover", the gear hides and shows with the rest
+  of the band; with "Never", it is gone with the band.
 - **SM-TEST-4** (round 6, R6-11) `/sm test`: Skill Master's waypoint arrow shows,
   pointing up and to the left at a sample weapon master with `240 yd` under it; no map pin is set.
   Drag it where you want it. `/sm test` again: it goes (a waypoint you had set before test mode comes

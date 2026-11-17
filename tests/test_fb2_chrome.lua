@@ -151,7 +151,7 @@ end)
 
 -- ── FB-16: Expand all / Collapse all ─────────────────────────────────────────────────────────
 
-test("fb16: one Expand / Collapse all control, between settings and close, showing what a click does", function()
+test("fb16: one Expand / Collapse all control, beside the settings mark (AD-86: inward of it), showing what a click does", function()
     -- Feedback round 2: the two marks read as one duplicated pair on the lock's side; they are one
     -- control now, at the top right, its mark and tip the act a click performs.
     withWorld(function()

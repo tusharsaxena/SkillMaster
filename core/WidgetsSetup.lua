@@ -4,6 +4,7 @@ local _, NS = ...
 -- window, the Journal and the LDB tooltip's Main window style), Footer and FOOTER, the window footers
 -- and their height through NS.Chrome.Footer (the main window's legend and the Journal's Alts hint
 -- line), CopyWindow, the probe's report (modules/Probe.lua),
+-- HeaderButtons and HEADER, every window's title-bar marks through NS.Chrome.TitleMarks (AD-86-SM),
 -- ContextMenu, the row menu (modules/Interact.lua), and CloseMenu, which the window's OnHide calls
 -- so the menu never outlives it.
 

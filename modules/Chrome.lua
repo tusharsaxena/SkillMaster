@@ -19,6 +19,9 @@ local addonName, NS = ...
 --                                                                      under, and the body's shift
 -- NS.Chrome.TitleBottom(frame) -> px                                   the band's bottom, read from it
 -- NS.Chrome.Footer(frame, opts) -> frame / .FooterHeight() -> px       a window's footer (Widgets')
+-- NS.Chrome.TitleMarks(frame, spec) -> hb                              a window's title-bar marks
+--                                                                      (Widgets' HeaderButtons)
+-- NS.Chrome.HeaderPitch() -> pad, gap / .SetTip(button, words)         the strip's pitch; a mark's words
 -- NS.Chrome.TooltipFontSize(tip, size, first) / .RestoreTooltipFonts(tip)   a tooltip's lines at a
 --                                                                      size (Tooltips page), and back
 
@@ -196,6 +199,10 @@ function C.SetIcon(b, icon, glyph, turned)
         if b.glyph then b.glyph:Hide() end
         return
     end
+    if b.label and not b.glyph then   -- a library mark drawn as its word: the word changes
+        b.label:SetText(glyph or "?")
+        return
+    end
     if not b.glyph then
         b.glyph = b:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         b.glyph:SetPoint("CENTER", b, "CENTER", 0, 0)
@@ -265,6 +272,112 @@ end
 --- draws at one size and one vertical center whatever margin its art leaves.
 function C.HeaderMark(parent, icon, glyph, onClick, tip)
     return newButton(parent, icon, glyph, onClick, tip, true)
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- A window's title-bar marks (AD-86-SM, LibKa0s#86; standalone-windows, *Title-bar controls*):
+-- LibKa0s Widgets' HeaderButtons, right-aligned, left to right the window's own extras, then
+-- settings, then close, one 18 px slot, PAD (6) from the corner and GAP (6) apart, painted by the
+-- library's one path (`icon.tint` at rest, `text.link` under the pointer, the close's own pair).
+-- The settings mark opens this addon's settings through the opener the launcher registered
+-- (core/LauncherSetup.lua's `openSettings`, read by LibKa0s-Core-1.0's OpenSettings), and the close
+-- is built through the one wrapper, NS.MakeCloseButton. Each mark keeps `button.tip`, the words its
+-- callers and suites read, beside the library's `__tip`; C.SetTip writes both.
+-- ---------------------------------------------------------------------------------------------
+
+-- An 18 px mark centered on the 30 px band 1 px in: 1 + (30 - 18) / 2 below the window's top. The
+-- skin's Header places the marks again on its band; this is where they stand without one.
+C.TITLE_MARK_Y = -7
+
+--- The strip's corner inset and gap: Widgets' HEADER, the same figures with no library.
+function C.HeaderPitch()
+    local H = NS.Widgets and NS.Widgets.HEADER
+    return (H and tonumber(H.PAD)) or 6, (H and tonumber(H.GAP)) or 6
+end
+
+--- A mark's tooltip words, read on each hover by this module's marks (`tip`) and the library's (`__tip`).
+function C.SetTip(b, words)
+    if not b then return end
+    b.tip, b.__tip = words, words
+end
+
+--- The settings click without the library: hide `hideOnSettings` first, then the window's own
+--- opener, else the options panel.
+local function plainSettings(spec)
+    return function()
+        local hide = spec.hideOnSettings
+        if hide and hide.Hide then hide:Hide() end
+        if type(spec.settings) == "function" then return spec.settings() end
+        if NS.OpenOptionsPanel then NS.OpenOptionsPanel() end
+    end
+end
+
+--- The strip's entries outermost first: close, settings, then the extras from the innermost out.
+local function plainList(frame, spec, hb)
+    local list = {}
+    if spec.close ~= false then
+        hb.close = NS.MakeCloseButton(frame, spec.close or function() frame:Hide() end)
+        if hb.close then list[1] = { key = "close", btn = hb.close } end
+    end
+    if spec.settings ~= false then
+        hb.settings = C.IconButton(frame, "settings", "S", plainSettings(spec), spec.settingsTip)
+        list[#list + 1] = { key = "settings", btn = hb.settings }
+    end
+    local extras = spec.extras or {}
+    for i = #extras, 1, -1 do
+        local x = extras[i]
+        local b = C.IconButton(frame, x.icon, x.glyph, x.onClick, x.tip)
+        hb.extras[x.key] = b
+        list[#list + 1] = { key = x.key, btn = b }
+    end
+    return list
+end
+
+--- The same strip with no Widgets library: this module's marks, placed from the same corner at the
+--- same pitch, answering the library's shape.
+local function plainMarks(frame, spec)
+    local pad, gap = C.HeaderPitch()
+    local hb = { extras = {}, order = {}, offsets = {}, right = {} }
+    local list = plainList(frame, spec, hb)
+    local off = pad
+    for _, e in ipairs(list) do
+        e.btn:SetPoint(spec.point, frame, spec.point, -off, spec.y)
+        hb.offsets[e.key] = -off
+        hb.right[#hb.right + 1] = { frame = e.btn, x = off }
+        off = off + C.SIZE + gap
+    end
+    for i = #list, 1, -1 do hb.order[#hb.order + 1] = list[i].key end
+    frame.headerButtons = hb
+    return hb
+end
+
+--- Build `frame`'s title-bar marks. spec = {
+---   close = fn | false,            the close's click (false: the window has none)
+---   settings = nil | fn | false,   nil: the launcher's opener; false needs `settingsOptOut`
+---   settingsOptOut, hideOnSettings, settingsTip,
+---   extras = { { key, icon, glyph, tip, onClick }, ... },   left to right, inward of settings
+---   level = n,                     each mark's frame level over the window's (LAYERS.LEVEL.CHROME)
+---   point, y                       the corner the marks stand in before the skin's Header places
+---                                  them on its band (TOPRIGHT, C.TITLE_MARK_Y)
+--- }
+--- Answers HeaderButtons' `hb` (also `frame.headerButtons`): `hb.right` is what NS.Skin.Header takes.
+function C.TitleMarks(frame, spec)
+    local full = {
+        owner = addonName, frame = frame, point = spec.point or "TOPRIGHT", y = spec.y or C.TITLE_MARK_Y,
+        makeClose = NS.MakeCloseButton, close = spec.close, settings = spec.settings,
+        settingsOptOut = spec.settingsOptOut, hideOnSettings = spec.hideOnSettings,
+        settingsTip = spec.settingsTip, extras = spec.extras,
+    }
+    local W = NS.Widgets
+    local hb
+    if W and type(W.HeaderButtons) == "function" then hb = W.HeaderButtons(frame, full) else hb = plainMarks(frame, full) end
+    if spec.settingsTip then C.SetTip(hb.settings, spec.settingsTip) end
+    for _, x in ipairs(spec.extras or {}) do C.SetTip(hb.extras[x.key], x.tip) end
+    if spec.level then
+        local level = frame:GetFrameLevel() + spec.level
+        for _, e in ipairs(hb.right) do e.frame:SetFrameLevel(level) end
+    end
+    return hb
 end
 
 -- ---------------------------------------------------------------------------------------------

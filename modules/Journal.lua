@@ -890,22 +890,20 @@ local function buildChrome()
     NS.Skin.Text(frame.title, "title")
     frame.titleBar = NS.Chrome.TitleBar(frame)
     buildStrip()
-    local close = NS.MakeCloseButton(frame, function() J.Hide() end)
-    if close then
-        close:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -4)
-        close:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CHROME)
-    end
-    frame.close = close
-    -- The lock mark (owner feedback round 5, R5-2): the main window's own, beside the close control,
-    -- toggling the one `locked` setting (/sm lock, /sm unlock); J.ApplyLock repaints it.
-    frame.lockButton = NS.Chrome.IconButton(frame, "lock", "L",
-        function() NS.SetByPath("locked", not NS.GetSetting("locked")) end, L["Lock or unlock the window"])
-    frame.lockButton:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CHROME)
-    if close then
-        frame.lockButton:SetPoint("RIGHT", close, "LEFT", -4, 0)
-    else
-        frame.lockButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -4)
-    end
+    -- The title-bar marks on LibKa0s Widgets' HeaderButtons (AD-86-SM, LibKa0s#86): the lock mark
+    -- (owner feedback round 5, R5-2: the main window's own, toggling the one `locked` setting, /sm
+    -- lock, /sm unlock; J.ApplyLock repaints it), then settings, then the close in the corner.
+    local hb = NS.Chrome.TitleMarks(frame, {
+        close = function() J.Hide() end,
+        settingsTip = L["Open the settings panel"],
+        level = LAYERS.LEVEL.CHROME,
+        extras = {
+            { key = "lock", icon = "lock", glyph = "L", tip = L["Lock or unlock the window"],
+              onClick = function() NS.SetByPath("locked", not NS.GetSetting("locked")) end },
+        },
+    })
+    frame.close, frame.settingsButton, frame.lockButton = hb.close, hb.settings, hb.extras.lock
+    NS.Skin.Header(frame, { right = hb.right, gap = select(2, NS.Chrome.HeaderPitch()) })
 end
 
 --- Paint the lock mark from the `locked` setting: the closed padlock while locked. The setting's
