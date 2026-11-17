@@ -185,6 +185,7 @@ Kit.run{
         "test_polish",
         "test_preview",
         "test_sim",
+        "test_window_chrome",
         "test_seams",
         "test_m5_seams",
         "test_m5_review",

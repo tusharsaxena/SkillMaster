@@ -125,6 +125,9 @@ test("round6 test mode: the Journal shows the main window's strip and its body m
     local ok, err = pcall(function()
         assertTrue(not (f.strip and f.strip:IsShown()), "no strip outside test mode")
         local onTab, onPanel
+        -- The docked strip's BodyOffset reads its own height (AD-88-SM): the client answers 18, the kit's
+        -- unarmed frame 0, so the strip is armed at the published height.
+        if f.strip then f.strip:__setGeom(0, NS.Widgets.TEST_STRIP.HEIGHT) end
         withTestMode(function()
             assertTrue(J.IsShown(), "the Journal, open before, stays open")
             assertTrue(f.strip ~= nil and f.strip:IsShown(), "the strip shows")

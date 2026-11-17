@@ -1,0 +1,174 @@
+-- tests/test_window_chrome.lua — the window chrome of the LibKa0s v1.105.0 adoption run (Ka0sAddonsCommonTasks
+-- docs/2026-11-17-LIBKA0S_V1_105_ADOPTION, wave A; WowAddonStandards v2.113.0):
+--   AD-88-SM, LibKa0s#88: every window's test and sim strip is docked by the library directly under
+--     the title bar (Widgets minor 27, `dock = "title"`; preview-mode, *Where the strip sits*), and
+--     what sits below the title bar moves down by the strip's own `BodyOffset` while it shows:
+--     the main window, the Journal and the LDB tooltip's Main window style;
+--   AD-89-SM, LibKa0s#89: the main window's footer (the bonus legend) is the library's `Footer`
+--     (Widgets minor 27; standalone-windows, *The footer*), FOOTER.HEIGHT tall, the body ending
+--     that far above the window's bottom edge plus the host's gap.
+local T = _G.SKM_TEST
+local NS, M = T.NS, T.mocks
+local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
+
+local W, J, Br, BP, C = NS.MainWindow, NS.Journal, NS.Broker, NS.BrokerPanel, NS.Chrome
+local Widgets = M.LibStub("LibKa0s-Widgets-1.0")
+
+--- Record every point production sets on `region` while `fn` runs (the kit records a frame's
+--- points only on a texture): answers { [point] = { rel, relPoint, x, y } }.
+local function pointsDuring(region, fn)
+    local got = {}
+    rawset(region, "SetPoint", function(_, point, rel, relPoint, x, y)
+        got[point] = { rel = rel, relPoint = relPoint, x = x, y = y }
+    end)
+    local ok, err = pcall(fn)
+    rawset(region, "SetPoint", nil)
+    if not ok then error(err, 0) end
+    return got
+end
+
+--- Assert `strip` is docked under `bar`: the library's dock methods, and its anchors on the bar's
+--- bottom edge, full width (inset 0), placed by the library (strip:Place), never by the host.
+local function assertDockedUnder(strip, bar, what)
+    assertTrue(strip ~= nil, what .. ": the strip is built")
+    assertTrue(bar ~= nil, what .. ": the window names its title bar")
+    assertTrue(type(strip.BodyOffset) == "function" and type(strip.Place) == "function",
+        what .. ": docked by the library (BodyOffset, Place)")
+    local pts = pointsDuring(strip, function() strip:Place() end)
+    assertTrue(pts.TOPLEFT and pts.TOPLEFT.rel == bar, what .. ": TOPLEFT on the title bar")
+    assertEqual(pts.TOPLEFT.relPoint, "BOTTOMLEFT", what .. ": at its bottom-left")
+    assertTrue(pts.TOPRIGHT and pts.TOPRIGHT.rel == bar, what .. ": TOPRIGHT on the title bar")
+    assertEqual(pts.TOPRIGHT.relPoint, "BOTTOMRIGHT", what .. ": at its bottom-right")
+    assertEqual(strip:BodyOffset(), 0, what .. ": no offset while hidden")
+end
+
+--- Arm `strip`'s height at the published TEST_STRIP.HEIGHT: a docked strip's BodyOffset reads its own
+--- height, which the client answers and the kit's unarmed frame answers as 0.
+local function arm(strip)
+    if strip then strip:__setGeom(0, Widgets.TEST_STRIP.HEIGHT) end
+end
+
+local function withTestMode(fn)
+    if NS.IsTestMode() then NS.ToggleTestMode() end
+    NS.ToggleTestMode()
+    local ok, err = pcall(fn)
+    if NS.IsTestMode() then NS.ToggleTestMode() end
+    M.__fireTimers()
+    if not ok then error(err, 0) end
+end
+
+-- ── AD-88-SM: the main window ────────────────────────────────────────────────────────────────
+
+test("chrome AD-88: the main window's test and sim strips dock under its title bar (the skin's band)", function()
+    W.Show()
+    local f = W.Frame()
+    assertTrue(f.titleBar == NS.Skin.Band(f), "the title bar is the skin's band, where it paints the bar")
+    assertDockedUnder(f.strip, f.titleBar, "test strip")
+    assertDockedUnder(f.simStrip, f.titleBar, "sim strip")
+    W.Hide()
+end)
+
+test("chrome AD-88: the main window's body sits under the title bar and moves down by the strip's BodyOffset", function()
+    W.Show()
+    local f = W.Frame()
+    arm(f.strip)
+    local function summaryY() return select(5, f.summaryIcon:GetPoint(1)) end
+    local ok, err = pcall(function()
+        W.Render()
+        assertEqual(summaryY(), -(C.TITLE_BOTTOM + 4), "no strip: the summary under the title band")
+        withTestMode(function()
+            W.Render()
+            local off = f.strip:BodyOffset()
+            assertEqual(off, Widgets.TEST_STRIP.HEIGHT, "the shown strip's offset is its height")
+            assertEqual(summaryY(), -(C.TITLE_BOTTOM + off + 4), "moved down by the offset")
+        end)
+        W.Render()
+        assertEqual(summaryY(), -(C.TITLE_BOTTOM + 4), "and back up when the strip goes")
+    end)
+    W.Hide()
+    if not ok then error(err, 0) end
+end)
+
+-- ── AD-89-SM: the main window's footer ───────────────────────────────────────────────────────
+
+test("chrome AD-89: the main window's legend is the library's Footer, FOOTER.HEIGHT (24 px) tall", function()
+    W.Show()
+    local f = W.Frame()
+    local foot = f.legend
+    assertEqual(Widgets.FOOTER.HEIGHT, 24, "the published footer height")
+    assertTrue(foot ~= nil and foot.line ~= nil and type(foot.SetLeft) == "function"
+        and type(foot.SetGrip) == "function", "built by Widgets.Footer (its hairline and its lines)")
+    assertTrue(foot.rule == nil, "no hand-drawn rule of its own: the footer's hairline is the library's")
+    assertTrue(f.legendText[1]:GetParent() == foot and f.legend.markerLabel:GetParent() == foot,
+        "the legend's swatches and labels ride the footer")
+    W.Hide()
+end)
+
+test("chrome AD-89: the main window's body ends FOOTER.HEIGHT above its bottom edge, plus the gap", function()
+    W.Show()
+    local f = W.Frame()
+    W.Hide()
+    local pts = pointsDuring(f.scroll, function()
+        NS.ToggleTestMode()   -- a marker change is a new layout
+        W.Show()
+        W.Render()
+    end)
+    NS.ToggleTestMode()
+    W.Render()
+    W.Hide()
+    M.__fireTimers()
+    assertTrue(pts.BOTTOMRIGHT ~= nil, "the scroll is placed")
+    assertEqual(pts.BOTTOMRIGHT.y, Widgets.FOOTER.HEIGHT + 2, "FOOTER.HEIGHT plus the host's 2 px gap")
+end)
+
+-- ── AD-88-SM: the Journal ────────────────────────────────────────────────────────────────────
+
+test("chrome AD-88: the Journal's strip docks under its title bar, the tabs moved down by BodyOffset", function()
+    J.Show()
+    local f = J.Frame()
+    local ok, err = pcall(function()
+        assertTrue(f.titleBar == NS.Skin.Band(f), "the title bar is the skin's band")
+        assertDockedUnder(f.strip, f.titleBar, "journal strip")
+        arm(f.strip)
+        if NS.IsTestMode() then NS.ToggleTestMode() end
+        local on = pointsDuring(f.tabs.log, function() NS.ToggleTestMode(); J.Render() end)
+        local ok2, err2 = pcall(function()
+            assertTrue(f.strip:IsShown(), "the strip shows in test mode")
+            assertEqual(f.strip:BodyOffset(), Widgets.TEST_STRIP.HEIGHT, "the offset is the strip's height")
+        end)
+        local back = pointsDuring(f.tabs.log, function() NS.ToggleTestMode(); J.Render() end)
+        M.__fireTimers()
+        if not ok2 then error(err2, 0) end
+        assertEqual(on.TOPLEFT.y, -(C.TITLE_BOTTOM + 2 + Widgets.TEST_STRIP.HEIGHT), "tabs under the strip")
+        assertEqual(back.TOPLEFT.y, -(C.TITLE_BOTTOM + 2), "and under the title band once it goes")
+    end)
+    J.Hide()
+    if not ok then error(err, 0) end
+end)
+
+-- ── AD-88-SM: the LDB tooltip's Main window style ────────────────────────────────────────────
+
+test("chrome AD-88: the Main window style tooltip's strip docks under its title band", function()
+    local p = NS.db.profile.tooltips.ldb
+    local saved = p.style
+    p.style = "window"
+    local ok, err = pcall(function()
+        local f = BP.Frame()
+        assertTrue(f.titleBar == NS.Skin.Band(f), "the title bar is the skin's band")
+        assertDockedUnder(f.strip, f.titleBar, "tooltip strip")
+        arm(f.strip)
+        withTestMode(function()
+            local pts = pointsDuring(f.list, function()
+                Br.OnEnter(M.UIParent)
+            end)
+            assertTrue(f.strip:IsShown(), "the strip shows in test mode")
+            assertEqual(pts.TOPLEFT.y, -(C.TITLE_BOTTOM + f.strip:BodyOffset() + 1), "the body under the strip")
+            -- The kit's Hide fires no OnHide: release the test-mode rows (their bar timers) as the client does.
+            Br.HideTooltip()
+            f:__fire("OnHide")
+        end)
+    end)
+    Br.HideTooltip()
+    p.style = saved
+    if not ok then error(err, 0) end
+end)

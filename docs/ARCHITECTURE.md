@@ -56,6 +56,19 @@ Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), th
 `settings/` holds the schema,
 the slash table and the settings pages.
 
+**Window chrome (LibKa0s v1.105.0 adoption, AD-88-SM and AD-89-SM).** Every window this addon draws
+that shows test or simulated data (the main window, the Journal and the LDB tooltip's Main window
+style) docks its strip with LibKa0s Widgets' TestStrip (`dock = "title"`, Widgets minor 27) under its
+title bar, which is the skin's title band (`NS.Chrome.TitleBar`, `S.Band`). The library anchors the
+strip and places it again on every show, hide and resize. The host never anchors it. Everything
+below the title bar starts at `NS.Chrome.TITLE_BOTTOM` (the band's 1 px inset plus `title.height`, 30
+px) and moves down by the strip's `BodyOffset` while one shows (`NS.Chrome.StripOffset`), as
+preview-mode's *Where the strip sits* requires. The main window's footer, the bonus legend, is the
+library's `Footer`. It has no fill and the skin's `divider` hairline, and it is `FOOTER.HEIGHT` (24
+px) tall across the bottom edge with the legend's swatches laid over it. The body ends that far
+above the window's bottom edge, plus a 2 px gap (standalone-windows, *The footer* and *Window
+chrome geometry*). Without the library the window builds a bare frame of the same height.
+
 ### Per-client features
 
 All features serve WoW Forever; the addon is Forever-only by owner decision. Its core (weapon

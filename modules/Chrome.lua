@@ -15,6 +15,8 @@ local addonName, NS = ...
 --                                                                      (nil takes it off; round 8, R8-2)
 -- NS.Chrome.Snap(texture)                                              snap art to the pixel grid
 -- NS.Chrome.MakeResizable(frame, spec) -> grip                         the one resize helper
+-- NS.Chrome.TitleBar(frame) -> frame / .StripOffset(strip) -> px       the bar a mode strip docks
+--                                                                      under, and the body's shift
 -- NS.Chrome.TooltipFontSize(tip, size, first) / .RestoreTooltipFonts(tip)   a tooltip's lines at a
 --                                                                      size (Tooltips page), and back
 
@@ -261,6 +263,39 @@ end
 --- draws at one size and one vertical center whatever margin its art leaves.
 function C.HeaderMark(parent, icon, glyph, onClick, tip)
     return newButton(parent, icon, glyph, onClick, tip, true)
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- The title bar a mode strip docks under (AD-88-SM, LibKa0s#88; preview-mode, *Where the strip
+-- sits*): LibKa0s Widgets' TestStrip with `dock = "title"` anchors itself under the frame it is
+-- handed, full width, and places itself again on every show, hide and resize. Each window hands it
+-- the skin's title band (S.Band), the frame the skin lays where it paints the bar in every skin, so
+-- the strip sits under the bar the player sees. What sits below the bar starts C.TITLE_BOTTOM under
+-- the window's top edge, plus the strip's BodyOffset while one shows, plus the window's own gap.
+-- ---------------------------------------------------------------------------------------------
+
+-- The title band's bottom edge below the window's top: its 1 px inset plus `title.height`, 30 px in
+-- every skin (standalone-windows, *Window chrome geometry*; skinning-§4, geometry is skin-invariant).
+C.TITLE_BOTTOM = 31
+
+--- The window's title bar as a frame: the skin's band, or with no skin library a bare frame of the
+--- same rect (1 px in, C.TITLE_BOTTOM - 1 tall) that draws nothing and takes no mouse.
+function C.TitleBar(frame)
+    local band = NS.Skin.Band and NS.Skin.Band(frame)
+    if type(band) == "table" then return band end
+    local bar = CreateFrame("Frame", nil, frame)
+    bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 1, -1)
+    bar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -1, -1)
+    bar:SetHeight(C.TITLE_BOTTOM - 1)
+    bar:EnableMouse(false)
+    return bar
+end
+
+--- How far a docked strip moves the body down now: its BodyOffset while it shows, else 0 (an
+--- undocked or absent strip, the library missing, moves nothing).
+function C.StripOffset(strip)
+    if not (strip and type(strip.BodyOffset) == "function") then return 0 end
+    return tonumber(strip:BodyOffset()) or 0
 end
 
 -- ---------------------------------------------------------------------------------------------

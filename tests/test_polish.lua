@@ -379,7 +379,10 @@ test("journal: a grip drag lays out at most once per frame and redraws once, aft
     local size = NS.db.profile.journal.size
     assertEqual(size and size.w, 733)
     assertEqual(size and size.h, 543)
-    assertEqual(J.VisibleLogRows(), math.floor((543 - 58 - 12 - 20) / 18), "the taller window shows more rows")
+    -- The body starts under the title band's bottom (NS.Chrome.TITLE_BOTTOM, AD-88-SM), the tabs and their
+    -- 8 px under it: 31 + 24 + 8, where it was 26 + 24 + 8 before the strip docked under the band.
+    local bodyTop = NS.Chrome.TITLE_BOTTOM + 24 + 8
+    assertEqual(J.VisibleLogRows(), math.floor((543 - bodyTop - 12 - 20) / 18), "the taller window shows more rows")
 
     J.Render, J.Relayout = realRender, realRelayout
     J.Hide()

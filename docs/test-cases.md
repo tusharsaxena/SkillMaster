@@ -739,6 +739,15 @@ Total.
 - sim: combat stops a running session
 - sim: the window shows the simulation strip while a session runs
 
+### test_window_chrome.lua (6)
+
+- chrome AD-88: the main window's test and sim strips dock under its title bar (the skin's band)
+- chrome AD-88: the main window's body sits under the title bar and moves down by the strip's BodyOffset
+- chrome AD-89: the main window's legend is the library's Footer, FOOTER.HEIGHT (24 px) tall
+- chrome AD-89: the main window's body ends FOOTER.HEIGHT above its bottom edge, plus the gap
+- chrome AD-88: the Journal's strip docks under its title bar, the tabs moved down by BodyOffset
+- chrome AD-88: the Main window style tooltip's strip docks under its title band
+
 ### test_seams.lua (5)
 
 - test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
@@ -1008,6 +1017,7 @@ Total.
 | test_polish.lua | 12 |
 | test_preview.lua | 6 |
 | test_sim.lua | 12 |
+| test_window_chrome.lua | 6 |
 | test_seams.lua | 5 |
 | test_m5_seams.lua | 7 |
 | test_m5_review.lua | 5 |
@@ -1027,4 +1037,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **749** |
+| **Total** | **755** |

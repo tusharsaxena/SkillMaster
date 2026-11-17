@@ -15,8 +15,9 @@ local addonName, NS = ...
 -- so the grip's corner follows the cursor rather than the frame growing about its center (FB-33).
 -- A display: it reads NS.SessionLog and NS.Alts through NS.Preview.Log() / .Alts() (test mode's
 -- sample while it is on, T5.2) and repaints on SKILLS_UPDATED and LAYOUT_CHANGED. While test mode
--- is on it shows the main window's test-mode strip under its title, the tabs and the body moved down
--- by the strip's height (owner feedback round 6, R6-2; J.Render syncs it).
+-- is on it shows the main window's test-mode strip, docked by the library directly under its title
+-- bar (Widgets' `dock = "title"`, AD-88-SM), the tabs and the body moved down by the strip's
+-- BodyOffset (owner feedback round 6, R6-2; J.Render syncs it).
 
 NS.Journal = {}
 local J = NS.Journal
@@ -55,7 +56,10 @@ local RANGE_LABEL = {
 function J.RangeLabel(range) return RANGE_LABEL[range] or range end
 
 -- 720 wide (owner feedback round 4): the Zone column took 150 px and the Skill column kept room.
-local WIDTH, HEIGHT, TITLE_H, TAB_H, PAD = 720, 420, 26, 24, 12
+-- TITLE_H is the title band's bottom edge (NS.Chrome.TITLE_BOTTOM): the tabs start under the bar the
+-- skin paints, and the strip docks between the two (AD-88-SM).
+local WIDTH, HEIGHT, TAB_H, PAD = 720, 420, 24, 12
+local TITLE_H = NS.Chrome.TITLE_BOTTOM
 local SIDE_W, ROW_H, ALT_ROW_H, LABEL_W, ETA_LINES = 190, 18, 32, 150, 5
 local ALT_HEAD_H, CHIP_H, CHIP_GAP = 32, 20, 4
 local LOG_HEAD_H = 18   -- the Log table's header band (round 5), from the chrome's 4 px slack
@@ -860,16 +864,16 @@ local function buildTabs()
     NS.Skin.Divider(frame.rule)
 end
 
--- The test-mode strip (round 6, R6-2): the main window's own, under the title while test mode is on.
+-- The test-mode strip (round 6, R6-2): the main window's own, while test mode is on, docked by the
+-- library directly under the title bar, full width (AD-88-SM, LibKa0s#88).
 local function buildStrip()
     frame.strip = NS.Widgets.TestStrip(frame, {
         text  = L["Test mode: the skills shown are sample data."],
         owner = addonName,
         onEnd = function() NS.ToggleTestMode() end,
+        dock = "title", titleBar = frame.titleBar, window = frame,
     })
     if not frame.strip then return end
-    frame.strip:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -TITLE_H)
-    frame.strip:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -TITLE_H)
     frame.strip:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.OVERLAY)
 end
 
@@ -879,6 +883,7 @@ local function buildChrome()
     frame.title:SetText(L["Skill Master \194\183 Journal"])
     NS.Skin.Shell(frame)
     NS.Skin.Text(frame.title, "title")
+    frame.titleBar = NS.Chrome.TitleBar(frame)
     buildStrip()
     local close = NS.MakeCloseButton(frame, function() J.Hide() end)
     if close then
@@ -918,10 +923,10 @@ end
 
 -- ── the strip's shift ────────────────────────────────────────────────────────────────────────
 
---- How far the tabs and the body sit below their place: the strip's height while it shows.
+--- How far the tabs and the body sit below their place: the docked strip's BodyOffset (its height
+--- while it shows, else 0).
 local function shift()
-    if not (frame and frame.strip and frame.strip:IsShown()) then return 0 end
-    return NS.Widgets.TEST_STRIP and NS.Widgets.TEST_STRIP.HEIGHT or 18
+    return frame and NS.Chrome.StripOffset(frame.strip) or 0
 end
 
 --- Anchor the tabs, their rule and both panels `shift()` below their place.

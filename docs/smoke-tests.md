@@ -622,6 +622,18 @@ the checks below that cover each item:
   nothing overlaps. Hover the LDB feed: the same line sits under the tooltip's title. `/sm test`
   again: the strip and the line go and the Journal's tabs move back up. Right-click the Journal's
   strip: End test ends test mode.
+- **SM-TEST-6** (AD-88-SM, the docked strip) `/sm test` with the main window and the Journal open, and
+  hover the LDB feed (Tooltips > Tooltip style: Main window). In each of the three, the amber strip
+  spans the full width directly under the title bar. It touches the bar's bottom edge with no gap,
+  and the bar's title and marks stay visible. The summary line, the Journal's tabs and the tooltip's
+  first block header sit just under the strip and none of them is covered. `/sm test` again: the
+  strip goes and everything moves back up under the title bar. Repeat once under a second skin (for
+  example WoW Midnight): the strip still sits under the bar.
+- **SM-TEST-7** (AD-89-SM, the footer) Open the main window: the bonus legend (temp bonus,
+  permanent bonus and, with thresholds on, threshold) sits on a 24 px footer along the window's
+  bottom edge. The footer has a thin hairline across its top and no darker band of its own (the
+  window's background shows through), the legend text is in the muted color, and the last row
+  scrolls clear above the hairline. Switch skins: the hairline takes the new skin's divider color.
 - **SM-TEST-4** (round 6, R6-11) `/sm test`: Skill Master's waypoint arrow shows,
   pointing up and to the left at a sample weapon master with `240 yd` under it; no map pin is set.
   Drag it where you want it. `/sm test` again: it goes (a waypoint you had set before test mode comes
