@@ -8,9 +8,9 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   micro button instead, and so do the Main window style's rows in either *Open a row from* (round 7,
   R7-6; round 8, R8-1); the Classic style's rows have no secure overlay.
 - The Main window style (round 7, R7-6) shows the window's row tooltip on the shared
-  GameTooltip, anchored to the right of the hovered row; both it and the panel sit at TOOLTIP, and
-  which one draws on top where they overlap (the panel's scroll-bar gutter) is the client's frame
-  level order. The overlay over a panel row is laid at the hover and re-laid on a scroll; the panel
+  GameTooltip, placed beside the panel (AD-92-SM: `NS.Chrome.PlaceBeside` against the panel, the
+  row's group; SM-TIP-6), so it no longer overlaps the panel. Both sit at TOOLTIP; if neither side
+  of the panel has room the tooltip falls back to centered below it. The overlay over a panel row is laid at the hover and re-laid on a scroll; the panel
   never moves while it shows. Unverified in game.
 - The Skills tab's switch and redraw after the secure open (`NS.Interact.ShowSkillsTab`,
   `NS.Compat.RefreshSkillsTab`) run tainted: `SkillsFrame:OnShow` reads the skill list under the
