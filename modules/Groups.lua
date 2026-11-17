@@ -641,10 +641,10 @@ local function buildBand(f)
     f.dockAll:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.collapseAll:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     -- The settings mark in the corner, the two marks inward of it (AD-86-SM; NS.Detached.BandMarks).
-    local gap = NS.Detached.BandMarks(f, { f.dockAll, f.collapseAll })
+    local marks = { f.dockAll, f.collapseAll }
+    local gap = NS.Detached.BandMarks(f, marks)
     if not f.dockAll:GetPoint(1) then
-        f.dockAll:SetPoint("RIGHT", f.settingsButton, "LEFT", -gap, 0)
-        f.collapseAll:SetPoint("RIGHT", f.dockAll, "LEFT", -2, 0)
+        NS.Detached.PlaceInward(f.settingsButton, marks, gap)
         f.title:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -5)
     end
 end

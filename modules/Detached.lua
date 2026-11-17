@@ -14,6 +14,7 @@ local _, NS = ...
 --   took out (NS.Blocks.FilterOf, round 5, R5-10); .StorePoint(id, p) (a split's landing)
 -- NS.Detached.ApplyStyle(f) / .Style() / .TopHeight(f) -> the shared Detached windows style (R5-7)
 -- NS.Detached.BandMarks(f, marks) -> gap: a band's settings mark (HeaderButtons) and its marks (AD-86-SM)
+-- NS.Detached.PlaceInward(anchor, marks, gap): the marks at the strip's pitch when no skin header placed them
 
 NS.Detached = {}
 local D = NS.Detached
@@ -170,6 +171,17 @@ function D.BandMarks(f, marks)
     return gap
 end
 
+--- The no-skin rung of D.BandMarks (S.Header placed nothing): each of `marks`, outermost first, `gap`
+--- left of the one before, the first `gap` left of `anchor` (the settings mark), so the strip keeps
+--- one pitch with or without a skin. Shared by the detached band and the merged window's band.
+function D.PlaceInward(anchor, marks, gap)
+    local prev = anchor
+    for _, b in ipairs(marks) do
+        b:SetPoint("RIGHT", prev, "LEFT", -gap, 0)
+        prev = b
+    end
+end
+
 local function buildBand(f)
     f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     f.title:SetText(NS.BlockDefs[f.id].title)
@@ -205,11 +217,7 @@ local function buildBand(f)
     marks[#marks + 1] = f.restore
     local gap = D.BandMarks(f, marks)
     if not f.dock:GetPoint(1) then
-        f.dock:SetPoint("RIGHT", f.settingsButton, "LEFT", -gap, 0)
-        f.collapse:SetPoint("RIGHT", f.dock, "LEFT", -2, 0)
-        f.sort:SetPoint("RIGHT", f.collapse, "LEFT", -2, 0)
-        if f.filter then f.filter:SetPoint("RIGHT", f.sort, "LEFT", -2, 0) end
-        f.restore:SetPoint("RIGHT", f.filter or f.sort, "LEFT", -2, 0)
+        D.PlaceInward(f.settingsButton, marks, gap)
         f.title:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -5)
     end
 end

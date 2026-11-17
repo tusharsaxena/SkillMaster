@@ -757,7 +757,7 @@ Total.
 - chrome degraded: with no widgets library a footer is a bare frame of FOOTER.HEIGHT with its left line
 - chrome degraded: the main window and the Journal open without LibKa0s, their footers bare
 
-### test_header_buttons.lua (8)
+### test_header_buttons.lua (9)
 
 - AD-86 main window: lock, journal, expand / collapse all, settings, close on HeaderButtons
 - AD-86 main window: the settings mark opens the settings through the launcher's opener
@@ -766,6 +766,7 @@ Total.
 - AD-86 trainer popup: settings, close on HeaderButtons; settings hides the popup first
 - AD-86 detached and merged bands: a settings mark in the corner, opening the settings
 - AD-86 detached and merged bands: the skin's header places settings in the corner, the marks inward at the pitch
+- AD-86 detached and merged bands: without a skin's header, every mark GAP inward of the one before
 - AD-86 degraded: without LibKa0s the main window and the Journal still build the strip, settings opening the panel
 
 ### test_seams.lua (5)
@@ -1038,7 +1039,7 @@ Total.
 | test_preview.lua | 6 |
 | test_sim.lua | 12 |
 | test_window_chrome.lua | 15 |
-| test_header_buttons.lua | 8 |
+| test_header_buttons.lua | 9 |
 | test_seams.lua | 5 |
 | test_m5_seams.lua | 7 |
 | test_m5_review.lua | 5 |
@@ -1058,4 +1059,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **772** |
+| **Total** | **773** |

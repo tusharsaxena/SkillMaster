@@ -654,7 +654,9 @@ the checks below that cover each item:
   the popup closes and the Skill Master settings open on top, not under it. The X still closes it.
 - **SM-TEST-11** (AD-86-SM, the detached and merged bands) Detach a block: its band carries a settings
   gear in the top right corner, the dock, collapse, sort and filter marks to its left as before (the
-  eye left of them when rows are hidden), evenly spaced. Click the gear: the settings open. Merge two
+  eye left of them when rows are hidden), evenly spaced at the main window's pitch (6 px between
+  marks; the band's marks sit a little further apart than before the adoption, so the strip is a
+  touch wider). Click the gear: the settings open. Merge two
   detached blocks: the merged window's band shows the gear in the corner, then dock all and collapse
   all. With Layout > Detached windows > Title band "On hover", the gear hides and shows with the rest
   of the band; with "Never", it is gone with the band.

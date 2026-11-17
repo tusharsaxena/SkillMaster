@@ -69,12 +69,40 @@ test("AD-86 main window: the settings mark opens the settings through the launch
     W.Hide()
 end)
 
-test("AD-86 main window: the expand / collapse all mark's tooltip follows what a click does", function()
-    W.Show()
-    W.Refresh(true)
-    local b = W.Frame().toggleAllButton
-    assertEqual(b.__tip, b.tip, "the library reads the same words the mark carries")
+--- One open block with a row, so a click on Expand / Collapse all has something to fold.
+local function withOpenBlock(fn)
+    local skills = { byKey = { guns = { key = "guns", name = "Guns", category = "weapon", rank = 105, max = 110,
+                                        tempPoints = 0, modifier = 0, learned = true } },
+                     order = { weapon = { "guns" } } }
+    local stats = { base = {}, spell = {}, defense = {}, utility = {} }
+    local saved = B.source
+    B.source = function() return skills, stats end
+    local ok, err = pcall(fn)
+    B.source = saved
+    for _, id in ipairs(NS.BLOCKS) do NS.db.profile.layout.blocks[id].collapsed = false end
     W.Hide()
+    if not ok then error(err, 0) end
+end
+
+test("AD-86 main window: the expand / collapse all mark's tooltip follows what a click does", function()
+    -- The library's HeaderButton shows `__tip` on hover, so that is the field pinned through a toggle
+    -- (review fix: the mark's own `tip` alone is not what the player reads).
+    withOpenBlock(function()
+        W.Show()
+        W.Render()
+        local b = W.Frame().toggleAllButton
+        assertTrue(W.AnyExpanded(), "a block is open")
+        assertEqual(b.__tip, NS.L["Collapse all blocks"], "open: the library shows Collapse all")
+        click(b)
+        M.__fireTimers()
+        W.Render()
+        assertEqual(b.__tip, NS.L["Expand all blocks"], "all collapsed: the library shows Expand all")
+        assertEqual(b.tip, b.__tip, "and the mark's own words agree")
+        click(b)
+        M.__fireTimers()
+        W.Render()
+        assertEqual(b.__tip, NS.L["Collapse all blocks"], "expanded again: back to Collapse all")
+    end)
 end)
 
 test("AD-86 journal: lock, settings, close on HeaderButtons, and settings opens the settings", function()
@@ -180,6 +208,39 @@ test("AD-86 detached and merged bands: the skin's header places settings in the 
     end)
 end)
 
+test("AD-86 detached and merged bands: without a skin's header, every mark GAP inward of the one before", function()
+    -- Review fix: the no-skin rung (S.Header placed nothing) stood the dock GAP from settings but the
+    -- other marks 2 px apart; D.PlaceInward, which both bands' builds call, keeps the strip's one pitch.
+    withBands(function(band, merged)
+        local _, gap = NS.Chrome.HeaderPitch()
+        assertEqual(gap, Widgets.HEADER.GAP, "the strip's pitch is the library's")
+        local chains = {
+            { "a detached block's band", band.settingsButton,
+              { band.dock, band.collapse, band.sort, band.filter, band.restore } },
+            { "a merged window's band", merged.settingsButton, { merged.dockAll, merged.collapseAll } },
+        }
+        for _, c in ipairs(chains) do
+            local what, anchorMark, marks = c[1], c[2], c[3]
+            local placed = {}
+            for _, m in ipairs(marks) do
+                rawset(m, "SetPoint", function(self, point, rel, _, x)
+                    if point == "RIGHT" then placed[self] = { rel, x } end
+                end)
+            end
+            local ok, err = pcall(D.PlaceInward, anchorMark, marks, gap)
+            for _, m in ipairs(marks) do rawset(m, "SetPoint", nil) end
+            if not ok then error(err, 0) end
+            local prev = anchorMark
+            for i, m in ipairs(marks) do
+                local p = placed[m]
+                assertTrue(p ~= nil and p[1] == prev, what .. ": mark " .. i .. " left of the one before")
+                assertEqual(p[2], -gap, what .. ": mark " .. i .. " GAP inward")
+                prev = m
+            end
+        end
+    end)
+end)
+
 -- ── the library-absent rung ──────────────────────────────────────────────────────────────────
 
 local loadDegraded = dofile("tests/degraded_env.lua")
@@ -202,3 +263,4 @@ test("AD-86 degraded: without LibKa0s the main window and the Journal still buil
     assertEqual(join(NS2.Journal.Frame().headerButtons.order), "lock,settings", "the Journal's strip")
     NS2.Journal.Hide()
 end)
+
