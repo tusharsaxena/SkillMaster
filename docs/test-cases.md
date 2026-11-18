@@ -97,10 +97,12 @@ Total.
 - window: combat ends test mode (preview-mode)
 - window: locked refuses the drag; unlocked drags and saves the drop point
 
-### test_launcher.lua (2)
+### test_launcher.lua (4)
 
 - launcher: the object is the brand, the 128 px logo, registered once OnEnable runs
 - launcher: left-click opens the settings panel through the same opener as /sm config
+- launcher: the menu carries a Journal checkbox after Show window and before Open settings
+- launcher: the Journal entry's tick is the Journal's state and its click the journal verb's
 
 ### test_keybinds.lua (4)
 
@@ -1020,7 +1022,7 @@ Total.
 | test_bus.lua | 3 |
 | test_slash.lua | 6 |
 | test_mainwindow.lua | 5 |
-| test_launcher.lua | 2 |
+| test_launcher.lua | 4 |
 | test_keybinds.lua | 4 |
 | test_locale.lua | 8 |
 | test_skinsetup.lua | 5 |
@@ -1081,4 +1083,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **791** |
+| **Total** | **793** |

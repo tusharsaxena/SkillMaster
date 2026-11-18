@@ -391,7 +391,11 @@ placer's horizontal side by screen third and its gap as well.
 - **The minimap button's status tooltip.** `LibKa0s-Launcher-1.0` draws it and re-places it through
   `PlaceLauncher` (Launcher minor 11). No host code anchors it (launcher-§7).
 - **The launcher's options menu.** The client's own menu (`MenuUtil.CreateContextMenu`) places its
-  entries' tooltips (*What it does not bind*).
+  entries' tooltips (*What it does not bind*). Its rows are the library's (Enabled, Locked, Test
+  mode, Sim mode, Show window, Open settings, Open skin selector) plus this addon's one host row,
+  *Journal*, after Show window (`extraEntries`, Launcher minor 11, LibKa0s#81, AD-81-SM): a checkbox
+  ticked while the Journal is open, whose click is `/sm journal`'s own handler (launcher-§2), grayed
+  while the addon is disabled.
 - **Library windows and widgets**: the row menu (Widgets' `ContextMenu`), the docked test and sim
   strips, the debug console, the sim and perf panels, the skin picker and the icon browser. Each is
   placed in the library's own code (`docs/api/Tooltip/version-1-docs.md`, *The library's own sites*).

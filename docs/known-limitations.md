@@ -28,10 +28,6 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   the Skin tab's overrides. Only the bars have their own font block.
 - Two columns place each docked block in the shorter column so far, so the block order reads down
   the columns by height rather than strictly left to right.
-- The launcher menu has no *Journal* entry yet (design §6.8): `LibKa0s-Launcher-1.0` minor 10 builds
-  only its fixed entries (Enabled, Locked, Test mode, Sim mode, Show window, Open settings), takes
-  no extra entry from the descriptor, and launcher-§2 forbids a host menu. It needs a library seam;
-  until then the Journal opens from `/sm journal` and the main window's title-bar journal mark.
 - Broker displays that only call a data object's `OnTooltipShow` show no feed tooltip: the feed
   supplies `OnEnter` / `OnLeave` (its rows are clickable), not `OnTooltipShow`.
 - The Alts matrix shows five characters across at the default width (more as the window widens,

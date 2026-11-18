@@ -551,8 +551,13 @@ In each check, the tooltip's words are what they were before this change.
 
 ## Launcher and settings
 
-- **SM-LDB-1** The minimap button shows the logo. Left-click opens the settings; right-click shows
-  Enabled, Locked, Test mode, Sim mode, Show window. Hovering shows the status tooltip.
+- **SM-LDB-1** (amended, AD-81-SM) The minimap button shows the logo. Left-click opens the settings;
+  right-click shows Enabled, Locked, Test mode, Sim mode, Show window, Journal, then Open settings
+  and Open skin selector. Hovering shows the status tooltip.
+- **SM-LDB-3** (new, AD-81-SM) Right-click the minimap button with the Journal closed: *Journal* is
+  unticked; click it: the Journal opens and the menu closes. Right-click again: *Journal* is ticked;
+  click it: the Journal closes. The same from a broker display's Skill Master feed. `/sm disable`,
+  then right-click: *Journal (enable the addon first)* is grayed and does nothing.
 - **SM-LDB-2** In a broker display (Titan Panel, ChocolateBar or Bazooka), add the one Skill Master
   feed ("Skill Master"; no All, Professions or Weapons feed is offered; the stats have their own
   feed, SM-DISP-40): it shows its

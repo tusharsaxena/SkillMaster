@@ -27,7 +27,7 @@ position says so beside its TOC line (toc-file-§5).
 | `core/DebugLogSetup.lua` | `NS.DebugLog`, `NS.Debug` and its gates (LibKa0s-DebugLog-1.0) | after Constants, State and CoreSetup |
 | `core/SkillMaster.lua` | AceAddon registration, `OnInitialize` / `OnEnable`, stand-down and stand-up, test mode | after CoreSetup: reclaims `NS.Print` from AceConsole |
 | `core/Database.lua` | AceDB store and the migration runner | conventional |
-| `core/LauncherSetup.lua` | the launcher object (LibKa0s-Launcher-1.0), registered OnEnable | conventional |
+| `core/LauncherSetup.lua` | the launcher object (LibKa0s-Launcher-1.0), registered OnEnable; its right-click menu's one host row, *Journal* (`extraEntries`, Launcher minor 11, AD-81-SM): a checkbox after Show window, ticked while the Journal is open, its click `/sm journal`'s handler, grayed while disabled | conventional |
 | `defaults/Profile.lua` | `NS.defaults`, the only place a default is written | read by the schema rows at load |
 | `defaults/SkillCatalog_Forever.lua` | `NS.SkillCatalog` (every profession, the 16 weapon lines, Defense, Lockpicking, Riding) with each line's in-game `icon` and a profession's `iconSpellID`, `NS.SKILL_ICON_UNKNOWN`, the excluded Skills-tab headers, `NS.DataMeta` | read at load by SkillData |
 | `defaults/ClassWeapons_Forever.lua` | `NS.ClassWeapons_Forever[classFile]`: the weapon lines and Riding each class can train | read at load by SkillData |

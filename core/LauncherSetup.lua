@@ -62,6 +62,15 @@ NS.Launcher = lib:New({
     isWindowShown  = function() return NS.MainWindow.IsShown() end,
     toggleWindow   = function() NS.MainWindow.Toggle() end,
 
+    -- The host's own row (Launcher minor 11, LibKa0s#81; AD-81-SM): the Journal, after Show window
+    -- and before Open settings, a checkbox ticked while it is open. Its click is `/sm journal`'s own
+    -- handler (launcher-§2); gated by default, so it grays while the addon is disabled.
+    extraEntries = {
+        { label   = NS.L["Journal"],
+          checked = function() return NS.Journal.IsShown() end,
+          onClick = function() runVerb("journal") end },
+    },
+
     version       = function() return NS.Version() end,
     print         = function(line) NS.Print(line) end,
     debug         = function(tag, message) NS.Debug(tag, "%s", message) end,

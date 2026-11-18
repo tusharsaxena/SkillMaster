@@ -3,7 +3,7 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-791%2F791_passing-green)
+![Tests](https://img.shields.io/badge/Tests-793%2F793_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
@@ -29,7 +29,7 @@ Test mode fills everything with a sample character, a level 22 Dwarf Hunter, so 
 
 `/sm skin` opens the skin picker. While it is open the window shows in test mode so you can see each skin as you pick it, and the eye button turns that preview off and on. Press Apply to keep the skin. Closing the picker without applying puts everything back the way it was.
 
-`/sm journal` (or the journal mark in the window's title bar) opens the Journal: this session's skill-ups with an estimate of when the next one lands, and your other characters' skills side by side. The minimap button opens the settings on a left-click and a menu on a right-click. `/sm disable` turns the whole addon off until you type `/sm enable`. Once, when you have a moment, type `/sm probe`, press Copy on the debug console it writes to, and send the text to the author; it describes how WoW Forever reports your skills and changes nothing.
+`/sm journal` (or the journal mark in the window's title bar) opens the Journal: this session's skill-ups with an estimate of when the next one lands, and your other characters' skills side by side. The minimap button opens the settings on a left-click and a menu on a right-click, whose *Journal* entry opens or closes the Journal. `/sm disable` turns the whole addon off until you type `/sm enable`. Once, when you have a moment, type `/sm probe`, press Copy on the debug console it writes to, and send the text to the author; it describes how WoW Forever reports your skills and changes nothing.
 
 Everything else lives under Settings → AddOns → Ka0s Skill Master, and `/sm help` (or `/skillmaster help`) lists every command.
 
