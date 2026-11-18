@@ -13,6 +13,17 @@ overlay, a pin to the broker feed), `[Skills]` (a scan's line and row counts), `
 queued until combat ends) and `[Arrow]` (the waypoint arrow's library lines), plus the library's own
 `[Cmd]`, `[Cfg]`, `[Launcher]` and `[Lifecycle]` lines.
 
+## Reports
+
+A report is a multi-line read-out the player asks for by name (the owner's report-routing ruling of
+2026-11-08, debug-logging). `/sm probe` is this addon's one report verb besides diagnostics: it writes
+the probe's JSON through `NS.DebugLog:Report("Probe", "probe", fn)`, ungated (it lands with logging
+off), under a `/sm probe` header line. A hidden console opens, and chat gets exactly one pointer line,
+`probe: N lines written to the debug console. Use Copy to share it.` (`REPORT_WRITTEN`, localized
+through the descriptor's `L`). Without the library the probe has no JSON encoder, so it refuses in
+chat on one line and writes nothing. Acknowledgments, refusals, usage, `help` and the reserved
+`/sm list` stay in chat; the Journal shows its log in its own window and has no chat read-out.
+
 ## The diagnostics report
 
 Two forms and no third: `/sm diagnostics` and `/sm debug diagnostics`, plus the console title bar's

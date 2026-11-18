@@ -3,7 +3,7 @@ local _, NS = ...
 -- test and sim strips, docked under each title bar (`dock = "title"`, Widgets minor 27; the main
 -- window, the Journal and the LDB tooltip's Main window style), Footer and FOOTER, the window footers
 -- and their height through NS.Chrome.Footer (the main window's legend and the Journal's Alts hint
--- line), CopyWindow, the probe's report (modules/Probe.lua),
+-- line),
 -- HeaderButtons and HEADER, every window's title-bar marks through NS.Chrome.TitleMarks (AD-86-SM),
 -- ContextMenu, the row menu (modules/Interact.lua), and CloseMenu, which the window's OnHide calls
 -- so the menu never outlives it.
@@ -19,7 +19,6 @@ NS.Widgets = {
     TestStrip  = function() return nil end,
     Footer     = function() return nil end,   -- NS.Chrome.Footer builds a bare frame of FOOTER.HEIGHT
     FOOTER     = { HEIGHT = 24, PAD = 8, GRIP = 22, MARK = 16, MARK_ART = 12, MARK_GAP = 4 },
-    CopyWindow = function() return nil end,
     ContextMenu = function() return nil end,
     CloseMenu  = function() end,
 }

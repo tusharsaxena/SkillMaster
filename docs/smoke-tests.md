@@ -12,7 +12,7 @@ the checks below that cover each item:
 
 | Design §9 item | Checks |
 |---|---|
-| The probe | SM-PROBE-1 |
+| The probe | SM-PROBE-1, SM-PROBE-2 |
 | Each category | SM-DISP-1, SM-TEST-1 |
 | The lure timer | SM-DISP-2, SM-SIM-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
@@ -719,9 +719,13 @@ In each check, the tooltip's words are what they were before this change.
 
 ## Probe
 
-- **SM-PROBE-1** `/sm probe`: a copy window opens with a JSON report, `skillLines` holding every
-  skill (a collapsed header in the Skills tab is collapsed again afterwards). Copy it and send it to
-  the author; it settles the assumed rows in `docs/forever-quirks.md`.
+- **SM-PROBE-1** (amended, AD-79-SM) `/sm probe`: the debug console opens, if it was hidden, with a
+  `/sm probe` header line and the JSON report under it, `skillLines` holding every skill (a collapsed
+  header in the Skills tab is collapsed again afterwards). No copy window opens. Press the console's
+  Copy and send the text to the author; it settles the assumed rows in `docs/forever-quirks.md`.
+- **SM-PROBE-2** (new, AD-79-SM) With debug logging off (`/sm debug off`) and the console closed,
+  `/sm probe`: chat shows exactly one line, `probe: 2 lines written to the debug console. Use Copy to
+  share it.`, and the report is in the console all the same. `/sm list` still prints in chat.
 
 ## Skins and diagnostics
 

@@ -133,14 +133,15 @@ Total.
 - perf: windowRender is noted while a capture is on, and nothing is noted while off
 - perf: every event-path bucket (detachedRender, skillScan, statScan, bonusRefresh) is reached
 
-### test_probe.lua (9)
+### test_probe.lua (10)
 
 - probe: Run() answers the report's six keys
 - probe: skillLines holds the raw returns of every line, the collapsed ones included
 - probe: headers lists the localized header names
 - probe: apis maps every probed name to a boolean
 - probe: enchant carries the weapon enchant returns (a lure's time left)
-- probe: /sm probe shows the report as JSON in the copy window
+- probe: /sm probe writes the JSON report to the debug console with one chat pointer
+- probe: library-absent, /sm probe refuses in chat on one line
 - probe: C_SkillInfo and C_Item are read first, a table-shaped line kept whole
 - probe: a slot-taking C_Item.GetWeaponEnchantInfo does not error, and each try is recorded
 - compat: WeaponEnchantInfo passes a slot and normalizes Forever's table to the 1.12 shape
@@ -1018,7 +1019,7 @@ Total.
 | test_locale.lua | 8 |
 | test_skinsetup.lua | 5 |
 | test_perf.lua | 2 |
-| test_probe.lua | 9 |
+| test_probe.lua | 10 |
 | test_skilldata.lua | 26 |
 | test_trainers.lua | 12 |
 | test_helpers.lua | 8 |
@@ -1074,4 +1075,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **784** |
+| **Total** | **785** |

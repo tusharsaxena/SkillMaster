@@ -255,7 +255,10 @@ strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDAT
 `help`, `config`, `skin`, `show`, `hide`, `toggle`, `journal`, `lock`, `unlock`, `test`, `sim`, `probe`, `enable`, `disable`,
 `list`, `get`, `set`, `reset`, `resetall`, `debug`, `diagnostics`, `perf`, `version`. The bare
 command opens the settings panel. While disabled, every verb but the library's live set refuses on
-one line. The table with each verb's handler and refusal: [slash-dispatch.md](slash-dispatch.md).
+one line. A report verb (`probe`, `diagnostics`) writes to the debug console, ungated, and prints
+one chat pointer; acknowledgments, refusals, `help` and `list` stay in chat
+([debug.md](debug.md#reports)). The table with each verb's handler and refusal:
+[slash-dispatch.md](slash-dispatch.md).
 
 ## Event Subscriptions
 

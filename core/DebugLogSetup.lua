@@ -54,7 +54,8 @@ if not lib then
         BuildDiagnostics = function() return { lines = {}, dropped = 0, capped = false, capsHit = false } end,
         -- Report and Serialize, new at LibKa0s v1.105.0 (DebugLog minor 23), the library's
         -- suggested stub: with no console the report streams to chat with no pointer, and a
-        -- serialize answers one line. Nothing here calls either yet (adoption is LibKa0s#79).
+        -- serialize answers one line. `/sm probe` reaches neither here: with no library it has no
+        -- JSON encoder and refuses in chat before reporting (modules/Probe.lua).
         Report          = function(_, _, _, fn)
             local n = 0
             if type(fn) == "function" then
@@ -126,6 +127,8 @@ NS.DebugLog = lib:New({
     diagnostics = function() return NS.Diagnostics and NS.Diagnostics.Sections() or {} end,
     L = {
         DIAG_WRITTEN = NS.L["Diagnostic report written to the debug console: %d lines. Use Copy to share it."],
+        -- D:Report's one chat pointer (DebugLog minor 23): `/sm probe` is the report verb today.
+        REPORT_WRITTEN = NS.L["%s: %d lines written to the debug console. Use Copy to share it."],
     },
 })
 
