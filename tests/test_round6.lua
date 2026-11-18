@@ -424,18 +424,18 @@ test("round6 thresholds: two switches, off in the window and on in the row toolt
 end)
 
 test("round6 thresholds: the tooltip bar follows its own switch, every other bar the window's", function()
-    local Bar = NS.Bar
+    local Bar = NS.BarStyle
     NS.Helpers.RestoreDefaults("bars")
     for _, k in ipairs({ "row", "compact", "mini" }) do
-        assertFalse(Bar.ResolveStyle(k).showMarkers, k .. ": off by default")
+        assertFalse(Bar.Resolve(k).showMarkers, k .. ": off by default")
     end
-    assertTrue(Bar.ResolveStyle("tooltip").showMarkers, "the row tooltip's bar: on by default")
+    assertTrue(Bar.Resolve("tooltip").showMarkers, "the row tooltip's bar: on by default")
     NS.SetByPath("bars.markersWindow", true)
     NS.SetByPath("bars.markersTooltip", false)
     for _, k in ipairs({ "row", "compact", "mini" }) do
-        assertTrue(Bar.ResolveStyle(k).showMarkers, k .. ": the window switch on")
+        assertTrue(Bar.Resolve(k).showMarkers, k .. ": the window switch on")
     end
-    assertFalse(Bar.ResolveStyle("tooltip").showMarkers, "the row tooltip's switch off")
+    assertFalse(Bar.Resolve("tooltip").showMarkers, "the row tooltip's switch off")
     NS.Helpers.RestoreDefaults("bars")
 end)
 
@@ -1183,7 +1183,7 @@ end)
 
 test("round6 arrow: the fill blends from the skin's accent at 300 yd to its sem.good at 30 yd", function()
     -- Round 8, R8-5: "Use the skin's colors" on (the default) draws these two, through the library.
-    local far, good = NS.Bar.Color("text.accent"), NS.Bar.Color("sem.good")
+    local far, good = NS.SkinColor("text.accent"), NS.SkinColor("sem.good")
     local Lib = WA.lib
     local cFar, cNear = WA.Instance():Colors()
     local function blend(yards) return { Lib.Mix(cFar, cNear, Lib.Fade(yards)) } end
@@ -1243,7 +1243,7 @@ test("round6 arrow: the arrow follows the player's facing and place, throttled, 
         M.__map.player = { mapID = 1453, x = 0.5, y = 0.48 }   -- 20 yd east of the trainer
         tick()
         assertEqual(p.text:GetText(), NS.L["%d yd"]:format(20))
-        local c, good = { p.body:GetVertexColor() }, NS.Bar.Color("sem.good")
+        local c, good = { p.body:GetVertexColor() }, NS.SkinColor("sem.good")
         assertTrue(near(c[1], good[1]) and near(c[2], good[2]) and near(c[3], good[3]), "sem.good within 30 yd")
     end)
 end)

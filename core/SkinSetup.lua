@@ -65,6 +65,26 @@ NS.SKIN_OWNER_TOKENS = {
     ["sm.headerBg"]  = { default = { 0, 0, 0, 0.35 }, follow = "list.header.bg" },
 }
 
+--- A token's color as { r, g, b, a }: the skin's, else the owner token's own default, so a
+--- degraded load (no LibKa0s) still draws. Every surface's one color read (re-homed from
+--- modules/Bar.lua's Bar.Color, AD-80-SM).
+function NS.SkinColor(token)
+    local c = NS.Skin and NS.Skin.Token and NS.Skin.Token(token)
+    if type(c) == "table" then return c end
+    local own = NS.SKIN_OWNER_TOKENS[token]
+    return own and own.default or nil
+end
+
+--- `stored` with the player's class color in place of its RGB while `useClass` is on; the stored
+--- alpha always applies, and an unresolvable class keeps the stored swatch (options-ui-§17).
+function NS.WithClassColor(stored, useClass)
+    local Core = LibStub and LibStub("LibKa0s-Core-1.0", true)
+    if not (useClass and Core and Core.ClassColor) then return stored end
+    local r, g, b = Core.ClassColor("player")
+    if r == nil then return stored end
+    return { r, g, b, type(stored) == "table" and stored[4] or 1 }
+end
+
 local function stored(path)
     if not (NS.db and NS.GetSetting) then return nil end
     return NS.GetSetting(path)

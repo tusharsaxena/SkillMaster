@@ -154,7 +154,7 @@ function I.LinkText(row)
     local e = row.entry
     if row.kind == "stat" then return ("[%s %s]"):format(e.label, e.display or "") end
     if e.learned == false then return ("[%s: %s]"):format(e.name, L["Not learned"]) end
-    return ("[%s %s]"):format(e.name, NS.Bar.Text(e.rank, tonumber(e.modifier) or 0, e.max))
+    return ("[%s %s]"):format(e.name, NS.Widgets.BarText(e.rank, tonumber(e.modifier) or 0, e.max))
 end
 
 --- A learned profession's trade link (owner feedback round 4), as its spellbook icon's shift-click

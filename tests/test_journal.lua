@@ -123,7 +123,7 @@ test("journal: the alts matrix has a column per character, a row per skill, a mi
     assertEqual(lw.label:GetText(), "Leatherworking", "the row's label is the skill")
     assertEqual(lw.cells[c].value:GetText(), "146/150")
     assertTrue(lw.cells[c].bar:IsShown(), "a mini bar for a skill it has")
-    assertTrue(math.abs(lw.cells[c].bar.geom.fill - 146 / 150) < 1e-9, "the shared bar widget draws it (NS.Bar)")
+    assertTrue(math.abs(lw.cells[c].bar.geom.fill - 146 / 150) < 1e-9, "the shared bar widget draws it (Widgets Bar)")
     assertTrue(lw.cells[c].bar.style.key == "mini" and not lw.cells[c].bar.style.showText, "the mini style: no text")
     assertTrue(mining.cells[c].unlearned:IsShown() and not mining.cells[c].value:IsShown()
         and not mining.cells[c].dash:IsShown(), "Unlearned for a profession it has not (round 4)")

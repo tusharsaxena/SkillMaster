@@ -55,7 +55,7 @@ test("skin colors: the category and bonus owner tokens carry the mockup's colors
         local def = NS.SKIN_OWNER_TOKENS[token]
         assertTrue(def ~= nil, token .. " is an owner token")
         assertTrue(near(def.default, hex(h)), token .. " defaults to #" .. h)
-        assertTrue(near(NS.Bar.Color(token), hex(h)), token .. " draws #" .. h .. " under the default skin")
+        assertTrue(near(NS.SkinColor(token), hex(h)), token .. " draws #" .. h .. " under the default skin")
     end
 end)
 
@@ -67,12 +67,12 @@ test("skin colors: following the skin, each category fills in its own token, not
     local seen = {}
     for _, cat in ipairs({ "primary", "secondary", "weapon", "other" }) do
         local c = NS.Rows.FillColor({ key = "x", rank = 1, max = 10, category = cat })
-        assertTrue(near(c, NS.Bar.Color("sm.cat." .. cat)), cat .. " fills in sm.cat." .. cat)
+        assertTrue(near(c, NS.SkinColor("sm.cat." .. cat)), cat .. " fills in sm.cat." .. cat)
         local sig = ("%.3f %.3f %.3f"):format(c[1], c[2], c[3])
         assertTrue(not seen[sig], cat .. " is told apart from the others")
         seen[sig] = true
     end
-    assertTrue(near(NS.Rows.FillColor({ key = "crit", pct = 10 }, true), NS.Bar.Color("sm.cat.stats")), "stats")
+    assertTrue(near(NS.Rows.FillColor({ key = "crit", pct = 10 }, true), NS.SkinColor("sm.cat.stats")), "stats")
     bars.colors.fromSkin = false
     bars.colors.weapon = { 1, 0, 0, 1 }
     assertTrue(near(NS.Rows.FillColor({ key = "x", rank = 1, max = 10, category = "weapon" }), { 1, 0, 0 }),
@@ -124,17 +124,17 @@ test("settings: a strata row's tooltip is the library's, over the row's own valu
 end)
 
 test("fill direction: right to left anchors the fill, the bonus and the spark on the bar's right edge", function()
-    local bar = NS.Bar.Create(M.UIParent, "row")
+    local bar = NS.Widgets.Bar(M.UIParent, NS.BarStyle.Opts("row"))
     bar:SetValues({ value = 50, max = 100, bonus = 10, bonusKind = "temp" })
     assertTrue(tostring((bar.fill:GetPoint(1))):find("LEFT$") ~= nil, "left to right by default")
     NS.SetByPath("bars.fillDirection", "RIGHT")
-    bar:ApplyStyle(NS.Bar.ResolveStyle("row"))
+    bar:ApplyStyle(NS.BarStyle.Resolve("row"))
     assertTrue(tostring((bar.fill:GetPoint(1))):find("RIGHT$") ~= nil, "the fill grows from the right")
     assertTrue(tostring((bar.bonus:GetPoint(1))):find("RIGHT$") ~= nil, "the bonus runs on from it")
     assertTrue(tostring((bar.spark:GetPoint(1))):find("^TOP") ~= nil and select(3, bar.spark:GetPoint(1)) == "TOPRIGHT",
         "the spark rides the fill's left end")
     NS.SetByPath("bars.fillDirection", "LEFT")
-    bar:ApplyStyle(NS.Bar.ResolveStyle("row"))
+    bar:ApplyStyle(NS.BarStyle.Resolve("row"))
     assertTrue(tostring((bar.fill:GetPoint(1))):find("LEFT$") ~= nil, "and back")
 end)
 

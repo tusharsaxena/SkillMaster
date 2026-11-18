@@ -116,7 +116,7 @@ end
 
 -- One tooltip line in a skin token's color (the row tooltip's rule: no typed color).
 local function tipLine(s, token, wrap)
-    local c = NS.Bar.Color(token) or NS.Bar.Color("text.body") or { 1, 1, 1 }
+    local c = NS.SkinColor(token) or NS.SkinColor("text.body") or { 1, 1, 1 }
     GameTooltip:AddLine(s, c[1], c[2], c[3], wrap)
 end
 
@@ -178,12 +178,12 @@ local function paintName(fs)
     local p = trainersProfile()
     if p.nameColorFromSkin ~= false or type(p.nameColor) ~= "table" then
         if not NS.Skin.IsEnabled() then
-            local c = NS.Bar.Color("text.accent")
+            local c = NS.SkinColor("text.accent")
             if c then fs:SetTextColor(c[1], c[2], c[3], c[4] or 1) end
         end
         return
     end
-    local c = NS.Bar.WithClass(p.nameColor, p.useClassColorName)
+    local c = NS.WithClassColor(p.nameColor, p.useClassColorName)
     fs:SetTextColor(c[1], c[2], c[3], c[4] or 1)
 end
 

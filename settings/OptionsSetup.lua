@@ -164,7 +164,7 @@ local descriptor = {
     bulkBegin    = NS.SchemaRuntime.BulkBegin,
     bulkEnd      = NS.SchemaRuntime.BulkEnd,
 
-    -- Colors are stored positionally, { r, g, b, a } (defaults/Profile.lua, NS.Bar reads c[1]..c[4]);
+    -- Colors are stored positionally, { r, g, b, a } (defaults/Profile.lua, the bar styles read c[1]..c[4]);
     -- a keyed table is still read, so a hand-edited value draws.
     colorDecode = function(c)
         c = type(c) == "table" and c or {}

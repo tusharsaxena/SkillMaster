@@ -3,7 +3,7 @@ local _, NS = ...
 -- numbers with the effective rank, the bar, every bonus source (a temp one with its time left), the
 -- session's gains and the ETA (T4.3's session log, when loaded), the next rank and its trainer, a
 -- weapon's distance to its cap, the gathering and fishing helpers (design §12 item 4), a stat's
--- markers and scale, and the click hints. Drawn on GameTooltip with one tooltip-style NS.Bar laid
+-- markers and scale, and the click hints. Drawn on GameTooltip with one tooltip-style Widgets Bar laid
 -- under its numbers line; GameTooltip is never re-skinned (Skin's Tooltip is for library tooltips).
 --
 -- NS.RowTooltip.Lines(entry, kind, openFrom) -> { { left, right, tone, rightTone } | { bar = true } |
@@ -13,7 +13,7 @@ local _, NS = ...
 NS.RowTooltip = {}
 local RT = NS.RowTooltip
 local L = NS.L
-local Bar = NS.Bar
+local Bar = NS.BarStyle   -- the bar's settings; the bar itself is NS.Widgets.Bar (AD-80-SM)
 local DOT = " \194\183 "
 
 local CATEGORY = { primary = L["Primary"], secondary = L["Secondary"], weapon = L["Weapon"], other = L["Other"] }
@@ -28,7 +28,7 @@ end
 
 local function numbers(out, e)
     local mod = tonumber(e.modifier) or 0
-    local text = Bar.Text(e.rank, mod, e.max)
+    local text = NS.Widgets.BarText(e.rank, mod, e.max)
     if mod ~= 0 then text = text .. DOT .. L["effective %d"]:format(e.rank + mod) end
     line(out, text, nil, "body")
     out[#out + 1] = { bar = true }
@@ -45,7 +45,7 @@ local function bonusLines(out, e)
     for _, s in ipairs(sources) do
         local amount = ("%+d"):format(s.amount or 0)
         if s.kind == "temp" and s.expires then
-            amount = amount .. DOT .. Bar.FormatTimer(s.expires - GetTime())
+            amount = amount .. DOT .. NS.Widgets.BarFormatTimer(s.expires - GetTime())
         end
         line(out, s.label, amount, "body", s.kind == "temp" and "temp" or "perm")
         out[#out].tone = s.kind == "temp" and "temp" or "perm"
@@ -215,7 +215,7 @@ local TONES = {
 local function toneColor(tone)
     if tone == "temp" then return Bar.PlayerColor("bonusTemp", "sm.bonusTemp") end
     if tone == "perm" then return Bar.PlayerColor("bonusPerm", "sm.bonusPerm") end
-    return Bar.Color(TONES[tone] or "text.body") or Bar.Color("sm.barText")
+    return NS.SkinColor(TONES[tone] or "text.body") or NS.SkinColor("sm.barText")
 end
 
 local tipBar
@@ -260,7 +260,7 @@ end
 local function ensureBar()
     ensureHooks()
     if tipBar then return tipBar end
-    tipBar = Bar.Create(GameTooltip, "tooltip")
+    tipBar = NS.Widgets.Bar(GameTooltip, Bar.Opts("tooltip"))
     return tipBar
 end
 
@@ -282,7 +282,7 @@ end
 
 local function placeBar(row, n)
     local b = ensureBar()
-    b:ApplyStyle(Bar.ResolveStyle("tooltip"))   -- each show, so a skin switch since the last one lands
+    b:ApplyStyle(Bar.Resolve("tooltip"))   -- each show, so a skin switch since the last one lands
     local anchor = _G["GameTooltipTextLeft" .. n]
     b:ClearAllPoints()
     if anchor then

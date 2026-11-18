@@ -239,7 +239,7 @@ Total.
 - stats: a secret read never raises and keeps the stat's last plain value, marked stale
 - stats: leaving combat asks for a rescan (PLAYER_REGEN_ENABLED)
 
-### test_bar.lua (11)
+### test_bar.lua (14)
 
 - bar: a bonus past the cap clamps the base, draws to the end and keeps the full text (Review Focus 4)
 - bar: the bonus segment wears the temp or the permanent color
@@ -252,6 +252,9 @@ Total.
 - bar: the resolved style reads the profile and the skin's tokens
 - bar: the pool hands bars back in order and clears their timers on release
 - bar: a secret width (a tooltip-anchored bar, tainted) lays out on the last plain width
+- bar: the bars are LibKa0s-Widgets-1.0's Bar, owned by this addon's skin
+- bar: the bonus slots are remapped onto sm.bonusTemp and sm.bonusPerm
+- bar: a bar paints the owner tokens it painted before the swap
 
 ### test_bars_live.lua (18)
 
@@ -791,7 +794,7 @@ Total.
 - test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
 - test_seam_broker_unlearned_row_opens_trainer_popup: the popup gets the skill key, not a table
 - test_seam_alert_click_sets_waypoint: a cap toast's click goes through the real NS.Waypoints
-- test_seam_mini_bars_are_the_bar_widget: the broker tooltip draws NS.Bar's mini style (the Journal's: test_journal)
+- test_seam_mini_bars_are_the_bar_widget: the broker tooltip draws the Widgets Bar's mini style (the Journal's: test_journal)
 - test_seam_title_bar_journal_button: the main window's journal mark toggles the Journal
 
 ### test_m5_seams.lua (7)
@@ -863,7 +866,7 @@ Total.
 - fb17: test mode's summary line names the sample character with its class icon
 - fb17: live, the name is the player's through NS.Compat
 
-### test_surface_parity.lua (11)
+### test_surface_parity.lua (12)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
 - parity: the DebugLog stub carries the whole live surface
@@ -876,6 +879,7 @@ Total.
 - parity: the Toast instance stub carries a live instance's whole surface
 - parity: the Perf, Pool and Widgets stubs carry every member the addon reaches
 - parity: the degraded load completes: options, slash and launcher answer without raising
+- parity: library-absent, a data bar keeps its text and answers every method the addon calls
 
 ### test_vendor_sync.lua (3)
 
@@ -1027,7 +1031,7 @@ Total.
 | test_helpers.lua | 8 |
 | test_bonuses.lua | 16 |
 | test_statdata.lua | 16 |
-| test_bar.lua | 11 |
+| test_bar.lua | 14 |
 | test_bars_live.lua | 18 |
 | test_bars_round2.lua | 8 |
 | test_bars_sizes.lua | 8 |
@@ -1064,7 +1068,7 @@ Total.
 | test_m5_leftovers.lua | 14 |
 | test_m6_fixes.lua | 18 |
 | test_fb2_chrome.lua | 10 |
-| test_surface_parity.lua | 11 |
+| test_surface_parity.lua | 12 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
 | test_diagnostics.lua | 9 |
@@ -1077,4 +1081,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **787** |
+| **Total** | **791** |

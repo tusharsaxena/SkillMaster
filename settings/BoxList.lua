@@ -208,7 +208,7 @@ function List.Row(scroll, list, spec)
     local label = AceGUI:Create(WIDGET)
     label:SetText(spec.text)
     label:SetImage(spec.icon)
-    local muted = spec.dimmed and NS.Bar.Color("sm.muted")
+    local muted = spec.dimmed and NS.SkinColor("sm.muted")
     if muted then label:SetColor(muted[1], muted[2], muted[3]) end
     local actions = spec.actions or {}
     label:SetRelativeWidth(List.LabelWidth(list, #actions))

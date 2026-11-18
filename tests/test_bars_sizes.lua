@@ -149,7 +149,7 @@ test("bar sizes: Main window tooltip row height sizes the bar's line, and a clea
         assertEqual(sized.h, 0, "cleared: back to auto height for the next tooltip")
         set("bars.tooltipRowHeight", 10)
         set("bars.tooltipHeight", 18)
-        assertEqual(NS.Bar.TooltipRowHeight("tooltip"), 18, "never shorter than its bar")
+        assertEqual(NS.BarStyle.TooltipRowHeight("tooltip"), 18, "never shorter than its bar")
         for n = 1, 30 do _G["GameTooltipTextLeft" .. n] = nil end
     end)
 end)
@@ -185,9 +185,9 @@ test("bar sizes: Use the skin's border is off by default, so a skin's real style
         return style, show, size
     end)
     local ok, err = pcall(function()
-        assertEqual(NS.Bar.ResolveStyle("row").border, nil, "Show border off: no border under a real skin style")
+        assertFalse(NS.BarStyle.Resolve("row").border, "Show border off: no border under a real skin style")
         set("bars.borderStyleFromSkin", true)
-        assertTrue(NS.Bar.ResolveStyle("row").border ~= nil, "opted in: the skin's style wins (skinning-§6)")
+        assertTrue(NS.BarStyle.Resolve("row").border ~= nil, "opted in: the skin's style wins (skinning-§6)")
     end)
     rawset(S, "BarBorder", prev)
     NS.Helpers.RestoreDefaults("bars")

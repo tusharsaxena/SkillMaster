@@ -29,9 +29,86 @@ local addonName, NS = ...
 --                                                                      element), above the control (a
 --                                                                      chrome one), toward the screen's
 --                                                                      center (the broker feed's cell)
+-- NS.Chrome.MakeEdges(frame, layer) -> edges / .PaintEdges(edges, c)   a frame's four 1 px edges
+-- NS.Chrome.PaintBorder(frame, s)                                      a frame's border from { border,
+--                                                                      borderStyle, borderSize }: the
+--                                                                      edges for Solid, an LSM border
+--                                                                      on a backdrop child otherwise
+--                                                                      (re-homed from modules/Bar.lua,
+--                                                                      AD-80-SM: the icon well, the
+--                                                                      detached frame, the snap ghost)
 
 NS.Chrome = {}
 local C = NS.Chrome
+
+-- ---------------------------------------------------------------------------------------------
+-- A frame's edges and border (the bars draw theirs through LibKa0s-Widgets-1.0's Bar)
+-- ---------------------------------------------------------------------------------------------
+
+local EDGE = 1   -- an edge's default width, UI units
+local function rgba(c) return c[1], c[2], c[3], c[4] or 1 end
+
+--- Four 1 px edge textures on `frame`, answered as a list (TOP, BOTTOM, LEFT, RIGHT).
+function C.MakeEdges(frame, layer)
+    local edges = {}
+    for i, side in ipairs({ "TOP", "BOTTOM", "LEFT", "RIGHT" }) do
+        local t = frame:CreateTexture(nil, layer or "BORDER")
+        if side == "TOP" or side == "BOTTOM" then
+            t:SetPoint(side .. "LEFT", frame, side .. "LEFT", 0, 0)
+            t:SetPoint(side .. "RIGHT", frame, side .. "RIGHT", 0, 0)
+            t:SetHeight(EDGE)
+        else
+            t:SetPoint("TOP" .. side, frame, "TOP" .. side, 0, 0)
+            t:SetPoint("BOTTOM" .. side, frame, "BOTTOM" .. side, 0, 0)
+            t:SetWidth(EDGE)
+        end
+        edges[i] = t
+    end
+    return edges
+end
+
+--- Color the edges, or hide them for a nil color.
+function C.PaintEdges(edges, c)
+    for _, t in ipairs(edges) do
+        if c then
+            t:SetColorTexture(rgba(c))
+            t:Show()
+        else
+            t:Hide()
+        end
+    end
+end
+
+--- The media path for an LSM key, or nil (no LibSharedMedia, an unknown key).
+function C.Media(kind, key)
+    local LSM = LibStub and LibStub("LibSharedMedia-3.0", true)
+    if not (LSM and type(key) == "string" and key ~= "") then return nil end
+    local ok, path = pcall(LSM.Fetch, LSM, kind, key, true)
+    return ok and path or nil
+end
+
+--- `frame`'s border (`frame.edges`, from C.MakeEdges): the four edges at `borderSize` px for a
+--- Solid style, else the LSM border drawn by a backdrop child (made on first use), else nothing.
+function C.PaintBorder(frame, s)
+    local path = s.border and s.borderStyle ~= "Solid" and C.Media("border", s.borderStyle) or nil
+    local size = s.borderSize or EDGE
+    for i, t in ipairs(frame.edges) do
+        if i <= 2 then t:SetHeight(size) else t:SetWidth(size) end
+    end
+    C.PaintEdges(frame.edges, (s.border and not path) and s.border or nil)
+    if not (path or frame.edgeFrame) then return end
+    local f = frame.edgeFrame
+    if not f then
+        f = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+        f:SetAllPoints(frame)
+        frame.edgeFrame = f
+    end
+    f:SetShown(path ~= nil)
+    if path and f.SetBackdrop then
+        f:SetBackdrop({ edgeFile = path, edgeSize = size })
+        f:SetBackdropBorderColor(rgba(s.border))
+    end
+end
 
 C.SIZE, C.ART = 18, 13   -- one size and one pitch for every control strip
 

@@ -164,7 +164,7 @@ test("rows: the color modes", function()
     bars.colors.fromSkin = false
     assertEqual(R.FillColor(e), bars.colors.primary)
     bars.colors.fromSkin = true
-    assertEqual(R.FillColor(e), NS.Bar.Color("sm.cat.primary"), "a category color that follows the skin")
+    assertEqual(R.FillColor(e), NS.SkinColor("sm.cat.primary"), "a category color that follows the skin")
     bars.colorMode = "progress"
     assertTrue(type(R.FillColor(e)) == "table")
     bars.colorMode = "likelihood"

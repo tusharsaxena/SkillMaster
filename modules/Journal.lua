@@ -121,10 +121,10 @@ local function skillName(key)
     return (tostring(key):gsub("^other:", ""))
 end
 
--- ── the mini bar: the shared bar widget (NS.Bar, "mini" style), colored as the main window's ──
+-- ── the mini bar: the shared bar widget (LibKa0s-Widgets-1.0 Bar, "mini" style), colored as the main window's ──
 
 local function drawMiniBar(cell, value, maxValue, color)
-    cell.bar:ApplyStyle(NS.Bar.ResolveStyle("mini"))   -- a skin or profile change since the last draw
+    cell.bar:ApplyStyle(NS.BarStyle.Resolve("mini"))   -- a skin or profile change since the last draw
     cell.bar:SetValues({ value = value, max = maxValue, color = color })
     cell.bar:Show()
 end
@@ -320,7 +320,7 @@ end
 -- skin's 1 px divider under it. The fill is repainted on every render (J.Render, which a look change
 -- reaches through LAYOUT_CHANGED); the divider is the skin's recorded paint.
 local function paintBand(header)
-    local c = NS.Bar.Color("sm.headerBg")
+    local c = NS.SkinColor("sm.headerBg")
     if c then header.bg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
 end
 
@@ -628,7 +628,7 @@ end
 
 -- One tooltip line in a skin token's color (the row tooltip's rule: no typed color).
 local function tipLine(s, token, wrap)
-    local c = NS.Bar.Color(token) or NS.Bar.Color("text.body") or { 1, 1, 1 }
+    local c = NS.SkinColor(token) or NS.SkinColor("text.body") or { 1, 1, 1 }
     GameTooltip:AddLine(s, c[1], c[2], c[3], wrap)
 end
 
@@ -704,7 +704,7 @@ local function newCell(row, c)
     cell.value:SetPoint("TOPLEFT", row, "TOPLEFT", x, -5)
     cell.value:SetWidth(COL_W - 12)
     cell.value:SetJustifyH("LEFT")
-    cell.bar = NS.Bar.Create(row, "mini")
+    cell.bar = NS.Widgets.Bar(row, NS.BarStyle.Opts("mini"))
     cell.bar:SetPoint("TOPLEFT", row, "TOPLEFT", x, -20)
     cell.bar:SetWidth(cell.barW)
     cell.bar:Hide()

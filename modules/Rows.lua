@@ -1,6 +1,6 @@
 local _, NS = ...
 -- modules/Rows.lua — one skill or stat row (design §6.2/§6.3, plan Task 3.2): an in-game icon in a
--- thin border of the row's color (FB-14), the name, the bar (NS.Bar) and its timer column, and the
+-- thin border of the row's color (FB-14), the name, the bar (LibKa0s-Widgets-1.0 Bar) and its timer column, and the
 -- unlearned variant (dimmed, its icon gray, "Not learned · <trainer>, <city> · <cost>"). Every row,
 -- skill or stat, carries one action mark at its right end (owner feedback rounds 3 and 4): the mark is
 -- the row's action. Open a row from (round 8, R8-1; R.OpenFrom) says whether a plain left click
@@ -123,7 +123,7 @@ local function iconBorderColor(p, rowColor)
     if p.borderColorFromRow == true then return rowColor end
     local S = NS.Skin
     if p.borderColorFromSkin ~= false and S.Color("icon.border") then return { S.Color("icon.border") } end
-    return NS.Bar.WithClass(p.borderColor, p.useClassColorBorder)
+    return NS.WithClassColor(p.borderColor, p.useClassColorBorder)
 end
 
 function R.IconStyle(rowColor, rowH)
@@ -134,7 +134,7 @@ function R.IconStyle(rowColor, rowH)
     local style = S.Resolve("icon.borderStyle", p.borderStyle or "Solid", follow) or p.borderStyle or "Solid"
     local edge = tonumber(S.Resolve("icon.borderSize", tonumber(p.borderSize) or 1, follow)) or 1
     local show = p.border ~= false and style ~= "None" and edge > 0
-    local color = show and (iconBorderColor(p, rowColor) or NS.Bar.Color("sm.barFill")) or nil
+    local color = show and (iconBorderColor(p, rowColor) or NS.SkinColor("sm.barFill")) or nil
     return { show = p.show ~= false, size = size, crop = crop, border = color, borderStyle = style, borderSize = edge }
 end
 
@@ -180,9 +180,9 @@ local LIKELIHOOD = { { 0.95, "sem.neutral" }, { 0.8, "sem.good" }, { 0.5, "sem.s
 
 local function ladder(steps, p)
     for _, step in ipairs(steps) do
-        if p >= step[1] then return NS.Bar.Color(step[2]) or NS.Bar.Color("sm.barFill") end
+        if p >= step[1] then return NS.SkinColor(step[2]) or NS.SkinColor("sm.barFill") end
     end
-    return NS.Bar.Color("sm.barFill")
+    return NS.SkinColor("sm.barFill")
 end
 
 --- The fill color for a row in the profile's color mode: by category (the skin's sm.cat.<category>
@@ -190,12 +190,12 @@ end
 --- orange against the cap) or flat (the Bar color, through its skin and class-color companions).
 function R.FillColor(e, isStat)
     local mode = bars().colorMode
-    if mode == "flat" then return NS.Bar.Swatch("barColor", "sm.barFill", "useClassColorBar") end
+    if mode == "flat" then return NS.BarStyle.Swatch("barColor", "sm.barFill", "useClassColorBar") end
     local p = isStat and (tonumber(e.pct) or 0) / 100 or ((e.max or 0) > 0 and e.rank / e.max or 0)
     if mode == "progress" then return ladder(PROGRESS, p) end
     if mode == "likelihood" and not isStat then return ladder(LIKELIHOOD, p) end
     local cat = isStat and "stats" or (e.category or "other")
-    return NS.Bar.PlayerColor(cat, "sm.cat." .. cat)
+    return NS.BarStyle.PlayerColor(cat, "sm.cat." .. cat)
 end
 
 --- The bar's values for a skill entry, and the earliest temp expiry (or nil). The bonus is the
@@ -211,7 +211,7 @@ function R.SkillValues(e)
     end
     local cat = NS.SkillCatalog[e.key]
     return { value = e.rank, max = e.max, bonus = tonumber(e.modifier) or 0, bonusKind = kind,
-             tiers = cat and cat.tiers }, expires
+             segments = cat and cat.tiers }, expires
 end
 
 --- The bar's values for a stat entry: its percentage of its reference, its markers, its text.
@@ -239,7 +239,7 @@ end
 --- says (by default 16 px, the 0.07 crop and a 1 px border in the row's color, FB-14).
 local function paintIcon(row, color, kind, key, learned)
     local h = row.baseH or bars().rowHeight or 20
-    local st = R.IconStyle(color or NS.Bar.Color("sm.barFill"), h)
+    local st = R.IconStyle(color or NS.SkinColor("sm.barFill"), h)
     local f = row.iconFrame
     f:SetShown(st.show)
     placeName(row, st.show)
@@ -247,7 +247,7 @@ local function paintIcon(row, color, kind, key, learned)
     f:SetSize(st.size, st.size)
     f:ClearAllPoints()
     f:SetPoint("TOPLEFT", row, "TOPLEFT", R.PAD, -(h - st.size) / 2)
-    NS.Bar.PaintBorder(f, st)
+    NS.Chrome.PaintBorder(f, st)
     local inset = st.border and st.borderSize or 0
     row.icon:ClearAllPoints()
     row.icon:SetPoint("TOPLEFT", f, "TOPLEFT", inset, -inset)
@@ -322,7 +322,7 @@ function Row:SetSkill(e)
     local mode = R.Display()
     setAct(self, true)
     if mode == "text" then
-        return showValueOnly(self, NS.Bar.Text(v.value or 0, v.bonus, v.max or 0, bars().textTemplate))
+        return showValueOnly(self, NS.Widgets.BarText(v.value or 0, v.bonus, v.max or 0, bars().textTemplate))
     end
     v.color = color
     if mode == "bar" then v.text = "" end
@@ -440,8 +440,8 @@ local function buildIcon(row)
     local bg = f:CreateTexture(nil, "BACKGROUND")
     bg:SetAllPoints(f)
     row.iconFrame, row.iconBg = f, bg
-    row.iconEdges = NS.Bar.MakeEdges(f, "BORDER")
-    f.edges = row.iconEdges   -- NS.Bar.PaintBorder's field: the icon's border is a bar border's kind
+    row.iconEdges = NS.Chrome.MakeEdges(f, "BORDER")
+    f.edges = row.iconEdges   -- NS.Chrome.PaintBorder's field: the icon's border is a bar border's kind
     -- Inside the 1 px edges, so the row's color stays a thin border round the art.
     row.icon = f:CreateTexture(nil, "ARTWORK")
     row.icon:SetPoint("TOPLEFT", f, "TOPLEFT", 1, -1)
@@ -495,7 +495,7 @@ local function build(parent, styleKey)
     row:RegisterForClicks("AnyUp")
     buildIcon(row)
     buildText(row)
-    row.bar = NS.Bar.Create(row, styleKey)
+    row.bar = NS.Widgets.Bar(row, NS.BarStyle.Opts(styleKey))
     row.bar:SetPoint("LEFT", row.name, "RIGHT", R.PAD, 0)
     row.bar:SetPoint("RIGHT", row, "RIGHT", -R.BAR_RIGHT, 0)
     buildAct(row)
@@ -513,8 +513,8 @@ function R.NewPool() return NS.Pool.New() end
 function R.Acquire(pool, parent, styleKey)
     local row = NS.Pool.Acquire(pool, function() return build(parent, styleKey) end)
     row:SetParent(parent)
-    row.bar:ApplyStyle(NS.Bar.ResolveStyle(styleKey))
-    local c = NS.Bar.Color("sm.iconBg")   -- every acquire, so a skin switch reaches a pooled row
+    row.bar:ApplyStyle(NS.BarStyle.Resolve(styleKey))
+    local c = NS.SkinColor("sm.iconBg")   -- every acquire, so a skin switch reaches a pooled row
     if c then row.iconBg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
     local h = bars().rowHeight or 20
     -- The icon and the action mark sit in the row's first line, so a hint line can grow it below.

@@ -124,7 +124,7 @@ rows[#rows + 1] = row({
 })
 
 local function barPreset(value)
-    return { value = value, text = NS.Bar.Text(107, 25, 150, value) }
+    return { value = value, text = NS.Widgets.BarText(107, 25, 150, value) }
 end
 add(rows, NS.TemplateRows({
     path = "bars.textTemplate", presetPath = "bars.textPreset", page = PAGE, group = TEXT, subgroup = CONTENT,

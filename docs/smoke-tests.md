@@ -443,6 +443,22 @@ the checks below that cover each item:
 - **SM-DISP-13** (FB-17) The summary line opens with the class icon, then the character's name in
   its class color, then `· Lv N · Race Class`. Note which icon source drew (the `classicon-<class>`
   atlas, or the class sheet), or none.
+## Data bars (AD-80-SM, LibKa0s#80)
+
+Every data bar is LibKa0s-Widgets-1.0's `Bar` now, styled from the Bars page by `NS.BarStyle`.
+
+- **SM-BAR-1** (new) Open the window with a lure on and a racial bonus: every skill and stat bar
+  looks as it did before: the fill in its category color, the bonus segment past it teal for the
+  lure (temp) and blue for the racial (permanent), the `107 +25 / 150` text and the lure's timer
+  inside the bar's far end. The same on a detached block, the row tooltip's bar, the Journal's Alts
+  mini bars and the LDB tooltip's mini bars. The window's legend swatches match the bonus colors.
+- **SM-BAR-2** (new, the one visible change) Bars > Show border on, thickness 1: each bar's edge is
+  one physical pixel, crisp at any UI scale (it was one UI unit, which a fractional scale blurred
+  or doubled); thickness 3 draws three pixels.
+- **SM-BAR-3** (new) With the window open, switch the skin (`/sm skin`, Apply): every bar repaints
+  in the new skin at once, no `/reload`. Bars > Rank tier colors on (Color mode By category): a
+  profession bar splits into a shade per rank tier entered, on a scale to 300.
+
 ## Tooltip placement (AD-92-SM, LibKa0s#92)
 
 Every tooltip Skill Master places itself opens where its element sits, never at the pointer and never

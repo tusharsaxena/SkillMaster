@@ -43,7 +43,8 @@ Env, Core, Skin, Bus, Pool, Widgets, Lifecycle, Perf, DebugLog, Launcher), the A
 wrapped at load by the simulator's seam (`core/SimSetup.lua`);
 `defaults/Profile.lua` is the defaults tree and `defaults/*_Forever.lua` the data tables (the skill
 catalog, the class weapon lists, trainers, ranks, gathering, fishing, racials, stat definitions);
-`modules/` holds the display (the bar widget `NS.Bar`, the title-bar controls `NS.Chrome`, the
+`modules/` holds the display (the bar style `NS.BarStyle`, this addon's settings for LibKa0s-Widgets-1.0's
+Bar, which draws every data bar; the title-bar controls `NS.Chrome`, the
 blocks `NS.Blocks`, the rows `NS.Rows`, the detached frames, the merged windows `NS.Groups` and their drags `NS.GroupsSnap`, the
 main window, the secure crafting
 overlays, the click map `NS.Interact`, the row tooltip, the trainer popup, `NS.Waypoints` and
@@ -182,7 +183,7 @@ Detached windows. `NS.Detached.ApplyStyle(frame)` paints it on each render: the 
 own `ownScale` times the tab's), the opacity, the background (the skin's `S.Shell` fill while
 `bgFromSkin` is on, else the swatch on a BACKGROUND 2 fill of the frame's own, over the skin's
 gradient and art and under the band), the border (the skin's edge while `borderFromSkin` is on,
-`S.Shell` `noBorder` otherwise, the frame's own edges through `NS.Bar.PaintBorder`) and the title
+`S.Shell` `noBorder` otherwise, the frame's own edges through `NS.Chrome.PaintBorder`) and the title
 band (`noTopBar` and the frame's `bandParts` hidden for Never; for On hover a 0.1 s `OnUpdate` poll of
 `IsMouseOver` toggles both). `S.Shell` is re-called only when its opts change, and the skin's own
 repaint replays the recorded ones. A merged group's frame takes the same call.

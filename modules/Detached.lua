@@ -262,14 +262,14 @@ end
 -- The background's swatch color while the skin's is not followed, else nil.
 local function bgColor(st)
     if st.bgFromSkin ~= false or type(st.bgColor) ~= "table" then return nil end
-    return NS.Bar.WithClass(st.bgColor, st.useClassColorBg)
+    return NS.WithClassColor(st.bgColor, st.useClassColorBg)
 end
 
 -- The window's own border while it is shown and the skin's is not followed, else nil.
 local function ownBorder(st)
     if st.border == false or st.borderFromSkin ~= false then return nil end
     local c = type(st.borderColor) == "table" and st.borderColor or NS.defaults.profile.layout.detached.borderColor
-    return { border = NS.Bar.WithClass(c, st.useClassColorBorder), borderStyle = st.borderStyle or "Solid",
+    return { border = NS.WithClassColor(c, st.useClassColorBorder), borderStyle = st.borderStyle or "Solid",
              borderSize = tonumber(st.borderSize) or 1 }
 end
 
@@ -299,7 +299,7 @@ local function ensureLayers(f)
     f.styleEdge = CreateFrame("Frame", nil, f)
     f.styleEdge:SetAllPoints(f)
     f.styleEdge:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
-    f.styleEdge.edges = NS.Bar.MakeEdges(f.styleEdge, "OVERLAY")
+    f.styleEdge.edges = NS.Chrome.MakeEdges(f.styleEdge, "OVERLAY")
 end
 
 local function bandShown(f, shown)
@@ -344,7 +344,7 @@ function D.ApplyStyle(f)
         f.styleBg:Hide()
     end
     local own = ownBorder(st)
-    NS.Bar.PaintBorder(f.styleEdge, own or { border = nil, borderStyle = "Solid", borderSize = 1 })
+    NS.Chrome.PaintBorder(f.styleEdge, own or { border = nil, borderStyle = "Solid", borderSize = 1 })
     -- The skin's edge only while the border is shown and follows it; the window's own edge otherwise.
     f.__noBorder = st.border == false or st.borderFromSkin == false
     local mode = titleBand(st)

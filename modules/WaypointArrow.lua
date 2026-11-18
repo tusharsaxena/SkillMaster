@@ -106,7 +106,7 @@ end
 -- ---------------------------------------------------------------------------------------------
 
 local function tipLine(s, token)
-    local c = NS.Bar.Color(token) or NS.Bar.Color("text.body") or { 1, 1, 1 }
+    local c = NS.SkinColor(token) or NS.SkinColor("text.body") or { 1, 1, 1 }
     GameTooltip:AddLine(s, c[1], c[2], c[3], true)
 end
 

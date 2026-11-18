@@ -602,7 +602,7 @@ end
 local Header = {}
 
 local function paintHeaderBg(h)
-    local c = NS.Bar.Color("sm.headerBg")
+    local c = NS.SkinColor("sm.headerBg")
     if c then h.bg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
 end
 
@@ -826,7 +826,7 @@ local function relayout()
     -- The in-game check that a look write reached the bars (/sm debug): the bar height drawn now.
     if NS.State.debug then
         NS.Debug("Set", "relayout: %d window rows restyled, bar height %s",
-            NS.MainWindow and #NS.MainWindow.Rows() or 0, tostring(NS.Bar.ResolveStyle("row").height))
+            NS.MainWindow and #NS.MainWindow.Rows() or 0, tostring(NS.BarStyle.Resolve("row").height))
     end
 end
 

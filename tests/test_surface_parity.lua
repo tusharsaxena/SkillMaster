@@ -67,7 +67,10 @@ test("parity: the Perf, Pool and Widgets stubs carry every member the addon reac
         Perf    = { "on", "suspended", "Note", "OnCommand" },
         Pool    = { "New", "Acquire", "ReleaseAll", "Counts", "NewKeyed", "AcquireKeyed",
                     "ReleaseAllKeyed", "CountsKeyed" },
-        Widgets = { "TestStrip", "Footer", "FOOTER", "ContextMenu", "CloseMenu" },
+        Widgets = { "TestStrip", "Footer", "FOOTER", "ContextMenu", "CloseMenu",
+                    -- the data bar (AD-80-SM): every Bar member the addon reaches
+                    "Bar", "BarStyle", "AcquireBar", "ReleaseBars", "BarText", "BarFormatTimer",
+                    "BarShade", "BAR" },
     }
     local problems = {}
     for seam, keys in pairs(reached) do
@@ -87,4 +90,20 @@ test("parity: the degraded load completes: options, slash and launcher answer wi
     NS2.Slash:OnSlash("diagnostics")
     NS2.MainWindow.Toggle()
     assertTrue(NS2.MainWindow.IsShown(), "the window still opens without LibKa0s")
+end)
+
+test("parity: library-absent, a data bar keeps its text and answers every method the addon calls", function()
+    local NS2, M2 = loadDegraded()
+    local W = NS2.Widgets
+    local bar = W.Bar(M2.UIParent, { style = W.BarStyle("row", { height = 16 }) })
+    for _, m in ipairs({ "SetValues", "SetTimer", "ApplyStyle", "Repaint", "Park", "Layout" }) do
+        assertTrue(type(bar[m]) == "function", "the stub bar's " .. m)
+    end
+    bar:SetValues({ value = 107, max = 150, bonus = 25 })
+    bar:SetTimer(9999)
+    assertTrue(bar.text:GetText() == "107 +25 / 150", "the text: " .. tostring(bar.text:GetText()))
+    local pool = {}
+    local a = W.AcquireBar(pool, M2.UIParent, { style = W.BarStyle("mini") })
+    W.ReleaseBars(pool)
+    assertTrue(W.AcquireBar(pool, M2.UIParent, { style = W.BarStyle("mini") }) == a, "pooled in order")
 end)

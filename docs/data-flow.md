@@ -140,7 +140,7 @@ The README's `## How the bars work` is the player-facing version of this page.
   right-click menu (round 9, R9-2) clears the waypoint, shares it in chat, shows it on the map, locks
   or resets the arrow, opens `NS.TrainerPopup.Show(key)` (Show trainers) or the Trainers and
   Waypoints page (Arrow settings...), and Hide arrow unticks `waypoints.arrow`.
-- The broker tooltip and the Journal's alt grid draw `NS.Bar` in its `mini` style: the broker from
+- The broker tooltip and the Journal's alt grid draw LibKa0s-Widgets-1.0's `Bar` in `NS.BarStyle`'s `mini` style: the broker from
   `NS.Rows.SkillValues` / `StatValues` with `NS.Rows.FillColor`, the Journal from the snapshot's rank,
   cap and category. Both follow `profile.bars` (the colors, `miniHeight`, the broker tooltip's `brokerRowHeight`, the fill direction) as the
   window's rows do. While `bars.colors.fromSkin` is on (the default) a category fills in the skin's

@@ -147,7 +147,7 @@ test("bar border: off by default in the profile and on its schema row", function
     assertTrue(row ~= nil, "the Show border row")
     assertFalse(row.default, "the Show border row's default agrees")
     withWindow(function()
-        assertEqual(NS.Bar.ResolveStyle("row").border, nil, "no border color resolved")
+        assertFalse(NS.BarStyle.Resolve("row").border, "no border color resolved")
         local bar = windowRow("leatherworking").bar
         for _, e in ipairs(bar.edges) do assertFalse(e:IsShown(), "a window bar draws no edge") end
     end)
@@ -158,7 +158,7 @@ test("bar border: off under the default skin's None; a real skin style wins only
     -- on, and the companion off hands Show border back. red under: Off ignored under None, or the
     -- companion off still drawing the skin's edge.
     withWindow(function()
-        assertEqual(NS.Bar.ResolveStyle("row").border, nil, "the shipped skin (None): Show border off is off")
+        assertFalse(NS.BarStyle.Resolve("row").border, "the shipped skin (None): Show border off is off")
     end)
     local S = NS.Skin
     local prev = rawget(S, "BarBorder")
@@ -170,12 +170,12 @@ test("bar border: off under the default skin's None; a real skin style wins only
     end)
     local ok, err = pcall(withWindow, function()
         -- The companion defaults OFF (the owner's ruling, an options-ui-§16 deviation).
-        assertEqual(NS.Bar.ResolveStyle("row").border, nil, "the companion off by default: Show border off is off")
+        assertFalse(NS.BarStyle.Resolve("row").border, "the companion off by default: Show border off is off")
         assertFalse(follows, "the companion is off by default")
         set("bars.borderStyleFromSkin", true)
-        assertTrue(NS.Bar.ResolveStyle("row").border ~= nil, "opted in: a skin stating a real style wins (skinning-§6)")
+        assertTrue(NS.BarStyle.Resolve("row").border ~= nil, "opted in: a skin stating a real style wins (skinning-§6)")
         set("bars.borderStyleFromSkin", false)
-        assertEqual(NS.Bar.ResolveStyle("row").border, nil, "the companion off again: Show border off is off")
+        assertFalse(NS.BarStyle.Resolve("row").border, "the companion off again: Show border off is off")
     end)
     rawset(S, "BarBorder", prev)
     if not ok then error(err, 0) end
@@ -198,7 +198,7 @@ end
 test("trainer popup: the trainer's name wears the skin's accent by default, apart from the other text", function()
     withWindow(function()
         local name, where = nameColor()
-        local accent = NS.Bar.Color("text.accent")
+        local accent = NS.SkinColor("text.accent")
         assertTrue(accent ~= nil, "the skin answers an accent")
         for i = 1, 3 do assertNear(name[i], accent[i], 1e-6, "the name's channel " .. i) end
         local same = true
@@ -221,7 +221,7 @@ test("trainer popup: the name's swatch draws once Use the skin's color is off, t
         assertNear(nameColor()[1], r, 1e-6, "the class color")
         assertNear(nameColor()[4], 0.9, 1e-6, "the stored alpha still applies")
         set("trainers.nameColorFromSkin", true)
-        local accent = NS.Bar.Color("text.accent")
+        local accent = NS.SkinColor("text.accent")
         assertNear(nameColor()[1], accent[1], 1e-6, "back on the skin's accent")
         NS.TrainerPopup.Hide()
     end)
