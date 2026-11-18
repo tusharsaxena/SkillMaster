@@ -1,6 +1,6 @@
 local _, NS = ...
 -- settings/Bars.lua — the Bars page (design §6.6, mockup "Options"): every look the bar widget
--- (modules/Bar.lua) draws. No preview bar (owner feedback round 4): the open window is the preview.
+-- (LibKa0s-Widgets-1.0's Bar, through NS.BarStyle) draws. No preview bar (owner feedback round 4): the open window is the preview.
 --
 --   Bar      -- Size -- the six heights           -- Fill -- the composed bar block (flat mode's color)
 --            -- Background -- the swatch pair     -- Border -- the composed border block
