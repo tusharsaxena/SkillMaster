@@ -644,11 +644,15 @@ In each check, the tooltip's words are what they were before this change.
 
 ## Test mode and the simulator
 
-- **SM-TEST-1** `/sm test`: the window, a detached block, the broker feed and the Journal all show
-  Ember Ironsong, the level-22 Dwarf Hunter (Leatherworking 146/150, Fishing 107 +25 with a lure
-  timer near 4:12, Guns 105 +5, Fist Weapons, Polearms, Thrown and Riding unlearned), the summary
-  reads "Ember Ironsong · Lv 22 · Dwarf Hunter" behind the Hunter icon and the strip says the data is sample data. `/sm test` again: your
-  own character everywhere.
+- **SM-TEST-1** (amended, AD-87-SM) `/sm test`: the window, a detached block, the broker feed and the
+  Journal all show Samplehunter Mockstride, the level-22 Dwarf Hunter (Leatherworking 146/150, Fishing
+  107 +25 with a lure timer near 4:12, Guns 105 +5, Fist Weapons, Polearms, Thrown and Riding
+  unlearned), the summary reads "Samplehunter Mockstride · Lv 22 · Dwarf Hunter" behind the Hunter
+  icon and the strip says the data is sample data. `/sm test` again: your own character everywhere.
+- **SM-TEST-12** (new, AD-87-SM) `/sm test`, then the Journal's Alts tab: the columns are Samplehunter
+  Mockstride (this character, first), then Mockflame Samplewick (Mage), Mockshield Sampleforge
+  (Warrior) and Sampleblade Mockvale (Paladin). Every name starts `Sample` or `Mock`; hovering a
+  name's header shows `Realm: Samplerealm` or `Realm: Mockrealm`, never a real realm.
 - **SM-TEST-2** (round 5, R5-1) With the main window and the Journal closed, `/sm test`: both open,
   and three toasts stack: the Leatherworking 150 / 150 cap toast (its next rank and trainer), a weapon-gap
   toast for Daggers (red numbers) and a skill-up toast for Bows (green numbers). They stay up (no countdown) and drag as one

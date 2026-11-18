@@ -223,7 +223,7 @@ test("round5 test mode: /sm test shows the main window, the Journal and one stic
         local kinds = {}
         for _, t in ipairs(A.TestToasts()) do kinds[t.payload.kind] = t.payload end
         assertTrue(kinds.cap and kinds.weapon and kinds.skillup, "a cap, a weapon-gap and a skill-up toast")
-        local c = NS.Preview_Forever.character
+        local c = NS.Preview.SampleCharacter()   -- its name is Sim.Sample's (AD-87-SM)
         assertTrue(NS.Preview.Character().name == c.name, "drawn from the sample character")
         assertTrue(kinds.cap.title:find(NS.L["Leatherworking"], 1, true) ~= nil, "the sample's Leatherworking at its cap")
     end)

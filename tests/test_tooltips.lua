@@ -136,8 +136,8 @@ test("tooltips: a Journal column header opens beside the Journal (PlaceBeside), 
     local chars = NS.db.global.characters
     local saved = {}
     for k, v in pairs(chars) do saved[k] = v end
-    chars["PvE-Ember Ironsong"] = {
-        name = "Ember Ironsong", class = "HUNTER", className = "Hunter", race = "Dwarf", level = 22,
+    chars["Samplerealm-Samplehunter Mockstride"] = {
+        name = "Samplehunter Mockstride", class = "HUNTER", className = "Hunter", race = "Dwarf", level = 22,
         skills = { leatherworking = { name = "Leatherworking", category = "primary", rank = 146, max = 150 } },
     }
     J.Show()
@@ -145,7 +145,7 @@ test("tooltips: a Journal column header opens beside the Journal (PlaceBeside), 
     local ok, err = pcall(function()
         local p = J.Frame().altsPanel
         local head
-        for c, item in ipairs(p.list) do if item.key == "PvE-Ember Ironsong" then head = p.heads[c] end end
+        for c, item in ipairs(p.list) do if item.key == "Samplerealm-Samplehunter Mockstride" then head = p.heads[c] end end
         assertTrue(head ~= nil, "the character's column header")
         local calls, rec, tip = hover(function() head:GetScript("OnEnter")(head) end)
         local c = assertPlaced(calls, rec, tip, "beside", head, "a Journal column header")

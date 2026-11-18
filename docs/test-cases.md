@@ -716,7 +716,7 @@ Total.
 - journal: a grip drag lays out at most once per frame and redraws once, after the release
 - journal: the saved size is restored, clamped to the minimum; locked refuses the grip
 
-### test_preview.lua (6)
+### test_preview.lua (8)
 
 - preview: test mode draws the sample Dwarf Hunter in every block
 - preview: the bonuses are the sample's: the Dwarf racial on Guns, the lure's timer on Fishing
@@ -724,6 +724,8 @@ Total.
 - preview: the Journal's session log and alts are the sample's
 - preview: test mode off restores the live data in every source
 - preview: combat ends test mode and puts the live data back
+- preview: the sample character and its alts are Sim.Sample's Forever people
+- preview: the library-absent copy of the sample people matches Sim.SAMPLE.forever
 
 ### test_sim.lua (12)
 
@@ -1051,7 +1053,7 @@ Total.
 | test_template.lua | 3 |
 | test_broker.lua | 17 |
 | test_polish.lua | 12 |
-| test_preview.lua | 6 |
+| test_preview.lua | 8 |
 | test_sim.lua | 12 |
 | test_window_chrome.lua | 15 |
 | test_header_buttons.lua | 9 |
@@ -1075,4 +1077,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **785** |
+| **Total** | **787** |
