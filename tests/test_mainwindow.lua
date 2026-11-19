@@ -134,10 +134,11 @@ test("window: a grip drag reflows the columns at most once per frame and redraws
     grip:__fire("OnMouseUp", "LeftButton")
     M.__fireTimers()   -- the one coalesced LAYOUT_CHANGED the release's bulk write queues
     assertEqual(renders, 1, "the full redraw runs once, after the release")
-    -- Window width is a column's: the frame's 533 less the scroll gutter and edges, plus a column's own 20.
-    assertEqual(L0.width, 523, "Window width takes the dragged width")
-    assertEqual(L0.maxHeight, 583, "Window height takes the dragged height")
-    assertEqual(widths.frame, 533, "the redraw keeps the dragged width")
+    -- Window width is a column's: the frame's 533 less the scroll gutter and edges, plus a column's own
+    -- 20, is 523; both rows step by 10, so the slider's grid takes 520 and 583 takes 580.
+    assertEqual(L0.width, 520, "Window width takes the dragged width, on its step grid")
+    assertEqual(L0.maxHeight, 580, "Window height takes the dragged height, on its step grid")
+    assertEqual(widths.frame, 530, "the redraw keeps the dragged width, snapped to the grid")
     for _, fr in ipairs({ f.content, f.columns[1], f }) do rawset(fr, "SetWidth", nil) end
     for _, k in ipairs({ "GetLeft", "GetTop", "SetPoint", "GetPoint" }) do rawset(f, k, nil) end
     local p = NS.db.profile.window.point
@@ -169,6 +170,22 @@ test("window: the grip's bounds are Window width's and Window height's range, pe
     W.Refresh(true)
     minW = f:GetResizeBounds()
     assertEqual(minW, 636, "two columns of 300 px bodies, the 6 px gap, the gutter and edges")
+    -- red under: a screen cap in UIParent units, which lets a window at Master scale 2 grow past it.
+    L0.columns = 1
+    local savedScale = NS.GetSetting("scale")
+    M.UIParent:__setGeom(1200, 1000)
+    local frameScale = 1   -- the base mock's GetScale answers no number, so the pair is recorded here
+    rawset(f, "SetScale", function(_, v) frameScale = v end)
+    rawset(f, "GetScale", function() return frameScale end)
+    NS.SetByPath("scale", 2)
+    W.ApplySettings()
+    local _, _, maxW2, maxH2 = f:GetResizeBounds()
+    assertEqual(maxW2, 600, "at Master scale 2 the width cap is half the screen, in the frame's units")
+    assertEqual(maxH2, 500, "and so is the height cap")
+    NS.SetByPath("scale", savedScale)
+    W.ApplySettings()
+    rawset(f, "SetScale", nil)
+    rawset(f, "GetScale", nil)
     M.UIParent.__geomLive = nil
     L0.columns = savedCols
     W.Refresh(true)

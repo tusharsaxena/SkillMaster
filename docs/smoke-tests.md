@@ -55,6 +55,13 @@ the checks below that cover each item:
 - **SM-WIN-8** (new, AF-SM-RESIZE) `/sm lock`: the grip disappears and the window neither drags nor
   resizes. `/sm unlock`: the grip is back. The title bar's lock mark and the launcher's Locked entry do
   the same. Hover the minimap or broker button for the LDB tooltip: it has no grip and keeps its size.
+- **SM-WIN-9** (new, AF-SM-RESIZE review fix) Drag the grip to an odd size and release, then open
+  Layout › Window: Window width and Window height read whole tens (the sliders' step). Nudge either
+  slider one step: the window moves by that one step only, with no jump first.
+- **SM-WIN-10** (new, AF-SM-RESIZE review fix) Set Master scale (General › Master controls) to 1.5 or
+  more and drag the grip as large as it goes: the window never grows wider or taller than the
+  visible screen. Set Master scale back to 1: the grip can again reach Window width's and
+  Window height's limits.
 
 ## Display (M3)
 

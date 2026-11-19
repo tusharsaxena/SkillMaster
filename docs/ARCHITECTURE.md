@@ -144,8 +144,12 @@ standalone-windows *Resizing*) writes the two settings the size already comes fr
 `layout.maxHeight` (Window height), through `NS.SetByPath` in one bulk bracket on the release, so the
 Layout page's sliders follow it and its one coalesced `LAYOUT_CHANGED` is the one full redraw. While
 the grip is dragged only `W.Relayout` runs (the columns and the body take the new width, at most once
-a rendered frame), and a render meanwhile keeps the grip's size. The grip's bounds are those rows'
-ranges at the current column count, capped at the screen. A grab pins the window by its top-left
+a rendered frame), and a render meanwhile keeps the grip's size. The release snaps both values to their
+rows' step grid (10 px, from each row's minimum), so a slider nudge after a drag never jumps the
+window. The grip's bounds are those rows'
+ranges at the current column count, capped at the screen in the frame's own units (the screen size
+divided by Master scale, re-applied by `W.ApplySettings`), so a scale above 1 never lets the window
+grow past the screen. A grab pins the window by its top-left
 (`NS.Chrome.PinTopLeft`), and the release saves that point with `savePoint`. `locked` hides the grip
 and its `canResize` refuses a grab, so `/sm lock`, `/sm unlock`, the header's lock mark and the
 launcher's Locked all gate it with the drag. The LDB tooltip (`modules/BrokerPanel.lua`) has no grip.

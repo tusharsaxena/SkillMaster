@@ -71,6 +71,16 @@ local function rowRange(path, lo, hi)
     return (row and tonumber(row.min)) or lo, (row and tonumber(row.max)) or hi
 end
 
+-- `v` snapped to the row's step grid (from its minimum), so the slider holds a value it can step
+-- from and the first nudge never jumps the window (a row with no step rounds to the pixel).
+local function snapToStep(path, v, lo)
+    local S = NS.SchemaRuntime
+    local row = S and S.FindRow and S.FindRow(path)
+    local step = row and tonumber(row.step)
+    if not (step and step > 0) then return floor(v + 0.5) end
+    return lo + floor((v - lo) / step + 0.5) * step
+end
+
 -- The frame width a Window width of `colSetting` gives, and the Window width a frame width maps to.
 local function widthFor(colSetting)
     local n = columns()
@@ -84,11 +94,17 @@ end
 local function screenSize()
     local sw = UIParent and tonumber(UIParent:GetWidth())
     local sh = UIParent and tonumber(UIParent:GetHeight())
-    return (sw and sw > 0) and sw or nil, (sh and sh > 0) and sh or nil
+    -- Resize bounds are in the frame's own units: Master scale above 1 shrinks the screen in them.
+    local scale = frame and type(frame.GetScale) == "function" and tonumber(frame:GetScale())
+    if not (scale and scale > 0) then scale = 1 end
+    sw = (sw and sw > 0) and sw / scale or nil
+    sh = (sh and sh > 0) and sh / scale or nil
+    return sw, sh
 end
 
 --- Re-apply the grip's bounds: Window width's and Window height's range at the current column
---- count, capped at the screen. A full layout runs it, so a Columns change moves them.
+--- count, capped at the screen (in the frame's units, so at its Master scale). A full layout and
+--- W.ApplySettings run it, so a Columns or Master scale change moves them.
 local function applyBounds()
     if not (frame and frame.resizeGrip) then return end
     local wLo, wHi = rowRange("layout.width", 320, 800)
@@ -332,8 +348,8 @@ local function storeSize(w, h)
     if not (NS.db and tonumber(w) and tonumber(h)) then return end
     local wLo, wHi = rowRange("layout.width", 320, 800)
     local hLo, hHi = rowRange("layout.maxHeight", 200, 1200)
-    local colSetting = max(wLo, min(wHi, floor(bodyColumnFor(w) + 4 + SCROLLBAR_W + 0.5)))
-    local height = max(hLo, min(hHi, floor(h + 0.5)))
+    local colSetting = max(wLo, min(wHi, snapToStep("layout.width", bodyColumnFor(w) + 4 + SCROLLBAR_W, wLo)))
+    local height = max(hLo, min(hHi, snapToStep("layout.maxHeight", h, hLo)))
     local function write()
         if colSetting ~= layoutSettings().width then NS.SetByPath("layout.width", colSetting) end
         if height ~= layoutSettings().maxHeight then NS.SetByPath("layout.maxHeight", height) end
@@ -659,6 +675,7 @@ function W.ApplySettings()
     if not (frame and NS.db) then return end
     frame:SetFrameStrata(W.Strata())
     frame:SetScale(NS.GetSetting("scale") or 1)
+    applyBounds()   -- the screen cap is in the frame's units, so it moves with Master scale
     frame:SetAlpha(NS.GetSetting("alpha") or 1)
     local locked = NS.GetSetting("locked")
     frame:SetMovable(not locked)
