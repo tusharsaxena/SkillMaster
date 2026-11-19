@@ -15,6 +15,7 @@ local addonName, NS = ...
 --                                                                      (nil takes it off; round 8, R8-2)
 -- NS.Chrome.Snap(texture)                                              snap art to the pixel grid
 -- NS.Chrome.MakeResizable(frame, spec) -> grip                         the one resize helper
+-- NS.Chrome.PinTopLeft(frame)                                         re-anchor by the top-left corner
 -- NS.Chrome.TitleBar(frame) -> frame / .StripOffset(strip) -> px       the bar a mode strip docks
 --                                                                      under, and the body's shift
 -- NS.Chrome.TitleBottom(frame) -> px                                   the band's bottom, read from it
@@ -601,6 +602,17 @@ end
 -- next rendered frame (a driver's one-shot OnUpdate), however many OnSizeChanged calls came in.
 -- The full redraw and the save run once, on the grip's release (LibKa0s's onResizeStop).
 -- ---------------------------------------------------------------------------------------------
+
+--- Pin `frame` by its top-left corner where it stands (FB-33). The client sizes a frame about its
+--- anchor: by its CENTER (a window's default place) it grew two pixels a pixel and leapt. Pinned, the
+--- grip's corner follows the cursor. GetLeft / GetTop answer in the units SetPoint takes. A grab's
+--- canResize calls it (the Journal, the main window).
+function C.PinTopLeft(frame)
+    local left, top = tonumber(frame:GetLeft()), tonumber(frame:GetTop())
+    if not (left and top) then return end
+    frame:ClearAllPoints()
+    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, top)
+end
 
 --- spec = { minWidth, minHeight, layout = fn(w, h), redraw = fn(), save = fn(w, h), canResize = fn(frame) }
 --- Answers the grip (frame.resizeGrip), or nil where the library offers none. frame.resizeDriver

@@ -3,7 +3,7 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-793%2F793_passing-green)
+![Tests](https://img.shields.io/badge/Tests-797%2F797_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
@@ -19,7 +19,7 @@ You set it up in the game's Settings → AddOns → Ka0s Skill Master, or with `
 
 ## Usage
 
-Type `/sm toggle` to open or close the window, or bind a key to it. The game's Options → Keybindings → Ka0s Skill Master has two keys, *Toggle skills window* and *Toggle journal*, and the General page's Keybindings tab in this addon's settings sets the same two. The window remembers where you dropped it. `/sm lock` stops it from moving and `/sm unlock` lets you drag it again; the close button or Escape puts it away.
+Type `/sm toggle` to open or close the window, or bind a key to it. The game's Options → Keybindings → Ka0s Skill Master has two keys, *Toggle skills window* and *Toggle journal*, and the General page's Keybindings tab in this addon's settings sets the same two. The window remembers where you dropped it. Drag the grip in its bottom-right corner to resize it; the new size becomes Window width and Window height on the Layout page. `/sm lock` (or the lock button in its title bar) stops it from moving and hides the grip, and `/sm unlock` lets you drag and resize it again; the close button or Escape puts it away. The LDB tooltip keeps its own size.
 
 Each block has a header. Click it to collapse the block, or use the mark on its right to pull the block out into a frame of its own that you can place anywhere; the same mark on the frame docks it again. Hover a row for the details. Click a profession to open its window (out of combat), click a weapon or Defense for the Skills tab, and click an unlearned skill to see its trainers and set a waypoint. Shift-click puts the skill into chat. Right-click gives you the row menu, where you can pin a skill (or a stat, to the Stats feed) to the broker feed or hide the row. A row opens from anywhere on it; to open it from its go icon only, set Layout → Window → *Open a row from* to *Go icon only* (the detached and merged windows follow it). The broker feeds' tooltips work the same way, with their own Tooltips → LDB tooltip → *Open a row from*.
 

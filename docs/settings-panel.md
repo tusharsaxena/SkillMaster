@@ -89,6 +89,11 @@ with the Master-controls Sim mode box and the bare `/sm sim`.
 
 ## Layout
 
+*Window width* and *Window height* (`layout.width`, `layout.maxHeight`) are also what the main
+window's resize grip writes on its release (AF-SM-RESIZE), so the two sliders follow a drag; the
+grip's bounds are their ranges. With *Shrink to fit the rows* on, the dragged height is the most the
+window grows to, as Window height is.
+
 The Window tab's last rows: *Columns* (`layout.columns`, One column / Two columns: the docked blocks
 fill two columns, each Window width wide, the shorter column first), *Open a row from*
 (`layout.openFrom`, round 8, R8-1: *Full row*, the default, a left click anywhere on a main window,

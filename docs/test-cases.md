@@ -89,13 +89,17 @@ Total.
 - slash: the stub's one library string is pinned to the live major
 - slash: on a library-absent load, /sm enable still lands through writeThrough
 
-### test_mainwindow.lua (5)
+### test_mainwindow.lua (9)
 
 - window: Toggle shows it, and again hides it
 - window: the chrome is the shared one: the title, the wrapped close control, MEDIUM strata
 - window: test mode shows the localized strip, and turning it off hides it
 - window: combat ends test mode (preview-mode)
 - window: locked refuses the drag; unlocked drags and saves the drop point
+- window: a grip drag reflows the columns at most once per frame and redraws once, after the release
+- window: the grip's bounds are Window width's and Window height's range, per column count
+- window: Locked hides the grip and refuses a grab; /sm unlock and the lock mark bring it back
+- broker: the LDB tooltip has no resize grip
 
 ### test_launcher.lua (4)
 
@@ -1021,7 +1025,7 @@ Total.
 | test_database.lua | 3 |
 | test_bus.lua | 3 |
 | test_slash.lua | 6 |
-| test_mainwindow.lua | 5 |
+| test_mainwindow.lua | 9 |
 | test_launcher.lua | 4 |
 | test_keybinds.lua | 4 |
 | test_locale.lua | 8 |
@@ -1083,4 +1087,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **793** |
+| **Total** | **797** |

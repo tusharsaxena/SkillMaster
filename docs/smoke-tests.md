@@ -44,6 +44,17 @@ the checks below that cover each item:
   lower or smaller than the others. Pop the block out and merge it with another detached block: the
   band's marks and the sub-header's marks read the same. Set the sort to Value, highest first and
   Progress: the sort mark keeps the size.
+- **SM-WIN-6** (new, AF-SM-RESIZE) With the window unlocked, its bottom-right corner shows the resize
+  grip, clear of the legend. Drag it wider and taller: the corner follows the cursor (the window does
+  not leap or grow about its center), the rows stretch with the width as you drag, and on release the
+  blocks redraw once. Open Layout › Window: Window width and Window height show the new size. `/reload`
+  and reopen: the window comes back at that size, where you left it. Try two columns too: both columns
+  share the new width.
+- **SM-WIN-7** (new, AF-SM-RESIZE) Drag the grip as small and as large as it goes: it stops at Window
+  width's and Window height's limits (never off the screen), and the window still draws cleanly at both.
+- **SM-WIN-8** (new, AF-SM-RESIZE) `/sm lock`: the grip disappears and the window neither drags nor
+  resizes. `/sm unlock`: the grip is back. The title bar's lock mark and the launcher's Locked entry do
+  the same. Hover the minimap or broker button for the LDB tooltip: it has no grip and keeps its size.
 
 ## Display (M3)
 

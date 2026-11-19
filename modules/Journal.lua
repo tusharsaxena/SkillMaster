@@ -212,15 +212,8 @@ local function applyPoint()
     end
 end
 
---- Pin the frame by its top-left corner where it stands (FB-33). The client sizes a frame about its
---- anchor: by its CENTER (the default place) the window grew two pixels a pixel and leapt. Pinned,
---- the grip's corner follows the cursor. GetLeft / GetTop answer in the units SetPoint takes.
-local function pinTopLeft()
-    local left, top = tonumber(frame:GetLeft()), tonumber(frame:GetTop())
-    if not (left and top) then return end
-    frame:ClearAllPoints()
-    frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, top)
-end
+--- Pin the frame by its top-left corner where it stands (FB-33; NS.Chrome.PinTopLeft).
+local function pinTopLeft() NS.Chrome.PinTopLeft(frame) end
 
 -- ── shared pieces ────────────────────────────────────────────────────────────────────────────
 

@@ -93,7 +93,7 @@ window's bottom edge (standalone-windows, *The footer* and *Window chrome geomet
 library it is a bare frame of the same height with its left line and no hairline. There are two:
 
 - **The main window's footer** carries the bonus legend's swatches. The body ends `FOOTER.HEIGHT`
-  plus a 2 px gap above the bottom edge.
+  plus a 2 px gap above the bottom edge. Its right side clears the resize grip in its corner.
 - **The Journal's Alts footer** carries the hint line ("Snapshots update on login, logout and every
   skill change..."). Its right side clears the resize grip in its corner. It shows only with the
   Alts tab. The Alts body ends `FOOTER.HEIGHT` plus 8 px above the bottom edge, which keeps its row
@@ -138,6 +138,17 @@ grip's release); `char.log` is `modules/SessionLog.lua`'s and `global.characters
 `modules/Alts.lua`'s ([schema.md](schema.md)). `profile.alerts.point`, the alert toasts' drop point,
 is the same kind: its one owner is `modules/Alerts.lua`, whose toast descriptor's `setPosition` (a
 test-mode drag, or the toast's `ResetPosition`) is its only writer.
+The main window's size is not named state: its resize grip (AF-SM-RESIZE, `NS.Chrome.MakeResizable`,
+standalone-windows *Resizing*) writes the two settings the size already comes from, `layout.width`
+(Window width, one column's: the frame width maps back through `layout.columns`) and
+`layout.maxHeight` (Window height), through `NS.SetByPath` in one bulk bracket on the release, so the
+Layout page's sliders follow it and its one coalesced `LAYOUT_CHANGED` is the one full redraw. While
+the grip is dragged only `W.Relayout` runs (the columns and the body take the new width, at most once
+a rendered frame), and a render meanwhile keeps the grip's size. The grip's bounds are those rows'
+ranges at the current column count, capped at the screen. A grab pins the window by its top-left
+(`NS.Chrome.PinTopLeft`), and the release saves that point with `savePoint`. `locked` hides the grip
+and its `canResize` refuses a grab, so `/sm lock`, `/sm unlock`, the header's lock mark and the
+launcher's Locked all gate it with the drag. The LDB tooltip (`modules/BrokerPanel.lua`) has no grip.
 The waypoint arrow keeps no named non-setting state since round 9 (R9-1): its drop point
 (`profile.waypoints.arrowFrame.point`, round 6) is gone, and a drag, the arrow's Lock and Reset
 position write the `waypoints.arrowX`, `arrowY` and `arrowLock` settings through `NS.SetByPath`
