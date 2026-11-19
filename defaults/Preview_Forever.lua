@@ -1,12 +1,14 @@
 local _, NS = ...
 -- defaults/Preview_Forever.lua — test mode's sample character (preview-mode), the one the v1 mockups
--- draw: Ember Ironsong, a level-22 Dwarf Hunter (Main, Journal and Tooltips .dc.html). Data only;
+-- draw: a level-22 Dwarf Hunter (Main, Journal and Tooltips .dc.html). Data only;
 -- modules/Preview.lua builds the models from it through the live pipelines (SkillData.Build,
 -- StatData.Build, Bonuses.Compute) at CALL time, and the simulator (modules/Simulator.lua) plays its
 -- scripted session on the same character.
 --
 -- Field meanings:
---   character  who the sample is; `raceFile` and `classFile` are the client's file tokens.
+--   character  who the sample is; `raceFile` and `classFile` are the client's file tokens. `sample`
+--              is its row in the collection's shared people, LibKa0s-Sim-1.0's Sim.Sample("forever")
+--              (LibKa0s#87): its name and realm come from that row (modules/Preview.lua), never here.
 --   lines      the Skills tab as the client lists it: a `header` row, then { name, rank, max,
 --              modifier? } per learned line. Names are the catalog's English names, localized
 --              through NS.L when the model is built. Unlearned rows come from the class list.
@@ -15,7 +17,8 @@ local _, NS = ...
 --   stats      value per NS.STAT_DEFS key (a number, or { value, raw }), at the character's level.
 --   log        the session's skill-ups, newest first, each { ago = seconds before now, skill, old,
 --              new, zone }; `sessionAgo` is when the session began.
---   alts       the other characters' snapshots, each skill { rank, max }.
+--   alts       the other characters' snapshots, each skill { rank, max }; `sample` is each one's
+--              shared row, as for the character.
 --   pinned, mainHand  catalog English names: the broker's {pinned} and {equippedWeapon} skills.
 --
 -- Kept current at every release (preview-mode): every display element the release adds appears
@@ -28,8 +31,8 @@ NS.Preview_Forever = {
     },
 
     character = {
-        name = "Ember Ironsong", level = 22, race = "Dwarf", raceFile = "Dwarf",
-        class = "Hunter", classFile = "HUNTER", faction = "Alliance", realm = "PvP",
+        sample = 1, level = 22, race = "Dwarf", raceFile = "Dwarf",   -- Samplehunter Mockstride
+        class = "Hunter", classFile = "HUNTER", faction = "Alliance",
     },
 
     lines = {
@@ -95,14 +98,17 @@ NS.Preview_Forever = {
     },
 
     alts = {
-        { name = "Quill Ashbrook", level = 41, race = "Human", class = "WARRIOR", className = "Warrior",
+        { sample = 5, level = 41,   -- Mockshield Sampleforge, of Mockrealm
+          race = "Human", class = "WARRIOR", className = "Warrior",
           faction = "Alliance", updatedAgo = 86400 * 2,
           skills = { blacksmithing = { 218, 225 }, mining = { 212, 225 }, cooking = { 201, 225 },
                      fishing = { 150, 225 } } },
-        { name = "Tamsin Reedwhistle", level = 17, race = "Gnome", class = "MAGE", className = "Mage",
+        { sample = 3, level = 17,   -- Mockflame Samplewick, of Mockrealm
+          race = "Gnome", class = "MAGE", className = "Mage",
           faction = "Alliance", updatedAgo = 86400 * 5,
           skills = { tailoring = { 70, 75 }, cooking = { 62, 75 }, fishing = { 38, 75 } } },
-        { name = "Brannoch Deepvale", level = 60, race = "Dwarf", class = "PALADIN", className = "Paladin",
+        { sample = 2, level = 60,   -- Sampleblade Mockvale
+          race = "Dwarf", class = "PALADIN", className = "Paladin",
           faction = "Alliance", updatedAgo = 86400 * 12,
           skills = { blacksmithing = { 300, 300 }, mining = { 300, 300 }, cooking = { 300, 300 },
                      fishing = { 265, 300 } } },

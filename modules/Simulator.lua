@@ -37,7 +37,7 @@ local function world() local s = session() return s and s.world or nil end
 
 --- The world a session starts from: the sample character, lure off, on foot.
 function H.NewWorld()
-    local c = NS.Preview_Forever.character
+    local c = NS.Preview.SampleCharacter()
     local w = { lines = NS.Preview.SkillLines(), level = c.level, classFile = c.classFile, name = c.name,
                 className = L[c.class], raceFile = c.raceFile, raceName = L[c.race],
                 lure = nil, run = H.RUN_YARDS, swim = H.SWIM_YARDS }

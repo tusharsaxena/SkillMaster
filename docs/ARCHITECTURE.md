@@ -23,7 +23,8 @@ bar widget, the blocks and rows in one or two columns, the detached frames and t
 (round 5), the crafting overlays,
 the row tooltip, the trainer popup and waypoints); the broker feed, the alerts, the session log,
 the alt overview and the Journal; the settings pages for every display setting; test mode's sample
-character (`modules/Preview.lua` over `defaults/Preview_Forever.lua`) and the simulator
+character and its alts (`modules/Preview.lua` over `defaults/Preview_Forever.lua`, named from
+LibKa0s-Sim-1.0's shared `Sim.Sample("forever")` people, with a library-absent copy) and the simulator
 (`modules/Simulator.lua` on LibKa0s-Sim-1.0); skins; the launcher, two key bindings and the
 diagnostics dump.
 
@@ -42,7 +43,8 @@ Env, Core, Skin, Bus, Pool, Widgets, Lifecycle, Perf, DebugLog, Launcher), the A
 wrapped at load by the simulator's seam (`core/SimSetup.lua`);
 `defaults/Profile.lua` is the defaults tree and `defaults/*_Forever.lua` the data tables (the skill
 catalog, the class weapon lists, trainers, ranks, gathering, fishing, racials, stat definitions);
-`modules/` holds the display (the bar widget `NS.Bar`, the title-bar controls `NS.Chrome`, the
+`modules/` holds the display (the bar style `NS.BarStyle`, this addon's settings for LibKa0s-Widgets-1.0's
+Bar, which draws every data bar; the title-bar controls `NS.Chrome`, the
 blocks `NS.Blocks`, the rows `NS.Rows`, the detached frames, the merged windows `NS.Groups` and their drags `NS.GroupsSnap`, the
 main window, the secure crafting
 overlays, the click map `NS.Interact`, the row tooltip, the trainer popup, `NS.Waypoints` and
@@ -55,6 +57,52 @@ Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), th
 `NS.SimHost`) and the diagnostics sections;
 `settings/` holds the schema,
 the slash table and the settings pages.
+
+**Window chrome (LibKa0s v1.105.0 adoption, AD-88-SM and AD-89-SM).** Every window this addon draws
+that shows test or simulated data (the main window, the Journal and the LDB tooltip's Main window
+style) docks its strip with LibKa0s Widgets' TestStrip (`dock = "title"`, Widgets minor 27) under its
+title bar, which is the skin's title band (`NS.Chrome.TitleBar`, `S.Band`). The library anchors the
+strip and places it again on every show, hide and resize. The host never anchors it. Everything
+below the title bar starts at the band's own bottom edge, read from the band where the skin lays it
+(`NS.Chrome.TitleBottom`: its height plus its inset, which is `win.borderSize` for a flat border, as
+`modules/Detached.lua`'s `D.TitleHeight` reads its band). The fixed `NS.Chrome.TITLE_BOTTOM` (31: a
+1 px inset plus `title.height`, 30 px) is used only when no band is measured. A band that moves (a
+skin switch) lays the body out again. The body also moves down by the strip's `BodyOffset` while one
+shows (`NS.Chrome.StripOffset`), as preview-mode's *Where the strip sits* requires.
+
+**Title-bar marks (AD-86-SM, LibKa0s#86).** Every window this addon draws builds its title-bar marks
+with LibKa0s Widgets' `HeaderButtons` through `NS.Chrome.TitleMarks` (standalone-windows, *Title-bar
+controls*): right-aligned, left to right the window's own extras, then settings, then the close in the
+corner, 18 px marks `HEADER.PAD` (6) from the corner and `HEADER.GAP` (6) apart, placed again on the
+skin's band by `S.Header` (the strip's `hb.right`), and recorded as `frame.headerButtons`. The main
+window carries lock, journal and Expand / Collapse all (inward of settings, the rule's order), the
+Journal the lock, the trainer popup none (its settings mark hides the popup first, `hideOnSettings`:
+it stands a strata over the settings panel). The settings mark opens this addon's settings through the
+opener the launcher registers (`core/LauncherSetup.lua`'s `openSettings`, LibKa0s-Core-1.0's
+`OpenSettings`), and the close is built through the one wrapper, `NS.MakeCloseButton` (HeaderButtons'
+`makeClose`). A detached block's band and a merged window's band carry the settings mark in the corner
+and no close (they never had one; docking is their way back), their block-header marks inward of it at
+the same pitch (`NS.Detached.BandMarks`, Documented deviations), `HEADER.GAP` (6 px) between every
+mark with a skin's header or without one (`NS.Detached.PlaceInward`, the no-skin rung). No window opts out of the settings
+mark. The addon builds no LibKa0s `DragHandle`, so no drag-handle settings mark is owed. Without the
+Widgets library the same strip is built from `NS.Chrome`'s own marks at the same pitch.
+
+Window footers are `NS.Chrome.Footer`, which is the library's `Footer`. It has no fill and the skin's
+`divider` hairline, and it is `FOOTER.HEIGHT` (24 px, `NS.Chrome.FooterHeight`) tall across the
+window's bottom edge (standalone-windows, *The footer* and *Window chrome geometry*). Without the
+library it is a bare frame of the same height with its left line and no hairline. There are two:
+
+- **The main window's footer** carries the bonus legend's swatches. The body ends `FOOTER.HEIGHT`
+  plus a 2 px gap above the bottom edge.
+- **The Journal's Alts footer** carries the hint line ("Snapshots update on login, logout and every
+  skill change..."). Its right side clears the resize grip in its corner. It shows only with the
+  Alts tab. The Alts body ends `FOOTER.HEIGHT` plus 8 px above the bottom edge, which keeps its row
+  count unchanged. The Log tab has no footer, so its body keeps the 12 px pad.
+
+The LDB tooltip's Main window style keeps its own footer, the hint lines from
+`NS.Broker.FooterText`, which wrap and are `textHeight + 8` tall. That footer is inside a tooltip and
+not along a window's bottom edge. The tooltip has no resize grip and no status line, so *The footer*
+does not cover it, and it stays as it is. The launcher is out of this adoption wave's scope.
 
 ### Per-client features
 
@@ -135,7 +183,7 @@ Detached windows. `NS.Detached.ApplyStyle(frame)` paints it on each render: the 
 own `ownScale` times the tab's), the opacity, the background (the skin's `S.Shell` fill while
 `bgFromSkin` is on, else the swatch on a BACKGROUND 2 fill of the frame's own, over the skin's
 gradient and art and under the band), the border (the skin's edge while `borderFromSkin` is on,
-`S.Shell` `noBorder` otherwise, the frame's own edges through `NS.Bar.PaintBorder`) and the title
+`S.Shell` `noBorder` otherwise, the frame's own edges through `NS.Chrome.PaintBorder`) and the title
 band (`noTopBar` and the frame's `bandParts` hidden for Never; for On hover a 0.1 s `OnUpdate` poll of
 `IsMouseOver` toggles both). `S.Shell` is re-called only when its opts change, and the skin's own
 repaint replays the recorded ones. A merged group's frame takes the same call.
@@ -209,7 +257,10 @@ strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDAT
 `help`, `config`, `skin`, `show`, `hide`, `toggle`, `journal`, `lock`, `unlock`, `test`, `sim`, `probe`, `enable`, `disable`,
 `list`, `get`, `set`, `reset`, `resetall`, `debug`, `diagnostics`, `perf`, `version`. The bare
 command opens the settings panel. While disabled, every verb but the library's live set refuses on
-one line. The table with each verb's handler and refusal: [slash-dispatch.md](slash-dispatch.md).
+one line. A report verb (`probe`, `diagnostics`) writes to the debug console, ungated, and prints
+one chat pointer; acknowledgments, refusals, `help` and `list` stay in chat
+([debug.md](debug.md#reports)). The table with each verb's handler and refusal:
+[slash-dispatch.md](slash-dispatch.md).
 
 ## Event Subscriptions
 
@@ -300,6 +351,61 @@ window's mark does. In the Classic style (no go icon) the row's click opens as b
 (`NS.Broker.OpenRow`) and no overlay is laid. A tooltip row's shift-click links it into chat in both
 modes and both styles.
 
+## Tooltip placement
+
+Every tooltip Skill Master places itself opens where its element sits in its window, never at the
+pointer and never off a corner of the control (WowAddonStandards standalone-windows, *Tooltip
+placement*; launcher-§7; LibKa0s#92, adopted as AD-92-SM). Each is owned at `ANCHOR_NONE`, filled,
+shown, and then placed by one of `NS.Chrome`'s three placers (`modules/Chrome.lua`), which read
+`LibKa0s-Tooltip-1.0` at call time. With the library absent, or geometry the library cannot read (a
+placer answers nil and places nothing), the tooltip attaches centered above its element, 2 px off, as
+the library's own fallback does. `tests/test_tooltips.lua` holds each site to its placer, checks the
+right-fits and right-does-not-fit layouts on the kit's fake screen, and guards the addon's Lua against
+any game anchor but `ANCHOR_NONE`.
+
+| Element | Class | Placer | Window group |
+|---|---|---|---|
+| A skill or stat row: main window, detached block, merged window, the LDB tooltip's Main window panel (`modules/RowTooltip.lua`) | body | `NS.Chrome.PlaceBeside` | `GroupOf(row)`: the row's outermost frame under UIParent (the window, the whole detached or merged HUD display, the panel) |
+| A Journal Alts column header (`modules/Journal.lua`) | body (a list's column-header row) | `NS.Chrome.PlaceBeside` | the Journal |
+| A trainer card (`modules/TrainerPopup.lua`) | body | `NS.Chrome.PlaceBeside` | the trainer popup |
+| The waypoint arrow (`modules/WaypointArrow.lua`, the host's `onEnter` on the library's frame) | body (a HUD display of one icon) | `NS.Chrome.PlaceBeside` | the arrow, the whole display |
+| The trainer popup's Set waypoint button, when disabled (its reason) | chrome (a modal dialog's control) | `NS.Chrome.PlaceAttached` | none: centered above the button |
+| The broker feeds' tooltip on a display's cell, both Tooltip styles (`modules/Broker.lua` `anchor`) | the launcher shape (launcher-§7) | `NS.Chrome.PlaceLauncher` | none: toward the screen's center, 2 px off the cell |
+| The library-absent rung of a title-bar or block-header mark (`modules/Chrome.lua` `showTip`) | chrome | attached above, by a relative point | none |
+
+Each was owned at a game anchor before: `ANCHOR_RIGHT` (a row, a card, the arrow), `ANCHOR_TOP` (the
+Set waypoint button, a mark without the library) and `ANCHOR_BOTTOM` (a column header). The broker
+feed's tooltip was already attached to its cell toward the screen's half; it now takes the launcher
+placer's horizontal side by screen third and its gap as well.
+
+**Left as they are, and why.**
+
+- **The title-bar marks, the closes and the block-header marks** (every window's header strip, a
+  detached or merged band, the main window's block headers). `LibKa0s-Tooltip-1.0`'s `AttachTitleTip`
+  places them above the control through `PlaceAttached` (`NS.Chrome.IconButton` / `HeaderMark`,
+  Widgets' `HeaderButtons`, `NS.MakeCloseButton`). The block headers' marks are treated as
+  header-strip controls, as smoke round 1's ruling 3 does for every header-strip mark
+  (`tests/test_sr1.lua`).
+- **The bonus scanner** (`modules/Bonuses.lua`, `SkillMasterScanTip`). A hidden tooltip owned by
+  UIParent at `ANCHOR_NONE` to read item lines. It is never shown, so it has no placement.
+- **The minimap button's status tooltip.** `LibKa0s-Launcher-1.0` draws it and re-places it through
+  `PlaceLauncher` (Launcher minor 11). No host code anchors it (launcher-§7).
+- **The launcher's options menu.** The client's own menu (`MenuUtil.CreateContextMenu`) places its
+  entries' tooltips (*What it does not bind*). Its rows are the library's (Enabled, Locked, Test
+  mode, Sim mode, Show window, Open settings, Open skin selector) plus this addon's one host row,
+  *Journal*, after Show window (`extraEntries`, Launcher minor 11, LibKa0s#81, AD-81-SM): a checkbox
+  ticked while the Journal is open, whose click is `/sm journal`'s own handler (launcher-§2), grayed
+  while the addon is disabled.
+- **Library windows and widgets**: the row menu (Widgets' `ContextMenu`), the docked test and sim
+  strips, the debug console, the sim and perf panels, the skin picker and the icon browser. Each is
+  placed in the library's own code (`docs/api/Tooltip/version-1-docs.md`, *The library's own sites*).
+- **The settings pages** in Blizzard's Settings canvas, the library's Options widgets among them.
+  options-ui governs them, and the tooltip-placement rule does not bind them.
+- **A broker display's own placement.** The feeds supply `OnEnter`, so the display does not place
+  their tooltip. Skill Master places it, as the row above describes. A display that ignores
+  `OnEnter` and calls `OnTooltipShow` would get no tooltip, because the feeds define no
+  `OnTooltipShow`.
+
 ## Known Limitations
 
 What the addon does not do yet, and what is still unverified in game: [known-limitations.md](known-limitations.md).
@@ -372,6 +478,7 @@ sources, the plan and its status ledger) and `docs/investigations/`. Of these, `
 | frame-layering-§1 | The crafting rows' secure overlays (`modules/SecureOverlay.lua`) sit one strata above their host window or detached block (`LAYERS.STRATA_ABOVE`), not in the host's strata at a level over it, and only the hovered crafting row's overlay is armed. | The hosts are toplevel (frame-layering-§4), and the client orders a raised toplevel window with everything in it as one group: an overlay in the host's strata lost the hit test to the row under it at any frame level, so no crafting click ever opened a profession (`GetMouseFoci` named the row alone, the overlay shown, placed and three levels higher). Arming only the hovered row keeps an invisible mouse-live frame a strata up from covering another window: a window over the row takes the pointer first, so the row is never hovered. | 2026-11-11, feedback round 2 | The standard gains a rule for secure click overlays over toplevel windows, or the client hit-tests a separate frame over a toplevel window's children by level |
 | frame-layering-§6 | The row menu (LibKa0s-Widgets-1.0 `ContextMenu`, a library-owned popup at FULLSCREEN_DIALOG) is lifted by the host to TOOLTIP strata, at the open LDB tooltip's level + `LAYERS.LEVEL.POPUP`, while it is open from that tooltip (`NS.Broker.RaiseMenu`: the row menu, and the Main window style's test-strip menu, round 6 review), and put back to FULLSCREEN_DIALOG (`LAYERS.STRATA.MENU`) as it hides. The standard names the library's tier as one this addon relies on, not one it moves; flagged in round 6 and accepted by the owner in round 7. | Both LDB tooltip styles sit at TOOLTIP, the strata every tooltip takes, so the menu opened from a row at FULLSCREEN_DIALOG drew under it and was half hidden (owner feedback round 6, R6-10, screenshot 59). The library offers no strata option for `ContextMenu`. | 2026-11-13, owner feedback round 6; owner-accepted 2026-11-13 (round 7, R7-8) | LibKa0s's `ContextMenu` takes a strata (or an opener frame whose strata it sits above) |
 | library-stack (LibKa0s `Core.ClassColor`) | The header's character name (FB-17) is colored from `RAID_CLASS_COLORS[classFile]` directly, not through `Core.ClassColor`. | The helper reads only the live unit, so test mode and the simulator's sample character would show the player's color; the Journal's alt rows already color this way. | 2026-11-10, feedback round 2 | LibKa0s's class-color helper accepts a class file |
+| standalone-windows (*Title-bar controls*) | A detached block's band and a merged window's band build only their settings mark with `W.HeaderButtons` (`close = false`); their block-header marks (dock, collapse, sort, filter, restore; dock all, collapse all) stay `NS.Chrome.HeaderMark`s, placed inward of the settings mark at the strip's pitch (`HEADER.PAD`, `HEADER.GAP`) by the skin's `S.Header`, not built as the strip's extras. | Those marks carry state the library's `HeaderButton` does not: art cropped to its ink box (round 6, R6-3), the filter's filled badge in its own colors (round 8, R8-2) and the restore mark's own showing; an extra built by the library repaints itself at `icon.tint` on a skin switch, which would undo the badge. Their colors already follow the rule (`icon.tint` at rest, `text.link` hot). | 2026-11-17, AD-86-SM (LibKa0s v1.105.0 adoption, wave B) | `W.HeaderButtons` adopts host-built extras (as it adopts `closeButton`), or carries a badge state. Not yet filed as a LibKa0s issue (review of AD-86-SM, 2026-11-17): the run's lead files it, and this row then cites it |
 | slash-commands-§8 | `/sm lock` and `/sm unlock` lock the windows only; the waypoint arrow has its own Lock (`waypoints.arrowLock`, on Trainers and Waypoints › Arrow position and in the arrow's right-click menu), which `/sm lock` does not reach. | Owner decision (round 9): the arrow is moved and locked on its own, apart from the windows, and the library widget owns that lock for every consumer. | 2026-11-14 (owner, round 9) | The standard rules on per-widget locks, or the owner asks for `/sm lock` to hold the arrow too. |
 
 ### Files over the 1500-line cap

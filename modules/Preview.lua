@@ -24,6 +24,45 @@ function P.IsOn() return data ~= nil end
 
 local function fixture() return NS.Preview_Forever end
 
+-- ── the sample people (LibKa0s#87) ───────────────────────────────────────────────────────────
+
+local SimLib = LibStub and LibStub("LibKa0s-Sim-1.0", true)
+
+--- The library-absent copy of Sim.SAMPLE.forever's identity fields, the degrade the Sim doc names
+--- ("a copy of the rows above"); tests/test_preview.lua holds it to the live set, row by row.
+P.FALLBACK_PEOPLE = {
+    { name = "Samplehunter", surname = "Mockstride",  fullName = "Samplehunter Mockstride", realm = "Samplerealm", classFile = "HUNTER" },
+    { name = "Sampleblade",  surname = "Mockvale",    fullName = "Sampleblade Mockvale",    realm = "Samplerealm", classFile = "PALADIN" },
+    { name = "Mockflame",    surname = "Samplewick",  fullName = "Mockflame Samplewick",    realm = "Mockrealm",   classFile = "MAGE" },
+    { name = "Samplemender", surname = "Mockbrook",   fullName = "Samplemender Mockbrook",  realm = "Samplerealm", classFile = "PRIEST" },
+    { name = "Mockshield",   surname = "Sampleforge", fullName = "Mockshield Sampleforge",  realm = "Mockrealm",   classFile = "WARRIOR" },
+}
+
+--- The collection's Forever sample people: Sim.Sample("forever"), else a copy of the fallback.
+function P.People()
+    if SimLib and type(SimLib.Sample) == "function" then return SimLib.Sample("forever") end
+    local out = {}
+    for i, row in ipairs(P.FALLBACK_PEOPLE) do
+        local c = {}
+        for k, v in pairs(row) do c[k] = v end
+        out[i] = c
+    end
+    return out
+end
+
+--- A fixture entry with its shared row's name (the whole two-word name, as Forever's store keys
+--- it, forever-quirks-§4) and realm; the fixture's own fields are kept.
+local function person(entry, people)
+    local row = people[entry.sample] or people[1]
+    local out = {}
+    for k, v in pairs(entry) do out[k] = v end
+    out.name, out.realm = row.fullName, row.realm
+    return out
+end
+
+--- Test mode's sample character, its name and realm from the shared people.
+function P.SampleCharacter() return person(fixture().character, P.People()) end
+
 -- ── the sample models ────────────────────────────────────────────────────────────────────────
 
 --- The fixture's Skills tab as the client's records (NS.Compat.SkillLineInfo's shape), in order.
@@ -92,11 +131,12 @@ end
 
 local function buildAlts(c, skills, now, stats)
     local list = { { key = c.realm .. "-" .. c.name, record = ownRecord(c, skills, now, stats), isCurrent = true } }
-    local others = {}
-    for _, a in ipairs(fixture().alts or {}) do
+    local others, people = {}, P.People()
+    for _, entry in ipairs(fixture().alts or {}) do
+        local a = person(entry, people)
         local s = {}
         for key, v in pairs(a.skills) do s[key] = catalogSkill(key, v[1], v[2]) end
-        others[#others + 1] = { key = c.realm .. "-" .. a.name, isCurrent = false,
+        others[#others + 1] = { key = a.realm .. "-" .. a.name, isCurrent = false,
             record = { name = a.name, class = a.class, className = L[a.className], race = L[a.race],
                        level = a.level, faction = a.faction, updated = now - (a.updatedAgo or 0), skills = s } }
     end
@@ -119,7 +159,7 @@ end
 
 --- Build the whole sample once, its timers counted from now.
 function P.Build()
-    local c = fixture().character
+    local c = P.SampleCharacter()
     local now, clock = time(), GetTime()
     local d = { character = c }
     d.skills = buildSkills(c)

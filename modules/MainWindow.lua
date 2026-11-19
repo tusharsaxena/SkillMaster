@@ -2,8 +2,11 @@ local addonName, NS = ...
 -- modules/MainWindow.lua — the Skill Master window (standalone-windows, design §6.1, mockup "Main"):
 -- its chrome (title band with lock, journal, settings, one Expand / Collapse all and close), the
 -- optional summary strip (the character's class icon and name, then its level line), the
--- docked blocks in a scrolled body (NS.Blocks headers and NS.Rows rows), the bonus legend, the
--- test-mode strip, the drag-only position, the one toggle handler and the Show window key binding.
+-- docked blocks in a scrolled body (NS.Blocks headers and NS.Rows rows), the bonus legend on the
+-- window's footer (LibKa0s Widgets' Footer, FOOTER.HEIGHT; standalone-windows, *The footer*), the
+-- test and sim strips docked under the title bar (Widgets' `dock = "title"`, preview-mode's *Where
+-- the strip sits*: the body moves down by the strip's BodyOffset while one shows), the drag-only
+-- position, the one toggle handler and the Show window key binding.
 --
 -- A render is a full layout only when the set of rows changed (blocks, collapse, keys); otherwise it
 -- redraws values in place. The crafting rows' secure overlays (T3.3, modules/SecureOverlay.lua)
@@ -17,7 +20,10 @@ local LAYERS = NS.Constants.LAYERS
 
 W.FRAME_NAME = "SkillMasterMainWindow"
 W.SCROLL_NAME = "SkillMasterMainScroll"
-local TITLE_H, SUMMARY_H, FOOTER_H, MIN_H, SCROLLBAR_W = 28, 22, 22, 120, 16
+local SUMMARY_H, MIN_H, SCROLLBAR_W = 22, 120, 16
+-- The footer's height, read where the library publishes it (NS.Chrome.FooterHeight: FOOTER.HEIGHT,
+-- 24 px under every skin; standalone-windows, *Window chrome geometry*), the same figure with no library.
+local function footerH() return NS.Chrome.FooterHeight() end
 -- What the scroll bar takes past the body: UIPanelScrollFrameTemplate hangs its 16 px bar 6 px off
 -- the scroll frame's right edge, and 4 px keep it off the window's border. The window grows by this
 -- gutter rather than the body shrinking, so the rows stay Window width's (feedback round 2).
@@ -81,7 +87,6 @@ local function toggleLock() NS.SetByPath("locked", not NS.GetSetting("locked")) 
 local function openJournal()
     if NS.Journal and NS.Journal.Toggle then NS.Journal.Toggle() end
 end
-local function openSettings() NS.OpenOptionsPanel() end
 --- Whether any docked block that draws rows is expanded: the one Expand / Collapse all control
 --- then collapses, else it expands (the two are one control, feedback round 2).
 function W.AnyExpanded()
@@ -101,46 +106,31 @@ local function paintToggleAll()
     if not b then return end
     local collapse = W.AnyExpanded()
     NS.Chrome.SetIcon(b, collapse and "fullscreen-exit" or "fullscreen-enter", collapse and "-" or "+")
-    b.tip = collapse and L["Collapse all blocks"] or L["Expand all blocks"]
+    NS.Chrome.SetTip(b, collapse and L["Collapse all blocks"] or L["Expand all blocks"])
     b.collapses = collapse
 end
 
-local function controlLevel(b)
-    if b then b:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CHROME) end
-end
-
 local function buildTitleControls()
-    frame.close = NS.MakeCloseButton(frame, function() W.Hide() end)
-    frame.lockButton = NS.Chrome.IconButton(frame, "lock", "L", toggleLock, L["Lock or unlock the window"])
-    frame.journalButton = NS.Chrome.IconButton(frame, "document", "J", openJournal, L["Open the journal"])
-    frame.settingsButton = NS.Chrome.IconButton(frame, "settings", "S", openSettings, L["Open the settings panel"])
-    -- Expand all and Collapse all (FB-16) are one control, between the settings mark and the close:
-    -- it shows what a click does now (paintToggleAll), never both at once (feedback round 2).
-    frame.toggleAllButton = NS.Chrome.IconButton(frame, "fullscreen-exit", "-", toggleAll, L["Collapse all blocks"])
-    -- Each by name: frame.close is nil without the Core library, and ipairs would stop at that hole.
-    controlLevel(frame.close)
-    controlLevel(frame.lockButton)
-    controlLevel(frame.toggleAllButton)
-    controlLevel(frame.journalButton)
-    controlLevel(frame.settingsButton)
-    -- The lock stands with the other marks at the top right (owner feedback round 3).
-    local left = {}
-    local right = { frame.toggleAllButton, frame.settingsButton, frame.journalButton, frame.lockButton }
-    if frame.close then table.insert(right, 1, frame.close) end
-    NS.Skin.Header(frame, { title = frame.title, align = "CENTER", left = left, right = right })
-    if not frame.lockButton:GetPoint(1) then   -- no skin library: the same strip, anchored by hand
-        frame.title:SetPoint("TOP", frame, "TOP", 0, -7)
-        local prev
-        for _, b in ipairs(left) do
-            if prev then b:SetPoint("LEFT", prev, "RIGHT", 4, 0) else b:SetPoint("TOPLEFT", frame, "TOPLEFT", 6, -5) end
-            prev = b
-        end
-        prev = nil
-        for _, b in ipairs(right) do
-            if prev then b:SetPoint("RIGHT", prev, "LEFT", -4, 0) else b:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -6, -5) end
-            prev = b
-        end
-    end
+    -- The title-bar marks on LibKa0s Widgets' HeaderButtons (AD-86-SM, LibKa0s#86; standalone-windows,
+    -- *Title-bar controls*): left to right the lock, the journal and the one Expand / Collapse all
+    -- control (FB-16: it shows what a click does now, paintToggleAll, never both at once), then
+    -- settings, then the close in the corner. The lock stands with the other marks at the top right
+    -- (owner feedback round 3); Expand / Collapse all moves inward of settings, the rule's order.
+    local hb = NS.Chrome.TitleMarks(frame, {
+        close = function() W.Hide() end,
+        settingsTip = L["Open the settings panel"],
+        level = LAYERS.LEVEL.CHROME,
+        extras = {
+            { key = "lock", icon = "lock", glyph = "L", onClick = toggleLock, tip = L["Lock or unlock the window"] },
+            { key = "journal", icon = "document", glyph = "J", onClick = openJournal, tip = L["Open the journal"] },
+            { key = "toggleAll", icon = "fullscreen-exit", glyph = "-", onClick = toggleAll, tip = L["Collapse all blocks"] },
+        },
+    })
+    frame.close, frame.settingsButton = hb.close, hb.settings
+    frame.lockButton, frame.journalButton = hb.extras.lock, hb.extras.journal
+    frame.toggleAllButton = hb.extras.toggleAll
+    NS.Skin.Header(frame, { title = frame.title, align = "CENTER", right = hb.right, gap = select(2, NS.Chrome.HeaderPitch()) })
+    if not frame.title:GetPoint(1) then frame.title:SetPoint("TOP", frame, "TOP", 0, -7) end
 end
 
 local function buildSummary()
@@ -174,13 +164,13 @@ local function swatch(parent, colorKey, label, anchor)
 end
 
 local function paintLegend()
-    local style = NS.Bar.ResolveStyle("row")
+    local style = NS.BarStyle.Resolve("row")
     -- The threshold entry only while the window's bars draw thresholds (owner feedback round 6, R6-4).
     local marks = style.showMarkers == true
     frame.legend.markerTex:SetShown(marks)
     frame.legend.markerLabel:SetShown(marks)
     for _, sw in ipairs(frame.legend.swatches) do
-        local c = style[sw.key]
+        local c = NS.BarStyle.Color(style[sw.key])   -- a token name or the player's color
         if c then sw.tex:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
     end
 end
@@ -199,22 +189,18 @@ local function legendMark(parent, colorKey, w, label, anchor)
     return { tex = t, key = colorKey }, fs, t
 end
 
+-- The window's footer (AD-89-SM, LibKa0s#89): NS.Chrome.Footer, the library's Footer, no fill, its
+-- hairline in the skin's `divider` along its top, FOOTER.HEIGHT tall across the window's bottom edge,
+-- painted for this addon's skin owner. Its words are the legend's, laid over it; its own left and right
+-- lines stay empty. With no library, a bare frame of the same height and no hairline.
 local function buildLegend()
-    local f = CreateFrame("Frame", nil, frame)
-    f:SetHeight(FOOTER_H)
-    f:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 1, 1)
-    f:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -1, 1)
+    local f = NS.Chrome.Footer(frame)
     local t1, fs1 = swatch(f, "bonusTemp", L["temp bonus"])
     local t2, fs2 = swatch(f, "bonusPerm", L["permanent bonus"], fs1)
     local marker, fs3 = legendMark(f, "marker", 2, L["threshold"])
     f.swatches = { { tex = t1, key = "bonusTemp" }, { tex = t2, key = "bonusPerm" }, marker }
     f.marks = { fs3 }
     f.markerTex, f.markerLabel = marker.tex, fs3
-    f.rule = f:CreateTexture(nil, "BORDER")
-    f.rule:SetPoint("TOPLEFT", f, "TOPLEFT", 0, 0)
-    f.rule:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, 0)
-    f.rule:SetHeight(1)
-    NS.Skin.Divider(f.rule)
     frame.legend = f
     frame.legendText = { fs1, fs2 }
     paintLegend()
@@ -250,24 +236,26 @@ local function buildChrome()
     NS.Skin.Shell(frame)
     NS.Skin.Text(frame.title, "title")
     buildTitleControls()
+    frame.titleBar = NS.Chrome.TitleBar(frame)
 
-    -- The test-mode marker (preview-mode): a localized text band, readable without hovering.
+    -- The test-mode marker (preview-mode): a localized text band, readable without hovering, docked
+    -- by the library directly under the title bar, full width (AD-88-SM, LibKa0s#88).
     frame.strip = NS.Widgets.TestStrip(frame, {
         text  = L["Test mode: the skills shown are sample data."],
         owner = addonName,
         onEnd = function() NS.ToggleTestMode() end,
+        dock = "title", titleBar = frame.titleBar, window = frame,
     })
-    -- The simulation's flavor of the same strip (kind "sim"), in the same place: the two modes
+    -- The simulation's flavor of the same strip (kind "sim"), at the same dock: the two modes
     -- are exclusive, so one marker shows at a time (preview-mode).
     frame.simStrip = NS.Widgets.TestStrip(frame, {
         text  = L["Simulation: a sample character plays scripted events."],
         owner = addonName,
         kind  = "sim",
         sim   = NS.Sim,
+        dock = "title", titleBar = frame.titleBar, window = frame,
     })
     for _, s in ipairs({ frame.strip, frame.simStrip }) do
-        s:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -TITLE_H)
-        s:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -TITLE_H)
         s:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.OVERLAY)
     end
     buildSummary()
@@ -341,11 +329,11 @@ local function plan(skills, stats)
     return out, table.concat(sig, ","), laid
 end
 
+--- Where the body starts under the window's top: the title band's bottom, moved down by the strip in
+--- force's BodyOffset (0 with none showing).
 local function bodyTop()
-    local top = TITLE_H
-    local shown = (frame.strip and frame.strip:IsShown()) or (frame.simStrip and frame.simStrip:IsShown())
-    if shown then top = top + (NS.Widgets.TEST_STRIP and NS.Widgets.TEST_STRIP.HEIGHT or 18) end
-    return top
+    local C = NS.Chrome
+    return C.TitleBottom(frame) + math.max(C.StripOffset(frame.strip), C.StripOffset(frame.simStrip))
 end
 
 local function placeSummary(top)
@@ -475,13 +463,13 @@ end
 local function fit(top, y)
     frame.scroll:ClearAllPoints()
     frame.scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", 2, -(top + 1))
-    frame.scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(2 + SCROLL_GUTTER), FOOTER_H + 2)
+    frame.scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(2 + SCROLL_GUTTER), footerH() + 2)
     local maxH = layoutSettings().maxHeight or 560
     frame:SetWidth(width())
     frame.content:SetWidth(W.ContentWidth())
     -- The window keeps Window height unless Shrink to fit is on: a block collapsing or expanding
     -- never resizes it (owner feedback round 3).
-    local h = layoutSettings().fitHeight and math.min(top + y + FOOTER_H + 4, maxH) or maxH
+    local h = layoutSettings().fitHeight and math.min(top + y + footerH() + 4, maxH) or maxH
     frame:SetHeight(math.max(MIN_H, h))
 end
 
@@ -493,8 +481,11 @@ local function renderTitle(test, sim)
     frame.title:SetText(word and L["%s - %s"]:format(L["Skill Master"], word) or L["Skill Master"])
 end
 
---- The marker state, part of the layout signature: a strip shown or hidden moves the body.
-local function markerSig(test, sim) return (test and "T" or "") .. (sim and "S" or "") end
+--- The marker state, part of the layout signature: a strip shown or hidden moves the body, and so
+--- does the title band's bottom (a skin whose band sits elsewhere, NS.Chrome.TitleBottom).
+local function markerSig(test, sim)
+    return (test and "T" or "") .. (sim and "S" or "") .. NS.Chrome.TitleBottom(frame)
+end
 
 --- Redraw the rows' values in place (a bonus tick, a stat or a rank change): no anchor moves.
 function W.RefreshValues()

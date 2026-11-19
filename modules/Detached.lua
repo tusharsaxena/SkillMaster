@@ -13,6 +13,8 @@ local _, NS = ...
 -- NS.Detached.Entries(id) -> the entries a detached frame draws, and how many the header's filter
 --   took out (NS.Blocks.FilterOf, round 5, R5-10); .StorePoint(id, p) (a split's landing)
 -- NS.Detached.ApplyStyle(f) / .Style() / .TopHeight(f) -> the shared Detached windows style (R5-7)
+-- NS.Detached.BandMarks(f, marks) -> gap: a band's settings mark (HeaderButtons) and its marks (AD-86-SM)
+-- NS.Detached.PlaceInward(anchor, marks, gap): the marks at the strip's pitch when no skin header placed them
 
 NS.Detached = {}
 local D = NS.Detached
@@ -148,6 +150,38 @@ function D.NewNote(parent)
     return note
 end
 
+--- A band's marks on the strip (AD-86-SM, LibKa0s#86; standalone-windows, *Title-bar controls*):
+--- LibKa0s Widgets' HeaderButtons builds the settings mark in the corner (no close: a detached or a
+--- merged window never had one, and docking is its way back), and the band's own block-header marks
+--- (`marks`, outermost first) stand inward of it at the strip's pitch, placed with it by the skin's
+--- Header, `f.title` clear of them. Those marks stay this addon's (NS.Chrome.HeaderMark): their art
+--- fitted to its ink box, the filter's filled badge and the restore mark's own showing are state the
+--- library's mark does not carry (docs/ARCHITECTURE.md, Documented deviations). Answers the gap.
+function D.BandMarks(f, marks)
+    local pad, gap = NS.Chrome.HeaderPitch()
+    local hb = NS.Chrome.TitleMarks(f, {
+        close = false, settingsTip = NS.L["Open the settings panel"],
+        level = LAYERS.LEVEL.CHROME, y = -2,
+    })
+    f.settingsButton = hb.settings
+    local right = {}
+    for _, e in ipairs(hb.right) do right[#right + 1] = e end
+    for _, b in ipairs(marks) do right[#right + 1] = b end
+    NS.Skin.Header(f, { title = f.title, align = "LEFT", right = right, pad = pad, gap = gap })
+    return gap
+end
+
+--- The no-skin rung of D.BandMarks (S.Header placed nothing): each of `marks`, outermost first, `gap`
+--- left of the one before, the first `gap` left of `anchor` (the settings mark), so the strip keeps
+--- one pitch with or without a skin. Shared by the detached band and the merged window's band.
+function D.PlaceInward(anchor, marks, gap)
+    local prev = anchor
+    for _, b in ipairs(marks) do
+        b:SetPoint("RIGHT", prev, "LEFT", -gap, 0)
+        prev = b
+    end
+end
+
 local function buildBand(f)
     f.title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     f.title:SetText(NS.BlockDefs[f.id].title)
@@ -178,16 +212,12 @@ local function buildBand(f)
     f.dock:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.collapse:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.sort:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
-    local right = { f.dock, f.collapse, f.sort }
-    if f.filter then right[#right + 1] = f.filter end
-    right[#right + 1] = f.restore
-    NS.Skin.Header(f, { title = f.title, align = "LEFT", right = right })
+    local marks = { f.dock, f.collapse, f.sort }
+    if f.filter then marks[#marks + 1] = f.filter end
+    marks[#marks + 1] = f.restore
+    local gap = D.BandMarks(f, marks)
     if not f.dock:GetPoint(1) then
-        f.dock:SetPoint("TOPRIGHT", f, "TOPRIGHT", -D.PAD, -2)
-        f.collapse:SetPoint("RIGHT", f.dock, "LEFT", -2, 0)
-        f.sort:SetPoint("RIGHT", f.collapse, "LEFT", -2, 0)
-        if f.filter then f.filter:SetPoint("RIGHT", f.sort, "LEFT", -2, 0) end
-        f.restore:SetPoint("RIGHT", f.filter or f.sort, "LEFT", -2, 0)
+        D.PlaceInward(f.settingsButton, marks, gap)
         f.title:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -5)
     end
 end
@@ -232,14 +262,14 @@ end
 -- The background's swatch color while the skin's is not followed, else nil.
 local function bgColor(st)
     if st.bgFromSkin ~= false or type(st.bgColor) ~= "table" then return nil end
-    return NS.Bar.WithClass(st.bgColor, st.useClassColorBg)
+    return NS.WithClassColor(st.bgColor, st.useClassColorBg)
 end
 
 -- The window's own border while it is shown and the skin's is not followed, else nil.
 local function ownBorder(st)
     if st.border == false or st.borderFromSkin ~= false then return nil end
     local c = type(st.borderColor) == "table" and st.borderColor or NS.defaults.profile.layout.detached.borderColor
-    return { border = NS.Bar.WithClass(c, st.useClassColorBorder), borderStyle = st.borderStyle or "Solid",
+    return { border = NS.WithClassColor(c, st.useClassColorBorder), borderStyle = st.borderStyle or "Solid",
              borderSize = tonumber(st.borderSize) or 1 }
 end
 
@@ -269,7 +299,7 @@ local function ensureLayers(f)
     f.styleEdge = CreateFrame("Frame", nil, f)
     f.styleEdge:SetAllPoints(f)
     f.styleEdge:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
-    f.styleEdge.edges = NS.Bar.MakeEdges(f.styleEdge, "OVERLAY")
+    f.styleEdge.edges = NS.Chrome.MakeEdges(f.styleEdge, "OVERLAY")
 end
 
 local function bandShown(f, shown)
@@ -314,7 +344,7 @@ function D.ApplyStyle(f)
         f.styleBg:Hide()
     end
     local own = ownBorder(st)
-    NS.Bar.PaintBorder(f.styleEdge, own or { border = nil, borderStyle = "Solid", borderSize = 1 })
+    NS.Chrome.PaintBorder(f.styleEdge, own or { border = nil, borderStyle = "Solid", borderSize = 1 })
     -- The skin's edge only while the border is shown and follows it; the window's own edge otherwise.
     f.__noBorder = st.border == false or st.borderFromSkin == false
     local mode = titleBand(st)
@@ -356,7 +386,7 @@ local function build(id)
     NS.Skin.Shell(f)
     buildBand(f)
     f.note = D.NewNote(f.body)
-    f.bandParts = { f.title, f.dock, f.collapse, f.sort }
+    f.bandParts = { f.title, f.settingsButton, f.dock, f.collapse, f.sort }
     if f.filter then f.bandParts[#f.bandParts + 1] = f.filter end
     f.onBand = function(self, shown)
         if shown then NS.Blocks.PaintRestore(self.restore, self.id) else self.restore:Hide() end

@@ -97,10 +97,12 @@ Total.
 - window: combat ends test mode (preview-mode)
 - window: locked refuses the drag; unlocked drags and saves the drop point
 
-### test_launcher.lua (2)
+### test_launcher.lua (4)
 
 - launcher: the object is the brand, the 128 px logo, registered once OnEnable runs
 - launcher: left-click opens the settings panel through the same opener as /sm config
+- launcher: the menu carries a Journal checkbox after Show window and before Open settings
+- launcher: the Journal entry's tick is the Journal's state and its click the journal verb's
 
 ### test_keybinds.lua (4)
 
@@ -133,14 +135,15 @@ Total.
 - perf: windowRender is noted while a capture is on, and nothing is noted while off
 - perf: every event-path bucket (detachedRender, skillScan, statScan, bonusRefresh) is reached
 
-### test_probe.lua (9)
+### test_probe.lua (10)
 
 - probe: Run() answers the report's six keys
 - probe: skillLines holds the raw returns of every line, the collapsed ones included
 - probe: headers lists the localized header names
 - probe: apis maps every probed name to a boolean
 - probe: enchant carries the weapon enchant returns (a lure's time left)
-- probe: /sm probe shows the report as JSON in the copy window
+- probe: /sm probe writes the JSON report to the debug console with one chat pointer
+- probe: library-absent, /sm probe refuses in chat on one line
 - probe: C_SkillInfo and C_Item are read first, a table-shaped line kept whole
 - probe: a slot-taking C_Item.GetWeaponEnchantInfo does not error, and each try is recorded
 - compat: WeaponEnchantInfo passes a slot and normalizes Forever's table to the 1.12 shape
@@ -238,7 +241,7 @@ Total.
 - stats: a secret read never raises and keeps the stat's last plain value, marked stale
 - stats: leaving combat asks for a rescan (PLAYER_REGEN_ENABLED)
 
-### test_bar.lua (11)
+### test_bar.lua (14)
 
 - bar: a bonus past the cap clamps the base, draws to the end and keeps the full text (Review Focus 4)
 - bar: the bonus segment wears the temp or the permanent color
@@ -251,6 +254,9 @@ Total.
 - bar: the resolved style reads the profile and the skin's tokens
 - bar: the pool hands bars back in order and clears their timers on release
 - bar: a secret width (a tooltip-anchored bar, tainted) lays out on the last plain width
+- bar: the bars are LibKa0s-Widgets-1.0's Bar, owned by this addon's skin
+- bar: the bonus slots are remapped onto sm.bonusTemp and sm.bonusPerm
+- bar: a bar paints the owner tokens it painted before the swap
 
 ### test_bars_live.lua (18)
 
@@ -715,7 +721,7 @@ Total.
 - journal: a grip drag lays out at most once per frame and redraws once, after the release
 - journal: the saved size is restored, clamped to the minimum; locked refuses the grip
 
-### test_preview.lua (6)
+### test_preview.lua (8)
 
 - preview: test mode draws the sample Dwarf Hunter in every block
 - preview: the bonuses are the sample's: the Dwarf racial on Guns, the lure's timer on Fishing
@@ -723,6 +729,8 @@ Total.
 - preview: the Journal's session log and alts are the sample's
 - preview: test mode off restores the live data in every source
 - preview: combat ends test mode and puts the live data back
+- preview: the sample character and its alts are Sim.Sample's Forever people
+- preview: the library-absent copy of the sample people matches Sim.SAMPLE.forever
 
 ### test_sim.lua (12)
 
@@ -739,12 +747,56 @@ Total.
 - sim: combat stops a running session
 - sim: the window shows the simulation strip while a session runs
 
+### test_window_chrome.lua (15)
+
+- chrome AD-88: the main window's test and sim strips dock under its title bar (the skin's band)
+- chrome AD-88: the main window's body sits under the title bar and moves down by the strip's BodyOffset
+- chrome AD-89: the main window's legend is the library's Footer, FOOTER.HEIGHT (24 px) tall
+- chrome AD-89: the main window's body ends FOOTER.HEIGHT above its bottom edge, plus the gap
+- chrome AD-88: the Journal's strip docks under its title bar, the tabs moved down by BodyOffset
+- chrome AD-88: the Main window style tooltip's strip docks under its title band
+- chrome review: the title band's bottom is read from the band, 31 only with none measured
+- chrome review: the main window's body follows the band's own bottom
+- chrome review: the Journal's tabs follow the band's own bottom
+- chrome review: the LDB tooltip's body follows the band's own bottom
+- chrome review: the Journal's Alts hint is the library's Footer, shown with the Alts tab only
+- chrome review: the Alts panel ends FOOTER.HEIGHT plus the gap above the bottom, the Log panel at PAD
+- chrome degraded: with no skin library the title bar is a bare frame of the band's rect
+- chrome degraded: with no widgets library a footer is a bare frame of FOOTER.HEIGHT with its left line
+- chrome degraded: the main window and the Journal open without LibKa0s, their footers bare
+
+### test_header_buttons.lua (9)
+
+- AD-86 main window: lock, journal, expand / collapse all, settings, close on HeaderButtons
+- AD-86 main window: the settings mark opens the settings through the launcher's opener
+- AD-86 main window: the expand / collapse all mark's tooltip follows what a click does
+- AD-86 journal: lock, settings, close on HeaderButtons, and settings opens the settings
+- AD-86 trainer popup: settings, close on HeaderButtons; settings hides the popup first
+- AD-86 detached and merged bands: a settings mark in the corner, opening the settings
+- AD-86 detached and merged bands: the skin's header places settings in the corner, the marks inward at the pitch
+- AD-86 detached and merged bands: without a skin's header, every mark GAP inward of the one before
+- AD-86 degraded: without LibKa0s the main window and the Journal still build the strip, settings opening the panel
+
+### test_tooltips.lua (11)
+
+- tooltips: a main window row opens beside the window (PlaceBeside), never at ANCHOR_RIGHT
+- tooltips: a detached block's row opens beside the detached display (PlaceBeside, GroupOf)
+- tooltips: a Journal column header opens beside the Journal (PlaceBeside), never at ANCHOR_BOTTOM
+- tooltips: a trainer card opens beside the popup (PlaceBeside), never at ANCHOR_RIGHT
+- tooltips: the popup's disabled Set waypoint button attaches its reason above it (PlaceAttached), never ANCHOR_TOP
+- tooltips: the waypoint arrow opens beside itself, the whole HUD display (PlaceBeside), never ANCHOR_RIGHT
+- tooltips: the broker feed's tooltip is placed on its cell toward the screen's center (PlaceLauncher), in both styles
+- tooltips: on the fake screen a row's tooltip opens right of the window when it fits, its top level with the row
+- tooltips: on the fake screen a row's tooltip opens left of the window when the right does not fit
+- tooltips: without the library a mark's tooltip attaches centered above it, never at a game anchor
+- tooltips: the addon's own Lua names no game tooltip anchor but ANCHOR_NONE (no cursor, no corner offset)
+
 ### test_seams.lua (5)
 
 - test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
 - test_seam_broker_unlearned_row_opens_trainer_popup: the popup gets the skill key, not a table
 - test_seam_alert_click_sets_waypoint: a cap toast's click goes through the real NS.Waypoints
-- test_seam_mini_bars_are_the_bar_widget: the broker tooltip draws NS.Bar's mini style (the Journal's: test_journal)
+- test_seam_mini_bars_are_the_bar_widget: the broker tooltip draws the Widgets Bar's mini style (the Journal's: test_journal)
 - test_seam_title_bar_journal_button: the main window's journal mark toggles the Journal
 
 ### test_m5_seams.lua (7)
@@ -810,13 +862,13 @@ Total.
 - fb14: Compat.SpellTexture reads C_Spell first, then the global, else nil
 - fb14: the row's icon is a trimmed texture, not two letters
 - fb15: the attach mark is the detach mark turned 180 degrees
-- fb16: one Expand / Collapse all control, between settings and close, showing what a click does
+- fb16: one Expand / Collapse all control, beside the settings mark (AD-86: inward of it), showing what a click does
 - fb16: SetAllCollapsed leaves the detached blocks alone and answers how many it changed
 - fb17: the class icon's source: the atlas where the client has it, else the class sheet
 - fb17: test mode's summary line names the sample character with its class icon
 - fb17: live, the name is the player's through NS.Compat
 
-### test_surface_parity.lua (11)
+### test_surface_parity.lua (12)
 
 - parity: the Core stub publishes every NS member core/CoreSetup.lua publishes live
 - parity: the DebugLog stub carries the whole live surface
@@ -829,6 +881,7 @@ Total.
 - parity: the Toast instance stub carries a live instance's whole surface
 - parity: the Perf, Pool and Widgets stubs carry every member the addon reaches
 - parity: the degraded load completes: options, slash and launcher answer without raising
+- parity: library-absent, a data bar keeps its text and answers every method the addon calls
 
 ### test_vendor_sync.lua (3)
 
@@ -969,18 +1022,18 @@ Total.
 | test_bus.lua | 3 |
 | test_slash.lua | 6 |
 | test_mainwindow.lua | 5 |
-| test_launcher.lua | 2 |
+| test_launcher.lua | 4 |
 | test_keybinds.lua | 4 |
 | test_locale.lua | 8 |
 | test_skinsetup.lua | 5 |
 | test_perf.lua | 2 |
-| test_probe.lua | 9 |
+| test_probe.lua | 10 |
 | test_skilldata.lua | 26 |
 | test_trainers.lua | 12 |
 | test_helpers.lua | 8 |
 | test_bonuses.lua | 16 |
 | test_statdata.lua | 16 |
-| test_bar.lua | 11 |
+| test_bar.lua | 14 |
 | test_bars_live.lua | 18 |
 | test_bars_round2.lua | 8 |
 | test_bars_sizes.lua | 8 |
@@ -1006,15 +1059,18 @@ Total.
 | test_template.lua | 3 |
 | test_broker.lua | 17 |
 | test_polish.lua | 12 |
-| test_preview.lua | 6 |
+| test_preview.lua | 8 |
 | test_sim.lua | 12 |
+| test_window_chrome.lua | 15 |
+| test_header_buttons.lua | 9 |
+| test_tooltips.lua | 11 |
 | test_seams.lua | 5 |
 | test_m5_seams.lua | 7 |
 | test_m5_review.lua | 5 |
 | test_m5_leftovers.lua | 14 |
 | test_m6_fixes.lua | 18 |
 | test_fb2_chrome.lua | 10 |
-| test_surface_parity.lua | 11 |
+| test_surface_parity.lua | 12 |
 | test_vendor_sync.lua | 3 |
 | test_disabled.lua | 9 |
 | test_diagnostics.lua | 9 |
@@ -1027,4 +1083,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **749** |
+| **Total** | **793** |

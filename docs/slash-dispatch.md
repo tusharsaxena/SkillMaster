@@ -14,7 +14,7 @@
 | `lock` / `unlock` | `NS.SetByPath("locked", ...)` then the stored echo | refused |
 | `test` | `NS.ToggleTestMode` | refused |
 | `sim` | `NS.Sim:RunVerb(rest)`: LibKa0s-Sim-1.0's grammar (bare: the status, the usage and the step panel; `start`, `step`, `pause`, `resume`, `restart`, `stop`, `status`, `panel`) | refused |
-| `probe` | `NS.Probe.Verb`: the report as JSON in a copy window | refused |
+| `probe` | `NS.Probe.Verb`: the report as JSON, written to the debug console through `D:Report`, with one chat pointer | refused |
 | `enable` / `disable` | `NS.SetByPath("enabled", ...)` then the echo | answers |
 | `list` / `get` / `set` / `reset` | the library's schema CLI | answers |
 | `resetall` | the confirmation popup, then the profile reset | answers |

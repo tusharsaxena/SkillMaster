@@ -151,7 +151,7 @@ end)
 
 -- ── FB-16: Expand all / Collapse all ─────────────────────────────────────────────────────────
 
-test("fb16: one Expand / Collapse all control, between settings and close, showing what a click does", function()
+test("fb16: one Expand / Collapse all control, beside the settings mark (AD-86: inward of it), showing what a click does", function()
     -- Feedback round 2: the two marks read as one duplicated pair on the lock's side; they are one
     -- control now, at the top right, its mark and tip the act a click performs.
     withWorld(function()
@@ -221,14 +221,14 @@ test("fb17: test mode's summary line names the sample character with its class i
     NS.ToggleTestMode()
     local ok, err = pcall(function()
         local id = W.Identity()
-        assertEqual(id.name, "Ember Ironsong")
+        assertEqual(id.name, "Samplehunter Mockstride")
         assertEqual(id.classFile, "HUNTER")
         local who = W.SummaryParts(NS.Blocks.Data())
         assertEqual(who, "Lv 22 \194\183 Dwarf Hunter", "the level line keeps its text")
         withGlobals({ C_Texture = { GetAtlasInfo = function() return {} end } }, function()
             W.Show()
             local f = W.Frame()
-            assertEqual(f.summaryName:GetText(), "Ember Ironsong")
+            assertEqual(f.summaryName:GetText(), "Samplehunter Mockstride")
             assertTrue(f.summary:GetText():find("Lv 22", 1, true) ~= nil, f.summary:GetText())
             assertTrue(f.summaryIcon:IsShown(), "the class icon shows")
             assertEqual(f.summaryIcon:GetAtlas(), "classicon-hunter")

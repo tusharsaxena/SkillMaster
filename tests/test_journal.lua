@@ -85,13 +85,13 @@ test("journal: a SKILLS_UPDATED repaints an open log", function()
 end)
 
 local function twoAlts()
-    NS.db.global.characters["PvE-Ember Ironsong"] = {
-        name = "Ember Ironsong", class = "HUNTER", className = "Hunter", race = "Dwarf", level = 22,
+    NS.db.global.characters["Samplerealm-Samplehunter Mockstride"] = {
+        name = "Samplehunter Mockstride", class = "HUNTER", className = "Hunter", race = "Dwarf", level = 22,
         skills = { leatherworking = { name = "Leatherworking", category = "primary", rank = 146, max = 150 },
                    bows = { name = "Bows", category = "weapon", rank = 80, max = 110 } },
     }
-    NS.db.global.characters["PvE-Quill Ashbrook"] = {
-        name = "Quill Ashbrook", class = "WARRIOR", className = "Warrior", race = "Human", level = 41,
+    NS.db.global.characters["Samplerealm-Mockshield Sampleforge"] = {
+        name = "Mockshield Sampleforge", class = "WARRIOR", className = "Warrior", race = "Human", level = 41,
         skills = { mining = { name = "Mining", category = "primary", rank = 212, max = 225 } },
     }
 end
@@ -117,13 +117,13 @@ test("journal: the alts matrix has a column per character, a row per skill, a mi
     local primaries = 0
     for _, cat in pairs(NS.SkillCatalog) do if cat.category == "primary" then primaries = primaries + 1 end end
     assertEqual(#p.rows, primaries, "Primary lists every profession, learned or not, and not Bows")
-    local c = columnOf(p, "PvE-Ember Ironsong")
+    local c = columnOf(p, "Samplerealm-Samplehunter Mockstride")
     assertTrue(c ~= nil and p.heads[c]:IsShown(), "a column per character")
     local lw, mining = rowOf(p, "leatherworking"), rowOf(p, "mining")
     assertEqual(lw.label:GetText(), "Leatherworking", "the row's label is the skill")
     assertEqual(lw.cells[c].value:GetText(), "146/150")
     assertTrue(lw.cells[c].bar:IsShown(), "a mini bar for a skill it has")
-    assertTrue(math.abs(lw.cells[c].bar.geom.fill - 146 / 150) < 1e-9, "the shared bar widget draws it (NS.Bar)")
+    assertTrue(math.abs(lw.cells[c].bar.geom.fill - 146 / 150) < 1e-9, "the shared bar widget draws it (Widgets Bar)")
     assertTrue(lw.cells[c].bar.style.key == "mini" and not lw.cells[c].bar.style.showText, "the mini style: no text")
     assertTrue(mining.cells[c].unlearned:IsShown() and not mining.cells[c].value:IsShown()
         and not mining.cells[c].dash:IsShown(), "Unlearned for a profession it has not (round 4)")
@@ -143,7 +143,7 @@ test("journal: the alts matrix has a column per character, a row per skill, a mi
     local wands = false
     for _, k in ipairs(p.rows) do if k == "wands" then wands = true end end
     assertFalse(wands, "no Wands: neither a hunter nor a warrior trains them")
-    local bows, cq = rowOf(p, "bows"), columnOf(p, "PvE-Quill Ashbrook")
+    local bows, cq = rowOf(p, "bows"), columnOf(p, "Samplerealm-Mockshield Sampleforge")
     assertTrue(bows.cells[cq].unlearned:IsShown(), "the warrior can train Bows: Unlearned")
     J.SelectFilter("other")
     local lock = false
@@ -176,7 +176,7 @@ test("journal: a stats sub-tab lists every stat of its block; a snapshot without
     -- red under: alts snapshots without stats, or a stats tab built from the snapshots alone
     forgetAll()
     twoAlts()
-    NS.db.global.characters["PvE-Ember Ironsong"].stats = {
+    NS.db.global.characters["Samplerealm-Samplehunter Mockstride"].stats = {
         strength = { group = "base", value = 88, display = "88", pct = 60 },
     }
     J.Show()
@@ -188,7 +188,7 @@ test("journal: a stats sub-tab lists every stat of its block; a snapshot without
     local keys = J.AltRows(p.list, "stats_base")
     assertEqual(#keys, want, "every Base & Combat stat the main window's block reads")
     local str = rowOf(p, "strength")
-    local ember, quill = columnOf(p, "PvE-Ember Ironsong"), columnOf(p, "PvE-Quill Ashbrook")
+    local ember, quill = columnOf(p, "Samplerealm-Samplehunter Mockstride"), columnOf(p, "Samplerealm-Mockshield Sampleforge")
     assertEqual(str.label:GetText(), "Strength")
     assertEqual(str.cells[ember].value:GetText(), "88")
     assertTrue(str.cells[ember].bar:IsShown(), "a stat it has draws a mini bar")
@@ -202,19 +202,19 @@ end)
 
 test("journal: a character's name is two lines in its column; the rest is the header's tooltip", function()
     -- red under: the whole name on one line wider than the column, or no header tooltip
-    assertEqual(select(1, J.NameLines("Ember Ironsong", "PvE")), "Ember")
-    assertEqual(select(2, J.NameLines("Ember Ironsong", "PvE")), "Ironsong")
-    local one, two, isRealm = J.NameLines("Zug", "PvP")
-    assertTrue(one == "Zug" and two == "PvP" and isRealm, "a one-word name sits over its realm")
-    assertEqual(J.RealmOf("PvE-Ember Ironsong", "Ember Ironsong"), "PvE")
+    assertEqual(select(1, J.NameLines("Samplehunter Mockstride", "Samplerealm")), "Samplehunter")
+    assertEqual(select(2, J.NameLines("Samplehunter Mockstride", "Samplerealm")), "Mockstride")
+    local one, two, isRealm = J.NameLines("Mockflame", "Mockrealm")
+    assertTrue(one == "Mockflame" and two == "Mockrealm" and isRealm, "a one-word name sits over its realm")
+    assertEqual(J.RealmOf("Samplerealm-Samplehunter Mockstride", "Samplehunter Mockstride"), "Samplerealm")
     forgetAll()
     twoAlts()
     J.Show()
     J.SelectTab("alts")
     local p = J.Frame().altsPanel
-    local head = p.heads[columnOf(p, "PvE-Ember Ironsong")]
-    assertEqual(head.line1:GetText(), "Ember")
-    assertEqual(head.line2:GetText(), "Ironsong")
+    local head = p.heads[columnOf(p, "Samplerealm-Samplehunter Mockstride")]
+    assertEqual(head.line1:GetText(), "Samplehunter")
+    assertEqual(head.line2:GetText(), "Mockstride")
     assertTrue(head.line1:GetWidth() <= J.COL_W and not head.line1:CanWordWrap(), "truncated to the column")
     local lines = {}
     rawset(M.GameTooltip, "AddLine", function(_, s) lines[#lines + 1] = s end)
@@ -223,9 +223,9 @@ test("journal: a character's name is two lines in its column; the rest is the he
     head:GetScript("OnLeave")(head)
     assertFalse(M.GameTooltip:IsShown(), "and the tooltip goes with the pointer")
     local all = table.concat(lines, "|")
-    assertTrue(all:find("Ember Ironsong", 1, true) ~= nil, "the whole name: " .. all)
+    assertTrue(all:find("Samplehunter Mockstride", 1, true) ~= nil, "the whole name: " .. all)
     assertTrue(all:find("Lv 22 Dwarf Hunter", 1, true) ~= nil, "level, race and class: " .. all)
-    assertTrue(all:find("Realm: PvE", 1, true) ~= nil, "the realm: " .. all)
+    assertTrue(all:find("Realm: Samplerealm", 1, true) ~= nil, "the realm: " .. all)
     J.SelectTab("log")
     J.Hide()
     forgetAll()
@@ -233,15 +233,15 @@ end)
 
 test("journal: right-click on a character's name asks before forgetting it", function()
     forgetAll()
-    NS.db.global.characters["PvE-Tamsin Reedwhistle"] = { name = "Tamsin Reedwhistle", level = 17, skills = {} }
+    NS.db.global.characters["Samplerealm-Mockflame Samplewick"] = { name = "Mockflame Samplewick", level = 17, skills = {} }
     J.Show()
     J.SelectTab("alts")
     local head = J.Frame().altsPanel.heads[1]
     M.__popups = {}
     head:GetScript("OnMouseUp")(head, "RightButton")
     assertEqual(M.__popups[1], "SKILLMASTER_FORGET_ALT")
-    M.StaticPopupDialogs.SKILLMASTER_FORGET_ALT.OnAccept(nil, "PvE-Tamsin Reedwhistle")
-    assertTrue(NS.db.global.characters["PvE-Tamsin Reedwhistle"] == nil, "forgotten on accept")
+    M.StaticPopupDialogs.SKILLMASTER_FORGET_ALT.OnAccept(nil, "Samplerealm-Mockflame Samplewick")
+    assertTrue(NS.db.global.characters["Samplerealm-Mockflame Samplewick"] == nil, "forgotten on accept")
     J.SelectTab("log")
     J.Hide()
 end)

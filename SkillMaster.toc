@@ -109,8 +109,9 @@ defaults\Stats_Forever.lua
 defaults\Preview_Forever.lua
 
 # Modules -- each reaches the others at CALL time
-# Conventional: NS.Bar, the data bar (T3.1); reads NS.Skin, NS.Pool and the profile at CALL time.
-modules\Bar.lua
+# Conventional: NS.BarStyle, the bars' settings as a LibKa0s-Widgets-1.0 Bar style (AD-80-SM); reads
+# NS.Widgets, NS.Skin and the profile at CALL time.
+modules\BarStyle.lua
 # Conventional: NS.Chrome, the shared icon controls (T3.2); reads NS.Icon and NS.Skin at CALL time.
 modules\Chrome.lua
 # Conventional: NS.Rows, one skill or stat row (T3.2); reaches Bar, Trainers and Bonuses at CALL time.

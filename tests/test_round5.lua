@@ -92,7 +92,7 @@ local function colorOf(tex) return rawget(tex, "__color") end
 
 local function assertBand(header, what)
     assertTrue(header.bg ~= nil, what .. ": a background band")
-    sameColor(colorOf(header.bg), NS.Bar.Color("sm.headerBg"), what .. ": the block header's color")
+    sameColor(colorOf(header.bg), NS.SkinColor("sm.headerBg"), what .. ": the block header's color")
     assertTrue(header.rule ~= nil, what .. ": a rule under it")
     assertEqual(header.rule:GetHeight(), 1, what .. ": the rule is 1 px")
     assertTrue(colorOf(header.rule) ~= nil, what .. ": the rule painted (the skin's divider)")
@@ -120,8 +120,8 @@ test("round5 table headers: a look change repaints both bands (the Journal re-re
     f.altsPanel.header.bg:SetColorTexture(0, 0, 0, 0)
     NS.bus:SendMessage(NS.MSG.LAYOUT_CHANGED)
     M.__fireTimers()
-    sameColor(colorOf(f.logPanel.header.bg), NS.Bar.Color("sm.headerBg"), "the Log band repainted")
-    sameColor(colorOf(f.altsPanel.header.bg), NS.Bar.Color("sm.headerBg"), "the Alts band repainted")
+    sameColor(colorOf(f.logPanel.header.bg), NS.SkinColor("sm.headerBg"), "the Log band repainted")
+    sameColor(colorOf(f.altsPanel.header.bg), NS.SkinColor("sm.headerBg"), "the Alts band repainted")
     J.Hide()
 end)
 
@@ -223,7 +223,7 @@ test("round5 test mode: /sm test shows the main window, the Journal and one stic
         local kinds = {}
         for _, t in ipairs(A.TestToasts()) do kinds[t.payload.kind] = t.payload end
         assertTrue(kinds.cap and kinds.weapon and kinds.skillup, "a cap, a weapon-gap and a skill-up toast")
-        local c = NS.Preview_Forever.character
+        local c = NS.Preview.SampleCharacter()   -- its name is Sim.Sample's (AD-87-SM)
         assertTrue(NS.Preview.Character().name == c.name, "drawn from the sample character")
         assertTrue(kinds.cap.title:find(NS.L["Leatherworking"], 1, true) ~= nil, "the sample's Leatherworking at its cap")
     end)

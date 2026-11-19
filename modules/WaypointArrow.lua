@@ -106,7 +106,7 @@ end
 -- ---------------------------------------------------------------------------------------------
 
 local function tipLine(s, token)
-    local c = NS.Bar.Color(token) or NS.Bar.Color("text.body") or { 1, 1, 1 }
+    local c = NS.SkinColor(token) or NS.SkinColor("text.body") or { 1, 1, 1 }
     GameTooltip:AddLine(s, c[1], c[2], c[3], true)
 end
 
@@ -119,16 +119,21 @@ end
 --- The trainer the arrow points at (test mode's sample while it shows), or nil.
 function WA.Target() return state.test or state.target end
 
+-- The arrow is a HUD display of one icon, a BODY element whose window group is the whole display,
+-- the arrow itself (LibKa0s#92, AD-92-SM): its tooltip opens beside it, right when it fits and
+-- otherwise left, level with its top (NS.Chrome.PlaceBeside). It was owned at ANCHOR_RIGHT, the
+-- corner offset the rule retires.
 local function onEnter(f)
     local t = WA.Target()
     if not (GameTooltip and t) then return end
-    GameTooltip:SetOwner(f, "ANCHOR_RIGHT")
+    GameTooltip:SetOwner(f, "ANCHOR_NONE")
     tipLine(t.name, "text.accent")
     tipLine(placeText(t), "text.body")
     local locked = inst ~= nil and inst:IsLocked()
     tipLine(locked and L["Right-click for options."] or L["Right-click for options. Drag to move the arrow."],
         "text.muted")
     GameTooltip:Show()
+    NS.Chrome.PlaceBeside(GameTooltip, f, f)
 end
 
 local function onLeave(f)

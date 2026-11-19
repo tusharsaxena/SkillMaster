@@ -12,7 +12,7 @@ the checks below that cover each item:
 
 | Design §9 item | Checks |
 |---|---|
-| The probe | SM-PROBE-1 |
+| The probe | SM-PROBE-1, SM-PROBE-2 |
 | Each category | SM-DISP-1, SM-TEST-1 |
 | The lure timer | SM-DISP-2, SM-SIM-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
@@ -58,6 +58,7 @@ the checks below that cover each item:
 - **SM-DISP-4** Hover a row: the tooltip shows the numbers, the bar, the bonuses (a lure with its
   time left), the next rank and trainer, a weapon's cap gap, Skinning's mob level, the gathering
   nodes and, for Fishing, the zone's need. Hover a stat: its markers (on its bar and as lines) and scale.
+  Where it opens is SM-TIP-1 (AD-92-SM: beside the window, no longer off the row's top-right corner).
 - **SM-DISP-5** Click Leatherworking (or any craft, Cooking, First Aid, Mining's Smelting): its
   window opens. Click Skinning or Fishing: its own window (Camping) opens. Click a weapon, Defense or
   Riding: Character → Skills, with that skill selected (`/sm debug` logs `[Click] Skills tab for <key>:
@@ -86,8 +87,8 @@ the checks below that cover each item:
 - **SM-DISP-11** (FB-15) A docked block's header shows the detach mark (a box, its arrow out of the
   top right); a detached frame's dock control is the same mark turned round (the arrow into the
   bottom left). Both tint on hover.
-- **SM-DISP-12** (FB-16, round 2) At the top right, between the settings mark and the close: one
-  control. While any block is open it is Collapse all (inward arrows); click it and every block in
+- **SM-DISP-12** (FB-16, round 2; AD-86-SM moved it inward of the settings mark) At the top right,
+  just left of the settings mark: one control. While any block is open it is Collapse all (inward arrows); click it and every block in
   the window folds, and it turns into Expand all (outward arrows). `/reload` keeps it; a detached
   block keeps its own state. Only the lock stands left of the title. At the narrowest Window width
   (320) the title stays centered, and the scroll bar sits inside the window's border.
@@ -201,7 +202,7 @@ the checks below that cover each item:
   weapon (Fist Weapons, Staves): a weapon master's `Also teaches:` line wraps onto a second line
   inside its card instead of being cut off, the card is taller by that line and the window by every
   such card; the buttons stay below the last card. Hover a card: a tooltip with the
-  trainer's name, place and the whole `Also teaches` list.
+  trainer's name, place and the whole `Also teaches` list (beside the popup since AD-92-SM: SM-TIP-4).
 - **SM-DISP-31** (round 5, R5-15: the trainer distance) In Stormwind, open the trainer popup on an
   unlearned weapon: each weapon master in a city on your continent shows `N yd` under its cost, the
   nearest first; one on the other continent, or without coordinates, shows none and comes last.
@@ -243,7 +244,7 @@ the checks below that cover each item:
   or more) it is the skin's accent; walk in: it shades into the skin's green by 30 yd. Within about
   5 yd it goes, the map pin clears and chat says `You have arrived: <trainer>`.
 - **SM-DISP-44** (round 6, R6-11; round 9) With the arrow up: hover it: the tooltip names the trainer and the
-  place with `Right-click for options. Drag to move the arrow.` Drag it elsewhere, `/reload`
+  place with `Right-click for options. Drag to move the arrow.` (beside the arrow since AD-92-SM: SM-TIP-5) Drag it elsewhere, `/reload`
   and set a waypoint again: it shows where you left it. Right-click it and pick Clear waypoint:
   it goes and the map pin clears. Set it again and click elsewhere on the world map to place your own
   pin: the arrow goes. Set it again and pick another trainer's Set waypoint: the arrow points at the
@@ -405,7 +406,8 @@ the checks below that cover each item:
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed
   in the skin's disabled look and does nothing; hover it: `No map coordinates for this trainer yet;
   Print to chat gives directions.` Print to chat prints them. Trainers and Waypoints > Waypoint method
-  Chat only: the button is disabled on a weapon master too, its tooltip naming the setting.
+  Chat only: the button is disabled on a weapon master too, its tooltip naming the setting. The reason
+  opens centered above the button (AD-92-SM: SM-TIP-4).
 - **SM-DISP-38** (round 6, R6-7) An Alliance character with Fishing at 150 / 150: open its trainer
   popup. The intro reads `Trainers for your faction (Alliance) who train Fishing to Expert (225) or
   higher:`; under an `Expert (225)` heading Old Man Heming, under `Artisan (300)` Nat Pagle. With
@@ -441,6 +443,57 @@ the checks below that cover each item:
 - **SM-DISP-13** (FB-17) The summary line opens with the class icon, then the character's name in
   its class color, then `· Lv N · Race Class`. Note which icon source drew (the `classicon-<class>`
   atlas, or the class sheet), or none.
+## Data bars (AD-80-SM, LibKa0s#80)
+
+Every data bar is LibKa0s-Widgets-1.0's `Bar` now, styled from the Bars page by `NS.BarStyle`.
+
+- **SM-BAR-1** (new) Open the window with a lure on and a racial bonus: every skill and stat bar
+  looks as it did before: the fill in its category color, the bonus segment past it teal for the
+  lure (temp) and blue for the racial (permanent), the `107 +25 / 150` text and the lure's timer
+  inside the bar's far end. The same on a detached block, the row tooltip's bar, the Journal's Alts
+  mini bars and the LDB tooltip's mini bars. The window's legend swatches match the bonus colors.
+- **SM-BAR-2** (new, the one visible change) Bars > Show border on, thickness 1: each bar's edge is
+  one physical pixel, crisp at any UI scale (it was one UI unit, which a fractional scale blurred
+  or doubled); thickness 3 draws three pixels.
+- **SM-BAR-3** (new) With the window open, switch the skin (`/sm skin`, Apply): every bar repaints
+  in the new skin at once, no `/reload`. Bars > Rank tier colors on (Color mode By category): a
+  profession bar splits into a shade per rank tier entered, on a scale to 300.
+
+## Tooltip placement (AD-92-SM, LibKa0s#92)
+
+Every tooltip Skill Master places itself opens where its element sits, never at the pointer and never
+off a corner of the control (standalone-windows, *Tooltip placement*; launcher-§7). The gap is 2 px.
+In each check, the tooltip's words are what they were before this change.
+
+- **SM-TIP-1** (a row is a body element) Open the main window near the screen's left: hover a row: its
+  tooltip opens right of the window, 2 px off its right edge, its top level with the row's top, and
+  covers no row. Drag the window to the screen's right edge and hover again: the tooltip opens left of
+  the window instead. Hover rows further down the list: each tooltip's top follows its row, never the
+  pointer. A row near the bottom of the screen: the tooltip slides up only as far as it must to stay
+  on screen. The row tooltip's bar still sits under its numbers line.
+- **SM-TIP-2** (detached and merged windows) Detach a block and hover one of its rows: the tooltip opens
+  beside the detached frame (right, or left at the screen's right edge), never over its rows. Merge two
+  detached blocks and hover a row in either section: the tooltip opens outside the whole merged window,
+  not between its sections.
+- **SM-TIP-3** (the Journal) Open the Journal on Alts and hover a character's column header: the
+  tooltip (name, level, realm, last seen) opens beside the Journal, its top level with the header,
+  no longer under the header over the skill rows.
+- **SM-TIP-4** (the trainer popup) Open the trainer popup on an unlearned weapon and hover a card: its
+  tooltip opens beside the popup, level with the card, the cards under it uncovered. Open it on
+  Fishing's next rank and hover the disabled Set waypoint: the reason opens centered above the button,
+  2 px off it (below it only when the popup sits at the very top of the screen).
+- **SM-TIP-5** (the waypoint arrow) With the arrow up, hover it: its tooltip opens beside the arrow
+  (right of it, or left of it when the arrow is near the screen's right edge), its top level with the
+  arrow's, never at the pointer. Drag the arrow elsewhere and hover again: it follows the arrow.
+- **SM-TIP-6** (the broker feed, launcher-§7) On a broker display (Titan Panel or the like) at the top of
+  the screen, hover the Skill Master feed in each Tooltip style (Main window, Classic): the tooltip
+  hangs 2 px under the feed's cell; with the cell in the screen's right third its right edge lines up
+  with the cell's right edge (it extends left), in the left third its left edge with the cell's, in the
+  middle third it is centered. A display at the bottom of the screen opens it 2 px above the cell. The
+  row tooltips inside the Main window style's panel open beside the panel (SM-TIP-1's rule).
+- **SM-TIP-7** (the title-bar marks, unchanged) Hover any title-bar or block-header mark: its one-line
+  tooltip still opens centered above the mark, as smoke round 1 ruled.
+
 ## Journal
 
 - **SM-JRN-1** `/sm journal` opens "Skill Master · Journal" with Log and Alts tabs; Escape and
@@ -498,8 +551,13 @@ the checks below that cover each item:
 
 ## Launcher and settings
 
-- **SM-LDB-1** The minimap button shows the logo. Left-click opens the settings; right-click shows
-  Enabled, Locked, Test mode, Sim mode, Show window. Hovering shows the status tooltip.
+- **SM-LDB-1** (amended, AD-81-SM) The minimap button shows the logo. Left-click opens the settings;
+  right-click shows Enabled, Locked, Test mode, Sim mode, Show window, Journal, then Open settings
+  and Open skin selector. Hovering shows the status tooltip.
+- **SM-LDB-3** (new, AD-81-SM) Right-click the minimap button with the Journal closed: *Journal* is
+  unticked; click it: the Journal opens and the menu closes. Right-click again: *Journal* is ticked;
+  click it: the Journal closes. The same from a broker display's Skill Master feed. `/sm disable`,
+  then right-click: *Journal (enable the addon first)* is grayed and does nothing.
 - **SM-LDB-2** In a broker display (Titan Panel, ChocolateBar or Bazooka), add the one Skill Master
   feed ("Skill Master"; no All, Professions or Weapons feed is offered; the stats have their own
   feed, SM-DISP-40): it shows its
@@ -607,11 +665,15 @@ the checks below that cover each item:
 
 ## Test mode and the simulator
 
-- **SM-TEST-1** `/sm test`: the window, a detached block, the broker feed and the Journal all show
-  Ember Ironsong, the level-22 Dwarf Hunter (Leatherworking 146/150, Fishing 107 +25 with a lure
-  timer near 4:12, Guns 105 +5, Fist Weapons, Polearms, Thrown and Riding unlearned), the summary
-  reads "Ember Ironsong · Lv 22 · Dwarf Hunter" behind the Hunter icon and the strip says the data is sample data. `/sm test` again: your
-  own character everywhere.
+- **SM-TEST-1** (amended, AD-87-SM) `/sm test`: the window, a detached block, the broker feed and the
+  Journal all show Samplehunter Mockstride, the level-22 Dwarf Hunter (Leatherworking 146/150, Fishing
+  107 +25 with a lure timer near 4:12, Guns 105 +5, Fist Weapons, Polearms, Thrown and Riding
+  unlearned), the summary reads "Samplehunter Mockstride · Lv 22 · Dwarf Hunter" behind the Hunter
+  icon and the strip says the data is sample data. `/sm test` again: your own character everywhere.
+- **SM-TEST-12** (new, AD-87-SM) `/sm test`, then the Journal's Alts tab: the columns are Samplehunter
+  Mockstride (this character, first), then Mockflame Samplewick (Mage), Mockshield Sampleforge
+  (Warrior) and Sampleblade Mockvale (Paladin). Every name starts `Sample` or `Mock`; hovering a
+  name's header shows `Realm: Samplerealm` or `Realm: Mockrealm`, never a real realm.
 - **SM-TEST-2** (round 5, R5-1) With the main window and the Journal closed, `/sm test`: both open,
   and three toasts stack: the Leatherworking 150 / 150 cap toast (its next rank and trainer), a weapon-gap
   toast for Daggers (red numbers) and a skill-up toast for Bows (green numbers). They stay up (no countdown) and drag as one
@@ -622,6 +684,44 @@ the checks below that cover each item:
   nothing overlaps. Hover the LDB feed: the same line sits under the tooltip's title. `/sm test`
   again: the strip and the line go and the Journal's tabs move back up. Right-click the Journal's
   strip: End test ends test mode.
+- **SM-TEST-6** (AD-88-SM, the docked strip) `/sm test` with the main window and the Journal open, and
+  hover the LDB feed (Tooltips > Tooltip style: Main window). In each of the three, the amber strip
+  spans the full width directly under the title bar. It touches the bar's bottom edge with no gap,
+  and the bar's title and marks stay visible. The summary line, the Journal's tabs and the tooltip's
+  first block header sit just under the strip and none of them is covered. `/sm test` again: the
+  strip goes and everything moves back up under the title bar. Repeat once under a second skin (for
+  example WoW Midnight): the strip still sits under the bar.
+- **SM-TEST-7** (AD-89-SM, the footer) Open the main window: the bonus legend (temp bonus,
+  permanent bonus and, with thresholds on, threshold) sits on a 24 px footer along the window's
+  bottom edge. The footer has a thin hairline across its top and no darker band of its own (the
+  window's background shows through), the legend text is in the muted color, and the last row
+  scrolls clear above the hairline. Switch skins: the hairline takes the new skin's divider color.
+  Open the Journal on its Alts tab: the hint line ("Snapshots update on login, logout and every
+  skill change...") sits on the same 24 px footer along the window's bottom edge, with the hairline
+  over it and the text clear of the resize grip. On the Log tab the footer and its hairline are gone,
+  and the log's rows reach as far down as before. Drag the grip: it still resizes the window.
+- **SM-TEST-8** (AD-86-SM, the main window's title marks) Open the main window. At the top right,
+  left to right: the lock, the journal mark, Expand / Collapse all, the settings gear, then the close
+  X in the corner, evenly spaced (6 px apart, the X 6 px from the edge), all the same size and gray at
+  rest. Hover each: its tooltip opens above it ("Lock or unlock the window", "Open the journal",
+  "Collapse all blocks", "Open the settings panel", "Close") and the mark lights in the skin's link
+  color, the X in red. Click the gear: the Skill Master settings open. The lock, the journal mark and
+  Expand / Collapse all still do what they did. Repeat under a second skin (for example WoW Midnight).
+- **SM-TEST-9** (AD-86-SM, the Journal's title marks) Open the Journal: at the top right, the lock,
+  the settings gear, then the close X in the corner, at the same spacing as the main window's. Hover
+  the gear: "Open the settings panel" above it, the gear in the link color. Click it: the settings
+  open. The lock still locks and unlocks both windows, and the X closes the Journal.
+- **SM-TEST-10** (AD-86-SM, the trainer popup's title marks) Open the trainer popup (click an
+  unlearned weapon row): its title bar carries the settings gear left of the close X. Click the gear:
+  the popup closes and the Skill Master settings open on top, not under it. The X still closes it.
+- **SM-TEST-11** (AD-86-SM, the detached and merged bands) Detach a block: its band carries a settings
+  gear in the top right corner, the dock, collapse, sort and filter marks to its left as before (the
+  eye left of them when rows are hidden), evenly spaced at the main window's pitch (6 px between
+  marks; the band's marks sit a little further apart than before the adoption, so the strip is a
+  touch wider). Click the gear: the settings open. Merge two
+  detached blocks: the merged window's band shows the gear in the corner, then dock all and collapse
+  all. With Layout > Detached windows > Title band "On hover", the gear hides and shows with the rest
+  of the band; with "Never", it is gone with the band.
 - **SM-TEST-4** (round 6, R6-11) `/sm test`: Skill Master's waypoint arrow shows,
   pointing up and to the left at a sample weapon master with `240 yd` under it; no map pin is set.
   Drag it where you want it. `/sm test` again: it goes (a waypoint you had set before test mode comes
@@ -644,9 +744,13 @@ the checks below that cover each item:
 
 ## Probe
 
-- **SM-PROBE-1** `/sm probe`: a copy window opens with a JSON report, `skillLines` holding every
-  skill (a collapsed header in the Skills tab is collapsed again afterwards). Copy it and send it to
-  the author; it settles the assumed rows in `docs/forever-quirks.md`.
+- **SM-PROBE-1** (amended, AD-79-SM) `/sm probe`: the debug console opens, if it was hidden, with a
+  `/sm probe` header line and the JSON report under it, `skillLines` holding every skill (a collapsed
+  header in the Skills tab is collapsed again afterwards). No copy window opens. Press the console's
+  Copy and send the text to the author; it settles the assumed rows in `docs/forever-quirks.md`.
+- **SM-PROBE-2** (new, AD-79-SM) With debug logging off (`/sm debug off`) and the console closed,
+  `/sm probe`: chat shows exactly one line, `probe: 2 lines written to the debug console. Use Copy to
+  share it.`, and the report is in the console all the same. `/sm list` still prints in chat.
 
 ## Skins and diagnostics
 

@@ -82,15 +82,41 @@ test("probe: enchant carries the weapon enchant returns (a lure's time left)", f
     assertEqual(r.enchant[2], 252000)
 end)
 
-test("probe: /sm probe shows the report as JSON in the copy window", function()
+-- #79 (AD-79-SM), the owner's report-routing ruling of 2026-11-08: a report is written to the debug
+-- console through D:Report, ungated, revealing a hidden console, with exactly one chat pointer.
+-- Re-pinned from "shows the report as JSON in the copy window", which the console's Copy replaces.
+test("probe: /sm probe writes the JSON report to the debug console with one chat pointer", function()
     installSkills()
-    local shown
-    local realCopy = NS.Probe.__copy
-    NS.Probe.__copy = { Show = function(_, text) shown = text end }
+    local D = NS.DebugLog
+    local wasOn = NS.State.debug
+    NS.State.debug = false               -- a report is ungated: it lands with logging off
+    D:Clear()
+    if D:IsShown() then D:Hide() end
+    local before = #M.__printed()
     NS.Slash:OnSlash("probe")
-    NS.Probe.__copy = realCopy
-    assertTrue(type(shown) == "string" and shown:sub(1, 1) == "{", "JSON object text: " .. tostring(shown))
-    assertTrue(shown:find('"skillLines"', 1, true) ~= nil, shown)
+    local printed = M.__printed()
+    local text = D:CopyText()
+    local shown = D:IsShown()
+    D:Hide()
+    NS.State.debug = wasOn
+    assertEqual(#printed - before, 1, "exactly one chat line: " .. table.concat(printed, " | ", before + 1))
+    assertTrue(printed[#printed]:find("lines written to the debug console", 1, true) ~= nil, printed[#printed])
+    assertTrue(shown, "the hidden console is revealed")
+    assertTrue(text:find("/sm probe", 1, true) ~= nil, "the report's header names the verb:\n" .. text)
+    assertTrue(text:find('"skillLines"', 1, true) ~= nil, "the JSON is in the console:\n" .. text)
+    assertTrue(NS.Probe.__copy == nil, "the probe's own copy window is gone")
+end)
+
+test("probe: library-absent, /sm probe refuses in chat on one line", function()
+    local loadDegraded = dofile("tests/degraded_env.lua")
+    local NS2 = loadDegraded()
+    NS2.addon:OnInitialize()
+    local printed, real = {}, NS2.Print
+    NS2.Print = function(line) printed[#printed + 1] = tostring(line) end
+    NS2.Slash:OnSlash("probe")
+    NS2.Print = real
+    assertEqual(#printed, 1, "one refusal line: " .. table.concat(printed, " | "))
+    assertTrue(printed[1]:find("unavailable", 1, true) ~= nil, printed[1])
 end)
 
 -- The kit's generated Forever API set (Ketho/BlizzardInterfaceResources, branch forever) carries the

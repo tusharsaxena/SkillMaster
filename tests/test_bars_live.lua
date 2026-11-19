@@ -250,7 +250,7 @@ case("bars live: the bar text template and position reach the drawn text", funct
     set("bars.textTemplate", tpl)
     each(bars, function(b, name)
         local v = b.values
-        local want = NS.Bar.Text(v.value, v.bonus, v.max, tpl)
+        local want = NS.Widgets.BarText(v.value, v.bonus, v.max, tpl)
         assertTrue(want:find("left", 1, true) ~= nil, name .. ": the template renders")
         assertEqual(b.text:GetText(), want, name .. ": the drawn text follows the template")
     end)
@@ -295,7 +295,7 @@ case("bars live: Rank tier colors split the fill by tier on a scale to 300, and 
         local function paint(t) local p = M.__paint(t) return p.texture and p.vertex or p.color end
         local c1, c2 = paint(b.segmentTextures[1]), paint(b.segmentTextures[2])
         assertNear(c1[1], base[1], 1e-6, name .. ": Apprentice in the category's own color")
-        assertNear(c2[3], base[3] * NS.Bar.TIER_SHADE[2], 1e-6, name .. ": Journeyman a shade darker")
+        assertNear(c2[3], base[3] * NS.Widgets.BAR.SHADE[2], 1e-6, name .. ": Journeyman a shade darker")
         assertTrue(c2[1] < c1[1] or c1[1] == 0, name .. ": darker, not another hue")
     end)
     set("bars.tierColors", false)

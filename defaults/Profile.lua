@@ -80,7 +80,7 @@ NS.defaults = {
         -- Stat rows the player hid. How a row draws is bars.rowDisplay, for skills and stats alike
         -- (schemaVersion 2 moved a stored stats.display there: core/Database.lua).
         stats  = { hidden = {} },
-        -- T3.1 the bar widget's look (modules/Bar.lua). The colors are the player's picks; while
+        -- T3.1 the bar widget's look (LibKa0s-Widgets-1.0's Bar, through NS.BarStyle). The colors are the player's picks; while
         -- `colors.fromSkin` is on (the default, skinning-§6) the skin's owner tokens draw instead
         -- (core/SkinSetup.lua, sm.cat.* and sm.bonus*). Both carry the approved mockup's colors
         -- (docs/superpowers/specs/2026-11-10-skill-master-mockups).
@@ -119,12 +119,12 @@ NS.defaults = {
             -- What every skill and stat row draws: "both" (bar and value), "bar" (no value text)
             -- or "text" (the value alone, no bar). The Bars page's Rows show.
             rowDisplay    = "both",
-            -- The bar text; tokens {rank} {bonus} {max} {pct} {left} (modules/Bar.lua Bar.Text).
+            -- The bar text; tokens {rank} {bonus} {max} {pct} {left} (W.BarText; {rank} is {value}'s alias).
             textTemplate  = "{rank} {bonus} / {max}",
             spark         = false,       -- a thin line riding the end of the fill (off: feedback round 2)
             -- Color mode By category only: a profession's fill split per rank tier (Apprentice 0-75,
             -- Journeyman 75-150, Expert 150-225, Artisan 225-300) on a scale to 300 whatever the cap,
-            -- each tier a darker shade of the category's color (modules/Bar.lua Bar.TierShade). The
+            -- each tier a darker shade of the category's color (W.BarShade, BAR.SHADE). The
             -- tier ticks it replaced are gone (feedback round 2; schemaVersion 4 drops `ticks`).
             tierColors    = false,
             -- A stat's threshold markers (hit cap, resist cap), one switch per surface (owner feedback

@@ -147,7 +147,7 @@ local function above()
 end
 
 local function paint(tex, token)
-    local c = NS.Bar.Color(token)
+    local c = NS.SkinColor(token)
     if c then tex:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
 end
 
@@ -201,7 +201,7 @@ local function ghostFrame()
     ghost = CreateFrame("Frame", nil, UIParent)
     ghost.bg = ghost:CreateTexture(nil, "BACKGROUND")
     ghost.bg:SetAllPoints(ghost)
-    ghost.edges = NS.Bar.MakeEdges(ghost, "OVERLAY")
+    ghost.edges = NS.Chrome.MakeEdges(ghost, "OVERLAY")
     ghost.title = ghost:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     ghost.title:SetPoint("LEFT", ghost, "LEFT", 8, 0)
     NS.Skin.Text(ghost.title, "heading")
@@ -216,7 +216,7 @@ local function paintGhost(state)
     local token = state == "out" and "sem.bad" or "sem.good"
     if ghost.token == token then return end
     ghost.token = token
-    NS.Bar.PaintBorder(ghost, { border = NS.Bar.Color(token), borderStyle = "Solid", borderSize = 2 })
+    NS.Chrome.PaintBorder(ghost, { border = NS.SkinColor(token), borderStyle = "Solid", borderSize = 2 })
 end
 
 -- ---------------------------------------------------------------------------------------------

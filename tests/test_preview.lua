@@ -107,7 +107,7 @@ test("preview: the Journal's session log and alts are the sample's", function()
     assertTrue(type(log:ETA("leatherworking")) == "number", "the sample has an ETA")
     local alts = NS.Preview.Alts():List()
     assertEqual(#alts, 4)
-    assertEqual(alts[1].record.name, "Ember Ironsong")
+    assertEqual(alts[1].record.name, "Samplehunter Mockstride", "the Sim.Sample protagonist (AD-87-SM)")
     assertTrue(alts[1].isCurrent, "this character first")
     assertEqual(alts[1].record.skills.leatherworking.rank, 146)
     assertFalse(NS.Preview.Alts():Forget(alts[2].key), "the sample forgets nothing")
@@ -144,4 +144,39 @@ test("preview: combat ends test mode and puts the live data back", function()
     NS.addon:OnEnterCombat()
     assertFalse(NS.IsTestMode())
     assertTrue(NS.Blocks.Data() == live)
+end)
+
+-- #87 (AD-87-SM): the sample people are the collection's shared set, Sim.Sample("forever"): the
+-- protagonist is row 1 and the three alts rows 5, 3 and 2, each keyed on its own sample realm.
+test("preview: the sample character and its alts are Sim.Sample's Forever people", function()
+    local Sim = M.LibStub("LibKa0s-Sim-1.0")
+    local people = Sim.Sample("forever")
+    local d = NS.Preview.Build()
+    assertEqual(d.character.name, people[1].fullName, "the protagonist")
+    assertEqual(d.character.realm, people[1].realm)
+    assertEqual(d.character.classFile, people[1].classFile)
+    local byName = {}
+    for _, item in ipairs(d.alts:List()) do byName[item.record.name] = item end
+    for _, i in ipairs({ 5, 3, 2 }) do
+        local row = people[i]
+        local item = byName[row.fullName]
+        assertTrue(item ~= nil, "alt " .. row.fullName .. " is drawn")
+        assertEqual(item.key, row.realm .. "-" .. row.fullName, "keyed on its own sample realm")
+        assertEqual(item.record.class, row.classFile, row.fullName .. "'s class")
+    end
+    for name in pairs(byName) do
+        local first = name:match("^(%S+)")
+        assertTrue(first:find("^Sample") or first:find("^Mock"), "an obviously fictional name: " .. name)
+    end
+end)
+
+test("preview: the library-absent copy of the sample people matches Sim.SAMPLE.forever", function()
+    local live = M.LibStub("LibKa0s-Sim-1.0").SAMPLE.forever
+    local copy = NS.Preview.FALLBACK_PEOPLE
+    assertEqual(#copy, #live, "every row")
+    for i, row in ipairs(live) do
+        for _, k in ipairs({ "name", "surname", "fullName", "realm", "classFile" }) do
+            assertEqual(copy[i][k], row[k], ("row %d %s"):format(i, k))
+        end
+    end
 end)

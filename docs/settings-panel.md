@@ -121,7 +121,7 @@ window too (`NS.Detached.ApplyStyle(frame)`); every row's onChange is `NS.ApplyL
 - *Border*: the composed border block with its *Show border* toggle (`border`, `borderStyle`,
   `borderSize`, `borderColor`, `useClassColorBorder`) and *Use the skin's border* (`borderFromSkin`,
   on by default). On, the skin's window edge; off, the style, thickness and swatch on edges of the
-  window's own (`NS.Bar.PaintBorder`); Show border off draws neither.
+  window's own (`NS.Chrome.PaintBorder`); Show border off draws neither.
 
 The Block order tab is a host tab keyed by its group (the rows `layout.blocks.<id>.order` are
 `skipRender`): one boxed row per block in `NS.Blocks.Ordered()` on `NS.OptionsList`

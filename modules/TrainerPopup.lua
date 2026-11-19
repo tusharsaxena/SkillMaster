@@ -116,18 +116,21 @@ end
 
 -- One tooltip line in a skin token's color (the row tooltip's rule: no typed color).
 local function tipLine(s, token, wrap)
-    local c = NS.Bar.Color(token) or NS.Bar.Color("text.body") or { 1, 1, 1 }
+    local c = NS.SkinColor(token) or NS.SkinColor("text.body") or { 1, 1, 1 }
     GameTooltip:AddLine(s, c[1], c[2], c[3], wrap)
 end
 
--- The card's tooltip: the whole card, the "Also teaches" list unclipped.
+-- The card's tooltip: the whole card, the "Also teaches" list unclipped. A card is a BODY element
+-- (LibKa0s#92, AD-92-SM): beside the popup, its window group, level with the card
+-- (NS.Chrome.PlaceBeside); it was owned at ANCHOR_RIGHT, the corner offset the rule retires.
 local function onCardEnter(self)
     if not (GameTooltip and self.trainer) then return end
-    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    GameTooltip:SetOwner(self, "ANCHOR_NONE")
     tipLine(self.trainer.name, "text.accent")
     tipLine(self.where:GetText() or "", "text.body")
     if self.alsoText and self.alsoText ~= "" then tipLine(self.alsoText, "text.muted", true) end
     GameTooltip:Show()
+    NS.Chrome.PlaceBeside(GameTooltip, self, frame)
 end
 
 local function onCardLeave(self)
@@ -175,12 +178,12 @@ local function paintName(fs)
     local p = trainersProfile()
     if p.nameColorFromSkin ~= false or type(p.nameColor) ~= "table" then
         if not NS.Skin.IsEnabled() then
-            local c = NS.Bar.Color("text.accent")
+            local c = NS.SkinColor("text.accent")
             if c then fs:SetTextColor(c[1], c[2], c[3], c[4] or 1) end
         end
         return
     end
-    local c = NS.Bar.WithClass(p.nameColor, p.useClassColorName)
+    local c = NS.WithClassColor(p.nameColor, p.useClassColorName)
     fs:SetTextColor(c[1], c[2], c[3], c[4] or 1)
 end
 
@@ -237,11 +240,15 @@ local function buildActions()
     NS.Skin.Text(frame.warning, "sem.warn")
     frame.waypoint = button(frame, L["Set waypoint"], setWaypoint, true)
     -- Hooked, not set: NS.Skin.Button hooked its hover look on these scripts, and SetScript drops it.
+    -- The action buttons are the popup's CHROME (a modal dialog's controls, LibKa0s#92, AD-92-SM):
+    -- the reason attaches centered above the button (NS.Chrome.PlaceAttached), below it only
+    -- without room above.
     frame.waypoint:HookScript("OnEnter", function(self)
         if not (GameTooltip and self.blockedText) then return end
-        GameTooltip:SetOwner(self, "ANCHOR_TOP")
+        GameTooltip:SetOwner(self, "ANCHOR_NONE")
         tipLine(self.blockedText, "text.body", true)
         GameTooltip:Show()
+        NS.Chrome.PlaceAttached(GameTooltip, self)
     end)
     frame.waypoint:HookScript("OnLeave", onCardLeave)
     frame.print = button(frame, L["Print to chat"], printDirections, false)
@@ -284,9 +291,17 @@ local function build()
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     NS.Skin.Shell(frame)
     NS.Skin.Text(frame.title, "title")
-    frame.close = NS.MakeCloseButton(frame, function() P.Hide() end)
-    if frame.close then frame.close:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.CHROME) end
-    NS.Skin.Header(frame, { title = frame.title, align = "LEFT", right = { frame.close } })
+    -- The title-bar marks on LibKa0s Widgets' HeaderButtons (AD-86-SM, LibKa0s#86): settings, then
+    -- the close. The popup stands a strata over its openers, HIGH or DIALOG, over the settings panel
+    -- (HIGH), so the settings mark hides it first (hideOnSettings).
+    local hb = NS.Chrome.TitleMarks(frame, {
+        close = function() P.Hide() end,
+        settingsTip = L["Open the settings panel"],
+        hideOnSettings = frame,
+        level = LAYERS.LEVEL.CHROME,
+    })
+    frame.close, frame.settingsButton = hb.close, hb.settings
+    NS.Skin.Header(frame, { title = frame.title, align = "LEFT", right = hb.right, gap = select(2, NS.Chrome.HeaderPitch()) })
     if not frame.title:GetPoint(1) then frame.title:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -7) end
     frame.intro = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.intro:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -(TITLE_H + 8))

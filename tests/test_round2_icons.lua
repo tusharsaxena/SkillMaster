@@ -42,11 +42,11 @@ end
 
 test("round2 icons: a tier's shade is the category color darkened, the first tier the color itself", function()
     local c = { 0.4, 0.6, 0.8, 1 }
-    local s1, s4 = NS.Bar.TierShade(c, 1), NS.Bar.TierShade(c, 4)
+    local s1, s4 = NS.Widgets.BarShade(c, 1), NS.Widgets.BarShade(c, 4)
     assertNear(s1[2], 0.6, 1e-9, "Apprentice: the color itself")
     assertTrue(s4[1] < s1[1] and s4[2] < s1[2] and s4[3] < s1[3], "Artisan: darker in every channel")
     assertNear(s4[1] / s4[3], 0.4 / 0.8, 1e-9, "the same hue, only darker")
-    for i = 2, 4 do assertTrue(NS.Bar.TIER_SHADE[i] < NS.Bar.TIER_SHADE[i - 1], "each tier darker than the last") end
+    for i = 2, 4 do assertTrue(NS.Widgets.BAR.SHADE[i] < NS.Widgets.BAR.SHADE[i - 1], "each tier darker than the last") end
 end)
 
 -- ── the rows' marks and timer ───────────────────────────────────────────────────────────────
@@ -167,7 +167,7 @@ test("round2 icons: the LDB tooltip draws the window's block titles on header ba
         local bands = NS.Broker.Bands(tip)
         -- One band per header, one per even row of each section.
         assertTrue(#bands > 0 and #bands < #rows + #titles, "headers and every other row, not every row")
-        local header = NS.Bar.Color("sm.headerBg")
+        local header = NS.SkinColor("sm.headerBg")
         assertNear(paint(bands[1])[1], header[1], 1e-6, "the first band is a header's, in the block header's color")
         NS.Broker.HideTooltip()
         assertEqual(#NS.Broker.Bands(tip), 0, "every band goes with the tooltip")

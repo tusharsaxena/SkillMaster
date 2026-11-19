@@ -333,10 +333,10 @@ if B.target then
 end
 
 -- ---------------------------------------------------------------------------------------------
--- The mini bar: the shared bar widget (NS.Bar, "mini" style) on a tooltip line
+-- The mini bar: the shared bar widget (LibKa0s-Widgets-1.0 Bar, "mini" style) on a tooltip line
 -- ---------------------------------------------------------------------------------------------
 
-local barPool = NS.Bar.NewPool()
+local barPool = NS.Pool.New()
 local barsDrawn = 0
 
 local function lineRegion(tip, n)
@@ -344,12 +344,12 @@ local function lineRegion(tip, n)
     return name and _G[name .. "TextLeft" .. n] or nil
 end
 
---- Draw one mini bar on tooltip line `n` from NS.Bar values ({ value, max, bonus, bonusKind,
+--- Draw one mini bar on tooltip line `n` from the bar's values ({ value, max, bonus, bonusKind,
 --- color, ... }: NS.Rows.SkillValues / StatValues). The bar clamps the bonus to its end.
 local function drawMiniBar(tip, n, values)
     local line = lineRegion(tip, n)
     if not line then return false end
-    local bar = NS.Bar.Acquire(barPool, tip, "mini")
+    local bar = NS.Widgets.AcquireBar(barPool, tip, NS.BarStyle.Opts("mini"))
     bar:SetFrameLevel(tip:GetFrameLevel() + LAYERS.LEVEL.OVERLAY)
     bar:ClearAllPoints()
     bar:SetPoint("LEFT", line, "LEFT", NAME_W, 0)
@@ -399,7 +399,7 @@ local sized = {}
 local function sizeRow(tip, n, h)
     local name = tip.GetName and tip:GetName()
     if not name then return end
-    h = h or NS.Bar.TooltipRowHeight("mini")
+    h = h or NS.BarStyle.TooltipRowHeight("mini")
     for _, side in ipairs({ "TextLeft", "TextRight" }) do
         local fs = _G[name .. side .. n]
         if fs and fs.SetHeight then
@@ -416,7 +416,7 @@ local function unsizeRows()
     end
 end
 
---- The mini bars on the open tooltip (NS.Bar widgets; the suites read them).
+--- The mini bars on the open tooltip (Widgets Bar instances; the suites read them).
 function B.Bars() return barPool.active or {} end
 
 -- ---------------------------------------------------------------------------------------------
@@ -466,7 +466,7 @@ end
 
 local function stripe(tip, n, i)
     if i % 2 ~= 0 then return end   -- the window's rows stripe the even ones (NS.Rows SetStripe)
-    band(tip, n, NS.Bar.TooltipRowHeight("mini"), NS.Skin.Color("list.stripe"))
+    band(tip, n, NS.BarStyle.TooltipRowHeight("mini"), NS.Skin.Color("list.stripe"))
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -540,7 +540,7 @@ local function releaseAll()
     if GameTooltip then NS.Chrome.RestoreTooltipFonts(GameTooltip) end
     releaseBands()
     hideHovers()
-    NS.Bar.ReleaseAll(barPool)
+    NS.Widgets.ReleaseBars(barPool)
     NS.Pool.ReleaseAll(hitPool)
 end
 
@@ -599,9 +599,9 @@ end
 local function addTitle(tip, title)
     tip:AddLine(colored("list.header.text", title))
     local n = tip:NumLines()
-    local h = NS.Bar.TooltipRowHeight("mini") + B.HEADER_PAD
+    local h = NS.BarStyle.TooltipRowHeight("mini") + B.HEADER_PAD
     sizeRow(tip, n, h)
-    local c = NS.Bar.Color("sm.headerBg")
+    local c = NS.SkinColor("sm.headerBg")
     if c then band(tip, n, h, c[1], c[2], c[3], c[4]) end
 end
 
@@ -947,8 +947,16 @@ local function hookTooltip(tip)
     end
 end
 
+-- Where the feed's tooltip opens (launcher-§7; LibKa0s#92, AD-92-SM): attached to the display's
+-- cell, never the cursor, toward the screen's center, TIP_GAP off the cell, through
+-- LibKa0s-Tooltip-1.0's PlaceLauncher (the vertical side by the screen half, the horizontal by its
+-- third), which writes a relative point and so needs no size: the panel (Main window style) and
+-- the line tooltip (Classic) are placed before they fill. Without the library, or a cell whose
+-- geometry cannot be read, centered on the cell, below it in the screen's upper half and above it
+-- in the lower.
 local function anchor(tip, frame)
     if tip.SetOwner then tip:SetOwner(frame, "ANCHOR_NONE") end
+    if NS.Chrome.PlaceLauncher(tip, frame) then return end
     tip:ClearAllPoints()
     local _, y = frame:GetCenter()
     local top = y and UIParent:GetHeight() and y > UIParent:GetHeight() / 2

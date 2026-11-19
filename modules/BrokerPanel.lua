@@ -2,7 +2,8 @@ local addonName, NS = ...
 -- modules/BrokerPanel.lua — the LDB tooltip in the main window's style (owner feedback round 6,
 -- R6-10; Tooltips > Tooltip style "Main window", the default for a new profile). An addon-owned
 -- frame at TOOLTIP strata that draws what the main window draws: the skin's window shell and title
--- band, test mode's strip, the window's block headers (NS.Blocks, the chevron showing the block's
+-- band, test mode's strip (docked by the library directly under the title band, Widgets' `dock =
+-- "title"`, AD-88-SM; the body moves down by its BodyOffset), the window's block headers (NS.Blocks, the chevron showing the block's
 -- collapse in the window; no sort or filter mark since round 8, R8-4, the rows following the
 -- window's sort and filter all the same) and the window's rows (NS.Rows: icon, name, the
 -- shared bar with its text inside it, the action mark at its right end), at the window's row
@@ -39,8 +40,10 @@ local LAYERS = NS.Constants.LAYERS
 P.FRAME_NAME = "SkillMasterBrokerPanel"
 
 -- The main window's own measures (modules/MainWindow.lua), so one Width draws one body: the title
--- band, the scroll bar the body's width is counted without, and the gutter the window grows by.
-local TITLE_H, SCROLLBAR_W = 28, 16
+-- band's bottom (NS.Chrome.TitleBottom, read from the band at each fill; TITLE_H, its no-band figure,
+-- sizes the frame before the first), the scroll bar the body's width is counted without, and the
+-- gutter the window grows by.
+local TITLE_H, SCROLLBAR_W = NS.Chrome.TITLE_BOTTOM, 16
 local SCROLL_GUTTER = 6 + SCROLLBAR_W + 4
 -- The footer's inset, the Journal's skin scroll bar's width, its gap and the wheel's step.
 local PAD, BAR_W, WHEEL_STEP = 10, 8, 40
@@ -260,18 +263,22 @@ local function build()
     -- No onEnd: the library's strip menu opens at its own FULLSCREEN_DIALOG strata, under this
     -- TOOLTIP frame. The strip's right-click opens the same End test row here, lifted above the
     -- tooltip as the row menu is (NS.Broker.RaiseMenu), so the tooltip stays up while it is open.
+    -- Docked under the title band by the library, full width (AD-88-SM, LibKa0s#88).
+    frame.titleBar = NS.Chrome.TitleBar(frame)
     frame.strip = NS.Widgets.TestStrip(frame, {
         text  = L["Test mode: the skills shown are sample data."],
         owner = addonName,
+        dock = "title", titleBar = frame.titleBar, window = frame,
     })
     if frame.strip then
         frame.strip:EnableMouse(true)
         frame.strip:SetScript("OnMouseUp", stripClick)
-        frame.strip:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -TITLE_H)
-        frame.strip:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -TITLE_H)
         frame.strip:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.OVERLAY)
     end
     buildBody()
+    -- The hint lines (NS.Broker.FooterText) stay a FontString of their own, wrapped and as tall as
+    -- they measure: this is a tooltip's footer, not a window's, with no resize grip and no status
+    -- line, so standalone-windows' *The footer* (Widgets' Footer) does not cover it (AD-89-SM review).
     frame.footer = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.footer:SetJustifyH("LEFT")
     frame.footer:SetWordWrap(true)
@@ -345,8 +352,7 @@ end
 
 --- Size the frame to its body, up to Height; past it, the body scrolls.
 local function fit(y)
-    local stripOn = frame.strip ~= nil and frame.strip:IsShown()
-    local top = TITLE_H + (stripOn and (NS.Widgets.TEST_STRIP and NS.Widgets.TEST_STRIP.HEIGHT or 18) or 0)
+    local top = NS.Chrome.TitleBottom(frame) + NS.Chrome.StripOffset(frame.strip)
     local w = P.Width()
     frame:SetWidth(w)
     frame.footer:SetWidth(w - 2 * PAD)

@@ -105,7 +105,7 @@ test("test_seam_alert_click_sets_waypoint: a cap toast's click goes through the 
     assertEqual(#M.__printed(), 1, "one directions line")
 end)
 
-test("test_seam_mini_bars_are_the_bar_widget: the broker tooltip draws NS.Bar's mini style (the Journal's: test_journal)", function()
+test("test_seam_mini_bars_are_the_bar_widget: the broker tooltip draws the Widgets Bar's mini style (the Journal's: test_journal)", function()
     withWorld(function()
         local tip = M.CreateFrame("GameTooltip", "SkillMasterSeamTip", M.UIParent)
         tip.lines = {}

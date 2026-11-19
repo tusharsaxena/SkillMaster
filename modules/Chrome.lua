@@ -15,11 +15,100 @@ local addonName, NS = ...
 --                                                                      (nil takes it off; round 8, R8-2)
 -- NS.Chrome.Snap(texture)                                              snap art to the pixel grid
 -- NS.Chrome.MakeResizable(frame, spec) -> grip                         the one resize helper
+-- NS.Chrome.TitleBar(frame) -> frame / .StripOffset(strip) -> px       the bar a mode strip docks
+--                                                                      under, and the body's shift
+-- NS.Chrome.TitleBottom(frame) -> px                                   the band's bottom, read from it
+-- NS.Chrome.Footer(frame, opts) -> frame / .FooterHeight() -> px       a window's footer (Widgets')
+-- NS.Chrome.TitleMarks(frame, spec) -> hb                              a window's title-bar marks
+--                                                                      (Widgets' HeaderButtons)
+-- NS.Chrome.HeaderPitch() -> pad, gap / .SetTip(button, words)         the strip's pitch; a mark's words
 -- NS.Chrome.TooltipFontSize(tip, size, first) / .RestoreTooltipFonts(tip)   a tooltip's lines at a
 --                                                                      size (Tooltips page), and back
+-- NS.Chrome.PlaceBeside(tip, el, group) / .PlaceAttached(tip, el)    where a shown tooltip opens:
+--   / .PlaceLauncher(tip, cell)                                        beside the window group (a body
+--                                                                      element), above the control (a
+--                                                                      chrome one), toward the screen's
+--                                                                      center (the broker feed's cell)
+-- NS.Chrome.MakeEdges(frame, layer) -> edges / .PaintEdges(edges, c)   a frame's four 1 px edges
+-- NS.Chrome.PaintBorder(frame, s)                                      a frame's border from { border,
+--                                                                      borderStyle, borderSize }: the
+--                                                                      edges for Solid, an LSM border
+--                                                                      on a backdrop child otherwise
+--                                                                      (re-homed from modules/Bar.lua,
+--                                                                      AD-80-SM: the icon well, the
+--                                                                      detached frame, the snap ghost)
 
 NS.Chrome = {}
 local C = NS.Chrome
+
+-- ---------------------------------------------------------------------------------------------
+-- A frame's edges and border (the bars draw theirs through LibKa0s-Widgets-1.0's Bar)
+-- ---------------------------------------------------------------------------------------------
+
+local EDGE = 1   -- an edge's default width, UI units
+local function rgba(c) return c[1], c[2], c[3], c[4] or 1 end
+
+--- Four 1 px edge textures on `frame`, answered as a list (TOP, BOTTOM, LEFT, RIGHT).
+function C.MakeEdges(frame, layer)
+    local edges = {}
+    for i, side in ipairs({ "TOP", "BOTTOM", "LEFT", "RIGHT" }) do
+        local t = frame:CreateTexture(nil, layer or "BORDER")
+        if side == "TOP" or side == "BOTTOM" then
+            t:SetPoint(side .. "LEFT", frame, side .. "LEFT", 0, 0)
+            t:SetPoint(side .. "RIGHT", frame, side .. "RIGHT", 0, 0)
+            t:SetHeight(EDGE)
+        else
+            t:SetPoint("TOP" .. side, frame, "TOP" .. side, 0, 0)
+            t:SetPoint("BOTTOM" .. side, frame, "BOTTOM" .. side, 0, 0)
+            t:SetWidth(EDGE)
+        end
+        edges[i] = t
+    end
+    return edges
+end
+
+--- Color the edges, or hide them for a nil color.
+function C.PaintEdges(edges, c)
+    for _, t in ipairs(edges) do
+        if c then
+            t:SetColorTexture(rgba(c))
+            t:Show()
+        else
+            t:Hide()
+        end
+    end
+end
+
+--- The media path for an LSM key, or nil (no LibSharedMedia, an unknown key).
+function C.Media(kind, key)
+    local LSM = LibStub and LibStub("LibSharedMedia-3.0", true)
+    if not (LSM and type(key) == "string" and key ~= "") then return nil end
+    local ok, path = pcall(LSM.Fetch, LSM, kind, key, true)
+    return ok and path or nil
+end
+
+--- `frame`'s border (`frame.edges`, from C.MakeEdges): the four edges at `borderSize` px for a
+--- Solid style, else the LSM border drawn by a backdrop child (made on first use), else nothing.
+function C.PaintBorder(frame, s)
+    local path = s.border and s.borderStyle ~= "Solid" and C.Media("border", s.borderStyle) or nil
+    local size = s.borderSize or EDGE
+    for i, t in ipairs(frame.edges) do
+        if i <= 2 then t:SetHeight(size) else t:SetWidth(size) end
+    end
+    C.PaintEdges(frame.edges, (s.border and not path) and s.border or nil)
+    if not (path or frame.edgeFrame) then return end
+    local f = frame.edgeFrame
+    if not f then
+        f = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+        f:SetAllPoints(frame)
+        frame.edgeFrame = f
+    end
+    f:SetShown(path ~= nil)
+    if path and f.SetBackdrop then
+        f:SetBackdrop({ edgeFile = path, edgeSize = size })
+        f:SetBackdropBorderColor(rgba(s.border))
+    end
+end
 
 C.SIZE, C.ART = 18, 13   -- one size and one pitch for every control strip
 
@@ -92,14 +181,68 @@ end
 -- The hover tooltip (ruling 3, SR-L2): LibKa0s-Tooltip-1.0's AttachTitleTip, the library's own
 -- title-bar tooltip: one line, `button.tip` read on each hover, in the owner's `gtip.title`, placed
 -- above the control by PlaceAttached (below only without room). Without the library, the game's
--- tooltip above the control.
+-- tooltip attached centered above the control (attachAbove).
 local function tipWords(self) return self.tip end
 
+-- ---------------------------------------------------------------------------------------------
+-- Where a tooltip opens (LibKa0s#92, AD-92-SM; WowAddonStandards standalone-windows, *Tooltip
+-- placement*, and launcher-§7). Every tooltip this addon places itself is owned at ANCHOR_NONE,
+-- filled, shown (so its size is known) and then placed by one of these, which read
+-- LibKa0s-Tooltip-1.0 at call time:
+--   PlaceBeside    a BODY element (a row, a card, a column header, the HUD arrow): beside the
+--                  window group, right when it fits and otherwise left, top level with the element,
+--                  TIP_GAP out; `group` nil is the library's GroupOf (the outermost frame under
+--                  UIParent: the window, the detached or merged HUD, the broker panel);
+--   PlaceAttached  a CHROME element (a modal's action button): centered above it, below it only
+--                  without room above;
+--   PlaceLauncher  the broker feed's own tooltip on its display cell: toward the screen's center,
+--                  TIP_GAP off the cell (the launcher shape, launcher-§7).
+-- With the library absent, or the geometry unreadable (a placer answers nil, nothing placed), the
+-- tooltip attaches centered above its element by a relative point, as the library's own fallback
+-- does. Never the cursor, never a corner offset.
+-- ---------------------------------------------------------------------------------------------
+
+C.TIP_GAP = 2
+
+local function tipLib()
+    local Tip = LibStub and LibStub("LibKa0s-Tooltip-1.0", true)
+    return type(Tip) == "table" and type(Tip.PlaceBeside) == "function" and Tip or nil
+end
+
+local function attachAbove(tip, el)
+    tip:ClearAllPoints()
+    tip:SetPoint("BOTTOM", el, "TOP", 0, C.TIP_GAP)
+end
+
+--- Place the shown `tip` for the body element `el`, beside its window group (`group` as
+--- LibKa0s-Tooltip-1.0's PlaceBeside takes it; nil is GroupOf(el)).
+function C.PlaceBeside(tip, el, group)
+    local Tip = tipLib()
+    if Tip and Tip.PlaceBeside(tip, el, group) then return end
+    attachAbove(tip, el)
+end
+
+--- Place the shown `tip` for the chrome element `el`, centered above it.
+function C.PlaceAttached(tip, el)
+    local Tip = tipLib()
+    if Tip and type(Tip.PlaceAttached) == "function" and Tip.PlaceAttached(tip, el) then return end
+    attachAbove(tip, el)
+end
+
+--- Place `tip` on the broker display's cell, toward the screen's center; answers true when the
+--- library placed it (false: the caller keeps its own attached anchor).
+function C.PlaceLauncher(tip, cell)
+    local Tip = tipLib()
+    return (Tip and type(Tip.PlaceLauncher) == "function" and Tip.PlaceLauncher(tip, cell)) and true or false
+end
+
+-- Without the library: the game's tooltip, owned at ANCHOR_NONE, attached centered above the mark.
 local function showTip(self)
     if not (self.tip and GameTooltip) then return end
-    GameTooltip:SetOwner(self, "ANCHOR_TOP")
+    GameTooltip:SetOwner(self, "ANCHOR_NONE")
     GameTooltip:SetText(self.tip)
     GameTooltip:Show()
+    attachAbove(GameTooltip, self)
 end
 
 local function hideTip(self)
@@ -192,6 +335,10 @@ function C.SetIcon(b, icon, glyph, turned)
         if b.glyph then b.glyph:Hide() end
         return
     end
+    if b.label and not b.glyph then   -- a library mark drawn as its word: the word changes
+        b.label:SetText(glyph or "?")
+        return
+    end
     if not b.glyph then
         b.glyph = b:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
         b.glyph:SetPoint("CENTER", b, "CENTER", 0, 0)
@@ -261,6 +408,191 @@ end
 --- draws at one size and one vertical center whatever margin its art leaves.
 function C.HeaderMark(parent, icon, glyph, onClick, tip)
     return newButton(parent, icon, glyph, onClick, tip, true)
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- A window's title-bar marks (AD-86-SM, LibKa0s#86; standalone-windows, *Title-bar controls*):
+-- LibKa0s Widgets' HeaderButtons, right-aligned, left to right the window's own extras, then
+-- settings, then close, one 18 px slot, PAD (6) from the corner and GAP (6) apart, painted by the
+-- library's one path (`icon.tint` at rest, `text.link` under the pointer, the close's own pair).
+-- The settings mark opens this addon's settings through the opener the launcher registered
+-- (core/LauncherSetup.lua's `openSettings`, read by LibKa0s-Core-1.0's OpenSettings), and the close
+-- is built through the one wrapper, NS.MakeCloseButton. Each mark keeps `button.tip`, the words its
+-- callers and suites read, beside the library's `__tip`; C.SetTip writes both.
+-- ---------------------------------------------------------------------------------------------
+
+-- An 18 px mark centered on the 30 px band 1 px in: 1 + (30 - 18) / 2 below the window's top. The
+-- skin's Header places the marks again on its band; this is where they stand without one.
+C.TITLE_MARK_Y = -7
+
+--- The strip's corner inset and gap: Widgets' HEADER, the same figures with no library.
+function C.HeaderPitch()
+    local H = NS.Widgets and NS.Widgets.HEADER
+    return (H and tonumber(H.PAD)) or 6, (H and tonumber(H.GAP)) or 6
+end
+
+--- A mark's tooltip words, read on each hover by this module's marks (`tip`) and the library's (`__tip`).
+function C.SetTip(b, words)
+    if not b then return end
+    b.tip, b.__tip = words, words
+end
+
+--- The settings click without the library: hide `hideOnSettings` first, then the window's own
+--- opener, else the options panel.
+local function plainSettings(spec)
+    return function()
+        local hide = spec.hideOnSettings
+        if hide and hide.Hide then hide:Hide() end
+        if type(spec.settings) == "function" then return spec.settings() end
+        if NS.OpenOptionsPanel then NS.OpenOptionsPanel() end
+    end
+end
+
+--- The strip's entries outermost first: close, settings, then the extras from the innermost out.
+local function plainList(frame, spec, hb)
+    local list = {}
+    if spec.close ~= false then
+        hb.close = NS.MakeCloseButton(frame, spec.close or function() frame:Hide() end)
+        if hb.close then list[1] = { key = "close", btn = hb.close } end
+    end
+    if spec.settings ~= false then
+        hb.settings = C.IconButton(frame, "settings", "S", plainSettings(spec), spec.settingsTip)
+        list[#list + 1] = { key = "settings", btn = hb.settings }
+    end
+    local extras = spec.extras or {}
+    for i = #extras, 1, -1 do
+        local x = extras[i]
+        local b = C.IconButton(frame, x.icon, x.glyph, x.onClick, x.tip)
+        hb.extras[x.key] = b
+        list[#list + 1] = { key = x.key, btn = b }
+    end
+    return list
+end
+
+--- The same strip with no Widgets library: this module's marks, placed from the same corner at the
+--- same pitch, answering the library's shape.
+local function plainMarks(frame, spec)
+    local pad, gap = C.HeaderPitch()
+    local hb = { extras = {}, order = {}, offsets = {}, right = {} }
+    local list = plainList(frame, spec, hb)
+    local off = pad
+    for _, e in ipairs(list) do
+        e.btn:SetPoint(spec.point, frame, spec.point, -off, spec.y)
+        hb.offsets[e.key] = -off
+        hb.right[#hb.right + 1] = { frame = e.btn, x = off }
+        off = off + C.SIZE + gap
+    end
+    for i = #list, 1, -1 do hb.order[#hb.order + 1] = list[i].key end
+    frame.headerButtons = hb
+    return hb
+end
+
+--- Build `frame`'s title-bar marks. spec = {
+---   close = fn | false,            the close's click (false: the window has none)
+---   settings = nil | fn | false,   nil: the launcher's opener; false needs `settingsOptOut`
+---   settingsOptOut, hideOnSettings, settingsTip,
+---   extras = { { key, icon, glyph, tip, onClick }, ... },   left to right, inward of settings
+---   level = n,                     each mark's frame level over the window's (LAYERS.LEVEL.CHROME)
+---   point, y                       the corner the marks stand in before the skin's Header places
+---                                  them on its band (TOPRIGHT, C.TITLE_MARK_Y)
+--- }
+--- Answers HeaderButtons' `hb` (also `frame.headerButtons`): `hb.right` is what NS.Skin.Header takes.
+function C.TitleMarks(frame, spec)
+    local full = {
+        owner = addonName, frame = frame, point = spec.point or "TOPRIGHT", y = spec.y or C.TITLE_MARK_Y,
+        makeClose = NS.MakeCloseButton, close = spec.close, settings = spec.settings,
+        settingsOptOut = spec.settingsOptOut, hideOnSettings = spec.hideOnSettings,
+        settingsTip = spec.settingsTip, extras = spec.extras,
+    }
+    local W = NS.Widgets
+    local hb
+    if W and type(W.HeaderButtons) == "function" then hb = W.HeaderButtons(frame, full) else hb = plainMarks(frame, full) end
+    if spec.settingsTip then C.SetTip(hb.settings, spec.settingsTip) end
+    for _, x in ipairs(spec.extras or {}) do C.SetTip(hb.extras[x.key], x.tip) end
+    if spec.level then
+        local level = frame:GetFrameLevel() + spec.level
+        for _, e in ipairs(hb.right) do e.frame:SetFrameLevel(level) end
+    end
+    return hb
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- The title bar a mode strip docks under (AD-88-SM, LibKa0s#88; preview-mode, *Where the strip
+-- sits*): LibKa0s Widgets' TestStrip with `dock = "title"` anchors itself under the frame it is
+-- handed, full width, and places itself again on every show, hide and resize. Each window hands it
+-- the skin's title band (S.Band), the frame the skin lays where it paints the bar in every skin, so
+-- the strip sits under the bar the player sees. What sits below the bar starts C.TitleBottom(frame)
+-- under the window's top edge, plus the strip's BodyOffset while one shows, plus the window's own gap.
+-- ---------------------------------------------------------------------------------------------
+
+-- The title band's bottom edge below the window's top when no band is measured (no skin library, or
+-- a band not yet laid): the 1 px inset plus `title.height`, 30 px. A host copies no band height
+-- (standalone-windows, *Window chrome geometry*): C.TitleBottom reads the band where the skin lays it.
+C.TITLE_BOTTOM = 31
+
+--- The window's title bar as a frame: the skin's band, or with no skin library a bare frame of the
+--- same rect (1 px in, C.TITLE_BOTTOM - 1 tall) that draws nothing and takes no mouse.
+function C.TitleBar(frame)
+    local band = NS.Skin.Band and NS.Skin.Band(frame)
+    if type(band) == "table" then return band end
+    local bar = CreateFrame("Frame", nil, frame)
+    bar:SetPoint("TOPLEFT", frame, "TOPLEFT", 1, -1)
+    bar:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -1, -1)
+    bar:SetHeight(C.TITLE_BOTTOM - 1)
+    bar:EnableMouse(false)
+    return bar
+end
+
+--- The title band's bottom edge below `frame`'s top now: the band's height plus its inset, read from
+--- `frame.titleBar` as the skin laid it (S.Band sits `win.borderSize` in for a flat border, 1 px for
+--- the others; modules/Detached.lua's D.TitleHeight reads its band the same way). C.TITLE_BOTTOM
+--- while no band is measured: no window, no title bar, or a band that answers no height yet.
+function C.TitleBottom(frame)
+    local band = type(frame) == "table" and frame.titleBar
+    if not (type(band) == "table" and band.GetHeight and band.GetPoint) then return C.TITLE_BOTTOM end
+    local h = tonumber(band:GetHeight()) or 0
+    if h <= 0 then return C.TITLE_BOTTOM end
+    local y = select(5, band:GetPoint(1))   -- the band's inset below the window's top edge
+    return h + math.abs(tonumber(y) or 0)
+end
+
+--- The window footer's height, read where the library publishes it (Widgets' FOOTER.HEIGHT, 24 px
+--- under every skin; standalone-windows, *Window chrome geometry*), the same figure with no library.
+function C.FooterHeight()
+    local F = NS.Widgets and NS.Widgets.FOOTER
+    return (F and tonumber(F.HEIGHT)) or 24
+end
+
+--- A window's footer (standalone-windows, *The footer*; AD-89-SM, LibKa0s#89): LibKa0s Widgets'
+--- Footer across `frame`'s bottom edge, no fill, the skin's `divider` hairline along its top, painted
+--- for this addon's skin owner. `opts` = { left = text, grip = bool } (`grip`: its right side clears
+--- the resize grip's corner). With no library, a bare frame of C.FooterHeight() and no hairline, its
+--- `left` line in the muted text role and `foot:SetLeft(text)` as the library's.
+function C.Footer(frame, opts)
+    opts = opts or {}
+    local W = NS.Widgets
+    local foot = W and W.Footer and W.Footer(frame, { owner = addonName, left = opts.left, grip = opts.grip })
+    if foot then return foot end
+    foot = CreateFrame("Frame", nil, frame)
+    foot:SetHeight(C.FooterHeight())
+    foot:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+    foot:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+    foot.left = foot:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    foot.left:SetPoint("LEFT", foot, "LEFT", 8, 0)
+    foot.left:SetPoint("RIGHT", foot, "RIGHT", opts.grip and -22 or -8, 0)
+    foot.left:SetJustifyH("LEFT")
+    foot.left:SetWordWrap(false)
+    NS.Skin.Text(foot.left, "muted")
+    foot.SetLeft = function(self, text) self.left:SetText(type(text) == "string" and text or "") end
+    foot:SetLeft(opts.left)
+    return foot
+end
+
+--- How far a docked strip moves the body down now: its BodyOffset while it shows, else 0 (an
+--- undocked or absent strip, the library missing, moves nothing).
+function C.StripOffset(strip)
+    if not (strip and type(strip.BodyOffset) == "function") then return 0 end
+    return tonumber(strip:BodyOffset()) or 0
 end
 
 -- ---------------------------------------------------------------------------------------------

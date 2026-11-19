@@ -39,17 +39,17 @@ test("test_alts_snapshot_two_word_name: the key is realm-key, then the whole two
     forgetAll()
     local realName = M.UnitName
     -- Forever's UnitName answers the first name and the SURNAME, never a realm.
-    M.UnitName = function() return "Traxex", "Silentshot" end
-    as("Traxex Silentshot", "PvP", model(), function() A:Snapshot(5000) end)
-    as("Traxex Ironhide", "PvP", model(), function() A:Snapshot(5001) end)
+    M.UnitName = function() return "Sampleblade", "Mockvale" end
+    as("Sampleblade Mockvale", "Samplerealm", model(), function() A:Snapshot(5000) end)
+    as("Sampleblade Mockbrook", "Samplerealm", model(), function() A:Snapshot(5001) end)
     M.UnitName = realName
     local chars = NS.db.global.characters
-    assertTrue(chars["PvP-Traxex Silentshot"] ~= nil, "keyed by the whole name")
-    assertTrue(chars["PvP-Traxex Ironhide"] ~= nil, "a second Traxex is a second character")
-    assertTrue(chars["Silentshot-Traxex"] == nil and chars["PvP-Traxex"] == nil,
+    assertTrue(chars["Samplerealm-Sampleblade Mockvale"] ~= nil, "keyed by the whole name")
+    assertTrue(chars["Samplerealm-Sampleblade Mockbrook"] ~= nil, "a second Sampleblade is a second character")
+    assertTrue(chars["Mockvale-Sampleblade"] == nil and chars["Samplerealm-Sampleblade"] == nil,
         "never the surname as a realm, never the first word alone")
-    local rec = chars["PvP-Traxex Silentshot"]
-    assertEqual(rec.name, "Traxex Silentshot")
+    local rec = chars["Samplerealm-Sampleblade Mockvale"]
+    assertEqual(rec.name, "Sampleblade Mockvale")
     assertEqual(rec.updated, 5000)
     assertEqual(rec.skills.leatherworking.rank, 146)
     assertEqual(rec.skills.leatherworking.max, 150)
@@ -62,9 +62,9 @@ end)
 test("alts: a half-loaded (empty) model keeps the skills the last snapshot had", function()
     forgetAll()
     local empty = { byKey = {}, order = { primary = {}, secondary = {}, weapon = {}, other = {} } }
-    as("Ember Ironsong", "PvE", model(), function() A:Snapshot(1) end)
-    as("Ember Ironsong", "PvE", empty, function() A:Snapshot(2) end)
-    local rec = NS.db.global.characters["PvE-Ember Ironsong"]
+    as("Samplehunter Mockstride", "Samplerealm", model(), function() A:Snapshot(1) end)
+    as("Samplehunter Mockstride", "Samplerealm", empty, function() A:Snapshot(2) end)
+    local rec = NS.db.global.characters["Samplerealm-Samplehunter Mockstride"]
     assertEqual(rec.updated, 2, "the record is touched")
     assertEqual(rec.skills.bows.rank, 80, "and its skills survive")
     forgetAll()
@@ -72,18 +72,18 @@ end)
 
 test("alts: List puts this character first, then by name; Forget drops one", function()
     forgetAll()
-    as("Zed Alpha", "PvE", model(), function() A:Snapshot(1) end)
-    as("Abe Beta", "PvE", model(), function() A:Snapshot(1) end)
-    as("Mia Gamma", "PvE", model(), function()
+    as("Mockzed Samplealpha", "Samplerealm", model(), function() A:Snapshot(1) end)
+    as("Mockabe Samplebeta", "Samplerealm", model(), function() A:Snapshot(1) end)
+    as("Mockmia Samplegamma", "Samplerealm", model(), function()
         A:Snapshot(1)
         local list = A:List()
-        assertEqual(list[1].key, "PvE-Mia Gamma")
+        assertEqual(list[1].key, "Samplerealm-Mockmia Samplegamma")
         assertTrue(list[1].isCurrent, "the current character is marked")
-        assertEqual(list[2].key, "PvE-Abe Beta")
-        assertEqual(list[3].key, "PvE-Zed Alpha")
+        assertEqual(list[2].key, "Samplerealm-Mockabe Samplebeta")
+        assertEqual(list[3].key, "Samplerealm-Mockzed Samplealpha")
     end)
-    assertTrue(A:Forget("PvE-Zed Alpha"))
-    assertFalse(A:Forget("PvE-Zed Alpha"), "already gone")
+    assertTrue(A:Forget("Samplerealm-Mockzed Samplealpha"))
+    assertFalse(A:Forget("Samplerealm-Mockzed Samplealpha"), "already gone")
     assertEqual(#A:List(), 2)
     forgetAll()
 end)
@@ -91,21 +91,21 @@ end)
 test("alts: a burst of SKILLS_UPDATED is one debounced snapshot; PLAYER_LOGOUT snapshots at once", function()
     forgetAll()
     M.__fireTimers()
-    as("Quill Ashbrook", "PvE", model(), function()
+    as("Mockshield Sampleforge", "Samplerealm", model(), function()
         NS.bus:SendMessage(NS.MSG.SKILLS_UPDATED, model())
         NS.bus:SendMessage(NS.MSG.SKILLS_UPDATED, model())
-        assertTrue(NS.db.global.characters["PvE-Quill Ashbrook"] == nil, "nothing before the debounce")
+        assertTrue(NS.db.global.characters["Samplerealm-Mockshield Sampleforge"] == nil, "nothing before the debounce")
         local queued = 0
         for _, t in ipairs(M.__timers) do
             if math.abs((t.delay or 0) - A.DEBOUNCE) < 1e-9 then queued = queued + 1 end
         end
         assertEqual(queued, 1, "one timer for the burst")
         M.__fireTimers()
-        assertTrue(NS.db.global.characters["PvE-Quill Ashbrook"] ~= nil, "snapshotted after it")
+        assertTrue(NS.db.global.characters["Samplerealm-Mockshield Sampleforge"] ~= nil, "snapshotted after it")
     end)
     forgetAll()
-    as("Quill Ashbrook", "PvE", model(), function() M.__fireEvent("PLAYER_LOGOUT") end)
-    assertTrue(NS.db.global.characters["PvE-Quill Ashbrook"] ~= nil, "logout snapshots without waiting")
+    as("Mockshield Sampleforge", "Samplerealm", model(), function() M.__fireEvent("PLAYER_LOGOUT") end)
+    assertTrue(NS.db.global.characters["Samplerealm-Mockshield Sampleforge"] ~= nil, "logout snapshots without waiting")
     forgetAll()
 end)
 
@@ -120,10 +120,10 @@ test("alts: the snapshot carries the character's stats by key, with each one's b
     forgetAll()
     local realModel = NS.StatData.Model
     NS.StatData.Model = function() return statModel() end
-    local ok, err = pcall(as, "Ember Ironsong", "PvE", model(), function() A:Snapshot(10) end)
+    local ok, err = pcall(as, "Samplehunter Mockstride", "Samplerealm", model(), function() A:Snapshot(10) end)
     NS.StatData.Model = realModel
     if not ok then error(err, 0) end
-    local st = NS.db.global.characters["PvE-Ember Ironsong"].stats
+    local st = NS.db.global.characters["Samplerealm-Samplehunter Mockstride"].stats
     assertTrue(st ~= nil, "stats stored")
     assertEqual(st.strength.group, "base")
     assertEqual(st.strength.value, 88)
@@ -137,12 +137,12 @@ test("alts: no stat model keeps the stats the last snapshot had; an old snapshot
     forgetAll()
     local realModel, realScan = NS.StatData.Model, NS.StatData.Scan
     NS.StatData.Model = function() return statModel() end
-    as("Ember Ironsong", "PvE", model(), function() A:Snapshot(1) end)
+    as("Samplehunter Mockstride", "Samplerealm", model(), function() A:Snapshot(1) end)
     NS.StatData.Model, NS.StatData.Scan = function() return nil end, function() return nil end
-    local ok, err = pcall(as, "Ember Ironsong", "PvE", model(), function() A:Snapshot(2) end)
+    local ok, err = pcall(as, "Samplehunter Mockstride", "Samplerealm", model(), function() A:Snapshot(2) end)
     NS.StatData.Model, NS.StatData.Scan = realModel, realScan
     if not ok then error(err, 0) end
-    assertEqual(NS.db.global.characters["PvE-Ember Ironsong"].stats.strength.value, 88, "kept")
+    assertEqual(NS.db.global.characters["Samplerealm-Samplehunter Mockstride"].stats.strength.value, 88, "kept")
     assertEqual(A.StatsOf(nil), nil, "no model, no stats: the Journal draws a dash")
     forgetAll()
 end)

@@ -100,11 +100,11 @@ local function withWindows(fn)
     local windows = {
         { name = "the main window", close = main.close,
           marks = { main.lockButton, main.journalButton, main.settingsButton, main.toggleAllButton } },
-        { name = "the journal", close = J.Frame().close, marks = { J.Frame().lockButton } },
-        { name = "the trainer popup", close = TP.Frame().close, marks = {} },
+        { name = "the journal", close = J.Frame().close, marks = { J.Frame().lockButton, J.Frame().settingsButton } },
+        { name = "the trainer popup", close = TP.Frame().close, marks = { TP.Frame().settingsButton } },
         { name = "a block header", marks = { header.chevron, header.detach, header.sort, header.filter } },
-        { name = "a detached block's band", marks = { band.dock, band.collapse, band.sort, band.filter } },
-        { name = "a merged window's band", marks = { merged.dockAll, merged.collapseAll } },
+        { name = "a detached block's band", marks = { band.dock, band.collapse, band.sort, band.filter, band.settingsButton } },
+        { name = "a merged window's band", marks = { merged.dockAll, merged.collapseAll, merged.settingsButton } },
         { name = "a merged section's sub-header", marks = { sub.chevron, sub.split, sub.sort, sub.filter } },
     }
     local ok, err = pcall(fn, windows)

@@ -542,7 +542,7 @@ local function applyPoint(f, g)
 end
 
 local function paintSubBg(sh)
-    local c = NS.Bar.Color("sm.headerBg")
+    local c = NS.SkinColor("sm.headerBg")
     if c then sh.bg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
 end
 
@@ -640,10 +640,11 @@ local function buildBand(f)
     f.band:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CONTENT)
     f.dockAll:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     f.collapseAll:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CHROME)
-    NS.Skin.Header(f, { title = f.title, align = "LEFT", right = { f.dockAll, f.collapseAll } })
+    -- The settings mark in the corner, the two marks inward of it (AD-86-SM; NS.Detached.BandMarks).
+    local marks = { f.dockAll, f.collapseAll }
+    local gap = NS.Detached.BandMarks(f, marks)
     if not f.dockAll:GetPoint(1) then
-        f.dockAll:SetPoint("TOPRIGHT", f, "TOPRIGHT", -NS.Detached.PAD, -2)
-        f.collapseAll:SetPoint("RIGHT", f.dockAll, "LEFT", -2, 0)
+        NS.Detached.PlaceInward(f.settingsButton, marks, gap)
         f.title:SetPoint("TOPLEFT", f, "TOPLEFT", 8, -5)
     end
 end
@@ -667,7 +668,7 @@ local function build()
     NS.Skin.Shell(f)
     buildBand(f)
     f.ownScale = 1
-    f.bandParts = { f.title, f.dockAll, f.collapseAll }
+    f.bandParts = { f.title, f.settingsButton, f.dockAll, f.collapseAll }
     return f
 end
 
