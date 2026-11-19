@@ -423,7 +423,8 @@ the checks below that cover each item:
   trainer popup on an unlearned weapon (Bows) and press Set waypoint: TomTom's waypoint appears (on
   the world map, the minimap and with TomTom's own arrow), titled with the trainer's name; Skill
   Master's arrow does not show, and chat says `Waypoint set (TomTom): <trainer>: <city> ...`. Hover
-  the TomTom waypoint: it names the trainer. A cap toast's click does the same.
+  the TomTom waypoint: it names the trainer. A cap toast's click does the same. (A map pin left by
+  a Set made before TomTom was enabled is not cleared; known-limitations.md.)
 - **SM-DISP-65** (new, AF-SM-TOMTOM) Disable TomTom and `/reload`: Set waypoint is the map pin with
   Skill Master's arrow again, and chat says `Map pin set: ...`. With TomTom enabled, Waypoint method
   Chat only: Set waypoint is grayed and Print to chat prints the directions.
