@@ -41,6 +41,8 @@ read_globals = {
   "C_SpellBook",                 -- a profession's trade link (core/Compat.lua TradeSkillLink)
   "ChatEdit_InsertLink", "ChatFrame_OpenChat", "IsShiftKeyDown",
   "UiMapPoint", "C_SuperTrack",
+  -- AF-SM-TOMTOM: the real TomTom addon, told by name (core/Compat.lua Compat.TomTom)
+  "TomTom",
   -- round 5, R5-15: the map point a world position is read for (core/Compat.lua MapWorldPos)
   "CreateVector2D",
   -- the click debug (modules/SecureOverlay.lua SO.MouseFoci): the frames under the pointer

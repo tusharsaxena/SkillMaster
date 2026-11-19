@@ -415,7 +415,7 @@ end
 local BLOCKED_TEXT = {
     nocoords = L["No map coordinates for this trainer yet; Print to chat gives directions."],
     chat = L["Waypoint method is Chat only (Trainers and Waypoints page); Print to chat gives directions."],
-    noprovider = L["No map pin on this client; Print to chat gives directions."],
+    noprovider = L["No TomTom and no map pin on this client; Print to chat gives directions."],
 }
 
 local function refreshActions()

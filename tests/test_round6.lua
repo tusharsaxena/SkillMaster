@@ -553,7 +553,7 @@ test("round6 waypoint: a trainer without coordinates disables the button and its
     end)
     withTrainerPopup("fistWeapons", {}, function(f)
         assertFalse(f.waypoint:IsEnabled(), "no map pin: disabled")
-        assertTrue(tipText(f.waypoint):find("No map pin", 1, true) ~= nil, "its tooltip says so")
+        assertTrue(tipText(f.waypoint):find("No TomTom and no map pin", 1, true) ~= nil, "its tooltip says so (AF-SM-TOMTOM)")
     end)
 end)
 

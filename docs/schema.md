@@ -31,7 +31,7 @@ SkillMasterDB
     enabled = true               -- Enable Ka0s Skill Master; /sm enable, /sm disable
     scale   = 1                  -- Master scale (0.5 .. 2)
     alpha   = 1                  -- Master opacity (0 .. 1)
-    locked  = false              -- Lock frame; /sm lock, /sm unlock, the window's and the Journal's lock marks
+    locked  = false              -- Lock frame (and hide the main window's resize grip); /sm lock, /sm unlock, the window's and the Journal's lock marks
     window  = { point = false }  -- drop point, written only by modules/MainWindow.lua
     skin = {
       source = "ka0s", skin = <library default: WoW Forever>,
@@ -40,7 +40,7 @@ SkillMasterDB
       pickerSeen = false,
     }
     layout = {                   -- the Layout page (T5.1)
-      width = 420, maxHeight = 560, blockGap = 0, summary = true,
+      width = 420, maxHeight = 560, blockGap = 0, summary = true,   -- width, maxHeight: also the resize grip's (AF-SM-RESIZE)
       fitHeight = false,         -- off: the window stays maxHeight tall (owner feedback round 3)
       columns = 1,               -- 1 | 2 columns of docked blocks, each `width` wide
       openFrom = "row",          -- Open a row from (round 8, R8-1): "row" (Full row: a left click

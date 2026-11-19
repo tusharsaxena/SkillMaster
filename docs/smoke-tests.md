@@ -17,7 +17,7 @@ the checks below that cover each item:
 | The lure timer | SM-DISP-2, SM-SIM-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
 | Rows page (round 9) | SM-DISP-59 |
-| Waypoints (no TomTom, round 7) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58, SM-DISP-60, SM-DISP-61, SM-DISP-62, SM-DISP-63 |
+| Waypoints (TomTom by name, AF-SM-TOMTOM) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58, SM-DISP-60, SM-DISP-61, SM-DISP-62, SM-DISP-63, SM-DISP-64, SM-DISP-65 |
 | Each skin | SM-SKIN-1, SM-SKIN-2 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
 | Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4, SM-DISP-18, SM-DISP-39, SM-DISP-40 |
@@ -44,6 +44,24 @@ the checks below that cover each item:
   lower or smaller than the others. Pop the block out and merge it with another detached block: the
   band's marks and the sub-header's marks read the same. Set the sort to Value, highest first and
   Progress: the sort mark keeps the size.
+- **SM-WIN-6** (new, AF-SM-RESIZE) With the window unlocked, its bottom-right corner shows the resize
+  grip, clear of the legend. Drag it wider and taller: the corner follows the cursor (the window does
+  not leap or grow about its center), the rows stretch with the width as you drag, and on release the
+  blocks redraw once. Open Layout › Window: Window width and Window height show the new size. `/reload`
+  and reopen: the window comes back at that size, where you left it. Try two columns too: both columns
+  share the new width.
+- **SM-WIN-7** (new, AF-SM-RESIZE) Drag the grip as small and as large as it goes: it stops at Window
+  width's and Window height's limits (never off the screen), and the window still draws cleanly at both.
+- **SM-WIN-8** (new, AF-SM-RESIZE) `/sm lock`: the grip disappears and the window neither drags nor
+  resizes. `/sm unlock`: the grip is back. The title bar's lock mark and the launcher's Locked entry do
+  the same. Hover the minimap or broker button for the LDB tooltip: it has no grip and keeps its size.
+- **SM-WIN-9** (new, AF-SM-RESIZE review fix) Drag the grip to an odd size and release, then open
+  Layout › Window: Window width and Window height read whole tens (the sliders' step). Nudge either
+  slider one step: the window moves by that one step only, with no jump first.
+- **SM-WIN-10** (new, AF-SM-RESIZE review fix) Set Master scale (General › Master controls) to 1.5 or
+  more and drag the grip as large as it goes: the window never grows wider or taller than the
+  visible screen. Set Master scale back to 1: the grip can again reach Window width's and
+  Window height's limits.
 
 ## Display (M3)
 
@@ -259,9 +277,9 @@ the checks below that cover each item:
   switch to it with the arrow up: it goes and the game's own arrow points at the pin. Switch back,
   set the waypoint, then switch to a profile whose arrow is at scale 2 and dragged elsewhere: the
   arrow takes that scale and place at once.
-- **SM-DISP-47** (round 7, R7-7: no TomTom) With TomTom, or an addon that answers TomTom's API (the
-  owner's case), loaded: Set waypoint on a weapon master gives the map pin and Skill Master's
-  arrow, never TomTom's; `/sm test` shows the sample arrow too. Untick Show Skill Master's
+- **SM-DISP-47** (round 7, R7-7; amended, AF-SM-TOMTOM: the real TomTom is SM-DISP-64) With an
+  addon that answers TomTom's API but is not TomTom itself (the owner's round-7 case) loaded: Set
+  waypoint on a weapon master gives the map pin and Skill Master's arrow, never TomTom's; `/sm test` shows the sample arrow too. Untick Show Skill Master's
   arrow and set it again: the map pin with the game's own arrow. Trainers and Waypoints > Waypoint
   method offers Map pin and Chat only, no TomTom entry. A profile that had TomTom first or Map pin
   stored reads Map pin after the upgrade.
@@ -401,6 +419,15 @@ the checks below that cover each item:
   arrow shows over it. Right-click it: Share in chat, Show on map and Show trainers are grayed.
   Clear waypoint: the sample goes, the real arrow is back and
   the map pin stays. `/sm test` again to end test mode: the real arrow stays.
+- **SM-DISP-64** (new, AF-SM-TOMTOM, owner img-19) With **TomTom** installed and enabled, open the
+  trainer popup on an unlearned weapon (Bows) and press Set waypoint: TomTom's waypoint appears (on
+  the world map, the minimap and with TomTom's own arrow), titled with the trainer's name; Skill
+  Master's arrow does not show, and chat says `Waypoint set (TomTom): <trainer>: <city> ...`. Hover
+  the TomTom waypoint: it names the trainer. A cap toast's click does the same. (A map pin left by
+  a Set made before TomTom was enabled is not cleared; known-limitations.md.)
+- **SM-DISP-65** (new, AF-SM-TOMTOM) Disable TomTom and `/reload`: Set waypoint is the map pin with
+  Skill Master's arrow again, and chat says `Map pin set: ...`. With TomTom enabled, Waypoint method
+  Chat only: Set waypoint is grayed and Print to chat prints the directions.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

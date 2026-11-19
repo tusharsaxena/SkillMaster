@@ -6,7 +6,9 @@ local addonName, NS = ...
 -- window's footer (LibKa0s Widgets' Footer, FOOTER.HEIGHT; standalone-windows, *The footer*), the
 -- test and sim strips docked under the title bar (Widgets' `dock = "title"`, preview-mode's *Where
 -- the strip sits*: the body moves down by the strip's BodyOffset while one shows), the drag-only
--- position, the one toggle handler and the Show window key binding.
+-- position, the corner resize grip (AF-SM-RESIZE: NS.Chrome.MakeResizable, its size written to
+-- Window width and Window height on the release, hidden and refused while Locked), the one toggle
+-- handler and the Show window key binding.
 --
 -- A render is a full layout only when the set of rows changed (blocks, collapse, keys); otherwise it
 -- redraws values in place. The crafting rows' secure overlays (T3.3, modules/SecureOverlay.lua)
@@ -36,6 +38,7 @@ local headers = {}   -- [block id] = the header drawn this pass
 local lastSig        -- the row set the current layout was built for
 
 local COLUMN_GAP = 6   -- px between two columns of blocks
+local sizing = false   -- the grip is being dragged: only the cheap pass lays the body out
 
 local function layoutSettings() return (NS.db and NS.db.profile.layout) or NS.defaults.profile.layout end
 local function columns() return tonumber(layoutSettings().columns) == 2 and 2 or 1 end
@@ -49,6 +52,74 @@ end
 
 --- The window's width: the body, its scroll bar's whole gutter and its edges.
 local function width() return W.ContentWidth() + 4 + SCROLL_GUTTER end
+
+-- ---------------------------------------------------------------------------------------------
+-- The resize grip (AF-SM-RESIZE; standalone-windows, Resizing). The grip sets the two Layout
+-- settings the window's size already comes from: Window width (one column's, so a frame width maps
+-- back through the column count) and Window height. Its bounds are those rows' own range, never
+-- past the screen. While it is dragged only the cheap pass runs (W.Relayout: the columns and the
+-- body take the new width, once per rendered frame); on the release the two settings are written
+-- through the seam in one bulk bracket, whose one coalesced LAYOUT_CHANGED is the one full redraw.
+-- ---------------------------------------------------------------------------------------------
+
+local floor, max, min = math.floor, math.max, math.min
+
+-- A Layout row's range (settings/Layout.lua), read from the schema so the grip and the slider agree.
+local function rowRange(path, lo, hi)
+    local S = NS.SchemaRuntime
+    local row = S and S.FindRow and S.FindRow(path)
+    return (row and tonumber(row.min)) or lo, (row and tonumber(row.max)) or hi
+end
+
+-- `v` snapped to the row's step grid (from its minimum), so the slider holds a value it can step
+-- from and the first nudge never jumps the window (a row with no step rounds to the pixel).
+local function snapToStep(path, v, lo)
+    local S = NS.SchemaRuntime
+    local row = S and S.FindRow and S.FindRow(path)
+    local step = row and tonumber(row.step)
+    if not (step and step > 0) then return floor(v + 0.5) end
+    return lo + floor((v - lo) / step + 0.5) * step
+end
+
+-- The frame width a Window width of `colSetting` gives, and the Window width a frame width maps to.
+local function widthFor(colSetting)
+    local n = columns()
+    return n * (colSetting - 4 - SCROLLBAR_W) + (n - 1) * COLUMN_GAP + 4 + SCROLL_GUTTER
+end
+local function bodyColumnFor(w)
+    local n = columns()
+    return (w - 4 - SCROLL_GUTTER - (n - 1) * COLUMN_GAP) / n
+end
+
+local function screenSize()
+    local sw = UIParent and tonumber(UIParent:GetWidth())
+    local sh = UIParent and tonumber(UIParent:GetHeight())
+    -- Resize bounds are in the frame's own units: Master scale above 1 shrinks the screen in them.
+    local scale = frame and type(frame.GetScale) == "function" and tonumber(frame:GetScale())
+    if not (scale and scale > 0) then scale = 1 end
+    sw = (sw and sw > 0) and sw / scale or nil
+    sh = (sh and sh > 0) and sh / scale or nil
+    return sw, sh
+end
+
+--- Re-apply the grip's bounds: Window width's and Window height's range at the current column
+--- count, capped at the screen (in the frame's units, so at its Master scale). A full layout and
+--- W.ApplySettings run it, so a Columns or Master scale change moves them.
+local function applyBounds()
+    if not (frame and frame.resizeGrip) then return end
+    local wLo, wHi = rowRange("layout.width", 320, 800)
+    local hLo, hHi = rowRange("layout.maxHeight", 200, 1200)
+    local sw, sh = screenSize()
+    local minW, maxW = widthFor(wLo), widthFor(wHi)
+    if sw then maxW = max(min(maxW, sw), minW) end
+    if sh then hHi = max(min(hHi, sh), hLo) end
+    if type(frame.SetResizeBounds) == "function" then
+        frame:SetResizeBounds(minW, hLo, maxW, hHi)
+    else
+        if type(frame.SetMinResize) == "function" then frame:SetMinResize(minW, hLo) end
+        if type(frame.SetMaxResize) == "function" then frame:SetMaxResize(maxW, hHi) end
+    end
+end
 
 local function savePoint()
     local point, _, relPoint, x, y = frame:GetPoint(1)
@@ -194,7 +265,7 @@ end
 -- painted for this addon's skin owner. Its words are the legend's, laid over it; its own left and right
 -- lines stay empty. With no library, a bare frame of the same height and no hairline.
 local function buildLegend()
-    local f = NS.Chrome.Footer(frame)
+    local f = NS.Chrome.Footer(frame, { grip = true })   -- its right side clears the grip's corner
     local t1, fs1 = swatch(f, "bonusTemp", L["temp bonus"])
     local t2, fs2 = swatch(f, "bonusPerm", L["permanent bonus"], fs1)
     local marker, fs3 = legendMark(f, "marker", 2, L["threshold"])
@@ -271,6 +342,48 @@ local function onHide()
     NS.Blocks.UpdateSpeedWatch()
 end
 
+-- The release: Window width and Window height take the dragged size, each through the seam
+-- (architecture-§5), in one bulk bracket so the redraw they cause is one coalesced LAYOUT_CHANGED.
+local function storeSize(w, h)
+    if not (NS.db and tonumber(w) and tonumber(h)) then return end
+    local wLo, wHi = rowRange("layout.width", 320, 800)
+    local hLo, hHi = rowRange("layout.maxHeight", 200, 1200)
+    local colSetting = max(wLo, min(wHi, snapToStep("layout.width", bodyColumnFor(w) + 4 + SCROLLBAR_W, wLo)))
+    local height = max(hLo, min(hHi, snapToStep("layout.maxHeight", h, hLo)))
+    local function write()
+        if colSetting ~= layoutSettings().width then NS.SetByPath("layout.width", colSetting) end
+        if height ~= layoutSettings().maxHeight then NS.SetByPath("layout.maxHeight", height) end
+    end
+    local S = NS.SchemaRuntime
+    if S and S.BulkRun then S.BulkRun("resize", "layout", write) else write() end
+end
+
+local function endSizing()
+    sizing = false
+    if NS.SecureOverlay then NS.SecureOverlay:SetMoving(frame, false) end   -- laid at the release
+end
+
+local function makeResizable()
+    NS.Chrome.MakeResizable(frame, {
+        layout = function(w, h) W.Relayout(w, h) end,
+        redraw = endSizing,
+        -- The grab re-anchored the frame by its top-left, so the drop point is saved with the size.
+        save = function(w, h)
+            storeSize(w, h)
+            savePoint()
+        end,
+        -- Asked at every grab, before sizing starts: Locked refuses, then the top-left pin.
+        canResize = function()
+            if NS.GetSetting("locked") then return false end
+            NS.Chrome.PinTopLeft(frame)
+            sizing = true
+            if NS.SecureOverlay then NS.SecureOverlay:SetMoving(frame, true) end   -- none trails it
+            return true
+        end,
+    })
+    applyBounds()
+end
+
 local function build()
     if frame then return frame end
     frame = CreateFrame("Frame", W.FRAME_NAME, UIParent, "BackdropTemplate")
@@ -287,6 +400,7 @@ local function build()
     if NS.SecureOverlay then NS.SecureOverlay:Follow(frame) end
 
     buildChrome()
+    makeResizable()
 
     frame.empty = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     frame.empty:SetPoint("CENTER", frame, "CENTER", 0, 0)
@@ -464,6 +578,9 @@ local function fit(top, y)
     frame.scroll:ClearAllPoints()
     frame.scroll:SetPoint("TOPLEFT", frame, "TOPLEFT", 2, -(top + 1))
     frame.scroll:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -(2 + SCROLL_GUTTER), footerH() + 2)
+    applyBounds()
+    -- A render while the grip is dragged keeps the grip's size: the body takes the frame's width.
+    if sizing then return W.Relayout(frame:GetWidth(), frame:GetHeight()) end
     local maxH = layoutSettings().maxHeight or 560
     frame:SetWidth(width())
     frame.content:SetWidth(W.ContentWidth())
@@ -526,6 +643,18 @@ function W.Render()
     if t0 then Perf.Note("windowRender", debugprofilestop() - t0) end
 end
 
+--- The cheap layout a size change runs while the grip is dragged (at most once a rendered frame,
+--- NS.Chrome.MakeResizable): the columns and the scrolled body take the frame's new width. The rows
+--- are anchored to their column's two edges, so they follow; nothing is re-planned or re-bound, and
+--- the release's redraw lays everything out once. Outside a drag it does nothing.
+function W.Relayout(w)
+    if not (frame and sizing) then return end
+    local n = columns()
+    local colW = max(1, bodyColumnFor(tonumber(w) or frame:GetWidth()))
+    placeColumns(n, colW)
+    frame.content:SetWidth(n * colW + (n - 1) * COLUMN_GAP)
+end
+
 --- The rows drawn this pass (the suites and the overlay sync read them).
 function W.Rows() return rowPool and rowPool.active or {} end
 function W.Headers() return headerPool and headerPool.active or {} end
@@ -546,9 +675,12 @@ function W.ApplySettings()
     if not (frame and NS.db) then return end
     frame:SetFrameStrata(W.Strata())
     frame:SetScale(NS.GetSetting("scale") or 1)
+    applyBounds()   -- the screen cap is in the frame's units, so it moves with Master scale
     frame:SetAlpha(NS.GetSetting("alpha") or 1)
     local locked = NS.GetSetting("locked")
     frame:SetMovable(not locked)
+    -- Locked holds the window: no drag, and no grip (AF-SM-RESIZE; canResize refuses it too).
+    if frame.resizeGrip then frame.resizeGrip:SetShown(not locked) end
     NS.Chrome.SetIcon(frame.lockButton, locked and "lock" or "unlock", locked and "L" or "U")
     applyPoint()
     if NS.SecureOverlay then NS.SecureOverlay:Sync() end

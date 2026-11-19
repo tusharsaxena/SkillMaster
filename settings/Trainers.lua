@@ -12,9 +12,10 @@ local PAGE, GROUP = "trainers", L["Trainers and waypoints"]
 NS.RegisterSchemaRows(NS.Live({
     { path = "waypoints.method", page = PAGE, group = GROUP, type = "string", default = PW.method,
       label = L["Waypoint method"],
-      desc = L["Where a trainer's waypoint goes: Map pin places one on the map, Chat only writes the directions. A trainer with no coordinates, or a client with no map pin, is always written to chat."],
-      -- Round 7, R7-7: no TomTom, so "auto" is the map pin, else chat (schemaVersion 11 folded a
-      -- stored "tomtom" or "native" into it).
+      desc = L["Where a trainer's waypoint goes: Map pin places one on the map (a TomTom waypoint, with TomTom's arrow, when TomTom is loaded), Chat only writes the directions. A trainer with no coordinates, or a client with neither TomTom nor a map pin, is always written to chat."],
+      -- Round 7, R7-7: no TomTom choice, so "auto" is the map pin, else chat (schemaVersion 11 folded
+      -- a stored "tomtom" or "native" into it). AF-SM-TOMTOM: "auto" is TomTom's waypoint when the
+      -- real TomTom is loaded (modules/Waypoints.lua); still no separate choice.
       values = { { value = "auto", text = L["Map pin"] }, { value = "chat", text = L["Chat only"] } } },
     { path = "waypoints.announce", page = PAGE, group = GROUP, type = "bool", default = PW.announce,
       label = L["Say where in chat"], desc = L["Print a chat line naming the trainer when a waypoint is set."] },
@@ -36,7 +37,7 @@ local ARROW = L["Waypoint arrow"]
 NS.RegisterSchemaRows(NS.Live({
     { path = "waypoints.arrow", page = PAGE, group = GROUP, subgroup = ARROW, type = "bool", default = PW.arrow,
       label = L["Show Skill Master's arrow"],
-      desc = L["A map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin."],
+      desc = L["A map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin. With TomTom loaded, TomTom's arrow points instead."],
       onChange = function() if NS.WaypointArrow then NS.WaypointArrow.ApplySettings() end end },
 }))
 -- The library's words, keyed as its SETTINGS_STRINGS, through NS.L.

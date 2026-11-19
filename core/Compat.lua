@@ -19,6 +19,7 @@ local _, NS = ...
 --   Compat.SelectSkillLine(i)              select line i in Character -> Skills; the call's name or nil
 --   Compat.MapWorldPos(mapID, x, y)        a map point's (0..1) world position: instance, x, y; or nil
 --   Compat.PlayerWorldPos()                the player's world position: instance, x, y; or nil
+--   Compat.TomTom()                        the real TomTom addon's table (loaded by name), or nil
 -- PlayerLevel to SpellName (T5.2), and PlayerName (FB-17), exist so the simulator's seam (core/SimSetup.lua, LibKa0s-Sim-1.0) can answer
 -- every client read a simulated character needs (preview-mode, H1): a module reads them as
 -- `NS.Compat.Member(...)` at call time and never captures one in a local.
@@ -428,4 +429,23 @@ function Compat.PlayerWorldPos()
     local okXY, x, y = pcall(pos.GetXY, pos)
     if not okXY or not (plainNumber(x) and plainNumber(y)) then return nil end
     return Compat.MapWorldPos(mapID, x, y)
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- AF-SM-TOMTOM (owner img-19, 2026-11-19): the real TomTom. Round 7 (R7-7) dropped TomTom because
+-- another addon answered TomTom's API (a `TomTom` global with an AddWaypoint), so the addon is told
+-- by its folder name, C_AddOns.IsAddOnLoaded("TomTom"), before its global is used. The bare
+-- IsAddOnLoaded is in neither client's name set (docs/forever-quirks.md, the assumed-API table), so
+-- no fallback to it.
+-- ---------------------------------------------------------------------------------------------
+
+--- The TomTom addon's table when the addon named TomTom is loaded and answers AddWaypoint, else nil.
+function Compat.TomTom()
+    local api = C_AddOns
+    if type(api) ~= "table" or type(api.IsAddOnLoaded) ~= "function" then return nil end
+    local ok, loaded = pcall(api.IsAddOnLoaded, "TomTom")
+    if not (ok and loaded) then return nil end
+    local tt = TomTom
+    if type(tt) ~= "table" or type(tt.AddWaypoint) ~= "function" then return nil end
+    return tt
 end

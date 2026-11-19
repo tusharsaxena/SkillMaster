@@ -131,11 +131,13 @@ The README's `## How the bars work` is the player-facing version of this page.
   rendered, and the body scrolls to the row's laid-out top (`row.layY`) less one header. A row in a
   detached block, or an unknown key, still shows the window. An unlearned broker row opens
   `NS.TrainerPopup.Show(key)`. Neither path touches a secure frame (design §6.5).
-- A left-click on a cap toast hands its trainer to `NS.Waypoints:Set`: the native user waypoint,
+- A left-click on a cap toast hands its trainer to `NS.Waypoints:Set`: a TomTom waypoint when the
+  real TomTom is loaded (`NS.Compat.TomTom`, told by name; AF-SM-TOMTOM), the native user waypoint,
   else the directions in chat; a trainer without coordinates always goes to chat. With Show Skill
   Master's arrow on, the native pin is set unsuper-tracked and `NS.WaypointArrow.Show(trainer)`
   points at it (round 6, R6-11); off, the pin is super-tracked and the client's arrow points.
-  `USER_WAYPOINT_UPDATED` (the pin cleared or replaced elsewhere) hides the arrow. No TomTom (round
+  `USER_WAYPOINT_UPDATED` (the pin cleared or replaced elsewhere) hides the arrow. With TomTom, the
+  arrow is hidden and TomTom's points; a TomTom-shaped global from another addon is ignored (round
   7, R7-7). The arrow's drag writes `waypoints.arrowX` / `arrowY` through `NS.SetByPath`. Its
   right-click menu (round 9, R9-2) clears the waypoint, shares it in chat, shows it on the map, locks
   or resets the arrow, opens `NS.TrainerPopup.Show(key)` (Show trainers) or the Trainers and

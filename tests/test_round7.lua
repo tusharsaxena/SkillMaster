@@ -81,7 +81,8 @@ test("round7 no TomTom: Waypoint method offers the map pin and chat only, no Tom
         assertTrue(not tostring(v.text):find("TomTom", 1, true), "no TomTom label: " .. tostring(v.text))
     end
     assertEqual(table.concat(values, ","), "auto,chat")
-    assertTrue(not row.desc:find("TomTom", 1, true), "the tooltip names no TomTom")
+    -- AF-SM-TOMTOM: the tooltip now says Map pin is a TomTom waypoint when the real TomTom is loaded.
+    assertTrue(row.desc:find("TomTom is loaded", 1, true) ~= nil, "the tooltip names the TomTom case")
     assertEqual(NS.defaults.profile.waypoints.method, "auto", "the default is unchanged")
 end)
 
@@ -102,6 +103,107 @@ test("round7 no TomTom: schemaVersion 11 folds a stored tomtom or native method 
     assertEqual(sv.profiles["R7-Chat"].waypoints.method, "chat", "Chat only is a choice and stays")
     assertTrue(sv.profiles["R7-None"].waypoints == nil, "a profile without one passes through")
     for _, k in ipairs({ "R7-TomTom", "R7-Native", "R7-Chat", "R7-None" }) do sv.profiles[k] = nil end
+end)
+
+-- ── AF-SM-TOMTOM: the real TomTom, detected by name (owner img-19, 2026-11-19) ─────────────
+-- R7-7 dropped TomTom because another addon answered TomTom's API. With the real TomTom loaded,
+-- though, it takes over the native user waypoint and clears it, which took Skill Master's arrow
+-- with it, so Set waypoint left nothing. The real addon, by name, now places a TomTom waypoint.
+
+--- Inside withTomTomShaped: TomTom loaded by name (C_AddOns.IsAddOnLoaded), its AddWaypoint
+--- recorded, or raising when `raises`.
+local function withRealTomTom(fn, raises)
+    withTomTomShaped(function(t, rec)
+        local savedAddOns = M.C_AddOns.IsAddOnLoaded
+        M.C_AddOns.IsAddOnLoaded = function(name) return name == "TomTom" end
+        rec.calls = {}
+        rawset(_G, "TomTom", { AddWaypoint = function(self, ...)
+            rec.tomtom = rec.tomtom + 1
+            rec.calls[#rec.calls + 1] = { self = self, ... }
+            if raises then error("TomTom raised") end
+            return {}
+        end })
+        local ok, err = pcall(fn, t, rec)
+        M.C_AddOns.IsAddOnLoaded = savedAddOns
+        if not ok then error(err, 0) end
+    end)
+end
+
+test("af tomtom: the real TomTom loaded places a TomTom waypoint and no arrow of ours", function()
+    -- red under: R7-7's native pin with TomTom loaded (TomTom clears it, and our arrow with it).
+    withRealTomTom(function(t, rec)
+        assertEqual(Wp:Method(t), "tomtom", "TomTom, detected by name")
+        assertEqual(Wp:Blocked(t), nil, "Set waypoint is not blocked")
+        assertEqual(Wp:Set(t), "tomtom")
+        assertEqual(rec.tomtom, 1, "TomTom:AddWaypoint called once")
+        local c = rec.calls[1]
+        assertTrue(c.self == rawget(_G, "TomTom"), "called as a method")
+        assertEqual(c[1], 1453, "the trainer's map")
+        assertEqual(c[2], 0.5, "x as a 0..1 fraction")
+        assertEqual(c[3], 0.5, "y as a 0..1 fraction")
+        local o = c[4]
+        assertTrue(type(o) == "table" and o.title == "Woo Ping" and o.from == "Skill Master"
+            and o.persistent == false and o.minimap == true and o.world == true, "the waypoint's options")
+        assertEqual(rec.set, 0, "no native pin")
+        assertFalse(WA.IsShown(), "TomTom's arrow points, not ours")
+    end)
+end)
+
+test("af tomtom: the announce line names TomTom", function()
+    withRealTomTom(function(t)
+        NS.db.profile.waypoints.announce = true
+        local before = #M.__printed()
+        Wp:Set(t)
+        local all = M.__printed()
+        assertEqual(#all, before + 1, "one line")
+        assertTrue(tostring(all[#all]):find("Waypoint set (TomTom): Woo Ping", 1, true) ~= nil, tostring(all[#all]))
+    end)
+end)
+
+test("af tomtom: TomTom's AddWaypoint raising falls back to the native pin and our arrow", function()
+    withRealTomTom(function(t, rec)
+        assertEqual(Wp:Set(t), "native", "the map pin when TomTom fails")
+        assertEqual(rec.tomtom, 1, "TomTom was tried first")
+        assertEqual(rec.set, 1, "the native pin is set")
+        assertTrue(WA.IsShown(), "with Skill Master's arrow")
+    end, true)
+end)
+
+test("af tomtom: TomTom absent keeps the native pin and our arrow; Chat only still prints", function()
+    withTomTomShaped(function(t, rec)
+        rawset(_G, "TomTom", nil)
+        assertEqual(Wp:Method(t), "native")
+        assertEqual(Wp:Set(t), "native")
+        assertEqual(rec.set, 1)
+        assertTrue(WA.IsShown(), "Skill Master's arrow")
+    end)
+    withRealTomTom(function(t, rec)
+        NS.db.profile.waypoints.method = "chat"
+        assertEqual(Wp:Method(t), "chat", "Chat only wins over TomTom")
+        assertEqual(Wp:Blocked(t), "chat")
+        assertEqual(Wp:Set(t), "chat")
+        assertEqual(rec.tomtom, 0)
+    end)
+end)
+
+test("af tomtom: TomTom loaded but no native pin API still places a waypoint", function()
+    withRealTomTom(function(t, rec)
+        M.C_Map.SetUserWaypoint = nil
+        assertEqual(Wp:Blocked(t), nil, "not noprovider: TomTom can place it")
+        assertEqual(Wp:Set(t), "tomtom")
+        assertEqual(rec.tomtom, 1)
+    end)
+end)
+
+test("af tomtom: Compat.TomTom answers the real addon only, by name", function()
+    withTomTomShaped(function()
+        assertTrue(NS.Compat.TomTom() == nil, "a TomTom-shaped global from another addon is not TomTom")
+    end)
+    withRealTomTom(function()
+        assertTrue(NS.Compat.TomTom() == rawget(_G, "TomTom"), "the loaded TomTom")
+        rawset(_G, "TomTom", { })
+        assertTrue(NS.Compat.TomTom() == nil, "loaded, but no AddWaypoint: not usable")
+    end)
 end)
 
 -- ── R7-2: the icon border's row color, off on a new profile ──────────────────────────────────

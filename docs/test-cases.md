@@ -89,13 +89,17 @@ Total.
 - slash: the stub's one library string is pinned to the live major
 - slash: on a library-absent load, /sm enable still lands through writeThrough
 
-### test_mainwindow.lua (5)
+### test_mainwindow.lua (9)
 
 - window: Toggle shows it, and again hides it
 - window: the chrome is the shared one: the title, the wrapped close control, MEDIUM strata
 - window: test mode shows the localized strip, and turning it off hides it
 - window: combat ends test mode (preview-mode)
 - window: locked refuses the drag; unlocked drags and saves the drop point
+- window: a grip drag reflows the columns at most once per frame and redraws once, after the release
+- window: the grip's bounds are Window width's and Window height's range, per column count
+- window: Locked hides the grip and refuses a grab; /sm unlock and the lock mark bring it back
+- broker: the LDB tooltip has no resize grip
 
 ### test_launcher.lua (4)
 
@@ -503,13 +507,19 @@ Total.
 - round6 arrow review: a profile switch re-applies the shown arrow's scale and position
 - round6 arrow review: right-clicking test mode's sample over a real waypoint brings the real arrow back
 
-### test_round7.lua (25)
+### test_round7.lua (31)
 
 - round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Skill Master's arrow always
 - round7 no TomTom: the arrow off super-tracks the pin (the client's arrow)
 - round7 no TomTom: /sm test shows the sample arrow while the arrow setting is on
 - round7 no TomTom: Waypoint method offers the map pin and chat only, no TomTom label
 - round7 no TomTom: schemaVersion 11 folds a stored tomtom or native method into auto
+- af tomtom: the real TomTom loaded places a TomTom waypoint and no arrow of ours
+- af tomtom: the announce line names TomTom
+- af tomtom: TomTom's AddWaypoint raising falls back to the native pin and our arrow
+- af tomtom: TomTom absent keeps the native pin and our arrow; Chat only still prints
+- af tomtom: TomTom loaded but no native pin API still places a waypoint
+- af tomtom: Compat.TomTom answers the real addon only, by name
 - round7 icon border: Use the row's color is off on a new profile, so the skin's icon border draws
 - round7 icon border: schemaVersion 12 keeps the row's color on every profile stored before
 - round7 header meta: no block header carries a line beside its title, Base & Combat included
@@ -1021,7 +1031,7 @@ Total.
 | test_database.lua | 3 |
 | test_bus.lua | 3 |
 | test_slash.lua | 6 |
-| test_mainwindow.lua | 5 |
+| test_mainwindow.lua | 9 |
 | test_launcher.lua | 4 |
 | test_keybinds.lua | 4 |
 | test_locale.lua | 8 |
@@ -1046,7 +1056,7 @@ Total.
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
 | test_round6.lua | 54 |
-| test_round7.lua | 25 |
+| test_round7.lua | 31 |
 | test_round8.lua | 23 |
 | test_round9.lua | 14 |
 | test_sr1.lua | 10 |
@@ -1083,4 +1093,4 @@ Total.
 | test_skin_switch.lua | 19 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **793** |
+| **Total** | **803** |
