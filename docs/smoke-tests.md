@@ -17,7 +17,7 @@ the checks below that cover each item:
 | The lure timer | SM-DISP-2, SM-SIM-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
 | Rows page (round 9) | SM-DISP-59 |
-| Waypoints (no TomTom, round 7) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58, SM-DISP-60, SM-DISP-61, SM-DISP-62, SM-DISP-63 |
+| Waypoints (TomTom by name, AF-SM-TOMTOM) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58, SM-DISP-60, SM-DISP-61, SM-DISP-62, SM-DISP-63, SM-DISP-64, SM-DISP-65 |
 | Each skin | SM-SKIN-1, SM-SKIN-2 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
 | Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4, SM-DISP-18, SM-DISP-39, SM-DISP-40 |
@@ -270,9 +270,9 @@ the checks below that cover each item:
   switch to it with the arrow up: it goes and the game's own arrow points at the pin. Switch back,
   set the waypoint, then switch to a profile whose arrow is at scale 2 and dragged elsewhere: the
   arrow takes that scale and place at once.
-- **SM-DISP-47** (round 7, R7-7: no TomTom) With TomTom, or an addon that answers TomTom's API (the
-  owner's case), loaded: Set waypoint on a weapon master gives the map pin and Skill Master's
-  arrow, never TomTom's; `/sm test` shows the sample arrow too. Untick Show Skill Master's
+- **SM-DISP-47** (round 7, R7-7; amended, AF-SM-TOMTOM: the real TomTom is SM-DISP-64) With an
+  addon that answers TomTom's API but is not TomTom itself (the owner's round-7 case) loaded: Set
+  waypoint on a weapon master gives the map pin and Skill Master's arrow, never TomTom's; `/sm test` shows the sample arrow too. Untick Show Skill Master's
   arrow and set it again: the map pin with the game's own arrow. Trainers and Waypoints > Waypoint
   method offers Map pin and Chat only, no TomTom entry. A profile that had TomTom first or Map pin
   stored reads Map pin after the upgrade.
@@ -412,6 +412,14 @@ the checks below that cover each item:
   arrow shows over it. Right-click it: Share in chat, Show on map and Show trainers are grayed.
   Clear waypoint: the sample goes, the real arrow is back and
   the map pin stays. `/sm test` again to end test mode: the real arrow stays.
+- **SM-DISP-64** (new, AF-SM-TOMTOM, owner img-19) With **TomTom** installed and enabled, open the
+  trainer popup on an unlearned weapon (Bows) and press Set waypoint: TomTom's waypoint appears (on
+  the world map, the minimap and with TomTom's own arrow), titled with the trainer's name; Skill
+  Master's arrow does not show, and chat says `Waypoint set (TomTom): <trainer>: <city> ...`. Hover
+  the TomTom waypoint: it names the trainer. A cap toast's click does the same.
+- **SM-DISP-65** (new, AF-SM-TOMTOM) Disable TomTom and `/reload`: Set waypoint is the map pin with
+  Skill Master's arrow again, and chat says `Map pin set: ...`. With TomTom enabled, Waypoint method
+  Chat only: Set waypoint is grayed and Print to chat prints the directions.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
   Open it on Fishing's next rank (profession trainers carry no coordinates): `Set waypoint` is grayed

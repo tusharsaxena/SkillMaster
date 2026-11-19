@@ -2,7 +2,8 @@ local _, NS = ...
 -- modules/WaypointArrow.lua — Skill Master's waypoint arrow, on LibKa0s-WaypointArrow-1.0 (owner
 -- feedback round 8, R8-5; the arrow itself was round 6's R6-11). A trainer's native map pin
 -- (NS.Waypoints) is not super-tracked, so the client's own arrow stays away, and the library's
--- small movable frame points the way instead, with the distance under it. This file is the thin
+-- small movable frame points the way instead, with the distance under it. With the real TomTom
+-- loaded, NS.Waypoints places TomTom's waypoint and hides this arrow (AF-SM-TOMTOM). This file is the thin
 -- adapter: the trainer it points at, the settings paths it is configured from, test mode's sample,
 -- the profile reload, the native pin it clears and watches, the tooltip and the right-click menu's
 -- Skill Master items.

@@ -98,9 +98,14 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   tooltip needs `SetMotionScriptsWhileDisabled`, called when the client has it. Unverified in game.
 - Skill Master's waypoint arrow (round 6, R6-11) shows only with a native pin set
   (`C_Map.SetUserWaypoint` on a map that takes one) and Show Skill Master's arrow on; off, the pin is
-  super-tracked and the game's arrow points. No TomTom (round 7, R7-7): another addon answering
-  TomTom's API hid this arrow in the owner's game, so none is looked for and TomTom's own arrow never
-  shows for a Skill Master waypoint. Its pin is set with
+  super-tracked and the game's arrow points. With the real TomTom loaded (AF-SM-TOMTOM, owner img-19,
+  2026-11-19), Set waypoint places a TomTom waypoint instead and TomTom's arrow points, never this
+  one: TomTom takes the client's user waypoint over and clears it, which hid this arrow with the pin,
+  so the native pin left nothing at all. TomTom is told by its folder name
+  (`C_AddOns.IsAddOnLoaded("TomTom")`, `NS.Compat.TomTom`), so another addon that only answers
+  TomTom's API (round 7's R7-7 case, which hid this arrow in the owner's game) is still ignored and
+  gets the native pin. A TomTom whose `AddWaypoint` raises falls back to the native pin and this
+  arrow. Test mode's sample arrow still shows with TomTom loaded. Its pin is set with
   `C_SuperTrack.SetSuperTrackedUserWaypoint(false)`, not just without the `true` call, so a pin the
   game was super-tracking loses its arrow too. The bearing assumes `GetWorldPosFromMapPos` answers x
   north and y west and `GetPlayerFacing` radians counter-clockwise from north (the retail
