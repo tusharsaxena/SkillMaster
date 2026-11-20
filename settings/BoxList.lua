@@ -178,15 +178,32 @@ local function slot(AceGUI, row, width)
     row:AddChild(s)
 end
 
+-- The client's white under an action mark: what Ignore settings panel and a release give back.
+local function stockMark(tex) tex:SetVertexColor(1, 1, 1, 1) end
+
+--- The mark's tint and its dim (SD-SK-SM.1): the skin's icon.tint through S.Mark on the settings
+--- panel (`panel = true`: the client's white while the Scope ignores the panel, live both ways), and
+--- the dim as alpha only, so it survives the tint. S.Mark gives the tint back when AceGUI releases
+--- the pooled Icon; the alpha goes back to full there too, so a dimmed mark never leaks into the
+--- next page that borrows the widget.
+local function paintMark(b, dimmed)
+    local tex = b.image
+    if not (type(tex) == "table" and tex.SetVertexColor) then return end
+    NS.Skin.Mark(tex, { panel = true, widget = b, stock = stockMark })
+    if tex.SetAlpha then tex:SetAlpha(dimmed and 0.35 or 1) end
+    local Skin = LibStub and LibStub("LibKa0s-Skin-1.0", true)
+    if Skin and type(Skin.OnRelease) == "function" and tex.SetAlpha then
+        Skin:OnRelease(b, function() tex:SetAlpha(1) end)
+    end
+end
+
 local function action(AceGUI, row, a, width)
     local b = AceGUI:Create("Icon")
     b:SetImage(a.image)
     b:SetImageSize(16, 16)
     b:SetWidth(width or List.ACTION_W)
     b:SetHeight(List.ROW_H)
-    -- The real Icon's SetDisabled(false), run on every acquire, gives the image back its full color,
-    -- so a dimmed mark never leaks into the next page that borrows the widget.
-    if b.image and b.image.SetVertexColor then b.image:SetVertexColor(1, 1, 1, a.dimmed and 0.35 or 1) end
+    paintMark(b, a.dimmed)
     if a.onClick then b:SetCallback("OnClick", function() a.onClick() end) end
     if NS.Helpers.AttachTooltip then NS.Helpers.AttachTooltip(b, a.title, a.tooltip) end
     row:AddChild(b)

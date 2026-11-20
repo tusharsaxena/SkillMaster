@@ -620,8 +620,9 @@ local function classColor(r)
 end
 
 -- One tooltip line in a skin token's color (the row tooltip's rule: no typed color).
+-- The gtip family, drawn for the stock GameTooltip's dark backing (the owner's U-7, skinning-§7).
 local function tipLine(s, token, wrap)
-    local c = NS.SkinColor(token) or NS.SkinColor("text.body") or { 1, 1, 1 }
+    local c = NS.SkinColor(token) or NS.SkinColor("gtip.body") or { 1, 1, 1 }
     GameTooltip:AddLine(s, c[1], c[2], c[3], wrap)
 end
 
@@ -635,16 +636,16 @@ local function onHeadEnter(head)
     local r = item.record
     GameTooltip:SetOwner(head, "ANCHOR_NONE")
     local c = classColor(r)
-    if c then GameTooltip:AddLine(r.name or item.key, c.r, c.g, c.b) else tipLine(r.name or item.key, "text.heading") end
+    if c then GameTooltip:AddLine(r.name or item.key, c.r, c.g, c.b) else tipLine(r.name or item.key, "gtip.title") end
     local sub = L["Lv %d %s %s"]:format(r.level or 0, r.race or "", r.className or r.class or "")
     if item.isCurrent then sub = L["%s \194\183 this character"]:format(sub) end
-    tipLine(sub, "text.body")
+    tipLine(sub, "gtip.body")
     local realm = J.RealmOf(item.key, r.name)
-    if realm ~= "" then tipLine(L["Realm: %s"]:format(realm), "text.muted") end
-    if r.faction then tipLine(r.faction, "text.muted") end
+    if realm ~= "" then tipLine(L["Realm: %s"]:format(realm), "gtip.muted") end
+    if r.faction then tipLine(r.faction, "gtip.muted") end
     if not item.isCurrent then
-        if tonumber(r.updated) then tipLine(L["Last seen: %s"]:format(date(L["%m/%d %H:%M"], r.updated)), "text.muted") end
-        tipLine(L["Right-click to forget this character."], "text.muted", true)
+        if tonumber(r.updated) then tipLine(L["Last seen: %s"]:format(date(L["%m/%d %H:%M"], r.updated)), "gtip.muted") end
+        tipLine(L["Right-click to forget this character."], "gtip.muted", true)
     end
     GameTooltip:Show()
     NS.Chrome.PlaceBeside(GameTooltip, head, frame)

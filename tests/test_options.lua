@@ -258,7 +258,10 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- rows, Use the skin's font, Text position, Show the trainer's name, Distance units) and its
     -- Position block (X offset, Y offset, Lock the arrow), thirteen composed rows: +13 full, the
     -- degraded count unmoved, the delta +13.
-    assertEqual(full, 365, "the full schema (round 9: the waypoint arrow's text and position blocks)")
+    -- LibKa0s v1.108.0 (WaypointArrowSettings minor 3): the Text block emits Use the skin's color and
+    -- Use the skin's shadow (arrowFontColorFromSkin, arrowFontShadowFromSkin): +2 full, the delta +2.
+    -- The detached background and border omit OptionsCompose minor 20's per-part companions.
+    assertEqual(full, 367, "the full schema (LibKa0s v1.108.0: the arrow's Text block gains its color and shadow companions)")
     assertEqual(degraded, 294, "the library-absent schema")
-    assertEqual(full - degraded, 71, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3), the detached background and border (9) and the waypoint arrow's blocks (18)")
+    assertEqual(full - degraded, 73, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3), the detached background and border (9) and the waypoint arrow's blocks (20)")
 end)

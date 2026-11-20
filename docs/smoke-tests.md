@@ -18,7 +18,7 @@ the checks below that cover each item:
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
 | Rows page (round 9) | SM-DISP-59 |
 | Waypoints (TomTom by name, AF-SM-TOMTOM) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58, SM-DISP-60, SM-DISP-61, SM-DISP-62, SM-DISP-63, SM-DISP-64, SM-DISP-65 |
-| Each skin | SM-SKIN-1, SM-SKIN-2 |
+| Each skin | SM-SKIN-1, SM-SKIN-2, SM-SKIN-3, SM-SKIN-4, SM-SKIN-5, SM-SKIN-6, SM-SKIN-7, SM-SKIN-8 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
 | Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4, SM-DISP-18, SM-DISP-39, SM-DISP-40 |
 
@@ -788,5 +788,30 @@ In each check, the tooltip's words are what they were before this change.
   block headers' fallback marks, the Journal's `old -> new` or the stat tooltip's marker lines). The
   category colors stay told apart (Primary blue, Secondary green, Weapon orange, Other violet) and
   the lure's teal and the racial's blue bonus segments keep their own colors.
+- **SM-SKIN-3** (LibKa0s v1.108.0, SD-RV-SM) `/sm skin`: Apply a skin with a glossy bar look (Glass).
+  Every data bar (the window's rows, a detached block, the row tooltip's bar, the broker tooltip's
+  mini bars, the Journal's mini bars) shows the skin's gloss over its fill; back on Ka0s Default the
+  gloss goes. Show border off on the Bars page still draws no bar border under every skin.
+- **SM-SKIN-4** (SD-RV-SM) Settings > Layout > Detached windows: the Background block shows one Use
+  the skin's background and the Border block one Use the skin's border, with no extra Use the skin's
+  color rows, and each still switches the detached windows between the skin's look and the swatches.
+- **SM-SKIN-5** (SD-SK-SM.2, SM.3) Turn test mode on (the arrow shows on its sample trainer), then
+  `/sm skin` and Apply another skin: the arrow's distance text takes the new skin's HUD text color
+  and shadow at once, with no reload or reopen. Trainers and Waypoints > Arrow text shows Use the
+  skin's color and Use the skin's shadow, both ticked; untick Use the skin's color and the text
+  takes the Font color swatch.
+- **SM-SKIN-6** (U-7) Under Obsidian (or another skin whose window accent is not gold), hover a
+  main window row, a trainer popup card, a Journal Alts column header and the waypoint arrow: each
+  tooltip's title is the tooltip gold, its lines the tooltip's light gray and its hints dim gray,
+  all legible on the dark game tooltip; a row tooltip's good, warning and bonus colors keep their
+  meaning hues.
+- **SM-SKIN-7** (U-31, SkillMaster#9) Open the trainer popup and move the pointer over each card: the
+  card under the pointer takes the skin's hover wash and loses it when the pointer leaves; the
+  selected card shows the hover while under the pointer and is selected again after. Switch skins
+  with the popup open and hover again: the wash is the new skin's. The Journal's rows take no hover.
+- **SM-SKIN-8** (SD-SK-SM.1) Settings > Skin: clear Ignore settings panel. On the Rows page the eye
+  marks take the skin's icon tint, and a dimmed eye is dimmed, not white. Tick Ignore settings panel
+  again: the eyes are the client's white, a dimmed one still dimmed. Open another settings page that
+  uses icons: none of them is left tinted or dimmed.
 - **SM-DIAG-1** `/sm diagnostics`: the report appears in the debug console with the ten sections
   (identity, settings, state, skin, model, probe, bonuses, layout, sim, rejected).

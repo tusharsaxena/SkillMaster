@@ -219,7 +219,10 @@ NS.defaults = {
             arrowNear       = { 0.35, 0.80, 0.45, 1 },
             -- Round 9, R9-1/R9-3: the library's Text block (the canonical Font block, options-ui-§16,
             -- with its "Use the skin's font" companion at arrowFont .. "FromSkin", then Text position,
-            -- the trainer name line and Distance units: yards | compact).
+            -- the trainer name line and Distance units: yards | compact). LibKa0s v1.108.0
+            -- (WaypointArrow 3.3, SD-SK-SM.2/.3, skinning-§9): the text color and shadow follow the
+            -- skin through companions at their paths plus "FromSkin", on by default; the swatch and
+            -- the shadow switch are read only with them off.
             arrowFont          = "Ka0s Prototype",
             arrowFontFromSkin  = true,
             arrowFontSize      = 12,
@@ -227,6 +230,8 @@ NS.defaults = {
             arrowFontClass     = false,
             arrowFontFlags     = "@skin",
             arrowFontShadow    = true,
+            arrowFontColorFromSkin  = true,
+            arrowFontShadowFromSkin = true,
             arrowTextPosition  = "BELOW",   -- BELOW | ABOVE | LEFT | RIGHT | HIDDEN
             arrowShowLabel     = false,
             arrowUnits         = "yards",

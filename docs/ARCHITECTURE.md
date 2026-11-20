@@ -245,7 +245,21 @@ HUD colors follow the skin (skinning-§6): every `*FromSkin` companion, the pale
 `bars.colors.fromSkin` included, defaults true; while the palette follows, the categories and
 bonuses draw the owner tokens `sm.cat.*` and `sm.bonus*` (`core/SkinSetup.lua`). No
 `Skin.FollowOnce` step: the addon was born on LibKa0s v1.94.0 with the companions on, so no stored
-profile predates them ([schema.md](schema.md)).
+profile predates them ([schema.md](schema.md)). From LibKa0s v1.108.0 the waypoint arrow's text
+color and shadow carry companions too (`waypoints.arrowFontColorFromSkin`,
+`arrowFontShadowFromSkin`, on); the arrow has no skin listener of its own, so `core/SkinSetup.lua`'s
+`OnLooksChanged` calls `NS.WaypointArrow.Restyle()` beside its `LAYOUT_CHANGED`. Every option for a
+texture, a font or a color starts on the skin (skinning-§9); the one opt-out is
+`bars.borderStyleFromSkin`, the owner's FB-19 override in Documented deviations.
+
+Lines written onto the stock `GameTooltip` (the row tooltip, a trainer card's, the Journal's column
+header, the arrow's) read the `gtip.*` family (`gtip.title`, `gtip.body`, `gtip.muted`), drawn for
+that frame's dark backing, and keep `sem.*` and `sm.bonus*` where the color is the meaning (the
+owner's U-7, 2026-11-20). A trainer popup card wears the skin's `list.hover` wash while the pointer
+is on it (the owner's U-31, SkillMaster#9); the Journal's rows are not clicked and take none. The
+settings list's action marks (the Rows page's eyes) take the skin's `icon.tint` through `S.Mark`
+on the panel (`panel = true`), dimmed by alpha, so they keep the client's white while *Ignore
+settings panel* is on.
 
 No structural registry exists.
 

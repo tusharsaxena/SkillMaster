@@ -166,6 +166,9 @@ SkillMasterDB
                   arrowFontSize = 12,                  -- skin's font companion, 6 .. 32
                   arrowFontColor = { 1, 1, 1, 1 }, arrowFontClass = false,
                   arrowFontFlags = "@skin", arrowFontShadow = true,
+                  arrowFontColorFromSkin = true,       -- LibKa0s v1.108.0 (WaypointArrow 3.3): the
+                  arrowFontShadowFromSkin = true,      -- text color (the skin's hud.text) and shadow
+                                                       -- (its HUD shadow) follow the skin while on
                   arrowTextPosition = "BELOW",         -- BELOW | ABOVE | LEFT | RIGHT | HIDDEN
                   arrowShowLabel = false,              -- the trainer's name as a second line (R9-3)
                   arrowUnits = "yards",                -- yards | compact (4.2k yd)
@@ -242,6 +245,9 @@ None for round 9's (R9-1) Text and Position keys (`arrowFont` .. `arrowUnits`, `
 now writes `arrowX` and `arrowY` through `NS.SetByPath`, and a stored `arrowFrame` is left unread,
 with no step, because the addon is unreleased. Their defaults are the library's `DEFAULTS` too
 (`tests/test_round9.lua`).
+None for `arrowFontColorFromSkin` and `arrowFontShadowFromSkin` (LibKa0s v1.108.0, SD-SK-SM.2 and
+SM.3) either: new keys defaulting on, and the addon never wrote a value to either, so no profile
+holds one to move (skinning-§9, *Every option default follows the skin*).
 
 No `Skin.FollowOnce` step (skinning-§6): the addon was born on LibKa0s v1.94.0 with every HUD color
 companion defaulting on, so no stored profile predates the companions and none has to be moved

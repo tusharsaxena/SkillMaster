@@ -801,6 +801,17 @@ Total.
 - tooltips: without the library a mark's tooltip attaches centered above it, never at a game anchor
 - tooltips: the addon's own Lua names no game tooltip anchor but ANCHOR_NONE (no cursor, no corner offset)
 
+### test_skin_defaults.lua (8)
+
+- skin defaults: the arrow's text color and shadow companions default on, the schema agreeing (SD-SK-SM.2, SM.3)
+- skin defaults: the arrow's text takes the skin's HUD text color and moves on a skin switch (SD-SK-SM.2)
+- skin defaults: a list row's eye takes the skin's icon tint with the Scope cleared, the dim as alpha only (SD-SK-SM.1)
+- skin defaults: with Ignore settings panel on, the eye keeps the client's white (SD-SK-SM.1)
+- skin defaults: a trainer card's tooltip lines read gtip.title and gtip.body (U-7)
+- skin defaults: the waypoint arrow's tooltip lines read the gtip family (U-7)
+- skin defaults: the row tooltip's tones read the gtip family, meaning colors kept (U-7)
+- skin defaults: a trainer card takes the skin's list.hover wash on hover, back on leave (U-31, SkillMaster#9)
+
 ### test_seams.lua (5)
 
 - test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
@@ -987,13 +998,14 @@ Total.
 
 ### test_skin_values.lua (3)
 
-- skin values: every host row carries its file, substring, why and cause id
+- skin values: every host row carries its file, substring, why and a cause id or kit row category
 - skin values: no typed value outside the kit's categories and the host's rows
 - skin values: the check is falsifiable, a planted value of each shape is reported
 
-### test_skin_switch.lua (19)
+### test_skin_switch.lua (25)
 
 - skin switch: the check is falsifiable, a surface that redraws a literal is reported
+- skin switch: the check is falsifiable, a bar whose texture never moves is reported
 - skin switch: the main window changes
 - skin switch: the main window changes with the Scope ignored
 - skin switch: a detached block changes
@@ -1010,6 +1022,11 @@ Total.
 - skin switch: the row tooltip's bar changes with the Scope ignored
 - skin switch: the broker feed tooltip changes
 - skin switch: the broker feed tooltip changes with the Scope ignored
+- skin switch: the broker feed tooltip in the Classic style changes
+- skin switch: the broker feed tooltip in the Classic style changes with the Scope ignored
+- skin switch: the waypoint arrow changes
+- skin switch: the waypoint arrow changes with the Scope ignored
+- skin switch: a settings list row's eye marks changes
 - skin switch: the debug console changes
 - skin switch: the debug console changes with the Scope ignored
 
@@ -1074,6 +1091,7 @@ Total.
 | test_window_chrome.lua | 15 |
 | test_header_buttons.lua | 9 |
 | test_tooltips.lua | 11 |
+| test_skin_defaults.lua | 8 |
 | test_seams.lua | 5 |
 | test_m5_seams.lua | 7 |
 | test_m5_review.lua | 5 |
@@ -1090,7 +1108,7 @@ Total.
 | test_layout_cap.lua | 13 |
 | test_lizard_sighted.lua | 8 |
 | test_skin_values.lua | 3 |
-| test_skin_switch.lua | 19 |
+| test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **803** |
+| **Total** | **817** |

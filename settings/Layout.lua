@@ -115,6 +115,9 @@ add(NS.Live(H.ColorPair({
     classColor = classColor,
     tooltips = { bgColor = L["The fill behind a detached window's rows. Not read while Use the skin's background is on."] },
     defaults = { bgColor = PD.bgColor, useClassColorBg = PD.useClassColorBg },
+    -- Use the skin's background below governs the whole fill, so the composer's own swatch
+    -- companion (LibKa0s v1.108.0, OptionsCompose minor 20) would be a second switch for one swatch.
+    omit = { bgColorFromSkin = true },
     extra = { fromSkin("layout.detached.bgFromSkin", L["Use the skin's background"],
         L["Fill every detached window as the skin fills its windows. Background color is not read while this is on."]) },
 })))
@@ -125,6 +128,9 @@ add(NS.Live(H.BorderGroup({
     tooltips = { borderColor = L["The edge of a detached window. Not read while Use the skin's border is on."] },
     defaults = { borderShow = PD.border, borderStyle = PD.borderStyle, borderSize = PD.borderSize,
                  borderColor = PD.borderColor, useClassColorBorder = PD.useClassColorBorder },
+    -- Use the skin's border below governs style, thickness and color together, so the composer's
+    -- per-part companions (OptionsCompose minor 20) are left out rather than doubled.
+    omit = { borderStyleFromSkin = true, borderColorFromSkin = true },
     extra = { fromSkin("layout.detached.borderFromSkin", L["Use the skin's border"],
         L["Edge every detached window as the skin edges its windows. Border style, thickness and color are not read while this is on."]) },
 })))
