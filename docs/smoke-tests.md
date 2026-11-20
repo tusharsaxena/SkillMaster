@@ -788,5 +788,12 @@ In each check, the tooltip's words are what they were before this change.
   block headers' fallback marks, the Journal's `old -> new` or the stat tooltip's marker lines). The
   category colors stay told apart (Primary blue, Secondary green, Weapon orange, Other violet) and
   the lure's teal and the racial's blue bonus segments keep their own colors.
+- **SM-SKIN-3** (LibKa0s v1.108.0, SD-RV-SM) `/sm skin`: Apply a skin with a glossy bar look (Glass).
+  Every data bar (the window's rows, a detached block, the row tooltip's bar, the broker tooltip's
+  mini bars, the Journal's mini bars) shows the skin's gloss over its fill; back on Ka0s Default the
+  gloss goes. Show border off on the Bars page still draws no bar border under every skin.
+- **SM-SKIN-4** (SD-RV-SM) Settings > Layout > Detached windows: the Background block shows one Use
+  the skin's background and the Border block one Use the skin's border, with no extra Use the skin's
+  color rows, and each still switches the detached windows between the skin's look and the swatches.
 - **SM-DIAG-1** `/sm diagnostics`: the report appears in the debug console with the ten sections
   (identity, settings, state, skin, model, probe, bonuses, layout, sim, rejected).

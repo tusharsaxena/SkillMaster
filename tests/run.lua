@@ -58,8 +58,28 @@ Kit.diagnostics = {
     reset       = function() NS.DebugLog:Clear() end,
 }
 
--- The typed-value gate (skinning-§1): nothing this addon draws needs an allow row yet.
-Kit.skinValues = {}
+-- The typed-value gate (skinning-§1). Kit revision 58 reads three- and four-number tables and
+-- `or { r, g, b }` fallbacks, so the values below, none of which draws a look, take kit categories.
+Kit.skinValues = { rows = {
+    { file = "core/WidgetsSetup.lua", substring = "SHADE = { 1, 0.8, 0.64, 0.5 }",
+      why = "the library-absent Bar stub's shade factors (brightness multipliers), mirroring WidgetsBar BAR.SHADE",
+      category = "not a color" },
+    { file = "modules/Chrome.lua", substring = "C.UPRIGHT, C.TURNED = { 0, 1, 0, 1 }, { 1, 0, 1, 0 }",
+      why = "texture coordinates of the detach and attach marks (left, right, top, bottom)",
+      category = "not a color" },
+    { file = "modules/Rows.lua", substring = "R.ICON_TRIM = { 0.07, 0.93, 0.07, 0.93 }",
+      why = "the icon trim, texture coordinates that cut the baked-in border off 1.x icon art",
+      category = "not a color" },
+    { file = "modules/Journal.lua", substring = 'or NS.SkinColor("text.body") or { 1, 1, 1 }',
+      why = "the last resort behind two skin tokens: every skin answers text.body, so it never draws",
+      category = "unreachable default" },
+    { file = "modules/TrainerPopup.lua", substring = 'or NS.SkinColor("text.body") or { 1, 1, 1 }',
+      why = "the last resort behind two skin tokens: every skin answers text.body, so it never draws",
+      category = "unreachable default" },
+    { file = "modules/WaypointArrow.lua", substring = 'or NS.SkinColor("text.body") or { 1, 1, 1 }',
+      why = "the last resort behind two skin tokens: every skin answers text.body, so it never draws",
+      category = "unreachable default" },
+} }
 
 -- The skin-switch test (skinning-§1): every surface this addon paints.
 Kit.skinSwitch = {
