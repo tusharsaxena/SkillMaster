@@ -114,26 +114,37 @@ function P.TextHeight(fs)
     return h
 end
 
--- One tooltip line in a skin token's color (the row tooltip's rule: no typed color).
+-- One tooltip line in a skin token's color (the row tooltip's rule: no typed color), from the gtip
+-- family, drawn for the stock GameTooltip's dark backing (the owner's U-7, skinning-§7).
 local function tipLine(s, token, wrap)
-    local c = NS.SkinColor(token) or NS.SkinColor("text.body") or { 1, 1, 1 }
+    local c = NS.SkinColor(token) or NS.SkinColor("gtip.body") or { 1, 1, 1 }
     GameTooltip:AddLine(s, c[1], c[2], c[3], wrap)
 end
 
 -- The card's tooltip: the whole card, the "Also teaches" list unclipped. A card is a BODY element
 -- (LibKa0s#92, AD-92-SM): beside the popup, its window group, level with the card
 -- (NS.Chrome.PlaceBeside); it was owned at ANCHOR_RIGHT, the corner offset the rule retires.
+-- The card's own wash: selected, else normal.
+local function restWash(c)
+    return c.index == state.selected and "selected" or "normal"
+end
+
+-- A card is clicked, so it takes the skin's list.hover wash while the pointer is on it (the owner's
+-- U-31, SkillMaster#9); ListRow is recorded, so a skin switch repaints it. The journal's rows are
+-- not clicked and take none.
 local function onCardEnter(self)
+    NS.Skin.ListRow(self, "hover")
     if not (GameTooltip and self.trainer) then return end
     GameTooltip:SetOwner(self, "ANCHOR_NONE")
-    tipLine(self.trainer.name, "text.accent")
-    tipLine(self.where:GetText() or "", "text.body")
-    if self.alsoText and self.alsoText ~= "" then tipLine(self.alsoText, "text.muted", true) end
+    tipLine(self.trainer.name, "gtip.title")
+    tipLine(self.where:GetText() or "", "gtip.body")
+    if self.alsoText and self.alsoText ~= "" then tipLine(self.alsoText, "gtip.muted", true) end
     GameTooltip:Show()
     NS.Chrome.PlaceBeside(GameTooltip, self, frame)
 end
 
 local function onCardLeave(self)
+    NS.Skin.ListRow(self, restWash(self))
     if GameTooltip and GameTooltip:IsOwned(self) then GameTooltip:Hide() end
 end
 
@@ -246,7 +257,7 @@ local function buildActions()
     frame.waypoint:HookScript("OnEnter", function(self)
         if not (GameTooltip and self.blockedText) then return end
         GameTooltip:SetOwner(self, "ANCHOR_NONE")
-        tipLine(self.blockedText, "text.body", true)
+        tipLine(self.blockedText, "gtip.body", true)
         GameTooltip:Show()
         NS.Chrome.PlaceAttached(GameTooltip, self)
     end)

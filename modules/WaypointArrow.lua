@@ -10,7 +10,7 @@ local _, NS = ...
 --
 -- NS.WaypointArrow.Show(trainer) / .Hide() / .Clear() / .IsShown() / .Frame() / .Target() /
 -- .Wanted() / .Update() / .ShowTest() / .HideTest() / .ApplySettings() / .OnWaypointUpdated() /
--- .StandDown() / .Instance() / .ResetPosition() / .OpenSettings() / .ShowTrainers() / .HideArrow() /
+-- .StandDown() / .Restyle() / .Instance() / .ResetPosition() / .OpenSettings() / .ShowTrainers() / .HideArrow() /
 -- .TrainerKey(); .PATHS and .SettingsRows(opts) for settings/Trainers.lua.
 --
 -- What the library owns: the frame (never secure, so it stays shown in combat), the five looks
@@ -106,8 +106,10 @@ end
 -- The host callbacks
 -- ---------------------------------------------------------------------------------------------
 
+-- A line on the stock GameTooltip reads the gtip family, drawn for its dark backing (the owner's
+-- U-7, skinning-§7).
 local function tipLine(s, token)
-    local c = NS.SkinColor(token) or NS.SkinColor("text.body") or { 1, 1, 1 }
+    local c = NS.SkinColor(token) or NS.SkinColor("gtip.body") or { 1, 1, 1 }
     GameTooltip:AddLine(s, c[1], c[2], c[3], true)
 end
 
@@ -128,11 +130,11 @@ local function onEnter(f)
     local t = WA.Target()
     if not (GameTooltip and t) then return end
     GameTooltip:SetOwner(f, "ANCHOR_NONE")
-    tipLine(t.name, "text.accent")
-    tipLine(placeText(t), "text.body")
+    tipLine(t.name, "gtip.title")
+    tipLine(placeText(t), "gtip.body")
     local locked = inst ~= nil and inst:IsLocked()
     tipLine(locked and L["Right-click for options."] or L["Right-click for options. Drag to move the arrow."],
-        "text.muted")
+        "gtip.muted")
     GameTooltip:Show()
     NS.Chrome.PlaceBeside(GameTooltip, f, f)
 end
@@ -310,6 +312,12 @@ function WA.HideTest()
     if not inst then return end
     if state.target and not WA.Wanted() then inst:Clear() end
     inst:HideSample()
+end
+
+--- A skin switch (core/SkinSetup.lua's listener): the built arrow takes its settings again, so its
+--- skin-following text color and shadow move with the skin (SD-SK-SM.2/.3). Nothing shows or hides.
+function WA.Restyle()
+    if inst then configure(inst) end
 end
 
 --- A settings row, and a profile switch, copy or reset: the look, text, scale and position apply

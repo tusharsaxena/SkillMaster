@@ -207,15 +207,19 @@ end
 -- Drawing on GameTooltip
 -- ---------------------------------------------------------------------------------------------
 
+-- A line's tone and its token. Lines on the stock GameTooltip read the gtip family, drawn for its
+-- dark backing (the owner's U-7, skinning-§7); the good, warn and bad tones are meaning colors and
+-- keep their semantic tokens.
 local TONES = {
-    body = "text.body", muted = "text.muted", heading = "text.heading", accent = "text.accent",
+    body = "gtip.body", muted = "gtip.muted", heading = "gtip.title", accent = "gtip.title",
     good = "sem.good", warn = "sem.warn", bad = "sem.bad",
 }
+RT.TONES = TONES
 
 local function toneColor(tone)
     if tone == "temp" then return Bar.PlayerColor("bonusTemp", "sm.bonusTemp") end
     if tone == "perm" then return Bar.PlayerColor("bonusPerm", "sm.bonusPerm") end
-    return NS.SkinColor(TONES[tone] or "text.body") or NS.SkinColor("sm.barText")
+    return NS.SkinColor(TONES[tone] or "gtip.body") or NS.SkinColor("sm.barText")
 end
 
 local tipBar

@@ -70,27 +70,38 @@ Kit.skinValues = { rows = {
     { file = "modules/Rows.lua", substring = "R.ICON_TRIM = { 0.07, 0.93, 0.07, 0.93 }",
       why = "the icon trim, texture coordinates that cut the baked-in border off 1.x icon art",
       category = "not a color" },
-    { file = "modules/Journal.lua", substring = 'or NS.SkinColor("text.body") or { 1, 1, 1 }',
-      why = "the last resort behind two skin tokens: every skin answers text.body, so it never draws",
+    { file = "modules/Journal.lua", substring = 'or NS.SkinColor("gtip.body") or { 1, 1, 1 }',
+      why = "the last resort behind two skin tokens: every skin answers gtip.body, so it never draws",
       category = "unreachable default" },
-    { file = "modules/TrainerPopup.lua", substring = 'or NS.SkinColor("text.body") or { 1, 1, 1 }',
-      why = "the last resort behind two skin tokens: every skin answers text.body, so it never draws",
+    { file = "modules/TrainerPopup.lua", substring = 'or NS.SkinColor("gtip.body") or { 1, 1, 1 }',
+      why = "the last resort behind two skin tokens: every skin answers gtip.body, so it never draws",
       category = "unreachable default" },
-    { file = "modules/WaypointArrow.lua", substring = 'or NS.SkinColor("text.body") or { 1, 1, 1 }',
-      why = "the last resort behind two skin tokens: every skin answers text.body, so it never draws",
+    { file = "modules/WaypointArrow.lua", substring = 'or NS.SkinColor("gtip.body") or { 1, 1, 1 }',
+      why = "the last resort behind two skin tokens: every skin answers gtip.body, so it never draws",
       category = "unreachable default" },
 } }
 
--- The skin-switch test (skinning-§1): every surface this addon paints.
+-- The skin-switch test (skinning-§1): every surface this addon paints. Kit revision 58 compares
+-- each setter family on its own; `expect = "texture"` asks every surface below that draws a data
+-- fill on a Texture (the LibKa0s Bar) or the skin's window art to move its texture too. No surface
+-- holds a family: the category and meaning hues are drawn beside skin-following parts that move.
+local installIcon = dofile("tests/fixture_icon_widget.lua")
+local boxList = {}
 Kit.skinSwitch = {
     owner = "SkillMaster",
     skin  = function() return mocks.LibStub("LibKa0s-Skin-1.0") end,
     surfaces = {
-        { name = "the main window", build = function()
+        -- On the sample character, so its rows' bars draw fills (Bars of data, expect "texture").
+        { name = "the main window", expect = "texture", build = function()
+            NS.Preview.Apply(true)
             NS.MainWindow.Show()
+            NS.MainWindow.Refresh(true)
             return NS.MainWindow.Frame()
-        end, reset = function() NS.MainWindow.Hide() end },
-        { name = "a detached block", build = function()
+        end, reset = function()
+            NS.MainWindow.Hide()
+            NS.Preview.Apply(false)
+        end },
+        { name = "a detached block", expect = "texture", build = function()
             NS.db.profile.layout.blocks.other.docked = false
             NS.Detached.Refresh()
             return NS.Detached.Frame("other")
@@ -99,7 +110,7 @@ Kit.skinSwitch = {
             NS.Detached.Refresh()
         end },
         -- A merged window (round 5, R5-6): two detached blocks as one.
-        { name = "a merged window", build = function()
+        { name = "a merged window", expect = "texture", build = function()
             local b = NS.db.profile.layout.blocks
             b.other.docked, b.secondary.docked = false, false
             NS.Detached.Refresh()
@@ -110,21 +121,25 @@ Kit.skinSwitch = {
             NS.db.profile.layout.groups = {}
             NS.Detached.Refresh()
         end },
-        { name = "the journal", build = function()
+        { name = "the journal", expect = "texture", build = function()
             NS.Journal.Show()
             return NS.Journal.Frame()
         end, reset = function() NS.Journal.Hide() end },
-        { name = "the trainer popup", build = function()
+        { name = "the trainer popup", expect = "texture", build = function()
             NS.TrainerPopup.Show("fistWeapons")
             return NS.TrainerPopup.Frame()
         end, reset = function() NS.TrainerPopup.Hide() end },
-        { name = "the alert toast", build = function()
+        { name = "the alert toast", expect = "texture", build = function()
             NS.Alerts.toast:Preview({ kind = "cap", name = "Leatherworking",
                 title = "Leatherworking 150 / 150", detail = "Train Expert (Lv 20)" })
             return NS.Alerts.toast:Frame()
         end, reset = function() NS.Alerts.toast:Clear() end },
         -- A tooltip is drawn when it shows, so its repaint is the next show (`paint`).
+        -- No `expect = "texture"`: headless, the tooltip's line has no width, so the bar lays its fill
+        -- hidden (WidgetsBar Layout) and draws no fill texture to compare. The same Bar and the same
+        -- NS.BarStyle seam are checked for their fill texture on the main window, on the sample.
         { name = "the row tooltip's bar", build = function()
+            NS.Preview.Apply(true)
             NS.MainWindow.Show()
             local row = NS.MainWindow.Rows()[1]
             NS.RowTooltip.Show(row)
@@ -134,10 +149,11 @@ Kit.skinSwitch = {
         end, reset = function()
             mocks.GameTooltip:Hide()
             NS.MainWindow.Hide()
+            NS.Preview.Apply(false)
         end },
         -- The feed's own tooltip frame (broker.tooltip.skin, on by default): its shell, its lines
         -- and the pooled mini bars parented to it. The shared GameTooltip is never painted.
-        { name = "the broker feed tooltip", build = function()
+        { name = "the broker feed tooltip", expect = "texture", build = function()
             NS.Preview.Apply(true)   -- the sample character: learned skills to draw bars for
             NS.Broker.OnEnter(mocks.UIParent)
             return NS.Broker.Tip()
@@ -147,7 +163,47 @@ Kit.skinSwitch = {
             NS.Broker.HideTooltip()
             NS.Preview.Apply(false)
         end },
-        { name = "the debug console", build = function()
+        -- The feed's Classic style (SD-SK-SM.4): the tooltip lines and mini bars on the same own
+        -- frame, its stripes and hover wash.
+        { name = "the broker feed tooltip in the Classic style", expect = "texture", build = function()
+            NS.db.profile.tooltips.ldb.style = "classic"
+            NS.Preview.Apply(true)
+            NS.Broker.OnEnter(mocks.UIParent)
+            return NS.Broker.Tip()
+        end, paint = function()
+            NS.Broker.OnEnter(mocks.UIParent)
+        end, reset = function()
+            NS.Broker.HideTooltip()
+            NS.Preview.Apply(false)
+            NS.db.profile.tooltips.ldb.style = NS.defaults.profile.tooltips.ldb.style
+        end },
+        -- The waypoint arrow on test mode's sample trainer (SD-SK-SM.4): its art's far and near
+        -- colors, and its distance text's face, color and shadow (SD-SK-SM.2, SM.3), re-applied by
+        -- the skin listener (NS.WaypointArrow.Restyle).
+        { name = "the waypoint arrow", build = function()
+            NS.db.profile.waypoints.arrow = true
+            NS.WaypointArrow.ShowTest()
+            return NS.WaypointArrow.Frame()
+        end, reset = function() NS.WaypointArrow.HideTest() end },
+        -- A settings list row's action marks, the eye lit and dimmed (SD-SK-SM.1), on the settings
+        -- panel: tested with Ignore settings panel cleared (scope "panel"); the pooled Icon carries
+        -- a painting image here (tests/fixture_icon_widget.lua).
+        { name = "a settings list row's eye marks", scope = "panel", build = function()
+            local uninstall, AceGUI = installIcon(NS, mocks)
+            boxList.uninstall, boxList.AceGUI = uninstall, AceGUI
+            boxList.scroll = AceGUI:Create("SimpleGroup")
+            local _, _, marks = NS.OptionsList.Row(boxList.scroll, nil, { text = "Leatherworking", actions = {
+                { image = NS.Icon("eye"), title = "Window" },
+                { image = NS.Icon("eye"), title = "LDB tooltip", dimmed = true },
+            } })
+            boxList.marks = marks
+            return marks[1].frame, marks[2].frame
+        end, reset = function()
+            for _, m in ipairs(boxList.marks or {}) do boxList.AceGUI:Release(m) end
+            if boxList.uninstall then boxList.uninstall() end
+            boxList.marks, boxList.uninstall = nil, nil
+        end },
+        { name = "the debug console", expect = "texture", build = function()
             NS.DebugLog:Show()
             return NS.DebugLog._frameForTest
         end, reset = function() NS.DebugLog:Hide() end },
@@ -208,6 +264,7 @@ Kit.run{
         "test_window_chrome",
         "test_header_buttons",
         "test_tooltips",
+        "test_skin_defaults",
         "test_seams",
         "test_m5_seams",
         "test_m5_review",

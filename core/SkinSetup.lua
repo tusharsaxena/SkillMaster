@@ -238,9 +238,12 @@ Skin:RegisterOwner(addonName, {
     tokens = NS.SKIN_OWNER_TOKENS,
 })
 
--- A skin switch is a layout change for the blocks and bars (T3.x repaint on it).
+-- A skin switch is a layout change for the blocks and bars (T3.x repaint on it). The waypoint arrow
+-- has no skin listener of its own, and from LibKa0s WaypointArrow 3.3 its text color and shadow
+-- follow the skin (SD-SK-SM.2/.3), so a switch re-applies its settings too.
 NS.Skin.OnLooksChanged(function()
     if NS.bus and NS.MSG then NS.bus:SendMessage(NS.MSG.LAYOUT_CHANGED) end
+    if NS.WaypointArrow and NS.WaypointArrow.Restyle then NS.WaypointArrow.Restyle() end
 end)
 
 function NS.SkinPaintAceTree(container)
