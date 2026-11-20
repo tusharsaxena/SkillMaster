@@ -121,9 +121,6 @@ local function tipLine(s, token, wrap)
     GameTooltip:AddLine(s, c[1], c[2], c[3], wrap)
 end
 
--- The card's tooltip: the whole card, the "Also teaches" list unclipped. A card is a BODY element
--- (LibKa0s#92, AD-92-SM): beside the popup, its window group, level with the card
--- (NS.Chrome.PlaceBeside); it was owned at ANCHOR_RIGHT, the corner offset the rule retires.
 -- The card's own wash: selected, else normal.
 local function restWash(c)
     return c.index == state.selected and "selected" or "normal"
@@ -132,6 +129,9 @@ end
 -- A card is clicked, so it takes the skin's list.hover wash while the pointer is on it (the owner's
 -- U-31, SkillMaster#9); ListRow is recorded, so a skin switch repaints it. The journal's rows are
 -- not clicked and take none.
+-- Its tooltip: the whole card, the "Also teaches" list unclipped. A card is a BODY element
+-- (LibKa0s#92, AD-92-SM): beside the popup, its window group, level with the card
+-- (NS.Chrome.PlaceBeside); it was owned at ANCHOR_RIGHT, the corner offset the rule retires.
 local function onCardEnter(self)
     NS.Skin.ListRow(self, "hover")
     if not (GameTooltip and self.trainer) then return end
