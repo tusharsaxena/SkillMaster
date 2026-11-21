@@ -89,5 +89,5 @@ round-6 `media/waypoint/` copy is gone.
 `tools/seeds/` is dev-only and never loaded or packaged (`.pkgmeta` ignores `tools`): `seeds.py` re-validates
 the trainer, fishing-zone and skill-catalog seeds against WoW Forever's DB2 ([validate-seeds.md](validate-seeds.md)),
 `forever_rulings.json` holds its rulings (written only by `seeds.py rule`), `test_seeds.py` its offline tests.
-`libs/` and `tests/_kit/` are vendored from LibKa0s v1.101.0 (the root `CLAUDE.md` provenance line) and never
+`libs/` and `tests/_kit/` are vendored from LibKa0s v1.108.0 (the root `CLAUDE.md` provenance line) and never
 edited.

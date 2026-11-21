@@ -122,11 +122,14 @@ window too (`NS.Detached.ApplyStyle(frame)`); every row's onChange is `NS.ApplyL
 - *Background*: the composed color pair (`bgColor`, `useClassColorBg`, options-ui-§16's background
   rule) and *Use the skin's background* (`bgFromSkin`, on by default, skinning-§6). On, the skin's
   window fill (`S.Shell`); off, the swatch on a fill of the window's own, over the skin's and under
-  the band.
+  the band. The composer's own swatch companion (`bgColorFromSkin`, LibKa0s v1.108.0)
+  is left out (`omit`, `settings/Layout.lua:120`), so one switch governs the fill.
 - *Border*: the composed border block with its *Show border* toggle (`border`, `borderStyle`,
   `borderSize`, `borderColor`, `useClassColorBorder`) and *Use the skin's border* (`borderFromSkin`,
   on by default). On, the skin's window edge; off, the style, thickness and swatch on edges of the
-  window's own (`NS.Chrome.PaintBorder`); Show border off draws neither.
+  window's own (`NS.Chrome.PaintBorder`); Show border off draws neither. The composer's per-part
+  companions (`borderStyleFromSkin`, `borderColorFromSkin`) are left out the same way
+  (`settings/Layout.lua:133`).
 
 The Block order tab is a host tab keyed by its group (the rows `layout.blocks.<id>.order` are
 `skipRender`): one boxed row per block in `NS.Blocks.Ordered()` on `NS.OptionsList`
