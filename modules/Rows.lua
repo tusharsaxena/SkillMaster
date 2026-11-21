@@ -257,13 +257,6 @@ local function paintIcon(row, color, kind, key, learned)
     row.icon:SetDesaturated(learned == false)
 end
 
---- Whether a skill entry's window opens by a cast (catalog openSpell). The cast is the crafting
---- overlay's (modules/SecureOverlay.lua), laid over the row's action mark.
-function R.Opens(e)
-    local cat = e and e.learned ~= false and NS.SkillCatalog[e.key]
-    return cat and cat.openSpell ~= nil or false
-end
-
 local function setLearnedLook(row, learned)
     row.bar:SetShown(learned)
     row.where:SetShown(not learned)

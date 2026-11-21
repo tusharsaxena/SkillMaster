@@ -1109,7 +1109,6 @@ function J.SelectFilter(filter)
 end
 
 function J.SelectedTab() return state.tab end
-function J.SelectedFilter() return state.filter end
 
 function J.NewSession()
     NS.Preview.Log():NewSession()
