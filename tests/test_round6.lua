@@ -538,12 +538,21 @@ end)
 
 test("round6 waypoint: a trainer without coordinates disables the button and its tooltip says why", function()
     withTrainerPopup("fishing", { native = true }, function(f)
+        -- Since the trainer probe (GitHub issue #3) nearly every record carries a point; the selected
+        -- one's is lifted for this case, standing for a record with none (Annora, inside Uldaman).
         local t = TP.Selected()
-        assertTrue(t ~= nil and t.x == nil, "the fishing trainers carry no coordinates")
-        assertEqual(f.waypoint.text:GetText(), "Set waypoint", "never Set waypoint (chat)")
-        assertFalse(f.waypoint:IsEnabled(), "disabled: it could only print to chat")
-        assertEqual(tipText(f.waypoint), "No map coordinates for this trainer yet; Print to chat gives directions.")
-        assertTrue(f.print:IsEnabled(), "Print to chat still works")
+        assertTrue(t ~= nil, "a fishing trainer is selected")
+        local x, y = t.x, t.y
+        t.x, t.y = nil, nil
+        local ok, err = pcall(function()
+            TP.Select(1)
+            assertEqual(f.waypoint.text:GetText(), "Set waypoint", "never Set waypoint (chat)")
+            assertFalse(f.waypoint:IsEnabled(), "disabled: it could only print to chat")
+            assertEqual(tipText(f.waypoint), "No map coordinates for this trainer yet; Print to chat gives directions.")
+            assertTrue(f.print:IsEnabled(), "Print to chat still works")
+        end)
+        t.x, t.y = x, y
+        assertTrue(ok, tostring(err))
     end)
     withTrainerPopup("fistWeapons", { native = true }, function(f)
         NS.SetByPath("waypoints.method", "chat")

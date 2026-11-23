@@ -112,3 +112,81 @@ test("test_trainers_riding_level_gate: the race's own riding trainer sorts first
     local nxt = NS.Trainers:NextRank("riding", 0, 0, 40, "Alliance", "Dwarf")
     assertEqual(nxt.trainers[1].name, "Ultham Ironhorn", names(nxt.trainers))
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- The trainer probe's fixes (GitHub issue #3; the four errors #2 found, each red on the old rows)
+-- ---------------------------------------------------------------------------------------------
+
+local function record(name)
+    for _, t in ipairs(NS.Trainers_Forever) do
+        if t.name == name then return t end
+    end
+    return nil
+end
+
+local function near(t, x, y)
+    return t and t.x and math.sqrt((t.x - x) ^ 2 + (t.y - y) ^ 2) <= 1.0
+end
+
+test("trainer probe fix: Woo Ping stands in Forever's re-bounded Stormwind frame, not the Era one", function()
+    local t = record("Woo Ping")
+    assertTrue(near(t, 63.88, 69.09), ("Woo Ping at %s, %s"):format(tostring(t and t.x), tostring(t and t.y)))
+    assertTrue(not near(t, 57.1, 57.7), "the Era-frame point is gone")
+end)
+
+test("trainer probe fix: Undercity's Journeyman Alchemy trainer is Doctor Martin Felben (npc 11044)", function()
+    assertNil(record("Doctor Martin Felbin"), "the misspelled name matches no NPC")
+    local t = record("Doctor Martin Felben")
+    assertTrue(t ~= nil and t.npcID == 11044 and t.city == "Undercity", "Felben")
+end)
+
+test("trainer probe fix: Gorina, a Mining Supplier, is no Mining trainer; Makaru still trains Orgrimmar", function()
+    assertNil(record("Gorina"), "Gorina is a vendor (npcFlags 4)")
+    local list = NS.Trainers:For("mining", "Horde", "Orc")
+    assertTrue(has(list, "Makaru", "Orgrimmar"), names(list))
+end)
+
+test("trainer probe fix: no two NPCs share one shipped point (Bixi and Buliwyf, Sayoc and Hanashi)", function()
+    local at = {}
+    for _, t in ipairs(NS.Trainers_Forever) do
+        if t.x then
+            local k = ("%d:%.1f:%.1f"):format(t.mapID, t.x, t.y)
+            assertTrue(at[k] == nil or at[k] == t.name, ("%s shares %s with %s"):format(t.name, k, tostring(at[k])))
+            at[k] = t.name
+        end
+    end
+    assertTrue(near(record("Buliwyf Stonehand"), 61.17, 89.52), "Buliwyf at his own spawn")
+end)
+
+test("trainer probe: every record carries its NPC id, once, and a point inside the map or none", function()
+    local seen = {}
+    for _, t in ipairs(NS.Trainers_Forever) do
+        assertEqual(type(t.npcID), "number", t.id .. " npcID")
+        assertTrue(seen[t.npcID] == nil, "npc " .. t.npcID .. " twice")
+        seen[t.npcID] = true
+        assertEqual(t.x == nil, t.y == nil, t.id .. " x and y together")
+        if t.x then
+            assertTrue(t.x > 0 and t.x < 100 and t.y > 0 and t.y < 100, t.id .. " in percent, 0..100")
+        end
+    end
+end)
+
+test("trainer probe: a rank learned from a book or a quest names it (the owner's books comment on #3)", function()
+    local want = {
+        Shandrina = 16072, Wulan = 16072, ["Deneb Walker"] = 16084, ["Balai Lok'Wein"] = 16084,
+        ["Old Man Heming"] = 16083,
+    }
+    for name, item in pairs(want) do
+        local t = record(name)
+        assertTrue(t and t.learn and t.learn.kind == "book" and t.learn.itemID == item, name)
+    end
+    local quests = { ["Dirge Quikcleave"] = 6610, ["Nat Pagle"] = 6607, ["Doctor Gustaf VanHowzen"] = 6624,
+                     ["Doctor Gregory Victor"] = 6622 }
+    for name, q in pairs(quests) do
+        local t = record(name)
+        assertTrue(t and t.learn and t.learn.kind == "quest" and t.learn.questID == q, name)
+    end
+    for _, t in ipairs(NS.Trainers_Forever) do
+        if t.learn then assertTrue(type(t.learn.item or t.learn.quest) == "string", t.id .. " learn names it") end
+    end
+end)

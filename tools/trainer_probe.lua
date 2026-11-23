@@ -122,6 +122,12 @@ local function checkRecord(rec, src, dupes)
     r.era.methodgg = E.Methodgg(rec, src.names)
     if dupes[rec.id] then
         r.checks.duplicate = { ok = false, msg = "shares its point with " .. table.concat(dupes[rec.id], ", ") }
+        -- Within tolerance, but on another NPC's point: the record's own spawn, rounded, parts them.
+        local spawn = r.checks.place and r.checks.place.spawn
+        if spawn then
+            addPatch(r, "x", rec.x, C.Round1(spawn.x), "its own spawn, apart from " .. table.concat(dupes[rec.id], ", "))
+            addPatch(r, "y", rec.y, C.Round1(spawn.y), "its own spawn, apart from " .. table.concat(dupes[rec.id], ", "))
+        end
     end
     r.reason = firstFailure(r.checks)
     r.confirmed = r.reason == nil and npc ~= nil
