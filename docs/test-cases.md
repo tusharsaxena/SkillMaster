@@ -181,7 +181,7 @@ Total.
 - skills: WoW Forever's struct reads its real ranks, and a profession's child line is one row
 - skills: a child line with an unknown name still maps through its parent skill-line ID
 
-### test_trainers.lua (33)
+### test_trainers.lua (35)
 
 - test_trainers_fist_alliance: Alliance fist weapons are taught in Ironforge and Darnassus
 - test_trainers_fist_alliance: the home city of the player's race sorts first
@@ -216,6 +216,8 @@ Total.
 - round2 forever-only: the 55 ship, each unverified with its reason, an npcID and a point
 - round2 forever-only: Zephras Isle and Riverglades trainers serve both factions (the owner's ruling)
 - round2 forever-only: a Junior trainer trains Apprentice only; riding's Forever instructors join
+- source ranks: a capital's titled craft trainer trains one rank below its title (Wowhead: Fimble Finespindle)
+- source ranks: every profession's every rank has a teacher for each faction
 
 ### test_trainer_probe.lua (18)
 
@@ -223,7 +225,7 @@ Total.
 - trainer probe: a record's npcID must carry its name
 - trainer probe: the side must serve the record's faction (Neutral wants both)
 - trainer probe: a vendor stored as a trainer fails the role check (Gorina)
-- trainer probe: a title's rank must be the record's top rank
+- trainer probe: a title's rank must be the record's top rank (one below the title, the owner's ruling)
 - trainer probe: a book vendor passes when it sells the book that trains the record's rank
 - trainer probe: a rank quest's giver passes when it starts that quest
 - trainer probe: a point in the Era frame fails the place check and the patch has Forever's (Woo Ping)
@@ -1098,7 +1100,7 @@ Total.
 | test_perf.lua | 2 |
 | test_probe.lua | 10 |
 | test_skilldata.lua | 26 |
-| test_trainers.lua | 33 |
+| test_trainers.lua | 35 |
 | test_trainer_probe.lua | 18 |
 | test_helpers.lua | 8 |
 | test_bonuses.lua | 16 |
@@ -1154,4 +1156,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **856** |
+| **Total** | **858** |

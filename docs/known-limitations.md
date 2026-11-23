@@ -135,13 +135,14 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
 - Every client API the data modules use is assumed until `/sm probe` confirms it
   ([forever-quirks.md](forever-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.
-- **Trainer data (GitHub issue #3).** Since round 2: 143 of the 199 records are confirmed
-  (`docs/trainer-probe/2026-11-23-r4/report.md`); the 55 Forever-only trainers ship unverified ("Forever-only,
+- **Trainer data (GitHub issue #3).** Since round 3: 145 of the 201 records are confirmed
+  (`docs/trainer-probe/2026-11-23-r5/report.md`); the 55 Forever-only trainers ship unverified ("Forever-only,
   from QuestieDB spawn, not yet seen in game") with ranks read from their titles (a plain craft title as
   Journeyman, Melbin Powderfuse's Goblin specialization unmodeled), and Linzy Blackbolt and Patricia Egan
   stand on one point in QuestieDB. The capitals' "Artisan" trainers train Expert, and a craft's Artisan is
-  its Master trainers' (round 2's research table in the spec); the Journeyman and Expert titles keep their
-  ranks on the owner's SM-TPROBE-3, against the 1.12 dump and Method.gg (SM-TPROBE-9). Round 1's
+  its Master trainers' (round 2's research table in the spec). Since the owner's ruling (2026-11-23, "trust
+  the source"), every titled craft trainer trains one rank below its title, as the 1.12 dump's rows do
+  (Method.gg's Tailoring guide alone disagrees). Round 1's
   record: 136 of the 137 trainer records were confirmed offline against
   QuestieDB's Forever NPC table (commit 47a4756b775e), which is Classic Era data projected into
   Forever's map frames on the assumption that no NPC moved: a moved or new Forever NPC is outside what
@@ -151,5 +152,4 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   same per-map transform, within 0.5 map-% of every one. The probe's in-game spot-check list (`docs/trainer-probe/2026-11-23-r2/report.md`) names
   the projected Stormwind and Mulgore points, the book and quest ranks, Bena Winterhoof (the 1.12 dump
   has her teach Alchemy to 75, her title says Expert), Sayoc's Staves (absent from the 1.12 dump) and
-  Annora. The 1.12 dump has every titled profession trainer teach one rank below its title; the data
-  keeps the titles (SM-TPROBE-3). Costs and level gates are not checked offline.
+  Annora. Costs and level gates are not checked offline.

@@ -121,7 +121,7 @@ local function findingsSection(out, run)
     if #(run.rankOff or {}) > 0 then
         out[#out + 1] = "### The 1.12 dump's ranks (cross-check only)"
         out[#out + 1] = ""
-        out[#out + 1] = ("Read by ItemTree's method (rank spells over titles), the 1.12 dump has %d Journeyman- and Expert-titled trainers teach one rank below their title (a Journeyman trainer to 75, an Expert to 150). The probe keeps those titles' ranks, which the owner's in-game check of a Journeyman trainer bore out (SM-TPROBE-3, 2026-11-23); a capital's Artisan title already reads as Expert (round 2). Records: %s."):format(#run.rankOff, table.concat(run.rankOff, ", "))
+        out[#out + 1] = ("Read by ItemTree's method (rank spells over titles), the 1.12 dump has %d records train one rank below what the data says. The data follows the dump's ranks (the owner's ruling, 2026-11-23: \"trust the source\"), so each is a data row to correct. Records: %s."):format(#run.rankOff, table.concat(run.rankOff, ", "))
         out[#out + 1] = ""
     end
 end

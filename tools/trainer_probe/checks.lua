@@ -44,7 +44,9 @@ C.WEAPON_SPELLS = {
 -- The cap a title's rank word trains to; a title with none trains its class's top (below). A
 -- capital's "Artisan" title trains to Expert (225): Artisan in a craft is the Master trainers'
 -- (round 2; the CMaNGOS rows, Method.gg's and wow-professions' Forever guides agree).
-C.TITLE_CAP = { Junior = 75, Journeyman = 150, Expert = 225, Artisan = 225, Master = 300 }
+-- The owner's ruling (2026-11-23, "trust the source"): every rank title reads one rank lower, as the
+-- 1.12 dump's rows teach (Wowhead's Fimble Finespindle agrees).
+C.TITLE_CAP = { Junior = 75, Journeyman = 75, Expert = 150, Artisan = 225, Master = 300 }
 C.PLAIN_CAP = { herbalism = 300, mining = 300, skinning = 300, cooking = 150, firstAid = 150, fishing = 150, riding = 150 }
 -- A craft trainer with a plain title ("Alchemist", "Blacksmith"; Forever's village trainers) is read
 -- as Journeyman, an untitled village trainer's reach in the 1.12 dump (round 2, spec D15).

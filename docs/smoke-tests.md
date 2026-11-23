@@ -803,6 +803,10 @@ you see on each Result line; none is passed until you say so.
   the rank's gate: the Journeyman trainer offers Journeyman (150) and the Artisan trainer Artisan
   (300). The CMaNGOS 1.12 dump has each one rank lower; Skill Master keeps the titles.
   Result: PASSED (owner, 2026-11-23).
+  Superseded (owner's ruling, 2026-11-23: "trust the source not my smoke test"; the owner checked
+  Wowhead for Fimble Finespindle and Drakk Stonehand): a Journeyman-titled trainer trains Apprentice,
+  an Expert-titled one Journeyman, an Artisan-titled one Expert, and a craft's Master trains Artisan.
+  The data follows the source; SM-TPROBE-8 is the in-game check of the new ranks.
 - **SM-TPROBE-4** (the books comment) Learn Cooking to 150 and open its trainer popup: Shandrina
   (Alliance) or Wulan (Horde) reads "Sells Expert Cookbook" on her card's second line, and Print to
   chat ends "· Sells Expert Cookbook". Hover the Cooking row: the tooltip's Trainer line says it too.
@@ -834,12 +838,15 @@ you see on each Result line; none is passed until you say so.
   craft at 200+: its Master (Alchemy Kylanna Windwhisper or Rogvar, Blacksmithing Brikk Keencraft,
   Enchanting Annora, Engineering Buzzek Bracketswing, Tailoring Timothy Worthington or Daryl Stack)
   trains Artisan, and a capital's "Artisan"-titled trainer (Georgio Bolero, Una) offers Expert only.
-  This re-checks SM-TPROBE-3's Artisan half, which every source contradicts.
+  This re-checks SM-TPROBE-3's Artisan half, which every source contradicts. (Amended after the
+  owner's ruling, 2026-11-23: at Expert, Leatherworking 125+, the trainer is Telonis or Una, and a
+  capital's Expert-titled trainer, Fimble Finespindle or Simon Tanner, offers Journeyman only.)
   Result:
 - **SM-TPROBE-9** At an Expert-titled capital trainer (for example Lilyssia Nightbreeze, Alchemy, or
   Simon Tanner, Leatherworking) with the skill at 125+, level 20+: does the trainer offer Expert (225),
   or only Journeyman (150)? The 1.12 dump and Method.gg say Journeyman; the data keeps Expert.
-  Result:
+  Result: Superseded before it ran (owner's ruling, 2026-11-23, "trust the source not my smoke test";
+  Wowhead's Fimble Finespindle): an Expert-titled trainer trains Journeyman, and the data now says so.
 - **SM-TPROBE-10** Open a profession's trainer popup: a "Show all trainers" check box sits under the
   intro, skinned, with a tooltip. Tick it: every rank's trainers, Artisan (300) first, then Expert,
   Journeyman, Apprentice, each trainer once; the trainers of your next rank carry "Your next rank" in

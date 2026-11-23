@@ -67,13 +67,13 @@ test("trainer probe: a vendor stored as a trainer fails the role check (Gorina)"
     assertTrue(r.msg:find("no trainer flag", 1, true) ~= nil, r.msg)
 end)
 
-test("trainer probe: a title's rank must be the record's top rank", function()
+test("trainer probe: a title's rank must be the record's top rank (one below the title, the owner's ruling)", function()
     local db = source()
-    local journeyman = { name = "Doctor Martin Felben", teaches = { "alchemy" }, ranks = { 75, 150 } }
-    assertTrue(C.Role(journeyman, db.npcs[1], db).ok, "Journeyman trains to 150")
-    local expert = { name = "Doctor Martin Felben", teaches = { "alchemy" }, ranks = { 75, 150, 225 } }
-    assertTrue(not C.Role(expert, db.npcs[1], db).ok, "a Journeyman title passed as Expert")
-    local wrongSkill = { name = "Doctor Martin Felben", teaches = { "tailoring" }, ranks = { 75, 150 } }
+    local journeyman = { name = "Doctor Martin Felben", teaches = { "alchemy" }, ranks = { 75 } }
+    assertTrue(C.Role(journeyman, db.npcs[1], db).ok, "a Journeyman title trains Apprentice")
+    local expert = { name = "Doctor Martin Felben", teaches = { "alchemy" }, ranks = { 75, 150 } }
+    assertTrue(not C.Role(expert, db.npcs[1], db).ok, "a Journeyman title passed as training Journeyman")
+    local wrongSkill = { name = "Doctor Martin Felben", teaches = { "tailoring" }, ranks = { 75 } }
     assertTrue(not C.Role(wrongSkill, db.npcs[1], db).ok, "an alchemist passed as a tailor")
 end)
 

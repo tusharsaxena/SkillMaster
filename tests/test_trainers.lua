@@ -77,7 +77,9 @@ test("test_trainers_next_rank_at_cap: Leatherworking 150/150 at level 22 trains 
     assertEqual(nxt.minLevel, 20)
     assertTrue(nxt.canTrain, "level 22 and skill 150 meet Expert's gate")
     assertTrue(#nxt.trainers > 0, "an Expert trainer is listed")
-    assertEqual(nxt.trainers[1].city, "Stormwind", names(nxt.trainers))
+    -- The owner's ruling (2026-11-23): Stormwind's Expert-titled trainer trains Journeyman only, so
+    -- Expert Leatherworking for Alliance is Telonis, Darnassus.
+    assertEqual(nxt.trainers[1].name, "Telonis", names(nxt.trainers))
 end)
 
 test("trainers: NextRank answers nil at Artisan and for a skill with no ranks", function()
@@ -386,7 +388,7 @@ test("round2 show all: AllRanks lists every rank, Artisan first, each trainer on
             seen[t] = true
         end
     end
-    assertEqual(table.concat(heads, ","), "Artisan,Expert,Journeyman")
+    assertEqual(table.concat(heads, ","), "Artisan,Expert,Journeyman,Apprentice")
     assertEqual(groups[1].trainers[1].name, "Drakk Stonehand")
     assertNil(NS.Trainers:AllRanks("swords"), "a weapon skill has no ranks")
 end)
@@ -399,7 +401,7 @@ test("round2 show all: the popup's check box lists every rank and marks the next
             assertEqual(headTexts(), "Artisan (300)", "off: the next rank only")
             TP.SetShowAll(true)
             assertTrue(NS.db.profile.trainers.showAll, "the check box writes the profile")
-            assertEqual(headTexts(), "Artisan (300),Expert (225),Journeyman (150)")
+            assertEqual(headTexts(), "Artisan (300),Expert (225),Journeyman (150),Apprentice (75)")
             for _, c in ipairs(TP.Cards()) do
                 local artisan = c.trainer.name == "Drakk Stonehand"
                 assertEqual(c.mark:IsShown(), artisan, c.trainer.name .. ": the mark is the next rank's only")
@@ -485,4 +487,31 @@ test("round2 forever-only: a Junior trainer trains Apprentice only; riding's For
     assertEqual(kelsey.teaches[1], "mining")
     assertEqual(record("Shari Stilwell").race, "Scourge")
     assertEqual(record("Genn Fairweather").teaches[1], "riding")
+end)
+
+-- ---------------------------------------------------------------------------------------------
+-- The owner's ruling (2026-11-23, "trust the source not my smoke test")
+-- ---------------------------------------------------------------------------------------------
+
+test("source ranks: a capital's titled craft trainer trains one rank below its title (Wowhead: Fimble Finespindle)", function()
+    local function top(t) local m = 0 for _, c in ipairs(t.ranks) do m = math.max(m, c) end return m end
+    assertEqual(top(record("Fimble Finespindle")), 150, "an Expert Leatherworker trains Journeyman")
+    assertEqual(top(record("Gretta Finespindle")), 75, "a Journeyman Leatherworker trains Apprentice")
+    assertEqual(top(record("Telonis")), 225, "an Artisan Leatherworker trains Expert")
+    assertEqual(top(record("Drakk Stonehand")), 300, "the Master trains Artisan")
+    assertEqual(top(record("Bena Winterhoof")), 75, "Bena Winterhoof trains Apprentice in the 1.12 dump")
+end)
+
+test("source ranks: every profession's every rank has a teacher for each faction", function()
+    local keys = { "alchemy", "blacksmithing", "enchanting", "engineering", "herbalism", "leatherworking", "mining",
+                   "skinning", "tailoring", "cooking", "firstAid", "fishing" }
+    for _, key in ipairs(keys) do
+        for _, faction in ipairs({ "Alliance", "Horde" }) do
+            for _, max in ipairs({ 0, 75, 150, 225 }) do
+                local race = faction == "Alliance" and "Human" or "Orc"
+                local nxt = NS.Trainers:NextRank(key, max, max, 60, faction, race)
+                assertTrue(nxt and #nxt.trainers > 0, ("%s %s past %d: no teacher"):format(faction, key, max))
+            end
+        end
+    end
 end)

@@ -117,6 +117,12 @@ local function checkRecord(rec, src, dupes)
             addPatch(r, "y", rec.y, s.y, r.checks.place.msg)
         end
         r.era.cmangos = E.Cmangos(rec, npc.id, src.cm)
+        -- The owner's ruling (2026-11-23, "trust the source"): where the 1.12 dump's rows teach exactly
+        -- the record's top rank, a title that reads otherwise (Bena Winterhoof's) does not fail the role.
+        local role, dump = r.checks.role, r.era.cmangos
+        if not role.ok and dump and dump.agree and rec.ranks and not rec.learn and role.msg:find("^title") then
+            r.checks.role = { ok = true, msg = role.msg .. "; the 1.12 dump's rows agree with the record" }
+        end
         r.era.pfquest = E.Pfquest(r.checks.place.spawn, npc.id, src.pf, src.qdb.coefficients)
     end
     r.era.methodgg = E.Methodgg(rec, src.names)

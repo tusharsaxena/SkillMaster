@@ -9,7 +9,7 @@ local _, NS = ...
 NS.DataMeta = NS.DataMeta or {}
 NS.DataMeta.Trainers_Forever = {
     source = "the offline trainer probe, tools/trainer_probe.lua (GitHub issue #3)",
-    verified = "questiedb@47a4756b775e", report = "docs/trainer-probe/2026-11-23-r4", date = "2026-11-23",
+    verified = "questiedb@47a4756b775e", report = "docs/trainer-probe/2026-11-23-r5", date = "2026-11-23",
     sources = {
         { name = "QuestieDB (github.com/Questie/QuestieDB), data/Forever", pin = "commit 47a4756b775e8c73687fd3066d6c13f0bc43a55e" },
         { name = "CMaNGOS classic-db (github.com/cmangos/classic-db), read by ItemTree's method", pin = "sha256 4f92db520868ab4e566726f68b5b2e380ae781209beaf22237b4f7f04600d0c0" },
@@ -148,6 +148,8 @@ NS.TrainerProvenance_Forever = {
         ["hahrana_ironhide"] = { npcID = 11098, name = "Hahrana Ironhide", mapID = 1444, x = 74.4, y = 43.1 },
         ["timothy_worthington"] = { npcID = 11052, name = "Timothy Worthington", mapID = 1445, x = 66.2, y = 51.8 },
         ["daryl_stack"] = { npcID = 2399, name = "Daryl Stack", mapID = 1424, x = 63.8, y = 20.8 },
+        ["kitta_firewind"] = { npcID = 11072, name = "Kitta Firewind", mapID = 1429, x = 64.9, y = 70.7 },
+        ["hgarth"] = { npcID = 11074, name = "Hgarth", mapID = 1442, x = 49.2, y = 57.2 },
         ["woo_ping"] = { npcID = 11867, name = "Woo Ping", mapID = 1453, x = 63.9, y = 69.1 },
         ["buliwyf_stonehand"] = { npcID = 11865, name = "Buliwyf Stonehand", mapID = 1455, x = 61.2, y = 89.5 },
         ["bixi_wobblebonk"] = { npcID = 13084, name = "Bixi Wobblebonk", mapID = 1455, x = 62.2, y = 89.6 },

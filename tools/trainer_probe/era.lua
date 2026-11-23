@@ -53,7 +53,9 @@ local function rankNote(rec, trains)
     local t = skill and trains[skill.line]
     local top = C.TopCap(rec)
     if not t then
-        return { agree = false, rankOff = top == 150,
+        -- An Apprentice-only record with no rank row says nothing either way (the dump's Journeyman
+        -- enchanters teach no Enchanting rank spell; Method.gg has them teach Apprentice).
+        return { agree = false, neutral = top == 75, rankOff = top == 150,
                  msg = ("teaches no %s rank in the 1.12 dump"):format(skill and skill.line or rec.teaches[1]) }
     end
     if t.cap == top then return { agree = true, msg = ("teaches %s to %d"):format(skill.line, t.cap) } end

@@ -250,3 +250,31 @@ agreed with the error.
   Booty Bay and Gadgetzan records use), whatever side QuestieDB gives; the other Forever-only
   trainers take QuestieDB's side. The probe keeps such a record unverified by its `hold` reason, so
   it never confirms a record the owner has not seen.
+
+## Round 3 (2026-11-23): the owner's rulings
+
+> On Expert- and Journeyman-titled trainers: "trust the source not my smoke test". The owner checked
+> Wowhead for Fimble Finespindle and he only teaches to the lower rank.
+>
+> On the Artisan half of SM-TPROBE-3: "trust the source not my smoke test". The owner checked Drakk
+> Stonehand.
+>
+> Linzy Blackbolt and Patricia Egan sharing a point is accepted, and Katoom stays out.
+
+- **D16 — Source ranks.** This supersedes round 2's doubt that kept the Journeyman and Expert titles.
+  Every capital craft trainer trains what the CMaNGOS 1.12 dump's rows teach. A Journeyman-titled
+  trainer trains Apprentice (75), an Expert-titled one Journeyman (150) and an Artisan-titled one Expert
+  (225, already so in round 2); Bena Winterhoof (Expert Alchemist) trains Apprentice. That moves 65
+  records: 64 one rank lower, Bena two lower (with round 2's ten Artisan-titled records, the 74 plus
+  Bena that round 1 counted). The same rule reads the four titled Forever-only trainers (Gur'dok,
+  Alphonse Dumas, Pa'zula, Charles Worth). The probe's title rule is Journeyman 75, Expert 150,
+  Artisan 225, Master 300. Where the dump's rows teach exactly the record's rank, a title that says
+  otherwise does not fail the role check (Bena). Sources: the dump, Wowhead (the owner's checks of
+  Fimble Finespindle and Drakk Stonehand) and Method.gg's Forever guides, which agree for every craft
+  they cover but Tailoring (they have no Engineering page). There they have the Expert-titled tailors teach Expert; the ruling follows the dump.
+- **D17 — Expert Enchanting.** With the capitals' Expert enchanters at Journeyman, no record trained
+  Expert Enchanting outside Uldaman. Kitta Firewind (Tower of Azora, Elwynn Forest, Alliance) and
+  Hgarth (Sun Rock Retreat, Stonetalon Mountains, Horde) join. The dump has both "Artisan Enchanters"
+  teach Expert, and Method.gg agrees. A test now holds every profession's every rank to a teacher for
+  each faction.
+- SM-TPROBE-3's pass and SM-TPROBE-9 are marked superseded in `docs/smoke-tests.md`. Their text stays.
