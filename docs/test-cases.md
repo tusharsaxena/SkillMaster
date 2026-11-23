@@ -181,7 +181,7 @@ Total.
 - skills: WoW Forever's struct reads its real ranks, and a profession's child line is one row
 - skills: a child line with an unknown name still maps through its parent skill-line ID
 
-### test_trainers.lua (22)
+### test_trainers.lua (33)
 
 - test_trainers_fist_alliance: Alliance fist weapons are taught in Ironforge and Darnassus
 - test_trainers_fist_alliance: the home city of the player's race sorts first
@@ -205,8 +205,19 @@ Total.
 - trainer provenance: a confirmed record still holds the values the probe confirmed
 - trainer provenance: the unverified mark follows the record, not a blanket flag
 - trainer probe books: a card for a book vendor or a rank quest's giver says how the rank is learned (#3)
+- round2 artisan: Alliance Artisan Leatherworking is Drakk Stonehand in the Hinterlands, not Telonis
+- round2 artisan: no capital trainer trains a craft to Artisan; each side has a Master who does
+- round2 artisan: the capitals' Artisan-titled trainers train Expert (225)
+- round2 note: Artisan Cooking at 225 says no trainer teaches it and names Clamlette Surprise and Dirge
+- round2 note: a book rank and a quest rank say so; a trained rank has no note
+- round2 show all: AllRanks lists every rank, Artisan first, each trainer once under its highest
+- round2 show all: the popup's check box lists every rank and marks the next rank's trainers
+- round2 show all: quest givers sit in their rank's group, an unlearned skill marks Apprentice
+- round2 forever-only: the 55 ship, each unverified with its reason, an npcID and a point
+- round2 forever-only: Zephras Isle and Riverglades trainers serve both factions (the owner's ruling)
+- round2 forever-only: a Junior trainer trains Apprentice only; riding's Forever instructors join
 
-### test_trainer_probe.lua (15)
+### test_trainer_probe.lua (18)
 
 - trainer probe: a misspelled name finds no NPC and names the near miss
 - trainer probe: a record's npcID must carry its name
@@ -223,6 +234,9 @@ Total.
 - trainer probe: the provenance file loads and holds each record's confirmation or reason
 - trainer probe: the JSON writer escapes and sorts
 - trainer probe: the command line wants the QuestieDB path and reads the options
+- trainer probe: an Artisan title trains to 225 and a Master title to 300 (round 2)
+- trainer probe: a Junior title trains Apprentice and a plain craft title Journeyman (round 2)
+- trainer probe: a held record is never confirmed, and its reason is the hold
 
 ### test_helpers.lua (8)
 
@@ -1084,8 +1098,8 @@ Total.
 | test_perf.lua | 2 |
 | test_probe.lua | 10 |
 | test_skilldata.lua | 26 |
-| test_trainers.lua | 22 |
-| test_trainer_probe.lua | 15 |
+| test_trainers.lua | 33 |
+| test_trainer_probe.lua | 18 |
 | test_helpers.lua | 8 |
 | test_bonuses.lua | 16 |
 | test_statdata.lua | 16 |
@@ -1140,4 +1154,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **842** |
+| **Total** | **856** |

@@ -17,7 +17,7 @@ the checks below that cover each item:
 | The lure timer | SM-DISP-2, SM-SIM-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
 | Rows page (round 9) | SM-DISP-59 |
-| Trainer data (the offline probe, GitHub issue #3) | SM-TPROBE-1, SM-TPROBE-2, SM-TPROBE-3, SM-TPROBE-4, SM-TPROBE-5, SM-TPROBE-6 |
+| Trainer data (the offline probe, GitHub issue #3) | SM-TPROBE-1, SM-TPROBE-2, SM-TPROBE-3, SM-TPROBE-4, SM-TPROBE-5, SM-TPROBE-6, SM-TPROBE-7, SM-TPROBE-8, SM-TPROBE-9, SM-TPROBE-10, SM-TPROBE-11 |
 | Waypoints (TomTom by name, AF-SM-TOMTOM) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58, SM-DISP-60, SM-DISP-61, SM-DISP-62, SM-DISP-63, SM-DISP-64, SM-DISP-65 |
 | Each skin | SM-SKIN-1, SM-SKIN-2, SM-SKIN-3, SM-SKIN-4, SM-SKIN-5, SM-SKIN-6, SM-SKIN-7, SM-SKIN-8 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
@@ -818,6 +818,43 @@ you see on each Result line; none is passed until you say so.
 - **SM-TPROBE-6** (Horde) Bena Winterhoof (Thunder Bluff, Middle Rise) trains Alchemy to Expert
   (225), and Sayoc (Orgrimmar) teaches Staves: the two records the 1.12 dump disagrees with.
   Result: Owed. Not validated (owner, 2026-11-23): no character with those professions.
+
+### Round 2 (the owner's feedback, 2026-11-23)
+
+- **SM-TPROBE-7** Cooking at 225/225: the popup's Artisan (300) heading reads "No trainer teaches
+  Artisan Cooking. Artisan Cooking is learned from a quest: Clamlette Surprise, given by Dirge
+  Quikcleave, Gadgetzan, Tanaris.", Dirge's card under it (Set waypoint leads to him), then "Trainers
+  who teach Cooking" with your side's cooking trainers. First Aid at 225: the same for Triage (Doctor
+  Gustaf VanHowzen, Theramore Isle, or Doctor Gregory Victor, Hammerfall); Fishing at 225: Nat Pagle,
+  Angler Extreme. Cooking at 150: Expert Cooking "is learned from a book: Expert Cookbook".
+  Result:
+- **SM-TPROBE-8** Leatherworking at 155/225 (the owner's case): Train: Leatherworking (Artisan) lists
+  Drakk Stonehand, Aerie Peak, The Hinterlands (Alliance) or Hahrana Ironhide, Camp Mojache, Feralas
+  (Horde), not Telonis or Una. Go to the Master and train Artisan (level 35, skill 200). Any other
+  craft at 200+: its Master (Alchemy Kylanna Windwhisper or Rogvar, Blacksmithing Brikk Keencraft,
+  Enchanting Annora, Engineering Buzzek Bracketswing, Tailoring Timothy Worthington or Daryl Stack)
+  trains Artisan, and a capital's "Artisan"-titled trainer (Georgio Bolero, Una) offers Expert only.
+  This re-checks SM-TPROBE-3's Artisan half, which every source contradicts.
+  Result:
+- **SM-TPROBE-9** At an Expert-titled capital trainer (for example Lilyssia Nightbreeze, Alchemy, or
+  Simon Tanner, Leatherworking) with the skill at 125+, level 20+: does the trainer offer Expert (225),
+  or only Journeyman (150)? The 1.12 dump and Method.gg say Journeyman; the data keeps Expert.
+  Result:
+- **SM-TPROBE-10** Open a profession's trainer popup: a "Show all trainers" check box sits under the
+  intro, skinned, with a tooltip. Tick it: every rank's trainers, Artisan (300) first, then Expert,
+  Journeyman, Apprentice, each trainer once; the trainers of your next rank carry "Your next rank" in
+  the skin's good color, and their card's tooltip names the rank. Switch skins: the mark stays
+  legible. Untick it: back to the next rank only. Close and reopen, and `/reload`: the box keeps its
+  state, and Settings > Trainers and Waypoints shows the same Show all trainers row. A weapon skill's
+  popup has no check box.
+  Result:
+- **SM-TPROBE-11** (the Forever-only trainers) Spot-check a few, each marked unverified: on Zephras
+  Isle, Nyassa Swiftdraught (Alchemy) and Halavuul Cragwind (Mining), listed for both factions; in
+  Riverglades, Grungle (Mining) and Melbin Powderfuse (does he train Engineering, and to what rank?);
+  one Junior trainer per faction (Alliance: Kelsey Fargo, Northshire, Elwynn Forest; Horde: Walter
+  Mason, Tirisfal Glades): each pin stands on the NPC and the trainer window offers Apprentice.
+  In Alterac Mountains: is it Linzy Blackbolt or Patricia Egan (one point in the data) who stands there?
+  Result:
 
 ## Skins and diagnostics
 

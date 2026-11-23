@@ -444,7 +444,9 @@ projected into Forever's frame, and Method.gg's guides. The probe writes a froze
 `docs/trainer-probe/<date>[-<run>]/` and the generated `defaults/TrainerProvenance_Forever.lua`: a
 record it confirms carries `verified = "questiedb@<sha12>"`, every other one `verified = false` with
 an `unverified` reason, and `tests/test_trainers.lua` holds both to the file. The trainer popup and
-the chat directions mark only the unverified records.
+the chat directions mark only the unverified records. A record the data holds back (`hold`: since
+round 2 the 55 Forever-only trainers, placed by QuestieDB alone) is never confirmed, whatever its
+checks say, until it is seen in game.
 
 **Licensing decision (2026-11-23, issue #3).** QuestieDB is GPLv3 for contributions, the CMaNGOS dump
 GPL-3.0, pfQuest MIT, ItemTree All Rights Reserved. Skill Master (MIT) ships none of their tables, no
