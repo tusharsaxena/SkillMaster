@@ -435,6 +435,27 @@ placer's horizontal side by screen third and its gap as well.
   `OnEnter` and calls `OnTooltipShow` would get no tooltip, because the feeds define no
   `OnTooltipShow`.
 
+### Trainer data provenance (GitHub issue #3)
+
+`defaults/Trainers_Forever.lua` is checked offline by the trainer probe (`tools/trainer_probe.lua`,
+dev-only): every record against QuestieDB's Forever NPC table at a pinned commit, cross-checked by the
+CMaNGOS 1.12 dump read the way ItemTree reads it (what a trainer's rows teach), pfQuest's Era spawns
+projected into Forever's frame, and Method.gg's guides. The probe writes a frozen run under
+`docs/trainer-probe/<date>[-<run>]/` and the generated `defaults/TrainerProvenance_Forever.lua`: a
+record it confirms carries `verified = "questiedb@<sha12>"`, every other one `verified = false` with
+an `unverified` reason, and `tests/test_trainers.lua` holds both to the file. The trainer popup and
+the chat directions mark only the unverified records. A record the data holds back (`hold`: since
+round 2 the 55 Forever-only trainers, placed by QuestieDB alone) is never confirmed, whatever its
+checks say, until it is seen in game.
+
+**Licensing decision (2026-11-23, issue #3).** QuestieDB is GPLv3 for contributions, the CMaNGOS dump
+GPL-3.0, pfQuest MIT, ItemTree All Rights Reserved. Skill Master (MIT) ships none of their tables, no
+fixture and no copy: only its own corrected records (names, `npcID`s, item and quest ids, coordinates
+rounded to 0.1 map-%) and the sources' commits in `NS.DataMeta.Trainers_Forever`. The probe reads the
+sources from checkouts outside the repo, and its reports quote a source only against one record. This
+is no deviation from the standard; it is recorded here as the provenance rule a future data change
+keeps.
+
 ## Known Limitations
 
 What the addon does not do yet, and what is still unverified in game: [known-limitations.md](known-limitations.md).
@@ -491,9 +512,10 @@ arrow's measurements, test mode and the simulator's reach, and the client APIs a
 Frozen and generated material is out of the map and named once per directory (documentation-§3):
 `docs/audits/`, `docs/reviews/`, `docs/automated-tests/<run>/`, `docs/perf-analysis/<run>/`,
 `docs/revendor/<date>-v<tag>/`, `docs/seed-research/<date>-<flavor>/` (a seed-validation run's frozen
-bundle, [validate-seeds.md](validate-seeds.md)), `docs/superpowers/` (the v1 design spec, its mockup
+bundle, [validate-seeds.md](validate-seeds.md)), `docs/trainer-probe/<date>[-<run>]/` (a trainer probe
+run's report, JSON and suggested patch, [Trainer data provenance](#trainer-data-provenance-github-issue-3)), `docs/superpowers/` (the v1 design spec, its mockup
 sources, the plan and its status ledger) and `docs/investigations/`. Of these, `docs/audits/`,
-`docs/reviews/`, `docs/revendor/`, `docs/seed-research/`, `docs/superpowers/` and
+`docs/reviews/`, `docs/revendor/`, `docs/seed-research/`, `docs/trainer-probe/`, `docs/superpowers/` and
 `docs/automated-tests/<run>/` exist today.
 
 ## Documented deviations

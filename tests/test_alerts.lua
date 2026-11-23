@@ -68,7 +68,9 @@ test("test_alerts_cap_once: reaching the cap toasts once with the next trainer, 
         assertEqual(p.kind, "cap")
         assertEqual(p.title, "Leatherworking 150 / 150 · Journeyman cap")
         assertTrue(p.detail:find("Train Expert (Lv 20): ", 1, true) == 1, p.detail)
-        assertTrue(p.trainer and p.trainer.city == "Ironforge", "the Dwarf's home city trainer first")
+        -- The owner's ruling (2026-11-23): Ironforge's Expert-titled trainer trains Journeyman, so the
+        -- Expert trainer is Telonis in Darnassus, another capital.
+        assertTrue(p.trainer and p.trainer.name == "Telonis", "the nearest capital's Expert trainer")
         assertEqual(toast.shown[1].key, "cap:leatherworking:150")
         local lines = printed()
         assertEqual(#lines, 1, "one chat line")

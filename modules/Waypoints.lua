@@ -77,6 +77,10 @@ function Wp:Directions(t)
     if t.subzone and t.subzone ~= where then where = where .. ", " .. t.subzone end
     if hasCoords(t) then where = where .. (" (%.1f, %.1f)"):format(t.x, t.y) end
     local text = L["%s: %s"]:format(t.name, where)
+    -- GitHub issue #3: a book or quest after the place, "Shandrina: Ashenvale (49.5, 67.1) · Sells
+    -- Expert Cookbook".
+    local learn = NS.Trainers.LearnNote(t)
+    if learn then text = text .. " \194\183 " .. learn end
     return text .. Wp.UnverifiedMark(t)
 end
 

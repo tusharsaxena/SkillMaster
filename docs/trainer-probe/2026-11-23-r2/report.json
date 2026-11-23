@@ -1,0 +1,2627 @@
+{
+  "confirmed": 136,
+  "date": "2026-11-23",
+  "foreverOnly": [
+    {
+      "id": 28694,
+      "name": "Alard Schmied",
+      "subName": "Blacksmith",
+      "uiMap": 1416
+    },
+    {
+      "id": 246152,
+      "name": "Shari Stilwell",
+      "subName": "Undead Horse Riding Instructor",
+      "uiMap": 1420
+    },
+    {
+      "id": 246795,
+      "name": "Linzy Blackbolt",
+      "subName": "Alchemist",
+      "uiMap": 1416
+    },
+    {
+      "id": 247223,
+      "name": "Nancy Songflower",
+      "subName": "Junior Herbalism Trainer",
+      "uiMap": 1429
+    },
+    {
+      "id": 247226,
+      "name": "Kelsey Fargo",
+      "subName": "Junior Mining Trainer",
+      "uiMap": 1429
+    },
+    {
+      "id": 247227,
+      "name": "Riley Peltskinner",
+      "subName": "Junior Skinning Trainer",
+      "uiMap": 1429
+    },
+    {
+      "id": 251905,
+      "name": "Zerril Softbreeze",
+      "subName": "Cook",
+      "uiMap": 2521
+    },
+    {
+      "id": 251913,
+      "name": "Aedi Thriceforged",
+      "subName": "Miner",
+      "uiMap": 2521
+    },
+    {
+      "id": 251972,
+      "name": "Charles Worth",
+      "subName": "Expert Tailor",
+      "uiMap": 1416
+    },
+    {
+      "id": 251977,
+      "name": "Angelique Butler",
+      "subName": "First Aid Trainer",
+      "uiMap": 1416
+    },
+    {
+      "id": 251978,
+      "name": "Vanessa Sellers",
+      "subName": "Enchanting Trainer",
+      "uiMap": 1416
+    },
+    {
+      "id": 251992,
+      "name": "Fenn Fairweather",
+      "subName": "Fisherman",
+      "uiMap": 2521
+    },
+    {
+      "id": 251993,
+      "name": "Indari Sunseam",
+      "subName": "Leatherworker",
+      "uiMap": 2521
+    },
+    {
+      "id": 252084,
+      "name": "Katherine Lee",
+      "subName": "Cooking Trainer",
+      "uiMap": 1416
+    },
+    {
+      "id": 252376,
+      "name": "Emerii Tallgust",
+      "subName": "Leatherworker",
+      "uiMap": 2521
+    },
+    {
+      "id": 252380,
+      "name": "Othesia Evengale",
+      "subName": "Tailor",
+      "uiMap": 2521
+    },
+    {
+      "id": 252388,
+      "name": "Halavuul Cragwind",
+      "subName": "Mining Trainer",
+      "uiMap": 2521
+    },
+    {
+      "id": 252479,
+      "name": "Daeann Steelwind",
+      "subName": "Blacksmith",
+      "uiMap": 2521
+    },
+    {
+      "id": 253004,
+      "name": "Iaadaria Bitterwind",
+      "subName": "Alchemist",
+      "uiMap": 2521
+    },
+    {
+      "id": 254087,
+      "name": "Miriaan Mistblade",
+      "subName": "Skinner",
+      "uiMap": 2521
+    },
+    {
+      "id": 254345,
+      "name": "Syriel Nightrain",
+      "subName": "Herbalist",
+      "uiMap": 2521
+    },
+    {
+      "id": 255877,
+      "name": "Hunter Moore",
+      "subName": "Fisherman",
+      "uiMap": 1424
+    },
+    {
+      "id": 255891,
+      "name": "Grungle",
+      "subName": "Miner",
+      "uiMap": 2548
+    },
+    {
+      "id": 256655,
+      "name": "Gorg",
+      "subName": "Cook",
+      "uiMap": 2548
+    },
+    {
+      "id": 256658,
+      "name": "Gur'dok",
+      "subName": "Journeyman Blacksmith",
+      "uiMap": 2548
+    },
+    {
+      "id": 257003,
+      "name": "Ishlee Breezewhisper",
+      "subName": "Skinner",
+      "uiMap": 2521
+    },
+    {
+      "id": 257004,
+      "name": "Eaysaa Brightgust",
+      "subName": "Alchemist",
+      "uiMap": 2521
+    },
+    {
+      "id": 257006,
+      "name": "Nyalah Brightfire",
+      "subName": "Cook",
+      "uiMap": 2521
+    },
+    {
+      "id": 257019,
+      "name": "Nyassa Swiftdraught",
+      "subName": "Alchemist",
+      "uiMap": 2521
+    },
+    {
+      "id": 257020,
+      "name": "Nasalanna Windsinger",
+      "subName": "Skinner",
+      "uiMap": 2521
+    },
+    {
+      "id": 257021,
+      "name": "Halassa Fernbreeze",
+      "subName": "Herbalist",
+      "uiMap": 2521
+    },
+    {
+      "id": 257022,
+      "name": "Messana Crestwind",
+      "subName": "Leatherworker",
+      "uiMap": 2521
+    },
+    {
+      "id": 257024,
+      "name": "Mendalass Tattermend",
+      "subName": "Skinner",
+      "uiMap": 2521
+    },
+    {
+      "id": 259250,
+      "name": "Alphonse Dumas",
+      "subName": "Journeyman Blacksmith",
+      "uiMap": 2548
+    },
+    {
+      "id": 260558,
+      "name": "Krix",
+      "subName": "Superior Fisherman",
+      "uiMap": 2548
+    },
+    {
+      "id": 260562,
+      "name": "Melbin Powderfuse",
+      "subName": "Master Goblin Engineer",
+      "uiMap": 2548
+    },
+    {
+      "id": 265756,
+      "name": "Genn Fairweather",
+      "subName": "Stablemaster and Riding Trainer",
+      "uiMap": 2521
+    },
+    {
+      "id": 265944,
+      "name": "William Pickman",
+      "subName": "Cooking Trainer",
+      "uiMap": 1420
+    },
+    {
+      "id": 266881,
+      "name": "Pa'zula",
+      "subName": "Journeyman Enchanter",
+      "uiMap": 1411
+    },
+    {
+      "id": 267324,
+      "name": "Margaret Weaver",
+      "subName": "Junior Skinning Trainer",
+      "uiMap": 1420
+    },
+    {
+      "id": 267325,
+      "name": "Walter Mason",
+      "subName": "Junior Mining Trainer",
+      "uiMap": 1420
+    },
+    {
+      "id": 267326,
+      "name": "Florence Nightshade",
+      "subName": "Junior Herbalism Trainer",
+      "uiMap": 1420
+    },
+    {
+      "id": 267328,
+      "name": "Norzsh",
+      "subName": "Weaponsmith",
+      "uiMap": 1411
+    },
+    {
+      "id": 267330,
+      "name": "Nawka Wildsong",
+      "subName": "Junior Skinning Trainer",
+      "uiMap": 1412
+    },
+    {
+      "id": 267331,
+      "name": "Vartha Rockmane",
+      "subName": "Junior Mining Trainer",
+      "uiMap": 1412
+    },
+    {
+      "id": 267332,
+      "name": "Garan Sunstrider",
+      "subName": "Junior Herbalism Trainer",
+      "uiMap": 1412
+    },
+    {
+      "id": 267333,
+      "name": "Terunne Bearshaper",
+      "subName": "Junior Skinning Trainer",
+      "uiMap": 1438
+    },
+    {
+      "id": 267334,
+      "name": "Fanorran Stilloak",
+      "subName": "Junior Mining Trainer",
+      "uiMap": 1438
+    },
+    {
+      "id": 267335,
+      "name": "Eleyna Duskbreeze",
+      "subName": "Junior Herbalism Trainer",
+      "uiMap": 1438
+    },
+    {
+      "id": 267336,
+      "name": "Brighid Stormflayer",
+      "subName": "Junior Skinning Trainer",
+      "uiMap": 1426
+    },
+    {
+      "id": 267337,
+      "name": "Sally Swiftwrench",
+      "subName": "Junior Mining Trainer",
+      "uiMap": 1426
+    },
+    {
+      "id": 267338,
+      "name": "Emrys Flintbeard",
+      "subName": "Junior Herbalism Trainer",
+      "uiMap": 1426
+    },
+    {
+      "id": 275321,
+      "name": "Edward Egan",
+      "subName": "Herbalist",
+      "uiMap": 1416
+    },
+    {
+      "id": 275322,
+      "name": "Patricia Egan",
+      "subName": "Alchemist",
+      "uiMap": 1416
+    },
+    {
+      "id": 276067,
+      "name": "Angus Hammerhand",
+      "subName": "Blacksmith",
+      "uiMap": 1420
+    }
+  ],
+  "foreverQuests": [
+    "betty_quin",
+    "sprite_jumpsprocket",
+    "shylamiir",
+    "gelman_stonehand",
+    "vosur_brakthel",
+    "thonys_pillarstone",
+    "jemma_quikswitch",
+    "reyna_stonebranch",
+    "gretta_finespindle",
+    "balthus_stoneflayer",
+    "uthrar_threx",
+    "trianna",
+    "whuut",
+    "yelmak",
+    "ug_thok",
+    "jhag",
+    "nogg",
+    "jandi",
+    "kamari",
+    "karolek",
+    "thuwd",
+    "snang",
+    "magar",
+    "kray",
+    "thrag_stonehoof",
+    "mot_dawnstrider",
+    "komin_winterhoof",
+    "brek_stonehoof",
+    "vhan",
+    "doctor_martin_felben",
+    "basil_frye",
+    "graham_van_talen",
+    "brom_killian",
+    "shandrina",
+    "doctor_gregory_victor",
+    "randal_hunter",
+    "ultham_ironhorn",
+    "binjy_featherwhistle",
+    "jartsam",
+    "kildar",
+    "xar_ti",
+    "kar_stormsinger",
+    "velma_warnam"
+  ],
+  "label": "2026-11-23-r2",
+  "methodggPages": [
+    "https://www.method.gg/wow-forever/alchemy-in-wow-forever-leveling-guide-and-trainers",
+    "https://www.method.gg/wow-forever/blacksmithing-in-wow-forever-leveling-guide-and-trainers",
+    "https://www.method.gg/wow-forever/enchanting-in-wow-forever-1-300-leveling-guide-and-trainers",
+    "https://www.method.gg/wow-forever/first-aid-in-wow-forever-1-300-leveling-guide-and-trainers",
+    "https://www.method.gg/wow-forever/fishing-in-wow-forever-leveling-guide-fishing-items-trainers",
+    "https://www.method.gg/wow-forever/herbalism-in-wow-forever-leveling-guide-herbalism-items-enchants-trainers",
+    "https://www.method.gg/wow-forever/how-to-get-a-mount-in-wow-forever-cost-requirement-and-mount-options",
+    "https://www.method.gg/wow-forever/leatherworking-in-wow-forever-leveling-guide-and-trainers",
+    "https://www.method.gg/wow-forever/mining-in-wow-forever-leveling-guide-mining-items-enchants-trainers",
+    "https://www.method.gg/wow-forever/skinning-in-wow-forever-leveling-guide-skinning-items-enchants-trainers",
+    "https://www.method.gg/wow-forever/tailoring-in-wow-forever-1-300-leveling-guide-and-trainers",
+    "https://www.method.gg/wow-forever/wow-forever-cooking-profession-leveling-guide-items-and-trainers"
+  ],
+  "rankOneBelowInDump": [
+    "tel_athir",
+    "lilyssia_nightbreeze",
+    "dane_lindgren",
+    "therum_deepforge",
+    "betty_quin",
+    "lucan_cordell",
+    "sprite_jumpsprocket",
+    "lilliam_sparkspindle",
+    "randal_worth",
+    "simon_tanner",
+    "lawrence_schneider",
+    "sellandus",
+    "georgio_bolero",
+    "vosur_brakthel",
+    "tally_berryfizz",
+    "groum_stonebeard",
+    "rotgath_stonebeard",
+    "bengus_deepforge",
+    "thonys_pillarstone",
+    "gimble_thistlefuzz",
+    "jemma_quikswitch",
+    "trixie_quikswitch",
+    "springspindle_fizzlegear",
+    "gretta_finespindle",
+    "fimble_finespindle",
+    "uthrar_threx",
+    "jormund_stonebrow",
+    "milla_fairancora",
+    "sylvanna_forestmoon",
+    "ainethil",
+    "lalina_summermoon",
+    "taladan",
+    "darianna",
+    "faldron",
+    "telonis",
+    "trianna",
+    "me_lynn",
+    "whuut",
+    "yelmak",
+    "ug_thok",
+    "snarl",
+    "saru_steelfury",
+    "jhag",
+    "godan",
+    "thund",
+    "nogg",
+    "roxxik",
+    "kamari",
+    "karolek",
+    "snang",
+    "magar",
+    "kray",
+    "thrag_stonehoof",
+    "karn_stonehoof",
+    "mot_dawnstrider",
+    "teg_dawnstrider",
+    "mak",
+    "tarn",
+    "una",
+    "vhan",
+    "tepa",
+    "doctor_martin_felben",
+    "doctor_marsh",
+    "doctor_herbert_halsey",
+    "basil_frye",
+    "james_van_brunt",
+    "malcomb_wynn",
+    "lavinia_crowe",
+    "graham_van_talen",
+    "franklin_lloyd",
+    "dan_golthas",
+    "victor_ward",
+    "rhiannon_davis",
+    "josef_gregorian"
+  ],
+  "records": [
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "tel_athir",
+      "name": "Tel'Athir",
+      "npcID": 5500,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "lilyssia_nightbreeze",
+      "name": "Lilyssia Nightbreeze",
+      "npcID": 5499,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "dane_lindgren",
+      "name": "Dane Lindgren",
+      "npcID": 957,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "therum_deepforge",
+      "name": "Therum Deepforge",
+      "npcID": 5511,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "betty_quin",
+      "name": "Betty Quin",
+      "npcID": 11068,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "lucan_cordell",
+      "name": "Lucan Cordell",
+      "npcID": 1317,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "sprite_jumpsprocket",
+      "name": "Sprite Jumpsprocket",
+      "npcID": 11026,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "lilliam_sparkspindle",
+      "name": "Lilliam Sparkspindle",
+      "npcID": 5518,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "tannysa",
+      "name": "Tannysa",
+      "npcID": 5566,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "shylamiir",
+      "name": "Shylamiir",
+      "npcID": 5502,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "randal_worth",
+      "name": "Randal Worth",
+      "npcID": 11096,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "simon_tanner",
+      "name": "Simon Tanner",
+      "npcID": 5564,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "gelman_stonehand",
+      "name": "Gelman Stonehand",
+      "npcID": 5513,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "maris_granger",
+      "name": "Maris Granger",
+      "npcID": 1292,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "lawrence_schneider",
+      "name": "Lawrence Schneider",
+      "npcID": 1300,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "sellandus",
+      "name": "Sellandus",
+      "npcID": 5567,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "georgio_bolero",
+      "name": "Georgio Bolero",
+      "npcID": 1346,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "stephen_ryback",
+      "name": "Stephen Ryback",
+      "npcID": 5482,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "shaina_fuller",
+      "name": "Shaina Fuller",
+      "npcID": 2327,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "arnold_leland",
+      "name": "Arnold Leland",
+      "npcID": 5493,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "vosur_brakthel",
+      "name": "Vosur Brakthel",
+      "npcID": 1246,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "tally_berryfizz",
+      "name": "Tally Berryfizz",
+      "npcID": 5177,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "groum_stonebeard",
+      "name": "Groum Stonebeard",
+      "npcID": 10277,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "rotgath_stonebeard",
+      "name": "Rotgath Stonebeard",
+      "npcID": 10276,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "bengus_deepforge",
+      "name": "Bengus Deepforge",
+      "npcID": 4258,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "thonys_pillarstone",
+      "name": "Thonys Pillarstone",
+      "npcID": 11065,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "gimble_thistlefuzz",
+      "name": "Gimble Thistlefuzz",
+      "npcID": 5157,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "jemma_quikswitch",
+      "name": "Jemma Quikswitch",
+      "npcID": 11028,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "trixie_quikswitch",
+      "name": "Trixie Quikswitch",
+      "npcID": 11029,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "springspindle_fizzlegear",
+      "name": "Springspindle Fizzlegear",
+      "npcID": 5174,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "reyna_stonebranch",
+      "name": "Reyna Stonebranch",
+      "npcID": 5137,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "gretta_finespindle",
+      "name": "Gretta Finespindle",
+      "npcID": 1466,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "fimble_finespindle",
+      "name": "Fimble Finespindle",
+      "npcID": 5127,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "geofram_bouldertoe",
+      "name": "Geofram Bouldertoe",
+      "npcID": 4254,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "balthus_stoneflayer",
+      "name": "Balthus Stoneflayer",
+      "npcID": 6291,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "uthrar_threx",
+      "name": "Uthrar Threx",
+      "npcID": 1703,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "jormund_stonebrow",
+      "name": "Jormund Stonebrow",
+      "npcID": 5153,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "daryl_riknussun",
+      "name": "Daryl Riknussun",
+      "npcID": 5159,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "nissa_firestone",
+      "name": "Nissa Firestone",
+      "npcID": 5150,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "grimnur_stonebrand",
+      "name": "Grimnur Stonebrand",
+      "npcID": 5161,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "milla_fairancora",
+      "name": "Milla Fairancora",
+      "npcID": 11041,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "sylvanna_forestmoon",
+      "name": "Sylvanna Forestmoon",
+      "npcID": 11042,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "ainethil",
+      "name": "Ainethil",
+      "npcID": 4160,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "lalina_summermoon",
+      "name": "Lalina Summermoon",
+      "npcID": 11070,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "taladan",
+      "name": "Taladan",
+      "npcID": 4213,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "firodren_mooncaller",
+      "name": "Firodren Mooncaller",
+      "npcID": 4204,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "darianna",
+      "name": "Darianna",
+      "npcID": 11083,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "faldron",
+      "name": "Faldron",
+      "npcID": 11081,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "telonis",
+      "name": "Telonis",
+      "npcID": 4212,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "eladriel",
+      "name": "Eladriel",
+      "npcID": 6292,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "trianna",
+      "name": "Trianna",
+      "npcID": 11050,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "me_lynn",
+      "name": "Me'lynn",
+      "npcID": 4159,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "alegorn",
+      "name": "Alegorn",
+      "npcID": 4210,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "dannelor",
+      "name": "Dannelor",
+      "npcID": 4211,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "whuut",
+      "name": "Whuut",
+      "npcID": 11046,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "yelmak",
+      "name": "Yelmak",
+      "npcID": 3347,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "ug_thok",
+      "name": "Ug'thok",
+      "npcID": 10266,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "snarl",
+      "name": "Snarl",
+      "npcID": 1383,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "saru_steelfury",
+      "name": "Saru Steelfury",
+      "npcID": 3355,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "jhag",
+      "name": "Jhag",
+      "npcID": 11066,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "godan",
+      "name": "Godan",
+      "npcID": 3345,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "thund",
+      "name": "Thund",
+      "npcID": 2857,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "nogg",
+      "name": "Nogg",
+      "npcID": 3412,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "roxxik",
+      "name": "Roxxik",
+      "npcID": 11017,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "jandi",
+      "name": "Jandi",
+      "npcID": 3404,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "kamari",
+      "name": "Kamari",
+      "npcID": 5811,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "karolek",
+      "name": "Karolek",
+      "npcID": 3365,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "makaru",
+      "name": "Makaru",
+      "npcID": 3357,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "thuwd",
+      "name": "Thuwd",
+      "npcID": 7088,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "snang",
+      "name": "Snang",
+      "npcID": 2855,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "magar",
+      "name": "Magar",
+      "npcID": 3363,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "zamja",
+      "name": "Zamja",
+      "npcID": 3399,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "arnok",
+      "name": "Arnok",
+      "npcID": 3373,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "lumak",
+      "name": "Lumak",
+      "npcID": 3332,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "kray",
+      "name": "Kray",
+      "npcID": 11047,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "bena_winterhoof",
+      "name": "Bena Winterhoof",
+      "npcID": 3009,
+      "patch": [],
+      "spot": [
+        "cmangos: teaches Alchemy to 75 in the 1.12 dump, the record says 225"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "thrag_stonehoof",
+      "name": "Thrag Stonehoof",
+      "npcID": 10278,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "karn_stonehoof",
+      "name": "Karn Stonehoof",
+      "npcID": 2998,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "mot_dawnstrider",
+      "name": "Mot Dawnstrider",
+      "npcID": 11071,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "teg_dawnstrider",
+      "name": "Teg Dawnstrider",
+      "npcID": 3011,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "komin_winterhoof",
+      "name": "Komin Winterhoof",
+      "npcID": 3013,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "mak",
+      "name": "Mak",
+      "npcID": 3008,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "tarn",
+      "name": "Tarn",
+      "npcID": 11084,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "una",
+      "name": "Una",
+      "npcID": 3007,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "brek_stonehoof",
+      "name": "Brek Stonehoof",
+      "npcID": 3001,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "mooranta",
+      "name": "Mooranta",
+      "npcID": 7089,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "vhan",
+      "name": "Vhan",
+      "npcID": 11051,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "tepa",
+      "name": "Tepa",
+      "npcID": 3004,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "aska_mistrunner",
+      "name": "Aska Mistrunner",
+      "npcID": 3026,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "pand_stonebinder",
+      "name": "Pand Stonebinder",
+      "npcID": 2798,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "kah_mistrunner",
+      "name": "Kah Mistrunner",
+      "npcID": 3028,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "doctor_martin_felben",
+      "name": "Doctor Martin Felben",
+      "npcID": 11044,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "doctor_marsh",
+      "name": "Doctor Marsh",
+      "npcID": 4609,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "doctor_herbert_halsey",
+      "name": "Doctor Herbert Halsey",
+      "npcID": 4611,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "basil_frye",
+      "name": "Basil Frye",
+      "npcID": 4605,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "james_van_brunt",
+      "name": "James Van Brunt",
+      "npcID": 4596,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "malcomb_wynn",
+      "name": "Malcomb Wynn",
+      "npcID": 11067,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "lavinia_crowe",
+      "name": "Lavinia Crowe",
+      "npcID": 4616,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "graham_van_talen",
+      "name": "Graham Van Talen",
+      "npcID": 4586,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "franklin_lloyd",
+      "name": "Franklin Lloyd",
+      "npcID": 11031,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "martha_alliestar",
+      "name": "Martha Alliestar",
+      "npcID": 4614,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "dan_golthas",
+      "name": "Dan Golthas",
+      "npcID": 223,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "brom_killian",
+      "name": "Brom Killian",
+      "npcID": 4598,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "killian_hagey",
+      "name": "Killian Hagey",
+      "npcID": 7087,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "victor_ward",
+      "name": "Victor Ward",
+      "npcID": 11048,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "rhiannon_davis",
+      "name": "Rhiannon Davis",
+      "npcID": 11049,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "josef_gregorian",
+      "name": "Josef Gregorian",
+      "npcID": 4576,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "eunice_burch",
+      "name": "Eunice Burch",
+      "npcID": 4552,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "mary_edras",
+      "name": "Mary Edras",
+      "npcID": 4591,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "armand_cromwell",
+      "name": "Armand Cromwell",
+      "npcID": 4573,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "brikk_keencraft",
+      "name": "Brikk Keencraft",
+      "npcID": 2836,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": false,
+        "role": true
+      },
+      "confirmed": false,
+      "id": "annora",
+      "name": "Annora",
+      "npcID": 11073,
+      "patch": [],
+      "reason": "place: the source holds an instance sentinel (inside an instance), no map position",
+      "spot": [
+        "not confirmed: place: the source holds an instance sentinel (inside an instance), no map position"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "shandrina",
+      "name": "Shandrina",
+      "npcID": 3955,
+      "patch": [],
+      "spot": [
+        "confirm the rank is learned from Expert Cookbook"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "wulan",
+      "name": "Wulan",
+      "npcID": 12033,
+      "patch": [],
+      "spot": [
+        "confirm the rank is learned from Expert Cookbook"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "dirge_quikcleave",
+      "name": "Dirge Quikcleave",
+      "npcID": 8125,
+      "patch": [],
+      "spot": [
+        "confirm the rank is learned from Clamlette Surprise"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "deneb_walker",
+      "name": "Deneb Walker",
+      "npcID": 2805,
+      "patch": [],
+      "spot": [
+        "confirm the rank is learned from Expert First Aid - Under Wraps"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "balai_lok_wein",
+      "name": "Balai Lok'Wein",
+      "npcID": 13476,
+      "patch": [],
+      "spot": [
+        "confirm the rank is learned from Expert First Aid - Under Wraps"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "doctor_gustaf_vanhowzen",
+      "name": "Doctor Gustaf VanHowzen",
+      "npcID": 12939,
+      "patch": [],
+      "spot": [
+        "confirm the rank is learned from Triage"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "doctor_gregory_victor",
+      "name": "Doctor Gregory Victor",
+      "npcID": 12920,
+      "patch": [],
+      "spot": [
+        "confirm the rank is learned from Triage"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "old_man_heming",
+      "name": "Old Man Heming",
+      "npcID": 2626,
+      "patch": [],
+      "spot": [
+        "confirm the rank is learned from Expert Fishing - The Bass and You"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "nat_pagle",
+      "name": "Nat Pagle",
+      "npcID": 12919,
+      "patch": [],
+      "spot": [
+        "confirm the rank is learned from Nat Pagle, Angler Extreme"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "woo_ping",
+      "name": "Woo Ping",
+      "npcID": 11867,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "buliwyf_stonehand",
+      "name": "Buliwyf Stonehand",
+      "npcID": 11865,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "bixi_wobblebonk",
+      "name": "Bixi Wobblebonk",
+      "npcID": 13084,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "ilyenia_moonfire",
+      "name": "Ilyenia Moonfire",
+      "npcID": 11866,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "sayoc",
+      "name": "Sayoc",
+      "npcID": 11868,
+      "patch": [],
+      "spot": [
+        "cmangos: weapon skills differ: shipped only staves; 1.12 only none"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "hanashi",
+      "name": "Hanashi",
+      "npcID": 2704,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "ansekhwa",
+      "name": "Ansekhwa",
+      "npcID": 11869,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "archibald",
+      "name": "Archibald",
+      "npcID": 11870,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "randal_hunter",
+      "name": "Randal Hunter",
+      "npcID": 4732,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "ultham_ironhorn",
+      "name": "Ultham Ironhorn",
+      "npcID": 4772,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "binjy_featherwhistle",
+      "name": "Binjy Featherwhistle",
+      "npcID": 7954,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "jartsam",
+      "name": "Jartsam",
+      "npcID": 4753,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "kildar",
+      "name": "Kildar",
+      "npcID": 4752,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "xar_ti",
+      "name": "Xar'Ti",
+      "npcID": 7953,
+      "patch": [],
+      "spot": []
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "kar_stormsinger",
+      "name": "Kar Stormsinger",
+      "npcID": 3690,
+      "patch": [],
+      "spot": [
+        "Forever re-bounded this map; the point is QuestieDB's projection of the Era spawn"
+      ]
+    },
+    {
+      "checks": {
+        "duplicate": true,
+        "faction": true,
+        "name": true,
+        "place": true,
+        "role": true
+      },
+      "confirmed": true,
+      "id": "velma_warnam",
+      "name": "Velma Warnam",
+      "npcID": 4773,
+      "patch": [],
+      "spot": []
+    }
+  ],
+  "sources": [
+    {
+      "name": "QuestieDB (github.com/Questie/QuestieDB), data/Forever",
+      "pin": "commit 47a4756b775e8c73687fd3066d6c13f0bc43a55e",
+      "use": "Forever names, titles, flags, sides, spawns, book vendors; the per-area transform"
+    },
+    {
+      "name": "CMaNGOS classic-db (github.com/cmangos/classic-db), read by ItemTree's method",
+      "pin": "sha256 4f92db520868ab4e566726f68b5b2e380ae781209beaf22237b4f7f04600d0c0",
+      "use": "1.12 trainer rows, rank books and vendors, rank quests"
+    },
+    {
+      "name": "pfQuest db/units.lua (github.com/shagu/pfQuest)",
+      "pin": "sha256 b8de09aa33fd4b16edb2287b8c4224c86e6ee420e717a4d428e2935c22c4a922",
+      "use": "Era spawns, projected into Forever's frame"
+    },
+    {
+      "name": "Method.gg WoW Forever profession guides",
+      "pin": "12 pages read 2026-11-23",
+      "use": "which NPCs the guides name (names only)"
+    },
+    {
+      "name": "ItemTree (curseforge.com/wow/addons/itemtree)",
+      "pin": "ItemTree v1.2.8 (owner's install)",
+      "use": "the method only (Core/TrainerSearch.lua): rank spells over titles, CMaNGOS + pfQuest + QuestieDB"
+    }
+  ],
+  "tag": "questiedb@47a4756b775e",
+  "tolerance": 1
+}

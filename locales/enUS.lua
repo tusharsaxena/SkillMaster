@@ -379,7 +379,22 @@ L["Arrow: character panel \194\183 Shift-click: link \194\183 Right-click: menu"
 L["Scale: vs %s"] = true
 L["Also teaches: %s"] = true
 L["%d yd"] = true
-L["Coordinates unverified on WoW Forever (flagged until the smoke pass)"] = true
+L["Not confirmed on WoW Forever yet (marked until checked)"] = true
+-- GitHub issue #3, the owner's books comment: how a rank is learned where no trainer trains it.
+L["Sells %s"] = true
+L["Quest: %s"] = true
+-- Round 2: a rank no trainer trains (NS.Trainers.NoTrainerNote), and the trainers listed under it.
+L["%s %s"] = true
+L["No trainer teaches %s."] = true
+L["%s is learned from a book: %s, sold by %s."] = true
+L["%s is learned from a quest: %s, given by %s."] = true
+L["Trainers who teach %s"] = true
+-- Round 2: the popup's Show all trainers mode.
+L["Show all trainers"] = true
+L["In the trainer popup for a profession, list every trainer of every rank, Artisan first, and mark the ones who train your next rank."] = true
+L["Every trainer for your faction (%s) who teaches %s, the highest rank first:"] = true
+L["Your next rank"] = true
+L["Your next rank: %s (%d)"] = true
 L["Set waypoint"] = true
 L["Print to chat"] = true
 L["End test"] = true

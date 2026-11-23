@@ -210,6 +210,10 @@ Kit.skinSwitch = {
     },
 }
 
+-- The client-globals gate scans what ships: tools/ is dev-only Lua run from the shell (the trainer
+-- probe, GitHub issue #3), never in the TOC, so its loadfile and dofile are not client calls.
+Kit.clientGlobals = { skip = { "tools/" } }
+
 Kit.run{
     dir = "tests/",
     suites = {
@@ -230,6 +234,7 @@ Kit.run{
         "test_probe",
         "test_skilldata",
         "test_trainers",
+        "test_trainer_probe",
         "test_helpers",
         "test_bonuses",
         "test_statdata",

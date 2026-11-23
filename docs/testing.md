@@ -59,6 +59,13 @@ function above CCN 15). The full four-suite record is `tests/_kit/run-automated-
 - [test-cases.md](test-cases.md) — the generated inventory, the authoritative pass count behind the
   README's tests badge. Regenerate it, and the badge, whenever the suite changes.
 - [smoke-tests.md](smoke-tests.md) — the in-game checks, run by the owner on WoW Forever.
+- The trainer probe (GitHub issue #3), `lua tools/trainer_probe.lua <QuestieDB> [--cmangos <dump>]
+  [--pfquest <units.lua>] [--methodgg <names.tsv>] [--date] [--run] [--write-provenance]`, checks the
+  trainer records offline and writes `docs/trainer-probe/<run>/` and the generated
+  `defaults/TrainerProvenance_Forever.lua`. Its checks are in the suite (`tests/test_trainer_probe.lua`);
+  a run needs the sources' checkouts outside the repo (their pins: `NS.DataMeta.Trainers_Forever`).
+  Re-run it, with `--write-provenance`, after any trainer edit: the suite fails a confirmed record
+  whose values changed since.
 - [validate-seeds.md](validate-seeds.md) — the seed validation against WoW Forever's DB2. Its tool's own
   tests, `python3 -m pytest -q -p no:cacheprovider tools/seeds`, run offline and sit outside the
   green commit gate above; a seed-validation run gates on them.

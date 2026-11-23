@@ -538,12 +538,21 @@ end)
 
 test("round6 waypoint: a trainer without coordinates disables the button and its tooltip says why", function()
     withTrainerPopup("fishing", { native = true }, function(f)
+        -- Since the trainer probe (GitHub issue #3) nearly every record carries a point; the selected
+        -- one's is lifted for this case, standing for a record with none (Annora, inside Uldaman).
         local t = TP.Selected()
-        assertTrue(t ~= nil and t.x == nil, "the fishing trainers carry no coordinates")
-        assertEqual(f.waypoint.text:GetText(), "Set waypoint", "never Set waypoint (chat)")
-        assertFalse(f.waypoint:IsEnabled(), "disabled: it could only print to chat")
-        assertEqual(tipText(f.waypoint), "No map coordinates for this trainer yet; Print to chat gives directions.")
-        assertTrue(f.print:IsEnabled(), "Print to chat still works")
+        assertTrue(t ~= nil, "a fishing trainer is selected")
+        local x, y = t.x, t.y
+        t.x, t.y = nil, nil
+        local ok, err = pcall(function()
+            TP.Select(1)
+            assertEqual(f.waypoint.text:GetText(), "Set waypoint", "never Set waypoint (chat)")
+            assertFalse(f.waypoint:IsEnabled(), "disabled: it could only print to chat")
+            assertEqual(tipText(f.waypoint), "No map coordinates for this trainer yet; Print to chat gives directions.")
+            assertTrue(f.print:IsEnabled(), "Print to chat still works")
+        end)
+        t.x, t.y = x, y
+        assertTrue(ok, tostring(err))
     end)
     withTrainerPopup("fistWeapons", { native = true }, function(f)
         NS.SetByPath("waypoints.method", "chat")
@@ -642,14 +651,16 @@ test("round6 trainer ranks: the popup lists Expert and Artisan trainers under th
     withRankPopup("fishing", 150, 150, function(f)
         assertEqual(f.title:GetText(), "Train: Fishing (Expert)")
         assertEqual(f.intro:GetText(), "Trainers for your faction (Alliance) who train Fishing to Expert (225) or higher:")
-        assertEqual(headingTexts(), "Expert (225),Artisan (300)")
-        assertEqual(names(TP.Trainers()), "Old Man Heming,Nat Pagle", "the next rank first")
-        assertEqual(#TP.Cards(), 2, "one card each")
+        -- Round 2: neither rank has a trainer (a book, a quest), so the skill's trainers follow.
+        assertEqual(headingTexts(), "Expert (225),Artisan (300),Trainers who teach Fishing")
+        assertEqual(names(TP.Trainers()), "Old Man Heming,Nat Pagle,Arnold Leland,Grimnur Stonebrand,Hunter Moore,Krix,Fenn Fairweather",
+            "the next rank first, then (round 2) the skill's trainers, the Forever-only ones among them")
+        assertEqual(#TP.Cards(), 7, "one card each, the trainers below included")
     end)
     withRankPopup("fishing", 225, 225, function(f)
         assertEqual(f.intro:GetText(), "Trainers for your faction (Alliance) who train Fishing to Artisan (300):",
             "no or higher at the top rank")
-        assertEqual(headingTexts(), "Artisan (300)")
+        assertEqual(headingTexts(), "Artisan (300),Trainers who teach Fishing", "round 2: a quest rank, then the trainers")
     end)
 end)
 
@@ -682,7 +693,8 @@ test("round6 trainer ranks: nearest first inside each rank, the ranks kept in or
 end)
 
 test("round6 trainer ranks: past the max height the cards scroll under a skin scroll bar, the wheel and the bar drive it", function()
-    withRankPopup("blacksmithing", 75, 75, function(f)
+    -- At 150 (Expert next): since round 2's Forever-only trainers the Journeyman list no longer fits.
+    withRankPopup("blacksmithing", 150, 150, function(f)
         local h
         f.SetHeight = function(_, v) h = v end
         TP.Relayout()

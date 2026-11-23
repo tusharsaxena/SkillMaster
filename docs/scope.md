@@ -24,8 +24,8 @@ scripted session on it.
 - **Per-item or per-category broker feeds.** The owner chose one skills feed whose tooltip shows and hides each section and row (feedback round 2, FB-12), plus one stats feed (round 6, R6-9).
 - **Recipe browsing or a tradeskill-window replacement.** Skill Master opens the stock window.
 - **Armor proficiencies, languages and class spell-school lines.** Not selected for v1.
-- **Guessing.** A bonus it cannot attribute shows as "Other"; trainer coordinates and thresholds stay
-  marked unverified until checked in game. A stat the client API cannot give is left out, never faked.
+- **Guessing.** A bonus it cannot attribute shows as "Other"; a trainer no offline source confirms
+  (the trainer probe, GitHub issue #3) and the thresholds stay marked unverified until checked in game. A stat the client API cannot give is left out, never faked.
 - **Polling.** Skills update on `SKILL_LINES_CHANGED` / `CHAT_MSG_SKILL`, stats on throttled unit
   events; the only tickers run while something visible needs them (expiry timers, the speed read, the
   trainer popup's distances, the waypoint arrow) and stop when it hides.

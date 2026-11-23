@@ -115,6 +115,37 @@ local function rankGroups(ladder, from, key, faction, race)
     return groups
 end
 
+local function topOf(rec)
+    local top = 0
+    for _, c in ipairs(rec.ranks or {}) do if c > top then top = c end end
+    return top
+end
+
+--- Round 2 (the owner's Show all trainers): every teacher of skill `key` for `faction`, one group per
+--- rank of its ladder, the highest (Artisan) first, each record once, under the highest rank it
+--- trains (a book vendor or quest giver under the rank it gives). { { rankName, cap, trainers } },
+--- empty ranks dropped; nil for a skill with no ladder.
+function Trainers:AllRanks(key, faction, race)
+    local ladder = ladderFor(key)
+    if not ladder then return nil end
+    faction, race = faction or playerFaction(), race or playerRace()
+    local groups = {}
+    for i = #ladder, 1, -1 do
+        local step = ladder[i]
+        local g = { rankName = step.rankName, cap = step.cap, trainers = {} }
+        for _, rec in ipairs(collect(key, faction, race)) do
+            if topOf(rec) == step.cap then g.trainers[#g.trainers + 1] = rec end
+        end
+        if #g.trainers > 0 then groups[#groups + 1] = g end
+    end
+    return groups
+end
+
+--- Whether record `rec` trains `cap` (a profession's rank; a record without ranks trains none).
+function Trainers.TrainsCap(rec, cap)
+    return rec.ranks ~= nil and contains(rec.ranks, cap)
+end
+
 --- The rank above the skill's current cap `max`, or nil when there is none (top rank reached, or a
 --- skill with no ranks: weapons, Lockpicking). Answers { rankName, cap, minLevel, minSkill, cost,
 --- canTrain, trainers, groups, higher }, where canTrain says `level` and `rank` meet the rank's
@@ -139,6 +170,55 @@ function Trainers:NextRank(key, rank, max, level, faction, race)
         end
     end
     return nil
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- GitHub issue #3 (the owner's books comment): a rank learned from a book or a quest
+-- ---------------------------------------------------------------------------------------------
+
+--- How trainer record `t`'s rank is learned when it is not trained: "Sells Expert Cookbook" (a book
+--- it sells) or "Quest: Clamlette Surprise" (a quest it gives); nil for a trainer. The book and
+--- quest names are enUS, as the trainer names are (defaults/Trainers_Forever.lua).
+function Trainers.LearnNote(t)
+    local learn = t and t.learn
+    if not learn then return nil end
+    if learn.kind == "book" then return NS.L["Sells %s"]:format(learn.item) end
+    if learn.kind == "quest" then return NS.L["Quest: %s"]:format(learn.quest) end
+    return nil
+end
+
+--- `text` with record `t`'s LearnNote before it, joined by a middle dot; `text` alone for a trainer.
+function Trainers.WithLearn(t, text)
+    local learn = Trainers.LearnNote(t)
+    if not learn then return text end
+    if text == nil or text == "" then return learn end
+    return learn .. " \194\183 " .. text
+end
+
+-- Where a book vendor or a quest giver stands, for the note: "Gadgetzan, Tanaris", or the zone alone.
+local function noteWhere(t)
+    if t.city and t.mapName and t.city ~= t.mapName then return t.city .. ", " .. t.mapName end
+    return t.mapName or t.city or ""
+end
+
+--- Round 2 (the owner's feedback, as ItemTree says it): when no record of `list` (one rank's
+--- teachers) is a trainer, every one a book vendor or a quest giver, the note that says so for
+--- `rankName` of skill `skill` (its display name): "No trainer teaches Artisan Cooking. Artisan
+--- Cooking is learned from a quest: Clamlette Surprise, given by Dirge Quikcleave, Gadgetzan,
+--- Tanaris."; nil when a trainer trains it or the list is empty.
+function Trainers.NoTrainerNote(skill, rankName, list)
+    if not (list and list[1] and rankName) then return nil end
+    local learn, givers = nil, {}
+    for _, t in ipairs(list) do
+        if not t.learn then return nil end
+        learn = learn or t.learn
+        givers[#givers + 1] = t.name .. ", " .. noteWhere(t)
+    end
+    local rank = NS.L["%s %s"]:format(rankName, skill)
+    local first = NS.L["No trainer teaches %s."]:format(rank)
+    local how = learn.kind == "book" and NS.L["%s is learned from a book: %s, sold by %s."]
+        or NS.L["%s is learned from a quest: %s, given by %s."]
+    return first .. " " .. how:format(rank, learn.item or learn.quest, table.concat(givers, "; "))
 end
 
 -- ---------------------------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-817%2F817_passing-green)
+![Tests](https://img.shields.io/badge/Tests-858%2F858_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
@@ -46,7 +46,10 @@ Everything else lives under Settings → AddOns → Ka0s Skill Master, and `/sm 
 | Question | Answer |
 |---|---|
 | Does it work on Retail? | No. The game doesn't list it on Retail at all, because the skills it shows don't exist there. |
-| Why does a trainer say "unverified"? | Trainer spots and some thresholds come from the classic data and haven't all been checked on WoW Forever yet. You can hide the mark on the Trainers and Waypoints page. |
+| Why does a trainer say "unverified"? | Almost every trainer's name, role and spot has been checked offline against WoW Forever data. The mark stays on the few that couldn't be (one stands inside a dungeon). You can hide it on the Trainers and Waypoints page. |
+| Why does a cooking, first aid or fishing teacher say "Sells" or "Quest"? | Those ranks aren't trained. You buy a book from that vendor or do that NPC's quest, and the card says which. Artisan in those three is always a quest, and the popup says so. |
+| Where do I train Artisan in a craft? | From a master trainer outside the capitals, such as Drakk Stonehand in the Hinterlands for Alliance leatherworkers. The capitals' trainers stop at Expert. |
+| Can I see every trainer, not just my next rank's? | Tick Show all trainers in the trainer window. It lists every rank, Artisan first, and marks the trainers for your next rank. |
 | Can I see my alts' skills? | Yes. Log each character in once and the Journal's Alts tab shows them all. |
 | Where are my settings stored? | In your own profile, so characters can share a layout or keep their own. |
 

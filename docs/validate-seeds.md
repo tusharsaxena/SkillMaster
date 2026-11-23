@@ -36,8 +36,18 @@ design mockups, and nothing in it mirrors a DB2 row.
   - **Measured and design values are never checked and never proposed**: trainer positions (x, y),
     costs, ranks, minimum levels and the zone fishing levels. The client's tables do not hold them.
     The trainers are measured or sourced records, so the tool proposes **no trainer candidates**.
-  - **The `verified = false` flags are the owner's smoke-pass state.** No tool and no ruling
-    changes them.
+  - **The `verified` flags are not this tool's.** No seeds ruling changes them. Since GitHub issue
+    #3 the trainers' flags come from the offline trainer probe (`tools/trainer_probe.lua`, its
+    generated `defaults/TrainerProvenance_Forever.lua`); the other seeds' stay the owner's
+    smoke-pass state.
+- **Trainer references beyond DB2** (issue #3, and #2's comment naming ItemTree). The client's DB2
+  holds no trainer NPC, so names, roles and positions are checked by the trainer probe, not here:
+  QuestieDB's Forever NPC table (the reference), the CMaNGOS 1.12 dump read by **ItemTree**'s method
+  (ItemTree, curseforge.com/wow/addons/itemtree, v1.2.8: its trainer search classes a trainer by the
+  rank spells its trainer rows teach, then its title; its Era data is that dump plus pfQuest's area
+  ids, and its Forever data a pinned QuestieDB commit, so it is not independent of QuestieDB; it is
+  All Rights Reserved, so the probe replicates the method and copies none of its data), pfQuest and
+  Method.gg's guides. A seeds run that changes a trainer row re-runs the probe after `apply`.
 - **Only the tool writes the rulings, and `apply` only removes.** Rulings live in
   `tools/seeds/forever_rulings.json`, written only by `seeds.py rule`, keyed `<list>:<id>` for a
   candidate and `shipped:<kind>:<list>:<id>` for a flag, never by build. A ruling holds until the
@@ -56,7 +66,8 @@ design mockups, and nothing in it mirrors a DB2 row.
 - **Precedent, in this order, never re-litigated:**
   1. a ruling already in `tools/seeds/forever_rulings.json`;
   2. the seed files' own headers (`Fishing_Forever.lua`: levels recalled from 1.12, unverified;
-     `Trainers_Forever.lua`: coordinates only where a source printed them, never a guessed pin;
+     `Trainers_Forever.lua`: coordinates only where a source printed them (since issue #3, QuestieDB's
+     single standing point, through the trainer probe), never a guessed pin;
      `SkillCatalog_Forever.lua`: the skill-line ids a `/sm probe` confirmed on build 70862);
   3. the design spec, `docs/superpowers/specs/2026-11-10-skill-master-design.md` (goal 1: the four
      categories and the lines in each);
@@ -155,8 +166,9 @@ so the headless suite runs under the Forever kit profile alone (`tests/client_pi
 ## Notes
 
 - **The client holds no trainer NPCs.** Forever's Creature table is the client's sparse copy
-  (companions and mounts). A trainer's name and position are checked in game, through the smoke
-  pass that flips `verified`.
+  (companions and mounts). A trainer's name, role and position are checked offline by the trainer
+  probe against QuestieDB (issue #3), and what no source settles is on the probe's in-game
+  spot-check list (`docs/trainer-probe/<run>/report.md`).
 - **AreaTable-only zones are not proposed.** The fishing list is keyed by uiMapID, so only a UiMap
   zone can be a candidate; an AreaTable zone with no UiMap has no key to ship under.
 - **City districts are WMO areas.** Stormwind's Mage Quarter or Ironforge's Great Forge are
