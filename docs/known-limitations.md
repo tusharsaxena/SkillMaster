@@ -138,7 +138,10 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
 - **Trainer data (GitHub issue #3).** 136 of the 137 trainer records are confirmed offline against
   QuestieDB's Forever NPC table (commit 47a4756b775e), which is Classic Era data projected into
   Forever's map frames on the assumption that no NPC moved: a moved or new Forever NPC is outside what
-  it settles. The probe's in-game spot-check list (`docs/trainer-probe/2026-11-23-r2/report.md`) names
+  it settles. For the 132 records whose point the probe supplied (the four weapon masters it did not move were
+  sourced apart), its place check confirms the copy,
+  not an independent reading; the independent agreement is pfQuest's Era spawn, projected through the
+  same per-map transform, within 0.5 map-% of every one. The probe's in-game spot-check list (`docs/trainer-probe/2026-11-23-r2/report.md`) names
   the projected Stormwind and Mulgore points, the book and quest ranks, Bena Winterhoof (the 1.12 dump
   has her teach Alchemy to 75, her title says Expert), Sayoc's Staves (absent from the 1.12 dump) and
   Annora. The 1.12 dump has every titled profession trainer teach one rank below its title; the data

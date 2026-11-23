@@ -136,7 +136,7 @@ replicated; the in-game spot-check list stands in for them.
 - **D9 — The 1.12 dump's ranks.** Read by ItemTree's method, the dump has every titled trainer
   teach one rank below its title (a Journeyman to 75, an Artisan to 225), while QuestieDB's Forever
   titles agree with the records. The probe keeps the titles, counts that pattern once in the report
-  and lists one in-game check (SM-TPROBE-3) rather than flagging 70 records.
+  and lists one in-game check (SM-TPROBE-3) rather than flagging 74 records.
 - **D10 — The validate-seeds rule.** `docs/validate-seeds.md` said "the `verified = false` flags
   are the owner's smoke-pass state; no tool changes them". Issue #3 supersedes that for the
   trainers: the probe's provenance file sets them, and the seeds tool still never does. ItemTree is
