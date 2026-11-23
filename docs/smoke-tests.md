@@ -899,3 +899,43 @@ you see on each Result line; none is passed until you say so.
   uses icons: none of them is left tinted or dimmed.
 - **SM-DIAG-1** `/sm diagnostics`: the report appears in the debug console with the ten sections
   (identity, settings, state, skin, model, probe, bonuses, layout, sim, rejected).
+
+## Feedback batch (2026-11-24)
+
+Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/`, items FB-SM-01 to FB-SM-06.
+
+- **SM-FB-1** (FB-SM-01, S4) Log in on Forever after the LibKa0s v1.112.0 re-vendor: no Lua error.
+  The main window, the Journal, a detached block's band and a merged window's band still carry the
+  gear, and it opens the settings. A detached or merged window's title band is not an unlock strip:
+  right-clicking it does nothing new.
+  Result:
+- **SM-FB-2** (FB-SM-03, T) Click a row's Go icon to open the trainer popup: its title bar carries
+  the close alone, no gear. The close and Escape still close it, and it still closes with the main
+  window.
+  Result:
+- **SM-FB-3** (FB-SM-02, P) Bars > Fill with Color mode Flat, then tick Use class color on the Bar
+  color, Background color, Border color and Font color blocks while each Use the skin's color stays
+  ticked: the bars' fill, background, border and text draw your class color (green on a hunter).
+  Untick Use class color: the skin's colors come back. Do the same on Layout > Detached windows
+  (Background, Border), Bars > Icons (Border color, with Use the row's color off) and Trainers and
+  Waypoints > Trainers > Trainer name color: each draws the class color while the skin's is ticked.
+  Result:
+- **SM-FB-4** (FB-SM-06, S3) Open Settings > Skill Master > Trainers and Waypoints: two tabs,
+  Trainers (Mark unverified trainers, Show all trainers, Trainer popup's Trainer name color) and
+  Waypoints (Waypoint method, Say where in chat, the Waypoint arrow, Arrow text and Arrow position
+  subgroups with Reset position). Defaults resets the rows on both tabs. The arrow's right-click
+  Arrow settings... still opens this page.
+  Result:
+- **SM-FB-5** (FB-SM-05, S2) With TomTom installed and Show Skill Master's arrow off, `/sm test`:
+  Skill Master's sample arrow shows, labeled "Sample: Skill Master's arrow is off" (with the arrow on
+  and TomTom loaded: "Sample: TomTom's arrow points to real waypoints"). No TomTom waypoint appears.
+  Untick or tick Show Skill Master's arrow during test mode: the sample stays. `/sm test` again: it
+  goes.
+  Result:
+- **SM-FB-6** (FB-SM-04, S1) Detach a block. Its window shows a corner resize grip: drag it wider
+  and narrower. The rows follow the width, the height stays the rows' height, and the window does
+  not jump. Layout > Blocks > the block's Block width slider shows the new width (a multiple of 10).
+  `/reload`: the width and the place are kept. Tick Lock this block, or `/sm lock`: the grip hides
+  and a drag on the corner does nothing; unlock: it is back. Merge two detached blocks of different
+  widths: the merged window's columns are the wider one's width.
+  Result:
