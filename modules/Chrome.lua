@@ -456,7 +456,9 @@ local function plainList(frame, spec, hb)
         hb.close = NS.MakeCloseButton(frame, spec.close or function() frame:Hide() end)
         if hb.close then list[1] = { key = "close", btn = hb.close } end
     end
-    if spec.settings ~= false then
+    if spec.companion == true then
+        hb.companion = true   -- a companion window carries no settings mark (standalone-windows, v2.119.0)
+    elseif spec.settings ~= false then
         hb.settings = C.IconButton(frame, "settings", "S", plainSettings(spec), spec.settingsTip)
         list[#list + 1] = { key = "settings", btn = hb.settings }
     end
@@ -492,6 +494,8 @@ end
 ---   close = fn | false,            the close's click (false: the window has none)
 ---   settings = nil | fn | false,   nil: the launcher's opener; false needs `settingsOptOut`
 ---   settingsOptOut, hideOnSettings, settingsTip,
+---   companion = true,              a companion window: no settings mark and no settingsOptOut
+---                                  (WidgetsHeader minor 2; FB-SM-03)
 ---   extras = { { key, icon, glyph, tip, onClick }, ... },   left to right, inward of settings
 ---   level = n,                     each mark's frame level over the window's (LAYERS.LEVEL.CHROME)
 ---   point, y                       the corner the marks stand in before the skin's Header places
@@ -503,7 +507,7 @@ function C.TitleMarks(frame, spec)
         owner = addonName, frame = frame, point = spec.point or "TOPRIGHT", y = spec.y or C.TITLE_MARK_Y,
         makeClose = NS.MakeCloseButton, close = spec.close, settings = spec.settings,
         settingsOptOut = spec.settingsOptOut, hideOnSettings = spec.hideOnSettings,
-        settingsTip = spec.settingsTip, extras = spec.extras,
+        settingsTip = spec.settingsTip, extras = spec.extras, companion = spec.companion,
     }
     local W = NS.Widgets
     local hb

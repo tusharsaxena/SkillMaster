@@ -359,16 +359,17 @@ local function build()
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     NS.Skin.Shell(frame)
     NS.Skin.Text(frame.title, "title")
-    -- The title-bar marks on LibKa0s Widgets' HeaderButtons (AD-86-SM, LibKa0s#86): settings, then
-    -- the close. The popup stands a strata over its openers, HIGH or DIALOG, over the settings panel
-    -- (HIGH), so the settings mark hides it first (hideOnSettings).
+    -- The title-bar marks on LibKa0s Widgets' HeaderButtons (AD-86-SM, LibKa0s#86): the close alone.
+    -- The popup is a companion of the skills window (FB-SM-03; WowAddonStandards v2.119.0,
+    -- standalone-windows, *A companion window carries no settings mark*): it opens only from that
+    -- window's rows (or the arrow's menu, for the trainer it points at), shows only that skill's
+    -- trainers, closes with the window and keeps no saved position.
     local hb = NS.Chrome.TitleMarks(frame, {
         close = function() P.Hide() end,
-        settingsTip = L["Open the settings panel"],
-        hideOnSettings = frame,
+        companion = true,
         level = LAYERS.LEVEL.CHROME,
     })
-    frame.close, frame.settingsButton = hb.close, hb.settings
+    frame.close = hb.close
     NS.Skin.Header(frame, { title = frame.title, align = "LEFT", right = hb.right, gap = select(2, NS.Chrome.HeaderPitch()) })
     if not frame.title:GetPoint(1) then frame.title:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -7) end
     frame.intro = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")

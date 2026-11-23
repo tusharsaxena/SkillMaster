@@ -76,8 +76,8 @@ controls*): right-aligned, left to right the window's own extras, then settings,
 corner, 18 px marks `HEADER.PAD` (6) from the corner and `HEADER.GAP` (6) apart, placed again on the
 skin's band by `S.Header` (the strip's `hb.right`), and recorded as `frame.headerButtons`. The main
 window carries lock, journal and Expand / Collapse all (inward of settings, the rule's order), the
-Journal the lock, the trainer popup none (its settings mark hides the popup first, `hideOnSettings`:
-it stands a strata over the settings panel). The settings mark opens this addon's settings through the
+Journal the lock. The trainer popup is a companion of the skills window (v2.119.0, standalone-windows,
+*A companion window carries no settings mark*; FB-SM-03): `companion = true`, the close alone. The settings mark opens this addon's settings through the
 opener the launcher registers (`core/LauncherSetup.lua`'s `openSettings`, LibKa0s-Core-1.0's
 `OpenSettings`), and the close is built through the one wrapper, `NS.MakeCloseButton` (HeaderButtons'
 `makeClose`). A detached block's band and a merged window's band carry the settings mark in the corner
