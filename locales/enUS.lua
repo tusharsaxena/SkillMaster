@@ -379,7 +379,10 @@ L["Arrow: character panel \194\183 Shift-click: link \194\183 Right-click: menu"
 L["Scale: vs %s"] = true
 L["Also teaches: %s"] = true
 L["%d yd"] = true
-L["Coordinates unverified on WoW Forever (flagged until the smoke pass)"] = true
+L["Not confirmed on WoW Forever yet (marked until checked)"] = true
+-- GitHub issue #3, the owner's books comment: how a rank is learned where no trainer trains it.
+L["Sells %s"] = true
+L["Quest: %s"] = true
 L["Set waypoint"] = true
 L["Print to chat"] = true
 L["End test"] = true

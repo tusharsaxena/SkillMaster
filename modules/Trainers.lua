@@ -142,6 +142,29 @@ function Trainers:NextRank(key, rank, max, level, faction, race)
 end
 
 -- ---------------------------------------------------------------------------------------------
+-- GitHub issue #3 (the owner's books comment): a rank learned from a book or a quest
+-- ---------------------------------------------------------------------------------------------
+
+--- How trainer record `t`'s rank is learned when it is not trained: "Sells Expert Cookbook" (a book
+--- it sells) or "Quest: Clamlette Surprise" (a quest it gives); nil for a trainer. The book and
+--- quest names are enUS, as the trainer names are (defaults/Trainers_Forever.lua).
+function Trainers.LearnNote(t)
+    local learn = t and t.learn
+    if not learn then return nil end
+    if learn.kind == "book" then return NS.L["Sells %s"]:format(learn.item) end
+    if learn.kind == "quest" then return NS.L["Quest: %s"]:format(learn.quest) end
+    return nil
+end
+
+--- `text` with record `t`'s LearnNote before it, joined by a middle dot; `text` alone for a trainer.
+function Trainers.WithLearn(t, text)
+    local learn = Trainers.LearnNote(t)
+    if not learn then return text end
+    if text == nil or text == "" then return learn end
+    return learn .. " \194\183 " .. text
+end
+
+-- ---------------------------------------------------------------------------------------------
 -- Round 5, R5-15: distances (pure math; the trainer popup measures the positions)
 -- ---------------------------------------------------------------------------------------------
 

@@ -237,3 +237,46 @@ test("trainer provenance: the unverified mark follows the record, not a blanket 
     assertEqual(NS.Waypoints.UnverifiedMark(confirmed), "", "a confirmed trainer reads unmarked")
     assertTrue(NS.Waypoints.UnverifiedMark(open) ~= "", "an unverified one is marked")
 end)
+
+-- The popup on `key`, learned at `rank` / `max` for an Alliance Human at level 40 (the blocks'
+-- model), then everything back (tests/test_round6.lua withRankPopup's shape).
+local function withRankPopup(key, rank, max, fn)
+    local TP, Bl = NS.TrainerPopup, NS.Blocks
+    local savedSource, savedFaction, savedRace, savedLevel = Bl.source, M.UnitFactionGroup, M.UnitRace, M.UnitLevel
+    local skills = { byKey = { [key] = { key = key, rank = rank, max = max, learned = true, category = "secondary" } },
+                     order = { primary = {}, secondary = { key }, weapon = {}, other = {} } }
+    Bl.source = function() return skills, { base = {}, spell = {}, defense = {}, utility = {} } end
+    M.UnitFactionGroup = function() return "Alliance", "Alliance" end
+    M.UnitRace = function() return "Human", "Human" end
+    M.UnitLevel = function() return 40 end
+    TP.Show(key)
+    local ok, err = pcall(fn, TP.Frame())
+    TP.Hide()
+    Bl.source, M.UnitFactionGroup, M.UnitRace, M.UnitLevel = savedSource, savedFaction, savedRace, savedLevel
+    if not ok then error(err, 0) end
+end
+
+test("trainer probe books: a card for a book vendor or a rank quest's giver says how the rank is learned (#3)", function()
+    withRankPopup("fishing", 150, 150, function()
+        local by = {}
+        for _, c in ipairs(NS.TrainerPopup.Cards()) do by[c.trainer.name] = c end
+        assertEqual(by["Old Man Heming"].alsoText, "Sells Expert Fishing - The Bass and You")
+        assertEqual(by["Nat Pagle"].alsoText, "Quest: Nat Pagle, Angler Extreme")
+        assertEqual(by["Nat Pagle"].also:GetText(), "Quest: Nat Pagle, Angler Extreme", "the card's second line")
+    end)
+    withRankPopup("firstAid", 150, 150, function()
+        for _, c in ipairs(NS.TrainerPopup.Cards()) do
+            if c.trainer.name == "Deneb Walker" then
+                assertEqual(c.alsoText, "Sells Expert First Aid - Under Wraps")
+            end
+        end
+    end)
+    local heming
+    for _, t in ipairs(NS.Trainers_Forever) do if t.name == "Old Man Heming" then heming = t end end
+    assertTrue(NS.Waypoints:Directions(heming):find("(27.4, 77.2) \194\183 Sells Expert Fishing - The Bass and You", 1, true) ~= nil,
+        NS.Waypoints:Directions(heming))
+    assertEqual(NS.Trainers.LearnNote({ name = "A trainer" }), nil, "a trainer has no learn note")
+    assertEqual(NS.Trainers.WithLearn({ name = "A trainer" }, "Also teaches: Daggers"), "Also teaches: Daggers")
+    assertEqual(NS.Trainers.WithLearn(heming, "Also teaches: Daggers"),
+        "Sells Expert Fishing - The Bass and You \194\183 Also teaches: Daggers")
+end)

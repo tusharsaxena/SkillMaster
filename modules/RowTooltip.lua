@@ -75,6 +75,8 @@ end
 
 local function trainerText(t)
     local text = ("%s, %s"):format(t.name, NS.Rows.Place(t))
+    local learn = NS.Trainers.LearnNote(t)   -- GitHub issue #3: a book or quest, not a trainer
+    if learn then text = text .. " \194\183 " .. learn end
     return text .. NS.Waypoints.UnverifiedMark(t)
 end
 

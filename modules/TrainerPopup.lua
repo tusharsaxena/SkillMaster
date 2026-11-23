@@ -208,7 +208,7 @@ local function fillCard(c, t, key, i, maxLines, width)
     c.cost:SetText(cost and NS.Rows.Money(cost) or "")
     c.where:SetText(whereText(t))
     c.dist:SetText(distText(t))
-    c.alsoText = teachesText(t, key)
+    c.alsoText = NS.Trainers.WithLearn(t, teachesText(t, key))
     c.also:SetMaxLines(maxLines)
     c.also:SetText(c.alsoText)
     -- The card's rest height carries one "Also teaches" line; a wrapped one adds the rest.
@@ -247,7 +247,7 @@ end
 
 local function buildActions()
     frame.warning = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    frame.warning:SetText(L["Coordinates unverified on WoW Forever (flagged until the smoke pass)"])
+    frame.warning:SetText(L["Not confirmed on WoW Forever yet (marked until checked)"])
     NS.Skin.Text(frame.warning, "sem.warn")
     frame.waypoint = button(frame, L["Set waypoint"], setWaypoint, true)
     -- Hooked, not set: NS.Skin.Button hooked its hover look on these scripts, and SetScript drops it.
