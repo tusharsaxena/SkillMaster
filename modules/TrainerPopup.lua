@@ -211,13 +211,18 @@ local function trainersProfile()
     return (NS.db and NS.db.profile.trainers) or NS.defaults.profile.trainers
 end
 
---- The trainer's name in its own color (feedback round 2, FB-11): the skin's accent, recorded so a
---- skin switch repaints it, while "Use the skin's color" is on; else the swatch through its
---- class-color companion, its alpha always applying (options-ui-§17). The skin's Text keeps the
+--- The trainer's name in its own color (feedback round 2, FB-11): the class color while "Use class
+--- color" is on (FB-SM-02: class first); else the skin's accent, recorded so a skin switch repaints
+--- it, while "Use the skin's color" is on; else the swatch, its alpha always applying (options-ui-§17). The skin's Text keeps the
 --- name's font either way; a skin switch's LAYOUT_CHANGED repaints the swatch over it.
 local function paintName(fs)
     NS.Skin.Text(fs, "accent")
     local p = trainersProfile()
+    local class = NS.ClassFirst(p.nameColor, p.useClassColorName)   -- FB-SM-02: class first
+    if class then
+        fs:SetTextColor(class[1], class[2], class[3], class[4] or 1)
+        return
+    end
     if p.nameColorFromSkin ~= false or type(p.nameColor) ~= "table" then
         if not NS.Skin.IsEnabled() then
             local c = NS.SkinColor("text.accent")

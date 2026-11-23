@@ -17,7 +17,7 @@ position says so beside its TOC line (toc-file-§5).
 | `core/State.lua` | session-only state: the debug flag, test mode | conventional |
 | `core/EnvSetup.lua` | `NS.Meta`, `NS.Version` (LibKa0s-Env-1.0) | conventional |
 | `core/CoreSetup.lua` | `NS.Print`, SafeRegister family, window chrome, the `MakeCloseButton` wrapper (LibKa0s-Core-1.0) | before everything that prints |
-| `core/SkinSetup.lua` | the skin owner and its tokens (the bar parts, the `sm.cat.*` category and `sm.bonus*` bonus colors), `NS.Skin`, `NS.SkinColor(token)` (every surface's color read, the owner token's default without the library) and `NS.WithClassColor`, the stored choice, the picker, the `skin` verb (LibKa0s-Skin-1.0) | registers at load; `NS.DEFAULT_SKIN` read by defaults |
+| `core/SkinSetup.lua` | the skin owner and its tokens (the bar parts, the `sm.cat.*` category and `sm.bonus*` bonus colors), `NS.Skin`, `NS.SkinColor(token)` (every surface's color read, the owner token's default without the library), `NS.ClassFirst(stored, useClass)` (the class rung of options-ui-§17's class, skin, swatch ladder, FB-SM-02) and `NS.WithClassColor`, the stored choice, the picker, the `skin` verb (LibKa0s-Skin-1.0) | registers at load; `NS.DEFAULT_SKIN` read by defaults |
 | `core/Bus.lua` | `NS.MSG`, the bus record and targets (LibKa0s-Bus-1.0) | before any subscriber |
 | `core/UnitEventsSetup.lua` | `NS.UnitEvents`: the one frame that hears the player's `UNIT_*` events through `RegisterUnitEvent`; stood up from `NS.RegisterRuntime`, down from `NS.StandDown` | before `modules/Bonuses.lua` and `modules/StatData.lua`, which register with it at load |
 | `core/PoolSetup.lua` | `NS.Pool` (LibKa0s-Pool-1.0), for the rows and bars to come | conventional |

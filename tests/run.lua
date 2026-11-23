@@ -241,6 +241,7 @@ Kit.run{
         "test_bar",
         "test_bars_live",
         "test_bars_round2",
+        "test_class_first",
         "test_bars_sizes",
         "test_round2_layout",
         "test_round2_icons",

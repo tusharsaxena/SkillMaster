@@ -259,16 +259,21 @@ function D.Style()
     return type(s) == "table" and s or NS.defaults.profile.layout.detached
 end
 
--- The background's swatch color while the skin's is not followed, else nil.
+-- The background's own color: the class color while its companion is on (FB-SM-02: class first),
+-- else the swatch while the skin's is not followed, else nil (the skin's fill).
 local function bgColor(st)
+    local class = NS.ClassFirst(st.bgColor, st.useClassColorBg)
+    if class then return class end
     if st.bgFromSkin ~= false or type(st.bgColor) ~= "table" then return nil end
     return NS.WithClassColor(st.bgColor, st.useClassColorBg)
 end
 
--- The window's own border while it is shown and the skin's is not followed, else nil.
+-- The window's own border while it is shown and either its class companion is on (FB-SM-02: class
+-- first) or the skin's is not followed, else nil (the skin's edge).
 local function ownBorder(st)
-    if st.border == false or st.borderFromSkin ~= false then return nil end
+    if st.border == false then return nil end
     local c = type(st.borderColor) == "table" and st.borderColor or NS.defaults.profile.layout.detached.borderColor
+    if st.borderFromSkin ~= false and not NS.ClassFirst(c, st.useClassColorBorder) then return nil end
     return { border = NS.WithClassColor(c, st.useClassColorBorder), borderStyle = st.borderStyle or "Solid",
              borderSize = tonumber(st.borderSize) or 1 }
 end
@@ -346,7 +351,7 @@ function D.ApplyStyle(f)
     local own = ownBorder(st)
     NS.Chrome.PaintBorder(f.styleEdge, own or { border = nil, borderStyle = "Solid", borderSize = 1 })
     -- The skin's edge only while the border is shown and follows it; the window's own edge otherwise.
-    f.__noBorder = st.border == false or st.borderFromSkin == false
+    f.__noBorder = st.border == false or own ~= nil
     local mode = titleBand(st)
     f.__titleBand = mode
     if mode == "hover" then

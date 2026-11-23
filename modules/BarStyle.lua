@@ -41,10 +41,12 @@ function BS.PlayerColor(key, token)
     return colors[key]
 end
 
---- A composed swatch (options-ui-§16/§17): the skin's `token` while `<key>FromSkin` is on, else the
---- stored `key` through its class-color companion `classKey`.
+--- A composed swatch (options-ui-§16/§17): the class color while `classKey` is on, else the skin's
+--- `token` while `<key>FromSkin` is on, else the stored `key` (FB-SM-02: class first).
 function BS.Swatch(key, token, classKey)
     local p = profileBars()
+    local class = NS.ClassFirst(p[key], p[classKey])
+    if class then return class end
     if p[key .. "FromSkin"] ~= false or type(p[key]) ~= "table" then return NS.SkinColor(token) end
     return NS.WithClassColor(p[key], p[classKey])
 end
@@ -58,6 +60,8 @@ end
 
 local function swatchSlot(key, token, classKey)
     local p = profileBars()
+    local class = NS.ClassFirst(p[key], p[classKey])
+    if class then return class end
     if p[key .. "FromSkin"] ~= false or type(p[key]) ~= "table" then return token end
     return NS.WithClassColor(p[key], p[classKey])
 end
