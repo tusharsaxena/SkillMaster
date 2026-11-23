@@ -225,6 +225,7 @@ function R.Provenance(run)
         "",
         "NS.DataMeta = NS.DataMeta or {}",
         "NS.DataMeta.Trainers_Forever = {",
+        "    source = \"the offline trainer probe, tools/trainer_probe.lua (GitHub issue #3)\",",
         ("    verified = %s, report = %s, date = %s,"):format(luaString(run.tag), luaString(run.reportDir), luaString(run.date)),
         "    sources = {",
     }

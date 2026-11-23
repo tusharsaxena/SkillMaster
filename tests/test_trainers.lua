@@ -58,11 +58,10 @@ test("trainers: an unknown key answers an empty list, never an error", function(
     assertEqual(#NS.Trainers:For("noSuchSkill", "Alliance", "Human"), 0)
 end)
 
-test("trainers: every record is unverified and names its source", function()
+test("trainers: every record names its source, its side and what it teaches, under a unique id", function()
     assertTrue(#NS.Trainers_Forever > 50, "the DB is populated: " .. #NS.Trainers_Forever)
     local ids = {}
     for _, t in ipairs(NS.Trainers_Forever) do
-        assertTrue(t.verified == false, t.id .. " verified")
         assertEqual(type(t.source), "string", t.id .. " source")
         assertTrue(t.faction == "Alliance" or t.faction == "Horde" or t.faction == "Neutral", t.id)
         assertTrue(type(t.teaches) == "table" and #t.teaches > 0, t.id .. " teaches")
@@ -189,4 +188,52 @@ test("trainer probe: a rank learned from a book or a quest names it (the owner's
     for _, t in ipairs(NS.Trainers_Forever) do
         if t.learn then assertTrue(type(t.learn.item or t.learn.quest) == "string", t.id .. " learn names it") end
     end
+end)
+
+-- ---------------------------------------------------------------------------------------------
+-- Provenance (GitHub issue #3): a probe confirmation or an explicit reason, for every record
+-- ---------------------------------------------------------------------------------------------
+
+test("trainer provenance: every record carries the probe's confirmation or an explicit unverified reason", function()
+    local meta = NS.DataMeta.Trainers_Forever
+    assertTrue(meta ~= nil and type(meta.verified) == "string" and meta.verified:match("^questiedb@%x+$") ~= nil,
+        "NS.DataMeta.Trainers_Forever names the QuestieDB commit")
+    assertEqual(type(meta.source), "string", "the probe is named")
+    assertTrue(type(meta.sources) == "table" and #meta.sources > 0, "the sources and their pins")
+    local P = NS.TrainerProvenance_Forever
+    for _, t in ipairs(NS.Trainers_Forever) do
+        if t.verified ~= false then
+            assertEqual(t.verified, meta.verified, t.id .. ": a confirmation is the run's tag")
+            assertTrue(P.confirmed[t.id] ~= nil, t.id .. ": confirmed by the probe")
+            assertNil(t.unverified, t.id .. ": a confirmed record has no reason")
+        else
+            assertEqual(type(t.unverified), "string", t.id .. ": an unverified record says why")
+            assertTrue(#t.unverified > 0, t.id .. ": an empty reason")
+        end
+    end
+end)
+
+test("trainer provenance: a confirmed record still holds the values the probe confirmed", function()
+    local byId = {}
+    for _, t in ipairs(NS.Trainers_Forever) do byId[t.id] = t end
+    for id, c in pairs(NS.TrainerProvenance_Forever.confirmed) do
+        local t = byId[id]
+        assertTrue(t ~= nil, id .. ": the probe confirmed a record that no longer ships")
+        for _, field in ipairs({ "npcID", "name", "mapID", "x", "y" }) do
+            assertEqual(t[field], c[field], id .. "." .. field .. " changed since the probe: re-run tools/trainer_probe.lua")
+        end
+    end
+    for id in pairs(NS.TrainerProvenance_Forever.unverified) do
+        assertTrue(byId[id] ~= nil, id .. ": a reason for a record that no longer ships")
+    end
+end)
+
+test("trainer provenance: the unverified mark follows the record, not a blanket flag", function()
+    local confirmed, open = nil, nil
+    for _, t in ipairs(NS.Trainers_Forever) do
+        if t.verified ~= false then confirmed = confirmed or t else open = open or t end
+    end
+    assertTrue(confirmed ~= nil and open ~= nil, "the data has both kinds")
+    assertEqual(NS.Waypoints.UnverifiedMark(confirmed), "", "a confirmed trainer reads unmarked")
+    assertTrue(NS.Waypoints.UnverifiedMark(open) ~= "", "an unverified one is marked")
 end)
