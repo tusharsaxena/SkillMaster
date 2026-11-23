@@ -196,3 +196,25 @@ test("trainer probe: an Artisan title trains to 225 and a Master title to 300 (r
     npc.subName = "Master Leatherworking Trainer"
     assertTrue(C.Role({ teaches = { "leatherworking" }, ranks = { 300 } }, npc, db).ok, "a Master trains Artisan")
 end)
+
+test("trainer probe: a Junior title trains Apprentice and a plain craft title Journeyman (round 2)", function()
+    local db = source()
+    local npc = { id = 9, name = "Kelsey Fargo", subName = "Junior Mining Trainer", flags = 20, faction = "A", spawns = {} }
+    assertTrue(C.Role({ teaches = { "mining" }, ranks = { 75 } }, npc, db).ok, "Junior to 75")
+    assertTrue(not C.Role({ teaches = { "mining" }, ranks = { 75, 150, 225, 300 } }, npc, db).ok, "a Junior passed as full")
+    npc.subName = "Alchemist"
+    assertTrue(C.Role({ teaches = { "alchemy" }, ranks = { 75, 150 } }, npc, db).ok, "a plain craft title to 150")
+end)
+
+test("trainer probe: a held record is never confirmed, and its reason is the hold", function()
+    local Probe = loadfile("tools/trainer_probe.lua")()
+    local db = source()
+    db.coefficients, db.changedAreas = {}, {}
+    local rec = { id = "woo", name = "Woo Ping", faction = "Alliance", mapID = 1453, x = 63.9, y = 69.1, npcID = 3,
+                  teaches = { "swords" }, hold = "Forever-only, from QuestieDB spawn, not yet seen in game" }
+    local run = Probe.Run({ rec }, { qdb = db, list = {} }, { date = "2026-11-23" })
+    assertEqual(run.confirmed, 0)
+    assertEqual(run.results[1].reason, rec.hold)
+    rec.hold = nil
+    assertEqual(Probe.Run({ rec }, { qdb = db, list = {} }, { date = "2026-11-23" }).confirmed, 1, "the same record unheld")
+end)

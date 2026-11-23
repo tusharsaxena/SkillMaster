@@ -130,6 +130,9 @@ local function checkRecord(rec, src, dupes)
         end
     end
     r.reason = firstFailure(r.checks)
+    -- A record the data holds back (round 2: the Forever-only trainers, not yet seen in game) is never
+    -- confirmed; its reason is the hold, and its checks still run and report under Findings.
+    if rec.hold then r.reason = rec.hold end
     r.confirmed = r.reason == nil and npc ~= nil
     r.spot = spotReasons(r, rec, src.qdb)
     return r

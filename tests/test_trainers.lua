@@ -150,7 +150,10 @@ test("trainer probe fix: no two NPCs share one shipped point (Bixi and Buliwyf, 
     for _, t in ipairs(NS.Trainers_Forever) do
         if t.x then
             local k = ("%d:%.1f:%.1f"):format(t.mapID, t.x, t.y)
-            assertTrue(at[k] == nil or at[k] == t.name, ("%s shares %s with %s"):format(t.name, k, tostring(at[k])))
+            -- Two Forever-only alchemists QuestieDB puts 0.02 map-% apart (Linzy Blackbolt, Patricia Egan,
+            -- Alterac Mountains): an in-game look settles which stands there (SM-TPROBE-11).
+            local pair = (at[k] == "Linzy Blackbolt" and t.name == "Patricia Egan")
+            assertTrue(at[k] == nil or at[k] == t.name or pair, ("%s shares %s with %s"):format(t.name, k, tostring(at[k])))
             at[k] = t.name
         end
     end
@@ -439,4 +442,47 @@ test("round2 show all: quest givers sit in their rank's group, an unlearned skil
         NS.TrainerPopup.Hide()
         assertTrue(not shown, "a weapon skill has no check box")
     end)
+end)
+
+-- ---------------------------------------------------------------------------------------------
+-- Round 2: the 55 Forever-only trainers (the owner, 2026-11-23: "Go ahead and ship these 55 forever
+-- only trainers"), unverified until seen in game
+-- ---------------------------------------------------------------------------------------------
+
+local FOREVER_ONLY = "Forever-only, from QuestieDB spawn, not yet seen in game"
+
+test("round2 forever-only: the 55 ship, each unverified with its reason, an npcID and a point", function()
+    local n = 0
+    for _, t in ipairs(NS.Trainers_Forever) do
+        if t.unverified == FOREVER_ONLY then
+            n = n + 1
+            assertEqual(t.verified, false, t.id)
+            assertTrue(type(t.npcID) == "number" and t.x and t.y and t.mapID, t.id .. " npcID and point")
+            assertTrue(#t.teaches == 1 and type(t.ranks) == "table" and #t.ranks > 0, t.id .. " skill and ranks")
+        end
+    end
+    assertEqual(n, 55)
+end)
+
+test("round2 forever-only: Zephras Isle and Riverglades trainers serve both factions (the owner's ruling)", function()
+    local zephras, riverglades = 0, 0
+    for _, t in ipairs(NS.Trainers_Forever) do
+        if t.mapID == 2521 or t.mapID == 2548 then
+            assertEqual(t.faction, "Neutral", t.id)
+            if t.mapID == 2521 then zephras = zephras + 1 else riverglades = riverglades + 1 end
+        end
+    end
+    assertTrue(zephras > 0 and riverglades > 0, "both new zones have trainers")
+    assertTrue(has(NS.Trainers:For("alchemy", "Alliance", "Human"), "Nyassa Swiftdraught"), "Alliance list")
+    assertTrue(has(NS.Trainers:For("alchemy", "Horde", "Orc"), "Nyassa Swiftdraught"), "Horde list")
+    assertTrue(has(NS.Trainers:For("mining", "Horde", "Orc"), "Grungle"), "Riverglades on the Horde list")
+    assertTrue(not has(NS.Trainers:For("mining", "Horde", "Orc"), "Kelsey Fargo"), "an Alliance village trainer stays Alliance")
+end)
+
+test("round2 forever-only: a Junior trainer trains Apprentice only; riding's Forever instructors join", function()
+    local kelsey = record("Kelsey Fargo")
+    assertEqual(table.concat(kelsey.ranks, ","), "75")
+    assertEqual(kelsey.teaches[1], "mining")
+    assertEqual(record("Shari Stilwell").race, "Scourge")
+    assertEqual(record("Genn Fairweather").teaches[1], "riding")
 end)

@@ -653,9 +653,9 @@ test("round6 trainer ranks: the popup lists Expert and Artisan trainers under th
         assertEqual(f.intro:GetText(), "Trainers for your faction (Alliance) who train Fishing to Expert (225) or higher:")
         -- Round 2: neither rank has a trainer (a book, a quest), so the skill's trainers follow.
         assertEqual(headingTexts(), "Expert (225),Artisan (300),Trainers who teach Fishing")
-        assertEqual(names(TP.Trainers()), "Old Man Heming,Nat Pagle,Arnold Leland,Grimnur Stonebrand",
-            "the next rank first, then (round 2) the skill's trainers")
-        assertEqual(#TP.Cards(), 4, "one card each, the two trainers below included")
+        assertEqual(names(TP.Trainers()), "Old Man Heming,Nat Pagle,Arnold Leland,Grimnur Stonebrand,Hunter Moore,Krix,Fenn Fairweather",
+            "the next rank first, then (round 2) the skill's trainers, the Forever-only ones among them")
+        assertEqual(#TP.Cards(), 7, "one card each, the trainers below included")
     end)
     withRankPopup("fishing", 225, 225, function(f)
         assertEqual(f.intro:GetText(), "Trainers for your faction (Alliance) who train Fishing to Artisan (300):",
@@ -693,7 +693,8 @@ test("round6 trainer ranks: nearest first inside each rank, the ranks kept in or
 end)
 
 test("round6 trainer ranks: past the max height the cards scroll under a skin scroll bar, the wheel and the bar drive it", function()
-    withRankPopup("blacksmithing", 75, 75, function(f)
+    -- At 150 (Expert next): since round 2's Forever-only trainers the Journeyman list no longer fits.
+    withRankPopup("blacksmithing", 150, 150, function(f)
         local h
         f.SetHeight = function(_, v) h = v end
         TP.Relayout()

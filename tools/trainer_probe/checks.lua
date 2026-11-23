@@ -44,8 +44,11 @@ C.WEAPON_SPELLS = {
 -- The cap a title's rank word trains to; a title with none trains its class's top (below). A
 -- capital's "Artisan" title trains to Expert (225): Artisan in a craft is the Master trainers'
 -- (round 2; the CMaNGOS rows, Method.gg's and wow-professions' Forever guides agree).
-C.TITLE_CAP = { Journeyman = 150, Expert = 225, Artisan = 225, Master = 300 }
+C.TITLE_CAP = { Junior = 75, Journeyman = 150, Expert = 225, Artisan = 225, Master = 300 }
 C.PLAIN_CAP = { herbalism = 300, mining = 300, skinning = 300, cooking = 150, firstAid = 150, fishing = 150, riding = 150 }
+-- A craft trainer with a plain title ("Alchemist", "Blacksmith"; Forever's village trainers) is read
+-- as Journeyman, an untitled village trainer's reach in the 1.12 dump (round 2, spec D15).
+C.CRAFT_PLAIN_CAP = 150
 C.BOOK_CAP = { Expert = 225, Artisan = 300 }
 
 local function bit(flags, b)
@@ -160,7 +163,7 @@ local function titleCap(key, title)
     for word, cap in pairs(C.TITLE_CAP) do
         if hasWord(title, word) then return cap end
     end
-    return C.PLAIN_CAP[key]
+    return C.PLAIN_CAP[key] or C.CRAFT_PLAIN_CAP
 end
 
 -- The role check of a trainer record: the trainer bit and a title that names the skill and rank.

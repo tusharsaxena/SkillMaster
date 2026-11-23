@@ -287,3 +287,88 @@ for _, r in ipairs({
     add{ name = r[1], faction = r[2], race = r[3], city = r[4], mapName = r[5], mapID = r[6],
          npcID = r[7], x = r[8], y = r[9], cost = 900000, teaches = { "riding" }, ranks = { 75, 150 }, source = SRC_RECALL }
 end
+
+-- The Forever-only trainers (round 2; the owner, 2026-11-23: "Go ahead and ship these 55 forever only
+-- trainers"): NPCs QuestieDB's Forever table holds and the CMaNGOS 1.12 dump does not, so nothing
+-- but QuestieDB places them. Each is unverified (`hold`: the probe never confirms one) until seen in
+-- game. npcID, name, title, side and spawn are QuestieDB's, the spawn rounded to 0.1. The side on
+-- Zephras Isle (2521) and in Riverglades (2548) is Neutral, the owner's ruling (2026-11-23: "new
+-- zones are reachable by both alliance and horde"). Ranks from the title: Junior = Apprentice, a
+-- Journeyman or Expert title its rank, a plain gathering or secondary title as the capitals' (to 300,
+-- to 150), a plain craft title Journeyman (an untitled village trainer's reach in the 1.12 dump),
+-- Expert for Alard Schmied and Vanessa Sellers (Method.gg's Forever guides). Melbin Powderfuse,
+-- "Master Goblin Engineer", trains the Goblin specialization, which the data does not model: he is
+-- read as a plain Engineering trainer (Journeyman), not an Artisan one. Norzsh, "Weaponsmith", is
+-- read as a Blacksmithing trainer (Journeyman). Rows: { name, faction, mapName, mapID, key, ranks,
+-- npcID, x, y } (city = the zone: QuestieDB names no subzone).
+local FOREVER_ONLY = "Forever-only, from QuestieDB spawn, not yet seen in game"
+local SRC_FOREVER = "QuestieDB data/Forever (NS.DataMeta.Trainers_Forever); Zephras Isle and Riverglades sides: "
+    .. "the owner, 2026-11-23"
+local JR = { 75 }
+for _, r in ipairs({
+    { "Alard Schmied", "Alliance", "Alterac Mountains", 1416, "blacksmithing", E, 28694, 19.8, 63.4 },   -- Blacksmith
+    { "Linzy Blackbolt", "Alliance", "Alterac Mountains", 1416, "alchemy", J, 246795, 18.5, 62.4 },   -- Alchemist
+    { "Nancy Songflower", "Alliance", "Elwynn Forest", 1429, "herbalism", JR, 247223, 52.4, 43.9 },   -- Junior Herbalism Trainer
+    { "Kelsey Fargo", "Alliance", "Elwynn Forest", 1429, "mining", JR, 247226, 47.2, 32.2 },   -- Junior Mining Trainer
+    { "Riley Peltskinner", "Alliance", "Elwynn Forest", 1429, "skinning", JR, 247227, 47.0, 39.9 },   -- Junior Skinning Trainer
+    { "Zerril Softbreeze", "Neutral", "Zephras Isle", 2521, "cooking", S, 251905, 43.9, 43.8 },   -- Cook
+    { "Aedi Thriceforged", "Neutral", "Zephras Isle", 2521, "mining", G, 251913, 44.9, 44.4 },   -- Miner
+    { "Charles Worth", "Alliance", "Alterac Mountains", 1416, "tailoring", E, 251972, 17.7, 60.3 },   -- Expert Tailor
+    { "Angelique Butler", "Neutral", "Alterac Mountains", 1416, "firstAid", S, 251977, 17.2, 61.1 },   -- First Aid Trainer
+    { "Vanessa Sellers", "Alliance", "Alterac Mountains", 1416, "enchanting", E, 251978, 16.8, 62.3 },   -- Enchanting Trainer
+    { "Fenn Fairweather", "Neutral", "Zephras Isle", 2521, "fishing", S, 251992, 45.0, 48.4 },   -- Fisherman
+    { "Indari Sunseam", "Neutral", "Zephras Isle", 2521, "leatherworking", J, 251993, 44.7, 44.5 },   -- Leatherworker
+    { "Katherine Lee", "Alliance", "Alterac Mountains", 1416, "cooking", S, 252084, 12.6, 65.8 },   -- Cooking Trainer
+    { "Emerii Tallgust", "Neutral", "Zephras Isle", 2521, "leatherworking", J, 252376, 63.7, 80.7 },   -- Leatherworker
+    { "Othesia Evengale", "Neutral", "Zephras Isle", 2521, "tailoring", J, 252380, 64.4, 81.2 },   -- Tailor
+    { "Halavuul Cragwind", "Neutral", "Zephras Isle", 2521, "mining", G, 252388, 65.4, 80.5 },   -- Mining Trainer
+    { "Daeann Steelwind", "Neutral", "Zephras Isle", 2521, "blacksmithing", J, 252479, 65.5, 80.3 },   -- Blacksmith
+    { "Iaadaria Bitterwind", "Neutral", "Zephras Isle", 2521, "alchemy", J, 253004, 66.3, 79.5 },   -- Alchemist
+    { "Miriaan Mistblade", "Neutral", "Zephras Isle", 2521, "skinning", G, 254087, 43.2, 43.3 },   -- Skinner
+    { "Syriel Nightrain", "Neutral", "Zephras Isle", 2521, "herbalism", G, 254345, 57.9, 75.5 },   -- Herbalist
+    { "Hunter Moore", "Alliance", "Hillsbrad Foothills", 1424, "fishing", S, 255877, 54.2, 80.3 },   -- Fisherman
+    { "Grungle", "Neutral", "Riverglades", 2548, "mining", G, 255891, 77.7, 51.9 },   -- Miner
+    { "Gorg", "Neutral", "Riverglades", 2548, "cooking", S, 256655, 58.7, 44.6 },   -- Cook
+    { "Gur'dok", "Neutral", "Riverglades", 2548, "blacksmithing", J, 256658, 60.0, 46.3 },   -- Journeyman Blacksmith
+    { "Ishlee Breezewhisper", "Neutral", "Zephras Isle", 2521, "skinning", G, 257003, 59.6, 76.1 },   -- Skinner
+    { "Eaysaa Brightgust", "Neutral", "Zephras Isle", 2521, "alchemy", J, 257004, 59.2, 76.4 },   -- Alchemist
+    { "Nyalah Brightfire", "Neutral", "Zephras Isle", 2521, "cooking", S, 257006, 60.6, 72.7 },   -- Cook
+    { "Nyassa Swiftdraught", "Neutral", "Zephras Isle", 2521, "alchemy", J, 257019, 43.7, 43.4 },   -- Alchemist
+    { "Nasalanna Windsinger", "Neutral", "Zephras Isle", 2521, "skinning", G, 257020, 43.2, 43.2 },   -- Skinner
+    { "Halassa Fernbreeze", "Neutral", "Zephras Isle", 2521, "herbalism", G, 257021, 43.0, 43.5 },   -- Herbalist
+    { "Messana Crestwind", "Neutral", "Zephras Isle", 2521, "leatherworking", J, 257022, 44.8, 44.6 },   -- Leatherworker
+    { "Mendalass Tattermend", "Neutral", "Zephras Isle", 2521, "skinning", G, 257024, 43.3, 43.4 },   -- Skinner
+    { "Alphonse Dumas", "Neutral", "Riverglades", 2548, "blacksmithing", J, 259250, 64.5, 82.0 },   -- Journeyman Blacksmith
+    { "Krix", "Neutral", "Riverglades", 2548, "fishing", S, 260558, 79.3, 54.8 },   -- Superior Fisherman
+    { "Melbin Powderfuse", "Neutral", "Riverglades", 2548, "engineering", J, 260562, 77.8, 50.9 },   -- Master Goblin Engineer
+    { "William Pickman", "Horde", "Tirisfal Glades", 1420, "cooking", S, 265944, 61.8, 51.4 },   -- Cooking Trainer
+    { "Pa'zula", "Horde", "Durotar", 1411, "enchanting", J, 266881, 56.7, 73.7 },   -- Journeyman Enchanter
+    { "Margaret Weaver", "Horde", "Tirisfal Glades", 1420, "skinning", JR, 267324, 32.6, 65.8 },   -- Junior Skinning Trainer
+    { "Walter Mason", "Horde", "Tirisfal Glades", 1420, "mining", JR, 267325, 32.2, 65.8 },   -- Junior Mining Trainer
+    { "Florence Nightshade", "Horde", "Tirisfal Glades", 1420, "herbalism", JR, 267326, 32.5, 65.1 },   -- Junior Herbalism Trainer
+    { "Norzsh", "Horde", "Durotar", 1411, "blacksmithing", J, 267328, 40.5, 68.1 },   -- Weaponsmith
+    { "Nawka Wildsong", "Horde", "Mulgore", 1412, "skinning", JR, 267330, 44.5, 76.7 },   -- Junior Skinning Trainer
+    { "Vartha Rockmane", "Horde", "Mulgore", 1412, "mining", JR, 267331, 44.3, 78.4 },   -- Junior Mining Trainer
+    { "Garan Sunstrider", "Horde", "Mulgore", 1412, "herbalism", JR, 267332, 44.1, 78.0 },   -- Junior Herbalism Trainer
+    { "Terunne Bearshaper", "Alliance", "Teldrassil", 1438, "skinning", JR, 267333, 59.4, 38.6 },   -- Junior Skinning Trainer
+    { "Fanorran Stilloak", "Alliance", "Teldrassil", 1438, "mining", JR, 267334, 58.2, 41.4 },   -- Junior Mining Trainer
+    { "Eleyna Duskbreeze", "Alliance", "Teldrassil", 1438, "herbalism", JR, 267335, 59.9, 41.3 },   -- Junior Herbalism Trainer
+    { "Brighid Stormflayer", "Alliance", "Dun Morogh", 1426, "skinning", JR, 267336, 29.2, 67.7 },   -- Junior Skinning Trainer
+    { "Sally Swiftwrench", "Alliance", "Dun Morogh", 1426, "mining", JR, 267337, 28.9, 67.7 },   -- Junior Mining Trainer
+    { "Emrys Flintbeard", "Alliance", "Dun Morogh", 1426, "herbalism", JR, 267338, 29.0, 66.6 },   -- Junior Herbalism Trainer
+    { "Edward Egan", "Alliance", "Alterac Mountains", 1416, "herbalism", G, 275321, 18.4, 63.2 },   -- Herbalist
+    { "Patricia Egan", "Alliance", "Alterac Mountains", 1416, "alchemy", J, 275322, 18.5, 62.4 },   -- Alchemist
+    { "Angus Hammerhand", "Horde", "Tirisfal Glades", 1420, "blacksmithing", J, 276067, 21.2, 45.7 },   -- Blacksmith
+}) do
+    add{ name = r[1], faction = r[2], city = r[3], mapName = r[3], mapID = r[4], teaches = { r[5] },
+         ranks = r[6], npcID = r[7], x = r[8], y = r[9], hold = FOREVER_ONLY, source = SRC_FOREVER }
+end
+-- Forever's riding instructors: Shari Stilwell (Undead Horse Riding Instructor, Tirisfal Glades, beside
+-- Velma Warnam's spot) and Genn Fairweather (Stablemaster and Riding Trainer, Zephras Isle, both sides,
+-- Apprentice riding per Method.gg's Forever guide; no race: QuestieDB names none).
+add{ name = "Shari Stilwell", faction = "Horde", race = "Scourge", city = "Tirisfal Glades", mapName = "Tirisfal Glades",
+     mapID = 1420, npcID = 246152, x = 60.2, y = 52.7, cost = 900000, teaches = { "riding" }, ranks = { 75, 150 },
+     hold = FOREVER_ONLY, source = SRC_FOREVER }
+add{ name = "Genn Fairweather", faction = "Neutral", city = "Zephras Isle", mapName = "Zephras Isle", mapID = 2521,
+     npcID = 265756, x = 53.8, y = 81.3, cost = 900000, teaches = { "riding" }, ranks = { 75 },
+     hold = FOREVER_ONLY, source = SRC_FOREVER }
