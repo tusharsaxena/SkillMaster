@@ -41,8 +41,10 @@ C.WEAPON_SPELLS = {
     Daggers = "daggers", Staves = "staves", Polearms = "polearms", Bows = "bows", Crossbows = "crossbows",
     Guns = "guns", Thrown = "thrown", ["Fist Weapons"] = "fistWeapons",
 }
--- The cap a title's rank word trains to; a title with none trains its class's top (below).
-C.TITLE_CAP = { Journeyman = 150, Expert = 225, Artisan = 300, Master = 300 }
+-- The cap a title's rank word trains to; a title with none trains its class's top (below). A
+-- capital's "Artisan" title trains to Expert (225): Artisan in a craft is the Master trainers'
+-- (round 2; the CMaNGOS rows, Method.gg's and wow-professions' Forever guides agree).
+C.TITLE_CAP = { Journeyman = 150, Expert = 225, Artisan = 225, Master = 300 }
 C.PLAIN_CAP = { herbalism = 300, mining = 300, skinning = 300, cooking = 150, firstAid = 150, fishing = 150, riding = 150 }
 C.BOOK_CAP = { Expert = 225, Artisan = 300 }
 

@@ -9,7 +9,7 @@ local _, NS = ...
 NS.DataMeta = NS.DataMeta or {}
 NS.DataMeta.Trainers_Forever = {
     source = "the offline trainer probe, tools/trainer_probe.lua (GitHub issue #3)",
-    verified = "questiedb@47a4756b775e", report = "docs/trainer-probe/2026-11-23-r2", date = "2026-11-23",
+    verified = "questiedb@47a4756b775e", report = "docs/trainer-probe/2026-11-23-r3", date = "2026-11-23",
     sources = {
         { name = "QuestieDB (github.com/Questie/QuestieDB), data/Forever", pin = "commit 47a4756b775e8c73687fd3066d6c13f0bc43a55e" },
         { name = "CMaNGOS classic-db (github.com/cmangos/classic-db), read by ItemTree's method", pin = "sha256 4f92db520868ab4e566726f68b5b2e380ae781209beaf22237b4f7f04600d0c0" },
@@ -141,6 +141,13 @@ NS.TrainerProvenance_Forever = {
         ["doctor_gregory_victor"] = { npcID = 12920, name = "Doctor Gregory Victor", mapID = 1417, x = 73.4, y = 36.9 },
         ["old_man_heming"] = { npcID = 2626, name = "Old Man Heming", mapID = 1434, x = 27.4, y = 77.2 },
         ["nat_pagle"] = { npcID = 12919, name = "Nat Pagle", mapID = 1445, x = 58.6, y = 60.1 },
+        ["kylanna_windwhisper"] = { npcID = 7948, name = "Kylanna Windwhisper", mapID = 1444, x = 32.6, y = 43.8 },
+        ["rogvar"] = { npcID = 1386, name = "Rogvar", mapID = 1435, x = 48.5, y = 55.9 },
+        ["buzzek_bracketswing"] = { npcID = 8736, name = "Buzzek Bracketswing", mapID = 1446, x = 52.3, y = 27.7 },
+        ["drakk_stonehand"] = { npcID = 11097, name = "Drakk Stonehand", mapID = 1425, x = 13.4, y = 43.5 },
+        ["hahrana_ironhide"] = { npcID = 11098, name = "Hahrana Ironhide", mapID = 1444, x = 74.4, y = 43.1 },
+        ["timothy_worthington"] = { npcID = 11052, name = "Timothy Worthington", mapID = 1445, x = 66.2, y = 51.8 },
+        ["daryl_stack"] = { npcID = 2399, name = "Daryl Stack", mapID = 1424, x = 63.8, y = 20.8 },
         ["woo_ping"] = { npcID = 11867, name = "Woo Ping", mapID = 1453, x = 63.9, y = 69.1 },
         ["buliwyf_stonehand"] = { npcID = 11865, name = "Buliwyf Stonehand", mapID = 1455, x = 61.2, y = 89.5 },
         ["bixi_wobblebonk"] = { npcID = 13084, name = "Bixi Wobblebonk", mapID = 1455, x = 62.2, y = 89.6 },

@@ -186,3 +186,13 @@ test("trainer probe: the command line wants the QuestieDB path and reads the opt
     assertTrue(not pcall(Probe.Args, {}), "no path accepted")
     assertTrue(not pcall(Probe.Args, { "/q", "--bogus" }), "an unknown flag accepted")
 end)
+
+test("trainer probe: an Artisan title trains to 225 and a Master title to 300 (round 2)", function()
+    local db = source()
+    local npc = { id = 9, name = "Telonis", subName = "Artisan Leatherworker", flags = 19, faction = "A", spawns = {} }
+    assertTrue(C.Role({ teaches = { "leatherworking" }, ranks = { 75, 150, 225 } }, npc, db).ok, "Artisan title to 225")
+    assertTrue(not C.Role({ teaches = { "leatherworking" }, ranks = { 75, 150, 225, 300 } }, npc, db).ok,
+        "an Artisan-titled trainer passed as training Artisan")
+    npc.subName = "Master Leatherworking Trainer"
+    assertTrue(C.Role({ teaches = { "leatherworking" }, ranks = { 300 } }, npc, db).ok, "a Master trains Artisan")
+end)

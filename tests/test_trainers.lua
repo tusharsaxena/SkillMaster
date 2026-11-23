@@ -280,3 +280,42 @@ test("trainer probe books: a card for a book vendor or a rank quest's giver says
     assertEqual(NS.Trainers.WithLearn(heming, "Also teaches: Daggers"),
         "Sells Expert Fishing - The Bass and You \194\183 Also teaches: Daggers")
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- Round 2 (the owner's Leatherworking report, 2026-11-23): who trains Artisan
+-- ---------------------------------------------------------------------------------------------
+
+local CRAFTS = { "alchemy", "blacksmithing", "enchanting", "engineering", "leatherworking", "tailoring" }
+local CAPITALS = { Stormwind = true, Ironforge = true, Darnassus = true, Orgrimmar = true,
+                   ["Thunder Bluff"] = true, Undercity = true }
+
+test("round2 artisan: Alliance Artisan Leatherworking is Drakk Stonehand in the Hinterlands, not Telonis", function()
+    local nxt = NS.Trainers:NextRank("leatherworking", 155, 225, 40, "Alliance", "NightElf")
+    assertEqual(nxt.rankName, "Artisan")
+    assertEqual(names(nxt.trainers), "Drakk Stonehand@Aerie Peak")
+    local horde = NS.Trainers:NextRank("leatherworking", 155, 225, 40, "Horde", "Tauren")
+    assertEqual(names(horde.trainers), "Hahrana Ironhide@Camp Mojache")
+end)
+
+test("round2 artisan: no capital trainer trains a craft to Artisan; each side has a Master who does", function()
+    for _, key in ipairs(CRAFTS) do
+        for _, faction in ipairs({ "Alliance", "Horde" }) do
+            local nxt = NS.Trainers:NextRank(key, 210, 225, 40, faction, faction == "Alliance" and "Human" or "Orc")
+            assertTrue(#nxt.trainers > 0, key .. " Artisan for " .. faction)
+            for _, t in ipairs(nxt.trainers) do
+                assertTrue(not CAPITALS[t.city], ("%s trains %s to Artisan in %s"):format(t.name, key, t.city))
+            end
+        end
+    end
+end)
+
+test("round2 artisan: the capitals' Artisan-titled trainers train Expert (225)", function()
+    for _, name in ipairs({ "Telonis", "Una", "Ainethil", "Doctor Herbert Halsey", "Bengus Deepforge", "Saru Steelfury",
+                            "Springspindle Fizzlegear", "Roxxik", "Georgio Bolero", "Josef Gregorian" }) do
+        local t = record(name)
+        assertTrue(t ~= nil, name)
+        local top = 0
+        for _, c in ipairs(t.ranks) do top = math.max(top, c) end
+        assertEqual(top, 225, name)
+    end
+end)

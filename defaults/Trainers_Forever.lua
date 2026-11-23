@@ -25,6 +25,8 @@ local _, NS = ...
 local SRC_TOUR = "Blizzard WoW Classic City Tour: %s (worldofwarcraft.blizzard.com/en-us/news/%s)"
 local SRC_WM = "warcrafttavern.com/wow-classic/guides/weapon-skill-trainers-and-locations; warcraft.wiki.gg/wiki/Weapon_master"
 local SRC_RECALL = "vanilla 1.12 data (recalled, not cross-checked)"
+local SRC_MASTER = "CMaNGOS classic-db 1.12 trainer rows (ItemTree's method); Method.gg WoW Forever guides; "
+    .. "wow-professions.com/forever; games.gg WoW Forever professions guide (read 2026-11-23)"
 local SRC_PROBE = "; npcID, name and coordinates: the trainer probe (NS.DataMeta.Trainers_Forever)"
 
 -- How a rank is learned where no trainer trains it (QuestieDB data/Forever: the book's vendors and
@@ -38,7 +40,10 @@ local TRIAGE_ALLIANCE = { kind = "quest", questID = 6624, quest = "Triage" }
 local TRIAGE_HORDE = { kind = "quest", questID = 6622, quest = "Triage" }
 
 -- Ranks a trainer trains, by the title the source printed. Journeyman <X> trains to 150, Expert
--- <X> to 225, Artisan <X> and the gathering "<X> Trainer" to 300, a secondary-skill trainer to 150.
+-- <X> to 225, the gathering "<X> Trainer" to 300, a secondary-skill trainer to 150. A capital's
+-- Artisan <X> trains to 225 too: Artisan in a craft is the Master trainers' outside the capitals
+-- (round 2, the owner's report; the spec's research table, docs/superpowers/specs/
+-- 2026-11-23-trainer-probe-design.md).
 local J, E, A = { 75, 150 }, { 75, 150, 225 }, { 75, 150, 225, 300 }
 local G, S = A, J
 
@@ -93,7 +98,7 @@ city({ name = "Stormwind", faction = "Alliance", mapID = 1453, news = "23149291"
     { "Maris Granger", "Old Town", "skinning", G, 1292, 72.1, 62.2 },
     { "Lawrence Schneider", "Mage Quarter", "tailoring", J, 1300, 53.5, 81.5 },
     { "Sellandus", "Mage Quarter", "tailoring", E, 5567, 52.2, 83.1 },
-    { "Georgio Bolero", "Mage Quarter", "tailoring", A, 1346, 53.1, 81.4 },
+    { "Georgio Bolero", "Mage Quarter", "tailoring", E, 1346, 53.1, 81.4 },
     { "Stephen Ryback", "Old Town", "cooking", S, 5482, 78.2, 53.1 },
     { "Shaina Fuller", "Cathedral Square", "firstAid", S, 2327, 53.0, 44.7 },
     { "Arnold Leland", "Trade District", "fishing", S, 5493, 55.0, 69.7 },
@@ -104,12 +109,12 @@ city({ name = "Ironforge", faction = "Alliance", mapID = 1455, news = "23149294"
     { "Tally Berryfizz", "Tinker Town", "alchemy", E, 5177, 66.6, 55.7 },
     { "Groum Stonebeard", "The Great Forge", "blacksmithing", J, 10277, 52.3, 41.9 },
     { "Rotgath Stonebeard", "The Great Forge", "blacksmithing", E, 10276, 52.4, 42.6 },
-    { "Bengus Deepforge", "The Great Forge", "blacksmithing", A, 4258, 52.6, 41.5 },
+    { "Bengus Deepforge", "The Great Forge", "blacksmithing", E, 4258, 52.6, 41.5 },
     { "Thonys Pillarstone", "The Great Forge", "enchanting", J, 11065, 60.3, 45.4 },
     { "Gimble Thistlefuzz", "The Great Forge", "enchanting", E, 5157, 59.8, 45.5 },
     { "Jemma Quikswitch", "Tinker Town", "engineering", J, 11028, 67.7, 44.2 },
     { "Trixie Quikswitch", "Tinker Town", "engineering", E, 11029, 67.5, 42.9 },
-    { "Springspindle Fizzlegear", "Tinker Town", "engineering", A, 5174, 68.5, 43.5 },
+    { "Springspindle Fizzlegear", "Tinker Town", "engineering", E, 5174, 68.5, 43.5 },
     { "Reyna Stonebranch", "The Great Forge", "herbalism", G, 5137, 55.9, 59.1 },
     { "Gretta Finespindle", "The Great Forge", "leatherworking", J, 1466, 38.8, 32.9 },
     { "Fimble Finespindle", "The Great Forge", "leatherworking", E, 5127, 40.2, 33.7 },
@@ -125,13 +130,13 @@ city({ name = "Ironforge", faction = "Alliance", mapID = 1455, news = "23149294"
 city({ name = "Darnassus", faction = "Alliance", mapID = 1457, news = "23149531" }, {
     { "Milla Fairancora", "Craftsmen's Terrace", "alchemy", J, 11041, 55.4, 22.7 },
     { "Sylvanna Forestmoon", "Craftsmen's Terrace", "alchemy", E, 11042, 56.4, 24.2 },
-    { "Ainethil", "Craftsmen's Terrace", "alchemy", A, 4160, 54.9, 24.0 },
+    { "Ainethil", "Craftsmen's Terrace", "alchemy", E, 4160, 54.9, 24.0 },
     { "Lalina Summermoon", "Craftsmen's Terrace", "enchanting", J, 11070, 58.8, 12.7 },
     { "Taladan", "Craftsmen's Terrace", "enchanting", E, 4213, 58.4, 13.1 },
     { "Firodren Mooncaller", "The Temple Gardens", "herbalism", G, 4204, 48.0, 68.0 },
     { "Darianna", "Craftsmen's Terrace", "leatherworking", J, 11083, 64.4, 20.9 },
     { "Faldron", "Craftsmen's Terrace", "leatherworking", E, 11081, 64.8, 21.8 },
-    { "Telonis", "Craftsmen's Terrace", "leatherworking", A, 4212, 64.4, 21.5 },
+    { "Telonis", "Craftsmen's Terrace", "leatherworking", E, 4212, 64.4, 21.5 },
     { "Eladriel", "Craftsmen's Terrace", "skinning", G, 6292, 64.1, 22.3 },
     { "Trianna", "Craftsmen's Terrace", "tailoring", J, 11050, 63.6, 21.2 },
     { "Me'lynn", "Craftsmen's Terrace", "tailoring", E, 4159, 63.4, 22.4 },
@@ -144,12 +149,12 @@ city({ name = "Orgrimmar", faction = "Horde", mapID = 1454, news = "23156369" },
     { "Yelmak", "The Drag", "alchemy", E, 3347, 56.8, 33.0 },
     { "Ug'thok", "Valley of Honor", "blacksmithing", J, 10266, 80.8, 23.7 },
     { "Snarl", "Valley of Honor", "blacksmithing", E, 1383, 79.6, 23.3 },
-    { "Saru Steelfury", "Valley of Honor", "blacksmithing", A, 3355, 82.4, 23.0 },
+    { "Saru Steelfury", "Valley of Honor", "blacksmithing", E, 3355, 82.4, 23.0 },
     { "Jhag", "The Drag", "enchanting", J, 11066, 53.5, 38.6 },
     { "Godan", "The Drag", "enchanting", E, 3345, 53.9, 38.7 },
     { "Thund", "Valley of Honor", "engineering", J, 2857, 76.0, 24.2 },
     { "Nogg", "Valley of Honor", "engineering", E, 3412, 76.0, 25.4 },
-    { "Roxxik", "Valley of Honor", "engineering", A, 11017, 76.2, 25.2 },
+    { "Roxxik", "Valley of Honor", "engineering", E, 11017, 76.2, 25.2 },
     { "Jandi", "The Drag", "herbalism", G, 3404, 55.6, 39.5 },
     { "Kamari", "The Drag", "leatherworking", J, 5811, 63.3, 44.8 },
     { "Karolek", "The Drag", "leatherworking", E, 3365, 62.8, 44.2 },
@@ -172,7 +177,7 @@ city({ name = "Thunder Bluff", faction = "Horde", mapID = 1456, news = "23178672
     { "Komin Winterhoof", "Middle Rise", "herbalism", G, 3013, 50.0, 40.4 },
     { "Mak", "Middle Rise", "leatherworking", J, 3008, 42.1, 43.5 },
     { "Tarn", "Middle Rise", "leatherworking", E, 11084, 42.3, 42.6 },
-    { "Una", "Middle Rise", "leatherworking", A, 3007, 41.5, 42.6 },
+    { "Una", "Middle Rise", "leatherworking", E, 3007, 41.5, 42.6 },
     { "Brek Stonehoof", "Lower Rise", "mining", G, 3001, 34.4, 57.9 },
     { "Mooranta", "Middle Rise", "skinning", G, 7089, 44.4, 43.2 },
     { "Vhan", "Middle Rise", "tailoring", J, 11051, 44.3, 44.3 },
@@ -185,7 +190,7 @@ city({ name = "Thunder Bluff", faction = "Horde", mapID = 1456, news = "23178672
 city({ name = "Undercity", faction = "Horde", mapID = 1458, news = "23149528" }, {
     { "Doctor Martin Felben", "The Apothecarium", "alchemy", J, 11044, 46.6, 74.1 },
     { "Doctor Marsh", "The Apothecarium", "alchemy", E, 4609, 50.9, 74.6 },
-    { "Doctor Herbert Halsey", "The Apothecarium", "alchemy", A, 4611, 47.8, 73.3 },
+    { "Doctor Herbert Halsey", "The Apothecarium", "alchemy", E, 4611, 47.8, 73.3 },
     { "Basil Frye", "The War Quarter", "blacksmithing", J, 4605, 60.2, 29.1 },
     { "James Van Brunt", "The War Quarter", "blacksmithing", E, 4596, 61.3, 30.6 },
     { "Malcomb Wynn", "The Apothecarium", "enchanting", J, 11067, 62.5, 60.4 },
@@ -198,7 +203,7 @@ city({ name = "Undercity", faction = "Horde", mapID = 1458, news = "23149528" },
     { "Killian Hagey", "The Rogues' Quarter", "skinning", G, 7087, 70.2, 59.2 },
     { "Victor Ward", "The Magic Quarter", "tailoring", J, 11048, 70.1, 29.8 },
     { "Rhiannon Davis", "The Magic Quarter", "tailoring", E, 11049, 70.0, 30.6 },
-    { "Josef Gregorian", "The Magic Quarter", "tailoring", A, 4576, 70.8, 30.7 },
+    { "Josef Gregorian", "The Magic Quarter", "tailoring", E, 4576, 70.8, 30.7 },
     { "Eunice Burch", "The Trade Quarter", "cooking", S, 4552, 62.1, 44.9 },
     { "Mary Edras", "The Rogues' Quarter", "firstAid", S, 4591, 73.2, 55.2 },
     { "Armand Cromwell", "The Magic Quarter", "fishing", S, 4573, 80.7, 31.3 },
@@ -222,6 +227,21 @@ for _, r in ipairs({
 }) do
     add{ name = r[1], faction = r[2], city = r[3], mapName = r[4], mapID = r[5], teaches = { r[6] },
          ranks = r[7], npcID = r[8], x = r[9], y = r[10], learn = r[11], source = SRC_RECALL }
+end
+
+-- The Master trainers who train a craft to Artisan (round 2): one per side, or one for both (Brikk
+-- Keencraft and Annora, above). Rows as above, without `learn`.
+for _, r in ipairs({
+    { "Kylanna Windwhisper", "Alliance", "Feathermoon Stronghold", "Feralas", 1444, "alchemy", { 300 }, 7948, 32.6, 43.8 },
+    { "Rogvar", "Horde", "Stonard", "Swamp of Sorrows", 1435, "alchemy", { 300 }, 1386, 48.5, 55.9 },
+    { "Buzzek Bracketswing", "Neutral", "Gadgetzan", "Tanaris", 1446, "engineering", { 300 }, 8736, 52.3, 27.7 },
+    { "Drakk Stonehand", "Alliance", "Aerie Peak", "The Hinterlands", 1425, "leatherworking", { 300 }, 11097, 13.4, 43.5 },
+    { "Hahrana Ironhide", "Horde", "Camp Mojache", "Feralas", 1444, "leatherworking", { 300 }, 11098, 74.4, 43.1 },
+    { "Timothy Worthington", "Alliance", "Theramore Isle", "Dustwallow Marsh", 1445, "tailoring", { 300 }, 11052, 66.2, 51.8 },
+    { "Daryl Stack", "Horde", "Tarren Mill", "Hillsbrad Foothills", 1424, "tailoring", { 300 }, 2399, 63.8, 20.8 },
+}) do
+    add{ name = r[1], faction = r[2], city = r[3], mapName = r[4], mapID = r[5], teaches = { r[6] },
+         ranks = r[7], npcID = r[8], x = r[9], y = r[10], source = SRC_MASTER }
 end
 
 -- The weapon masters. Every skill costs 10s at level 1, Polearms 1g at level 20.
