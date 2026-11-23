@@ -606,15 +606,22 @@ end
 --- next (round 2's mark; the ladder's first for an unlearned skill, nil at the top). Unlearned: its
 --- teachers (one unnamed group); learned: its next rank's and every higher rank's (R6-7); with Show
 --- all trainers on and a ladder: every rank's, Artisan first.
-local function resolve(key)
+-- Skill `key`'s next rank (NS.Trainers:NextRank, nil when unlearned or at the top) and the cap the
+-- player trains next: that rank's, the ladder's first for an unlearned skill, else nil.
+local function nextOf(key)
     local e = skillEntry(key)
-    local name, faction = skillName(key), type(UnitFactionGroup) == "function" and UnitFactionGroup("player") or ""
     local learned = e ~= nil and e.learned ~= false
     local nr = learned and NS.Trainers:NextRank(key, e.rank, e.max) or nil
     local ladder = ladderOf(key)
-    local nextCap = nr and nr.cap or (not learned and ladder and ladder[1].cap) or nil
+    if nr then return nr, nr.cap end
+    return nil, not learned and ladder and ladder[1].cap or nil
+end
+
+local function resolve(key)
+    local name, faction = skillName(key), type(UnitFactionGroup) == "function" and UnitFactionGroup("player") or ""
+    local nr, nextCap = nextOf(key)
     local title = nr and L["Train: %s (%s)"]:format(name, nr.rankName) or L["Learn: %s"]:format(name)
-    if ladder and P.ShowAll() then
+    if ladderOf(key) and P.ShowAll() then
         return allGroups(key, name), title,
             L["Every trainer for your faction (%s) who teaches %s, the highest rank first:"]:format(faction, name), nextCap
     end
