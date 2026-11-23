@@ -70,6 +70,7 @@ NS.MasterReactions = {
     locked  = function()
         NS.MainWindow.ApplySettings()
         NS.Journal.ApplyLock()   -- the Journal's lock mark (round 5, R5-2)
+        if NS.Detached then NS.Detached.ApplyLock() end   -- the detached windows' grips (FB-SM-04)
     end,
 }
 

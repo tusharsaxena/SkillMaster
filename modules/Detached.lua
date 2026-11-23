@@ -15,6 +15,7 @@ local _, NS = ...
 -- NS.Detached.ApplyStyle(f) / .Style() / .TopHeight(f) -> the shared Detached windows style (R5-7)
 -- NS.Detached.BandMarks(f, marks) -> gap: a band's settings mark (HeaderButtons) and its marks (AD-86-SM)
 -- NS.Detached.PlaceInward(anchor, marks, gap): the marks at the strip's pitch when no skin header placed them
+-- NS.Detached.Width(id) / .WidestOf(ids) / .ApplyLock(): the block's width and its grip (FB-SM-04)
 
 NS.Detached = {}
 local D = NS.Detached
@@ -22,6 +23,9 @@ local LAYERS = NS.Constants.LAYERS
 local Perf = NS.Perf
 
 D.WIDTH, D.TITLE_H, D.PAD = 280, 22, 4   -- 280: the rows' 18 px back (feedback round 2)
+-- FB-SM-04: a block's own width, layout.blocks.<id>.width, inside these bounds (its Blocks row's
+-- range, which the grip's bounds share); D.WIDTH is its default.
+D.MIN_WIDTH, D.MAX_WIDTH, D.WIDTH_STEP = 200, 600, 10
 -- The rows' own breathing room above the first row and below the last (feedback round 2); the
 -- spacing between rows is the rows' own height and is not touched.
 D.ROW_PAD = 4
@@ -48,6 +52,21 @@ end
 
 local function isLocked(id)
     return NS.GetSetting("locked") or settings(id).locked == true
+end
+
+--- Block `id`'s detached width (FB-SM-04): its stored width inside MIN_WIDTH..MAX_WIDTH, else WIDTH.
+function D.Width(id)
+    local s = NS.Blocks.Settings(id)
+    local w = s and tonumber(s.width)
+    if not w then return D.WIDTH end
+    return math.max(D.MIN_WIDTH, math.min(D.MAX_WIDTH, w))
+end
+
+--- The widest of `ids`' widths: a merged window's column width. WIDTH for none.
+function D.WidestOf(ids)
+    local w = 0
+    for _, id in ipairs(ids or {}) do w = math.max(w, D.Width(id)) end
+    return w > 0 and w or D.WIDTH
 end
 
 local function savePoint(f)
@@ -372,11 +391,69 @@ local function placeBody(f, top)
     f.body:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, -top)
 end
 
+-- ---------------------------------------------------------------------------------------------
+-- The resize grip (FB-SM-04; standalone-windows, Resizing): the corner grip sets the block's width
+-- only. Its bounds are the Blocks row's range at the content's height, so the height never moves.
+-- While it is dragged the rows follow the frame's width by their anchors; on the release the width
+-- is written through the settings seam on the row's step grid (one ApplyLook redraw) and the drop
+-- point the grab pinned is saved first, so the redraw lands where the frame stands. Locked (the
+-- global lock or the block's own) hides the grip and refuses a grab.
+-- ---------------------------------------------------------------------------------------------
+
+local function snapWidth(w)
+    w = tonumber(w) or D.WIDTH
+    w = D.MIN_WIDTH + math.floor((w - D.MIN_WIDTH) / D.WIDTH_STEP + 0.5) * D.WIDTH_STEP
+    return math.max(D.MIN_WIDTH, math.min(D.MAX_WIDTH, w))
+end
+
+local function makeResizable(f)
+    NS.Chrome.MakeResizable(f, {
+        layout = function() end,   -- the rows are anchored to both edges: they follow the frame
+        redraw = function()
+            f.sizing = nil
+            if NS.SecureOverlay then NS.SecureOverlay:SetMoving(f, false) end
+        end,
+        save = function(w)
+            savePoint(f)
+            NS.SetByPath("layout.blocks." .. f.id .. ".width", snapWidth(w))
+        end,
+        canResize = function()
+            if isLocked(f.id) then return false end
+            NS.Chrome.PinTopLeft(f)
+            f.sizing = true
+            if NS.SecureOverlay then NS.SecureOverlay:SetMoving(f, true) end
+            return true
+        end,
+    })
+end
+
+-- The grip's bounds (the row's range, the height pinned at `h`) and its showing (hidden while locked).
+local function applyGrip(f, h)
+    local grip = f.resizeGrip
+    if not grip then return end
+    if type(f.SetResizeBounds) == "function" then
+        f:SetResizeBounds(D.MIN_WIDTH, h, D.MAX_WIDTH, h)
+    else
+        if type(f.SetMinResize) == "function" then f:SetMinResize(D.MIN_WIDTH, h) end
+        if type(f.SetMaxResize) == "function" then f:SetMaxResize(D.MAX_WIDTH, h) end
+    end
+    grip:SetShown(not isLocked(f.id))
+end
+
+--- The lock changed (the global Locked's reaction, settings/General.lua): every built detached
+--- window's drag and grip follow it at once, not at its next render.
+function D.ApplyLock()
+    for id, f in pairs(frames) do
+        f:SetMovable(not isLocked(id))
+        if f.resizeGrip then f.resizeGrip:SetShown(not isLocked(id)) end
+    end
+end
+
 local function build(id)
     local f = CreateFrame("Frame", "SkillMasterBlock_" .. id, UIParent, "BackdropTemplate")
     f:SetFrameStrata(LAYERS.STRATA.HUD)
     f.id = id
-    f:SetWidth(D.WIDTH)
+    f:SetWidth(D.Width(id))
     f:SetClampedToScreen(true)
     f:EnableMouse(true)
     f:SetMovable(true)
@@ -396,6 +473,7 @@ local function build(id)
     f.onBand = function(self, shown)
         if shown then NS.Blocks.PaintRestore(self.restore, self.id) else self.restore:Hide() end
     end
+    makeResizable(f)
     frames[id] = f
     return f
 end
@@ -422,7 +500,10 @@ function D.Render(id)
     placeBody(f, top)
     f.rowsH = y   -- the rows' drawn extent (the block as a merged section, NS.Groups)
     f.body:SetHeight(math.max(y, 1))
-    f:SetHeight(top + y + D.PAD)
+    local h = top + y + D.PAD
+    if not f.sizing then f:SetWidth(D.Width(id)) end
+    f:SetHeight(h)
+    applyGrip(f, h)
     f:SetMovable(not isLocked(id))
     if t0 then Perf.Note("detachedRender", debugprofilestop() - t0) end
 end

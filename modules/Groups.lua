@@ -231,6 +231,13 @@ end
 
 function G.Members(gid) return M.Members(G.All()[gid]) end
 
+--- The column width of `key`'s window (FB-SM-04): a group's widest member's width, a block's own.
+function G.Width(key)
+    local g = G.All()[key]
+    if g then return NS.Detached.WidestOf(M.Members(g)) end
+    return NS.Detached.Width(key)
+end
+
 --- The window's title: its sections' short names joined by " · ".
 function G.Title(gid)
     local parts = {}
@@ -336,7 +343,7 @@ local function mergePoint(groups, gid, target, side, before, rect, stacked)
     if tl then
         if side == "left" then
             local added = #(groups[gid].columns) - before
-            tl = tl - added * NS.Detached.WIDTH * gs
+            tl = tl - added * G.Width(gid) * gs
         elseif side == "top" then
             tt = tt + stacked * gs
         end
@@ -392,7 +399,7 @@ local function sectionPoint(gid, id)
     local gp = topLeft((G.All()[gid] or {}).point)
     if not (gp and sec) then return nil end
     local gs = groupScale()
-    return pointAt((gp.x + (sec.col - 1) * NS.Detached.WIDTH) * gs, (gp.y - (f.top or 0) - sec.y) * gs, bs)
+    return pointAt((gp.x + (sec.col - 1) * G.Width(gid)) * gs, (gp.y - (f.top or 0) - sec.y) * gs, bs)
 end
 
 -- Beside the group, right of its last column, level with the section.
@@ -407,7 +414,7 @@ local function besidePoint(gid, id)
     local gs = groupScale()
     local cols = #G.Columns(gid)
     local y = gp.y - ((f and f.top or 0) + (sec and sec.y or 0))
-    return pointAt((gp.x + cols * NS.Detached.WIDTH + G.GAP) * gs, y * gs, bs)
+    return pointAt((gp.x + cols * G.Width(gid) + G.GAP) * gs, y * gs, bs)
 end
 
 --- Pop section `id` out of group `gid` as its own detached window at `point` (the drop point of a
@@ -725,7 +732,7 @@ function G.Render(gid)
     local t0 = Perf.on and debugprofilestop()
     local D = NS.Detached
     release(f)
-    local width = D.WIDTH
+    local width = D.WidestOf(M.Members(g))   -- FB-SM-04: every column the widest member's width
     local ncols = #g.columns
     f:SetWidth(ncols * width)
     f.title:SetText(G.Title(gid))

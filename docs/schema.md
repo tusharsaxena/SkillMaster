@@ -54,7 +54,7 @@ SkillMasterDB
         borderFromSkin = true,
         titleBand = "always",    -- "always" | "hover" | "never"
       },
-      blocks.<id> = { shown = true, docked = true, order = n, collapsed = false, scale = 1, locked = false,
+      blocks.<id> = { shown = true, docked = true, order = n, collapsed = false, scale = 1, width = 280, locked = false,
                       -- collapsed: false for every block (round 6, R6-8: Spell and Defense were true)
                       -- on a new profile; schemaVersion 10 writes the old true into a profile stored
                       -- before R6-8 that never toggled them (AceDB stores no default), so it keeps
@@ -62,6 +62,7 @@ SkillMasterDB
                       point = false,    -- point: drag-only, written only by modules/Detached.lua
                       sort = "name" }   -- "name" | "value" | "valueAsc" | "progress" (round 3)
       blocks.weapon.belowCapOnly = false   -- the detached compact preset's filter (M5 polish)
+      blocks.<id>.width = 280              -- the detached window's width, 200 to 600 step 10 (FB-SM-04); its corner grip writes it
       blocks.<id>.filter = "all"           -- the header's filter mark, one of the block's set
                                            -- (NS.Blocks.FILTER_SETS): primary, secondary "all" |
                                            -- "belowCap" | "atCap"; weapon "all" | "learned" |

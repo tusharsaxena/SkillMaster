@@ -243,6 +243,7 @@ Kit.run{
         "test_bars_round2",
         "test_class_first",
         "test_trainers_tabs",
+        "test_detached_width",
         "test_bars_sizes",
         "test_round2_layout",
         "test_round2_icons",

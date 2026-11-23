@@ -184,6 +184,11 @@ local function blockRows(id)
         row({ path = base .. "scale", group = BLOCKS, subgroup = d.title, type = "number", default = def.scale,
               min = 0.5, max = 2, step = 0.05, label = L["Block scale"],
               desc = L["Scale of the block's own frame while it is detached."], onChange = NS.ApplyLook }),
+        -- FB-SM-04 (the owner, 2026-11-24): the detached window's width, which its corner grip writes.
+        row({ path = base .. "width", group = BLOCKS, subgroup = d.title, type = "number", default = def.width,
+              min = NS.Detached.MIN_WIDTH, max = NS.Detached.MAX_WIDTH, step = 10, label = L["Block width"],
+              desc = L["Width of the block's own frame while it is detached. Dragging the frame's corner grip sets it. In a merged window every column takes its widest block's width."],
+              onChange = NS.ApplyLook }),
         row({ path = base .. "order", group = ORDER, type = "number", default = def.order, skipRender = true,
               min = 1, max = #NS.BLOCKS, step = 1, label = L["Position: %s"]:format(d.title),
               desc = L["The block's place in the window, 1 at the top. Drag it on Layout > Block order."],
