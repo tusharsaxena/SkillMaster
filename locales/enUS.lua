@@ -383,6 +383,12 @@ L["Not confirmed on WoW Forever yet (marked until checked)"] = true
 -- GitHub issue #3, the owner's books comment: how a rank is learned where no trainer trains it.
 L["Sells %s"] = true
 L["Quest: %s"] = true
+-- Round 2: a rank no trainer trains (NS.Trainers.NoTrainerNote), and the trainers listed under it.
+L["%s %s"] = true
+L["No trainer teaches %s."] = true
+L["%s is learned from a book: %s, sold by %s."] = true
+L["%s is learned from a quest: %s, given by %s."] = true
+L["Trainers who teach %s"] = true
 L["Set waypoint"] = true
 L["Print to chat"] = true
 L["End test"] = true

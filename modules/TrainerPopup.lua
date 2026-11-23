@@ -9,7 +9,11 @@ local _, NS = ...
 --
 -- NS.TrainerPopup.Show(key) / .Hide() / .IsShown() / .Frame() / .Trainers() / .Groups() / .Select(i)
 -- / .Selected() / .Relayout() / .TextHeight(fs) / .Distance(t) / .RefreshDistances() / .Ticking()
--- / .Scroll() / .SetScroll(offset) / .Headings() / .Key()
+-- / .Scroll() / .SetScroll(offset) / .Headings() / .Notes() / .Key()
+--
+-- Round 2 (the owner's feedback, 2026-11-23): a rank no trainer trains (Artisan Cooking, First Aid,
+-- Fishing; Expert from a book) says so under its heading, naming the quest or book and who gives
+-- it, the giver's card selectable for its waypoint, and the skill's trainers listed below.
 --
 -- Round 5, R5-14: a card's "Also teaches" line wraps inside the card (up to ALSO_LINES lines), the
 -- card grows by the wrapped height and the window by the cards, and the card's tooltip always
@@ -349,22 +353,64 @@ local function heading(n)
     return h
 end
 
--- The headings and cards, top down inside the scroll child, `width` wide, each "Also teaches" line
--- wrapping to ALSO_LINES; the height they take.
+--- The "No trainer teaches" notes on show, in order (round 2; the suites read them).
+function P.Notes()
+    local out = {}
+    for _, n in ipairs(frame and frame.notes or {}) do if n:IsShown() then out[#out + 1] = n end end
+    return out
+end
+
+-- The `n`th note line, wrapped to the list's width (round 2, NS.Trainers.NoTrainerNote).
+local function note(n)
+    frame.notes = frame.notes or {}
+    local fs = frame.notes[n]
+    if not fs then
+        fs = frame.content:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        fs:SetJustifyH("LEFT")
+        fs:SetWordWrap(true)
+        NS.Skin.Text(fs, "sem.warn")
+        frame.notes[n] = fs
+    end
+    return fs
+end
+
+-- A group's heading (a rank's "Expert (225)", or a titled group's text) and its note, at `y`; the
+-- height they take.
+local function placeHead(g, y, width, counts)
+    local h0 = y
+    local text = g.title or (g.rankName and L["%s (%d)"]:format(g.rankName, g.cap))
+    if text then
+        counts.h = counts.h + 1
+        local h = heading(counts.h)
+        h:ClearAllPoints()
+        h:SetPoint("TOPLEFT", frame.content, "TOPLEFT", 2, -(y + 2))
+        h:SetText(text)
+        h:Show()
+        y = y + HEAD_H
+    end
+    if g.note then
+        counts.n = counts.n + 1
+        local fs = note(counts.n)
+        fs:ClearAllPoints()
+        fs:SetWidth(width - 4)
+        fs:SetPoint("TOPLEFT", frame.content, "TOPLEFT", 2, -y)
+        fs:SetText(g.note)
+        fs:Show()
+        y = y + math.ceil(P.TextHeight(fs)) + 4
+    end
+    return y - h0
+end
+
+-- The headings, notes and cards, top down inside the scroll child, `width` wide, each "Also
+-- teaches" line wrapping to ALSO_LINES; the height they take.
 local function placeList(width)
     NS.Pool.ReleaseAll(cardPool)
     for _, h in ipairs(frame.headings) do h:Hide() end
-    local y, i, n, unverified = 0, 0, 0, false
+    for _, fs in ipairs(frame.notes or {}) do fs:Hide() end
+    local y, i, unverified = 0, 0, false
+    local counts = { h = 0, n = 0 }
     for _, g in ipairs(state.groups) do
-        if g.rankName then
-            n = n + 1
-            local h = heading(n)
-            h:ClearAllPoints()
-            h:SetPoint("TOPLEFT", frame.content, "TOPLEFT", 2, -(y + 2))
-            h:SetText(L["%s (%d)"]:format(g.rankName, g.cap))
-            h:Show()
-            y = y + HEAD_H
-        end
+        y = y + placeHead(g, y, width, counts)
         for _, t in ipairs(g.list) do
             i = i + 1
             local c = NS.Pool.Acquire(cardPool, function() return buildCard(frame.content) end)
@@ -438,6 +484,21 @@ local function refreshActions()
     frame.print:SetEnabled(t ~= nil)
 end
 
+-- Round 2 (the owner's feedback, as ItemTree shows it): a rank no trainer trains says so under its
+-- heading (NS.Trainers.NoTrainerNote), and when the next rank is one, the skill's trainers follow
+-- under "Trainers who teach X" (those not listed above, book vendors and quest givers left out).
+local function annotate(groups, key, name)
+    for _, g in ipairs(groups) do g.note = NS.Trainers.NoTrainerNote(name, g.rankName, g.base) end
+    if not (groups[1] and groups[1].note) then return groups end
+    local listed, rest = {}, {}
+    for _, g in ipairs(groups) do for _, t in ipairs(g.base) do listed[t] = true end end
+    for _, t in ipairs(NS.Trainers:For(key)) do
+        if not listed[t] and not t.learn then rest[#rest + 1] = t end
+    end
+    if #rest > 0 then groups[#groups + 1] = { title = L["Trainers who teach %s"]:format(name), base = rest } end
+    return groups
+end
+
 --- The groups and the lines for skill `key`: its teachers when unlearned (one unnamed group), else
 --- its next rank's and every higher rank's, one group per rank (R6-7).
 local function resolve(key)
@@ -458,7 +519,7 @@ local function resolve(key)
             local intro = nr.higher
                 and L["Trainers for your faction (%s) who train %s to %s (%d) or higher:"]
                 or L["Trainers for your faction (%s) who train %s to %s (%d):"]
-            return groups, L["Train: %s (%s)"]:format(name, nr.rankName),
+            return annotate(groups, key, name), L["Train: %s (%s)"]:format(name, nr.rankName),
                 intro:format(faction, name, nr.rankName, nr.cap)
         end
     end

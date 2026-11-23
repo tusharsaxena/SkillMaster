@@ -164,6 +164,32 @@ function Trainers.WithLearn(t, text)
     return learn .. " \194\183 " .. text
 end
 
+-- Where a book vendor or a quest giver stands, for the note: "Gadgetzan, Tanaris", or the zone alone.
+local function noteWhere(t)
+    if t.city and t.mapName and t.city ~= t.mapName then return t.city .. ", " .. t.mapName end
+    return t.mapName or t.city or ""
+end
+
+--- Round 2 (the owner's feedback, as ItemTree says it): when no record of `list` (one rank's
+--- teachers) is a trainer, every one a book vendor or a quest giver, the note that says so for
+--- `rankName` of skill `skill` (its display name): "No trainer teaches Artisan Cooking. Artisan
+--- Cooking is learned from a quest: Clamlette Surprise, given by Dirge Quikcleave, Gadgetzan,
+--- Tanaris."; nil when a trainer trains it or the list is empty.
+function Trainers.NoTrainerNote(skill, rankName, list)
+    if not (list and list[1] and rankName) then return nil end
+    local learn, givers = nil, {}
+    for _, t in ipairs(list) do
+        if not t.learn then return nil end
+        learn = learn or t.learn
+        givers[#givers + 1] = t.name .. ", " .. noteWhere(t)
+    end
+    local rank = NS.L["%s %s"]:format(rankName, skill)
+    local first = NS.L["No trainer teaches %s."]:format(rank)
+    local how = learn.kind == "book" and NS.L["%s is learned from a book: %s, sold by %s."]
+        or NS.L["%s is learned from a quest: %s, given by %s."]
+    return first .. " " .. how:format(rank, learn.item or learn.quest, table.concat(givers, "; "))
+end
+
 -- ---------------------------------------------------------------------------------------------
 -- Round 5, R5-15: distances (pure math; the trainer popup measures the positions)
 -- ---------------------------------------------------------------------------------------------

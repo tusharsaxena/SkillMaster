@@ -319,3 +319,38 @@ test("round2 artisan: the capitals' Artisan-titled trainers train Expert (225)",
         assertEqual(top, 225, name)
     end
 end)
+
+test("round2 note: Artisan Cooking at 225 says no trainer teaches it and names Clamlette Surprise and Dirge", function()
+    withRankPopup("cooking", 225, 225, function()
+        local TP = NS.TrainerPopup
+        local notes = TP.Notes()
+        assertEqual(#notes, 1)
+        assertEqual(notes[1]:GetText(), "No trainer teaches Artisan Cooking. Artisan Cooking is learned from a quest: "
+            .. "Clamlette Surprise, given by Dirge Quikcleave, Gadgetzan, Tanaris.")
+        local heads = {}
+        for i, h in ipairs(TP.Headings()) do heads[i] = h:GetText() end
+        assertEqual(table.concat(heads, ","), "Artisan (300),Trainers who teach Cooking")
+        assertEqual(TP.Trainers()[1].name, "Dirge Quikcleave", "the giver's card first, for its waypoint")
+        local after = {}
+        for i = 2, #TP.Trainers() do after[TP.Trainers()[i].name] = true end
+        assertTrue(after["Stephen Ryback"] and after.Alegorn, "the skill's trainers listed below")
+        assertTrue(not after.Shandrina, "no book vendor among the trainers")
+    end)
+end)
+
+test("round2 note: a book rank and a quest rank say so; a trained rank has no note", function()
+    local Tr = NS.Trainers
+    local shandrina = record("Shandrina")
+    assertEqual(Tr.NoTrainerNote("Cooking", "Expert", { shandrina }),
+        "No trainer teaches Expert Cooking. Expert Cooking is learned from a book: Expert Cookbook, sold by Shandrina, Ashenvale.")
+    assertEqual(Tr.NoTrainerNote("First Aid", "Artisan", { record("Doctor Gustaf VanHowzen") }),
+        "No trainer teaches Artisan First Aid. Artisan First Aid is learned from a quest: Triage, given by "
+            .. "Doctor Gustaf VanHowzen, Theramore Isle, Dustwallow Marsh.")
+    assertNil(Tr.NoTrainerNote("Leatherworking", "Artisan", { record("Drakk Stonehand") }), "a trainer trains it")
+    assertNil(Tr.NoTrainerNote("Cooking", "Expert", { shandrina, record("Stephen Ryback") }), "one trainer is enough")
+    assertNil(Tr.NoTrainerNote("Cooking", "Expert", {}), "an empty rank")
+    withRankPopup("leatherworking", 155, 225, function()
+        assertEqual(#NS.TrainerPopup.Notes(), 0, "Artisan Leatherworking is trained")
+        assertEqual(NS.TrainerPopup.Trainers()[1].name, "Drakk Stonehand")
+    end)
+end)
