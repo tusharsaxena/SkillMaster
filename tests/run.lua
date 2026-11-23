@@ -230,6 +230,7 @@ Kit.run{
         "test_probe",
         "test_skilldata",
         "test_trainers",
+        "test_trainer_probe",
         "test_helpers",
         "test_bonuses",
         "test_statdata",
