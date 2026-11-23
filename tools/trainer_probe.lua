@@ -96,6 +96,42 @@ local function firstFailure(checks)
     return nil
 end
 
+-- The checks against the matched NPC: side, role, place (and its patch), the Era cross-checks.
+local function checkNpc(r, rec, npc, src)
+    r.npcID, r.foreverQuest = npc.id, npc.foreverQuest
+    addPatch(r, "npcID", rec.npcID, npc.id, "the matched NPC")
+    r.checks.faction = C.SideOK(rec.faction, npc.faction) and { ok = true }
+        or { ok = false, msg = ("the source's side is %q"):format(tostring(npc.faction)) }
+    r.checks.role = C.Role(rec, npc, src.qdb)
+    r.checks.place = C.Place(rec, npc, src.qdb)
+    local s = r.checks.place.suggest
+    if s then
+        addPatch(r, "x", rec.x, s.x, r.checks.place.msg)
+        addPatch(r, "y", rec.y, s.y, r.checks.place.msg)
+    end
+    r.era.cmangos = E.Cmangos(rec, npc.id, src.cm)
+    -- The owner's ruling (2026-11-23, "trust the source"): where the 1.12 dump's rows teach exactly
+    -- the record's top rank, a title that reads otherwise (Bena Winterhoof's) does not fail the role.
+    local role, dump = r.checks.role, r.era.cmangos
+    if not role.ok and dump and dump.agree and rec.ranks and not rec.learn and role.msg:find("^title") then
+        r.checks.role = { ok = true, msg = role.msg .. "; the 1.12 dump's rows agree with the record" }
+    end
+    r.era.pfquest = E.Pfquest(r.checks.place.spawn, npc.id, src.pf, src.qdb.coefficients)
+end
+
+-- The duplicate check's finding, and the record's own spawn as its patch (within tolerance, but on
+-- another NPC's point: the rounded spawn parts them).
+local function checkDuplicate(r, rec, others)
+    if not others then return end
+    local with = table.concat(others, ", ")
+    r.checks.duplicate = { ok = false, msg = "shares its point with " .. with }
+    local spawn = r.checks.place and r.checks.place.spawn
+    if spawn then
+        addPatch(r, "x", rec.x, C.Round1(spawn.x), "its own spawn, apart from " .. with)
+        addPatch(r, "y", rec.y, C.Round1(spawn.y), "its own spawn, apart from " .. with)
+    end
+end
+
 -- The checks of one record: { id, name, npcID, checks, era, patch, confirmed, reason, spot }.
 local function checkRecord(rec, src, dupes)
     local r = { id = rec.id, name = rec.name, faction = rec.faction, city = rec.city, mapID = rec.mapID,
@@ -104,37 +140,9 @@ local function checkRecord(rec, src, dupes)
     r.checks.name = nameCheck
     local npc = nameCheck.npc
     if nameCheck.suggest then addPatch(r, "name", rec.name, nameCheck.suggest.name, "the NPC's name in the source") end
-    if npc then
-        r.npcID, r.foreverQuest = npc.id, npc.foreverQuest
-        addPatch(r, "npcID", rec.npcID, npc.id, "the matched NPC")
-        r.checks.faction = C.SideOK(rec.faction, npc.faction) and { ok = true }
-            or { ok = false, msg = ("the source's side is %q"):format(tostring(npc.faction)) }
-        r.checks.role = C.Role(rec, npc, src.qdb)
-        r.checks.place = C.Place(rec, npc, src.qdb)
-        local s = r.checks.place.suggest
-        if s then
-            addPatch(r, "x", rec.x, s.x, r.checks.place.msg)
-            addPatch(r, "y", rec.y, s.y, r.checks.place.msg)
-        end
-        r.era.cmangos = E.Cmangos(rec, npc.id, src.cm)
-        -- The owner's ruling (2026-11-23, "trust the source"): where the 1.12 dump's rows teach exactly
-        -- the record's top rank, a title that reads otherwise (Bena Winterhoof's) does not fail the role.
-        local role, dump = r.checks.role, r.era.cmangos
-        if not role.ok and dump and dump.agree and rec.ranks and not rec.learn and role.msg:find("^title") then
-            r.checks.role = { ok = true, msg = role.msg .. "; the 1.12 dump's rows agree with the record" }
-        end
-        r.era.pfquest = E.Pfquest(r.checks.place.spawn, npc.id, src.pf, src.qdb.coefficients)
-    end
+    if npc then checkNpc(r, rec, npc, src) end
     r.era.methodgg = E.Methodgg(rec, src.names)
-    if dupes[rec.id] then
-        r.checks.duplicate = { ok = false, msg = "shares its point with " .. table.concat(dupes[rec.id], ", ") }
-        -- Within tolerance, but on another NPC's point: the record's own spawn, rounded, parts them.
-        local spawn = r.checks.place and r.checks.place.spawn
-        if spawn then
-            addPatch(r, "x", rec.x, C.Round1(spawn.x), "its own spawn, apart from " .. table.concat(dupes[rec.id], ", "))
-            addPatch(r, "y", rec.y, C.Round1(spawn.y), "its own spawn, apart from " .. table.concat(dupes[rec.id], ", "))
-        end
-    end
+    checkDuplicate(r, rec, dupes[rec.id])
     r.reason = firstFailure(r.checks)
     -- A record the data holds back (round 2: the Forever-only trainers, not yet seen in game) is never
     -- confirmed; its reason is the hold, and its checks still run and report under Findings.
