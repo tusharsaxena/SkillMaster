@@ -354,3 +354,89 @@ test("round2 note: a book rank and a quest rank say so; a trained rank has no no
         assertEqual(NS.TrainerPopup.Trainers()[1].name, "Drakk Stonehand")
     end)
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- Round 2: Show all trainers (the owner's feedback, 2026-11-23)
+-- ---------------------------------------------------------------------------------------------
+
+local function headTexts()
+    local out = {}
+    for i, h in ipairs(NS.TrainerPopup.Headings()) do out[i] = h:GetText() end
+    return table.concat(out, ",")
+end
+
+local function withShowAll(on, fn)
+    local saved = NS.TrainerPopup.ShowAll()
+    NS.SetByPath("trainers.showAll", on)
+    local ok, err = pcall(fn)
+    NS.SetByPath("trainers.showAll", saved)
+    if not ok then error(err, 0) end
+end
+
+test("round2 show all: AllRanks lists every rank, Artisan first, each trainer once under its highest", function()
+    local groups = NS.Trainers:AllRanks("leatherworking", "Alliance", "Human")
+    local heads, seen = {}, {}
+    for i, g in ipairs(groups) do
+        heads[i] = g.rankName
+        for _, t in ipairs(g.trainers) do
+            assertTrue(not seen[t], t.name .. " listed once")
+            seen[t] = true
+        end
+    end
+    assertEqual(table.concat(heads, ","), "Artisan,Expert,Journeyman")
+    assertEqual(groups[1].trainers[1].name, "Drakk Stonehand")
+    assertNil(NS.Trainers:AllRanks("swords"), "a weapon skill has no ranks")
+end)
+
+test("round2 show all: the popup's check box lists every rank and marks the next rank's trainers", function()
+    withShowAll(false, function()
+        withRankPopup("leatherworking", 155, 225, function(f)
+            local TP = NS.TrainerPopup
+            assertTrue(f.showAll:IsShown(), "a profession shows the check box")
+            assertEqual(headTexts(), "Artisan (300)", "off: the next rank only")
+            TP.SetShowAll(true)
+            assertTrue(NS.db.profile.trainers.showAll, "the check box writes the profile")
+            assertEqual(headTexts(), "Artisan (300),Expert (225),Journeyman (150)")
+            for _, c in ipairs(TP.Cards()) do
+                local artisan = c.trainer.name == "Drakk Stonehand"
+                assertEqual(c.mark:IsShown(), artisan, c.trainer.name .. ": the mark is the next rank's only")
+            end
+            assertEqual(TP.MarkTip(), "Your next rank: Artisan (300)")
+            TP.SetShowAll(false)
+            assertEqual(headTexts(), "Artisan (300)", "off again")
+            for _, c in ipairs(TP.Cards()) do assertTrue(not c.mark:IsShown(), "no mark when off") end
+        end)
+    end)
+end)
+
+test("round2 show all: quest givers sit in their rank's group, an unlearned skill marks Apprentice", function()
+    withShowAll(true, function()
+        withRankPopup("cooking", 225, 225, function()
+            local TP = NS.TrainerPopup
+            assertEqual(headTexts(), "Artisan (300),Expert (225),Journeyman (150)")
+            assertEqual(TP.Groups()[1].list[1].name, "Dirge Quikcleave", "the quest giver under Artisan")
+            assertTrue(TP.Groups()[1].note ~= nil, "Artisan Cooking's note")
+            assertTrue(TP.Marked(TP.Groups()[1].list[1]), "Dirge trains the next rank")
+        end)
+    end)
+    withShowAll(true, function()
+        local savedFaction = M.UnitFactionGroup
+        M.UnitFactionGroup = function() return "Alliance", "Alliance" end
+        local TP = NS.TrainerPopup
+        TP.Show("alchemy")
+        local ok, err = pcall(function()
+            local marked = 0
+            for _, t in ipairs(TP.Trainers()) do if TP.Marked(t) then marked = marked + 1 end end
+            assertTrue(marked > 0, "Apprentice trainers are marked for an unlearned skill")
+        end)
+        TP.Hide()
+        M.UnitFactionGroup = savedFaction
+        assertTrue(ok, tostring(err))
+    end)
+    withShowAll(true, function()
+        NS.TrainerPopup.Show("swords")
+        local shown = NS.TrainerPopup.Frame().showAll:IsShown()
+        NS.TrainerPopup.Hide()
+        assertTrue(not shown, "a weapon skill has no check box")
+    end)
+end)

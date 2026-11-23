@@ -389,6 +389,12 @@ L["No trainer teaches %s."] = true
 L["%s is learned from a book: %s, sold by %s."] = true
 L["%s is learned from a quest: %s, given by %s."] = true
 L["Trainers who teach %s"] = true
+-- Round 2: the popup's Show all trainers mode.
+L["Show all trainers"] = true
+L["In the trainer popup for a profession, list every trainer of every rank, Artisan first, and mark the ones who train your next rank."] = true
+L["Every trainer for your faction (%s) who teaches %s, the highest rank first:"] = true
+L["Your next rank"] = true
+L["Your next rank: %s (%d)"] = true
 L["Set waypoint"] = true
 L["Print to chat"] = true
 L["End test"] = true

@@ -115,6 +115,37 @@ local function rankGroups(ladder, from, key, faction, race)
     return groups
 end
 
+local function topOf(rec)
+    local top = 0
+    for _, c in ipairs(rec.ranks or {}) do if c > top then top = c end end
+    return top
+end
+
+--- Round 2 (the owner's Show all trainers): every teacher of skill `key` for `faction`, one group per
+--- rank of its ladder, the highest (Artisan) first, each record once, under the highest rank it
+--- trains (a book vendor or quest giver under the rank it gives). { { rankName, cap, trainers } },
+--- empty ranks dropped; nil for a skill with no ladder.
+function Trainers:AllRanks(key, faction, race)
+    local ladder = ladderFor(key)
+    if not ladder then return nil end
+    faction, race = faction or playerFaction(), race or playerRace()
+    local groups = {}
+    for i = #ladder, 1, -1 do
+        local step = ladder[i]
+        local g = { rankName = step.rankName, cap = step.cap, trainers = {} }
+        for _, rec in ipairs(collect(key, faction, race)) do
+            if topOf(rec) == step.cap then g.trainers[#g.trainers + 1] = rec end
+        end
+        if #g.trainers > 0 then groups[#groups + 1] = g end
+    end
+    return groups
+end
+
+--- Whether record `rec` trains `cap` (a profession's rank; a record without ranks trains none).
+function Trainers.TrainsCap(rec, cap)
+    return rec.ranks ~= nil and contains(rec.ranks, cap)
+end
+
 --- The rank above the skill's current cap `max`, or nil when there is none (top rank reached, or a
 --- skill with no ranks: weapons, Lockpicking). Answers { rankName, cap, minLevel, minSkill, cost,
 --- canTrain, trainers, groups, higher }, where canTrain says `level` and `rank` meet the rank's

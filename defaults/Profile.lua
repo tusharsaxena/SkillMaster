@@ -244,6 +244,7 @@ NS.defaults = {
         },
         trainers = {
             unverified = true,   -- mark trainer data not yet checked on WoW Forever
+            showAll = false,     -- round 2: the popup lists every rank's trainers, Artisan first
             -- The trainer popup's trainer name (feedback round 2, FB-11): the skin's accent while
             -- nameColorFromSkin is on (the default, skinning-§6), else the swatch through its
             -- class-color companion (options-ui-§17). The swatch starts on WoW Forever's tan accent.

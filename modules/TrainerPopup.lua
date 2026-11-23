@@ -77,6 +77,26 @@ function P.Ticking() return ticker ~= nil end
 --- The cards on show, in order (the suites read them).
 function P.Cards() return cardPool and cardPool.active or {} end
 
+-- Skill `key`'s rank ladder (defaults/Ranks_Forever.lua), or nil for a skill with no ranks.
+local function ladderOf(key)
+    local name = NS.RankLadderFor_Forever and NS.RankLadderFor_Forever[key]
+    return name and NS.Ranks_Forever and NS.Ranks_Forever[name]
+end
+
+--- Whether card trainer `t` wears the "Your next rank" mark: Show all trainers is on and `t` trains
+--- the rank the player trains next (round 2).
+function P.Marked(t)
+    return state.showAll == true and state.nextCap ~= nil and NS.Trainers.TrainsCap(t, state.nextCap)
+end
+
+--- The marked card's tooltip line: "Your next rank: Expert (225)".
+function P.MarkTip()
+    for _, step in ipairs(state.key and ladderOf(state.key) or {}) do
+        if step.cap == state.nextCap then return L["Your next rank: %s (%d)"]:format(step.rankName, step.cap) end
+    end
+    return L["Your next rank"]
+end
+
 local function skillName(key)
     local cat = NS.SkillCatalog[key]
     return cat and L[cat.name] or key
@@ -142,6 +162,7 @@ local function onCardEnter(self)
     GameTooltip:SetOwner(self, "ANCHOR_NONE")
     tipLine(self.trainer.name, "gtip.title")
     tipLine(self.where:GetText() or "", "gtip.body")
+    if P.Marked(self.trainer) then tipLine(P.MarkTip(), "sem.good") end
     if self.alsoText and self.alsoText ~= "" then tipLine(self.alsoText, "gtip.muted", true) end
     GameTooltip:Show()
     NS.Chrome.PlaceBeside(GameTooltip, self, frame)
@@ -164,6 +185,12 @@ local function buildCard(parent)
     c.dist:SetPoint("TOPRIGHT", c.cost, "BOTTOMRIGHT", 0, -3)
     c.dist:SetJustifyH("RIGHT")
     NS.Skin.Text(c.dist, "muted")
+    -- Round 2: the mark of a trainer of the player's next rank, in Show all trainers mode.
+    c.mark = c:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    c.mark:SetPoint("LEFT", c.name, "RIGHT", 6, 0)
+    c.mark:SetText(L["Your next rank"])
+    NS.Skin.Text(c.mark, "sem.good")
+    c.mark:Hide()
     c.where = c:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     c.where:SetPoint("TOPLEFT", c.name, "BOTTOMLEFT", 0, -3)
     NS.Skin.Text(c.where, "body")
@@ -208,6 +235,7 @@ local function fillCard(c, t, key, i, maxLines, width)
     c.also:SetWidth(width - 16)   -- an explicit width, so the wrapped height measures before layout
     c.name:SetText(t.name)
     paintName(c.name)
+    c.mark:SetShown(P.Marked(t))
     local cost = t.costByKey and t.costByKey[key] or t.cost
     c.cost:SetText(cost and NS.Rows.Money(cost) or "")
     c.where:SetText(whereText(t))
@@ -247,6 +275,31 @@ local function button(parent, label, onClick, primary)
     b:SetScript("OnClick", onClick)
     NS.Skin.Button(b, { primary = primary })
     return b
+end
+
+-- Round 2: the Show all trainers check box, the client's UICheckButtonTemplate painted by the skin
+-- (LibKa0s-Widgets has no check box; NS.Skin.Checkbox is what the options panel's are painted with),
+-- with its label and a tooltip. Shown for a skill with ranks only (Show).
+local function buildShowAll()
+    local cb = CreateFrame("CheckButton", nil, frame, "UICheckButtonTemplate")
+    cb:SetSize(20, 20)
+    NS.Skin.Checkbox(cb, { hover = true })
+    cb.label = cb:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    cb.label:SetPoint("LEFT", cb, "RIGHT", 2, 0)
+    cb.label:SetText(L["Show all trainers"])
+    NS.Skin.Text(cb.label, "body")
+    -- Toggled from the setting, not GetChecked: the write seam holds the state (the panel's row too).
+    cb:SetScript("OnClick", function() P.SetShowAll(not P.ShowAll()) end)
+    cb:SetScript("OnEnter", function(self)
+        if not GameTooltip then return end
+        GameTooltip:SetOwner(self, "ANCHOR_NONE")
+        tipLine(L["Show all trainers"], "gtip.title")
+        tipLine(L["In the trainer popup for a profession, list every trainer of every rank, Artisan first, and mark the ones who train your next rank."], "gtip.body", true)
+        GameTooltip:Show()
+        NS.Chrome.PlaceAttached(GameTooltip, self)
+    end)
+    cb:SetScript("OnLeave", function(self) if GameTooltip and GameTooltip:IsOwned(self) then GameTooltip:Hide() end end)
+    frame.showAll = cb
 end
 
 local function buildActions()
@@ -323,6 +376,7 @@ local function build()
     frame.intro:SetPoint("RIGHT", frame, "RIGHT", -PAD, 0)
     frame.intro:SetJustifyH("LEFT")
     NS.Skin.Text(frame.intro, "muted")
+    buildShowAll()
     cardPool = NS.Pool.New()
     buildList()
     buildActions()
@@ -437,6 +491,11 @@ P.SetScroll = function(offset) setScroll(offset) end
 
 local function layout()
     local top = TITLE_H + 8 + math.ceil(P.TextHeight(frame.intro)) + 8
+    if frame.showAll:IsShown() then
+        frame.showAll:ClearAllPoints()
+        frame.showAll:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD - 2, -(top - 4))
+        top = top + 20
+    end
     local full = WIDTH - 2 * PAD
     local listH, unverified = placeList(full)
     local room = P.MAX_HEIGHT - top - (unverified and 18 or 0) - BUTTON_H - PAD
@@ -501,30 +560,72 @@ end
 
 --- The groups and the lines for skill `key`: its teachers when unlearned (one unnamed group), else
 --- its next rank's and every higher rank's, one group per rank (R6-7).
-local function resolve(key)
+local function skillEntry(key)
     local e = NS.SkillData and NS.SkillData.Get and NS.SkillData:Get(key)
     local B = NS.Blocks
     if B.source then
         local skills = B.Data()
         e = skills and skills.byKey[key] or e
     end
-    local name, faction = skillName(key), type(UnitFactionGroup) == "function" and UnitFactionGroup("player") or ""
-    if e and e.learned ~= false then
-        local nr = NS.Trainers:NextRank(key, e.rank, e.max)
-        if nr then
-            local groups = {}
-            for i, g in ipairs(nr.groups or { { rankName = nr.rankName, cap = nr.cap, trainers = nr.trainers } }) do
-                groups[i] = { rankName = g.rankName, cap = g.cap, base = g.trainers }
-            end
-            local intro = nr.higher
-                and L["Trainers for your faction (%s) who train %s to %s (%d) or higher:"]
-                or L["Trainers for your faction (%s) who train %s to %s (%d):"]
-            return annotate(groups, key, name), L["Train: %s (%s)"]:format(name, nr.rankName),
-                intro:format(faction, name, nr.rankName, nr.cap)
-        end
+    return e
+end
+
+--- Whether the popup lists every rank's trainers (round 2, trainers.showAll).
+function P.ShowAll()
+    local p = (NS.db and NS.db.profile.trainers) or NS.defaults.profile.trainers
+    return p.showAll == true
+end
+
+--- Turn Show all trainers on or off (the row's single write seam) and re-open the popup on its skill.
+function P.SetShowAll(on)
+    NS.SetByPath("trainers.showAll", on and true or false)
+    if P.IsShown() and state.key then P.Show(state.key) end
+end
+
+-- Round 2, Show all trainers: every rank's teachers, Artisan first (NS.Trainers:AllRanks), a rank no
+-- trainer trains with its note.
+local function allGroups(key, name)
+    local groups = {}
+    for i, g in ipairs(NS.Trainers:AllRanks(key) or {}) do
+        groups[i] = { rankName = g.rankName, cap = g.cap, base = g.trainers,
+                      note = NS.Trainers.NoTrainerNote(name, g.rankName, g.trainers) }
     end
-    return { { base = NS.Trainers:For(key) } }, L["Learn: %s"]:format(name),
-        L["Trainers for your faction (%s) who teach %s:"]:format(faction, name)
+    return groups
+end
+
+-- The next rank's groups (R6-7), annotated (round 2).
+local function rankGroupsOf(nr, key, name)
+    local groups = {}
+    for i, g in ipairs(nr.groups or { { rankName = nr.rankName, cap = nr.cap, trainers = nr.trainers } }) do
+        groups[i] = { rankName = g.rankName, cap = g.cap, base = g.trainers }
+    end
+    return annotate(groups, key, name)
+end
+
+--- What skill `key` opens on: its groups, title and intro, and the cap of the rank the player trains
+--- next (round 2's mark; the ladder's first for an unlearned skill, nil at the top). Unlearned: its
+--- teachers (one unnamed group); learned: its next rank's and every higher rank's (R6-7); with Show
+--- all trainers on and a ladder: every rank's, Artisan first.
+local function resolve(key)
+    local e = skillEntry(key)
+    local name, faction = skillName(key), type(UnitFactionGroup) == "function" and UnitFactionGroup("player") or ""
+    local learned = e ~= nil and e.learned ~= false
+    local nr = learned and NS.Trainers:NextRank(key, e.rank, e.max) or nil
+    local ladder = ladderOf(key)
+    local nextCap = nr and nr.cap or (not learned and ladder and ladder[1].cap) or nil
+    local title = nr and L["Train: %s (%s)"]:format(name, nr.rankName) or L["Learn: %s"]:format(name)
+    if ladder and P.ShowAll() then
+        return allGroups(key, name), title,
+            L["Every trainer for your faction (%s) who teaches %s, the highest rank first:"]:format(faction, name), nextCap
+    end
+    if nr then
+        local intro = nr.higher
+            and L["Trainers for your faction (%s) who train %s to %s (%d) or higher:"]
+            or L["Trainers for your faction (%s) who train %s to %s (%d):"]
+        return rankGroupsOf(nr, key, name), title, intro:format(faction, name, nr.rankName, nr.cap), nextCap
+    end
+    return { { base = NS.Trainers:For(key) } }, title,
+        L["Trainers for your faction (%s) who teach %s:"]:format(faction, name), nextCap
 end
 
 -- Every group's cards nearest first by state.dist, and the cards' order group by group.
@@ -621,10 +722,14 @@ end
 function P.Show(key)
     build()
     frame:SetFrameStrata(P.Strata())   -- at each open: the openers' strata are the player's
-    local groups, title, intro = resolve(key)
+    local groups, title, intro, nextCap = resolve(key)
     local all = {}
     for _, g in ipairs(groups) do for _, t in ipairs(g.base) do all[#all + 1] = t end end
     state.key, state.groups, state.base, state.selected, state.offset = key, groups, all, 1, 0
+    state.showAll = ladderOf(key) ~= nil and P.ShowAll()
+    state.nextCap = nextCap
+    frame.showAll:SetShown(ladderOf(key) ~= nil)
+    frame.showAll:SetChecked(state.showAll)
     state.dist = measure(all)
     state.list = orderGroups()
     frame.title:SetText(title)

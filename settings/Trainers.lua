@@ -22,6 +22,10 @@ NS.RegisterSchemaRows(NS.Live({
     { path = "trainers.unverified", page = PAGE, group = GROUP, type = "bool", default = PT.unverified,
       label = L["Mark unverified trainers"],
       desc = L["Flag trainer data not yet checked on WoW Forever, in tooltips, the trainer popup and chat."] },
+    -- Round 2 (the owner's feedback): the trainer popup's own check box writes this row too.
+    { path = "trainers.showAll", page = PAGE, group = GROUP, type = "bool", default = PT.showAll,
+      label = L["Show all trainers"],
+      desc = L["In the trainer popup for a profession, list every trainer of every rank, Artisan first, and mark the ones who train your next rank."] },
 }))
 
 -- The Waypoint arrow subgroup. Round 6, R6-11: Skill Master's own arrow (modules/WaypointArrow.lua),
