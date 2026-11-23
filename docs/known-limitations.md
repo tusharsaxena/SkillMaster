@@ -108,7 +108,7 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   arrow. When TomTom wins, a native pin an earlier Set placed (before TomTom was enabled) is not
   cleared and may stay on the map beside TomTom's waypoint: the client's user waypoint may be one the
   player placed, and nothing tells Skill Master's from theirs, so the TomTom path leaves it alone
-  (clear it from the world map). Test mode's sample arrow still shows with TomTom loaded. Its pin is set with
+  (clear it from the world map). Test mode's sample arrow is always Skill Master's own, whatever Show Skill Master's arrow says, and with TomTom loaded it is labeled "Sample: TomTom's arrow points to real waypoints": test mode never places a TomTom waypoint, which would be TomTom's saved state (FB-SM-05). Its pin is set with
   `C_SuperTrack.SetSuperTrackedUserWaypoint(false)`, not just without the `true` call, so a pin the
   game was super-tracking loses its arrow too. The bearing assumes `GetWorldPosFromMapPos` answers x
   north and y west and `GetPlayerFacing` radians counter-clockwise from north (the retail

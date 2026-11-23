@@ -290,19 +290,42 @@ function WA.Clear()
     WA.Hide()
 end
 
---- Test mode (preview-mode): the arrow on a sample trainer, at the library's sample distance and
---- angle. Nothing is written. Shown only where a real pin would show it (Show Skill Master's arrow on).
-function WA.ShowTest()
-    if not WA.Wanted() then return end
-    local sample
+-- A trainer with coordinates to sample: a swords trainer first (the old sample), else any.
+local function sampleTrainer()
     for _, t in ipairs(NS.Trainers:For("swords") or {}) do
-        if t.mapID and t.x and t.y then sample = t break end
+        if t.mapID and t.x and t.y then return t end
     end
-    if not sample then return end
+    for _, t in ipairs(NS.Trainers_Forever or {}) do
+        if t.mapID and t.x and t.y then return t end
+    end
+    return nil
+end
+
+-- The words under the sample: the trainer's name where a real pin would show this arrow, else what
+-- the preview stands in for, so it never claims to be the arrow a real waypoint shows.
+local function sampleLabel(t)
+    if profile().arrow == false then return L["Sample: Skill Master's arrow is off"] end
+    local C = NS.Compat
+    if C and C.TomTom and C.TomTom() then return L["Sample: TomTom's arrow points to real waypoints"] end
+    return t.name
+end
+
+--- Test mode (preview-mode): the arrow on a sample trainer, at the library's sample distance and
+--- angle. Nothing is written. FB-SM-05 (the owner, 2026-11-24: "some arrow should show in test
+--- mode"): always Skill Master's own sample, whatever Show Skill Master's arrow says and whether
+--- TomTom is loaded, labeled when it is not the arrow a real waypoint would show. TomTom is never
+--- driven here: its waypoint would be TomTom's saved state, and test mode writes nothing.
+function WA.ShowTest()
+    if not Arrow then return end
+    local sample = sampleTrainer()
+    if not sample then
+        if NS.Debug then NS.Debug("Arrow", "%s", "test mode: no trainer with coordinates to sample") end
+        return
+    end
     local a = WA.Instance()
     state.test = sample
     configure(a)
-    a:ShowSample(sample.name)
+    a:ShowSample(sampleLabel(sample))
 end
 
 --- Test mode ended: the sample goes; a real waypoint set before it is pointed at again.
@@ -325,11 +348,17 @@ end
 --- own arrow (the old behavior).
 function WA.ApplySettings()
     if inst then configure(inst) end
+    -- FB-SM-05: test mode's sample stays (its label follows the setting); only the real target
+    -- follows Wanted().
+    local testing = state.test ~= nil and NS.IsTestMode and NS.IsTestMode()
+    if testing and inst then inst:ShowSample(sampleLabel(state.test)) end
     if WA.Wanted() then return end
     local had = state.target ~= nil
-    state.test = nil
     WA.Hide()
-    if inst then inst:HideSample() end
+    if not testing then
+        state.test = nil
+        if inst then inst:HideSample() end
+    end
     if had and type(C_SuperTrack) == "table" and type(C_SuperTrack.SetSuperTrackedUserWaypoint) == "function" then
         pcall(C_SuperTrack.SetSuperTrackedUserWaypoint, true)
     end
