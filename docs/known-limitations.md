@@ -86,8 +86,8 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   shows under Artisan (300), not Expert. Unverified in game.
 - The trainer popup's distances (round 5, R5-15) are measured from the map API's world positions
   (`NS.Compat.PlayerWorldPos`, `MapWorldPos`), straight-line yards inside one instance (continent),
-  not a path. A trainer without coordinates (most profession trainers: the data gives only the weapon
-  masters' x and y), one on another continent, or a player the client gives no position (inside an
+  not a path. A trainer without coordinates (since the trainer probe, GitHub issue #3, only Annora
+  inside Uldaman), one on another continent, or a player the client gives no position (inside an
   instance, a secret) shows no distance and sorts after the measured ones, in the data's order. The
   cards can reorder under the pointer as the player moves (once a second); the selected trainer stays
   selected. Computed here, not by another addon (the owner's call). Unverified in game.
@@ -135,3 +135,12 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
 - Every client API the data modules use is assumed until `/sm probe` confirms it
   ([forever-quirks.md](forever-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.
+- **Trainer data (GitHub issue #3).** 136 of the 137 trainer records are confirmed offline against
+  QuestieDB's Forever NPC table (commit 47a4756b775e), which is Classic Era data projected into
+  Forever's map frames on the assumption that no NPC moved: a moved or new Forever NPC is outside what
+  it settles. The probe's in-game spot-check list (`docs/trainer-probe/2026-11-23-r2/report.md`) names
+  the projected Stormwind and Mulgore points, the book and quest ranks, Bena Winterhoof (the 1.12 dump
+  has her teach Alchemy to 75, her title says Expert), Sayoc's Staves (absent from the 1.12 dump) and
+  Annora. The 1.12 dump has every titled profession trainer teach one rank below its title; the data
+  keeps the titles (SM-TPROBE-3). Costs and level gates are not checked offline. 55 Forever-only
+  trainers QuestieDB knows (Zephras Isle, the Junior gathering trainers, …) are not in the data.

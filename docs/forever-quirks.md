@@ -288,6 +288,17 @@ can list a name the client lacks); it is not a measurement. *Source:* this addon
 `tests/_kit/client_globals_forever.lua`, read when the missing-globals gate flagged the probe's first
 draft for calling the bare `GetSkillLineInfo` (2026-11-10).
 
+### Trainer NPCs are not client data (offline probe, 2026-11-23)
+
+Forever's client tables hold no trainer NPC (its Creature table is the companions and mounts;
+[validate-seeds.md](validate-seeds.md)), and creature positions are server data. So the trainer
+records are checked offline against QuestieDB's Forever NPC table, which is the Classic Era baseline
+projected through each map's Forever bounds. Four maps changed frame on Forever: Stormwind City,
+Mulgore, Eastern Plaguelands and Redridge Mountains (QuestieDB `data/Forever/conversion.json`), so an
+Era-sourced point on them is off by up to about 13 map-% (Woo Ping was). *Do:* take a point on those
+maps from the projected source, never from an Era guide, and spot-check it in game. *Source:* the
+trainer probe (`tools/trainer_probe.lua`, GitHub issue #3), `docs/trainer-probe/2026-11-23/report.md`.
+
 ### The character panel and secret geometry (measured, 2026-11-12)
 
 The owner's in-game errors and clicks on Forever 1.60.1 (build 70888), with the stock UI's source

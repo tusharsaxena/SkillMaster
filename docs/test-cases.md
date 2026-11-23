@@ -181,7 +181,7 @@ Total.
 - skills: WoW Forever's struct reads its real ranks, and a profession's child line is one row
 - skills: a child line with an unknown name still maps through its parent skill-line ID
 
-### test_trainers.lua (12)
+### test_trainers.lua (22)
 
 - test_trainers_fist_alliance: Alliance fist weapons are taught in Ironforge and Darnassus
 - test_trainers_fist_alliance: the home city of the player's race sorts first
@@ -189,12 +189,40 @@ Total.
 - trainers: For reads the player's faction and race when none is passed
 - trainers: Neutral trainers are on both factions' lists
 - trainers: an unknown key answers an empty list, never an error
-- trainers: every record is unverified and names its source
+- trainers: every record names its source, its side and what it teaches, under a unique id
 - test_trainers_next_rank_at_cap: Leatherworking 150/150 at level 22 trains Expert
 - trainers: NextRank answers nil at Artisan and for a skill with no ranks
 - trainers: NextRank's skill gate (Journeyman wants 50)
 - test_trainers_riding_level_gate: riding 75 opens at 40, 150 at 60
 - test_trainers_riding_level_gate: the race's own riding trainer sorts first
+- trainer probe fix: Woo Ping stands in Forever's re-bounded Stormwind frame, not the Era one
+- trainer probe fix: Undercity's Journeyman Alchemy trainer is Doctor Martin Felben (npc 11044)
+- trainer probe fix: Gorina, a Mining Supplier, is no Mining trainer; Makaru still trains Orgrimmar
+- trainer probe fix: no two NPCs share one shipped point (Bixi and Buliwyf, Sayoc and Hanashi)
+- trainer probe: every record carries its NPC id, once, and a point inside the map or none
+- trainer probe: a rank learned from a book or a quest names it (the owner's books comment on #3)
+- trainer provenance: every record carries the probe's confirmation or an explicit unverified reason
+- trainer provenance: a confirmed record still holds the values the probe confirmed
+- trainer provenance: the unverified mark follows the record, not a blanket flag
+- trainer probe books: a card for a book vendor or a rank quest's giver says how the rank is learned (#3)
+
+### test_trainer_probe.lua (15)
+
+- trainer probe: a misspelled name finds no NPC and names the near miss
+- trainer probe: a record's npcID must carry its name
+- trainer probe: the side must serve the record's faction (Neutral wants both)
+- trainer probe: a vendor stored as a trainer fails the role check (Gorina)
+- trainer probe: a title's rank must be the record's top rank
+- trainer probe: a book vendor passes when it sells the book that trains the record's rank
+- trainer probe: a rank quest's giver passes when it starts that quest
+- trainer probe: a point in the Era frame fails the place check and the patch has Forever's (Woo Ping)
+- trainer probe: a record with no point gets the one standing point; spread spawns and instances give none
+- trainer probe: two NPCs on one point are both flagged (Bixi and Buliwyf)
+- trainer probe: the SQL tuple reader keeps quotes, escapes, NULL and numbers
+- trainer probe: the sandbox gives a source no library
+- trainer probe: the provenance file loads and holds each record's confirmation or reason
+- trainer probe: the JSON writer escapes and sorts
+- trainer probe: the command line wants the QuestieDB path and reads the options
 
 ### test_helpers.lua (8)
 
@@ -1056,7 +1084,8 @@ Total.
 | test_perf.lua | 2 |
 | test_probe.lua | 10 |
 | test_skilldata.lua | 26 |
-| test_trainers.lua | 12 |
+| test_trainers.lua | 22 |
+| test_trainer_probe.lua | 15 |
 | test_helpers.lua | 8 |
 | test_bonuses.lua | 16 |
 | test_statdata.lua | 16 |
@@ -1111,4 +1140,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **817** |
+| **Total** | **842** |

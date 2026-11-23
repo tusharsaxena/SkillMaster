@@ -17,6 +17,7 @@ the checks below that cover each item:
 | The lure timer | SM-DISP-2, SM-SIM-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
 | Rows page (round 9) | SM-DISP-59 |
+| Trainer data (the offline probe, GitHub issue #3) | SM-TPROBE-1, SM-TPROBE-2, SM-TPROBE-3, SM-TPROBE-4, SM-TPROBE-5, SM-TPROBE-6 |
 | Waypoints (TomTom by name, AF-SM-TOMTOM) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58, SM-DISP-60, SM-DISP-61, SM-DISP-62, SM-DISP-63, SM-DISP-64, SM-DISP-65 |
 | Each skin | SM-SKIN-1, SM-SKIN-2, SM-SKIN-3, SM-SKIN-4, SM-SKIN-5, SM-SKIN-6, SM-SKIN-7, SM-SKIN-8 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
@@ -87,7 +88,8 @@ the checks below that cover each item:
   blocked" error. Detach a block in combat: it moves only when combat ends. Escape the window in
   combat: no error, and no invisible button is left where the rows were after combat.
 - **SM-DISP-7** An unlearned weapon row reads `Not learned · <trainer>, <city> · 10s`. A click on
-  the row (its action mark included) opens the trainer popup: the faction's weapon masters, the unverified warning. Set
+  the row (its action mark included) opens the trainer popup: the faction's weapon masters, with no
+  unverified warning since the trainer probe confirmed them (amended, GitHub issue #3). Set
   waypoint (a map pin and Skill Master's arrow), and Print to chat.
 - **SM-DISP-8** Open the window and the Journal over it, then click the window: it comes to the
   front and a crafting row still opens its profession (the overlay was re-leveled above the rows).
@@ -778,6 +780,44 @@ In each check, the tooltip's words are what they were before this change.
 - **SM-PROBE-2** (new, AD-79-SM) With debug logging off (`/sm debug off`) and the console closed,
   `/sm probe`: chat shows exactly one line, `probe: 2 lines written to the debug console. Use Copy to
   share it.`, and the report is in the console all the same. `/sm list` still prints in chat.
+
+## Trainer data (the offline probe, GitHub issue #3)
+
+The probe confirmed 136 of 137 trainer records offline (`docs/trainer-probe/2026-11-23-r2/report.md`,
+its *In-game spot checks* list). These checks are the spots no offline source settles. Record what
+you see on each Result line; none is passed until you say so.
+
+- **SM-TPROBE-1** (Alliance) In Stormwind, open the trainer popup for Swords (unlearned) or a weapon
+  skill Woo Ping teaches, Set waypoint on Woo Ping: the pin and the arrow lead to him in the Trade
+  District (63.9, 69.1 on Forever's Stormwind map), not to the Era spot. Then do the same for two
+  Stormwind profession trainers (for example Tel'Athir in the Mage Quarter, Gelman Stonehand in the
+  Dwarven District): each pin stands on the NPC.
+  Result:
+- **SM-TPROBE-2** (Horde) In Mulgore, at Bloodhoof Village: Set waypoint on
+  Kar Stormsinger (riding): the pin stands on him (46.8, 62.0, a projected Mulgore point). In
+  Orgrimmar's Valley of Honor, Sayoc and Hanashi have their own pins a step apart, and Makaru is the
+  Mining trainer listed (no Gorina). In Undercity, Journeyman Alchemy lists Doctor Martin Felben.
+  Result:
+- **SM-TPROBE-3** (either faction) At one Journeyman trainer (for example Tel'Athir, Alchemy) and one
+  Artisan trainer (for example Georgio Bolero, Tailoring), open the trainer window with the skill at
+  the rank's gate: the Journeyman trainer offers Journeyman (150) and the Artisan trainer Artisan
+  (300). The CMaNGOS 1.12 dump has each one rank lower; Skill Master keeps the titles.
+  Result:
+- **SM-TPROBE-4** (the books comment) Learn Cooking to 150 and open its trainer popup: Shandrina
+  (Alliance) or Wulan (Horde) reads "Sells Expert Cookbook" on her card's second line, and Print to
+  chat ends "· Sells Expert Cookbook". Hover the Cooking row: the tooltip's Trainer line says it too.
+  The vendor sells the book. Fishing at 150: Old Man Heming "Sells Expert Fishing - The Bass and You",
+  Nat Pagle "Quest: Nat Pagle, Angler Extreme". First Aid at 150: Deneb Walker or Balai Lok'Wein
+  "Sells Expert First Aid - Under Wraps", and at 225 the Trauma Surgeon "Quest: Triage".
+  Result:
+- **SM-TPROBE-5** Open the Enchanting popup at 225 (Artisan): Annora (Uldaman) is the one card with
+  the unverified mark and the warning "Not confirmed on WoW Forever yet (marked until checked)";
+  Set waypoint is disabled (no coordinates), Print to chat gives Uldaman, Badlands. Any other
+  popup with only confirmed trainers shows no warning.
+  Result:
+- **SM-TPROBE-6** (Horde) Bena Winterhoof (Thunder Bluff, Middle Rise) trains Alchemy to Expert
+  (225), and Sayoc (Orgrimmar) teaches Staves: the two records the 1.12 dump disagrees with.
+  Result:
 
 ## Skins and diagnostics
 
