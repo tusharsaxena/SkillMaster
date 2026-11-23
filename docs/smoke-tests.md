@@ -792,32 +792,32 @@ you see on each Result line; none is passed until you say so.
   District (63.9, 69.1 on Forever's Stormwind map), not to the Era spot. Then do the same for two
   Stormwind profession trainers (for example Tel'Athir in the Mage Quarter, Gelman Stonehand in the
   Dwarven District): each pin stands on the NPC.
-  Result:
+  Result: PASSED (owner, 2026-11-23).
 - **SM-TPROBE-2** (Horde) In Mulgore, at Bloodhoof Village: Set waypoint on
   Kar Stormsinger (riding): the pin stands on him (46.8, 62.0, a projected Mulgore point). In
   Orgrimmar's Valley of Honor, Sayoc and Hanashi have their own pins a step apart, and Makaru is the
   Mining trainer listed (no Gorina). In Undercity, Journeyman Alchemy lists Doctor Martin Felben.
-  Result:
+  Result: PASSED (owner, 2026-11-23).
 - **SM-TPROBE-3** (either faction) At one Journeyman trainer (for example Tel'Athir, Alchemy) and one
   Artisan trainer (for example Georgio Bolero, Tailoring), open the trainer window with the skill at
   the rank's gate: the Journeyman trainer offers Journeyman (150) and the Artisan trainer Artisan
   (300). The CMaNGOS 1.12 dump has each one rank lower; Skill Master keeps the titles.
-  Result:
+  Result: PASSED (owner, 2026-11-23).
 - **SM-TPROBE-4** (the books comment) Learn Cooking to 150 and open its trainer popup: Shandrina
   (Alliance) or Wulan (Horde) reads "Sells Expert Cookbook" on her card's second line, and Print to
   chat ends "· Sells Expert Cookbook". Hover the Cooking row: the tooltip's Trainer line says it too.
   The vendor sells the book. Fishing at 150: Old Man Heming "Sells Expert Fishing - The Bass and You",
   Nat Pagle "Quest: Nat Pagle, Angler Extreme". First Aid at 150: Deneb Walker or Balai Lok'Wein
   "Sells Expert First Aid - Under Wraps", and at 225 the Trauma Surgeon "Quest: Triage".
-  Result:
+  Result: PASSED (owner, 2026-11-23).
 - **SM-TPROBE-5** Open the Enchanting popup at 225 (Artisan): Annora (Uldaman) is the one card with
   the unverified mark and the warning "Not confirmed on WoW Forever yet (marked until checked)";
   Set waypoint is disabled (no coordinates), Print to chat gives Uldaman, Badlands. Any other
   popup with only confirmed trainers shows no warning.
-  Result:
+  Result: Owed. Not validated (owner, 2026-11-23): no character with those professions.
 - **SM-TPROBE-6** (Horde) Bena Winterhoof (Thunder Bluff, Middle Rise) trains Alchemy to Expert
   (225), and Sayoc (Orgrimmar) teaches Staves: the two records the 1.12 dump disagrees with.
-  Result:
+  Result: Owed. Not validated (owner, 2026-11-23): no character with those professions.
 
 ## Skins and diagnostics
 
