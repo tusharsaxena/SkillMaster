@@ -800,7 +800,7 @@ Total.
 - journal: a grip drag lays out at most once per frame and redraws once, after the release
 - journal: the saved size is restored, clamped to the minimum; locked refuses the grip
 
-### test_preview.lua (8)
+### test_preview.lua (9)
 
 - preview: test mode draws the sample Dwarf Hunter in every block
 - preview: the bonuses are the sample's: the Dwarf racial on Guns, the lure's timer on Fishing
@@ -809,7 +809,13 @@ Total.
 - preview: test mode off restores the live data in every source
 - preview: combat ends test mode and puts the live data back
 - preview: the sample character and its alts are Sim.Sample's Forever people
-- preview: the library-absent copy of the sample people matches Sim.SAMPLE.forever
+- preview: no hand-kept copy of the sample people (LibKa0s#104)
+- preview: a library-absent load draws a nameless sample character and no alts
+
+### test_sample_names.lua (2)
+
+- sample names: the matcher finds a planted name and passes an identifier
+- sample names: no Sample*/Mock* name literal outside tests/, libs/ and the frozen docs
 
 ### test_sim.lua (12)
 
@@ -825,6 +831,18 @@ Total.
 - sim: the verb, the launcher entry and the checkbox are one handler
 - sim: combat stops a running session
 - sim: the window shows the simulation strip while a session runs
+
+### test_sim_start_panel.lua (3)
+
+- sim start panel: the panel's Start row is the typed start, and it shows the panel
+- sim start panel: the Master controls Sim box shows the panel
+- sim start panel: the launcher menu's Sim mode entry shows the panel
+
+### test_dropdown_selected.lua (3)
+
+- dropdown selected: the Journal's range picker paints its selected range apart
+- dropdown selected: the sort menu's current order (a radio row) paints apart
+- dropdown selected: Azeroth's selection is the gold fallback, not its accent
 
 ### test_window_chrome.lua (15)
 
@@ -1160,8 +1178,11 @@ Total.
 | test_template.lua | 3 |
 | test_broker.lua | 17 |
 | test_polish.lua | 12 |
-| test_preview.lua | 8 |
+| test_preview.lua | 9 |
+| test_sample_names.lua | 2 |
 | test_sim.lua | 12 |
+| test_sim_start_panel.lua | 3 |
+| test_dropdown_selected.lua | 3 |
 | test_window_chrome.lua | 15 |
 | test_header_buttons.lua | 10 |
 | test_tooltips.lua | 11 |
@@ -1185,4 +1206,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **875** |
+| **Total** | **884** |

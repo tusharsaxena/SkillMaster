@@ -96,5 +96,5 @@ QuestieDB's Forever NPC table, cross-checks it with the CMaNGOS 1.12 dump (ItemT
 Method.gg names list, and writes `docs/trainer-probe/<run>/` and `defaults/TrainerProvenance_Forever.lua`
 (the modules: `io`, `questiedb`, `cmangos`, `pfquest`, `checks`, `era`, `report`; tests in
 `tests/test_trainer_probe.lua`).
-`libs/` and `tests/_kit/` are vendored from LibKa0s v1.109.0 (the root `CLAUDE.md` provenance line) and never
+`libs/` and `tests/_kit/` are vendored from LibKa0s v1.113.0 (the root `CLAUDE.md` provenance line) and never
 edited.
