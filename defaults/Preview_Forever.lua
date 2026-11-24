@@ -31,7 +31,7 @@ NS.Preview_Forever = {
     },
 
     character = {
-        sample = 1, level = 22, race = "Dwarf", raceFile = "Dwarf",   -- Samplehunter Mockstride
+        sample = 1, level = 22, race = "Dwarf", raceFile = "Dwarf",   -- Sim.Sample("forever") row 1
         class = "Hunter", classFile = "HUNTER", faction = "Alliance",
     },
 
@@ -98,16 +98,16 @@ NS.Preview_Forever = {
     },
 
     alts = {
-        { sample = 5, level = 41,   -- Mockshield Sampleforge, of Mockrealm
+        { sample = 5, level = 41,   -- row 5, the Warrior
           race = "Human", class = "WARRIOR", className = "Warrior",
           faction = "Alliance", updatedAgo = 86400 * 2,
           skills = { blacksmithing = { 218, 225 }, mining = { 212, 225 }, cooking = { 201, 225 },
                      fishing = { 150, 225 } } },
-        { sample = 3, level = 17,   -- Mockflame Samplewick, of Mockrealm
+        { sample = 3, level = 17,   -- row 3, the Mage
           race = "Gnome", class = "MAGE", className = "Mage",
           faction = "Alliance", updatedAgo = 86400 * 5,
           skills = { tailoring = { 70, 75 }, cooking = { 62, 75 }, fishing = { 38, 75 } } },
-        { sample = 2, level = 60,   -- Sampleblade Mockvale
+        { sample = 2, level = 60,   -- row 2, the Paladin
           race = "Dwarf", class = "PALADIN", className = "Paladin",
           faction = "Alliance", updatedAgo = 86400 * 12,
           skills = { blacksmithing = { 300, 300 }, mining = { 300, 300 }, cooking = { 300, 300 },

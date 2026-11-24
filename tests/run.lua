@@ -268,6 +268,7 @@ Kit.run{
         "test_broker",
         "test_polish",
         "test_preview",
+        "test_sample_names",
         "test_sim",
         "test_sim_start_panel",
         "test_dropdown_selected",

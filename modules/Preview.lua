@@ -28,40 +28,35 @@ local function fixture() return NS.Preview_Forever end
 
 local SimLib = LibStub and LibStub("LibKa0s-Sim-1.0", true)
 
---- The library-absent copy of Sim.SAMPLE.forever's identity fields, the degrade the Sim doc names
---- ("a copy of the rows above"); tests/test_preview.lua holds it to the live set, row by row.
-P.FALLBACK_PEOPLE = {
-    { name = "Samplehunter", surname = "Mockstride",  fullName = "Samplehunter Mockstride", realm = "Samplerealm", classFile = "HUNTER" },
-    { name = "Sampleblade",  surname = "Mockvale",    fullName = "Sampleblade Mockvale",    realm = "Samplerealm", classFile = "PALADIN" },
-    { name = "Mockflame",    surname = "Samplewick",  fullName = "Mockflame Samplewick",    realm = "Mockrealm",   classFile = "MAGE" },
-    { name = "Samplemender", surname = "Mockbrook",   fullName = "Samplemender Mockbrook",  realm = "Samplerealm", classFile = "PRIEST" },
-    { name = "Mockshield",   surname = "Sampleforge", fullName = "Mockshield Sampleforge",  realm = "Mockrealm",   classFile = "WARRIOR" },
-}
-
---- The collection's Forever sample people: Sim.Sample("forever"), else a copy of the fallback.
+--- The collection's Forever sample people: Sim.Sample("forever"), the one source of sample names
+--- (LibKa0s#104: no addon keeps its own list). A library-absent load answers none.
 function P.People()
     if SimLib and type(SimLib.Sample) == "function" then return SimLib.Sample("forever") end
-    local out = {}
-    for i, row in ipairs(P.FALLBACK_PEOPLE) do
-        local c = {}
-        for k, v in pairs(row) do c[k] = v end
-        out[i] = c
-    end
-    return out
+    return {}
 end
 
 --- A fixture entry with its shared row's name (the whole two-word name, as Forever's store keys
 --- it, forever-quirks-§4) and realm; the fixture's own fields are kept.
 local function person(entry, people)
     local row = people[entry.sample] or people[1]
+    if not row then return nil end
     local out = {}
     for k, v in pairs(entry) do out[k] = v end
     out.name, out.realm = row.fullName, row.realm
     return out
 end
 
---- Test mode's sample character, its name and realm from the shared people.
-function P.SampleCharacter() return person(fixture().character, P.People()) end
+--- Test mode's sample character, its name and realm from the shared people; a library-absent load
+--- draws it nameless ("Sample character", no realm), never with an invented name.
+function P.SampleCharacter()
+    local entry = fixture().character
+    local c = person(entry, P.People())
+    if c then return c end
+    c = {}
+    for k, v in pairs(entry) do c[k] = v end
+    c.name, c.realm = L["Sample character"], ""
+    return c
+end
 
 -- ── the sample models ────────────────────────────────────────────────────────────────────────
 
@@ -133,12 +128,14 @@ local function buildAlts(c, skills, now, stats)
     local list = { { key = c.realm .. "-" .. c.name, record = ownRecord(c, skills, now, stats), isCurrent = true } }
     local others, people = {}, P.People()
     for _, entry in ipairs(fixture().alts or {}) do
-        local a = person(entry, people)
-        local s = {}
-        for key, v in pairs(a.skills) do s[key] = catalogSkill(key, v[1], v[2]) end
-        others[#others + 1] = { key = a.realm .. "-" .. a.name, isCurrent = false,
-            record = { name = a.name, class = a.class, className = L[a.className], race = L[a.race],
-                       level = a.level, faction = a.faction, updated = now - (a.updatedAgo or 0), skills = s } }
+        local a = person(entry, people)   -- nil without the library: no invented alt
+        if a then
+            local s = {}
+            for key, v in pairs(a.skills) do s[key] = catalogSkill(key, v[1], v[2]) end
+            others[#others + 1] = { key = a.realm .. "-" .. a.name, isCurrent = false,
+                record = { name = a.name, class = a.class, className = L[a.className], race = L[a.race],
+                           level = a.level, faction = a.faction, updated = now - (a.updatedAgo or 0), skills = s } }
+        end
     end
     table.sort(others, function(x, y) return x.record.name < y.record.name end)
     for _, o in ipairs(others) do list[#list + 1] = o end

@@ -18,6 +18,7 @@ L["%s - %s"] = true
 L["No skills to show yet."] = true
 L["Test mode: the skills shown are sample data."] = true
 L["Test mode"] = true
+L["Sample character"] = true   -- test mode's nameless stand-in when LibKa0s-Sim-1.0 is absent
 L["Test mode cannot start in combat."] = true
 L["Shows or hides the Skill Master window."] = true
 
