@@ -37,7 +37,7 @@ Total.
 - options: the per-block rows go through NS.Blocks (detach, dock, collapse, order)
 - options: a hidden block leaves the window and the detached frames
 - options: the waypoint method preference decides the provider
-- options: the unverified mark follows its row
+- options: an unverified trainer's directions carry no mark (the owner, 2026-11-25)
 - options: the bar text template and the timer and marker switches reach the bar
 - options: the flat color mode draws the Bar color, or the skin's while its companion is on
 - options: the Bars page has no preview bar (owner feedback round 4)
@@ -203,7 +203,7 @@ Total.
 - trainer probe: a rank learned from a book or a quest names it (the owner's books comment on #3)
 - trainer provenance: every record carries the probe's confirmation or an explicit unverified reason
 - trainer provenance: a confirmed record still holds the values the probe confirmed
-- trainer provenance: the unverified mark follows the record, not a blanket flag
+- trainer provenance: no trainer is shown as unverified (the owner, 2026-11-25)
 - trainer probe books: a card for a book vendor or a rank quest's giver says how the rank is learned (#3)
 - round2 artisan: Alliance Artisan Leatherworking is Drakk Stonehand in the Hinterlands, not Telonis
 - round2 artisan: no capital trainer trains a craft to Artisan; each side has a Master who does

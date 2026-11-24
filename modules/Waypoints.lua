@@ -58,14 +58,9 @@ function Wp:Blocked(t)
     return "noprovider"
 end
 
---- The " (unverified)" mark for trainer data not checked on WoW Forever, unless the Trainers and
---- Waypoints page turned it off (trainers.unverified); "" otherwise.
-function Wp.UnverifiedMark(t)
-    if t.verified == false and setting("trainers.unverified", true) ~= false then
-        return " " .. L["(unverified)"]
-    end
-    return ""
-end
+-- No trainer is shown as unverified (the owner, 2026-11-25: "i dont want to ship anything which
+-- shows waypoint unverified - if it comes up, or a user reports it, ill fix it then"). The probe's
+-- per-record provenance (verified, unverified) stays in the data for the probe and the suites.
 
 local function announce(line)
     if setting("waypoints.announce", true) ~= false then NS.Print(line) end
@@ -81,7 +76,7 @@ function Wp:Directions(t)
     -- Expert Cookbook".
     local learn = NS.Trainers.LearnNote(t)
     if learn then text = text .. " \194\183 " .. learn end
-    return text .. Wp.UnverifiedMark(t)
+    return text
 end
 
 function Wp:Print(t) NS.Print(Wp:Directions(t)) end

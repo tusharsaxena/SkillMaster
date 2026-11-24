@@ -28,7 +28,7 @@ end)
 test("FB-SM-06 each row on its tab", function()
     local at = {}
     for _, row in ipairs(NS.SchemaForPage("trainers")) do at[row.path] = row end
-    for _, path in ipairs({ "trainers.unverified", "trainers.showAll", "trainers.nameColor",
+    for _, path in ipairs({ "trainers.showAll", "trainers.nameColor",
                             "trainers.useClassColorName", "trainers.nameColorFromSkin" }) do
         assertTrue(at[path] ~= nil, path .. " is on the page")
         assertEqual(at[path].group, L["Trainers"], path .. " on the Trainers tab")

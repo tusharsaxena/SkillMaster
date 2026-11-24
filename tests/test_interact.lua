@@ -401,17 +401,8 @@ test("trainer popup: the faction's trainers, the selection and the waypoint butt
         assertEqual(P.Selected(), list[1])
         P.Select(2)
         assertEqual(P.Selected(), list[2])
-        -- The probe confirmed every fist-weapon master (GitHub issue #3): no warning. An unverified
-        -- card brings it back (the provenance is per record, not a blanket flag).
-        assertFalse(f.warning:IsShown(), "probe-confirmed trainers carry no warning")
-        local t = list[2]
-        local was = t.verified
-        t.verified = false
-        P.Relayout()
-        local shown = f.warning:IsShown()
-        t.verified = was
-        P.Relayout()
-        assertTrue(shown, "an unverified card is flagged")
+        -- No unverified warning ships (the owner, 2026-11-25), whatever a record's provenance.
+        assertTrue(f.warning == nil, "the popup has no unverified warning")
         assertEqual(f.waypoint.text:GetText(), "Set waypoint", "the label names no provider (R6-6)")
         assertFalse(f.waypoint:IsEnabled(), "no native pin: only chat, so disabled (R6-6)")
         M.__resetPrinted()

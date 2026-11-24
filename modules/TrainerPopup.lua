@@ -2,7 +2,7 @@ local _, NS = ...
 -- modules/TrainerPopup.lua — "where do I learn this" (design §2 goal 7, mockup "Tooltips" artboard,
 -- plan Task 3.3): the trainers for the player's faction who teach an unlearned skill, or who train a
 -- learned one's next rank, one selectable card each (name, cost, city · subzone (x, y), what else
--- they teach), the unverified-data warning, and two actions: set a waypoint (the native pin or
+-- they teach), and two actions: set a waypoint (the native pin or
 -- chat, NS.Waypoints) and print the directions. A window opened on demand from the MEDIUM
 -- main window, so HIGH (frame-layering-§1/§4), toplevel, clamped, Escape closes it, and it closes
 -- with the window.
@@ -308,9 +308,6 @@ local function buildShowAll()
 end
 
 local function buildActions()
-    frame.warning = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    frame.warning:SetText(L["Not confirmed on WoW Forever yet (marked until checked)"])
-    NS.Skin.Text(frame.warning, "sem.warn")
     frame.waypoint = button(frame, L["Set waypoint"], setWaypoint, true)
     -- Hooked, not set: NS.Skin.Button hooked its hover look on these scripts, and SetScript drops it.
     -- The action buttons are the popup's CHROME (a modal dialog's controls, LibKa0s#92, AD-92-SM):
@@ -467,7 +464,7 @@ local function placeList(width)
     NS.Pool.ReleaseAll(cardPool)
     for _, h in ipairs(frame.headings) do h:Hide() end
     for _, fs in ipairs(frame.notes or {}) do fs:Hide() end
-    local y, i, unverified = 0, 0, false
+    local y, i = 0, 0
     local counts = { h = 0, n = 0 }
     for _, g in ipairs(state.groups) do
         y = y + placeHead(g, y, width, counts)
@@ -479,10 +476,9 @@ local function placeList(width)
             local h = fillCard(c, t, state.key, i, ALSO_LINES, width)
             c:Show()
             y = y + h + 6
-            unverified = unverified or NS.Waypoints.UnverifiedMark(t) ~= ""
         end
     end
-    return y, unverified
+    return y
 end
 
 --- Scroll the cards to `offset` units, clamped to what the list overflows by.
@@ -503,10 +499,10 @@ local function layout()
         top = top + 20
     end
     local full = WIDTH - 2 * PAD
-    local listH, unverified = placeList(full)
-    local room = P.MAX_HEIGHT - top - (unverified and 18 or 0) - BUTTON_H - PAD
+    local listH = placeList(full)
+    local room = P.MAX_HEIGHT - top - BUTTON_H - PAD
     local scrolls = listH > room and frame.scrollBar ~= nil
-    if scrolls then listH, unverified = placeList(full - SCROLL_W - SCROLL_GAP) end
+    if scrolls then listH = placeList(full - SCROLL_W - SCROLL_GAP) end
     local viewH = math.max(1, scrolls and room or listH)
     frame.content:SetSize(scrolls and full - SCROLL_W - SCROLL_GAP or full, math.max(1, listH))
     frame.list:ClearAllPoints()
@@ -520,10 +516,6 @@ local function layout()
     state.maxOffset = scrolls and math.ceil(listH - viewH) or 0
     setScroll(state.offset)
     local y = top + viewH
-    frame.warning:ClearAllPoints()
-    frame.warning:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -y)
-    frame.warning:SetShown(unverified)
-    if unverified then y = y + 18 end
     frame.waypoint:ClearAllPoints()
     frame.waypoint:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -y)
     frame.waypoint:SetPoint("RIGHT", frame, "CENTER", 40, 0)

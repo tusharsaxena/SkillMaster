@@ -646,7 +646,7 @@ In each check, the tooltip's words are what they were before this change.
 - **SM-OPT-4** Hide a skill from its row menu, then open Rows: its Window eye is dimmed; click it
   and the row comes back.
 - **SM-OPT-5** Trainers and Waypoints: Waypoint method Chat only, click an unlearned row's Go: only
-  the chat line, no map pin and no arrow. Turn Mark unverified trainers off: no "(unverified)".
+  the chat line, no map pin and no arrow. No "(unverified)" shows (the owner, 2026-11-25: the Mark unverified trainers row is gone).
 - **SM-OPT-6** A fresh profile: no bar draws a border under any skin, Azeroth, High Contrast and
   WoW Midnight included (Show border and Use the skin's border are both off by default). Tick Use
   the skin's border under High Contrast: its edge draws. Set Bars > Main window tooltip bar height to 12, hover a Defense or Other row, then hover the
@@ -822,6 +822,8 @@ you see on each Result line; none is passed until you say so.
   Amended (the owner's feedback, 2026-11-24): Annora's point is now Uldaman's back entrance in the
   eastern Badlands (65.3, 42.6), so Set waypoint works on her card; she keeps the unverified mark and
   the warning. SM-TPROBE-13 is the re-check.
+  Superseded (the owner, 2026-11-25): no trainer is shown as unverified; the mark, the warning and
+  the Mark unverified trainers row are gone.
 - **SM-TPROBE-6** (Horde) Bena Winterhoof (Thunder Bluff, Middle Rise) trains Alchemy to Expert
   (225), and Sayoc (Orgrimmar) teaches Staves: the two records the 1.12 dump disagrees with.
   Result: Superseded (owner's ruling, 2026-11-24: "trust the dump"): Bena Winterhoof trains Alchemy
@@ -877,14 +879,14 @@ you see on each Result line; none is passed until you say so.
   the Expert book vendor and the Artisan quest giver, nobody below them. Tick Show all trainers: every
   trainer of the skill is back, each rank under its heading.
   Result: PASSED (owner, 2026-11-25).
-- **SM-TPROBE-13** Enchanting at 225: Annora's card carries the unverified mark and the warning, and
-  Set waypoint is enabled: the pin and arrow lead to Uldaman's back entrance in the eastern Badlands
+- **SM-TPROBE-13** Enchanting at 225: Annora's card carries no unverified mark or warning (the owner,
+  2026-11-25), and Set waypoint is enabled: the pin and arrow lead to Uldaman's back entrance in the eastern Badlands
   (65.3, 42.6). Print to chat gives Uldaman, Badlands (65.3, 42.6).
-  Result: Owed. Not validated (owner, 2026-11-25): no character to check it with.
+  Result: PASSED (owner, 2026-11-25: "assume all the SM checks pass").
 - **SM-TPROBE-14** (Horde) Staves' popup lists Hanashi (Orgrimmar) and Ansekhwa (Thunder Bluff), not
   Sayoc; Sayoc still lists for Axes, Bows, Daggers, Fist Weapons and Thrown. Bena Winterhoof is under
   Apprentice in Alchemy's Show all trainers list.
-  Result: Owed. Not validated (owner, 2026-11-25): no character to check it with.
+  Result: PASSED (owner, 2026-11-25: "assume all the SM checks pass").
 
 ## Skins and diagnostics
 
@@ -950,7 +952,7 @@ Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/`, items FB-SM-01 to FB-SM
   Waypoints > Trainers > Trainer name color: each draws the class color while the skin's is ticked.
   Result:
 - **SM-FB-4** (FB-SM-06, S3) Open Settings > Skill Master > Trainers and Waypoints: two tabs,
-  Trainers (Mark unverified trainers, Show all trainers, Trainer popup's Trainer name color) and
+  Trainers (Show all trainers, Trainer popup's Trainer name color) and
   Waypoints (Waypoint method, Say where in chat, the Waypoint arrow, Arrow text and Arrow position
   subgroups with Reset position). Defaults resets the rows on both tabs. The arrow's right-click
   Arrow settings... still opens this page.

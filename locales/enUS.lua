@@ -355,7 +355,6 @@ L["This session"] = true
 L["+%d (%d / h)"] = true
 L["ETA to %d"] = true
 L["%s at this rate"] = true
-L["(unverified)"] = true
 L["Next rank"] = true
 L["%s at %d \194\183 Lv %d"] = true
 L["Trainer"] = true
@@ -380,7 +379,6 @@ L["Arrow: character panel \194\183 Shift-click: link \194\183 Right-click: menu"
 L["Scale: vs %s"] = true
 L["Also teaches: %s"] = true
 L["%d yd"] = true
-L["Not confirmed on WoW Forever yet (marked until checked)"] = true
 -- GitHub issue #3, the owner's books comment: how a rank is learned where no trainer trains it.
 L["Sells %s"] = true
 L["Quest: %s"] = true
@@ -648,8 +646,6 @@ L["Map pin"] = true
 L["Chat only"] = true
 L["Say where in chat"] = true
 L["Print a chat line naming the trainer when a waypoint is set."] = true
-L["Mark unverified trainers"] = true
-L["Flag trainer data not yet checked on WoW Forever, in tooltips, the trainer popup and chat."] = true
 -- Feedback round 2, FB-11: the trainer popup's name color (settings/Trainers.lua).
 L["Trainer popup"] = true
 L["Trainer name color"] = true
