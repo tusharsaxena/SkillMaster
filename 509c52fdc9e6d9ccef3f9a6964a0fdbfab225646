@@ -1,0 +1,4 @@
+FB2 independent review (workflow wf_0f1c645f-6fa, 2026-11-24): ok
+Fixes: 509c52f FB2-SM-REV: Prove the bare verb and a Restart show the step panel
+Gate: KA0S_KIT_CLIENT=forever ka0s-bounded lua tests/run.lua: 886 passed, 0 failed, 1 skipped, 887 total (exit 0). Plain ka0s-bounded lua tests/run.lua gives the same 886/0/1 of 887 (the TOC is Forever-only, 16001). ka0s-bounded luacheck .: 0 warnings / 0 errors in 169 files. No file is over 1500 lines; the largest are tests/test_round6.lua at 1490 and modules/Journal.lua at 1215.
+Open: Minor, not changed: tests/test_sample_names.lua lists files with io.popen('git ls-files') and requires more than 50 files walked. The suite would therefore fail if run from a tree with no git, such as a release zip. The suites only ever run from the repo, so I left it as it is. The owner may want a fallback.
