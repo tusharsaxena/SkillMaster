@@ -15,6 +15,7 @@ ahead and removed the row), and passed again once the guard was restored.
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
 import sys
 import tempfile
@@ -53,23 +54,40 @@ TABLES = {
 TRAINERS = '''local _, NS = ...
 local J, E, A = { 75, 150 }, { 75, 150, 225 }, { 75, 150, 225, 300 }
 local G, S = A, J
+local function city(c, rows)
+    for _, r in ipairs(rows) do
+        add{ name = r[1], faction = c.faction, city = c.name, subzone = r[2], mapName = c.name,
+             mapID = c.mapID, teaches = { r[3] }, ranks = r[4], npcID = r[5], x = r[6], y = r[7], source = "s" }
+    end
+end
 city({ name = "Stormwind", faction = "Alliance", mapID = 1453, news = "1" }, {
-    { "Tel'Athir", "Mage Quarter", "alchemy", J },
-    { "Nobody Here", "Lost Quarter", "alchemy", E },
+    { "Tel'Athir", "Mage Quarter", "alchemy", J, 900001, 50.0, 50.0 },
+    { "Nobody Here", "Lost Quarter", "alchemy", E, 900002, 40.0, 40.0 },
 })
 for _, r in ipairs({
-    { "Nat Pagle", "Neutral", "Dustwallow Marsh", "Dustwallow Marsh", 1445, "fishing", { 300 } },
+    { "Nat Pagle", "Neutral", "Dustwallow Marsh", "Dustwallow Marsh", 1445, "fishing", { 300 }, 900003, 58.6, 60.1, BOOK },
 }) do
+    add{ name = r[1], faction = r[2], city = r[3], mapName = r[4], mapID = r[5], teaches = { r[6] },
+         ranks = r[7], npcID = r[8], x = r[9], y = r[10], learn = r[11], source = "s" }
 end
 for _, r in ipairs({
-    { "Woo Ping", "Alliance", "Stormwind", "Mage Quarter", 1453, 57.1, 57.7,
+    { "Woo Ping", "Alliance", "Stormwind", "Mage Quarter", 1453, 57.1, 57.7, 900004,
       { "swords", "polearms" } },
 }) do
+    local polearms = false
+    add{ name = r[1], faction = r[2], city = r[3], subzone = r[4], mapName = r[3], mapID = r[5],
+         x = r[6], y = r[7], npcID = r[8], cost = 1000, teaches = r[9], source = "s",
+         costByKey = polearms and COST or nil }
 end
 for _, r in ipairs({
-    { "Randal Hunter", "Alliance", "Human", "Eastvale Logging Camp", "Elwynn Forest", 1429 },
+    { "Randal Hunter", "Alliance", "Human", "Eastvale Logging Camp", "Elwynn Forest", 1429, 900005, nil, nil },
 }) do
+    add{ name = r[1], faction = r[2], race = r[3], city = r[4], mapName = r[5], mapID = r[6],
+         npcID = r[7], x = r[8], y = r[9], cost = 900000, teaches = { "riding" }, ranks = { 75, 150 }, source = "s" }
 end
+add{ name = "Zara Invented", faction = "Neutral", city = "Elwynn Forest", mapName = "Elwynn Forest",
+     mapID = 1429, npcID = 900006, x = 20.0, y = 30.0, cost = 900000, teaches = { "riding" }, ranks = { 75 },
+     hold = HOLD, source = SRC }
 '''
 
 FISHING = '''local L = NS.L
@@ -103,6 +121,55 @@ NS.SkillCatalog.riding.aliasIDs = { 148 }
 '''
 
 
+GATHERING = '''local L = NS.L
+NS.Gathering_Forever = {
+    mining = {
+        verified = false, source = "recalled",
+        { name = L["Glimmer Vein"],   need = 1 },
+        { name = L["Hollow Deposit"], need = 65 },
+    },
+    herbalism = {
+        verified = false, source = "recalled",
+        { name = L["Dusk Petal"], need = 1 },
+    },
+}
+'''
+
+# An invented ForeverDB in its real shape (positional rows, string creature keys, spm in 0..1000,
+# spw world points through umaa): made-up names, ids from 900000 up, made-up coordinates. Never a
+# real ForeverDB row (its data is GPL-3.0; the repo is MIT).
+FOREVERDB = {
+    "meta": {"build": "2099-01-01", "hash": "feedfacecafe0000", "counts": {}},
+    "npc": {"900001": ["Tel'Athir", "Journeyman Alchemist", 30, 30, 0],
+            "900002": ["Somebody Else", "Alchemist", 30, 30, 0],
+            "900003": ["Nat Pagle", "Fisherman", 45, 45, 0],
+            "900004": ["Woo Ping", "Weapon Master", 40, 40, 0],
+            "900006": ["Zara Invented", "Riding Trainer", 20, 20, 0]},
+    "nfac": {"900001": "A", "900002": "A", "900003": "AH", "900004": "A", "900006": "H"},
+    # 900001: one spm point at 50.3, 50.1 (on), 900006 at 25.0, 30.0 (off by 5)
+    "spm": {"c900001": {"1453": [503, 501]}, "c900006": {"1429": [250, 300]}},
+    # 900003: a world point on Map 1 that projects onto UiMap 1445 at 58.6, 60.1
+    "spw": {"c900003": [[1, 600.0 - 0.601 * 1000.0, 500.0 - 0.586 * 1000.0]]},
+    "umaa": {"900100": [1445, 1, 15, 0, 0, 1, 1, -400.0, -500.0, -1000000, 600.0, 500.0, 1000000]},
+    "obj": {"900200": ["Glimmer Vein"], "900201": ["Dusk Petal"]},
+    "spf": {"ProfessionTrainers": {"900001": 171, "900002": 356},
+            "WeaponMasters": {"900004": [43, 55]}},
+}
+
+
+def write_foreverdb(folder: Path, tag: str = "v2099.01.01.1") -> Path:
+    folder.mkdir(parents=True, exist_ok=True)
+    data = json.dumps(FOREVERDB).encode("utf-8")
+    (folder / "foreverdb.json").write_bytes(data)
+    src = {"format": 1, "tag": tag, "commit": "0" * 40, "date": "2099-01-02", "origin": ["github"],
+           "tocVersion": tag[1:], "meta": {"build": "2099-01-01", "hash": "feedfacecafe0000"},
+           "files": [{"path": "ForeverDB/ForeverDB.toc", "bytes": 1, "sha256": "a" * 64, "sha256LF": "a" * 64}],
+           "urls": ["https://example.invalid/ForeverDB.toc"], "install": None,
+           "json": {"path": "foreverdb.json", "sha256": hashlib.sha256(data).hexdigest()}}
+    (folder / "SOURCES.json").write_text(json.dumps(src), encoding="utf-8")
+    return folder
+
+
 def crlf(text: str) -> bytes:
     return text.replace("\n", "\r\n").encode("utf-8")
 
@@ -119,16 +186,16 @@ class Fixture(unittest.TestCase):
         self.defaults = self.tmp / "defaults"
         self.defaults.mkdir()
         for name, text in (("Trainers_Forever.lua", TRAINERS), ("Fishing_Forever.lua", FISHING),
-                           ("SkillCatalog_Forever.lua", CATALOG)):
+                           ("SkillCatalog_Forever.lua", CATALOG), ("Gathering_Forever.lua", GATHERING)):
             (self.defaults / name).write_bytes(crlf(text))
-        floor = mock.patch.multiple(seeds, SEED_MINIMUMS={"trainers": 1, "fishing": 1, "catalog": 1},
+        floor = mock.patch.multiple(seeds, SEED_MINIMUMS={"trainers": 1, "fishing": 1, "catalog": 1, "gathering": 1},
                                     SEED_SENTINELS={"trainers": ("Woo Ping",), "fishing": (1429,)})
         floor.start()
         self.addCleanup(floor.stop)
 
-    def doc(self):
+    def doc(self, fdb=None):
         return seeds.derive_doc(seeds.DB(self.tables), seeds.read_seeds(self.defaults), "forever",
-                                "1.60.1.70938", "", "2026-11-15")
+                                "1.60.1.70938", "", "2026-11-15", fdb)
 
 
 class LuaReader(unittest.TestCase):
@@ -147,11 +214,34 @@ class LuaReader(unittest.TestCase):
 class Seeds(Fixture):
     def test_trainers(self):
         rows = {t["id"]: t for t in seeds.read_seeds(self.defaults)["trainers"]}
-        self.assertEqual(sorted(rows), ["nat_pagle", "nobody_here", "randal_hunter", "tel_athir", "woo_ping"])
+        self.assertEqual(sorted(rows), ["nat_pagle", "nobody_here", "randal_hunter", "tel_athir", "woo_ping",
+                                        "zara_invented"])
         self.assertEqual(rows["woo_ping"]["teaches"], ["swords", "polearms"])
+        self.assertEqual(rows["woo_ping"]["npcID"], 900004)
         self.assertEqual(rows["randal_hunter"]["mapName"], "Elwynn Forest")
         self.assertEqual(rows["randal_hunter"]["city"], "Eastvale Logging Camp")
+        self.assertIsNone(rows["randal_hunter"]["x"])
         self.assertEqual(rows["nat_pagle"]["mapID"], 1445)
+        self.assertEqual((rows["nat_pagle"]["x"], rows["nat_pagle"]["y"]), (58.6, 60.1))
+        self.assertEqual(rows["tel_athir"]["faction"], "Alliance")         # city()'s head table
+        self.assertEqual(rows["tel_athir"]["subzone"], "Mage Quarter")
+        self.assertEqual(rows["zara_invented"]["teaches"], ["riding"])      # a standalone add{}
+        self.assertEqual(rows["zara_invented"]["npcID"], 900006)
+
+    def test_the_shipped_trainers_parse(self):
+        """The reader against the real defaults/: every record, the sentinels, unique ids."""
+        rows = seeds.read_trainers((seeds.DEFAULTS / "Trainers_Forever.lua").read_bytes().decode("utf-8")
+                                   .replace("\r\n", "\n"))
+        self.assertGreaterEqual(len(rows), 190)
+        self.assertTrue(all(r["npcID"] for r in rows))
+        names = {r["name"] for r in rows}
+        for name in ("Woo Ping", "Genn Fairweather", "Annora", "Shari Stilwell"):
+            self.assertIn(name, names)
+
+    def test_gathering(self):
+        nodes = seeds.read_seeds(self.defaults)["gathering"]
+        self.assertEqual([n["id"] for n in nodes], ["herbalism.dusk_petal", "mining.glimmer_vein", "mining.hollow_deposit"])
+        self.assertEqual(nodes[2]["need"], 65)
 
     def test_catalog(self):
         cat = seeds.read_seeds(self.defaults)["catalog"]
@@ -190,6 +280,111 @@ class Seeds(Fixture):
         tables["UiMap"] = path
         with self.assertRaises(SystemExit):
             seeds.derive_doc(seeds.DB(tables), seeds.read_seeds(self.defaults), "forever", "b", "", "2026-11-15")
+
+
+class ForeverDBEvidence(Fixture):
+    def setUp(self):
+        super().setUp()
+        self.fdb = seeds.ForeverDB(write_foreverdb(self.tmp / "fdb"))
+
+    def flags(self):
+        return {(f["kind"], f["id"]): f for f in self.doc(self.fdb)["flags"] if f["kind"].startswith("fdb-")}
+
+    def test_no_evidence_without_the_option(self):
+        doc = self.doc()
+        self.assertNotIn("foreverdb", doc)
+        self.assertFalse([f for f in doc["flags"] if f["kind"].startswith("fdb-")])
+
+    def test_trainer_verdicts(self):
+        doc = self.doc(self.fdb)
+        v = doc["foreverdb"]["verdicts"]["trainers"]
+        self.assertEqual(v["tel_athir"]["npc"], "found")
+        self.assertEqual(v["tel_athir"]["spot"], "ok")
+        self.assertEqual(v["tel_athir"]["spotSource"], "spm")
+        self.assertEqual(v["tel_athir"]["role"], "ok")
+        self.assertEqual(v["nobody_here"]["npc"], "name-mismatch")
+        self.assertEqual(v["nat_pagle"]["spot"], "ok")                 # spw projected through umaa
+        self.assertEqual(v["nat_pagle"]["spotSource"], "spw")
+        self.assertEqual(v["nat_pagle"]["side"], "ok")                 # Neutral is "AH"
+        self.assertEqual(v["randal_hunter"]["npc"], "missing")
+        self.assertNotIn("spot", v["randal_hunter"])
+        self.assertEqual(v["zara_invented"]["spot"], "position-off")
+        self.assertEqual(doc["foreverdb"]["tag"], "v2099.01.01.1")
+        self.assertEqual(doc["shipped"]["gathering"], 3)
+
+    def test_trainer_flags(self):
+        flags = self.flags()
+        self.assertIn(("fdb-name", "nobody_here"), flags)
+        self.assertIn("'Somebody Else'", flags[("fdb-name", "nobody_here")]["detail"])
+        self.assertIn(("fdb-role", "nobody_here"), flags)             # spf says Fishing, it teaches Alchemy
+        self.assertIn(("fdb-npc", "randal_hunter"), flags)
+        self.assertIn(("fdb-side", "zara_invented"), flags)           # Neutral shipped, "H" in nfac
+        self.assertIn(("fdb-spot", "zara_invented"), flags)
+        self.assertIn("5.0 map-% away", flags[("fdb-spot", "zara_invented")]["detail"])
+        self.assertIn(("fdb-role", "woo_ping"), flags)                # WeaponMasters adds a line the record lacks
+        self.assertNotIn(("fdb-spot", "tel_athir"), flags)
+        self.assertNotIn(("fdb-side", "nat_pagle"), flags)
+        self.assertNotIn(("fdb-spot", "nat_pagle"), flags)
+
+    def test_gathering_flags(self):
+        flags = self.flags()
+        self.assertIn(("fdb-node", "mining.hollow_deposit"), flags)
+        self.assertNotIn(("fdb-node", "mining.glimmer_vein"), flags)
+        self.assertEqual(self.doc(self.fdb)["foreverdb"]["verdicts"]["gathering"]["herbalism.dusk_petal"], "found")
+
+    def test_a_gathering_flag_is_keep_only(self):
+        r = {}
+        with self.assertRaises(SystemExit):
+            seeds.set_ruling(r, "shipped:fdb-node:gathering:mining.hollow_deposit", "remove", "no such node")
+        seeds.set_ruling(r, "shipped:fdb-node:gathering:mining.hollow_deposit", "keep", "fixed by hand")
+
+    def test_a_changed_cache_is_refused(self):
+        folder = self.tmp / "fdb"
+        (folder / "foreverdb.json").write_bytes(b"{}")
+        with self.assertRaises(SystemExit):
+            seeds.ForeverDB(folder)
+
+    def test_sources_and_rulings_keep_no_rows(self):
+        doc = self.doc(self.fdb)
+        doc["foreverdb"]["helper"] = "fixture"
+        sources = seeds.format_sources(doc, {})
+        self.assertIn("v2099.01.01.1", sources)
+        self.assertIn("a" * 64, sources)
+        rulings = seeds.format_rulings_md(doc, {}, "2099-01-02")
+        self.assertIn("ForeverDB v2099.01.01.1", rulings)
+        for text in (sources, json.dumps(doc["foreverdb"])):
+            self.assertNotIn("Journeyman Alchemist", text)            # an npc title: a row field never compared
+            self.assertNotIn("Weapon Master", text)
+
+    def test_replay_refetches_the_pinned_tag(self):
+        bundle = self.tmp / "2099-01-02-forever"
+        (bundle / "raw").mkdir(parents=True)
+        for name, path in self.tables.items():
+            (bundle / "raw" / path.name).write_bytes(path.read_bytes())
+        cache = self.tmp / "cache"
+        write_foreverdb(cache / "v2099.01.01.1")
+        argv = ["--defaults", str(self.defaults), "--rulings", str(self.tmp / "r.json"), "derive", "--flavor",
+                "forever", "--bundle", str(bundle), "--date", "2099-01-02", "--build", "9.9.9", "--replay",
+                "--foreverdb", str(cache / "v2099.01.01.1"), "--foreverdb-helper", "fixture helper"]
+        self.assertEqual(seeds.main(argv), 0)
+        first = (bundle / "candidates.json").read_bytes()
+        self.assertIn(b"fixture helper", (bundle / "SOURCES.md").read_bytes())
+        again = argv[:argv.index("--foreverdb")] + ["--foreverdb-cache", str(cache)]
+        self.assertEqual(seeds.main(again), 0)                       # the tag and helper come from the bundle
+        self.assertEqual((bundle / "candidates.json").read_bytes(), first)
+        with self.assertRaises(SystemExit):                          # the pinned tag is not cached
+            seeds.main(argv[:argv.index("--foreverdb")] + ["--foreverdb-cache", str(self.tmp / "empty")])
+
+    def test_status_follows_the_tag(self):
+        root = self.tmp / "research"
+        bundle = root / "2026-11-15-forever"
+        bundle.mkdir(parents=True)
+        (bundle / "candidates.json").write_text(json.dumps({"build": "1.2", "foreverdb": {"tag": "v1"}}),
+                                                encoding="utf-8")
+        found = seeds.bundles(root, "forever")
+        self.assertTrue(seeds.status_line("1.2", found, "v1").startswith("CURRENT 1.2"))
+        self.assertTrue(seeds.status_line("1.2", found, "v2").startswith("NEW 1.2 (ForeverDB v2"))
+        self.assertTrue(seeds.status_line("1.2", found).startswith("CURRENT 1.2"))
 
 
 class Rulings(Fixture):
@@ -254,7 +449,7 @@ class Apply(Fixture):
         fishing = (self.defaults / "Fishing_Forever.lua").read_bytes()
         self.assertNotIn(b"Nobody Here", trainers)
         self.assertNotIn(b"Gone Zone", fishing)
-        self.assertEqual(trainers, crlf(TRAINERS.replace('    { "Nobody Here", "Lost Quarter", "alchemy", E },\n', "")))
+        self.assertEqual(trainers, crlf(TRAINERS.replace('    { "Nobody Here", "Lost Quarter", "alchemy", E, 900002, 40.0, 40.0 },\n', "")))
         self.assertEqual(fishing, crlf(FISHING.replace('        { L["Gone Zone"], 9999, 55 },\n', "")))
         self.assertEqual(seeds.apply_bundle(doc, rulings, self.defaults), [])
         self.assertEqual((self.defaults / "Trainers_Forever.lua").read_bytes(), trainers)

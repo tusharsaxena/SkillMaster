@@ -508,7 +508,7 @@ arrow's measurements, test mode and the simulator's reach, and the client APIs a
 
 | Doc | Covers |
 |---|---|
-| `validate-seeds.md` | The seed-validation contract `/dev-copilot:validate-seeds SkillMaster forever` runs: `tools/seeds/seeds.py` re-checks the trainer, fishing-zone and skill-catalog seeds against WoW Forever's own DB2 (wago.tools `wowf`), with its rulings, precedent and gate |
+| `validate-seeds.md` | The seed-validation contract `/dev-copilot:validate-seeds SkillMaster forever` runs: `tools/seeds/seeds.py` re-checks the trainer, fishing-zone and skill-catalog seeds against WoW Forever's own DB2 (wago.tools `wowf`), and the trainers and gathering nodes against ForeverDB as secondary evidence (verdicts only, GPL data never copied), with its rulings, precedent and gate |
 
 Frozen and generated material is out of the map and named once per directory (documentation-§3):
 `docs/audits/`, `docs/reviews/`, `docs/automated-tests/<run>/`, `docs/perf-analysis/<run>/`,
