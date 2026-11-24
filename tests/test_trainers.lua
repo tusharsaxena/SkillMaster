@@ -233,14 +233,15 @@ test("trainer provenance: a confirmed record still holds the values the probe co
     end
 end)
 
-test("trainer provenance: the unverified mark follows the record, not a blanket flag", function()
-    local confirmed, open = nil, nil
+test("trainer provenance: no trainer is shown as unverified (the owner, 2026-11-25)", function()
+    local open
     for _, t in ipairs(NS.Trainers_Forever) do
-        if t.verified ~= false then confirmed = confirmed or t else open = open or t end
+        if t.verified == false then open = open or t end
     end
-    assertTrue(confirmed ~= nil and open ~= nil, "the data has both kinds")
-    assertEqual(NS.Waypoints.UnverifiedMark(confirmed), "", "a confirmed trainer reads unmarked")
-    assertTrue(NS.Waypoints.UnverifiedMark(open) ~= "", "an unverified one is marked")
+    assertTrue(open ~= nil, "the data still records unverified trainers")
+    assertNil(NS.Waypoints.UnverifiedMark, "no mark helper ships")
+    assertTrue(NS.Waypoints:Directions(open):find("unverified", 1, true) == nil, "chat names no mark")
+    assertNil(NS.GetSetting and NS.GetSetting("trainers.unverified"), "no setting turns a mark on")
 end)
 
 -- The popup on `key`, learned at `rank` / `max` for an Alliance Human at level 40 (the blocks'
@@ -334,12 +335,11 @@ test("round2 note: Artisan Cooking at 225 says no trainer teaches it and names C
             .. "Clamlette Surprise, given by Dirge Quikcleave, Gadgetzan, Tanaris.")
         local heads = {}
         for i, h in ipairs(TP.Headings()) do heads[i] = h:GetText() end
-        assertEqual(table.concat(heads, ","), "Artisan (300),Trainers who teach Cooking")
-        assertEqual(TP.Trainers()[1].name, "Dirge Quikcleave", "the giver's card first, for its waypoint")
-        local after = {}
-        for i = 2, #TP.Trainers() do after[TP.Trainers()[i].name] = true end
-        assertTrue(after["Stephen Ryback"] and after.Alegorn, "the skill's trainers listed below")
-        assertTrue(not after.Shandrina, "no book vendor among the trainers")
+        -- The owner's feedback (2026-11-24): with Show all trainers off, the quest giver alone, no
+        -- "Trainers who teach Cooking" group below.
+        assertEqual(table.concat(heads, ","), "Artisan (300)")
+        assertEqual(TP.Trainers()[1].name, "Dirge Quikcleave", "the giver's card, for its waypoint")
+        assertEqual(#TP.Trainers(), 1, "the skill's other trainers are not listed")
     end)
 end)
 

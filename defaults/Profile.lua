@@ -247,7 +247,6 @@ NS.defaults = {
             arrowLock = false,
         },
         trainers = {
-            unverified = true,   -- mark trainer data not yet checked on WoW Forever
             showAll = false,     -- round 2: the popup lists every rank's trainers, Artisan first
             -- The trainer popup's trainer name (feedback round 2, FB-11): the class color while
             -- useClassColorName is on (options-ui-§17, class first; FB-SM-02), else the skin's accent

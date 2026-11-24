@@ -219,9 +219,12 @@ city({ name = "Undercity", faction = "Horde", mapID = 1458, news = "23149528" },
 -- The Expert and Artisan teachers outside the capitals. Expert Cooking, First Aid and Fishing are
 -- books these NPCs sell, and Artisan Cooking, First Aid and Fishing quests they give (learn).
 -- Rows: { name, faction, city, mapName, mapID, key, ranks, npcID, x, y, learn }.
+-- Annora stands inside Uldaman, so no source gives her a map point; hers is the dungeon's back
+-- entrance in the eastern Badlands (65.3, 42.6, the owner's guide, 2026-11-24), the quickest way in.
+-- She stays unverified: the point is the door, not the NPC.
 for _, r in ipairs({
     { "Brikk Keencraft", "Neutral", "Booty Bay", "Stranglethorn Vale", 1434, "blacksmithing", { 300 }, 2836, 29.0, 75.6 },
-    { "Annora", "Neutral", "Uldaman", "Badlands", 1418, "enchanting", { 300 }, 11073, nil, nil },
+    { "Annora", "Neutral", "Uldaman", "Badlands", 1418, "enchanting", { 300 }, 11073, 65.3, 42.6 },
     { "Shandrina", "Alliance", "Ashenvale", "Ashenvale", 1440, "cooking", { 225 }, 3955, 49.5, 67.1, EXPERT_COOKBOOK },
     { "Wulan", "Horde", "Shadowprey Village", "Desolace", 1443, "cooking", { 225 }, 12033, 26.2, 69.7, EXPERT_COOKBOOK },
     { "Dirge Quikcleave", "Neutral", "Gadgetzan", "Tanaris", 1446, "cooking", { 300 }, 8125, 52.6, 28.1, CLAMLETTE_SURPRISE },
@@ -255,7 +258,8 @@ for _, r in ipairs({
          ranks = r[7], npcID = r[8], x = r[9], y = r[10], source = SRC_MASTER }
 end
 
--- The weapon masters. Every skill costs 10s at level 1, Polearms 1g at level 20.
+-- The weapon masters. Every skill costs 10s at level 1, Polearms 1g at level 20. Sayoc teaches no
+-- Staves: the CMaNGOS 1.12 dump has none for him (the owner's ruling, 2026-11-24, "trust the dump").
 -- Rows: { name, faction, city, subzone, mapID, x, y, npcID, teaches }.
 local POLEARMS_COST, POLEARMS_LEVEL = { polearms = 10000 }, { polearms = 20 }
 for _, r in ipairs({
@@ -268,7 +272,7 @@ for _, r in ipairs({
     { "Ilyenia Moonfire", "Alliance", "Darnassus", "Warrior's Terrace", 1457, 57.6, 46.7, 11866,
       { "bows", "daggers", "fistWeapons", "staves", "thrown" } },
     { "Sayoc", "Horde", "Orgrimmar", "Valley of Honor", 1454, 81.7, 19.6, 11868,
-      { "axes", "twoHandedAxes", "bows", "daggers", "fistWeapons", "staves", "thrown" } },
+      { "axes", "twoHandedAxes", "bows", "daggers", "fistWeapons", "thrown" } },
     { "Hanashi", "Horde", "Orgrimmar", "Valley of Honor", 1454, 81.5, 19.6, 2704,
       { "axes", "twoHandedAxes", "bows", "staves", "thrown" } },
     { "Ansekhwa", "Horde", "Thunder Bluff", "Lower Rise", 1456, 40.9, 62.7, 11869,

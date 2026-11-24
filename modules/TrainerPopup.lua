@@ -2,7 +2,7 @@ local _, NS = ...
 -- modules/TrainerPopup.lua — "where do I learn this" (design §2 goal 7, mockup "Tooltips" artboard,
 -- plan Task 3.3): the trainers for the player's faction who teach an unlearned skill, or who train a
 -- learned one's next rank, one selectable card each (name, cost, city · subzone (x, y), what else
--- they teach), the unverified-data warning, and two actions: set a waypoint (the native pin or
+-- they teach), and two actions: set a waypoint (the native pin or
 -- chat, NS.Waypoints) and print the directions. A window opened on demand from the MEDIUM
 -- main window, so HIGH (frame-layering-§1/§4), toplevel, clamped, Escape closes it, and it closes
 -- with the window.
@@ -308,9 +308,6 @@ local function buildShowAll()
 end
 
 local function buildActions()
-    frame.warning = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    frame.warning:SetText(L["Not confirmed on WoW Forever yet (marked until checked)"])
-    NS.Skin.Text(frame.warning, "sem.warn")
     frame.waypoint = button(frame, L["Set waypoint"], setWaypoint, true)
     -- Hooked, not set: NS.Skin.Button hooked its hover look on these scripts, and SetScript drops it.
     -- The action buttons are the popup's CHROME (a modal dialog's controls, LibKa0s#92, AD-92-SM):
@@ -467,7 +464,7 @@ local function placeList(width)
     NS.Pool.ReleaseAll(cardPool)
     for _, h in ipairs(frame.headings) do h:Hide() end
     for _, fs in ipairs(frame.notes or {}) do fs:Hide() end
-    local y, i, unverified = 0, 0, false
+    local y, i = 0, 0
     local counts = { h = 0, n = 0 }
     for _, g in ipairs(state.groups) do
         y = y + placeHead(g, y, width, counts)
@@ -479,10 +476,9 @@ local function placeList(width)
             local h = fillCard(c, t, state.key, i, ALSO_LINES, width)
             c:Show()
             y = y + h + 6
-            unverified = unverified or NS.Waypoints.UnverifiedMark(t) ~= ""
         end
     end
-    return y, unverified
+    return y
 end
 
 --- Scroll the cards to `offset` units, clamped to what the list overflows by.
@@ -503,10 +499,10 @@ local function layout()
         top = top + 20
     end
     local full = WIDTH - 2 * PAD
-    local listH, unverified = placeList(full)
-    local room = P.MAX_HEIGHT - top - (unverified and 18 or 0) - BUTTON_H - PAD
+    local listH = placeList(full)
+    local room = P.MAX_HEIGHT - top - BUTTON_H - PAD
     local scrolls = listH > room and frame.scrollBar ~= nil
-    if scrolls then listH, unverified = placeList(full - SCROLL_W - SCROLL_GAP) end
+    if scrolls then listH = placeList(full - SCROLL_W - SCROLL_GAP) end
     local viewH = math.max(1, scrolls and room or listH)
     frame.content:SetSize(scrolls and full - SCROLL_W - SCROLL_GAP or full, math.max(1, listH))
     frame.list:ClearAllPoints()
@@ -520,10 +516,6 @@ local function layout()
     state.maxOffset = scrolls and math.ceil(listH - viewH) or 0
     setScroll(state.offset)
     local y = top + viewH
-    frame.warning:ClearAllPoints()
-    frame.warning:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -y)
-    frame.warning:SetShown(unverified)
-    if unverified then y = y + 18 end
     frame.waypoint:ClearAllPoints()
     frame.waypoint:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -y)
     frame.waypoint:SetPoint("RIGHT", frame, "CENTER", 40, 0)
@@ -550,17 +542,12 @@ local function refreshActions()
 end
 
 -- Round 2 (the owner's feedback, as ItemTree shows it): a rank no trainer trains says so under its
--- heading (NS.Trainers.NoTrainerNote), and when the next rank is one, the skill's trainers follow
--- under "Trainers who teach X" (those not listed above, book vendors and quest givers left out).
-local function annotate(groups, key, name)
+-- heading (NS.Trainers.NoTrainerNote). The owner's feedback of 2026-11-24 retired the "Trainers who
+-- teach X" group that followed such a rank: with Show all trainers off, the popup lists the next
+-- rank's teachers alone (at Artisan First Aid, Doctor Gustaf VanHowzen and no one else); Show all
+-- trainers is where every trainer of the skill is listed.
+local function annotate(groups, name)
     for _, g in ipairs(groups) do g.note = NS.Trainers.NoTrainerNote(name, g.rankName, g.base) end
-    if not (groups[1] and groups[1].note) then return groups end
-    local listed, rest = {}, {}
-    for _, g in ipairs(groups) do for _, t in ipairs(g.base) do listed[t] = true end end
-    for _, t in ipairs(NS.Trainers:For(key)) do
-        if not listed[t] and not t.learn then rest[#rest + 1] = t end
-    end
-    if #rest > 0 then groups[#groups + 1] = { title = L["Trainers who teach %s"]:format(name), base = rest } end
     return groups
 end
 
@@ -600,12 +587,12 @@ local function allGroups(key, name)
 end
 
 -- The next rank's groups (R6-7), annotated (round 2).
-local function rankGroupsOf(nr, key, name)
+local function rankGroupsOf(nr, name)
     local groups = {}
     for i, g in ipairs(nr.groups or { { rankName = nr.rankName, cap = nr.cap, trainers = nr.trainers } }) do
         groups[i] = { rankName = g.rankName, cap = g.cap, base = g.trainers }
     end
-    return annotate(groups, key, name)
+    return annotate(groups, name)
 end
 
 --- What skill `key` opens on: its groups, title and intro, and the cap of the rank the player trains
@@ -635,7 +622,7 @@ local function resolve(key)
         local intro = nr.higher
             and L["Trainers for your faction (%s) who train %s to %s (%d) or higher:"]
             or L["Trainers for your faction (%s) who train %s to %s (%d):"]
-        return rankGroupsOf(nr, key, name), title, intro:format(faction, name, nr.rankName, nr.cap), nextCap
+        return rankGroupsOf(nr, name), title, intro:format(faction, name, nr.rankName, nr.cap), nextCap
     end
     return { { base = NS.Trainers:For(key) } }, title,
         L["Trainers for your faction (%s) who teach %s:"]:format(faction, name), nextCap

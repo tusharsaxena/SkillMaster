@@ -444,8 +444,8 @@ CMaNGOS 1.12 dump read the way ItemTree reads it (what a trainer's rows teach), 
 projected into Forever's frame, and Method.gg's guides. The probe writes a frozen run under
 `docs/trainer-probe/<date>[-<run>]/` and the generated `defaults/TrainerProvenance_Forever.lua`: a
 record it confirms carries `verified = "questiedb@<sha12>"`, every other one `verified = false` with
-an `unverified` reason, and `tests/test_trainers.lua` holds both to the file. The trainer popup and
-the chat directions mark only the unverified records. A record the data holds back (`hold`: since
+an `unverified` reason, and `tests/test_trainers.lua` holds both to the file. No surface shows that
+provenance (the owner, 2026-11-25: nothing ships marked unverified): it serves the probe and the suites. A record the data holds back (`hold`: since
 round 2 the 55 Forever-only trainers, placed by QuestieDB alone) is never confirmed, whatever its
 checks say, until it is seen in game.
 

@@ -144,13 +144,9 @@ test("options: the waypoint method preference decides the provider", function()
     M.C_Map, M.UiMapPoint = saved.C_Map, saved.UiMapPoint
 end)
 
-test("options: the unverified mark follows its row", function()
-    local Wp = NS.Waypoints
+test("options: an unverified trainer's directions carry no mark (the owner, 2026-11-25)", function()
     local t = { name = "Woo Ping", city = "Stormwind", verified = false }
-    assertTrue(Wp:Directions(t):find("unverified", 1, true) ~= nil)
-    NS.SetByPath("trainers.unverified", false)
-    assertTrue(Wp:Directions(t):find("unverified", 1, true) == nil)
-    NS.SetByPath("trainers.unverified", true)
+    assertTrue(NS.Waypoints:Directions(t):find("unverified", 1, true) == nil)
 end)
 
 test("options: the bar text template and the timer and marker switches reach the bar", function()
@@ -262,7 +258,8 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- Use the skin's shadow (arrowFontColorFromSkin, arrowFontShadowFromSkin): +2 full, the delta +2.
     -- The detached background and border omit OptionsCompose minor 20's per-part companions.
     -- Round 2 of the trainer probe (GitHub issue #3): the hand-written Show all trainers row, +1 both.
-    assertEqual(full, 376, "the full schema (round 2: Show all trainers; FB-SM-04: eight Block width rows)")
-    assertEqual(degraded, 303, "the library-absent schema")
+    -- 2026-11-25 (the owner): the hand-written Mark unverified trainers row is gone, -1 both.
+    assertEqual(full, 375, "the full schema (round 2: Show all trainers; FB-SM-04: eight Block width rows; 2026-11-25: no Mark unverified trainers row)")
+    assertEqual(degraded, 302, "the library-absent schema")
     assertEqual(full - degraded, 73, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3), the detached background and border (9) and the waypoint arrow's blocks (20)")
 end)
