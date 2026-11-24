@@ -24,8 +24,9 @@ bar widget, the blocks and rows in one or two columns, the detached frames and t
 the row tooltip, the trainer popup and waypoints); the broker feed, the alerts, the session log,
 the alt overview and the Journal; the settings pages for every display setting; test mode's sample
 character and its alts (`modules/Preview.lua` over `defaults/Preview_Forever.lua`, named from
-LibKa0s-Sim-1.0's shared `Sim.Sample("forever")` people, with a library-absent copy) and the simulator
-(`modules/Simulator.lua` on LibKa0s-Sim-1.0); skins; the launcher, two key bindings and the
+LibKa0s-Sim-1.0's shared `Sim.Sample("forever")` people, the one source of sample names
+(LibKa0s#104); a library-absent load draws a nameless sample and no alts) and the simulator
+(`modules/Simulator.lua` on LibKa0s-Sim-1.0, every start of which opens the step panel); skins; the launcher, two key bindings and the
 diagnostics dump.
 
 Pure data modules (`SkillData`, `Bonuses`, `StatData`, `Trainers`, `Helpers`, `SessionLog`, `Alts`)
@@ -76,8 +77,8 @@ controls*): right-aligned, left to right the window's own extras, then settings,
 corner, 18 px marks `HEADER.PAD` (6) from the corner and `HEADER.GAP` (6) apart, placed again on the
 skin's band by `S.Header` (the strip's `hb.right`), and recorded as `frame.headerButtons`. The main
 window carries lock, journal and Expand / Collapse all (inward of settings, the rule's order), the
-Journal the lock, the trainer popup none (its settings mark hides the popup first, `hideOnSettings`:
-it stands a strata over the settings panel). The settings mark opens this addon's settings through the
+Journal the lock. The trainer popup is a companion of the skills window (v2.119.0, standalone-windows,
+*A companion window carries no settings mark*; FB-SM-03): `companion = true`, the close alone. The settings mark opens this addon's settings through the
 opener the launcher registers (`core/LauncherSetup.lua`'s `openSettings`, LibKa0s-Core-1.0's
 `OpenSettings`), and the close is built through the one wrapper, `NS.MakeCloseButton` (HeaderButtons'
 `makeClose`). A detached block's band and a merged window's band carry the settings mark in the corner

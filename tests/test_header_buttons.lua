@@ -6,7 +6,7 @@
 -- addon's settings through the opener its launcher registered:
 --   the main window (lock, journal, expand / collapse all, settings, close),
 --   the Journal (lock, settings, close),
---   the trainer popup (settings, close; it sits a strata over the settings panel, so it hides first),
+--   the trainer popup (close alone: a companion of the skills window, FB-SM-03),
 --   a detached block's band and a merged window's band (their block-header marks, then settings;
 --     no close, as before).
 -- The library-absent rung builds the same strip from this addon's own marks.
@@ -117,18 +117,22 @@ test("AD-86 journal: lock, settings, close on HeaderButtons, and settings opens 
     J.Hide()
 end)
 
-test("AD-86 trainer popup: settings, close on HeaderButtons; settings hides the popup first", function()
+-- FB-SM-03 (WowAddonStandards v2.119.0, standalone-windows, *A companion window carries no settings
+-- mark*): the trainer popup opens only from a row of the skills window (or the arrow's menu, which
+-- points at that window's trainers), shows only that row's trainers, closes with the window and keeps
+-- no saved position, so it is a companion: the close alone, built with HeaderButtons' companion.
+test("FB-SM-03 trainer popup: a companion, the close alone on HeaderButtons", function()
     local savedFaction = M.UnitFactionGroup
     M.UnitFactionGroup = function() return "Alliance", "Alliance" end
     local ok, err = pcall(function()
         TP.Show("fistWeapons")
         local f = TP.Frame()
-        assertStrip(f.headerButtons, { "settings", "close" }, "the trainer popup")
-        assertTrue(f.headerButtons.close == f.close and f.headerButtons.settings == f.settingsButton,
-            "the window keeps its names")
+        assertStrip(f.headerButtons, { "close" }, "the trainer popup")
+        assertTrue(f.headerButtons.companion == true, "recorded as a companion")
+        assertTrue(f.headerButtons.settings == nil and f.settingsButton == nil, "no settings mark")
+        assertTrue(f.headerButtons.optOut == nil, "a companion, not a waiver")
+        assertTrue(f.headerButtons.close == f.close, "the window keeps its close")
         assertTrue(f:IsShown(), "the popup is open")
-        assertEqual(countOpens(function() click(f.settingsButton) end), 1, "one click, the settings panel")
-        assertTrue(not f:IsShown(), "and the popup, a strata over the panel, hid first")
     end)
     TP.Hide()
     M.UnitFactionGroup = savedFaction
@@ -262,5 +266,15 @@ test("AD-86 degraded: without LibKa0s the main window and the Journal still buil
     NS2.Journal.Show()
     assertEqual(join(NS2.Journal.Frame().headerButtons.order), "lock,settings", "the Journal's strip")
     NS2.Journal.Hide()
+end)
+
+test("FB-SM-03 degraded: without LibKa0s a companion's marks carry no settings", function()
+    local NS2, M2 = loadDegraded()
+    local frame = M2.CreateFrame("Frame", nil, M2.UIParent)
+    local hb = NS2.Chrome.TitleMarks(frame, { close = function() end, companion = true,
+        extras = { { key = "x", icon = "info", glyph = "?", onClick = function() end } } })
+    assertTrue(hb.settings == nil, "no settings mark")
+    assertTrue(hb.companion == true, "recorded as a companion")
+    for _, key in ipairs(hb.order) do assertTrue(key ~= "settings", "settings is not in the strip") end
 end)
 

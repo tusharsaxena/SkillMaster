@@ -338,6 +338,28 @@ Total.
 - trainer popup: the name's swatch draws once Use the skin's color is off, the class color through its companion
 - trainer popup: a changed name color reaches an open popup at once
 
+### test_class_first.lua (5)
+
+- FB-SM-02 bars: the flat fill, background, border and text draw the class color while the skin's is followed too
+- FB-SM-02 bars: with the class off the skin's color still wins over the swatch
+- FB-SM-02 detached windows: the background and the border draw the class color while the skin's is followed too
+- FB-SM-02 icons: the border draws the class color while the skin's icon border is followed too
+- FB-SM-02 trainer popup: the trainer's name draws the class color while the skin's accent is followed too
+
+### test_trainers_tabs.lua (2)
+
+- FB-SM-06 the Trainers and Waypoints page: two tabs, Trainers then Waypoints
+- FB-SM-06 each row on its tab
+
+### test_detached_width.lua (6)
+
+- FB-SM-04 the width row: Layout > Blocks, beside Block scale, 200 to 600 in steps of 10, 280 by default
+- FB-SM-04 a detached window takes its block's width
+- FB-SM-04 the grip: shown, its bounds the row's range at the content's height
+- FB-SM-04 the grip: a drag writes the width on its step grid and keeps the drop point
+- FB-SM-04 Locked hides the grip and refuses a grab, the global lock and the block's own
+- FB-SM-04 a merged window's columns take its widest member's width
+
 ### test_bars_sizes.lua (8)
 
 - bar sizes: each tooltip's heights sit in its own group on the Tooltips page, no detached height
@@ -551,7 +573,7 @@ Total.
 - round6 arrow review: a profile switch re-applies the shown arrow's scale and position
 - round6 arrow review: right-clicking test mode's sample over a real waypoint brings the real arrow back
 
-### test_round7.lua (31)
+### test_round7.lua (34)
 
 - round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Skill Master's arrow always
 - round7 no TomTom: the arrow off super-tracks the pin (the client's arrow)
@@ -584,6 +606,9 @@ Total.
 - round7 go icon: a hovered crafting row's icon gets the window's secure cast; the panel's hide disarms it
 - round7 go icon: in combat a hover arms nothing and the icon's click says why, as the window's
 - round7 go icon: a tooltip row's shift-click links it into chat
+- FB-SM-05 test mode: the arrow off still shows a labeled sample
+- FB-SM-05 test mode: with TomTom loaded the sample is Skill Master's, labeled, and TomTom is never written
+- FB-SM-05 test mode: turning the arrow off while it runs keeps the sample
 
 ### test_round8.lua (23)
 
@@ -775,7 +800,7 @@ Total.
 - journal: a grip drag lays out at most once per frame and redraws once, after the release
 - journal: the saved size is restored, clamped to the minimum; locked refuses the grip
 
-### test_preview.lua (8)
+### test_preview.lua (9)
 
 - preview: test mode draws the sample Dwarf Hunter in every block
 - preview: the bonuses are the sample's: the Dwarf racial on Guns, the lure's timer on Fishing
@@ -784,7 +809,13 @@ Total.
 - preview: test mode off restores the live data in every source
 - preview: combat ends test mode and puts the live data back
 - preview: the sample character and its alts are Sim.Sample's Forever people
-- preview: the library-absent copy of the sample people matches Sim.SAMPLE.forever
+- preview: no hand-kept copy of the sample people (LibKa0s#104)
+- preview: a library-absent load draws a nameless sample character and no alts
+
+### test_sample_names.lua (2)
+
+- sample names: the matcher finds a planted name and passes an identifier
+- sample names: no Sample*/Mock* name literal outside tests/, libs/ and the frozen docs
 
 ### test_sim.lua (12)
 
@@ -800,6 +831,20 @@ Total.
 - sim: the verb, the launcher entry and the checkbox are one handler
 - sim: combat stops a running session
 - sim: the window shows the simulation strip while a session runs
+
+### test_sim_start_panel.lua (5)
+
+- sim start panel: the panel's Start row is the typed start, and it shows the panel
+- sim start panel: the bare /sm sim shows the panel
+- sim start panel: a Restart with the panel closed shows it again
+- sim start panel: the Master controls Sim box shows the panel
+- sim start panel: the launcher menu's Sim mode entry shows the panel
+
+### test_dropdown_selected.lua (3)
+
+- dropdown selected: the Journal's range picker paints its selected range apart
+- dropdown selected: the sort menu's current order (a radio row) paints apart
+- dropdown selected: the selection is Ka0s Default's gold in every skin, WoW Forever's included
 
 ### test_window_chrome.lua (15)
 
@@ -819,17 +864,18 @@ Total.
 - chrome degraded: with no widgets library a footer is a bare frame of FOOTER.HEIGHT with its left line
 - chrome degraded: the main window and the Journal open without LibKa0s, their footers bare
 
-### test_header_buttons.lua (9)
+### test_header_buttons.lua (10)
 
 - AD-86 main window: lock, journal, expand / collapse all, settings, close on HeaderButtons
 - AD-86 main window: the settings mark opens the settings through the launcher's opener
 - AD-86 main window: the expand / collapse all mark's tooltip follows what a click does
 - AD-86 journal: lock, settings, close on HeaderButtons, and settings opens the settings
-- AD-86 trainer popup: settings, close on HeaderButtons; settings hides the popup first
+- FB-SM-03 trainer popup: a companion, the close alone on HeaderButtons
 - AD-86 detached and merged bands: a settings mark in the corner, opening the settings
 - AD-86 detached and merged bands: the skin's header places settings in the corner, the marks inward at the pitch
 - AD-86 detached and merged bands: without a skin's header, every mark GAP inward of the one before
 - AD-86 degraded: without LibKa0s the main window and the Journal still build the strip, settings opening the panel
+- FB-SM-03 degraded: without LibKa0s a companion's marks carry no settings
 
 ### test_tooltips.lua (11)
 
@@ -1108,6 +1154,9 @@ Total.
 | test_bar.lua | 14 |
 | test_bars_live.lua | 18 |
 | test_bars_round2.lua | 8 |
+| test_class_first.lua | 5 |
+| test_trainers_tabs.lua | 2 |
+| test_detached_width.lua | 6 |
 | test_bars_sizes.lua | 8 |
 | test_round2_layout.lua | 7 |
 | test_round2_icons.lua | 10 |
@@ -1118,7 +1167,7 @@ Total.
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
 | test_round6.lua | 54 |
-| test_round7.lua | 31 |
+| test_round7.lua | 34 |
 | test_round8.lua | 23 |
 | test_round9.lua | 14 |
 | test_sr1.lua | 10 |
@@ -1131,10 +1180,13 @@ Total.
 | test_template.lua | 3 |
 | test_broker.lua | 17 |
 | test_polish.lua | 12 |
-| test_preview.lua | 8 |
+| test_preview.lua | 9 |
+| test_sample_names.lua | 2 |
 | test_sim.lua | 12 |
+| test_sim_start_panel.lua | 5 |
+| test_dropdown_selected.lua | 3 |
 | test_window_chrome.lua | 15 |
-| test_header_buttons.lua | 9 |
+| test_header_buttons.lua | 10 |
 | test_tooltips.lua | 11 |
 | test_skin_defaults.lua | 8 |
 | test_seams.lua | 5 |
@@ -1156,4 +1208,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **858** |
+| **Total** | **886** |

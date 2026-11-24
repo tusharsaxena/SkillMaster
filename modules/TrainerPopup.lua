@@ -211,13 +211,18 @@ local function trainersProfile()
     return (NS.db and NS.db.profile.trainers) or NS.defaults.profile.trainers
 end
 
---- The trainer's name in its own color (feedback round 2, FB-11): the skin's accent, recorded so a
---- skin switch repaints it, while "Use the skin's color" is on; else the swatch through its
---- class-color companion, its alpha always applying (options-ui-§17). The skin's Text keeps the
+--- The trainer's name in its own color (feedback round 2, FB-11): the class color while "Use class
+--- color" is on (FB-SM-02: class first); else the skin's accent, recorded so a skin switch repaints
+--- it, while "Use the skin's color" is on; else the swatch, its alpha always applying (options-ui-§17). The skin's Text keeps the
 --- name's font either way; a skin switch's LAYOUT_CHANGED repaints the swatch over it.
 local function paintName(fs)
     NS.Skin.Text(fs, "accent")
     local p = trainersProfile()
+    local class = NS.ClassFirst(p.nameColor, p.useClassColorName)   -- FB-SM-02: class first
+    if class then
+        fs:SetTextColor(class[1], class[2], class[3], class[4] or 1)
+        return
+    end
     if p.nameColorFromSkin ~= false or type(p.nameColor) ~= "table" then
         if not NS.Skin.IsEnabled() then
             local c = NS.SkinColor("text.accent")
@@ -359,16 +364,17 @@ local function build()
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     NS.Skin.Shell(frame)
     NS.Skin.Text(frame.title, "title")
-    -- The title-bar marks on LibKa0s Widgets' HeaderButtons (AD-86-SM, LibKa0s#86): settings, then
-    -- the close. The popup stands a strata over its openers, HIGH or DIALOG, over the settings panel
-    -- (HIGH), so the settings mark hides it first (hideOnSettings).
+    -- The title-bar marks on LibKa0s Widgets' HeaderButtons (AD-86-SM, LibKa0s#86): the close alone.
+    -- The popup is a companion of the skills window (FB-SM-03; WowAddonStandards v2.119.0,
+    -- standalone-windows, *A companion window carries no settings mark*): it opens only from that
+    -- window's rows (or the arrow's menu, for the trainer it points at), shows only that skill's
+    -- trainers, closes with the window and keeps no saved position.
     local hb = NS.Chrome.TitleMarks(frame, {
         close = function() P.Hide() end,
-        settingsTip = L["Open the settings panel"],
-        hideOnSettings = frame,
+        companion = true,
         level = LAYERS.LEVEL.CHROME,
     })
-    frame.close, frame.settingsButton = hb.close, hb.settings
+    frame.close = hb.close
     NS.Skin.Header(frame, { title = frame.title, align = "LEFT", right = hb.right, gap = select(2, NS.Chrome.HeaderPitch()) })
     if not frame.title:GetPoint(1) then frame.title:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -7) end
     frame.intro = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")

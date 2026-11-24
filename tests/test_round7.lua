@@ -68,7 +68,8 @@ test("round7 no TomTom: /sm test shows the sample arrow while the arrow setting 
         assertFalse(WA.IsShown())
         NS.db.profile.waypoints.arrow = false
         WA.ShowTest()
-        assertFalse(WA.IsShown(), "the arrow off: no sample")
+        assertTrue(WA.IsShown(), "the arrow off: still a sample (FB-SM-05)")
+        WA.HideTest()
     end)
 end)
 
@@ -785,5 +786,63 @@ test("round7 go icon: a tooltip row's shift-click links it into chat", function(
         I6.Link = real
         if not ok then error(err, 0) end
         assertEqual(table.concat(linked, ","), "skill:swords", "linked, not opened")
+    end)
+end)
+
+-- ── FB-SM-05: test mode always shows an arrow (the owner, 2026-11-24, S2: "some arrow should show
+-- in test mode (either this addons arrow, or tomtom's arrow)") ───────────────────────────────────
+-- Test mode writes nothing, and a TomTom waypoint is TomTom's saved state, so the preview is always
+-- Skill Master's own sample arrow, labeled when it is not the arrow a real waypoint would show.
+
+--- Run `fn(labels)` with the arrow's ShowSample recorded: every label it was handed, in order (the
+--- instance carries its methods as plain fields, so the real one is put back).
+local function withLabels(fn)
+    local a = WA.Instance()
+    local labels = {}
+    local real = a.ShowSample
+    rawset(a, "ShowSample", function(self, label) labels[#labels + 1] = label return real(self, label) end)
+    local ok, err = pcall(fn, labels)
+    rawset(a, "ShowSample", real)
+    if not ok then error(err, 0) end
+end
+
+test("FB-SM-05 test mode: the arrow off still shows a labeled sample", function()
+    withTomTomShaped(function()
+        NS.db.profile.waypoints.arrow = false
+        withLabels(function(labels)
+            WA.ShowTest()
+            assertTrue(WA.IsShown(), "a sample arrow shows")
+            assertEqual(labels[#labels], NS.L["Sample: Skill Master's arrow is off"], "labeled as such")
+        end)
+        WA.HideTest()
+        assertFalse(WA.IsShown(), "and it goes when test mode ends")
+    end)
+end)
+
+test("FB-SM-05 test mode: with TomTom loaded the sample is Skill Master's, labeled, and TomTom is never written", function()
+    withRealTomTom(function(_, rec)
+        withLabels(function(labels)
+            WA.ShowTest()
+            assertTrue(WA.IsShown(), "a sample arrow shows")
+            assertEqual(labels[#labels], NS.L["Sample: TomTom's arrow points to real waypoints"], "labeled")
+        end)
+        assertEqual(rec.tomtom, 0, "no TomTom waypoint in test mode")
+        WA.HideTest()
+    end)
+end)
+
+test("FB-SM-05 test mode: turning the arrow off while it runs keeps the sample", function()
+    withTomTomShaped(function()
+        local was = NS.State.testMode
+        NS.State.testMode = true
+        local ok, err = pcall(function()
+            WA.ShowTest()
+            NS.db.profile.waypoints.arrow = false
+            WA.ApplySettings()
+            assertTrue(WA.IsShown(), "the sample stays while test mode is on")
+        end)
+        NS.State.testMode = was
+        WA.HideTest()
+        if not ok then error(err, 0) end
     end)
 end)

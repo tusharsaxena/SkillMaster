@@ -220,6 +220,7 @@ test("trainer popup: the name's swatch draws once Use the skin's color is off, t
         local r = M.LibStub("LibKa0s-Core-1.0").ClassColor("player") or 0.1
         assertNear(nameColor()[1], r, 1e-6, "the class color")
         assertNear(nameColor()[4], 0.9, 1e-6, "the stored alpha still applies")
+        set("trainers.useClassColorName", false)
         set("trainers.nameColorFromSkin", true)
         local accent = NS.SkinColor("text.accent")
         assertNear(nameColor()[1], accent[1], 1e-6, "back on the skin's accent")

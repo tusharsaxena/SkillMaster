@@ -85,6 +85,17 @@ function NS.WithClassColor(stored, useClass)
     return { r, g, b, type(stored) == "table" and stored[4] or 1 }
 end
 
+--- The first rung of options-ui-§17's ladder (class, then the skin's color, then the swatch;
+--- WowAddonStandards v2.119.0, FB-SM-02): the player's class color with `stored`'s alpha while
+--- `useClass` is on and the class resolves, else nil, so the caller goes on to the skin's color
+--- while its companion is on, else the swatch. Every caller here is player-scoped.
+function NS.ClassFirst(stored, useClass)
+    if useClass ~= true then return nil end
+    local c = NS.WithClassColor(stored, true)
+    if c == stored then return nil end
+    return c
+end
+
 local function stored(path)
     if not (NS.db and NS.GetSetting) then return nil end
     return NS.GetSetting(path)

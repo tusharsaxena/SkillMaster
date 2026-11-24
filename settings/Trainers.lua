@@ -3,29 +3,54 @@ local _, NS = ...
 -- trainer's Go button sets, whether chat says so, the unverified-data mark, Skill Master's own arrow
 -- (round 6, R6-11) and its look, colors and scale (round 8, R8-5: LibKa0s-WaypointArrow-1.0's
 -- settings block), its text and position (round 9, R9-1), and the trainer popup's name color (a swatch on the skin's accent by default,
--- with its class-color companion).
+-- with its class-color companion). FB-SM-06 (the owner, 2026-11-24: "Split Trainers and Waypoint
+-- into 2 separate tabs"): two groups, so two tabs, Trainers (the trainer data and the popup) first,
+-- then Waypoints (the method, the chat line, the arrow); the page key and title are unchanged.
 local H = NS.Helpers
 local L = NS.L
 local PW, PT = NS.defaults.profile.waypoints, NS.defaults.profile.trainers
-local PAGE, GROUP = "trainers", L["Trainers and waypoints"]
+local PAGE = "trainers"
+local TRAINERS, WAYPOINTS = L["Trainers"], L["Waypoints"]
 
+-- The Trainers tab: the trainer data, then the trainer popup.
 NS.RegisterSchemaRows(NS.Live({
-    { path = "waypoints.method", page = PAGE, group = GROUP, type = "string", default = PW.method,
+    { path = "trainers.unverified", page = PAGE, group = TRAINERS, type = "bool", default = PT.unverified,
+      label = L["Mark unverified trainers"],
+      desc = L["Flag trainer data not yet checked on WoW Forever, in tooltips, the trainer popup and chat."] },
+    -- Round 2 (the owner's feedback): the trainer popup's own check box writes this row too.
+    { path = "trainers.showAll", page = PAGE, group = TRAINERS, type = "bool", default = PT.showAll,
+      label = L["Show all trainers"],
+      desc = L["In the trainer popup for a profession, list every trainer of every rank, Artisan first, and mark the ones who train your next rank."] },
+}))
+
+-- The trainer popup's name line (feedback round 2, FB-11): one swatch, its class-color companion
+-- (options-ui-§17, the player's class: the trainer is no unit with one) and "Use the skin's color",
+-- on by default, which draws the skin's accent (skinning-§6). The popup repaints on LAYOUT_CHANGED.
+local nameRows = H.ColorPair({
+    prefix = "trainers.", page = PAGE, group = TRAINERS, subgroup = L["Trainer popup"],
+    key = "nameColor", companionKey = "useClassColorName", label = L["Trainer name color"],
+    classColor = { source = "player" },
+    tooltips = { nameColor = L["The trainer's name in the trainer popup. Not read while Use the skin's color is on."] },
+    defaults = { nameColor = PT.nameColor, useClassColorName = PT.useClassColorName },
+    extra = {
+        { path = "trainers.nameColorFromSkin", page = PAGE, type = "bool", default = PT.nameColorFromSkin,
+          label = L["Use the skin's color"],
+          desc = L["Draw the trainer's name in the skin's accent. Trainer name color is not read while this is on."] },
+    },
+})
+NS.RegisterSchemaRows(NS.Live(nameRows))
+
+-- The Waypoints tab: where a waypoint goes and whether chat says so, then the arrow.
+NS.RegisterSchemaRows(NS.Live({
+    { path = "waypoints.method", page = PAGE, group = WAYPOINTS, type = "string", default = PW.method,
       label = L["Waypoint method"],
       desc = L["Where a trainer's waypoint goes: Map pin places one on the map (a TomTom waypoint, with TomTom's arrow, when TomTom is loaded), Chat only writes the directions. A trainer with no coordinates, or a client with neither TomTom nor a map pin, is always written to chat."],
       -- Round 7, R7-7: no TomTom choice, so "auto" is the map pin, else chat (schemaVersion 11 folded
       -- a stored "tomtom" or "native" into it). AF-SM-TOMTOM: "auto" is TomTom's waypoint when the
       -- real TomTom is loaded (modules/Waypoints.lua); still no separate choice.
       values = { { value = "auto", text = L["Map pin"] }, { value = "chat", text = L["Chat only"] } } },
-    { path = "waypoints.announce", page = PAGE, group = GROUP, type = "bool", default = PW.announce,
+    { path = "waypoints.announce", page = PAGE, group = WAYPOINTS, type = "bool", default = PW.announce,
       label = L["Say where in chat"], desc = L["Print a chat line naming the trainer when a waypoint is set."] },
-    { path = "trainers.unverified", page = PAGE, group = GROUP, type = "bool", default = PT.unverified,
-      label = L["Mark unverified trainers"],
-      desc = L["Flag trainer data not yet checked on WoW Forever, in tooltips, the trainer popup and chat."] },
-    -- Round 2 (the owner's feedback): the trainer popup's own check box writes this row too.
-    { path = "trainers.showAll", page = PAGE, group = GROUP, type = "bool", default = PT.showAll,
-      label = L["Show all trainers"],
-      desc = L["In the trainer popup for a profession, list every trainer of every rank, Artisan first, and mark the ones who train your next rank."] },
 }))
 
 -- The Waypoint arrow subgroup. Round 6, R6-11: Skill Master's own arrow (modules/WaypointArrow.lua),
@@ -39,7 +64,7 @@ NS.RegisterSchemaRows(NS.Live({
 -- counts them in the gap).
 local ARROW = L["Waypoint arrow"]
 NS.RegisterSchemaRows(NS.Live({
-    { path = "waypoints.arrow", page = PAGE, group = GROUP, subgroup = ARROW, type = "bool", default = PW.arrow,
+    { path = "waypoints.arrow", page = PAGE, group = WAYPOINTS, subgroup = ARROW, type = "bool", default = PW.arrow,
       label = L["Show Skill Master's arrow"],
       desc = L["A map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin. With TomTom loaded, TomTom's arrow points instead."],
       onChange = function() if NS.WaypointArrow then NS.WaypointArrow.ApplySettings() end end },
@@ -92,28 +117,11 @@ local ARROW_WORDS = {
 -- The Position block's Reset position button, keyed by its subgroup, for the page's render.
 local arrowHooks = {}
 if NS.WaypointArrow then
-    local rows, hooks = NS.WaypointArrow.SettingsRows({ page = PAGE, group = GROUP, subgroup = ARROW,
+    local rows, hooks = NS.WaypointArrow.SettingsRows({ page = PAGE, group = WAYPOINTS, subgroup = ARROW,
         textSubgroup = L["Arrow text"], positionSubgroup = ARROW_WORDS.POSITION, L = ARROW_WORDS })
     NS.RegisterSchemaRows(rows)
     arrowHooks = hooks or {}
 end
-
--- The trainer popup's name line (feedback round 2, FB-11): one swatch, its class-color companion
--- (options-ui-§17, the player's class: the trainer is no unit with one) and "Use the skin's color",
--- on by default, which draws the skin's accent (skinning-§6). The popup repaints on LAYOUT_CHANGED.
-local nameRows = H.ColorPair({
-    prefix = "trainers.", page = PAGE, group = GROUP, subgroup = L["Trainer popup"],
-    key = "nameColor", companionKey = "useClassColorName", label = L["Trainer name color"],
-    classColor = { source = "player" },
-    tooltips = { nameColor = L["The trainer's name in the trainer popup. Not read while Use the skin's color is on."] },
-    defaults = { nameColor = PT.nameColor, useClassColorName = PT.useClassColorName },
-    extra = {
-        { path = "trainers.nameColorFromSkin", page = PAGE, type = "bool", default = PT.nameColorFromSkin,
-          label = L["Use the skin's color"],
-          desc = L["Draw the trainer's name in the skin's accent. Trainer name color is not read while this is on."] },
-    },
-})
-NS.RegisterSchemaRows(NS.Live(nameRows))
 
 NS.RegisterSchemaPage(PAGE, L["Trainers and Waypoints"], {
     defaultsTooltip = L["Restore every Trainers and Waypoints setting on this profile to its default."],

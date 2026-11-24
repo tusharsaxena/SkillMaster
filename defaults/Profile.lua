@@ -35,8 +35,9 @@ NS.defaults = {
             detachedStrata = "MEDIUM",
             -- Layout > Detached windows (round 5, R5-7): one style for every detached window
             -- (modules/Detached.lua D.ApplyStyle). scale multiplies each block's own; alpha is the
-            -- whole window's; the background and the border follow the skin while their companions
-            -- are on (skinning-§6), else the swatches through their class companions; titleBand is
+            -- whole window's; the background and the border take the class color while their class
+            -- companions are on, else follow the skin while their skin companions are on
+            -- (skinning-§6), else the swatches (options-ui-§17, class first; FB-SM-02); titleBand is
             -- "always", "hover" (shown while the pointer is over the window) or "never".
             detached = {
                 scale               = 1,
@@ -60,17 +61,18 @@ NS.defaults = {
             -- filter: the header's filter mark (modules/Blocks.lua B.FILTER_SETS; the weapon block's,
             -- round 5, R5-10; every block's, round 7, R7-1), "all" by default.
             blocks = {
-                primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
-                secondary     = { docked = true, order = 2, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
+                primary       = { docked = true, order = 1, collapsed = false, point = false, scale = 1, width = 280, locked = false, shown = true, sort = "name", filter = "all" },
+                secondary     = { docked = true, order = 2, collapsed = false, point = false, scale = 1, width = 280, locked = false, shown = true, sort = "name", filter = "all" },
+                -- width: the detached window's width (FB-SM-04, 200 to 600; its grip writes it).
                 -- belowCapOnly: the detached compact preset shows only the equipped weapons and the
                 -- skills below their cap (Detached.dc.html; Layout > Blocks > Weapon skills).
-                weapon        = { docked = true, order = 3, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name",
+                weapon        = { docked = true, order = 3, collapsed = false, point = false, scale = 1, width = 280, locked = false, shown = true, sort = "name",
                                   belowCapOnly = false, filter = "all" },
-                other         = { docked = true, order = 4, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
-                stats_base    = { docked = true, order = 5, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
-                stats_spell   = { docked = true, order = 6, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
-                stats_defense = { docked = true, order = 7, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
-                stats_utility = { docked = true, order = 8, collapsed = false, point = false, scale = 1, locked = false, shown = true, sort = "name", filter = "all" },
+                other         = { docked = true, order = 4, collapsed = false, point = false, scale = 1, width = 280, locked = false, shown = true, sort = "name", filter = "all" },
+                stats_base    = { docked = true, order = 5, collapsed = false, point = false, scale = 1, width = 280, locked = false, shown = true, sort = "name", filter = "all" },
+                stats_spell   = { docked = true, order = 6, collapsed = false, point = false, scale = 1, width = 280, locked = false, shown = true, sort = "name", filter = "all" },
+                stats_defense = { docked = true, order = 7, collapsed = false, point = false, scale = 1, width = 280, locked = false, shown = true, sort = "name", filter = "all" },
+                stats_utility = { docked = true, order = 8, collapsed = false, point = false, scale = 1, width = 280, locked = false, shown = true, sort = "name", filter = "all" },
             },
         },
         -- Rows a player hid from the row menu (T3.3) or the Skills and Stats pages, whether unlearned
@@ -88,7 +90,8 @@ NS.defaults = {
         -- art is cropped each side (the 1.x art's baked-in border; 7 is the old fixed crop), and the
         -- composed border. Its color is the row's own (the meaning color FB-14 chose, so it takes no
         -- skin companion, options-ui-§17) while borderColorFromRow is on; off, the skin's icon border
-        -- while borderColorFromSkin is on, else the swatch through its class companion.
+        -- while borderColorFromSkin is on, else the swatch; a class companion on comes before the
+        -- skin's (options-ui-§17, class first; FB-SM-02).
         -- borderColorFromRow is off on a new profile (round 7, R7-2); schemaVersion 12 kept the old
         -- true on every profile stored before.
         icons = {
@@ -137,7 +140,8 @@ NS.defaults = {
             colorMode     = "category",  -- "category" | "progress" | "likelihood" | "flat"
             -- T5.1 the composed blocks (options-ui-§16): the fill (the flat color mode's color),
             -- the background, the border and the text. Every `*FromSkin` companion starts on the
-            -- skin (skinning-§6): the stored pick waits for the player to turn it off.
+            -- skin (skinning-§6): the stored pick waits for the player to turn it off. A class
+            -- companion on comes first (options-ui-§17, class first; FB-SM-02).
             barTexture          = "Ka0s Default",
             barAlpha            = 1,
             barColor            = { 0.27, 0.59, 0.90, 1 },
@@ -245,9 +249,10 @@ NS.defaults = {
         trainers = {
             unverified = true,   -- mark trainer data not yet checked on WoW Forever
             showAll = false,     -- round 2: the popup lists every rank's trainers, Artisan first
-            -- The trainer popup's trainer name (feedback round 2, FB-11): the skin's accent while
-            -- nameColorFromSkin is on (the default, skinning-§6), else the swatch through its
-            -- class-color companion (options-ui-§17). The swatch starts on WoW Forever's tan accent.
+            -- The trainer popup's trainer name (feedback round 2, FB-11): the class color while
+            -- useClassColorName is on (options-ui-§17, class first; FB-SM-02), else the skin's accent
+            -- while nameColorFromSkin is on (the default, skinning-§6), else the swatch. The swatch
+            -- starts on WoW Forever's tan accent.
             nameColor         = { 0.788, 0.627, 0.478, 1 },
             useClassColorName = false,
             nameColorFromSkin = true,

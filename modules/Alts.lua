@@ -7,7 +7,7 @@ local _, NS = ...
 -- `stats` (FB-33) mirrors the main window's four stat blocks; a snapshot taken before it existed has
 -- none, and the Journal draws a dash for every stat it does not know (no migration: absent = unknown).
 -- THE KEY (forever-quirks-§4): "<realm>-<name>" from AceDB 40's db.keys, which is the ruleset
--- ("PvP") and the character's WHOLE two-word name ("Samplehunter Mockstride") on
+-- ("PvP") and the character's WHOLE two-word name ("First Surname") on
 -- Forever. The store never derives them again: UnitName's second return is the surname there, not a
 -- realm.
 -- A.View(list): a read-only stand-in with List / Forget over `list` (test mode's sample alts).

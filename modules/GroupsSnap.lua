@@ -185,7 +185,7 @@ local function showGlow(hit, tf)
     else
         -- Over the column a top or bottom drop stacks into.
         local edge = side == "top" and "TOP" or "BOTTOM"
-        local w = NS.Detached.WIDTH * (tonumber(NS.Detached.Style().scale) or 1)
+        local w = NS.Groups.Width(hit.key) * (tonumber(NS.Detached.Style().scale) or 1)
         local x = ((hit.col or 1) - 1) * w
         g:SetPoint(edge .. "LEFT", tf, edge .. "LEFT", x, 0)
         g:SetWidth(w)
@@ -306,7 +306,7 @@ function S.BeginSection(sh, gid, id)
     local cx, cy = S.Cursor()
     if not cx then return end
     local gs = tonumber(NS.Detached.Style().scale) or 1
-    local w, h = NS.Detached.WIDTH * gs, NS.Groups.SUB_H * gs
+    local w, h = NS.Groups.Width(gid) * gs, NS.Groups.SUB_H * gs
     -- Where the pointer took the sub-header, so the ghost does not jump under it.
     local r = S.Rect(sh)
     local offX, offY = 24, h / 2

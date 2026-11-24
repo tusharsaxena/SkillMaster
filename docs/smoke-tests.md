@@ -13,13 +13,13 @@ the checks below that cover each item:
 | Design §9 item | Checks |
 |---|---|
 | The probe | SM-PROBE-1, SM-PROBE-2 |
-| Each category | SM-DISP-1, SM-TEST-1 |
-| The lure timer | SM-DISP-2, SM-SIM-1 |
+| Each category | SM-DISP-1, SM-TEST-1, SM-FB2-4 |
+| The lure timer | SM-DISP-2, SM-SIM-1, SM-FB2-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
 | Rows page (round 9) | SM-DISP-59 |
 | Trainer data (the offline probe, GitHub issue #3) | SM-TPROBE-1, SM-TPROBE-2, SM-TPROBE-3, SM-TPROBE-4, SM-TPROBE-5, SM-TPROBE-6, SM-TPROBE-7, SM-TPROBE-8, SM-TPROBE-9, SM-TPROBE-10, SM-TPROBE-11 |
 | Waypoints (TomTom by name, AF-SM-TOMTOM) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58, SM-DISP-60, SM-DISP-61, SM-DISP-62, SM-DISP-63, SM-DISP-64, SM-DISP-65 |
-| Each skin | SM-SKIN-1, SM-SKIN-2, SM-SKIN-3, SM-SKIN-4, SM-SKIN-5, SM-SKIN-6, SM-SKIN-7, SM-SKIN-8 |
+| Each skin | SM-SKIN-1, SM-SKIN-2, SM-SKIN-3, SM-SKIN-4, SM-SKIN-5, SM-SKIN-6, SM-SKIN-7, SM-SKIN-8, SM-FB2-3 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
 | Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4, SM-DISP-18, SM-DISP-39, SM-DISP-40 |
 
@@ -899,3 +899,69 @@ you see on each Result line; none is passed until you say so.
   uses icons: none of them is left tinted or dimmed.
 - **SM-DIAG-1** `/sm diagnostics`: the report appears in the debug console with the ten sections
   (identity, settings, state, skin, model, probe, bonuses, layout, sim, rejected).
+
+## Feedback batch (2026-11-24)
+
+Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/`, items FB-SM-01 to FB-SM-06.
+
+- **SM-FB-1** (FB-SM-01, S4) Log in on Forever after the LibKa0s v1.112.0 re-vendor: no Lua error.
+  The main window, the Journal, a detached block's band and a merged window's band still carry the
+  gear, and it opens the settings. A detached or merged window's title band is not an unlock strip:
+  right-clicking it does nothing new.
+  Result:
+- **SM-FB-2** (FB-SM-03, T) Click a row's Go icon to open the trainer popup: its title bar carries
+  the close alone, no gear. The close and Escape still close it, and it still closes with the main
+  window.
+  Result:
+- **SM-FB-3** (FB-SM-02, P) Bars > Fill with Color mode Flat, then tick Use class color on the Bar
+  color, Background color, Border color and Font color blocks while each Use the skin's color stays
+  ticked: the bars' fill, background, border and text draw your class color (green on a hunter).
+  Untick Use class color: the skin's colors come back. Do the same on Layout > Detached windows
+  (Background, Border), Bars > Icons (Border color, with Use the row's color off) and Trainers and
+  Waypoints > Trainers > Trainer name color: each draws the class color while the skin's is ticked.
+  Result:
+- **SM-FB-4** (FB-SM-06, S3) Open Settings > Skill Master > Trainers and Waypoints: two tabs,
+  Trainers (Mark unverified trainers, Show all trainers, Trainer popup's Trainer name color) and
+  Waypoints (Waypoint method, Say where in chat, the Waypoint arrow, Arrow text and Arrow position
+  subgroups with Reset position). Defaults resets the rows on both tabs. The arrow's right-click
+  Arrow settings... still opens this page.
+  Result:
+- **SM-FB-5** (FB-SM-05, S2) With TomTom installed and Show Skill Master's arrow off, `/sm test`:
+  Skill Master's sample arrow shows, labeled "Sample: Skill Master's arrow is off" (with the arrow on
+  and TomTom loaded: "Sample: TomTom's arrow points to real waypoints"). No TomTom waypoint appears.
+  Untick or tick Show Skill Master's arrow during test mode: the sample stays. `/sm test` again: it
+  goes.
+  Result:
+- **SM-FB-6** (FB-SM-04, S1) Detach a block. Its window shows a corner resize grip: drag it wider
+  and narrower. The rows follow the width, the height stays the rows' height, and the window does
+  not jump. Layout > Blocks > the block's Block width slider shows the new width (a multiple of 10).
+  `/reload`: the width and the place are kept. Tick Lock this block, or `/sm lock`: the grip hides
+  and a drag on the corner does nothing; unlock: it is back. Merge two detached blocks of different
+  widths: the merged window's columns are the wider one's width.
+  Result:
+
+### Round 2 (the owner's smoke feedback, 2026-11-24)
+
+Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/R2_SMOKE_FEEDBACK.md`, item FB2-SM-01.
+
+- **SM-FB2-1** (FB2-SM-01, D2) Log in on Forever after the LibKa0s v1.113.0 re-vendor: no Lua error.
+  With the step panel closed, `/sm sim start fishingTrip`: the session runs and the step panel opens.
+  `/sm sim stop`, close the panel, then `/sm sim`: the panel opens and nothing
+  starts. Click the panel's Start row: the session runs with the panel still shown. Close the panel
+  while the session runs, then `/sm sim restart`: a fresh session runs and the panel opens again.
+  Result:
+- **SM-FB2-2** (FB2-SM-01, D2) With the step panel closed, tick General > Master controls > Sim mode,
+  and separately pick the launcher menu's Sim mode entry: each opens the step panel.
+  Result:
+- **SM-FB2-3** (FB2-SM-01, D3) Settings > Skill Master > General > Skin: Azeroth. Open the Journal's
+  Log tab and its range picker: the selected range reads gold, the other ranges parchment text.
+  Click a block header's sort mark: the current order's row reads gold beside its tick. Back to Ka0s
+  Default and Obsidian: the selected rows read gold too, not Obsidian's blue accent. On Forever,
+  under the default WoW Forever skin, repeat both menus: the selected rows read gold, not its tan
+  accent. In every skin the selected row reads gold and its text differs from the others.
+  Result:
+- **SM-FB2-4** (FB2-SM-01, D1) `/sm test`: the window and the Journal's Alts tab show the same names
+  as SM-TEST-1 and SM-TEST-12 (Samplehunter Mockstride first, then the Mage, Warrior and Paladin),
+  every name starting `Sample` or `Mock`. `/sm sim start fishingTrip`: the simulated character is
+  Samplehunter Mockstride too.
+  Result:

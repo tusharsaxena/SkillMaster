@@ -170,13 +170,21 @@ test("preview: the sample character and its alts are Sim.Sample's Forever people
     end
 end)
 
-test("preview: the library-absent copy of the sample people matches Sim.SAMPLE.forever", function()
-    local live = M.LibStub("LibKa0s-Sim-1.0").SAMPLE.forever
-    local copy = NS.Preview.FALLBACK_PEOPLE
-    assertEqual(#copy, #live, "every row")
-    for i, row in ipairs(live) do
-        for _, k in ipairs({ "name", "surname", "fullName", "realm", "classFile" }) do
-            assertEqual(copy[i][k], row[k], ("row %d %s"):format(i, k))
-        end
-    end
+-- FB2-SM-01 (LibKa0s#104, decision D1): every named sample person comes from the library. The
+-- hand-kept copy of Sim.SAMPLE.forever (P.FALLBACK_PEOPLE) is gone; a library-absent load draws a
+-- nameless sample character and no alts, never an invented name.
+test("preview: no hand-kept copy of the sample people (LibKa0s#104)", function()
+    assertTrue(NS.Preview.FALLBACK_PEOPLE == nil, "P.FALLBACK_PEOPLE is retired")
+    local Sim = M.LibStub("LibKa0s-Sim-1.0")
+    local people, mine = Sim.Sample("forever"), NS.Preview.People()
+    assertEqual(#mine, #people, "People() is Sim.Sample('forever')")
+    for i, row in ipairs(people) do assertEqual(mine[i].fullName, row.fullName, "row " .. i) end
+end)
+
+test("preview: a library-absent load draws a nameless sample character and no alts", function()
+    local NS2 = dofile("tests/degraded_env.lua")()
+    assertEqual(#NS2.Preview.People(), 0, "no people without the library")
+    local c = NS2.Preview.SampleCharacter()
+    assertEqual(c.name, NS2.L["Sample character"], "the nameless stand-in")
+    assertEqual(c.level, NS2.Preview_Forever.character.level, "the fixture's own fields kept")
 end)
