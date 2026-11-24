@@ -72,7 +72,7 @@ local function npcName(n, id)
     return (n and type(n.name) == "string" and n.name ~= "") and n.name or L["NPC %d"]:format(id)
 end
 
--- The sellers of the item that serve the player, the first F.TOP by name, and how many more.
+-- The sellers of the item that serve the player, the first F.TOP in ForeverDB's order, and how many more.
 local function sellers(ids)
     local faction, names, more = playerFaction(), {}, 0
     for _, id in ipairs(ids or {}) do

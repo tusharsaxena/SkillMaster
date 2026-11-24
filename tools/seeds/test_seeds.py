@@ -61,17 +61,17 @@ local function city(c, rows)
     end
 end
 city({ name = "Stormwind", faction = "Alliance", mapID = 1453, news = "1" }, {
-    { "Tel'Athir", "Mage Quarter", "alchemy", J, 900001, 50.0, 50.0 },
+    { "Vel'Morra", "Mage Quarter", "alchemy", J, 900001, 50.0, 50.0 },
     { "Nobody Here", "Lost Quarter", "alchemy", E, 900002, 40.0, 40.0 },
 })
 for _, r in ipairs({
-    { "Nat Pagle", "Neutral", "Dustwallow Marsh", "Dustwallow Marsh", 1445, "fishing", { 300 }, 900003, 58.6, 60.1, BOOK },
+    { "Brannoc Reedline", "Neutral", "Dustwallow Marsh", "Dustwallow Marsh", 1445, "fishing", { 300 }, 900003, 58.6, 60.1, BOOK },
 }) do
     add{ name = r[1], faction = r[2], city = r[3], mapName = r[4], mapID = r[5], teaches = { r[6] },
          ranks = r[7], npcID = r[8], x = r[9], y = r[10], learn = r[11], source = "s" }
 end
 for _, r in ipairs({
-    { "Woo Ping", "Alliance", "Stormwind", "Mage Quarter", 1453, 57.1, 57.7, 900004,
+    { "Hesk Dunmarrow", "Alliance", "Stormwind", "Mage Quarter", 1453, 57.1, 57.7, 900004,
       { "swords", "polearms" } },
 }) do
     local polearms = false
@@ -140,10 +140,10 @@ NS.Gathering_Forever = {
 # real ForeverDB row (its data is GPL-3.0; the repo is MIT).
 FOREVERDB = {
     "meta": {"build": "2099-01-01", "hash": "feedfacecafe0000", "counts": {}},
-    "npc": {"900001": ["Tel'Athir", "Journeyman Alchemist", 30, 30, 0],
+    "npc": {"900001": ["Vel'Morra", "Invented Brewer Title", 30, 30, 0],
             "900002": ["Somebody Else", "Alchemist", 30, 30, 0],
-            "900003": ["Nat Pagle", "Fisherman", 45, 45, 0],
-            "900004": ["Woo Ping", "Weapon Master", 40, 40, 0],
+            "900003": ["Brannoc Reedline", "Invented Angler Title", 45, 45, 0],
+            "900004": ["Hesk Dunmarrow", "Invented Blade Title", 40, 40, 0],
             "900006": ["Zara Invented", "Riding Trainer", 20, 20, 0]},
     "nfac": {"900001": "A", "900002": "A", "900003": "AH", "900004": "A", "900006": "H"},
     # 900001: one spm point at 50.3, 50.1 (on), 900006 at 25.0, 30.0 (off by 5)
@@ -189,7 +189,7 @@ class Fixture(unittest.TestCase):
                            ("SkillCatalog_Forever.lua", CATALOG), ("Gathering_Forever.lua", GATHERING)):
             (self.defaults / name).write_bytes(crlf(text))
         floor = mock.patch.multiple(seeds, SEED_MINIMUMS={"trainers": 1, "fishing": 1, "catalog": 1, "gathering": 1},
-                                    SEED_SENTINELS={"trainers": ("Woo Ping",), "fishing": (1429,)})
+                                    SEED_SENTINELS={"trainers": ("Hesk Dunmarrow",), "fishing": (1429,)})
         floor.start()
         self.addCleanup(floor.stop)
 
@@ -207,24 +207,24 @@ class LuaReader(unittest.TestCase):
         self.assertEqual(value.fields, {"x": "y"})
 
     def test_slug_matches_the_lua(self):
-        self.assertEqual(seeds.slug("Tel'Athir"), "tel_athir")
+        self.assertEqual(seeds.slug("Vel'Morra"), "vel_morra")
         self.assertEqual(seeds.slug("Doctor Gustaf VanHowzen"), "doctor_gustaf_vanhowzen")
 
 
 class Seeds(Fixture):
     def test_trainers(self):
         rows = {t["id"]: t for t in seeds.read_seeds(self.defaults)["trainers"]}
-        self.assertEqual(sorted(rows), ["nat_pagle", "nobody_here", "randal_hunter", "tel_athir", "woo_ping",
+        self.assertEqual(sorted(rows), ["brannoc_reedline", "hesk_dunmarrow", "nobody_here", "randal_hunter", "vel_morra",
                                         "zara_invented"])
-        self.assertEqual(rows["woo_ping"]["teaches"], ["swords", "polearms"])
-        self.assertEqual(rows["woo_ping"]["npcID"], 900004)
+        self.assertEqual(rows["hesk_dunmarrow"]["teaches"], ["swords", "polearms"])
+        self.assertEqual(rows["hesk_dunmarrow"]["npcID"], 900004)
         self.assertEqual(rows["randal_hunter"]["mapName"], "Elwynn Forest")
         self.assertEqual(rows["randal_hunter"]["city"], "Eastvale Logging Camp")
         self.assertIsNone(rows["randal_hunter"]["x"])
-        self.assertEqual(rows["nat_pagle"]["mapID"], 1445)
-        self.assertEqual((rows["nat_pagle"]["x"], rows["nat_pagle"]["y"]), (58.6, 60.1))
-        self.assertEqual(rows["tel_athir"]["faction"], "Alliance")         # city()'s head table
-        self.assertEqual(rows["tel_athir"]["subzone"], "Mage Quarter")
+        self.assertEqual(rows["brannoc_reedline"]["mapID"], 1445)
+        self.assertEqual((rows["brannoc_reedline"]["x"], rows["brannoc_reedline"]["y"]), (58.6, 60.1))
+        self.assertEqual(rows["vel_morra"]["faction"], "Alliance")         # city()'s head table
+        self.assertEqual(rows["vel_morra"]["subzone"], "Mage Quarter")
         self.assertEqual(rows["zara_invented"]["teaches"], ["riding"])      # a standalone add{}
         self.assertEqual(rows["zara_invented"]["npcID"], 900006)
 
@@ -252,11 +252,11 @@ class Seeds(Fixture):
 
     def test_flags(self):
         kinds = {(f["kind"], f["list"], f["id"]) for f in self.doc()["flags"]}
-        self.assertIn(("map-name", "trainers", "tel_athir"), kinds)             # Stormwind vs Stormwind City
+        self.assertIn(("map-name", "trainers", "vel_morra"), kinds)             # Stormwind vs Stormwind City
         self.assertIn(("subzone", "trainers", "nobody_here"), kinds)            # no such district
-        self.assertNotIn(("subzone", "trainers", "tel_athir"), kinds)           # Mage Quarter is a WMO area
+        self.assertNotIn(("subzone", "trainers", "vel_morra"), kinds)           # Mage Quarter is a WMO area
         self.assertNotIn(("place", "trainers", "randal_hunter"), kinds)         # Eastvale sits under Elwynn
-        self.assertIn(("skill", "trainers", "woo_ping"), kinds)                 # polearms: no catalog key
+        self.assertIn(("skill", "trainers", "hesk_dunmarrow"), kinds)                 # polearms: no catalog key
         self.assertIn(("map-unknown", "fishing", "9999"), kinds)
         self.assertIn(("map-type", "fishing", "1460"), kinds)
         self.assertNotIn(("map-name", "fishing", "1453"), kinds)
@@ -298,14 +298,14 @@ class ForeverDBEvidence(Fixture):
     def test_trainer_verdicts(self):
         doc = self.doc(self.fdb)
         v = doc["foreverdb"]["verdicts"]["trainers"]
-        self.assertEqual(v["tel_athir"]["npc"], "found")
-        self.assertEqual(v["tel_athir"]["spot"], "ok")
-        self.assertEqual(v["tel_athir"]["spotSource"], "spm")
-        self.assertEqual(v["tel_athir"]["role"], "ok")
+        self.assertEqual(v["vel_morra"]["npc"], "found")
+        self.assertEqual(v["vel_morra"]["spot"], "ok")
+        self.assertEqual(v["vel_morra"]["spotSource"], "spm")
+        self.assertEqual(v["vel_morra"]["role"], "ok")
         self.assertEqual(v["nobody_here"]["npc"], "name-mismatch")
-        self.assertEqual(v["nat_pagle"]["spot"], "ok")                 # spw projected through umaa
-        self.assertEqual(v["nat_pagle"]["spotSource"], "spw")
-        self.assertEqual(v["nat_pagle"]["side"], "ok")                 # Neutral is "AH"
+        self.assertEqual(v["brannoc_reedline"]["spot"], "ok")                 # spw projected through umaa
+        self.assertEqual(v["brannoc_reedline"]["spotSource"], "spw")
+        self.assertEqual(v["brannoc_reedline"]["side"], "ok")                 # Neutral is "AH"
         self.assertEqual(v["randal_hunter"]["npc"], "missing")
         self.assertNotIn("spot", v["randal_hunter"])
         self.assertEqual(v["zara_invented"]["spot"], "position-off")
@@ -321,10 +321,10 @@ class ForeverDBEvidence(Fixture):
         self.assertIn(("fdb-side", "zara_invented"), flags)           # Neutral shipped, "H" in nfac
         self.assertIn(("fdb-spot", "zara_invented"), flags)
         self.assertIn("5.0 map-% away", flags[("fdb-spot", "zara_invented")]["detail"])
-        self.assertIn(("fdb-role", "woo_ping"), flags)                # WeaponMasters adds a line the record lacks
-        self.assertNotIn(("fdb-spot", "tel_athir"), flags)
-        self.assertNotIn(("fdb-side", "nat_pagle"), flags)
-        self.assertNotIn(("fdb-spot", "nat_pagle"), flags)
+        self.assertIn(("fdb-role", "hesk_dunmarrow"), flags)                # WeaponMasters adds a line the record lacks
+        self.assertNotIn(("fdb-spot", "vel_morra"), flags)
+        self.assertNotIn(("fdb-side", "brannoc_reedline"), flags)
+        self.assertNotIn(("fdb-spot", "brannoc_reedline"), flags)
 
     def test_gathering_flags(self):
         flags = self.flags()
@@ -353,8 +353,8 @@ class ForeverDBEvidence(Fixture):
         rulings = seeds.format_rulings_md(doc, {}, "2099-01-02")
         self.assertIn("ForeverDB v2099.01.01.1", rulings)
         for text in (sources, json.dumps(doc["foreverdb"])):
-            self.assertNotIn("Journeyman Alchemist", text)            # an npc title: a row field never compared
-            self.assertNotIn("Weapon Master", text)
+            self.assertNotIn("Invented Brewer Title", text)            # an npc title: a row field never compared
+            self.assertNotIn("Invented Blade Title", text)
 
     def test_replay_refetches_the_pinned_tag(self):
         bundle = self.tmp / "2099-01-02-forever"

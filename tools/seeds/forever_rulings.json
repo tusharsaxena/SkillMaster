@@ -96,7 +96,7 @@
     "ruling": "keep"
   },
   "shipped:fdb-side:trainers:angelique_butler": {
-    "reason": "fixed by hand (judgment call, 2026-11-25): Neutral -> Alliance; ForeverDB nfac 'A', and every other Alterac Mountains Forever trainer (7, QuestieDB and ForeverDB alike) is Alliance; QuestieDB alone said Neutral; the next derive stops flagging it",
+    "reason": "fixed by hand (judgment call, 2026-11-25): Neutral -> Alliance; every other Alterac Mountains Forever trainer (7, QuestieDB and ForeverDB alike) is Alliance, and ForeverDB nfac 'A' agrees; that neighbor pattern carries the call, not nfac alone (nfac is the NPC's own side, which is why it decides nothing on Zephras Isle and Riverglades, where the owner ruled the trainers Neutral); QuestieDB's side is AH, and the probe's side check accepts Alliance against AH, so no probe flag follows; the next derive stops flagging it",
     "ruling": "keep"
   },
   "shipped:fdb-side:trainers:gorg": {

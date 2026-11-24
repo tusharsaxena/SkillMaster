@@ -67,7 +67,8 @@ design mockups, and nothing in it mirrors a DB2 row.
   rank spells its trainer rows teach, then its title; its Era data is that dump plus pfQuest's area
   ids, and its Forever data a pinned QuestieDB commit, so it is not independent of QuestieDB; it is
   All Rights Reserved, so the probe replicates the method and copies none of its data), pfQuest and
-  Method.gg's guides. A seeds run that changes a trainer row re-runs the probe after `apply`.
+  Method.gg's guides. A seeds run that changes a trainer's `npcID`, `name`, `mapID`, `x` or `y` re-runs the probe
+  after `apply` (below).
 - **Only the tool writes the rulings, and `apply` only removes.** Rulings live in
   `tools/seeds/forever_rulings.json`, written only by `seeds.py rule`, keyed `<list>:<id>` for a
   candidate and `shipped:<kind>:<list>:<id>` for a flag, never by build. A ruling holds until the
@@ -189,7 +190,8 @@ endings and layout, and a second `apply` changes nothing.
 - When a removal changes a trainer count a test pins (`tests/test_trainers.lua`), update the test.
 - When a hand fix changed a trainer's `npcID`, `name`, `mapID`, `x` or `y` (the values the probe
   confirms), re-run the trainer probe with `--write-provenance` (`docs/testing.md`): the suite fails a
-  confirmed record whose values changed. A side (`faction`) fix needs no probe run.
+  confirmed record whose values changed. A side (`faction`) fix needs no probe run: the provenance
+  file stores no side, and the probe's side check accepts either side against QuestieDB's AH.
 
 ### Stage
 

@@ -64,15 +64,18 @@ and point that QuestieDB and the trainer probe gave. There was nothing to fix in
 ## Judgment calls applied
 
 - **Angelique Butler (First Aid Trainer, Alterac Mountains, npc 251977): Neutral to Alliance.**
-  ForeverDB's `nfac` says Alliance, and every other Alterac Mountains Forever trainer (Alard Schmied,
-  Linzy Blackbolt, Charles Worth, Vanessa Sellers, Katherine Lee, Edward Egan, Patricia Egan) is
-  Alliance in both QuestieDB and ForeverDB. QuestieDB alone made her Neutral, and no owner ruling
-  covers Alterac Mountains. Effect: she leaves the Horde trainer lists; Horde First Aid keeps every
+  Every other Alterac Mountains Forever trainer (Alard Schmied, Linzy Blackbolt, Charles Worth,
+  Vanessa Sellers, Katherine Lee, Edward Egan, Patricia Egan) is Alliance in both QuestieDB and
+  ForeverDB, and ForeverDB's `nfac` says Alliance for her too. The neighbor pattern carries the call,
+  not `nfac` alone: `nfac` is the NPC's own side, not the side it serves, which is why the `nfac` 'A'
+  and 'H' on the Zephras Isle and Riverglades trainers decide nothing against the owner's Neutral
+  ruling there. QuestieDB alone made her Neutral (side AH), and no owner ruling covers Alterac
+  Mountains. Effect: she leaves the Horde trainer lists; Horde First Aid keeps every
   capital trainer. Smoke: SM-SEEDFDB-1. To reverse it, set her row back to `"Neutral"`; a later run
-  then flags her again. She is not a probe-confirmed record, and the probe's confirmation
-  covers npcID, name, mapID and point, not side, so `defaults/TrainerProvenance_Forever.lua` is
-  unchanged and no probe re-run was needed; the next probe run will report that QuestieDB says
-  Neutral.
+  then flags her again. She is not a probe-confirmed record, and the provenance file stores
+  npcID, name, mapID and point, not side, so `defaults/TrainerProvenance_Forever.lua` is unchanged
+  and no probe re-run was needed. The probe does check side, but its side check accepts Alliance
+  against QuestieDB's AH, so no probe flag follows from the change.
 
 ## Needs owner review
 
