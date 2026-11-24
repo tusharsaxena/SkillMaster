@@ -269,6 +269,7 @@ Kit.run{
         "test_polish",
         "test_preview",
         "test_sim",
+        "test_sim_start_panel",
         "test_window_chrome",
         "test_header_buttons",
         "test_tooltips",
