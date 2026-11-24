@@ -18,6 +18,7 @@ the checks below that cover each item:
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
 | Rows page (round 9) | SM-DISP-59 |
 | Trainer data (the offline probe, GitHub issue #3) | SM-TPROBE-1, SM-TPROBE-2, SM-TPROBE-3, SM-TPROBE-4, SM-TPROBE-5, SM-TPROBE-6, SM-TPROBE-7, SM-TPROBE-8, SM-TPROBE-9, SM-TPROBE-10, SM-TPROBE-11, SM-TPROBE-12, SM-TPROBE-13, SM-TPROBE-14 |
+| Trainer data (seed validation with ForeverDB, 2026-11-25) | SM-SEEDFDB-1, SM-SEEDFDB-2 |
 | Waypoints (TomTom by name, AF-SM-TOMTOM) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58, SM-DISP-60, SM-DISP-61, SM-DISP-62, SM-DISP-63, SM-DISP-64, SM-DISP-65 |
 | Each skin | SM-SKIN-1, SM-SKIN-2, SM-SKIN-3, SM-SKIN-4, SM-SKIN-5, SM-SKIN-6, SM-SKIN-7, SM-SKIN-8, SM-FB2-3 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
@@ -887,6 +888,25 @@ you see on each Result line; none is passed until you say so.
   Sayoc; Sayoc still lists for Axes, Bows, Daggers, Fist Weapons and Thrown. Bena Winterhoof is under
   Apprentice in Alchemy's Show all trainers list.
   Result: PASSED (owner, 2026-11-25: "assume all the SM checks pass").
+
+### Seed validation with ForeverDB (2026-11-25)
+
+The 2026-11-25 seed run (`docs/seed-research/2026-11-25-forever/ANALYSIS.md`) checked every trainer
+against ForeverDB. It changed one shipped row, a judgment call the owner may reverse here.
+
+- **SM-SEEDFDB-1** (the one data change) Angelique Butler, First Aid Trainer in Alterac Mountains, is
+  now Alliance, not Neutral. On an Alliance character with First Aid below 150, open the First Aid
+  trainer popup with Show all trainers ticked: Angelique Butler is listed (Alterac Mountains). On a
+  Horde character, the same popup does not list her. If you can reach her, she is friendly to
+  Alliance and hostile or unfriendly to Horde.
+  Result: pending (owner). Pending sign-off: reverse the change (her row back to "Neutral") if she
+  serves Horde too.
+- **SM-SEEDFDB-2** (needs owner review, no data changed) ForeverDB's trainer table disagrees with its
+  own NPC titles on five Forever-only trainers. Talk to each and note what it trains: on Zephras Isle,
+  Aedi Thriceforged (shipped Mining), Eaysaa Brightgust (Alchemy), Nasalanna Windsinger (Skinning) and
+  Messana Crestwind (Leatherworking); in Durotar, Norzsh (Blacksmithing). Also check whether Durotar
+  has Junior Skinning, Mining and Herbalism trainers (ForeverDB hints at Kagil, Norzsh and Zor'la).
+  Result: pending (owner).
 
 ## Skins and diagnostics
 

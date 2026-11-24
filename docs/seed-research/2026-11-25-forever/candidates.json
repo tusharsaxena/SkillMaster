@@ -1,0 +1,2403 @@
+{
+ "build": "1.60.1.71091",
+ "buildCreated": "",
+ "candidates": [
+  {
+   "id": "1418",
+   "key": "fishing:1418",
+   "list": "fishing",
+   "name": "Badlands",
+   "notes": [
+    "UiMap Type 3 (zone), parent Eastern Kingdoms (1415)"
+   ]
+  },
+  {
+   "id": "1419",
+   "key": "fishing:1419",
+   "list": "fishing",
+   "name": "Blasted Lands",
+   "notes": [
+    "UiMap Type 3 (zone), parent Eastern Kingdoms (1415)"
+   ]
+  },
+  {
+   "id": "1427",
+   "key": "fishing:1427",
+   "list": "fishing",
+   "name": "Searing Gorge",
+   "notes": [
+    "UiMap Type 3 (zone), parent Eastern Kingdoms (1415)"
+   ]
+  },
+  {
+   "id": "2482",
+   "key": "fishing:2482",
+   "list": "fishing",
+   "name": "Mount Hyjal",
+   "notes": [
+    "UiMap Type 3 (zone), parent Kalimdor (1414)"
+   ]
+  },
+  {
+   "id": "2521",
+   "key": "fishing:2521",
+   "list": "fishing",
+   "name": "Zephras Isle",
+   "notes": [
+    "UiMap Type 3 (zone), parent Azeroth (947)"
+   ]
+  },
+  {
+   "id": "2548",
+   "key": "fishing:2548",
+   "list": "fishing",
+   "name": "Riverglades",
+   "notes": [
+    "UiMap Type 3 (zone), parent Eastern Kingdoms (1415)"
+   ]
+  },
+  {
+   "id": "2652",
+   "key": "fishing:2652",
+   "list": "fishing",
+   "name": "Shen'dralas",
+   "notes": [
+    "UiMap Type 3 (zone), parent Kalimdor (1414)"
+   ]
+  },
+  {
+   "id": "2665",
+   "key": "fishing:2665",
+   "list": "fishing",
+   "name": "Zephras Isle",
+   "notes": [
+    "UiMap Type 3 (zone), parent none (0)"
+   ]
+  },
+  {
+   "id": "40",
+   "key": "catalog:40",
+   "list": "catalog",
+   "name": "Poisons",
+   "notes": [
+    "SkillLine category 9, Flags 128, no parent line"
+   ]
+  },
+  {
+   "id": "118",
+   "key": "catalog:118",
+   "list": "catalog",
+   "name": "Dual Wield",
+   "notes": [
+    "SkillLine category 6, Flags 146, no parent line"
+   ]
+  },
+  {
+   "id": "142",
+   "key": "catalog:142",
+   "list": "catalog",
+   "name": "Survival",
+   "notes": [
+    "SkillLine category 9, Flags 0, no parent line"
+   ]
+  },
+  {
+   "id": "155",
+   "key": "catalog:155",
+   "list": "catalog",
+   "name": "Swimming",
+   "notes": [
+    "SkillLine category 9, Flags 0, no parent line"
+   ]
+  },
+  {
+   "id": "3011",
+   "key": "catalog:3011",
+   "list": "catalog",
+   "name": "Galestrider Riding",
+   "notes": [
+    "SkillLine category 9, Flags 144, no parent line"
+   ]
+  },
+  {
+   "id": "3012",
+   "key": "catalog:3012",
+   "list": "catalog",
+   "name": "Comprehension",
+   "notes": [
+    "SkillLine category 9, Flags 128, no parent line"
+   ]
+  },
+  {
+   "id": "3014",
+   "key": "catalog:3014",
+   "list": "catalog",
+   "name": "Feral Combat",
+   "notes": [
+    "SkillLine category 6, Flags 128, no parent line"
+   ]
+  }
+ ],
+ "creature": {
+  "note": "the client's Creature table holds companions and mounts, not trainers: report only",
+  "tableRows": 183,
+  "trainersMatched": []
+ },
+ "date": "2026-11-25",
+ "flags": [
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "tel_athir",
+   "key": "shipped:map-name:trainers:tel_athir",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Tel'Athir"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "lilyssia_nightbreeze",
+   "key": "shipped:map-name:trainers:lilyssia_nightbreeze",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Lilyssia Nightbreeze"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "dane_lindgren",
+   "key": "shipped:map-name:trainers:dane_lindgren",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Dane Lindgren"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "therum_deepforge",
+   "key": "shipped:map-name:trainers:therum_deepforge",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Therum Deepforge"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "betty_quin",
+   "key": "shipped:map-name:trainers:betty_quin",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Betty Quin"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "lucan_cordell",
+   "key": "shipped:map-name:trainers:lucan_cordell",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Lucan Cordell"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "sprite_jumpsprocket",
+   "key": "shipped:map-name:trainers:sprite_jumpsprocket",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Sprite Jumpsprocket"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "lilliam_sparkspindle",
+   "key": "shipped:map-name:trainers:lilliam_sparkspindle",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Lilliam Sparkspindle"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "tannysa",
+   "key": "shipped:map-name:trainers:tannysa",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Tannysa"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "shylamiir",
+   "key": "shipped:map-name:trainers:shylamiir",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Shylamiir"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "randal_worth",
+   "key": "shipped:map-name:trainers:randal_worth",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Randal Worth"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "simon_tanner",
+   "key": "shipped:map-name:trainers:simon_tanner",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Simon Tanner"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "gelman_stonehand",
+   "key": "shipped:map-name:trainers:gelman_stonehand",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Gelman Stonehand"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "maris_granger",
+   "key": "shipped:map-name:trainers:maris_granger",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Maris Granger"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "lawrence_schneider",
+   "key": "shipped:map-name:trainers:lawrence_schneider",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Lawrence Schneider"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "sellandus",
+   "key": "shipped:map-name:trainers:sellandus",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Sellandus"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "georgio_bolero",
+   "key": "shipped:map-name:trainers:georgio_bolero",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Georgio Bolero"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "stephen_ryback",
+   "key": "shipped:map-name:trainers:stephen_ryback",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Stephen Ryback"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "shaina_fuller",
+   "key": "shipped:map-name:trainers:shaina_fuller",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Shaina Fuller"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "arnold_leland",
+   "key": "shipped:map-name:trainers:arnold_leland",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Arnold Leland"
+  },
+  {
+   "detail": "'Middle Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "kray",
+   "key": "shipped:subzone:trainers:kray",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Kray"
+  },
+  {
+   "detail": "'Middle Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "bena_winterhoof",
+   "key": "shipped:subzone:trainers:bena_winterhoof",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Bena Winterhoof"
+  },
+  {
+   "detail": "'Lower Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "thrag_stonehoof",
+   "key": "shipped:subzone:trainers:thrag_stonehoof",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Thrag Stonehoof"
+  },
+  {
+   "detail": "'Lower Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "karn_stonehoof",
+   "key": "shipped:subzone:trainers:karn_stonehoof",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Karn Stonehoof"
+  },
+  {
+   "detail": "'Middle Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "mot_dawnstrider",
+   "key": "shipped:subzone:trainers:mot_dawnstrider",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Mot Dawnstrider"
+  },
+  {
+   "detail": "'Middle Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "teg_dawnstrider",
+   "key": "shipped:subzone:trainers:teg_dawnstrider",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Teg Dawnstrider"
+  },
+  {
+   "detail": "'Middle Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "komin_winterhoof",
+   "key": "shipped:subzone:trainers:komin_winterhoof",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Komin Winterhoof"
+  },
+  {
+   "detail": "'Middle Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "mak",
+   "key": "shipped:subzone:trainers:mak",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Mak"
+  },
+  {
+   "detail": "'Middle Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "tarn",
+   "key": "shipped:subzone:trainers:tarn",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Tarn"
+  },
+  {
+   "detail": "'Middle Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "una",
+   "key": "shipped:subzone:trainers:una",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Una"
+  },
+  {
+   "detail": "'Lower Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "brek_stonehoof",
+   "key": "shipped:subzone:trainers:brek_stonehoof",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Brek Stonehoof"
+  },
+  {
+   "detail": "'Middle Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "mooranta",
+   "key": "shipped:subzone:trainers:mooranta",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Mooranta"
+  },
+  {
+   "detail": "'Middle Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "vhan",
+   "key": "shipped:subzone:trainers:vhan",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Vhan"
+  },
+  {
+   "detail": "'Middle Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "tepa",
+   "key": "shipped:subzone:trainers:tepa",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Tepa"
+  },
+  {
+   "detail": "'High Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "aska_mistrunner",
+   "key": "shipped:subzone:trainers:aska_mistrunner",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Aska Mistrunner"
+  },
+  {
+   "detail": "'High Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "kah_mistrunner",
+   "key": "shipped:subzone:trainers:kah_mistrunner",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Kah Mistrunner"
+  },
+  {
+   "detail": "'The War Quarter' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "basil_frye",
+   "key": "shipped:subzone:trainers:basil_frye",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Basil Frye"
+  },
+  {
+   "detail": "'The War Quarter' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "james_van_brunt",
+   "key": "shipped:subzone:trainers:james_van_brunt",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "James Van Brunt"
+  },
+  {
+   "detail": "\"The Rogues' Quarter\" is named nowhere in AreaTable or WMOAreaTable",
+   "id": "graham_van_talen",
+   "key": "shipped:subzone:trainers:graham_van_talen",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Graham Van Talen"
+  },
+  {
+   "detail": "\"The Rogues' Quarter\" is named nowhere in AreaTable or WMOAreaTable",
+   "id": "franklin_lloyd",
+   "key": "shipped:subzone:trainers:franklin_lloyd",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Franklin Lloyd"
+  },
+  {
+   "detail": "\"The Rogues' Quarter\" is named nowhere in AreaTable or WMOAreaTable",
+   "id": "dan_golthas",
+   "key": "shipped:subzone:trainers:dan_golthas",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Dan Golthas"
+  },
+  {
+   "detail": "'The War Quarter' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "brom_killian",
+   "key": "shipped:subzone:trainers:brom_killian",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Brom Killian"
+  },
+  {
+   "detail": "\"The Rogues' Quarter\" is named nowhere in AreaTable or WMOAreaTable",
+   "id": "killian_hagey",
+   "key": "shipped:subzone:trainers:killian_hagey",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Killian Hagey"
+  },
+  {
+   "detail": "'The Magic Quarter' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "victor_ward",
+   "key": "shipped:subzone:trainers:victor_ward",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Victor Ward"
+  },
+  {
+   "detail": "'The Magic Quarter' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "rhiannon_davis",
+   "key": "shipped:subzone:trainers:rhiannon_davis",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Rhiannon Davis"
+  },
+  {
+   "detail": "'The Magic Quarter' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "josef_gregorian",
+   "key": "shipped:subzone:trainers:josef_gregorian",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Josef Gregorian"
+  },
+  {
+   "detail": "'The Trade Quarter' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "eunice_burch",
+   "key": "shipped:subzone:trainers:eunice_burch",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Eunice Burch"
+  },
+  {
+   "detail": "\"The Rogues' Quarter\" is named nowhere in AreaTable or WMOAreaTable",
+   "id": "mary_edras",
+   "key": "shipped:subzone:trainers:mary_edras",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Mary Edras"
+  },
+  {
+   "detail": "'The Magic Quarter' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "armand_cromwell",
+   "key": "shipped:subzone:trainers:armand_cromwell",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Armand Cromwell"
+  },
+  {
+   "detail": "'Stormwind'; UiMap 1453 is 'Stormwind City'",
+   "id": "woo_ping",
+   "key": "shipped:map-name:trainers:woo_ping",
+   "kind": "map-name",
+   "list": "trainers",
+   "name": "Woo Ping"
+  },
+  {
+   "detail": "'Lower Rise' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "ansekhwa",
+   "key": "shipped:subzone:trainers:ansekhwa",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Ansekhwa"
+  },
+  {
+   "detail": "'The War Quarter' is named nowhere in AreaTable or WMOAreaTable",
+   "id": "archibald",
+   "key": "shipped:subzone:trainers:archibald",
+   "kind": "subzone",
+   "list": "trainers",
+   "name": "Archibald"
+  },
+  {
+   "detail": "ForeverDB has no spot of npc 11073 on UiMap 1418",
+   "id": "annora",
+   "key": "shipped:fdb-spot:trainers:annora",
+   "kind": "fdb-spot",
+   "list": "trainers",
+   "name": "Annora"
+  },
+  {
+   "detail": "spf WeaponMasters lacks [473] and adds []",
+   "id": "buliwyf_stonehand",
+   "key": "shipped:fdb-role:trainers:buliwyf_stonehand",
+   "kind": "fdb-role",
+   "list": "trainers",
+   "name": "Buliwyf Stonehand"
+  },
+  {
+   "detail": "spf WeaponMasters lacks [473] and adds []",
+   "id": "ilyenia_moonfire",
+   "key": "shipped:fdb-role:trainers:ilyenia_moonfire",
+   "kind": "fdb-role",
+   "list": "trainers",
+   "name": "Ilyenia Moonfire"
+  },
+  {
+   "detail": "spf WeaponMasters lacks [473] and adds []",
+   "id": "sayoc",
+   "key": "shipped:fdb-role:trainers:sayoc",
+   "kind": "fdb-role",
+   "list": "trainers",
+   "name": "Sayoc"
+  },
+  {
+   "detail": "spf ProfessionTrainers says skill line 164; the record teaches [186]",
+   "id": "aedi_thriceforged",
+   "key": "shipped:fdb-role:trainers:aedi_thriceforged",
+   "kind": "fdb-role",
+   "list": "trainers",
+   "name": "Aedi Thriceforged"
+  },
+  {
+   "detail": "shipped Neutral; ForeverDB nfac says 'A'",
+   "id": "angelique_butler",
+   "key": "shipped:fdb-side:trainers:angelique_butler",
+   "kind": "fdb-side",
+   "list": "trainers",
+   "name": "Angelique Butler"
+  },
+  {
+   "detail": "shipped Neutral; ForeverDB nfac says 'A'",
+   "id": "iaadaria_bitterwind",
+   "key": "shipped:fdb-side:trainers:iaadaria_bitterwind",
+   "kind": "fdb-side",
+   "list": "trainers",
+   "name": "Iaadaria Bitterwind"
+  },
+  {
+   "detail": "shipped Neutral; ForeverDB nfac says 'H'",
+   "id": "gorg",
+   "key": "shipped:fdb-side:trainers:gorg",
+   "kind": "fdb-side",
+   "list": "trainers",
+   "name": "Gorg"
+  },
+  {
+   "detail": "shipped Neutral; ForeverDB nfac says 'H'",
+   "id": "gur_dok",
+   "key": "shipped:fdb-side:trainers:gur_dok",
+   "kind": "fdb-side",
+   "list": "trainers",
+   "name": "Gur'dok"
+  },
+  {
+   "detail": "spf ProfessionTrainers says skill line 333; the record teaches [171]",
+   "id": "eaysaa_brightgust",
+   "key": "shipped:fdb-role:trainers:eaysaa_brightgust",
+   "kind": "fdb-role",
+   "list": "trainers",
+   "name": "Eaysaa Brightgust"
+  },
+  {
+   "detail": "spf ProfessionTrainers says skill line 333; the record teaches [393]",
+   "id": "nasalanna_windsinger",
+   "key": "shipped:fdb-role:trainers:nasalanna_windsinger",
+   "kind": "fdb-role",
+   "list": "trainers",
+   "name": "Nasalanna Windsinger"
+  },
+  {
+   "detail": "spf ProfessionTrainers says skill line 186; the record teaches [165]",
+   "id": "messana_crestwind",
+   "key": "shipped:fdb-role:trainers:messana_crestwind",
+   "kind": "fdb-role",
+   "list": "trainers",
+   "name": "Messana Crestwind"
+  },
+  {
+   "detail": "shipped Neutral; ForeverDB nfac says 'A'",
+   "id": "alphonse_dumas",
+   "key": "shipped:fdb-side:trainers:alphonse_dumas",
+   "kind": "fdb-side",
+   "list": "trainers",
+   "name": "Alphonse Dumas"
+  },
+  {
+   "detail": "spf ProfessionTrainers says skill line 186; the record teaches [164]",
+   "id": "norzsh",
+   "key": "shipped:fdb-role:trainers:norzsh",
+   "kind": "fdb-role",
+   "list": "trainers",
+   "name": "Norzsh"
+  }
+ ],
+ "flavor": "forever",
+ "foreverdb": {
+  "build": "2026-11-24",
+  "commit": "6e0a34b4bd017483aff616f5766348e1cea519ae",
+  "fetched": "2026-11-25",
+  "files": [
+   {
+    "bytes": 625,
+    "path": "ForeverDB/ForeverDB.toc",
+    "sha256": "0f58c1666f22332a2b1b0de9a665dc78acab3db9ac8207ee23e8ecd6e4375e0c",
+    "sha256LF": "0f58c1666f22332a2b1b0de9a665dc78acab3db9ac8207ee23e8ecd6e4375e0c"
+   },
+   {
+    "bytes": 3231144,
+    "path": "ForeverDB/ForeverDB.lua",
+    "sha256": "8db482a11ce9dc96db8a00d9fb1fcc95a22a564fa64c8f3547ab95c913b19bc4",
+    "sha256LF": "8db482a11ce9dc96db8a00d9fb1fcc95a22a564fa64c8f3547ab95c913b19bc4"
+   },
+   {
+    "bytes": 3433858,
+    "path": "ForeverDB/ForeverDB_2.lua",
+    "sha256": "72a641230b2d96ccc812a0065c35ebe6f1770eebf13ad745cb27260b53accb9a",
+    "sha256LF": "72a641230b2d96ccc812a0065c35ebe6f1770eebf13ad745cb27260b53accb9a"
+   },
+   {
+    "bytes": 3313064,
+    "path": "ForeverDB/ForeverDB_3.lua",
+    "sha256": "843aed45dd307caea7e4a3dd7c4c4c326278005c4c09a947d7c3d160497ed466",
+    "sha256LF": "843aed45dd307caea7e4a3dd7c4c4c326278005c4c09a947d7c3d160497ed466"
+   },
+   {
+    "bytes": 1971859,
+    "path": "ForeverDB/ForeverDB_4.lua",
+    "sha256": "7a0218364c64edba12d9cedcb67e777fcdbdd005418ca1451354bd5471f6a386",
+    "sha256LF": "7a0218364c64edba12d9cedcb67e777fcdbdd005418ca1451354bd5471f6a386"
+   }
+  ],
+  "hash": "34e1dda1e0baf54c",
+  "helper": "dev-copilot 2.12.0, scripts/foreverdb.py at commit 140d30ba69c6e602e40cbe8151693b4936aa8736 (branch feat/2026-11-25-seeds-foreverdb)",
+  "install": {
+   "path": "/mnt/g/Games/Blizzard/World of Warcraft/_forever_/Interface/AddOns/ForeverDB",
+   "version": "2026.11.24.46"
+  },
+  "json": {
+   "path": "foreverdb.json",
+   "sha256": "156924e2e077ce87b7e0ee88d98bb3c4a42c2f1641584540dce2cdd722fffbdc"
+  },
+  "origin": [
+   "github",
+   "install"
+  ],
+  "spotTolerance": 1.0,
+  "tag": "v2026.11.24.46",
+  "tocVersion": "2026.11.24.46",
+  "urls": [
+   "https://raw.githubusercontent.com/foreverfraddons/forever-db/v2026.11.24.46/ForeverDB/ForeverDB.toc",
+   "https://raw.githubusercontent.com/foreverfraddons/forever-db/v2026.11.24.46/ForeverDB/ForeverDB.lua",
+   "https://raw.githubusercontent.com/foreverfraddons/forever-db/v2026.11.24.46/ForeverDB/ForeverDB_2.lua",
+   "https://raw.githubusercontent.com/foreverfraddons/forever-db/v2026.11.24.46/ForeverDB/ForeverDB_3.lua",
+   "https://raw.githubusercontent.com/foreverfraddons/forever-db/v2026.11.24.46/ForeverDB/ForeverDB_4.lua"
+  ],
+  "verdicts": {
+   "gathering": {
+    "herbalism.arthas_tears": "found",
+    "herbalism.black_lotus": "found",
+    "herbalism.blindweed": "found",
+    "herbalism.briarthorn": "found",
+    "herbalism.bruiseweed": "found",
+    "herbalism.dreamfoil": "found",
+    "herbalism.earthroot": "found",
+    "herbalism.fadeleaf": "found",
+    "herbalism.firebloom": "found",
+    "herbalism.ghost_mushroom": "found",
+    "herbalism.golden_sansam": "found",
+    "herbalism.goldthorn": "found",
+    "herbalism.grave_moss": "found",
+    "herbalism.gromsblood": "found",
+    "herbalism.icecap": "found",
+    "herbalism.khadgar_s_whisker": "found",
+    "herbalism.kingsblood": "found",
+    "herbalism.liferoot": "found",
+    "herbalism.mageroyal": "found",
+    "herbalism.mountain_silversage": "found",
+    "herbalism.peacebloom": "found",
+    "herbalism.plaguebloom": "found",
+    "herbalism.purple_lotus": "found",
+    "herbalism.silverleaf": "found",
+    "herbalism.stranglekelp": "found",
+    "herbalism.sungrass": "found",
+    "herbalism.wild_steelbloom": "found",
+    "herbalism.wintersbite": "found",
+    "mining.copper_vein": "found",
+    "mining.dark_iron_deposit": "found",
+    "mining.gold_vein": "found",
+    "mining.incendicite_mineral_vein": "found",
+    "mining.indurium_mineral_vein": "found",
+    "mining.iron_deposit": "found",
+    "mining.lesser_bloodstone_deposit": "found",
+    "mining.mithril_deposit": "found",
+    "mining.rich_thorium_vein": "found",
+    "mining.silver_vein": "found",
+    "mining.small_thorium_vein": "found",
+    "mining.tin_vein": "found",
+    "mining.truesilver_deposit": "found"
+   },
+   "trainers": {
+    "aedi_thriceforged": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "mismatch",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "ainethil": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "alard_schmied": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "alegorn": {
+     "dist": 0.12,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "alphonse_dumas": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "mismatch",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "angelique_butler": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "mismatch",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "angus_hammerhand": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "annora": {
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "no-spot"
+    },
+    "ansekhwa": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "archibald": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "armand_cromwell": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "arnok": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "arnold_leland": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "aska_mistrunner": {
+     "dist": 0.09,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "balai_lok_wein": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "balthus_stoneflayer": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "basil_frye": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "bena_winterhoof": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "bengus_deepforge": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "betty_quin": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "binjy_featherwhistle": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "bixi_wobblebonk": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "brek_stonehoof": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "brighid_stormflayer": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "brikk_keencraft": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "brom_killian": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "buliwyf_stonehand": {
+     "dist": 0.12,
+     "npc": "found",
+     "role": "mismatch",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "buzzek_bracketswing": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "charles_worth": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "daeann_steelwind": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "dan_golthas": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "dane_lindgren": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "dannelor": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "darianna": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "daryl_riknussun": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "daryl_stack": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "deneb_walker": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "dirge_quikcleave": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "doctor_gregory_victor": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "doctor_gustaf_vanhowzen": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "doctor_herbert_halsey": {
+     "dist": 0.12,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "doctor_marsh": {
+     "dist": 0.09,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "doctor_martin_felben": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "drakk_stonehand": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "eaysaa_brightgust": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "mismatch",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "edward_egan": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "eladriel": {
+     "dist": 0.01,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "eleyna_duskbreeze": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "emerii_tallgust": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "emrys_flintbeard": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "eunice_burch": {
+     "dist": 0.1,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "faldron": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "fanorran_stilloak": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "fenn_fairweather": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "fimble_finespindle": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "firodren_mooncaller": {
+     "dist": 0.09,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "florence_nightshade": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "franklin_lloyd": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "garan_sunstrider": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "gelman_stonehand": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "genn_fairweather": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "geofram_bouldertoe": {
+     "dist": 0.01,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "georgio_bolero": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "gimble_thistlefuzz": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "godan": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "gorg": {
+     "dist": 0.1,
+     "npc": "found",
+     "role": "ok",
+     "side": "mismatch",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "graham_van_talen": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "gretta_finespindle": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "grimnur_stonebrand": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "groum_stonebeard": {
+     "dist": 0.13,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "grungle": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "gur_dok": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "mismatch",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "hahrana_ironhide": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "halassa_fernbreeze": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "halavuul_cragwind": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "hanashi": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "hgarth": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "hunter_moore": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "iaadaria_bitterwind": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "mismatch",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "ilyenia_moonfire": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "mismatch",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "indari_sunseam": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "ishlee_breezewhisper": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "james_van_brunt": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "jandi": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "jartsam": {
+     "dist": 0.12,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "jemma_quikswitch": {
+     "dist": 0.14,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "jhag": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "jormund_stonebrow": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "josef_gregorian": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "kah_mistrunner": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "kamari": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "kar_stormsinger": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "karn_stonehoof": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "karolek": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "katherine_lee": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "kelsey_fargo": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "kildar": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "killian_hagey": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "kitta_firewind": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "komin_winterhoof": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "kray": {
+     "dist": 0.09,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "krix": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "kylanna_windwhisper": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "lalina_summermoon": {
+     "dist": 0.1,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "lavinia_crowe": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "lawrence_schneider": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "lilliam_sparkspindle": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "lilyssia_nightbreeze": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "linzy_blackbolt": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "lucan_cordell": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "lumak": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "magar": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "mak": {
+     "dist": 0.12,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "makaru": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "malcomb_wynn": {
+     "dist": 0.12,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "margaret_weaver": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "maris_granger": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "martha_alliestar": {
+     "dist": 0.09,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "mary_edras": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "me_lynn": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "melbin_powderfuse": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "mendalass_tattermend": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "messana_crestwind": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "mismatch",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "milla_fairancora": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "miriaan_mistblade": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "mooranta": {
+     "dist": 0.09,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "mot_dawnstrider": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "nancy_songflower": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "nasalanna_windsinger": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "mismatch",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "nat_pagle": {
+     "dist": 0.15,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "nawka_wildsong": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "nissa_firestone": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "nogg": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "norzsh": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "mismatch",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "nyalah_brightfire": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "nyassa_swiftdraught": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "old_man_heming": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "othesia_evengale": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "pa_zula": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "pand_stonebinder": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "patricia_egan": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "randal_hunter": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "randal_worth": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "reyna_stonebranch": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "rhiannon_davis": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "riley_peltskinner": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "rogvar": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "rotgath_stonebeard": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "roxxik": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "sally_swiftwrench": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "saru_steelfury": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "sayoc": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "mismatch",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "sellandus": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "shaina_fuller": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "shandrina": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "shari_stilwell": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "shylamiir": {
+     "dist": 0.36,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "simon_tanner": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "snang": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "snarl": {
+     "dist": 0.01,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "springspindle_fizzlegear": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "sprite_jumpsprocket": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "stephen_ryback": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "sylvanna_forestmoon": {
+     "dist": 0.09,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "syriel_nightrain": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "taladan": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "tally_berryfizz": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "tannysa": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "tarn": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "teg_dawnstrider": {
+     "dist": 0.01,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "tel_athir": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "telonis": {
+     "dist": 0.11,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "tepa": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "terunne_bearshaper": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "therum_deepforge": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "thonys_pillarstone": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "thrag_stonehoof": {
+     "dist": 0.09,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "thund": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "thuwd": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "timothy_worthington": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "trianna": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "trixie_quikswitch": {
+     "dist": 0.09,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "ug_thok": {
+     "dist": 0.07,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "ultham_ironhorn": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "una": {
+     "dist": 0.08,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "uthrar_threx": {
+     "dist": 0.09,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "vanessa_sellers": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "vartha_rockmane": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "velma_warnam": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "vhan": {
+     "dist": 0.13,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "victor_ward": {
+     "dist": 0.05,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "vosur_brakthel": {
+     "dist": 0.04,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "walter_mason": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "whuut": {
+     "dist": 0.02,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "william_pickman": {
+     "dist": 0.0,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    },
+    "woo_ping": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "wulan": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "xar_ti": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "absent",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "yelmak": {
+     "dist": 0.06,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "zamja": {
+     "dist": 0.03,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spw"
+    },
+    "zerril_softbreeze": {
+     "dist": 0.1,
+     "npc": "found",
+     "role": "ok",
+     "side": "ok",
+     "spot": "ok",
+     "spotSource": "spm"
+    }
+   }
+  }
+ },
+ "product": "wowf",
+ "shipped": {
+  "alias": 8,
+  "catalog": 31,
+  "fishing": 43,
+  "gathering": 41,
+  "iconSpell": 12,
+  "openSpell": 9,
+  "trainers": 201
+ },
+ "tool": "tools/seeds/seeds.py derive"
+}

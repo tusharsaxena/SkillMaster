@@ -329,7 +329,7 @@ for _, r in ipairs({
     { "Zerril Softbreeze", "Neutral", "Zephras Isle", 2521, "cooking", S, 251905, 43.9, 43.8 },   -- Cook
     { "Aedi Thriceforged", "Neutral", "Zephras Isle", 2521, "mining", G, 251913, 44.9, 44.4 },   -- Miner
     { "Charles Worth", "Alliance", "Alterac Mountains", 1416, "tailoring", ET, 251972, 17.7, 60.3 },   -- Expert Tailor
-    { "Angelique Butler", "Neutral", "Alterac Mountains", 1416, "firstAid", S, 251977, 17.2, 61.1 },   -- First Aid Trainer
+    { "Angelique Butler", "Alliance", "Alterac Mountains", 1416, "firstAid", S, 251977, 17.2, 61.1 },   -- First Aid Trainer
     { "Vanessa Sellers", "Alliance", "Alterac Mountains", 1416, "enchanting", E, 251978, 16.8, 62.3 },   -- Enchanting Trainer
     { "Fenn Fairweather", "Neutral", "Zephras Isle", 2521, "fishing", S, 251992, 45.0, 48.4 },   -- Fisherman
     { "Indari Sunseam", "Neutral", "Zephras Isle", 2521, "leatherworking", J, 251993, 44.7, 44.5 },   -- Leatherworker

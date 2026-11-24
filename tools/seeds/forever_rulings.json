@@ -59,6 +59,62 @@
     "reason": "needs owner review: a zone's fishing level is measured in game (Fishing_Forever.lua header), and DB2 holds none; a second Zephras Isle UiMap (System 1, no parent), likely the isle's own map shape; review with 2521",
     "ruling": "reject"
   },
+  "shipped:fdb-role:trainers:aedi_thriceforged": {
+    "reason": "the data cannot decide: ForeverDB's own npc title is Miner, as shipped, while its spf table says Blacksmithing; spf disagrees with its npc titles on 16 of 294 rows, a run of neighboring Forever ids; needs owner review in game",
+    "ruling": "keep"
+  },
+  "shipped:fdb-role:trainers:buliwyf_stonehand": {
+    "reason": "spf WeaponMasters names Fist Weapons (473) for none of the 8 masters, so it does not model the line; the CMaNGOS 1.12 dump teaches it here (precedent: trust the sources, the 1.12 dump)",
+    "ruling": "keep"
+  },
+  "shipped:fdb-role:trainers:eaysaa_brightgust": {
+    "reason": "the data cannot decide: ForeverDB's own npc title is Alchemist, as shipped, while its spf table says Enchanting (a run of shifted Zephras Isle ids); needs owner review in game",
+    "ruling": "keep"
+  },
+  "shipped:fdb-role:trainers:ilyenia_moonfire": {
+    "reason": "spf WeaponMasters names Fist Weapons (473) for none of the 8 masters, so it does not model the line; the CMaNGOS 1.12 dump teaches it here (precedent: trust the sources, the 1.12 dump)",
+    "ruling": "keep"
+  },
+  "shipped:fdb-role:trainers:messana_crestwind": {
+    "reason": "the data cannot decide: ForeverDB's own npc title is Leatherworker, as shipped, while its spf table says Mining (a run of shifted Zephras Isle ids); needs owner review in game",
+    "ruling": "keep"
+  },
+  "shipped:fdb-role:trainers:nasalanna_windsinger": {
+    "reason": "the data cannot decide: ForeverDB's own npc title is Skinner, as shipped, while its spf table says Enchanting (a run of shifted Zephras Isle ids); needs owner review in game",
+    "ruling": "keep"
+  },
+  "shipped:fdb-role:trainers:norzsh": {
+    "reason": "recorded reading (Trainers_Forever.lua header): Norzsh, Weaponsmith, is read as Blacksmithing; ForeverDB's npc title is Weaponsmith too, while spf says Mining (with Kagil and Zor'la beside him as Skinning and Herbalism); needs owner review in game",
+    "ruling": "keep"
+  },
+  "shipped:fdb-role:trainers:sayoc": {
+    "reason": "spf WeaponMasters names Fist Weapons (473) for none of the 8 masters, so it does not model the line; the CMaNGOS 1.12 dump teaches it here (precedent: trust the sources, the 1.12 dump; the Staves ruling of 2026-11-24 stands)",
+    "ruling": "keep"
+  },
+  "shipped:fdb-side:trainers:alphonse_dumas": {
+    "reason": "the owner's ruling (2026-11-23): Zephras Isle and Riverglades trainers are Neutral, reachable by both sides; nfac 'A' is the NPC's own side",
+    "ruling": "keep"
+  },
+  "shipped:fdb-side:trainers:angelique_butler": {
+    "reason": "fixed by hand (judgment call, 2026-11-25): Neutral -> Alliance; ForeverDB nfac 'A', and every other Alterac Mountains Forever trainer (7, QuestieDB and ForeverDB alike) is Alliance; QuestieDB alone said Neutral; the next derive stops flagging it",
+    "ruling": "keep"
+  },
+  "shipped:fdb-side:trainers:gorg": {
+    "reason": "the owner's ruling (2026-11-23): Zephras Isle and Riverglades trainers are Neutral, reachable by both sides; nfac 'H' is the NPC's own side",
+    "ruling": "keep"
+  },
+  "shipped:fdb-side:trainers:gur_dok": {
+    "reason": "the owner's ruling (2026-11-23): Zephras Isle and Riverglades trainers are Neutral, reachable by both sides; nfac 'H' is the NPC's own side",
+    "ruling": "keep"
+  },
+  "shipped:fdb-side:trainers:iaadaria_bitterwind": {
+    "reason": "the owner's ruling (2026-11-23): Zephras Isle and Riverglades trainers are Neutral, reachable by both sides; nfac 'A' is the NPC's own side",
+    "ruling": "keep"
+  },
+  "shipped:fdb-spot:trainers:annora": {
+    "reason": "the owner's ruling (2026-11-24): Annora stands inside Uldaman (ForeverDB's only spawn is on the instance map, 70), so her point is the dungeon's back entrance at 65.3, 42.6, not an NPC spot",
+    "ruling": "keep"
+  },
   "shipped:map-name:trainers:arnold_leland": {
     "reason": "'Stormwind' is the source's short label for UiMap 1453 (Stormwind City); the mapID, which the waypoint uses, is right, so a rename is the owner's call",
     "ruling": "keep"
