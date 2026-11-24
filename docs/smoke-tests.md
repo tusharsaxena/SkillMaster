@@ -908,6 +908,43 @@ against ForeverDB. It changed one shipped row, a judgment call the owner may rev
   has Junior Skinning, Mining and Herbalism trainers (ForeverDB hints at Kagil, Norzsh and Zor'la).
   Result: pending (owner).
 
+### ForeverDB in the addon (SF-SM-02, LibKa0s#105)
+
+Ka0sAddonsCommonTasks `docs/2026-11-25-SEEDS_AND_FOREVERDB/`, item SF-SM-02: the optional ForeverDB
+addon read through `LibKa0s-ForeverDB-1.0` (`modules/ForeverDBSources.lua`, Trainers > Use ForeverDB).
+
+- **SM-FDB-1** (with ForeverDB) On Forever with ForeverDB installed and enabled, log in and run
+  `/dump C_AddOns.IsAddOnLoaded("ForeverDB")`: `false`, unless another addon you run loads it. Then
+  `/sm diagnostics`: the report's identity section has a `ForeverDB: present=yes loaded=no`
+  line with ForeverDB's version. No Lua error.
+  Result:
+- **SM-FDB-2** (with ForeverDB) A character whose Fishing, Cooking or First Aid is at 150/150 (the next
+  rank, Expert, comes from a book). Hover that skill's row: under the Trainer line come the book's
+  name with "ForeverDB" beside it, "Sold by" naming sellers of your faction only (three at most, then
+  "+N more"), "Drops from" with up to three creatures and their chances ("rate unknown" where
+  ForeverDB has none), and "World drop" when ForeverDB has a level for it. `/dump
+  C_AddOns.IsAddOnLoaded("ForeverDB")` now answers `true` (the tooltip loaded it). Hover a skill whose
+  next rank a trainer trains: no source lines.
+  Result:
+- **SM-FDB-3** (with ForeverDB) Open the same skill's trainer popup and hover the book seller's card
+  (for Fishing, Old Man Heming): the card's tooltip ends with the same source lines as SM-FDB-2. Every
+  other card is unchanged, and no card's tooltip says "Map position from ForeverDB": every shipped
+  trainer has its own position, which ForeverDB never overrides.
+  Result:
+- **SM-FDB-4** (with ForeverDB) Settings > Skill Master > Trainers and Waypoints > Trainers: hover Use
+  ForeverDB, on by default: its tooltip starts "Needs the ForeverDB addon". Untick it and hover the
+  SM-FDB-2 row again: no source lines. Tick it again: they are back.
+  Result:
+- **SM-FDB-5** (without ForeverDB) Disable ForeverDB in the AddOns list and `/reload`. Hover the
+  SM-FDB-2 row: the tooltip is as it was before this change (the Trainer line, then the helper and the
+  click hint), with no Lua error. The trainer popup and its cards are unchanged. The Use ForeverDB row
+  is still on the Trainers tab, and `/sm diagnostics` reports `ForeverDB: present=yes loaded=no`.
+  Result:
+- **SM-FDB-6** (Retail) Skill Master is Forever-only: on Retail it is not in the AddOns list (the TOC's
+  load-gating pair), so there is nothing of it to load or check. Confirm it is absent from Retail's list
+  with ForeverDB's presence making no difference.
+  Result:
+
 ## Skins and diagnostics
 
 - **SM-SKIN-1** `/sm skin`: pick Ka0s Default, Apply. The window and the debug console change look.

@@ -7,7 +7,7 @@
 ## Version: 0.1.0
 ## IconTexture: Interface\AddOns\SkillMaster\media\logos\skillmaster.logo.128.tga
 ## SavedVariables: SkillMasterDB, SkillMasterPerfDB
-## OptionalDeps: Ace3, LibStub, CallbackHandler-1.0, LibSharedMedia-3.0, LibDataBroker-1.1, LibDBIcon-1.0, EllesmereUI
+## OptionalDeps: Ace3, LibStub, CallbackHandler-1.0, LibSharedMedia-3.0, LibDataBroker-1.1, LibDBIcon-1.0, EllesmereUI, ForeverDB
 ## DefaultState: enabled
 ## Category-enUS: UI
 ## X-License: MIT
@@ -152,6 +152,10 @@ modules\Probe.lua
 modules\SkillData.lua
 # Conventional: pure lookups over the defaults\*_Forever.lua tables, read at CALL time (T2.4).
 modules\Trainers.lua
+# Conventional: NS.ForeverDBSources (SF-SM-02, LibKa0s#105): a book's sources and a missing trainer
+# spot through LibKa0s-ForeverDB-1.0 (resolved at FILE SCOPE, after libs\LibKa0s\LibKa0s.xml); ForeverDB
+# itself is an optional LoadOnDemand addon, loaded by the first lookup, never at login.
+modules\ForeverDBSources.lua
 # Conventional: publishes NS.SkillHelpers (NS.Helpers is the options library, settings\OptionsSetup.lua).
 modules\Helpers.lua
 # T2.2: defines NS.addon:OnBonusesUnitChanged at FILE SCOPE, so it follows core\SkillMaster.lua; reads NS.SkillData at call time.

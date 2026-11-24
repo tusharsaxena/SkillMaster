@@ -2,6 +2,10 @@ package-as: SkillMaster
 
 # Libraries are vendored in libs/ and committed -- NO externals: block (packaging, library-stack-§3).
 
+# ForeverDB is optional at run time (WowAddonStandards clients-§11): never required-dependencies.
+optional-dependencies:
+  - forever-db
+
 ignore:
   - .luacheckrc
   - .pkgmeta         # dev-only: this file configures the packager; it is not part of the package

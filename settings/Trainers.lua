@@ -18,6 +18,10 @@ NS.RegisterSchemaRows(NS.Live({
     { path = "trainers.showAll", page = PAGE, group = TRAINERS, type = "bool", default = PT.showAll,
       label = L["Show all trainers"],
       desc = L["In the trainer popup for a profession, list every trainer of every rank, Artisan first, and mark the ones who train your next rank."] },
+    -- SF-SM-02 (LibKa0s#105, clients-§11): ForeverDB is optional, so the row says it is needed.
+    { path = "trainers.foreverDB", page = PAGE, group = TRAINERS, type = "bool", default = PT.foreverDB,
+      label = L["Use ForeverDB"],
+      desc = L["Needs the ForeverDB addon (optional, WoW Forever). When it is installed, a rank learned from a book shows where the book is sold and what drops it, in the row tooltip and on the trainer popup's card, and a trainer with no map position in Skill Master's data takes ForeverDB's. ForeverDB loads the first time one of these is shown (about 12 MB). Without it, nothing changes."] },
 }))
 
 -- The trainer popup's name line (feedback round 2, FB-11): one swatch, its class-color companion
