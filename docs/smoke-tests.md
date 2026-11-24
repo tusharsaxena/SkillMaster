@@ -956,8 +956,9 @@ Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/R2_SMOKE_FEEDBACK.md`, ite
 - **SM-FB2-3** (FB2-SM-01, D3) Settings > Skill Master > General > Skin: Azeroth. Open the Journal's
   Log tab and its range picker: the selected range reads gold, the other ranges parchment text.
   Click a block header's sort mark: the current order's row reads gold beside its tick. Back to Ka0s
-  Default: the selected rows read gold; under Obsidian they read its blue accent. In every skin the
-  selected row's text differs from the others.
+  Default and Obsidian: the selected rows read gold too, not Obsidian's blue accent. On Forever,
+  under the default WoW Forever skin, repeat both menus: the selected rows read gold, not its tan
+  accent. In every skin the selected row reads gold and its text differs from the others.
   Result:
 - **SM-FB2-4** (FB2-SM-01, D1) `/sm test`: the window and the Journal's Alts tab show the same names
   as SM-TEST-1 and SM-TEST-12 (Samplehunter Mockstride first, then the Mage, Warrior and Paladin),

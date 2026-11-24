@@ -844,7 +844,7 @@ Total.
 
 - dropdown selected: the Journal's range picker paints its selected range apart
 - dropdown selected: the sort menu's current order (a radio row) paints apart
-- dropdown selected: Azeroth's selection is the gold fallback, not its accent
+- dropdown selected: the selection is Ka0s Default's gold in every skin, WoW Forever's included
 
 ### test_window_chrome.lua (15)
 

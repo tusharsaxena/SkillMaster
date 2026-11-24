@@ -4,18 +4,21 @@
 -- The owner, 2026-11-24: "make the current selected always be a different color than the other
 -- texts - e.g. gold in ka0s default ... Check this for all addons that have a similar pattern".
 -- The rule is the library's (LibKa0s-Widgets-1.0, WidgetsDropdown minor 4): a selected row paints
--- W.SelectedColor(owner), `menu.textSel` while it stands off `menu.text`, else Ka0s Default's gold.
+-- W.SelectedColor(owner): Ka0s Default's gold in every skin (the owner's ruling of 2026-11-24 on
+-- round 2, FB2-LK-04: "leave it as gold"), the skin's `menu.textSel` only where the gold stands under
+-- 20 CIEDE2000 off its `menu.text`, which no shipped skin does today.
 -- This addon draws no menu of its own: the Journal's range picker is a W.Dropdown and the sort,
 -- filter, row, group and broker menus are W.ContextMenu. The cases open the range picker and the
--- sort menu (a radio row per order) under Ka0s Default, Obsidian and Azeroth (the one shipped skin
--- that takes the gold fallback) and check the selected row against a plain row and the rule.
+-- sort menu (a radio row per order) under Ka0s Default, Obsidian, Azeroth and WoW Forever (the
+-- default skin on Forever, whose tan accent round 2 kept) and check the selected row against a plain
+-- row, the rule and the gold.
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
 
 local OWNER = "SkillMaster"
-local SKINS = { "ka0s", "obsidian", "azeroth" }
-local GOLD = { 1, 0.82, 0 }   -- Ka0s Default's selected gold, the fallback
+local SKINS = { "ka0s", "obsidian", "azeroth", "forever" }
+local GOLD = { 1, 0.82, 0 }   -- Ka0s Default's selected gold, every skin's selection
 
 local function skinLib() return M.LibStub("LibKa0s-Skin-1.0") end
 local function widgets() return M.LibStub("LibKa0s-Widgets-1.0") end
@@ -61,15 +64,14 @@ local function checkRows(key, sel, plain, where)
     assertEqual(rgb(painted(sel)), rgb(want), key .. ": " .. where .. "'s selected row is W.SelectedColor")
     assertTrue(rgb(painted(sel)) ~= rgb(painted(plain)), key .. ": " .. where .. "'s selected row differs from a plain row")
     assertEqual(rgb(painted(plain)), rgb(NS.SkinColor("menu.text") or {}), key .. ": " .. where .. "'s plain row is menu.text")
-    if key == "azeroth" then
-        -- Azeroth's own accent stands 16.3 CIEDE2000 off its menu text, under the floor of 20.
-        assertEqual(rgb(painted(sel)), rgb(GOLD), key .. ": " .. where .. "'s selected row is the gold fallback")
-    end
+    -- every shipped skin's menu text stands 20 CIEDE2000 or more off the gold, so the gold wins.
+    assertEqual(rgb(painted(sel)), rgb(GOLD), key .. ": " .. where .. "'s selected row is Ka0s Default's gold")
 end
 
 test("dropdown selected: the Journal's range picker paints its selected range apart", function()
     -- red under WidgetsDropdown minor 3: Azeroth's selection painted its gold accent, 16.3 off its
-    -- parchment menu text, so the selected range read like the rest.
+    -- parchment menu text, so the selected range read like the rest; red under round 2's cut of
+    -- minor 4: WoW Forever's selection painted its tan accent, not the gold.
     local J = NS.Journal
     J.Show()
     J.SelectTab("log")
@@ -106,13 +108,12 @@ test("dropdown selected: the sort menu's current order (a radio row) paints apar
     if not ok then error(err, 0) end
 end)
 
-test("dropdown selected: Azeroth's selection is the gold fallback, not its accent", function()
-    local lib = skinLib()
-    local source, current = lib:GetChoice(OWNER)
-    lib:SetChoice(OWNER, source, "azeroth")
+test("dropdown selected: the selection is Ka0s Default's gold in every skin, WoW Forever's included", function()
+    -- red under round 2's cut of minor 4: WoW Forever answered its tan accent #C9A07A.
     local W = widgets()
     assertTrue(type(W.SelectedColor) == "function", "W.SelectedColor, the shared menu's selected color")
-    local r, g, b = W.SelectedColor(OWNER)
-    lib:SetChoice(OWNER, source, current)
-    assertEqual(rgb({ r, g, b }), rgb(GOLD), "Azeroth's selected row is Ka0s Default's gold")
+    underSkins(function(key)
+        local r, g, b = W.SelectedColor(OWNER)
+        assertEqual(rgb({ r, g, b }), rgb(GOLD), key .. ": the selected row is Ka0s Default's gold")
+    end)
 end)
