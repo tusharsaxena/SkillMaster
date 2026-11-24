@@ -876,15 +876,15 @@ you see on each Result line; none is passed until you say so.
   Cooking at 225: Dirge Quikcleave alone. Fishing at 225: Nat Pagle alone. Fishing or Cooking at 150:
   the Expert book vendor and the Artisan quest giver, nobody below them. Tick Show all trainers: every
   trainer of the skill is back, each rank under its heading.
-  Result:
+  Result: PASSED (owner, 2026-11-25).
 - **SM-TPROBE-13** Enchanting at 225: Annora's card carries the unverified mark and the warning, and
   Set waypoint is enabled: the pin and arrow lead to Uldaman's back entrance in the eastern Badlands
   (65.3, 42.6). Print to chat gives Uldaman, Badlands (65.3, 42.6).
-  Result:
+  Result: Owed. Not validated (owner, 2026-11-25): no character to check it with.
 - **SM-TPROBE-14** (Horde) Staves' popup lists Hanashi (Orgrimmar) and Ansekhwa (Thunder Bluff), not
   Sayoc; Sayoc still lists for Axes, Bows, Daggers, Fist Weapons and Thrown. Bena Winterhoof is under
   Apprentice in Alchemy's Show all trainers list.
-  Result:
+  Result: Owed. Not validated (owner, 2026-11-25): no character to check it with.
 
 ## Skins and diagnostics
 
