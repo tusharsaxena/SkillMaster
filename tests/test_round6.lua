@@ -651,16 +651,16 @@ test("round6 trainer ranks: the popup lists Expert and Artisan trainers under th
     withRankPopup("fishing", 150, 150, function(f)
         assertEqual(f.title:GetText(), "Train: Fishing (Expert)")
         assertEqual(f.intro:GetText(), "Trainers for your faction (Alliance) who train Fishing to Expert (225) or higher:")
-        -- Round 2: neither rank has a trainer (a book, a quest), so the skill's trainers follow.
-        assertEqual(headingTexts(), "Expert (225),Artisan (300),Trainers who teach Fishing")
-        assertEqual(names(TP.Trainers()), "Old Man Heming,Nat Pagle,Arnold Leland,Grimnur Stonebrand,Hunter Moore,Krix,Fenn Fairweather",
-            "the next rank first, then (round 2) the skill's trainers, the Forever-only ones among them")
-        assertEqual(#TP.Cards(), 7, "one card each, the trainers below included")
+        -- Neither rank has a trainer (a book, a quest): the vendor and the quest giver alone (the
+        -- owner's feedback, 2026-11-24, retired round 2's "Trainers who teach Fishing" group).
+        assertEqual(headingTexts(), "Expert (225),Artisan (300)")
+        assertEqual(names(TP.Trainers()), "Old Man Heming,Nat Pagle", "the next rank's and the higher rank's teachers")
+        assertEqual(#TP.Cards(), 2, "one card each")
     end)
     withRankPopup("fishing", 225, 225, function(f)
         assertEqual(f.intro:GetText(), "Trainers for your faction (Alliance) who train Fishing to Artisan (300):",
             "no or higher at the top rank")
-        assertEqual(headingTexts(), "Artisan (300),Trainers who teach Fishing", "round 2: a quest rank, then the trainers")
+        assertEqual(headingTexts(), "Artisan (300)", "a quest rank, its giver alone")
     end)
 end)
 

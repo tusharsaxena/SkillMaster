@@ -334,12 +334,11 @@ test("round2 note: Artisan Cooking at 225 says no trainer teaches it and names C
             .. "Clamlette Surprise, given by Dirge Quikcleave, Gadgetzan, Tanaris.")
         local heads = {}
         for i, h in ipairs(TP.Headings()) do heads[i] = h:GetText() end
-        assertEqual(table.concat(heads, ","), "Artisan (300),Trainers who teach Cooking")
-        assertEqual(TP.Trainers()[1].name, "Dirge Quikcleave", "the giver's card first, for its waypoint")
-        local after = {}
-        for i = 2, #TP.Trainers() do after[TP.Trainers()[i].name] = true end
-        assertTrue(after["Stephen Ryback"] and after.Alegorn, "the skill's trainers listed below")
-        assertTrue(not after.Shandrina, "no book vendor among the trainers")
+        -- The owner's feedback (2026-11-24): with Show all trainers off, the quest giver alone, no
+        -- "Trainers who teach Cooking" group below.
+        assertEqual(table.concat(heads, ","), "Artisan (300)")
+        assertEqual(TP.Trainers()[1].name, "Dirge Quikcleave", "the giver's card, for its waypoint")
+        assertEqual(#TP.Trainers(), 1, "the skill's other trainers are not listed")
     end)
 end)
 

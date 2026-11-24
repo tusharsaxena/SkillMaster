@@ -550,17 +550,12 @@ local function refreshActions()
 end
 
 -- Round 2 (the owner's feedback, as ItemTree shows it): a rank no trainer trains says so under its
--- heading (NS.Trainers.NoTrainerNote), and when the next rank is one, the skill's trainers follow
--- under "Trainers who teach X" (those not listed above, book vendors and quest givers left out).
-local function annotate(groups, key, name)
+-- heading (NS.Trainers.NoTrainerNote). The owner's feedback of 2026-11-24 retired the "Trainers who
+-- teach X" group that followed such a rank: with Show all trainers off, the popup lists the next
+-- rank's teachers alone (at Artisan First Aid, Doctor Gustaf VanHowzen and no one else); Show all
+-- trainers is where every trainer of the skill is listed.
+local function annotate(groups, name)
     for _, g in ipairs(groups) do g.note = NS.Trainers.NoTrainerNote(name, g.rankName, g.base) end
-    if not (groups[1] and groups[1].note) then return groups end
-    local listed, rest = {}, {}
-    for _, g in ipairs(groups) do for _, t in ipairs(g.base) do listed[t] = true end end
-    for _, t in ipairs(NS.Trainers:For(key)) do
-        if not listed[t] and not t.learn then rest[#rest + 1] = t end
-    end
-    if #rest > 0 then groups[#groups + 1] = { title = L["Trainers who teach %s"]:format(name), base = rest } end
     return groups
 end
 
@@ -600,12 +595,12 @@ local function allGroups(key, name)
 end
 
 -- The next rank's groups (R6-7), annotated (round 2).
-local function rankGroupsOf(nr, key, name)
+local function rankGroupsOf(nr, name)
     local groups = {}
     for i, g in ipairs(nr.groups or { { rankName = nr.rankName, cap = nr.cap, trainers = nr.trainers } }) do
         groups[i] = { rankName = g.rankName, cap = g.cap, base = g.trainers }
     end
-    return annotate(groups, key, name)
+    return annotate(groups, name)
 end
 
 --- What skill `key` opens on: its groups, title and intro, and the cap of the rank the player trains
@@ -635,7 +630,7 @@ local function resolve(key)
         local intro = nr.higher
             and L["Trainers for your faction (%s) who train %s to %s (%d) or higher:"]
             or L["Trainers for your faction (%s) who train %s to %s (%d):"]
-        return rankGroupsOf(nr, key, name), title, intro:format(faction, name, nr.rankName, nr.cap), nextCap
+        return rankGroupsOf(nr, name), title, intro:format(faction, name, nr.rankName, nr.cap), nextCap
     end
     return { { base = NS.Trainers:For(key) } }, title,
         L["Trainers for your faction (%s) who teach %s:"]:format(faction, name), nextCap

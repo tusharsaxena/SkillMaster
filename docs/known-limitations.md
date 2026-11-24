@@ -86,8 +86,8 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   shows under Artisan (300), not Expert. Unverified in game.
 - The trainer popup's distances (round 5, R5-15) are measured from the map API's world positions
   (`NS.Compat.PlayerWorldPos`, `MapWorldPos`), straight-line yards inside one instance (continent),
-  not a path. A trainer without coordinates (since the trainer probe, GitHub issue #3, only Annora
-  inside Uldaman), one on another continent, or a player the client gives no position (inside an
+  not a path. A trainer without coordinates (none since 2026-11-24, when Annora,
+  inside Uldaman, took the dungeon's back entrance as her point, the owner's guide), one on another continent, or a player the client gives no position (inside an
   instance, a secret) shows no distance and sorts after the measured ones, in the data's order. The
   cards can reorder under the pointer as the player moves (once a second); the selected trainer stays
   selected. Computed here, not by another addon (the owner's call). Unverified in game.
@@ -152,4 +152,5 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   same per-map transform, within 0.5 map-% of every one. The probe's in-game spot-check list (`docs/trainer-probe/2026-11-23-r2/report.md`) names
   the projected Stormwind and Mulgore points, the book and quest ranks, Bena Winterhoof (the 1.12 dump
   has her teach Alchemy to 75, her title says Expert), Sayoc's Staves (absent from the 1.12 dump) and
-  Annora. Costs and level gates are not checked offline.
+  Annora. The owner's ruling on the two disagreements (2026-11-24, "trust the dump"): Bena Winterhoof
+  keeps the dump's Apprentice and Sayoc teaches no Staves. Costs and level gates are not checked offline.
