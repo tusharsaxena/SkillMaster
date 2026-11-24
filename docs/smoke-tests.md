@@ -13,13 +13,13 @@ the checks below that cover each item:
 | Design §9 item | Checks |
 |---|---|
 | The probe | SM-PROBE-1, SM-PROBE-2 |
-| Each category | SM-DISP-1, SM-TEST-1 |
-| The lure timer | SM-DISP-2, SM-SIM-1 |
+| Each category | SM-DISP-1, SM-TEST-1, SM-FB2-4 |
+| The lure timer | SM-DISP-2, SM-SIM-1, SM-FB2-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
 | Rows page (round 9) | SM-DISP-59 |
 | Trainer data (the offline probe, GitHub issue #3) | SM-TPROBE-1, SM-TPROBE-2, SM-TPROBE-3, SM-TPROBE-4, SM-TPROBE-5, SM-TPROBE-6, SM-TPROBE-7, SM-TPROBE-8, SM-TPROBE-9, SM-TPROBE-10, SM-TPROBE-11 |
 | Waypoints (TomTom by name, AF-SM-TOMTOM) | SM-DISP-7, SM-OPT-5, SM-SEAM-2, SM-DISP-47, SM-DISP-57, SM-DISP-58, SM-DISP-60, SM-DISP-61, SM-DISP-62, SM-DISP-63, SM-DISP-64, SM-DISP-65 |
-| Each skin | SM-SKIN-1, SM-SKIN-2, SM-SKIN-3, SM-SKIN-4, SM-SKIN-5, SM-SKIN-6, SM-SKIN-7, SM-SKIN-8 |
+| Each skin | SM-SKIN-1, SM-SKIN-2, SM-SKIN-3, SM-SKIN-4, SM-SKIN-5, SM-SKIN-6, SM-SKIN-7, SM-SKIN-8, SM-FB2-3 |
 | Detach and dock | SM-DISP-3, SM-DISP-11, SM-OPT-3 |
 | Feeds in a broker display | SM-LDB-2, SM-SEAM-1, SM-SEAM-4, SM-DISP-18, SM-DISP-39, SM-DISP-40 |
 
@@ -938,4 +938,28 @@ Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/`, items FB-SM-01 to FB-SM
   `/reload`: the width and the place are kept. Tick Lock this block, or `/sm lock`: the grip hides
   and a drag on the corner does nothing; unlock: it is back. Merge two detached blocks of different
   widths: the merged window's columns are the wider one's width.
+  Result:
+
+### Round 2 (the owner's smoke feedback, 2026-11-24)
+
+Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/R2_SMOKE_FEEDBACK.md`, item FB2-SM-01.
+
+- **SM-FB2-1** (FB2-SM-01, D2) Log in on Forever after the LibKa0s v1.113.0 re-vendor: no Lua error.
+  With the step panel closed, `/sm sim start fishingTrip`: the session runs and the step panel opens.
+  `/sm sim stop`, close the panel, then `/sm sim`: the panel opens and nothing
+  starts. Click the panel's Start row: the session runs with the panel still shown.
+  Result:
+- **SM-FB2-2** (FB2-SM-01, D2) With the step panel closed, tick General > Master controls > Sim mode,
+  and separately pick the launcher menu's Sim mode entry: each opens the step panel.
+  Result:
+- **SM-FB2-3** (FB2-SM-01, D3) Settings > Skill Master > General > Skin: Azeroth. Open the Journal's
+  Log tab and its range picker: the selected range reads gold, the other ranges parchment text.
+  Click a block header's sort mark: the current order's row reads gold beside its tick. Back to Ka0s
+  Default: the selected rows read gold; under Obsidian they read its blue accent. In every skin the
+  selected row's text differs from the others.
+  Result:
+- **SM-FB2-4** (FB2-SM-01, D1) `/sm test`: the window and the Journal's Alts tab show the same names
+  as SM-TEST-1 and SM-TEST-12 (Samplehunter Mockstride first, then the Mage, Warrior and Paladin),
+  every name starting `Sample` or `Mock`. `/sm sim start fishingTrip`: the simulated character is
+  Samplehunter Mockstride too.
   Result:
