@@ -947,7 +947,8 @@ Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/R2_SMOKE_FEEDBACK.md`, ite
 - **SM-FB2-1** (FB2-SM-01, D2) Log in on Forever after the LibKa0s v1.113.0 re-vendor: no Lua error.
   With the step panel closed, `/sm sim start fishingTrip`: the session runs and the step panel opens.
   `/sm sim stop`, close the panel, then `/sm sim`: the panel opens and nothing
-  starts. Click the panel's Start row: the session runs with the panel still shown.
+  starts. Click the panel's Start row: the session runs with the panel still shown. Close the panel
+  while the session runs, then `/sm sim restart`: a fresh session runs and the panel opens again.
   Result:
 - **SM-FB2-2** (FB2-SM-01, D2) With the step panel closed, tick General > Master controls > Sim mode,
   and separately pick the launcher menu's Sim mode entry: each opens the step panel.

@@ -38,6 +38,28 @@ test("sim start panel: the panel's Start row is the typed start, and it shows th
     reset()
 end)
 
+test("sim start panel: the bare /sm sim shows the panel", function()
+    reset()
+    NS.Slash:OnSlash("sim")
+    assertFalse(NS.Sim:IsActive(), "the bare verb starts no session")
+    assertTrue(NS.Sim:IsPanelShown(), "the bare verb opened the step panel")
+    reset()
+end)
+
+test("sim start panel: a Restart with the panel closed shows it again", function()
+    -- red under Sim minor 4: Restart's Start never showed the panel, so a player who closed it
+    -- mid-session restarted into a hidden stepper.
+    reset()
+    NS.Slash:OnSlash("sim start " .. H.SCENARIO)
+    assertTrue(NS.Sim:IsActive(), "a session runs")
+    NS.Sim:HidePanel()
+    assertFalse(NS.Sim:IsPanelShown(), "the player closed the panel")
+    NS.Slash:OnSlash("sim restart")
+    assertTrue(NS.Sim:IsActive(), "the restart started a fresh session")
+    assertTrue(NS.Sim:IsPanelShown(), "and the panel is shown")
+    reset()
+end)
+
 test("sim start panel: the Master controls Sim box shows the panel", function()
     reset()
     local row

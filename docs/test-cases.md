@@ -832,9 +832,11 @@ Total.
 - sim: combat stops a running session
 - sim: the window shows the simulation strip while a session runs
 
-### test_sim_start_panel.lua (3)
+### test_sim_start_panel.lua (5)
 
 - sim start panel: the panel's Start row is the typed start, and it shows the panel
+- sim start panel: the bare /sm sim shows the panel
+- sim start panel: a Restart with the panel closed shows it again
 - sim start panel: the Master controls Sim box shows the panel
 - sim start panel: the launcher menu's Sim mode entry shows the panel
 
@@ -1181,7 +1183,7 @@ Total.
 | test_preview.lua | 9 |
 | test_sample_names.lua | 2 |
 | test_sim.lua | 12 |
-| test_sim_start_panel.lua | 3 |
+| test_sim_start_panel.lua | 5 |
 | test_dropdown_selected.lua | 3 |
 | test_window_chrome.lua | 15 |
 | test_header_buttons.lua | 10 |
@@ -1206,4 +1208,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **884** |
+| **Total** | **886** |
