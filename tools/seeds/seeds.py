@@ -50,15 +50,30 @@ WHAT THIS IS
         Trainers get no candidates: the client holds no trainer NPC rows (above), and every
         trainer record is measured or sourced.
 
+    ForeverDB evidence (`derive --foreverdb <folder>`, clients-§10's second source). DB2 holds no
+    trainer NPC and no game object, so with the folder dev-copilot's `scripts/foreverdb.py fetch`
+    printed, the tool also checks, and flags for a ruling (never applies):
+        trainers   fdb-npc      the npcID is no ForeverDB npc row
+                   fdb-name     the npc row's name is not the record's
+                   fdb-side     nfac is not the record's faction (Neutral = "AH")
+                   fdb-spot     no spot of the NPC on the record's mapID, or the nearest is more than
+                                SPOT_TOLERANCE map-% away (spm points, else spw projected via umaa)
+                   fdb-role     spf ProfessionTrainers / WeaponMasters disagree with `teaches`
+        gathering  fdb-node     a node or herb name (defaults/Gathering_Forever.lua) is no obj name
+    ForeverDB's data is GPL-3.0: candidates.json keeps per-id verdicts and flags quoting only the
+    compared field, SOURCES.md the tag, commit and sha256s, and no row is ever written.
+
 THE STEPS
-    python3 tools/seeds/seeds.py status [--flavor forever]
+    python3 tools/seeds/seeds.py status [--flavor forever] [--foreverdb-tag T]
     python3 tools/seeds/seeds.py derive --flavor forever --bundle docs/seed-research/<date>-forever --date <date> [--build V] [--replay]
+                                        [--foreverdb <folder> [--foreverdb-helper TEXT]] [--foreverdb-cache DIR]
     python3 tools/seeds/seeds.py check  --bundle docs/seed-research/<date>-forever
     python3 tools/seeds/seeds.py rule   --tsv <file> --bundle docs/seed-research/<date>-forever
     python3 tools/seeds/seeds.py report --bundle docs/seed-research/<date>-forever --date <date>
     python3 tools/seeds/seeds.py apply  --bundle docs/seed-research/<date>-forever --date <date>
 
-    `status` prints `CURRENT <build> (<bundle>)` or `NEW <build> (...)`. `derive` pins one build,
+    `status` prints `CURRENT <build> (<bundle>)` or `NEW <build> (...)`; with --foreverdb-tag the
+    bundle is current only when its build and its ForeverDB tag are both the newest. `derive` pins one build,
     fetches each table once into the git-ignored `.cache/` (streamed, `?build=` always, a real
     User-Agent), freezes the tables it read into the bundle's raw/*.csv.gz, and writes SOURCES.md
     and candidates.json; `--replay` re-derives from raw/ alone. `rule` is the only writer of
@@ -79,8 +94,11 @@ from __future__ import annotations
 import argparse
 import csv
 import gzip
+import hashlib
 import io
 import json
+import math
+import os
 import re
 import shutil
 import sys
@@ -98,7 +116,7 @@ RULINGS_PATH = HERE / "forever_rulings.json"
 FLAVORS = {"forever": "wowf"}   # flavor -> wago.tools product; Skill Master is Forever-only
 BUILDS_URL = "https://wago.tools/api/builds"
 TABLE_URL = "https://wago.tools/db2/%s/csv?build=%s"
-USER_AGENT = "ka0s-seed-validation (SkillMaster tools/seeds)"
+USER_AGENT = "SkillMaster-seed-check"
 CHUNK = 1 << 16
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -128,12 +146,12 @@ SENTINELS = (
     ("SpellName", "2259", "Name_lang", "Alchemy"),
 )
 # The seed parse's own floor: names the parser must find, and the least it must read.
-SEED_SENTINELS = {"trainers": ("Woo Ping", "Nat Pagle", "Randal Hunter", "Tel'Athir"),
+SEED_SENTINELS = {"trainers": ("Woo Ping", "Nat Pagle", "Randal Hunter", "Tel'Athir", "Genn Fairweather"),
                   "fishing": (1429, 1453, 1423)}
-SEED_MINIMUMS = {"trainers": 100, "fishing": 40, "catalog": 31}
+SEED_MINIMUMS = {"trainers": 190, "fishing": 40, "catalog": 31, "gathering": 30}
 
 CANDIDATE_LISTS = ("fishing", "catalog")
-FLAG_LISTS = ("trainers", "fishing", "catalog", "alias", "openSpell", "iconSpell")
+FLAG_LISTS = ("trainers", "fishing", "catalog", "alias", "openSpell", "iconSpell", "gathering")
 REMOVABLE_LISTS = ("trainers", "fishing")
 CANDIDATE_RULINGS = ("reject",)
 FLAG_RULINGS = ("keep", "remove")
@@ -274,6 +292,8 @@ def _after_name(t: _Tokens, name: str):
         return s
     if name in ("true", "false"):
         return name == "true"
+    if name == "nil":
+        return None
     return Name(name)
 
 
@@ -295,38 +315,131 @@ def slug(name: str) -> str:
     return re.sub(r"[^A-Za-z0-9]+", "_", name.lower()).strip("_")
 
 
+# The add{} fields the trainer reader resolves, and how each value may be written: `{ r[N] }`,
+# `r[N]`, `c.<field>` (city()'s head table), or a literal (a string, a number, a `{ ... }` table).
+_ADD_FIELDS = ("name", "faction", "city", "subzone", "mapName", "mapID", "teaches", "npcID", "x", "y")
+_ADD_FIELD = re.compile(r"\b(%s)\s*=\s*(?:\{\s*r\[(\d+)\]\s*\}|r\[(\d+)\]|c\.(\w+)|(\{[^{}]*\}|\"(?:[^\"\\\\]|\\\\.)*\"|-?\d+(?:\.\d+)?))"
+                        % "|".join(_ADD_FIELDS))
+
+
+def _close_brace(text: str, start: int) -> int:
+    """The index just past the `}` that closes the `{` at `text[start]` (strings and comments skipped)."""
+    depth, i = 0, start
+    while i < len(text):
+        ch = text[i]
+        if ch in "\"'":
+            j = i + 1
+            while text[j] != ch:
+                j += 2 if text[j] == "\\" else 1
+            i = j
+        elif text.startswith("--", i):
+            i = text.find("\n", i)
+            if i < 0:
+                break
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return i + 1
+        i += 1
+    raise SystemExit("seed parse: an unclosed add{ at %d; update read_trainers." % start)
+
+
+def _add_spec(body: str) -> dict:
+    """`{field: (how, value)}` out of one add{ ... } body: ("wrap", N), ("row", N), ("head", name) or
+    ("lit", value)."""
+    spec = {}
+    for m in _ADD_FIELD.finditer(body):
+        field, wrap, row, head, lit = m.groups()
+        if wrap:
+            spec[field] = ("wrap", int(wrap))
+        elif row:
+            spec[field] = ("row", int(row))
+        elif head:
+            spec[field] = ("head", head)
+        else:
+            spec[field] = ("lit", read_lua("{" + lit + "}", 0)[0].items[0])
+    return spec
+
+
+def _plain(value):
+    return list(value.items) if isinstance(value, LuaTable) else value
+
+
+def _record(spec: dict, row: list, head=None) -> dict:
+    out = {"subzone": None, "npcID": None, "x": None, "y": None}
+    for field, (how, val) in spec.items():
+        if how == "wrap":
+            out[field] = [row[val - 1]]
+        elif how == "row":
+            out[field] = _plain(row[val - 1]) if val <= len(row) else None
+        elif how == "head":
+            out[field] = head.fields.get(val) if head is not None else None
+        else:
+            out[field] = _plain(val)
+    missing = [f for f in ("name", "faction", "city", "mapName", "mapID", "teaches") if out.get(f) is None]
+    if missing:
+        raise SystemExit("seed parse: a trainer record without %s (%r); update read_trainers."
+                         % (", ".join(missing), out.get("name")))
+    return out
+
+
+def _add_in(text: str, at: int, stop: int) -> dict:
+    """The field spec of the first add{ between `at` and `stop`."""
+    m = re.compile(r"\badd\s*\{").search(text, at, stop)
+    if not m:
+        raise SystemExit("seed parse: a trainer block with no add{ (at %d); update read_trainers." % at)
+    brace = m.end() - 1
+    return _add_spec(text[brace:_close_brace(text, brace)])
+
+
 def read_trainers(text: str) -> list[dict]:
-    """Every trainer record, in file order: the city() blocks, then the three row loops (Expert and
-    Artisan rows of 7 fields, weapon masters of 8, riding instructors of 6)."""
+    """Every trainer record, in file order: each `city()` call, each `for _, r in ipairs({...}) do
+    add{...} end` loop, and each standalone `add{...}`. Field positions are read from the add{} the
+    rows feed (its `r[N]` references), so a reordered or widened row shape needs no reader change."""
     out: list[dict] = []
+    fn = re.search(r"^local function city\(", text, re.M)
+    city_spec = _add_in(text, fn.end(), text.index("\nend", fn.end())) if fn else None
+    blocks = []
     for m in re.finditer(r"^city\(", text, re.M):
-        call, _end = read_lua(text, m.end() - 1)
-        head, rows = call.items[0], call.items[1]
-        for r in rows.items:
-            out.append({"name": r.items[0], "faction": head.fields["faction"], "city": head.fields["name"],
-                        "subzone": r.items[1], "mapName": head.fields["name"], "mapID": head.fields["mapID"],
-                        "teaches": [r.items[2]]})
+        blocks.append((m.start(), "city", m))
     for m in re.finditer(r"^for _, r in ipairs\(", text, re.M):
-        rows, _end = read_lua(text, m.end())
-        for r in rows.items:
-            f = r.items
-            if len(f) == 7:
-                out.append({"name": f[0], "faction": f[1], "city": f[2], "subzone": None, "mapName": f[3],
-                            "mapID": f[4], "teaches": [f[5]]})
-            elif len(f) == 8:
-                out.append({"name": f[0], "faction": f[1], "city": f[2], "subzone": f[3], "mapName": f[2],
-                            "mapID": f[4], "teaches": list(f[7].items)})
-            elif len(f) == 6:
-                out.append({"name": f[0], "faction": f[1], "city": f[3], "subzone": None, "mapName": f[4],
-                            "mapID": f[5], "teaches": ["riding"]})
-            else:
-                raise SystemExit("seed parse: a trainer row of %d fields (%r); update read_trainers." % (len(f), f[0]))
+        blocks.append((m.start(), "loop", m))
+    for m in re.finditer(r"^add\s*\{", text, re.M):
+        blocks.append((m.start(), "add", m))
+    for _at, kind, m in sorted(blocks, key=lambda b: b[0]):
+        if kind == "city":
+            if city_spec is None:
+                raise SystemExit("seed parse: city() rows but no `local function city`; update read_trainers.")
+            call, _end = read_lua(text, m.end() - 1)
+            head, rows = call.items[0], call.items[1]
+            out += [_record(city_spec, r.items, head) for r in rows.items]
+        elif kind == "loop":
+            rows, end = read_lua(text, m.end())
+            stop = re.compile(r"^end\b", re.M).search(text, end)
+            spec = _add_in(text, end, stop.start() if stop else len(text))
+            out += [_record(spec, r.items) for r in rows.items]
+        else:
+            rec, _end = read_lua(text, m.end() - 1)
+            out.append(_record({k: ("lit", v) for k, v in rec.fields.items() if k in _ADD_FIELDS}, []))
     seen: dict[str, str] = {}
     for rec in out:
         rec["id"] = slug(rec["name"])
         if rec["id"] in seen:
             raise SystemExit("seed parse: two trainers share the id %r." % rec["id"])
         seen[rec["id"]] = rec["name"]
+    return out
+
+
+def read_gathering(text: str) -> list[dict]:
+    """Every node row of defaults/Gathering_Forever.lua: `{id: <list>.<slug>, list, name, need}`."""
+    tab = _read_at(text, "NS.Gathering_Forever =")
+    out = []
+    for lst in sorted(tab.fields):
+        for row in tab.fields[lst].items:
+            out.append({"id": "%s.%s" % (lst, slug(row.fields["name"])), "list": lst,
+                        "name": row.fields["name"], "need": row.fields.get("need")})
     return out
 
 
@@ -373,7 +486,8 @@ def read_seeds(defaults: Path = DEFAULTS) -> dict:
 
     seeds = {"trainers": read_trainers(text("Trainers_Forever.lua")),
              "fishing": read_fishing(text("Fishing_Forever.lua")),
-             "catalog": read_catalog(text("SkillCatalog_Forever.lua"))}
+             "catalog": read_catalog(text("SkillCatalog_Forever.lua")),
+             "gathering": read_gathering(text("Gathering_Forever.lua"))}
     return seeds
 
 
@@ -406,9 +520,10 @@ def http_get(url: str, accept: str = "text/csv"):
 
 
 def live_build(product: str) -> dict:
-    """The newest build the builds API lists for `product`: `{version, created_at}`."""
+    """The newest live (non-background-download) build the builds API lists for `product`:
+    `{version, created_at}`."""
     data = json.load(http_get(BUILDS_URL, accept="application/json"))
-    builds = data.get(product) or []
+    builds = [b for b in data.get(product) or [] if not b.get("is_bgdl")]   # a background download is not live
     if not builds:
         raise SystemExit("The builds API lists no %r builds; pass --build." % product)
     return {"version": builds[0]["version"], "created_at": builds[0].get("created_at", "")}
@@ -609,7 +724,164 @@ def catalog_candidates(db: DB, cat: dict) -> list[dict]:
     return out
 
 
-def derive_doc(db: DB, seeds: dict, flavor: str, build: str, created: str, date: str) -> dict:
+# ---------------------------------------------------------------------------
+# ForeverDB: the second evidence source for what DB2 cannot hold (clients-§10)
+# ---------------------------------------------------------------------------
+# ForeverDB (github.com/foreverfraddons/forever-db) is GPL-3.0 data. The tool reads the parsed copy
+# dev-copilot's scripts/foreverdb.py caches (`foreverdb.py fetch --tag <tag> --date <date>` prints
+# the folder) and writes only verdicts: never a row into the repo, a fixture or a bundle. A verdict
+# may quote the one field it compares (an NPC's name, a side, the nearest spot). DB2 stays primary:
+# ForeverDB only checks what DB2 holds nothing of (trainer NPCs, their sides and spawns, gathering
+# objects), and every disagreement is a flag for a ruling, never an automatic change.
+
+SPOT_TOLERANCE = 1.0   # map-%: the trainer probe's own tolerance (docs/trainer-probe/*/report.md)
+SIDES = {"Alliance": "A", "Horde": "H", "Neutral": "AH"}
+
+
+class ForeverDB:
+    """The tables the checks read, out of one cached tag's foreverdb.json."""
+
+    def __init__(self, folder: Path):
+        folder = Path(folder)
+        try:
+            src = json.loads((folder / "SOURCES.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError) as err:
+            raise SystemExit("--foreverdb %s: no readable SOURCES.json (%s); run foreverdb.py fetch first." % (folder, err))
+        data = (folder / "foreverdb.json").read_bytes()
+        if hashlib.sha256(data).hexdigest() != src.get("json", {}).get("sha256"):
+            raise SystemExit("--foreverdb %s: foreverdb.json does not match its SOURCES.json; re-run foreverdb.py fetch."
+                             % folder)
+        db = json.loads(data.decode("utf-8"))
+        self.sources = src
+        self.tag = src.get("tag")
+        self.npc = db.get("npc") or {}
+        self.nfac = db.get("nfac") or {}
+        self.spm = db.get("spm") or {}
+        self.spw = db.get("spw") or {}
+        self.umaa = [r for r in (db.get("umaa") or {}).values() if isinstance(r, list) and len(r) >= 13]
+        spf = db.get("spf") or {}
+        self.prof_trainers = spf.get("ProfessionTrainers") or {}
+        self.weapon_masters = spf.get("WeaponMasters") or {}
+        self.obj_names: set = set()
+        for row in (db.get("obj") or {}).values():
+            if isinstance(row, list) and row and isinstance(row[0], str):
+                self.obj_names.add(row[0])
+
+    def summary(self) -> dict:
+        s = self.sources
+        return {"tag": self.tag, "commit": s.get("commit"), "tocVersion": s.get("tocVersion"),
+                "build": (s.get("meta") or {}).get("build"), "hash": (s.get("meta") or {}).get("hash"),
+                "fetched": s.get("date"), "origin": s.get("origin"), "files": s.get("files"),
+                "urls": s.get("urls"), "install": ({"path": s["install"].get("path"), "version": s["install"].get("version")}
+                                                   if s.get("install") else None),
+                "json": s.get("json"), "spotTolerance": SPOT_TOLERANCE}
+
+    def _project(self, ui_map: int, map_id, wx, wy):
+        """A world point on `map_id` as `(x, y)` map-% of UiMap `ui_map`, through its UiMapAssignment
+        rows (umaa: UiMapID, MapID, AreaID, UiMin xy, UiMax xy, RegionMin xyz, RegionMax xyz); None
+        when no row of that UiMap covers it."""
+        for r in self.umaa:
+            if r[0] != ui_map or r[1] != map_id:
+                continue
+            u0x, u0y, u1x, u1y = r[3], r[4], r[5], r[6]
+            min_x, min_y, max_x, max_y = r[7], r[8], r[10], r[11]
+            if not (min_x <= wx <= max_x and min_y <= wy <= max_y) or max_x == min_x or max_y == min_y:
+                continue
+            x = u0x + (max_y - wy) / (max_y - min_y) * (u1x - u0x)
+            y = u0y + (max_x - wx) / (max_x - min_x) * (u1y - u0y)
+            return (x * 100, y * 100)
+        return None
+
+    def spots(self, npc_id: int, ui_map: int) -> tuple[list, str]:
+        """`([(x, y) map-%], source)`: spm's points on the map when it has some, else spw's world
+        spawns projected onto it."""
+        pts = (self.spm.get("c%d" % npc_id) or {}).get(str(ui_map))
+        if isinstance(pts, list) and len(pts) >= 2:
+            return [(pts[i] / 10, pts[i + 1] / 10) for i in range(0, len(pts) - 1, 2)], "spm"
+        out = []
+        for grp in self.spw.get("c%d" % npc_id) or []:
+            if not isinstance(grp, list) or len(grp) < 3:
+                continue
+            for i in range(1, len(grp) - 1, 2):
+                p = self._project(ui_map, grp[0], grp[i], grp[i + 1])
+                if p:
+                    out.append(p)
+        return out, "spw"
+
+
+def fdb_trainer_flags(fdb: ForeverDB, trainers: list[dict], skill_ids: dict) -> tuple[list, dict]:
+    """`(flags, verdicts)` for each trainer: its npcID against npc (found, missing, name-mismatch),
+    its side against nfac, its point against the NPC's spots on the shipped map (ok, position-off,
+    no-spot), and its `teaches` against spf's ProfessionTrainers and WeaponMasters."""
+    flags, verdicts = [], {}
+    for t in trainers:
+        v: dict = {}
+        verdicts[t["id"]] = v
+        nid = t.get("npcID")
+        row = fdb.npc.get(str(nid)) if nid is not None else None
+        if not isinstance(row, list) or not row:
+            v["npc"] = "missing"
+            flags.append(_flag("fdb-npc", "trainers", t["id"], t["name"], "npcID %s is no ForeverDB npc row" % nid))
+            continue
+        if row[0] != t["name"]:
+            v["npc"] = "name-mismatch"
+            flags.append(_flag("fdb-name", "trainers", t["id"], t["name"], "ForeverDB npc %d is named %r" % (nid, row[0])))
+        else:
+            v["npc"] = "found"
+        side = fdb.nfac.get(str(nid))
+        if side is None:
+            v["side"] = "unknown"
+        elif side != SIDES.get(t["faction"]):
+            v["side"] = "mismatch"
+            flags.append(_flag("fdb-side", "trainers", t["id"], t["name"], "shipped %s; ForeverDB nfac says %r"
+                               % (t["faction"], side)))
+        else:
+            v["side"] = "ok"
+        if t.get("x") is not None and t.get("y") is not None:
+            pts, src = fdb.spots(nid, t["mapID"])
+            if not pts:
+                v["spot"] = "no-spot"
+                flags.append(_flag("fdb-spot", "trainers", t["id"], t["name"], "ForeverDB has no spot of npc %d on UiMap %d"
+                                   % (nid, t["mapID"])))
+            else:
+                best = min(pts, key=lambda p: math.hypot(p[0] - t["x"], p[1] - t["y"]))
+                dist = round(math.hypot(best[0] - t["x"], best[1] - t["y"]), 2)
+                v["spot"], v["dist"], v["spotSource"] = ("ok" if dist <= SPOT_TOLERANCE else "position-off"), dist, src
+                if dist > SPOT_TOLERANCE:
+                    flags.append(_flag("fdb-spot", "trainers", t["id"], t["name"],
+                                       "shipped %.1f, %.1f; nearest ForeverDB spot (%s, %d) %.1f, %.1f is %.1f map-%% away"
+                                       % (t["x"], t["y"], src, len(pts), best[0], best[1], dist)))
+        teach = {skill_ids[k] for k in t["teaches"] if k in skill_ids}
+        prof = fdb.prof_trainers.get(str(nid))
+        weap = fdb.weapon_masters.get(str(nid))
+        if isinstance(prof, int):
+            v["role"] = "ok" if prof in teach else "mismatch"
+            if prof not in teach:
+                flags.append(_flag("fdb-role", "trainers", t["id"], t["name"], "spf ProfessionTrainers says skill line %d; "
+                                   "the record teaches %s" % (prof, sorted(teach))))
+        elif isinstance(weap, list):
+            want = {w for w in weap if isinstance(w, int)}
+            v["role"] = "ok" if want == teach else "mismatch"
+            if want != teach:
+                flags.append(_flag("fdb-role", "trainers", t["id"], t["name"], "spf WeaponMasters lacks %s and adds %s"
+                                   % (sorted(teach - want), sorted(want - teach))))
+        else:
+            v["role"] = "absent"
+    return flags, verdicts
+
+
+def fdb_gathering_flags(fdb: ForeverDB, nodes: list[dict]) -> tuple[list, dict]:
+    """`(flags, verdicts)`: each node or herb name against ForeverDB's object names (obj)."""
+    flags, verdicts = [], {}
+    for n in nodes:
+        found = n["name"] in fdb.obj_names
+        verdicts[n["id"]] = "found" if found else "missing"
+        if not found:
+            flags.append(_flag("fdb-node", "gathering", n["id"], n["name"], "no ForeverDB object is named %r" % n["name"]))
+    return flags, verdicts
+
+
+def derive_doc(db: DB, seeds: dict, flavor: str, build: str, created: str, date: str, fdb: ForeverDB = None) -> dict:
     missing = db.sentinels() + check_seed_floor(seeds)
     if missing:
         raise SystemExit("coverage gate FAILED: %s. Fix the reader or the fetch before ruling anything."
@@ -619,7 +891,13 @@ def derive_doc(db: DB, seeds: dict, flavor: str, build: str, created: str, date:
              + catalog_flags(db, cat))
     candidates = fishing_candidates(db, seeds["fishing"]) + catalog_candidates(db, cat)
     matched = sorted(t["name"] for t in seeds["trainers"] if t["name"] in db.creatures)
-    return {
+    evidence = None
+    if fdb is not None:
+        tflags, tverdicts = fdb_trainer_flags(fdb, seeds["trainers"], cat["skillLineIDs"])
+        gflags, gverdicts = fdb_gathering_flags(fdb, seeds["gathering"])
+        flags += tflags + gflags
+        evidence = dict(fdb.summary(), verdicts={"trainers": tverdicts, "gathering": gverdicts})
+    doc = {
         "flavor": flavor, "product": FLAVORS[flavor], "build": build, "buildCreated": created, "date": date,
         "tool": "tools/seeds/seeds.py derive",
         "shipped": {"trainers": len(seeds["trainers"]), "fishing": len(seeds["fishing"]),
@@ -629,6 +907,10 @@ def derive_doc(db: DB, seeds: dict, flavor: str, build: str, created: str, date:
                      "note": "the client's Creature table holds companions and mounts, not trainers: report only"},
         "candidates": candidates, "flags": flags,
     }
+    if evidence is not None:
+        doc["shipped"]["gathering"] = len(seeds["gathering"])
+        doc["foreverdb"] = evidence
+    return doc
 
 
 # ---------------------------------------------------------------------------
@@ -643,14 +925,22 @@ def bundle_build(bundle: Path) -> str:
     return json.loads((bundle / "candidates.json").read_text(encoding="utf-8"))["build"]
 
 
-def status_line(live: str, found: list[Path]) -> str:
+def bundle_tag(bundle: Path):
+    return (json.loads((bundle / "candidates.json").read_text(encoding="utf-8")).get("foreverdb") or {}).get("tag")
+
+
+def status_line(live: str, found: list[Path], tag: str = None) -> str:
     """`CURRENT <build> (<bundle>)` or `NEW <build> ...`; the first word is what
-    /dev-copilot:validate-seeds reads."""
+    /dev-copilot:validate-seeds reads. With `tag` (the newest ForeverDB tag), the newest bundle is
+    current only when its build and its tag are both the newest."""
     if not found:
         return "NEW %s (no bundle yet)" % live
     built = bundle_build(found[-1])
+    had = bundle_tag(found[-1]) if tag else None
+    if built == live and had == tag:
+        return "CURRENT %s (%s)" % (live + (" + ForeverDB %s" % tag if tag else ""), found[-1].name)
     if built == live:
-        return "CURRENT %s (%s)" % (live, found[-1].name)
+        return "NEW %s (ForeverDB %s; last ruled %s, %s)" % (live, tag, had or "none", found[-1].name)
     return "NEW %s (last ruled %s, %s)" % (live, built, found[-1].name)
 
 
@@ -804,6 +1094,26 @@ def format_sources(doc: dict, sizes: dict) -> str:
         lines.append("| %s | `%s` | %s | %s |" % (table, TABLE_URL % (table, doc["build"]), sizes.get(table, "?"), why))
     lines += ["", "Each table is frozen as `raw/<Table>.csv.gz`; `seeds.py derive --replay` re-derives from "
               "them with no network and no cache.", ""]
+    f = doc.get("foreverdb")
+    if f:
+        lines += ["## ForeverDB (second evidence source, clients-§10)", "",
+                  "ForeverDB's data is GPL-3.0, so this bundle keeps no raw rows: only the pin below, the "
+                  "per-id verdicts in `candidates.json` (`foreverdb.verdicts`) and the flags. A replay "
+                  "re-fetches the pinned tag, which is immutable, through dev-copilot's "
+                  "`scripts/foreverdb.py fetch --tag %s --date <date>`." % f["tag"], "",
+                  "- Repository: https://github.com/foreverfraddons/forever-db",
+                  "- Tag: `%s`, commit `%s` (TOC `## Version` %s; meta.build %s, meta.hash `%s`)"
+                  % (f["tag"], f.get("commit") or "unknown", f.get("tocVersion"), f.get("build"), f.get("hash")),
+                  "- Fetched: %s, from %s" % (f.get("fetched"), " + ".join(f.get("origin") or ())),
+                  "- Helper: %s" % (f.get("helper") or "not recorded")]
+        if f.get("install"):
+            lines.append("- Owner's install read: version %s (`%s`), confirmed against the tag by its sha256"
+                         % (f["install"].get("version"), f["install"].get("path")))
+        lines += ["- Spot tolerance: %.1f map-%% (the trainer probe's)" % f.get("spotTolerance", SPOT_TOLERANCE), "",
+                  "| File | Bytes | sha256 (as fetched) | sha256 (LF) |", "| --- | --- | --- | --- |"]
+        for fl in f.get("files") or ():
+            lines.append("| `%s` | %s | `%s` | `%s` |" % (fl.get("path"), fl.get("bytes"), fl.get("sha256"), fl.get("sha256LF")))
+        lines += ["", "URLs: %s" % ", ".join("`%s`" % u for u in f.get("urls") or ()) or "URLs: none (install read)", ""]
     return "\n".join(lines)
 
 
@@ -819,6 +1129,17 @@ def format_rulings_md(doc: dict, rulings: dict, date: str) -> str:
                                                    ", ".join("%d %s" % (n, r) for r, n in sorted(tally.items()))), "",
              "Creature: %d distinct names on the build; trainer names found in it: %d (%s)." % (
                  doc["creature"]["tableRows"], len(doc["creature"]["trainersMatched"]), doc["creature"]["note"]), ""]
+    f = doc.get("foreverdb")
+    if f:
+        tally_v: dict = defaultdict(int)
+        for v in f["verdicts"]["trainers"].values():
+            for part in ("npc", "side", "spot", "role"):
+                if part in v:
+                    tally_v["%s %s" % (part, v[part])] += 1
+        for v in f["verdicts"]["gathering"].values():
+            tally_v["node %s" % v] += 1
+        lines += ["ForeverDB %s (commit %s) verdicts: %s." % (f["tag"], (f.get("commit") or "unknown")[:12],
+                                                           ", ".join("%s %d" % kv for kv in sorted(tally_v.items()))), ""]
     unruled = unruled_keys(doc, rulings)
     if unruled:
         lines += ["## Unruled: %d" % len(unruled), ""] + ["- `%s`" % k for k in unruled] + [""]
@@ -858,6 +1179,14 @@ def _date(value: str) -> str:
     return value
 
 
+def fdb_cache_root(override: Path = None) -> Path:
+    """dev-copilot scripts/foreverdb.py's cache root (its cache_root())."""
+    if override is not None:
+        return override
+    base = os.environ.get("XDG_CACHE_HOME") or os.path.join(os.path.expanduser("~"), ".cache")
+    return Path(base) / "ka0s-seeds" / "foreverdb"
+
+
 def bundle_tables(bundle: Path, build: str, replay: bool, cache_dir: Path) -> tuple[dict, dict]:
     """`({table: path}, {table: csv bytes})`, from raw/ on a replay, else fetched and frozen."""
     raw = bundle / "raw"
@@ -879,13 +1208,14 @@ def bundle_tables(bundle: Path, build: str, replay: bool, cache_dir: Path) -> tu
 
 
 def cmd_status(args) -> int:
-    print(status_line(live_build(FLAVORS[args.flavor])["version"], bundles(args.root, args.flavor)))
+    print(status_line(live_build(FLAVORS[args.flavor])["version"], bundles(args.root, args.flavor), args.foreverdb_tag))
     return 0
 
 
 def cmd_derive(args) -> int:
     product = FLAVORS[args.flavor]
     prior = args.bundle / "candidates.json"
+    old: dict = {}
     if args.replay:
         if not prior.exists() and not args.build:
             raise SystemExit("--replay needs the bundle's candidates.json (for its build) or --build.")
@@ -896,13 +1226,25 @@ def cmd_derive(args) -> int:
     else:
         live = live_build(product)
         build, created = live["version"], live["created_at"]
+    fdb_dir, helper = args.foreverdb, args.foreverdb_helper
+    if args.replay and fdb_dir is None and old.get("foreverdb"):
+        fdb_dir = fdb_cache_root(args.foreverdb_cache) / old["foreverdb"]["tag"]
+        helper = helper or old["foreverdb"].get("helper")
+        if not (fdb_dir / "SOURCES.json").exists():
+            raise SystemExit("--replay: the bundle pins ForeverDB %s, which is not cached; re-fetch it (the tag is "
+                             "immutable): foreverdb.py fetch --tag %s --date <date>" % (old["foreverdb"]["tag"],
+                                                                                         old["foreverdb"]["tag"]))
     tables, sizes = bundle_tables(args.bundle, build, args.replay, args.cache_dir)
-    doc = derive_doc(DB(tables), read_seeds(args.defaults), args.flavor, build, created, args.date)
+    fdb = ForeverDB(fdb_dir) if fdb_dir is not None else None
+    doc = derive_doc(DB(tables), read_seeds(args.defaults), args.flavor, build, created, args.date, fdb)
+    if fdb is not None:
+        doc["foreverdb"]["helper"] = helper
     write_json(prior, doc)
     write_repo_text(args.bundle / "SOURCES.md", format_sources(doc, sizes))
     unruled = unruled_keys(doc, load_rulings(args.rulings))
-    log("build %s: %d candidates, %d flags, %d unruled; shipped %s" % (
-        build, len(doc["candidates"]), len(doc["flags"]), len(unruled), doc["shipped"]))
+    log("build %s%s: %d candidates, %d flags, %d unruled; shipped %s" % (
+        build, " + ForeverDB %s" % fdb.tag if fdb else "", len(doc["candidates"]), len(doc["flags"]), len(unruled),
+        doc["shipped"]))
     return 0
 
 
@@ -962,12 +1304,20 @@ def parse_args(argv):
     s = sub.add_parser("status", help="is there a live build newer than the newest bundle?")
     s.add_argument("--flavor", choices=sorted(FLAVORS), default="forever")
     s.add_argument("--root", type=Path, default=RESEARCH)
+    s.add_argument("--foreverdb-tag", default=None, help="the newest ForeverDB tag (foreverdb.py status)")
     d = sub.add_parser("derive", help="flags and candidates into the bundle's candidates.json")
     d.add_argument("--flavor", choices=sorted(FLAVORS), required=True)
     d.add_argument("--bundle", type=Path, required=True)
     d.add_argument("--date", type=_date, required=True)
     d.add_argument("--build", default=None, help="pin this build instead of the live one")
     d.add_argument("--replay", action="store_true", help="read only the bundle's raw/, no network")
+    d.add_argument("--foreverdb", type=Path, default=None,
+                   help="the folder `foreverdb.py fetch --tag <tag> --date <date>` printed (ForeverDB evidence)")
+    d.add_argument("--foreverdb-helper", default=None,
+                   help="which foreverdb.py made that folder (e.g. `dev-copilot 2.12.0 <commit>`), for SOURCES.md")
+    d.add_argument("--foreverdb-cache", type=Path, default=None,
+                   help="the helper's cache root (default ${XDG_CACHE_HOME:-~/.cache}/ka0s-seeds/foreverdb), "
+                        "where --replay finds the bundle's pinned tag")
     r = sub.add_parser("rule", help="record rulings (the only writer of the rulings file)")
     r.add_argument("--key", action="append")
     r.add_argument("--ruling")

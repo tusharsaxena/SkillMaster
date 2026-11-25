@@ -248,6 +248,9 @@ NS.defaults = {
         },
         trainers = {
             showAll = false,     -- round 2: the popup lists every rank's trainers, Artisan first
+            -- SF-SM-02 (LibKa0s#105): read ForeverDB, when installed, for a book rank's sources and a
+            -- trainer the data has no spot for (modules/ForeverDBSources.lua).
+            foreverDB = true,
             -- The trainer popup's trainer name (feedback round 2, FB-11): the class color while
             -- useClassColorName is on (options-ui-§17, class first; FB-SM-02), else the skin's accent
             -- while nameColorFromSkin is on (the default, skinning-§6), else the swatch. The swatch

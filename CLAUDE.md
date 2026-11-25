@@ -32,11 +32,13 @@ Start here, then read the docs:
   `data-flow.md`, `common-tasks.md`, `debug.md`, `forever-quirks.md`, `smoke-tests.md`, …).
 
 **WoW Forever only** (roster Clients `Forever`, clients-§9): the suite runs under the Forever kit
-profile only (also pinned in-repo by `tests/client_pin.lua`, so a bare run is Forever too). Green gate before every commit: `KA0S_KIT_CLIENT=forever lua tests/run.lua` and
-`~/.claude/dev-copilot/bin/ka0s-bounded luacheck .` (0/0). The kit bounds the suite on load;
+profile only (also pinned in-repo by `tests/client_pin.lua`, so a bare run is Forever too). Green gate before every commit: `KA0S_KIT_CLIENT=forever lua tests/run.lua`,
+`~/.claude/dev-copilot/bin/ka0s-bounded luacheck .` (0/0) and the seed tool's offline tests,
+`python3 -m pytest -q -p no:cacheprovider tools/seeds` (or `python3 -m unittest discover -s tools/seeds`
+where pytest is absent; `docs/validate-seeds.md`). The kit bounds the suite on load;
 `luacheck` loads no kit, so it runs through the bounded runner (testing-§15). Never
 auto-stage/commit/push and never bump the version without an explicit instruction.
 
-Bundles [LibKa0s](https://github.com/tusharsaxena/LibKa0s) v1.113.0 (MIT).
+Bundles [LibKa0s](https://github.com/tusharsaxena/LibKa0s) v1.114.0 (MIT).
 LibKa0s icons: chevron-down, chevron-right, chevron-up, clear, close, confirm, copy, document, external-link, eye, fullscreen-enter, fullscreen-exit, info, list, lock, move, ph:funnel, ph:sign-in, ph:sort-descending, reset, segment, settings, sort-asc, sort-desc, unlock, volume-high.
 LibKa0s sounds: none.

@@ -3,7 +3,7 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-886%2F886_passing-green)
+![Tests](https://img.shields.io/badge/Tests-906%2F906_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
@@ -50,6 +50,7 @@ Everything else lives under Settings → AddOns → Ka0s Skill Master, and `/sm 
 | Why does a cooking, first aid or fishing teacher say "Sells" or "Quest"? | Those ranks aren't trained. You buy a book from that vendor or do that NPC's quest, and the card says which. Artisan in those three is always a quest, and the popup says so. |
 | Where do I train Artisan in a craft? | From a master trainer outside the capitals, such as Drakk Stonehand in the Hinterlands for Alliance leatherworkers. The capitals' trainers stop at Expert. |
 | Can I see every trainer, not just my next rank's? | Tick Show all trainers in the trainer window. It lists every rank, Artisan first, and marks the trainers for your next rank. |
+| Do I need ForeverDB? | No. If you have it installed, a skill whose next rank comes from a book shows in its tooltip where the book is sold and what drops it. ForeverDB loads the first time that tooltip opens. Turn it off with Use ForeverDB on the Trainers and Waypoints page. |
 | Can I see my alts' skills? | Yes. Log each character in once and the Journal's Alts tab shows them all. |
 | Where are my settings stored? | In your own profile, so characters can share a layout or keep their own. |
 

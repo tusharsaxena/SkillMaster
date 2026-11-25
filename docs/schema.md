@@ -178,6 +178,7 @@ SkillMasterDB
                                                        -- -2000 .. 2000; a drag writes them
                   arrowLock = false }                  -- the arrow's own lock (not /sm lock)
     trainers = { showAll = false,     -- the trainer popup lists every rank (GitHub issue #3, round 2)
+                 foreverDB = true,    -- read ForeverDB, when installed: book sources, missing spots (SF-SM-02)
                  nameColor = { r, g, b, a }, useClassColorName = false,   -- the trainer popup's
                  nameColorFromSkin = true }   -- trainer name: the skin's accent while on (FB-11)
     alerts = {                   -- modules/Alerts.lua (T4.2); the Alerts page (T5.1)

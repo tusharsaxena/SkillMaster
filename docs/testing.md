@@ -40,12 +40,18 @@ Several kit suites read `git ls-files`, so a new file must be staged before it i
 
 ## The green commit gate
 
-Both commands above, green, before every commit (testing-§4). Nothing else gates a commit.
+Both commands above, plus the seed tool's offline tests (below), green, before every commit
+(testing-§4). Nothing else gates a commit.
+
+```sh
+python3 -m pytest -q -p no:cacheprovider tools/seeds   # or: python3 -m unittest discover -s tools/seeds
+```
 
 | Suite | What it is | Checkpoint |
 |---|---|---|
 | lint | `luacheck .` | gates every commit and the tag |
 | tests | the headless suite, Forever profile | gates every commit and the tag |
+| seeds | `tools/seeds/test_seeds.py` (offline, no network) | gates every commit |
 | perf | the offline scenarios (`tests/perf.lua`) | recorded at release; gates the tag only through the release battery |
 | complexity | `lizard` over the kit's sighted shadow | recorded at release; the tag needs zero functions above CCN 15 |
 
@@ -66,6 +72,7 @@ function above CCN 15). The full four-suite record is `tests/_kit/run-automated-
   a run needs the sources' checkouts outside the repo (their pins: `NS.DataMeta.Trainers_Forever`).
   Re-run it, with `--write-provenance`, after any trainer edit: the suite fails a confirmed record
   whose values changed since.
-- [validate-seeds.md](validate-seeds.md) — the seed validation against WoW Forever's DB2. Its tool's own
-  tests, `python3 -m pytest -q -p no:cacheprovider tools/seeds`, run offline and sit outside the
-  green commit gate above; a seed-validation run gates on them.
+- [validate-seeds.md](validate-seeds.md) — the seed validation against WoW Forever's DB2, with
+  ForeverDB as the second evidence source for the trainers and gathering nodes. Its tool's own tests,
+  `python3 -m pytest -q -p no:cacheprovider tools/seeds`, run offline and are part of the green
+  commit gate above (since 2026-11-25, LibKa0s#102).

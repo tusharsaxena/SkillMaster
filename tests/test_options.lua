@@ -259,7 +259,8 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- The detached background and border omit OptionsCompose minor 20's per-part companions.
     -- Round 2 of the trainer probe (GitHub issue #3): the hand-written Show all trainers row, +1 both.
     -- 2026-11-25 (the owner): the hand-written Mark unverified trainers row is gone, -1 both.
-    assertEqual(full, 375, "the full schema (round 2: Show all trainers; FB-SM-04: eight Block width rows; 2026-11-25: no Mark unverified trainers row)")
-    assertEqual(degraded, 302, "the library-absent schema")
+    -- SF-SM-02 (LibKa0s#105): the hand-written Use ForeverDB row, +1 both.
+    assertEqual(full, 376, "the full schema (round 2: Show all trainers; FB-SM-04: eight Block width rows; 2026-11-25: no Mark unverified trainers row; SF-SM-02: Use ForeverDB)")
+    assertEqual(degraded, 303, "the library-absent schema")
     assertEqual(full - degraded, 73, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3), the detached background and border (9) and the waypoint arrow's blocks (20)")
 end)
