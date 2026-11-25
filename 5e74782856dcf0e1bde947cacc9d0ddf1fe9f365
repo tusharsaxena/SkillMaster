@@ -1,0 +1,7 @@
+Independent review, Ka0sAddonsCommonTasks docs/2026-11-25-SEEDS_AND_FOREVERDB (workflows wf_df07c1ab-8d1, wf_219c4c4a-92a)
+SF-SM-01+02: 4 findings (minor, minor, minor, minor); fix pass: 5e74782 SF-SM-01: review fixes (Angelique Butler's reasoning, the probe's side check, invented fixture names, a sellers comment); fix gate green=True
+  - [minor] defaults/Trainers_Forever.lua:332 The Angelique Butler fix (Neutral to Alliance, SF-SM-01's one shipped-data change) treats ForeverDB nfac 'A' as deciding evidence. The same run's rulings (tools/seeds/forever_rulings.json:95 and :103,
+  - [minor] docs/seed-research/2026-11-25-forever/ANALYSIS.md:74 The claim 'the next probe run will report that QuestieDB says Neutral' is false. tools/trainer_probe/checks.lua:73-79 SideOK('Alliance', 'AH') returns true, so the probe accepts an Alliance record tha
+  - [minor] tools/seeds/test_seeds.py:143 The ForeverDB-shaped fixture (FOREVERDB) uses real NPC names with real-style titles: Tel'Athir 'Journeyman Alchemist', Nat Pagle 'Fisherman', Woo Ping 'Weapon Master'. Spec section 1 requires made-up
+  - [minor] modules/ForeverDBSources.lua:75 The doc comment says sellers() keeps 'the first F.TOP by name', but the code takes vendors in the order ItemSources returns them and never sorts by name. The test at tests/test_foreverdb_sources.lua:1
+Lead gate re-run 2026-11-25 at this head: green (see EXECUTION_RECORD.md).
