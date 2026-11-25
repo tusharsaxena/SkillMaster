@@ -43,13 +43,3 @@ waypoint arrow (LibKa0s-WaypointArrow-1.0's OnUpdate, throttled to 0.03 s, disar
 is taken down); skills update on skill events, stats on throttled unit events (plus a 0.5 s speed
 read while a speed display is on screen) (ARCHITECTURE.md, Event Subscriptions).
 In-game captures live in [perf-analysis/README.md](perf-analysis/README.md); none has been taken.
-
-### Memory: ForeverDB (SF-SM-02)
-
-ForeverDB, the optional data addon `modules/ForeverDBSources.lua` reads, is about 12 MB on disk and
-in memory once loaded. It is LoadOnDemand and never loads at login: the first lookup loads it, once a
-session (a row tooltip on a rank learned from a book, or a trainer popup that lists a record with no
-map position), and the load is one hitch at that moment. Use ForeverDB off, or ForeverDB not installed,
-adds nothing. The memory is ForeverDB's own and is shared by every addon that reads it; another addon
-(another Ka0s addon among them) may have loaded it first. This repo carries no numeric memory ceiling
-to record it in, so it is recorded here.

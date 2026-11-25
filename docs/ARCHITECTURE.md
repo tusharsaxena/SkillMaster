@@ -116,7 +116,6 @@ the default skin, is the library's (skinning-§2).
 |---|---|---|
 | Skill and stat bars, blocks, detached frames, columns | not listed | yes |
 | Bonuses, trainers, waypoints, gathering and fishing helpers | not listed | yes |
-| ForeverDB sources and trainer spots (`modules/ForeverDBSources.lua`, optional ForeverDB) | not listed | yes, with ForeverDB installed |
 | Broker feed, alerts, session log, alts, Journal | not listed | yes |
 | Settings pages, skins, test mode, simulator, launcher, key bindings, diagnostics | not listed | yes |
 
@@ -457,30 +456,6 @@ rounded to 0.1 map-%) and the sources' commits in `NS.DataMeta.Trainers_Forever`
 sources from checkouts outside the repo, and its reports quote a source only against one record. This
 is no deviation from the standard; it is recorded here as the provenance rule a future data change
 keeps.
-
-### ForeverDB, an optional data addon (SF-SM-02, LibKa0s#105)
-
-`modules/ForeverDBSources.lua` (`NS.ForeverDBSources`) reads WoW Forever's ForeverDB addon, only through
-`LibKa0s-ForeverDB-1.0` and only while Trainers > Use ForeverDB (`trainers.foreverDB`, on by default) is
-on (WowAddonStandards clients-§11). ForeverDB is in the TOC's `## OptionalDeps` and `.pkgmeta`'s
-`optional-dependencies`, never required: no player needs it.
-
-- **A book rank's sources.** When the next rank's first teacher sells a book (`learn.kind == "book"`), the
-  row tooltip adds the book's sellers for the player's faction (three, then "+N more"), the creatures it
-  drops from (three, most likely first, with chances; "rate unknown" where ForeverDB has none) and a world
-  drop's minimum level. The trainer popup's card tooltip for that seller lists the same.
-- **A trainer's map spot, only where the data has none.** A record with `x` and `y` is never overridden.
-  A record without them is shown through a view (`F.Placed`, a table that reads the record's fields)
-  carrying ForeverDB's first spot for its `npcID` on the record's own map, or on any map when it names
-  none; the card's tooltip says "Map position from ForeverDB". On the shipped data every one of the 201
-  records has a position (SF-SM-01 reconciled them), so this path is dormant until a record without one
-  ships.
-- **When it loads.** Nothing at login. The first lookup loads ForeverDB's 12 MB, once a session: a row
-  tooltip on a book rank, or a trainer popup listing a record with no position. Without ForeverDB (not
-  installed, disabled, failing to load, reshaped) or off Forever, every member answers nothing and the
-  display is unchanged (`tests/test_foreverdb_sources.lua`).
-- **Licensing.** ForeverDB's data is GPL-3.0 and this addon is MIT, so no row of it is in the repo; the
-  tests use the kit's invented fake (`tests/_kit/mock_foreverdb.lua`).
 
 ## Known Limitations
 

@@ -907,10 +907,12 @@ against ForeverDB. It changed one shipped row, a judgment call the owner may rev
   has Junior Skinning, Mining and Herbalism trainers (ForeverDB hints at Kagil, Norzsh and Zor'la).
   Result: PASSED (owner, 2026-11-25): accepted as built.
 
-### ForeverDB in the addon (SF-SM-02, LibKa0s#105)
+### ForeverDB in the addon (SF-SM-02, LibKa0s#105; retired by ISF-SM-01)
 
 Ka0sAddonsCommonTasks `docs/2026-11-25-SEEDS_AND_FOREVERDB/`, item SF-SM-02: the optional ForeverDB
 addon read through `LibKa0s-ForeverDB-1.0` (`modules/ForeverDBSources.lua`, Trainers > Use ForeverDB).
+These rows passed and are kept as the record. The feature was removed on 2026-11-25 (ISF-SM-01, below):
+only Drop Watcher reads ForeverDB now, so SM-FDB-1..5 no longer describe the addon.
 
 - **SM-FDB-1** (with ForeverDB) On Forever with ForeverDB installed and enabled, log in and run
   `/dump C_AddOns.IsAddOnLoaded("ForeverDB")`: `false`, unless another addon you run loads it. Then
@@ -943,6 +945,21 @@ addon read through `LibKa0s-ForeverDB-1.0` (`modules/ForeverDBSources.lua`, Trai
   load-gating pair), so there is nothing of it to load or check. Confirm it is absent from Retail's list
   with ForeverDB's presence making no difference.
   Result: PASSED (owner, 2026-11-25).
+
+### Skill Master stops reading ForeverDB (ISF-SM-01, 2026-11-25)
+
+Ka0sAddonsCommonTasks `docs/2026-11-25-ITEM_SEARCH_FEEDBACK/`, item ISF-SM-01 (spec §8): only Drop
+Watcher reads ForeverDB. `modules/ForeverDBSources.lua`, the Use ForeverDB row and `## OptionalDeps:
+ForeverDB` are gone; a book rank's sources and a trainer's position come from Skill Master's own data.
+
+- **ISF-SM-01-1** On Forever with ForeverDB installed and enabled (and Drop Watcher disabled, so
+  nothing else asks for it), log in and `/reload`. `/dump C_AddOns.IsAddOnLoaded("ForeverDB")`:
+  `false`, and stays `false` after the steps below. Hover the row of a skill at 150/150 whose next rank
+  comes from a book (Fishing, Cooking or First Aid): the Trainer line names the book's seller, then the
+  helper and the click hint, with no "Sold by", "Drops from" or "World drop" lines. Open that skill's
+  trainer popup and hover the seller's card: no ForeverDB lines. Settings > Skill Master > Trainers and
+  Waypoints > Trainers has no Use ForeverDB row. No Lua error.
+  Result: not run.
 
 ## Skins and diagnostics
 

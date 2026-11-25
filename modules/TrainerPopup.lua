@@ -35,12 +35,6 @@ local _, NS = ...
 -- world positions (NS.Compat.PlayerWorldPos / MapWorldPos, the map API, guarded) and compared only
 -- inside one instance (continent); none when unknown. The cards sort nearest first, the unmeasured
 -- after in the data's order, and re-measure once a second (P.TICK, an AceTimer) while shown.
---
--- SF-SM-02 (LibKa0s#105): with ForeverDB installed and Use ForeverDB on, a record the data has no
--- position for is shown through NS.ForeverDBSources.Placed's view, which carries ForeverDB's spot (a
--- shipped position is never overridden), and its card's tooltip says where the position came from;
--- a book vendor's card tooltip lists the book's sources. Without ForeverDB the popup is unchanged
--- (the Use ForeverDB row on the Trainers tab says the feature needs it).
 
 NS.TrainerPopup = {}
 local P = NS.TrainerPopup
@@ -170,11 +164,6 @@ local function onCardEnter(self)
     tipLine(self.where:GetText() or "", "gtip.body")
     if P.Marked(self.trainer) then tipLine(P.MarkTip(), "sem.good") end
     if self.alsoText and self.alsoText ~= "" then tipLine(self.alsoText, "gtip.muted", true) end
-    if self.trainer.spotSource then tipLine(L["Map position from ForeverDB"], "gtip.muted") end
-    local F = NS.ForeverDBSources
-    for _, l in ipairs(F and F.TextLines(F.BookLines(self.trainer)) or {}) do
-        tipLine(l.text, l.heading and "gtip.title" or "gtip.body", true)
-    end
     GameTooltip:Show()
     NS.Chrome.PlaceBeside(GameTooltip, self, frame)
 end
@@ -734,10 +723,6 @@ function P.Show(key)
     build()
     frame:SetFrameStrata(P.Strata())   -- at each open: the openers' strata are the player's
     local groups, title, intro, nextCap = resolve(key)
-    -- SF-SM-02: a record with no position takes ForeverDB's spot, through a view (never the record);
-    -- ForeverDB is asked, and loaded, only when such a record is listed.
-    local F = NS.ForeverDBSources
-    if F then for _, g in ipairs(groups) do g.base = F.PlaceAll(g.base) end end
     local all = {}
     for _, g in ipairs(groups) do for _, t in ipairs(g.base) do all[#all + 1] = t end end
     state.key, state.groups, state.base, state.selected, state.offset = key, groups, all, 1, 0

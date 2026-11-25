@@ -1,8 +1,7 @@
 local _, NS = ...
 -- modules/RowTooltip.lua — the row tooltip (design §6.2/§6.3, mockup "Tooltips", plan Task 3.3): the
 -- numbers with the effective rank, the bar, every bonus source (a temp one with its time left), the
--- session's gains and the ETA (T4.3's session log, when loaded), the next rank and its trainer (a
--- book rank with the book's sources from ForeverDB, when installed: SF-SM-02), a
+-- session's gains and the ETA (T4.3's session log, when loaded), the next rank and its trainer, a
 -- weapon's distance to its cap, the gathering and fishing helpers (design §12 item 4), a stat's
 -- markers and scale, and the click hints. Drawn on GameTooltip with one tooltip-style Widgets Bar laid
 -- under its numbers line; GameTooltip is never re-skinned (Skin's Tooltip is for library tooltips).
@@ -85,14 +84,7 @@ local function rankLines(out, e)
     local nr = NS.Trainers and NS.Trainers:NextRank(e.key, e.rank, e.max)
     if not nr then return end
     line(out, L["Next rank"], L["%s at %d \194\183 Lv %d"]:format(nr.rankName, e.max, nr.minLevel), "muted", "body")
-    local t = nr.trainers[1]
-    if not t then return end
-    line(out, L["Trainer"], trainerText(t), "muted", "body")
-    -- SF-SM-02: a rank learned from a book, where the book is sold and what drops it (ForeverDB,
-    -- when installed; this is the lookup that loads it). Nothing without it.
-    for _, l in ipairs(NS.ForeverDBSources and NS.ForeverDBSources.BookLines(t) or {}) do
-        line(out, l.left, l.right, l.tone, l.rightTone)
-    end
+    if nr.trainers[1] then line(out, L["Trainer"], trainerText(nr.trainers[1]), "muted", "body") end
 end
 
 local function weaponLines(out, e)

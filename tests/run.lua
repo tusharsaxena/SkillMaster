@@ -275,7 +275,7 @@ Kit.run{
         "test_window_chrome",
         "test_header_buttons",
         "test_tooltips",
-        "test_foreverdb_sources",
+        "test_no_foreverdb",
         "test_skin_defaults",
         "test_seams",
         "test_m5_seams",
