@@ -18,12 +18,6 @@ marked as such rather than listed as a requirement.
 - **Optional: EllesmereUI.** A third-party addon, not required and not vendored. `## OptionalDeps:`
   also names it so it loads first when installed; with it present, the General page's Skin source
   can take this addon's look from EllesmereUI instead of a Ka0s skin (`core/SkinSetup.lua`).
-- **Optional: ForeverDB** (CurseForge `forever-db`, GPL-3.0 data). A third-party WoW Forever data
-  addon, not required and not vendored, read only through the vendored `LibKa0s-ForeverDB-1.0`
-  (WowAddonStandards clients-§11). `## OptionalDeps:` names it, and `.pkgmeta` lists it under
-  `optional-dependencies`, never `required-dependencies`. With it installed and Trainers > Use
-  ForeverDB on, a book rank's row tooltip shows where the book is sold and what drops it, and a
-  trainer with no map position takes ForeverDB's. It loads on first use (about 12 MB), never at login.
 
 ## Development — the contributor toolchain
 

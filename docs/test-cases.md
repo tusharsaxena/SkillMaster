@@ -891,28 +891,15 @@ Total.
 - tooltips: without the library a mark's tooltip attaches centered above it, never at a game anchor
 - tooltips: the addon's own Lua names no game tooltip anchor but ANCHOR_NONE (no cursor, no corner offset)
 
-### test_foreverdb_sources.lua (20)
+### test_no_foreverdb.lua (7)
 
 - characterization: Fishing 150/150's row tooltip names the next rank and its book seller, then the hint
 - characterization: a trainer record with no position shows no coordinates and blocks the waypoint
 - characterization: every shipped trainer record has a map position
-- foreverdb: nothing loads ForeverDB at file load; a tooltip with no book and a placed popup ask nothing
-- foreverdb present: a book rank's row tooltip lists sellers, drops by chance and the world drop
-- foreverdb present: a seller of the other faction is left out
-- foreverdb present: past three sellers or three drops, the rest is counted
-- foreverdb present: an item ForeverDB names no source for adds nothing
-- foreverdb present: a trainer with no position takes ForeverDB's spot through a view
-- foreverdb present: the card's tooltip says where the position came from
-- foreverdb present: a shipped position is never overridden, and ForeverDB is not asked
-- foreverdb present: a record on a map ForeverDB has no spot on stays without coordinates
-- foreverdb missing: the tooltip and the popup are unchanged
-- foreverdb loadfails: the tooltip and the popup are unchanged
-- foreverdb reshaped: the tooltip and the popup are unchanged
-- foreverdb off Forever (the Retail case, under the Forever-only profile): inert, nothing loads
-- foreverdb: Use ForeverDB off reads nothing and loads nothing
-- foreverdb: drop chances as the tooltip reads them
-- foreverdb: the Use ForeverDB row is on the Trainers tab, on by default, and says it needs ForeverDB
-- foreverdb: an optional dependency only (TOC OptionalDeps, .pkgmeta optional-dependencies)
+- no ForeverDB: no addon Lua file outside libs/ and tests/_kit/ reads ForeverDB
+- no ForeverDB: the TOC and .pkgmeta name no ForeverDB dependency, and the module is gone
+- no ForeverDB: no Use ForeverDB setting, default or string
+- no ForeverDB: schemaVersion 13 drops a stored trainers.foreverDB from every profile
 
 ### test_skin_defaults.lua (8)
 
@@ -1211,7 +1198,7 @@ Total.
 | test_window_chrome.lua | 15 |
 | test_header_buttons.lua | 10 |
 | test_tooltips.lua | 11 |
-| test_foreverdb_sources.lua | 20 |
+| test_no_foreverdb.lua | 7 |
 | test_skin_defaults.lua | 8 |
 | test_seams.lua | 5 |
 | test_m5_seams.lua | 7 |
@@ -1232,4 +1219,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **906** |
+| **Total** | **893** |

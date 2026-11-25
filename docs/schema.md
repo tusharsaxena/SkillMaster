@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (12)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (13)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "<ruleset>-<First Surname>" (forever-quirks-§4);
@@ -178,7 +178,6 @@ SkillMasterDB
                                                        -- -2000 .. 2000; a drag writes them
                   arrowLock = false }                  -- the arrow's own lock (not /sm lock)
     trainers = { showAll = false,     -- the trainer popup lists every rank (GitHub issue #3, round 2)
-                 foreverDB = true,    -- read ForeverDB, when installed: book sources, missing spots (SF-SM-02)
                  nameColor = { r, g, b, a }, useClassColorName = false,   -- the trainer popup's
                  nameColorFromSkin = true }   -- trainer name: the skin's accent while on (FB-11)
     alerts = {                   -- modules/Alerts.lua (T4.2); the Alerts page (T5.1)
@@ -234,6 +233,7 @@ LibDBIcon's own.
 | 9 → 10 | `statsCollapseKept`, per profile | Spell and Defense default to expanded on a new profile (round 6, R6-8; added by the round's review): a profile stored before R6-8 (the run starts at stamp 1 to 6) gets `layout.blocks.stats_spell.collapsed` and `stats_defense.collapsed = true`, the old default AceDB stripped, where none is stored; a stored value stays; a fresh install and a build already on the new default (stamp 7 or later) pass through |
 | 10 → 11 | `waypointMethodFolded`, per profile | no TomTom (round 7, R7-7): `waypoints.method` keeps `"auto"` (the map pin, else chat) and `"chat"`; a stored `"tomtom"` or `"native"` meant the map pin once TomTom is gone, so it goes and the default `"auto"` answers; `"chat"` stays |
 | 11 → 12 | `iconRowColorKept`, per profile | Bars > Icons' Use the row's color (`icons.borderColorFromRow`) defaults off on a new profile (round 7, R7-2): every profile an earlier install stored gets the old `true`, which AceDB stripped, where none is stored, an empty stored profile included (as step 8); a stored value stays; only a fresh install (stamp 0) passes through |
+| 12 → 13 | `foreverDBRetired`, per profile | Skill Master stops reading ForeverDB (ISF-SM-01; only Drop Watcher reads it): a stored `trainers.foreverDB`, SF-SM-02's Use ForeverDB switch, goes whatever it holds; nothing carries over |
 
 No step for the waypoint arrow's keys (round 6, R6-11): `waypoints.arrow`, `waypoints.arrowScale` and
 `waypoints.arrowFrame` are new keys and nothing stored reshapes, so the defaults answer on every

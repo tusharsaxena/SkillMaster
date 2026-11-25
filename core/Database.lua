@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 12
+NS.SCHEMA_VERSION = 13
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -152,6 +152,15 @@ local function iconRowColorKept(_, profile, from)
     if rawget(profile.icons, "borderColorFromRow") == nil then profile.icons.borderColorFromRow = true end
 end
 
+--- 12 -> 13 (ISF-SM-01, Ka0sAddonsCommonTasks docs/2026-11-25-ITEM_SEARCH_FEEDBACK/ spec §8): Skill
+--- Master no longer reads ForeverDB (only Drop Watcher does), so Trainers > Use ForeverDB is gone and a
+--- stored `trainers.foreverDB` (SF-SM-02's switch, on by default, so only a stored false was a choice)
+--- names nothing any more: it goes, whatever it holds.
+local function foreverDBRetired(_, profile)
+    local t = type(profile) == "table" and profile.trainers
+    if type(t) == "table" then t.foreverDB = nil end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
 -- is the stamp the run started at (0 on a fresh install).
@@ -168,6 +177,7 @@ local STEPS = {
     { to = 10, run = statsCollapseKept, perProfile = true },
     { to = 11, run = waypointMethodFolded, perProfile = true },
     { to = 12, run = iconRowColorKept, perProfile = true },
+    { to = 13, run = foreverDBRetired, perProfile = true },
 }
 
 function NS:InitDB()
