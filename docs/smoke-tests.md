@@ -899,14 +899,13 @@ against ForeverDB. It changed one shipped row, a judgment call the owner may rev
   trainer popup with Show all trainers ticked: Angelique Butler is listed (Alterac Mountains). On a
   Horde character, the same popup does not list her. If you can reach her, she is friendly to
   Alliance and hostile or unfriendly to Horde.
-  Result: pending (owner). Pending sign-off: reverse the change (her row back to "Neutral") if she
-  serves Horde too.
+  Result: PASSED (owner, 2026-11-25): accepted as built; the change is kept (her row stays Alliance).
 - **SM-SEEDFDB-2** (needs owner review, no data changed) ForeverDB's trainer table disagrees with its
   own NPC titles on five Forever-only trainers. Talk to each and note what it trains: on Zephras Isle,
   Aedi Thriceforged (shipped Mining), Eaysaa Brightgust (Alchemy), Nasalanna Windsinger (Skinning) and
   Messana Crestwind (Leatherworking); in Durotar, Norzsh (Blacksmithing). Also check whether Durotar
   has Junior Skinning, Mining and Herbalism trainers (ForeverDB hints at Kagil, Norzsh and Zor'la).
-  Result: pending (owner).
+  Result: PASSED (owner, 2026-11-25): accepted as built.
 
 ### ForeverDB in the addon (SF-SM-02, LibKa0s#105)
 
@@ -917,7 +916,7 @@ addon read through `LibKa0s-ForeverDB-1.0` (`modules/ForeverDBSources.lua`, Trai
   `/dump C_AddOns.IsAddOnLoaded("ForeverDB")`: `false`, unless another addon you run loads it. Then
   `/sm diagnostics`: the report's identity section has a `ForeverDB: present=yes loaded=no`
   line with ForeverDB's version. No Lua error.
-  Result:
+  Result: PASSED (owner, 2026-11-25).
 - **SM-FDB-2** (with ForeverDB) A character whose Fishing, Cooking or First Aid is at 150/150 (the next
   rank, Expert, comes from a book). Hover that skill's row: under the Trainer line come the book's
   name with "ForeverDB" beside it, "Sold by" naming sellers of your faction only (three at most, then
@@ -925,25 +924,25 @@ addon read through `LibKa0s-ForeverDB-1.0` (`modules/ForeverDBSources.lua`, Trai
   ForeverDB has none), and "World drop" when ForeverDB has a level for it. `/dump
   C_AddOns.IsAddOnLoaded("ForeverDB")` now answers `true` (the tooltip loaded it). Hover a skill whose
   next rank a trainer trains: no source lines.
-  Result:
+  Result: PASSED (owner, 2026-11-25).
 - **SM-FDB-3** (with ForeverDB) Open the same skill's trainer popup and hover the book seller's card
   (for Fishing, Old Man Heming): the card's tooltip ends with the same source lines as SM-FDB-2. Every
   other card is unchanged, and no card's tooltip says "Map position from ForeverDB": every shipped
   trainer has its own position, which ForeverDB never overrides.
-  Result:
+  Result: PASSED (owner, 2026-11-25).
 - **SM-FDB-4** (with ForeverDB) Settings > Skill Master > Trainers and Waypoints > Trainers: hover Use
   ForeverDB, on by default: its tooltip starts "Needs the ForeverDB addon". Untick it and hover the
   SM-FDB-2 row again: no source lines. Tick it again: they are back.
-  Result:
+  Result: PASSED (owner, 2026-11-25).
 - **SM-FDB-5** (without ForeverDB) Disable ForeverDB in the AddOns list and `/reload`. Hover the
   SM-FDB-2 row: the tooltip is as it was before this change (the Trainer line, then the helper and the
   click hint), with no Lua error. The trainer popup and its cards are unchanged. The Use ForeverDB row
   is still on the Trainers tab, and `/sm diagnostics` reports `ForeverDB: present=yes loaded=no`.
-  Result:
+  Result: PASSED (owner, 2026-11-25).
 - **SM-FDB-6** (Retail) Skill Master is Forever-only: on Retail it is not in the AddOns list (the TOC's
   load-gating pair), so there is nothing of it to load or check. Confirm it is absent from Retail's list
   with ForeverDB's presence making no difference.
-  Result:
+  Result: PASSED (owner, 2026-11-25).
 
 ## Skins and diagnostics
 
