@@ -219,6 +219,33 @@ function B.Hits() return hitPool.active or {} end
 function B.Chevrons() return chevronPool.active or {} end
 
 B.CHEVRON_W = 16   -- the chevron's hit width at a header line's left end
+B.INDENT_PX = 12   -- one tree level's indent, when the client cannot measure it in the line's font
+
+-- A tree header's line leads with its depth's indent (four spaces a level, addTreeRow) and then its chevron.
+local INDENT = "    "
+local measure   -- a hidden font string the indent is measured on, made on first use
+
+--- The width of `depth` levels of indent in `line`'s font: measured as "<indent>x" less "x" (so a trailing
+--- space is never trimmed off), else depth * B.INDENT_PX.
+function B.IndentWidth(line, depth)
+    depth = depth or 0
+    if depth <= 0 then return 0 end
+    local face, size, flags
+    if line and line.GetFont then face, size, flags = line:GetFont() end
+    if face and not measure then
+        local host = CreateFrame("Frame", nil, UIParent)   -- hidden: the string is measured, never drawn
+        host:Hide()
+        measure = host:CreateFontString(nil, "BACKGROUND")
+    end
+    if face and measure and measure:SetFont(face, size, flags) ~= false then
+        measure:SetText(INDENT:rep(depth) .. "x")
+        local with = tonumber(measure:GetStringWidth()) or 0
+        measure:SetText("x")
+        local w = with - (tonumber(measure:GetStringWidth()) or 0)
+        if w > 0 then return w end
+    end
+    return depth * B.INDENT_PX
+end
 
 local function addChevron(tip, row, line)
     local b = NS.Pool.Acquire(chevronPool, newChevron)
@@ -226,7 +253,8 @@ local function addChevron(tip, row, line)
     b:SetParent(tip)
     b:SetFrameLevel(tip:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     b:ClearAllPoints()
-    b:SetPoint("LEFT", line, "LEFT", -2, 0)
+    -- Over the chevron where it is drawn: a nested tree header's sits past its indent (SMW-REV).
+    b:SetPoint("LEFT", line, "LEFT", -2 + B.IndentWidth(line, row.depth), 0)
     b:SetSize(B.CHEVRON_W, (line.GetHeight and line:GetHeight() or 12) + 2)
     b:Show()
 end
@@ -392,10 +420,9 @@ local function addStatSection(tip, rows, id, sm)
     if note then tip:AddLine(B.Colored("gtip.muted", note)) end
 end
 
--- A tree family's rows (SMW-08..10): a header line leads with its fold chevron, indented by its depth, and
--- answers its chevron's row ({ line, node, family }); a leaf a value line with its kind's mini bar.
-local INDENT = "    "
-
+-- A tree family's rows (SMW-08..10): a header line leads with its fold chevron, indented by its depth (INDENT,
+-- above), and answers its chevron's row ({ line, node, family, depth }); a leaf a value line with its kind's mini
+-- bar.
 local function addTreeRow(tip, r, i)
     local e, spec = r.entry, NS.Tree.Kind(r.kind) or {}
     local lead = INDENT:rep(r.depth or 0) .. (r.header and chevronMark(r.folded) or "")
@@ -410,7 +437,7 @@ local function addTreeRow(tip, r, i)
         values.text = ""
         drawMiniBar(tip, n, values)
     end
-    if r.header then return { line = n, node = e.nodeKey, family = spec.family } end
+    if r.header then return { line = n, node = e.nodeKey, family = spec.family, depth = r.depth or 0 } end
     return { line = n, kind = r.kind, key = e.key }
 end
 

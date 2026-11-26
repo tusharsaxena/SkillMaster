@@ -1304,3 +1304,8 @@ none is passed until you say so.
   Statistics feed with a category unfolded in its tooltip, leave, change that statistic, hover again: the tooltip
   shows the new value.
   Result:
+- **SM-REV-4** (new, SMW-REV) Tooltip style Classic. Hover the Skill Master Statistics feed, open Character in the
+  tooltip, then click Wealth's chevron (one level in): Wealth unfolds. On the Reputations feed, click Steamwheedle
+  Cartel's chevron (under Alliance or Horde): it folds and unfolds. A click on the chevron where it is drawn acts,
+  at every depth.
+  Result:

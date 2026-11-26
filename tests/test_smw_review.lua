@@ -296,12 +296,12 @@ end)
 local SD = NS.StatisticsData
 local fx = dofile("tests/fixture_statistics.lua")
 
-local function withStatistics(fn)
+local function withStatistics(fn, tree)
     local savedFold, savedPins = NS.db.char.fold, NS.db.char.pins
     NS.db.char.fold, NS.db.char.pins = {}, {}
     SD:Reset()
     M.__fireTimers()
-    local spy, restore = fx.install(M)
+    local spy, restore = fx.install(M, tree)
     local ok, err = pcall(fn, spy)
     NS.Broker.HideTooltip()
     NS.Broker.SetFeed(NS.Broker.DEFAULT_FEED)
@@ -436,4 +436,46 @@ test("smw-rev: the feeds read the main hand and the level only for a template th
     H.WeaponSkillInSlot, P.Character = realSlot, realChar
     NS.Broker.Refresh()
     if not ok then error(err, 0) end
+end)
+
+-- ---------------------------------------------------------------------------------------------
+-- The Classic tooltip's tree chevrons
+-- ---------------------------------------------------------------------------------------------
+
+test("smw-rev: a nested header's chevron in the Classic tooltip sits over its chevron, past the indent", function()
+    local tree = {
+        { id = 130, name = "Character", parent = -1, rows = { { statID = 9001, name = "Times camped", quantity = 58 } } },
+        { id = 140, name = "Wealth", parent = 130, rows = { { statID = 9101, name = "Auctions posted", quantity = 33 } } },
+        { id = 141, name = "Auctions", parent = 140, rows = { { statID = 9201, name = "Auctions won", quantity = 4 } } },
+    }
+    withStatistics(function()
+        local ldb = NS.db.profile.tooltips.ldb
+        local saved = { style = ldb.style, folds = ldb.folds }
+        ldb.style, ldb.folds = "classic", { blocks = {}, nodes = {} }
+        local ok, err = pcall(function()
+            local B = NS.Broker
+            B.OnEnter(M.UIParent, "statistics")
+            local store = B.TipNodeStore("statistics")
+            NS.Tree.SetFolded("statistics", 130, false, store)
+            NS.Tree.SetFolded("statistics", 140, false, store)
+            B.OnEnter(M.UIParent, "statistics")
+            -- The pooled buttons record their anchor's x; the redraw reuses them.
+            local at, buttons = {}, {}
+            for _, c in ipairs(B.Chevrons()) do
+                buttons[#buttons + 1] = c
+                rawset(c, "SetPoint", function(self, _, _, _, x)
+                    if self.row.node ~= nil then at[self.row.depth] = x end
+                end)
+            end
+            B.OnEnter(M.UIParent, "statistics")
+            for _, c in ipairs(buttons) do rawset(c, "SetPoint", nil) end
+            assertEqual(at[0], -2, "a top category's chevron at the line's left")
+            assertEqual(at[1], -2 + B.INDENT_PX, "Wealth's, one indent in")
+            assertEqual(at[2], -2 + 2 * B.INDENT_PX, "Auctions', two indents in")
+            assertEqual(B.IndentWidth(nil, 0), 0, "no indent at the top")
+        end)
+        NS.Broker.HideTooltip()
+        ldb.style, ldb.folds = saved.style, saved.folds
+        if not ok then error(err, 0) end
+    end, tree)
 end)
