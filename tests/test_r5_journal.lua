@@ -237,6 +237,10 @@ test("r5 sm-11: the Name filter narrows to a kind, or one name, and the summary 
         pick("name", "Skill-ups")
         assertEqual(shownNames(), "Bows,Fishing", "a kind picked drops the name of another")
         assertEqual(card.value:GetText(), "+2", "the skill-ups counted")
+        pick("name", "Honor Points")
+        pick("name", "Everything")
+        assertFalse(JF.Active("name"), "Everything drops the kind and the name")
+        assertEqual(#logRows(), 5, "every row back")
     end)
 end)
 

@@ -177,7 +177,13 @@ end
 
 -- The Name column: a kind, then a submenu per kind present of its names (picking one sets the kind too).
 function MENUS.name(list, ctx)
-    local rows = { { title = true, label = L["Name"] }, radio(L["Everything"], "kind", nil, ctx) }
+    local every = radio(L["Everything"], "kind", nil, ctx)
+    every.selected = function() return filters.kind == nil and filters.name == nil end
+    every.onClick = function()   -- no kind and no name
+        filters.kind, filters.name = nil, nil
+        if ctx.onChange then ctx.onChange() end
+    end
+    local rows = { { title = true, label = L["Name"] }, every }
     for _, k in ipairs(JF.KINDS) do
         local row = radio(KIND_LABEL[k], "kind", k, ctx)
         local onClick = row.onClick
