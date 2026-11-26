@@ -1154,3 +1154,27 @@ none is passed until you say so.
 - **SM-PIN-6** (new, SMW-06) `/sm test`: the Professions feed shows the sample's Fishing pin and a row's Pin is
   grayed; end test mode: your own pins are back, unchanged.
   Result:
+
+## The LDB tooltip: only the fold acts (SMW-07, 2026-11-26)
+
+- **SM-TIP-1** (new, SMW-07) Hover the Skill Master feed (Tooltips > Tooltip style: Main window). Click the
+  chevron on Secondary Skills: the section folds in the tooltip, which stays up where it was; click it again: it
+  opens. The Professions window's Secondary Skills block did not fold, and folding it in the window leaves the
+  tooltip's section open.
+  Result:
+- **SM-TIP-2** (new, SMW-07) Set Tooltips > Height low enough that the tooltip scrolls, scroll down a little,
+  then fold and unfold a section: the body stays where you scrolled it (no jump to the top).
+  Result:
+- **SM-TIP-3** (new, SMW-07) In the tooltip, left-click, shift-click and right-click a row, and click its go
+  icon, a crafting row's included: nothing opens, nothing is linked, no menu shows. Hovering a row still
+  highlights it and shows its row tooltip, with no click hint. Clicking the header's title does nothing; only
+  the chevron folds.
+  Result:
+- **SM-TIP-4** (new, SMW-07) Tooltips > Tooltip style: Classic. Each section header now starts with a chevron;
+  clicking it folds and unfolds that section in place. Rows still wash on hover and take no click.
+  Result:
+- **SM-TIP-5** (new, SMW-07) Tooltips > LDB tooltip has no "Open a row from" row any more; the footer reads
+  "Click label: toggle window · Right-click label: options · Click a chevron to fold". The feed's own left
+  click still toggles its window and its right click opens Broker settings. In test mode the tooltip's test
+  strip takes no click.
+  Result:

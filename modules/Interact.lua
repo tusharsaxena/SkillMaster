@@ -14,7 +14,7 @@ local addonName, NS = ...
 --   shift-click  a profession's trade link, any other row as text, into the chat edit box
 --   right-click  the row menu (LibKa0s-Widgets-1.0 ContextMenu): pin to its family's broker, hide the
 --                row, set a waypoint to the trainer, show the trainers
--- Never secure itself; the broker's rows (T4.1) reuse Target and Open, never the overlays.
+-- Never secure itself. The LDB tooltip's rows open nothing (SMW-07: only a section's fold acts there).
 --
 -- NS.Interact.OnRowClick(row, button) -> "none"|"link"|"menu"
 -- NS.Interact.OnMarkClick(row, button) -> "secure"|"tradeskill"|"skills"|"paperdoll"|"trainer"|"link"|"menu"
@@ -188,7 +188,6 @@ end
 --- whole set's row (settings/Rows.lua), so an unknown "other:" key is still a settings write
 --- that the page's Defaults undoes.
 local function hideRow(row)
-    if row.surface == "broker" then return I.HideInTooltip(row) end
     local kind = row.kind == "stat" and "stats" or "skills"
     local key = row.entry.key
     local p = kind .. ".hidden." .. key
@@ -197,18 +196,6 @@ local function hideRow(row)
     for k, v in pairs(NS.db.profile[kind].hidden or {}) do set[k] = v end
     set[key] = true
     return NS.SetByPath(kind .. ".hidden", set)
-end
-
---- Leave `row` out of the LDB tooltip (its own hidden sets, settings/Rows.lua): the tooltip's
---- row menu hides there, never in the main window.
-function I.HideInTooltip(row)
-    local setKey = row.kind == "stat" and "hiddenStats" or "hiddenSkills"
-    local p = "broker.tooltip." .. setKey .. "." .. row.entry.key
-    if NS.FindSchemaRow(p) then return NS.SetByPath(p, true) end
-    local set = {}
-    for k, v in pairs(NS.db.profile.broker.tooltip[setKey] or {}) do set[k] = v end
-    set[row.entry.key] = true
-    return NS.SetByPath("broker.tooltip." .. setKey, set)
 end
 
 --- The row menu's Pin row (GitHub issue #11, SMW-06): a tick that pins `row` to its own family's broker
@@ -246,8 +233,8 @@ function I.MenuRows(row)
             onClick = function() if trainer then NS.Waypoints:Set(trainer) end end }
         rows[#rows + 1] = { value = "trainers", label = L["Show trainers"], onClick = function() I.Trainer(row) end }
     end
-    local hideLabel = row.surface == "broker" and L["Hide in this tooltip"] or L["Hide this row"]
-    rows[#rows + 1] = { value = "hide", label = hideLabel, onClick = function() hideRow(row) end }
+    -- The LDB tooltip opens no menu (SMW-07): its rows hide from the Rows page's LDB tooltip column.
+    rows[#rows + 1] = { value = "hide", label = L["Hide this row"], onClick = function() hideRow(row) end }
     return rows
 end
 

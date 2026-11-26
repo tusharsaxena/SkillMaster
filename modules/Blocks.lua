@@ -662,7 +662,12 @@ function B.PaintRestore(mark, id)
         or L["%d hidden rows. Click to show them again."]:format(n)
 end
 
-local function onHeaderClick(self) B:ToggleCollapsed(self.id) end
+-- A header's own fold (`onFold`, the LDB tooltip's: SMW-07, its section folds there alone) or the block's
+-- collapse in its window.
+local function onHeaderClick(self)
+    if self.onFold then return self.onFold(self) end
+    B:ToggleCollapsed(self.id)
+end
 
 local function onDetachClick(self)
     local h = self:GetParent()

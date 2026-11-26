@@ -197,6 +197,8 @@ modules\Broker.lua
 # Conventional: the feeds' tooltip content and the Classic lines (SMW-05, split out of modules\Broker.lua);
 # reads NS.Broker and NS.Pool at FILE SCOPE (both load earlier).
 modules\BrokerTooltip.lua
+# SMW-07: the LDB tooltip's own folds (tooltips.ldb.folds); reads NS.Broker at FILE SCOPE.
+modules\BrokerFolds.lua
 # R6-10: the LDB tooltip in the main window's style; reads NS.Broker, NS.Blocks, NS.Rows and NS.Journal at CALL time.
 modules\BrokerPanel.lua
 # T5.2: test mode's data swap; builds its models through SkillData, StatData and Bonuses at CALL time.

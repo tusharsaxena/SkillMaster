@@ -199,8 +199,8 @@ test("broker: the Professions and Skills feeds' tooltips have their own two sect
     assertTrue(text:find("+5", 1, true) ~= nil, "Guns shows its +5 bonus")
     assertTrue(B.BarsDrawn() >= 3, "a mini bar per learned row of the Skills feed, drew " .. B.BarsDrawn())
     local keys = {}
-    for _, r in ipairs(rows) do keys[r.key] = r end
-    assertTrue(keys.bows and keys.skinning and keys.swords, "clickable rows carry their keys")
+    for _, r in ipairs(rows) do if r.key then keys[r.key] = r end end
+    assertTrue(keys.bows and keys.skinning and keys.swords, "the hovered rows carry their keys")
     M.__fireTimers()
 end)
 
@@ -285,16 +285,14 @@ test("broker: clicks follow design §6.5 and never touch a secure frame", functi
     reset()
     local W = NS.MainWindow
     local calls = {}
-    local saved = { W.Toggle, W.ShowAndScrollTo, M.ToggleCharacter }
+    local saved = { W.Toggle, M.ToggleCharacter }
     W.Toggle = function() calls[#calls + 1] = "toggle" end
-    W.ShowAndScrollTo = function(key) calls[#calls + 1] = (type(key) == "string" and "scroll:" .. key or "BAD") end
     M.ToggleCharacter = function(tab) calls[#calls + 1] = "char:" .. tab end
     M.__ldbObjects["Skill Master"].OnClick(nil, "LeftButton")
-    B.OpenRow({ kind = "skill", key = "cooking" })
-    B.OpenRow({ kind = "skill", key = "bows" })
-    B.OpenRow({ kind = "stat", key = "speed" })
-    W.Toggle, W.ShowAndScrollTo, M.ToggleCharacter = saved[1], saved[2], saved[3]
-    assertEqual(table.concat(calls, ","), "toggle,scroll:cooking,char:SkillsFrame,char:PaperDollFrame")
+    W.Toggle, M.ToggleCharacter = saved[1], saved[2]
+    assertEqual(table.concat(calls, ","), "toggle", "the cell toggles its window")
+    -- SMW-07: a tooltip row opens nothing (only a section's chevron acts), so the row opener is gone.
+    assertTrue(B.OpenRow == nil and B.RowMenu == nil, "no row click path from the tooltip")
     -- SMW-05: each other feed's cell toggles its own window.
     NS.Windows.HideAll()
     M.__ldbObjects["Skill Master Reputations"].OnClick(nil, "LeftButton")
@@ -304,25 +302,13 @@ test("broker: clicks follow design §6.5 and never touch a secure frame", functi
     assertFalse(NS.Windows.Get("reputations").IsShown(), "a second click hides it")
 end)
 
-test("broker: a crafting row without ShowAndScrollTo still opens the main window", function()
-    reset()
-    local W = NS.MainWindow
-    local saved, shown = W.ShowAndScrollTo, 0
-    local realShow = W.Show
-    W.ShowAndScrollTo = nil
-    W.Show = function() shown = shown + 1 end
-    B.OpenRow({ kind = "skill", key = "cooking" })
-    W.Show, W.ShowAndScrollTo = realShow, saved
-    assertEqual(shown, 1)
-end)
-
 test("broker: a hovered tooltip row wears the window's hover wash, under its text, until the pointer leaves", function()
     withTooltip(function()
         reset()
         local tip = dressed(B.Tip(), B.TIP_NAME)
         B.OnEnter(M.UIParent)
         local hits = B.Hits()
-        assertTrue(#hits > 0, "the rows are clickable")
+        assertTrue(#hits > 0, "the rows take the pointer for their hover")
         assertTrue(B.HoverWash(tip) == nil or not B.HoverWash(tip):IsShown(), "nothing washed before a hover")
         local hit = hits[1]
         hit:__fire("OnEnter")

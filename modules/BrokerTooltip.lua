@@ -2,13 +2,18 @@ local _, NS = ...
 -- modules/BrokerTooltip.lua — the broker feeds' tooltip content (split out of modules/Broker.lua, item
 -- SMW-05 of docs/superpowers/plans/2026-11-26-skillmaster-windows.md, which keeps the feeds, their text,
 -- their clicks and the showing machinery): the Classic style's lines (tooltips.ldb.style = "classic") with
--- Widgets Bar mini bars, the rows' heights, the header bands and stripes, the clickable rows' hit buttons
+-- Widgets Bar mini bars, the rows' heights, the header bands and stripes, the rows' hover areas, the chevrons
 -- and hover wash, and the content both styles share: each feed's sections (its family's blocks, read
 -- through NS.Blocks.Entries with the tooltip's own Hide sets), its heading, its footer and test mode's line.
 --
+-- ONLY THE FOLD TAKES A CLICK (the owner's ask, SMW-07). A section's header carries a chevron; its click
+-- folds or unfolds that section in the tooltip alone (B.ToggleTipFold, modules/BrokerFolds.lua) and the
+-- lines are drawn again in place. A row's line takes the pointer for its hover wash only: no open, link or
+-- menu.
+--
 -- B.FillTooltip(tip, which) / B.ReleaseLines() / B.AddHit(tip, row) / B.TooltipEntries(id, skills, stats) /
--- B.ShownBlocks() / B.Heading() / B.FooterText(openFrom) / B.OpenFrom() / B.AddTestModeLine(tip) /
--- B.Models() / B.Bars() / B.Bands(tip) / B.Hits() / B.HoverWash(tip) / B.ValueInset(tip) / B.BarsDrawn()
+-- B.ShownBlocks() / B.Heading() / B.FooterText() / B.AddTestModeLine(tip) / B.Models() / B.Bars() /
+-- B.Bands(tip) / B.Hits() / B.Chevrons() / B.HoverWash(tip) / B.ValueInset(tip) / B.BarsDrawn()
 
 local B = NS.Broker
 local L = NS.L
@@ -152,10 +157,10 @@ local function stripe(tip, n, i)
 end
 
 -- ---------------------------------------------------------------------------------------------
--- Row hit areas: plain buttons over the tooltip's lines, so a row can be clicked (never secure)
+-- Row hover areas over the tooltip's lines (the wash, never a click), and the sections' fold chevrons
 -- ---------------------------------------------------------------------------------------------
 
-local hitPool = NS.Pool.New()
+local hitPool, chevronPool = NS.Pool.New(), NS.Pool.New()
 
 -- The hovered row's wash (the window's `list.hover`, NS.Rows onEnter): one texture per tooltip, on
 -- the tooltip in the stripes' BORDER layer one sublevel up, so it covers a stripe and never the
@@ -187,22 +192,47 @@ local function hideHovers()
     for _, t in pairs(hovers) do t:Hide() end
 end
 
+-- A plain frame, not a button: it takes the pointer for the hover and no click (SMW-07).
 local function newHit()
-    local hit = CreateFrame("Button", nil, UIParent)
-    hit:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-    hit:SetScript("OnClick", function(self, button) B.OpenRow(self.row, button, self) end)
+    local hit = CreateFrame("Frame", nil, UIParent)
+    hit:EnableMouse(true)
     hit:SetScript("OnEnter", showHover)
     hit:SetScript("OnLeave", hideHovers)
     return hit
 end
 
---- The tooltip's clickable rows now (the suites read them).
-function B.Hits() return hitPool.active or {} end
+-- A section header's chevron: the one thing in the tooltip a click acts on.
+local function newChevron()
+    local b = CreateFrame("Button", nil, UIParent)
+    b:RegisterForClicks("LeftButtonUp")
+    b:SetScript("OnClick", function(self) B.ToggleTipFold(self.row.fold) end)
+    return b
+end
 
---- A plain hit button over row `row`'s line of `tip` (B.OnEnter lays one per Classic row).
+--- The tooltip's row hover areas now (the suites read them).
+function B.Hits() return hitPool.active or {} end
+--- The tooltip's section chevrons now (the suites read them).
+function B.Chevrons() return chevronPool.active or {} end
+
+B.CHEVRON_W = 16   -- the chevron's hit width at a header line's left end
+
+local function addChevron(tip, row, line)
+    local b = NS.Pool.Acquire(chevronPool, newChevron)
+    b.row = row
+    b:SetParent(tip)
+    b:SetFrameLevel(tip:GetFrameLevel() + LAYERS.LEVEL.CHROME)
+    b:ClearAllPoints()
+    b:SetPoint("LEFT", line, "LEFT", -2, 0)
+    b:SetSize(B.CHEVRON_W, (line.GetHeight and line:GetHeight() or 12) + 2)
+    b:Show()
+end
+
+--- Over `tip`'s line of `row`: a section header's fold chevron (`row.fold`, its block id) or a row's hover
+--- area (B.OnEnter lays one per Classic row and header).
 function B.AddHit(tip, row)
     local line = lineRegion(tip, row.line)
     if not line then return end
+    if row.fold then return addChevron(tip, row, line) end
     local hit = NS.Pool.Acquire(hitPool, newHit)
     hit.row = row
     hit:SetParent(tip)
@@ -215,7 +245,8 @@ function B.AddHit(tip, row)
 end
 
 --- Let go of everything the Classic lines drew: the sized rows, the fonts, the bands, the hover wash, the
---- mini bars and the hit areas (modules/Broker.lua's showing machinery calls it as the tooltip goes).
+--- mini bars, the hover areas and the chevrons (modules/Broker.lua's showing machinery calls it as the
+--- tooltip goes, and before each redraw).
 function B.ReleaseLines()
     unsizeRows()
     -- Tooltips > Font size undone on whichever tooltip carried it (a no-op on one never sized).
@@ -226,6 +257,7 @@ function B.ReleaseLines()
     hideHovers()
     NS.Widgets.ReleaseBars(barPool)
     NS.Pool.ReleaseAll(hitPool)
+    NS.Pool.ReleaseAll(chevronPool)
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -278,15 +310,25 @@ local function addSkillRow(tip, e, i)
     return { line = n, kind = "skill", key = e.key }
 end
 
+--- The chevron drawn at a folding header's left: the icon as a texture escape, else its glyph.
+local function chevronMark(folded)
+    local icon = NS.Icon(folded and "chevron-right" or "chevron-down")
+    if icon then return ("|T%s:0|t "):format(icon) end
+    return folded and "> " or "v "
+end
+
 --- A section's header: the window's block title in the header text color on the header band, a
---- little taller than a row. No chevron: the tooltip's sections do not collapse.
-local function addTitle(tip, title)
-    tip:AddLine(B.Colored("list.header.text", title))
+--- little taller than a row. A block's header (`foldId`) leads with its chevron (SMW-07: the Classic
+--- style's sections fold too) and answers its chevron's row ({ line, fold }); the Pinned header folds nothing.
+local function addTitle(tip, title, foldId)
+    local mark = foldId and chevronMark(B.TipFolded(foldId)) or ""
+    tip:AddLine(mark .. B.Colored("list.header.text", title))
     local n = tip:NumLines()
     local h = NS.BarStyle.TooltipRowHeight("mini") + B.HEADER_PAD
     sizeRow(tip, n, h)
     local c = NS.SkinColor("sm.headerBg")
     if c then band(tip, n, h, c[1], c[2], c[3], c[4]) end
+    return foldId and { line = n, fold = foldId } or nil
 end
 
 --- The tooltip's own Hide sets as NS.Blocks.Entries asks ("skills" | "stats", key).
@@ -316,7 +358,8 @@ local function addSkillSection(tip, rows, section, m)
     local entries, removed = B.TooltipEntries(section, m, nil)
     local note = NS.Blocks.FilterNote(entries, removed)
     if #entries == 0 and not note then return end
-    addTitle(tip, sectionTitle(section))
+    rows[#rows + 1] = addTitle(tip, sectionTitle(section), section)
+    if B.TipFolded(section) then return end
     for i, r in ipairs(entries) do rows[#rows + 1] = addSkillRow(tip, r.entry, i) end
     if note then tip:AddLine(B.Colored("gtip.muted", note)) end
 end
@@ -339,7 +382,8 @@ local function addStatSection(tip, rows, id, sm)
     local entries, removed = B.TooltipEntries(id, nil, sm)
     local note = NS.Blocks.FilterNote(entries, removed)
     if #entries == 0 and not note then return end
-    addTitle(tip, sectionTitle(id))
+    rows[#rows + 1] = addTitle(tip, sectionTitle(id), id)
+    if B.TipFolded(id) then return end
     for i, r in ipairs(entries) do rows[#rows + 1] = addStatRow(tip, r.entry, i) end
     if note then tip:AddLine(B.Colored("gtip.muted", note)) end
 end
@@ -397,21 +441,9 @@ function B.AddTestModeLine(tip)
     return true
 end
 
---- Where a Main window style row opens from (Tooltips > Open a row from, round 7, R7-6): "row"
---- (Full row, the default since round 8, R8-1: anywhere on it does what its go icon does) or "icon"
---- (Go icon only). The Classic style has no go icon: always "row" (its own row click, B.OpenRow).
-function B.OpenFrom()
-    if B.Style() ~= "window" then return "row" end
-    return B.TipSettings().openFrom == "icon" and "icon" or "row"
-end
-
---- The tooltip's footer: what the label and the rows do on a click, the rows' as `openFrom` ("icon" |
---- "row"; B.OpenFrom() when nil) says. The Classic lines (B.FillTooltip) always pass "row".
-function B.FooterText(openFrom)
-    if (openFrom or B.OpenFrom()) == "icon" then
-        return L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click the go icon to open, shift-click to link, right-click for the menu"]
-    end
-    return L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, shift-click to link, right-click for the menu"]
+--- The tooltip's footer: what the feed's label does on a click, and the one click the tooltip takes.
+function B.FooterText()
+    return L["Click label: toggle window \194\183 Right-click label: options \194\183 Click a chevron to fold"]
 end
 
 --- The blocks the Main window style draws for the feed showing now, in the window's block order
@@ -436,8 +468,9 @@ function B.Heading()
     return f.title, gained
 end
 
---- Fill `tip` (the feed's tooltip, or a stand-in) with the shown sections. Answers the clickable
---- rows, each { line, kind = "skill" | "stat", key }. `which` picks the feed (a family id, the Professions
+--- Fill `tip` (the feed's tooltip, or a stand-in) with the shown sections. Answers the lines that take
+--- the pointer: each row { line, kind = "skill" | "stat", key } (its hover) and each section header's
+--- chevron { line, fold = block id }. `which` picks the feed (a family id, the Professions
 --- feed by default); it stays the feed showing now.
 function B.FillTooltip(tip, which)
     if which then B.SetFeed(which) end
@@ -454,7 +487,7 @@ function B.FillTooltip(tip, which)
     end
     fillSections(tip, rows)
     fitBars(tip)
-    tip:AddLine(B.Colored("gtip.footer", B.FooterText("row")))   -- Classic rows open from the whole row
+    tip:AddLine(B.Colored("gtip.footer", B.FooterText()))
     return rows
 end
 

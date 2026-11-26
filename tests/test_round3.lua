@@ -189,20 +189,19 @@ test("round3 broker: a second Pin on the pinned skill unpins it, and the feed re
     B.Refresh()
 end)
 
-test("round3 broker: a right-click on a tooltip row opens the row menu, whose Hide leaves it out of the tooltip only", function()
+-- Re-pinned by SMW-07 (the owner's ask: in the LDB tooltip only a section's fold chevron acts): a tooltip row
+-- opens no menu, so the menu's tooltip-only Hide went; the Rows page's LDB tooltip column still hides there.
+test("round3 broker: a tooltip row opens no menu; the tooltip's own Hide set still leaves it out of the tooltip only", function()
     withWorld(function()
         local savedMenu, opened = I.Menu, nil
         I.Menu = function(row) opened = row return row end
         local ok, err = pcall(function()
-            B.OpenRow({ kind = "skill", key = "cooking" }, "RightButton", M.UIParent)
-            assertTrue(opened ~= nil and opened.entry.key == "cooking", "the menu for the row's entry")
-            assertEqual(opened.surface, "broker")
-            local hide
-            for _, r in ipairs(I.MenuRows(opened)) do if r.value == "hide" then hide = r end end
-            assertEqual(hide.label, "Hide in this tooltip")
-            hide.onClick()
+            assertTrue(B.OpenRow == nil and B.RowMenu == nil, "no row menu from the tooltip")
+            assertTrue(I.HideInTooltip == nil, "the menu's tooltip-only Hide went with it")
+            assertTrue(NS.SetByPath("broker.tooltip.hiddenSkills.cooking", true), "the Rows page's LDB eye")
             assertTrue(B.HiddenInTooltip("skill", "cooking"), "left out of the tooltip")
             assertFalse(NS.db.profile.skills.hidden.cooking == true, "still in the window")
+            assertTrue(opened == nil, "no menu opened")
         end)
         I.Menu = savedMenu
         NS.db.profile.broker.tooltip.hiddenSkills.cooking = nil

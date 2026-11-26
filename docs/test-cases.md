@@ -416,7 +416,7 @@ Total.
 - round3 alerts: skip untrained by default; equipped only; every weapon; a muted weapon never
 - round3 window: collapsing every block keeps the window's height; Shrink to fit lets it shrink
 - round3 broker: a second Pin on the pinned skill unpins it, and the feed reads Professions
-- round3 broker: a right-click on a tooltip row opens the row menu, whose Hide leaves it out of the tooltip only
+- round3 broker: a tooltip row opens no menu; the tooltip's own Hide set still leaves it out of the tooltip only
 - round3 broker: the bars stop at the widest value, never past the old fixed column
 - round3 click: a weapon row opens the Skills tab with its line selected
 - round3 click: Compat.OpenTradeSkill answers false without the call, and the call's own answer with it
@@ -530,7 +530,7 @@ Total.
 - round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once
 - round9 rows: one tab per block in the default block order, each drawing only its block
 
-### test_round6.lua (54)
+### test_round6.lua (53)
 
 - round6 toast: the gap and skill-up toasts wear the cap toast's skin shell, no tint or edge of their own
 - round6 toast: the value stays red or green and carries its delta in brackets
@@ -556,17 +556,16 @@ Total.
 - round6 trainer ranks: past the max height the cards scroll under a skin scroll bar, the wheel and the bar drive it
 - round6 ldb look: a new profile draws the Main window style on its own TOOLTIP frame, the window's size
 - round6 ldb look: the window's headers and rows, the bar with its text inside and the mark at its right
-- round6 ldb look: a block collapsed in the window is a collapsed header here, and nothing on a header acts
-- round6 ldb look: a row's left click opens and its right click opens the row menu
+- round6 ldb look: a block collapsed in the window stays open here; only the header's chevron takes the pointer
+- round6 ldb look: a row's left and right clicks open nothing
 - round6 ldb look: the window's weapon filter and sort reach both styles
 - round6 ldb look: past its Height the body scrolls, by the wheel and by the skin's scroll bar
-- round6 ldb look: the row menu draws above the tooltip in both styles, and goes back as it hides
 - round6 ldb look: the classic-only rows are dimmed in the Main window style, width and height in Classic
 - round6 ldb look: schemaVersion 8 keeps every stored profile on Classic; a fresh install starts on it new
 - round6 stats feed: its own data source, its tooltip the four stat blocks, its clicks its window's
 - round6 stats feed: a stat row's menu pins its stat to the feed per character; with none it reads Character Stats
 - round6 stats feed: schemaVersion 9 drops a stored Stats section switch, the stat blocks' switches answer
-- round6 review: the Main window style's test strip opens its menu above the tooltip, and it ends test mode
+- round6 review: the Main window style's test strip shows in test mode and takes no click
 - round6 review: the Set waypoint button keeps the skin's hover look beside its own tooltip
 - round6 review: schemaVersion 8 keeps an empty stored profile on Classic too; only a fresh install starts new
 - round6 review: schemaVersion 10 keeps Spell and Defense collapsed on a profile from before R6-8
@@ -587,7 +586,7 @@ Total.
 - round6 arrow review: a profile switch re-applies the shown arrow's scale and position
 - round6 arrow review: right-clicking test mode's sample over a real waypoint brings the real arrow back
 
-### test_round7.lua (34)
+### test_round7.lua (32)
 
 - round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Skill Master's arrow always
 - round7 no TomTom: the arrow off super-tracks the pin (the client's arrow)
@@ -614,17 +613,15 @@ Total.
 - round7 filters: every window header carries the funnel, the filled badge while it narrows, and its menu
 - round7 filters: a detached stat frame and a merged section carry the mark and follow the filter
 - round7 filters: both LDB tooltip styles honor every block's filter
-- round7 go icon: Open a row from, Main window style only (Full row by default since round 8)
-- round7 go icon: the row's left click opens nothing; shift-click and right-click stay on the row
-- round7 go icon: the whole row mode (round 8: Full row) arms the cast over the row, the icon live
-- round7 go icon: a hovered crafting row's icon gets the window's secure cast; the panel's hide disarms it
-- round7 go icon: in combat a hover arms nothing and the icon's click says why, as the window's
-- round7 go icon: a tooltip row's shift-click links it into chat
+- round7 go icon: Open a row from is gone from the LDB tooltip; schemaVersion 16 drops a stored one
+- round7 go icon: a tooltip row's left, shift and right clicks do nothing, on the row and on its go icon
+- round7 go icon: a hovered crafting row arms no secure cast, and its go icon takes no mouse
+- round7 go icon: a tooltip row keeps its hover: the window's wash and its row tooltip, with no click hint
 - FB-SM-05 test mode: the arrow off still shows a labeled sample
 - FB-SM-05 test mode: with TomTom loaded the sample is Skill Master's, labeled, and TomTom is never written
 - FB-SM-05 test mode: turning the arrow off while it runs keeps the sample
 
-### test_round8.lua (23)
+### test_round8.lua (22)
 
 - round8 header marks: a detached band's marks rest in the main window header's color
 - round8 header marks: a merged window's band and section sub-headers match the main window header
@@ -632,7 +629,7 @@ Total.
 - round8 ldb tooltip: the main window's headers keep their sort and filter marks
 - round8 filter badge: the window header's funnel on a solid square while it narrows, hover readable
 - round8 filter badge: a detached band and a merged sub-header wear the same badge
-- round8 open a row from: Layout > Window's Open a row from, Full row by default; the LDB tooltip's too
+- round8 open a row from: Layout > Window's Open a row from, Full row by default (the LDB tooltip's went, SMW-07)
 - round8 open a row from: Full row lays the crafting cast over the whole row, Go icon only over the icon
 - round8 open a row from: a Full row click opens what the go icon opens; Go icon only, the row opens nothing
 - round8 open a row from: shift-click links and right-click opens the menu in both modes, on the row and its overlay
@@ -640,8 +637,7 @@ Total.
 - round8 open a row from: in combat a Full row arms nothing and its click says why; armed again after
 - round8 open a row from: detached and merged windows follow the main window's setting
 - round8 open a row from: the row tooltip's click hint says the mode
-- round8 open a row from: the LDB tooltip's Full row arms the cast over the whole row and opens from anywhere
-- round8 open a row from: the LDB tooltip's Go icon only keeps the cast on the icon and the row inert
+- round8 open a row from: a tooltip row opens nothing and arms no cast, in either window mode
 - round8 arrow: the profile's arrow defaults are the library's, Raised and the skin's colors
 - round8 arrow: the Waypoint arrow subgroup is the library's settings block at Skill Master's paths
 - round8 arrow: each of the five looks reaches the shown arrow through its setting
@@ -817,7 +813,7 @@ Total.
 - test_template_tokens: no pin falls back to the last skill-up, then to the lowest profession
 - test_template_unknown_token_empty: unknown tokens and missing data render empty
 
-### test_broker.lua (17)
+### test_broker.lua (16)
 
 - broker: one data source per family (SMW-05), "Skill Master" and "Skill Master Stats" kept, separate from the launcher object
 - broker: the feed renders its template
@@ -828,7 +824,6 @@ Total.
 - broker: a tooltip Hide leaves the main window alone, and the window's Hide leaves the tooltip
 - broker: a tooltip Hide row per catalog skill and per stat, on the Rows page (R5-13), apart from the window's
 - broker: clicks follow design §6.5 and never touch a secure frame
-- broker: a crafting row without ShowAndScrollTo still opens the main window
 - broker: a hovered tooltip row wears the window's hover wash, under its text, until the pointer leaves
 - broker: stood down, the feed reads Off and its tooltip says so; standing up re-renders
 - broker: the tooltip wears the skin by default, on its own frame, never on GameTooltip
@@ -862,6 +857,15 @@ Total.
 - pins: the Main window style tooltip lists them first too, a Pinned header over their rows
 - pins: the Broker page's Pins tab lists each broker's pins, moves and unpins them
 - pins: in test mode the feeds draw the sample's pins, and this character's store stays
+
+### test_ldb_tooltip.lua (6)
+
+- ldb tooltip: a section's chevron folds it in the tooltip alone, and the tooltip redraws in place
+- ldb tooltip: a fold's redraw keeps the body's scroll offset, clamped to the new overflow
+- ldb tooltip: Classic sections carry chevrons that fold them, and its rows take no click
+- ldb tooltip: the Classic header line shows the chevron's state
+- ldb tooltip: a tree header's tooltip fold is the tooltip's own, never the window's
+- ldb tooltip: a redraw with no tooltip up does nothing
 
 ### test_polish.lua (12)
 
@@ -992,8 +996,8 @@ Total.
 
 ### test_seams.lua (5)
 
-- test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
-- test_seam_broker_unlearned_row_opens_trainer_popup: the popup gets the skill key, not a table
+- test_seam_crafting_row_scrolls_window: ShowAndScrollTo expands, shows and scrolls to a crafting row
+- test_seam_unlearned_row_opens_trainer_popup: the popup gets the skill key, not a table
 - test_seam_alert_click_sets_waypoint: a cap toast's click goes through the real NS.Waypoints
 - test_seam_mini_bars_are_the_bar_widget: the broker tooltip draws the Widgets Bar's mini style (the Journal's: test_journal)
 - test_seam_title_bar_journal_button: the main window's journal mark toggles the Journal
@@ -1255,9 +1259,9 @@ Total.
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
-| test_round6.lua | 54 |
-| test_round7.lua | 34 |
-| test_round8.lua | 23 |
+| test_round6.lua | 53 |
+| test_round7.lua | 32 |
+| test_round8.lua | 22 |
 | test_round9.lua | 14 |
 | test_sr1.lua | 10 |
 | test_blocks.lua | 10 |
@@ -1270,9 +1274,10 @@ Total.
 | test_journal.lua | 22 |
 | test_alerts.lua | 14 |
 | test_template.lua | 3 |
-| test_broker.lua | 17 |
+| test_broker.lua | 16 |
 | test_feeds.lua | 12 |
 | test_pins.lua | 8 |
+| test_ldb_tooltip.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
 | test_sample_names.lua | 2 |
@@ -1303,4 +1308,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **953** |
+| **Total** | **954** |

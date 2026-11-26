@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 15
+NS.SCHEMA_VERSION = 16
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -214,6 +214,15 @@ local function feedTemplatesSplit(_, profile)
     end
 end
 
+--- 15 -> 16 (SMW-07, the owner's ask: in the LDB tooltip only a section's fold chevron acts): a tooltip
+--- row opens nothing any more, so Tooltips > Open a row from is retired and a stored
+--- `tooltips.ldb.openFrom` names nothing: it goes, whatever it holds.
+local function tipOpenFromRetired(_, profile)
+    local t = type(profile) == "table" and rawget(profile, "tooltips")
+    local ldb = type(t) == "table" and rawget(t, "ldb")
+    if type(ldb) == "table" then ldb.openFrom = nil end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
 -- is the stamp the run started at (0 on a fresh install).
@@ -233,6 +242,7 @@ local STEPS = {
     { to = 13, run = foreverDBRetired, perProfile = true },
     { to = 14, run = windowsSplit, perProfile = true },
     { to = 15, run = feedTemplatesSplit, perProfile = true },
+    { to = 16, run = tipOpenFromRetired, perProfile = true },
 }
 
 function NS:InitDB()

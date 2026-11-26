@@ -4,8 +4,8 @@ local _, NS = ...
 --
 -- Two kinds, each laid over the hovered row's ACTION MARK alone in Open a row from's Go icon only
 -- (owner feedback round 4: the mark is the action), or over the WHOLE ROW in its Full row, the
--- default (round 8, R8-1; SO.CoverFor), on the main window's, the detached frames', the merged
--- windows' and (round 7, R7-6) the LDB panel's rows (its own Open a row from):
+-- default (round 8, R8-1; SO.CoverFor), on the main window's, the detached frames' and the merged
+-- windows' rows (never the LDB tooltip's, which open nothing since SMW-07):
 --   * "spell": one SecureActionButtonTemplate per profession that opens a window by a cast (catalog
 --     `openSpell`: the crafts, Cooking, First Aid, Smelting for Mining), `type1 = "spell"`, `spell =`
 --     the localized spell name.
@@ -289,11 +289,7 @@ local function wanted()
         local f = G.Frame(gid)
         if not moving[f] then scan(G.Rows(gid), f, nil) end
     end
-    -- The LDB tooltip's Main window style (round 7, R7-6; either Open a row from since round 8): its
-    -- rows, clipped to its scrolled body, while it shows.
-    local P = NS.BrokerPanel
-    local pf = P and P.Armed and P.Armed() and P.Frame()
-    if pf then scan(P.Rows(), pf, pf.list) end
+    -- The LDB tooltip's rows are never scanned: nothing opens from them (SMW-07, the owner's ask).
     return out
 end
 

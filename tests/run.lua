@@ -276,6 +276,7 @@ Kit.run{
         "test_broker",
         "test_feeds",
         "test_pins",
+        "test_ldb_tooltip",
         "test_polish",
         "test_preview",
         "test_sample_names",

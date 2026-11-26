@@ -67,5 +67,11 @@ L["Each broker shows its own pins, up to %d, in this order: {pinned} joins them,
 L["Nothing pinned."] = true
 L["Each broker's pins: their order, and unpin."] = true
 
+-- The LDB tooltip: only the fold acts (modules/BrokerTooltip.lua, modules/BrokerPanel.lua, settings/Tooltips.lua, SMW-07).
+L["Click label: toggle window \194\183 Right-click label: options \194\183 Click a chevron to fold"] = true
+L["Fold this section in the tooltip"] = true
+L["Unfold this section in the tooltip"] = true
+L["Main window draws the LDB tooltip as the main window: its block headers, rows, bars and fonts, the window's sort and filter, at the Width and Height below. Classic is the tooltip lines with mini bars. In both, a section's chevron folds it in the tooltip alone."] = true
+
 -- `true` only documents the key: replace each with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

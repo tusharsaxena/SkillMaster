@@ -199,10 +199,12 @@ NS.defaults = {
             -- window's default size to start), or "classic", the tooltip lines with mini bars (barWidth,
             -- 128 keeps its old 380 px, and fontSize, read by that style only). A new profile starts on
             -- "window"; schemaVersion 8 kept every profile that existed before on "classic".
-            -- openFrom (round 7, R7-6): "row" (Full row), a Main window style row opens from anywhere
-            -- on it, doing what its go icon does, or "icon" (Go icon only), from its go icon alone.
-            -- "row" since round 8 (R8-1; unreleased, no migration).
-            ldb = { style = "window", width = 420, height = 560, barWidth = 128, fontSize = 12, openFrom = "row" },
+            -- SMW-07: only a section's fold chevron acts in the LDB tooltip, so Open a row from
+            -- (openFrom, round 7) is retired (schemaVersion 16). folds: the tooltip's own folds, named
+            -- non-setting state (modules/BrokerFolds.lua, its one writer): blocks[id] = true folded,
+            -- nodes[family] a tree family's header folds.
+            ldb = { style = "window", width = 420, height = 560, barWidth = 128, fontSize = 12,
+                    folds = { blocks = {}, nodes = {} } },
         },
         -- T5.1 the Trainers and Waypoints page (modules/Waypoints.lua, modules/TrainerPopup.lua).
         waypoints = {

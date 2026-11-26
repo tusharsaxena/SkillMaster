@@ -42,9 +42,9 @@ local function withWorld(fn)
     if not ok then error(err, 0) end
 end
 
-test("test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it", function()
-    -- red under: the broker calling PW:ShowAndScrollTo (the key lands as the window table), or a
-    -- collapsed block left shut, or the window shown unscrolled.
+-- SMW-07: the LDB tooltip's rows open nothing any more; the window's own ShowAndScrollTo keeps its seam.
+test("test_seam_crafting_row_scrolls_window: ShowAndScrollTo expands, shows and scrolls to a crafting row", function()
+    -- red under: a collapsed block left shut, or the window shown unscrolled.
     local PW = NS.Windows.Get("professions")   -- SMW-04: the window that docks the crafting rows
     withWorld(function(_, blocks)
         blocks.primary.order, blocks.primary.collapsed = 99, true   -- last in the window, and shut
@@ -60,7 +60,7 @@ test("test_seam_broker_crafting_row_scrolls_window: a broker crafting row expand
             PW.Show = realShow
             return r
         end
-        Br.OpenRow({ kind = "skill", key = "leatherworking" })
+        PW.ShowAndScrollTo("leatherworking")
         PW.Show = realShow
         assertTrue(PW.IsShown(), "the main window opened")
         assertEqual(blocks.primary.collapsed, false, "the collapsed block holding the row is expanded")
@@ -75,9 +75,9 @@ test("test_seam_broker_crafting_row_scrolls_window: a broker crafting row expand
     end)
 end)
 
-test("test_seam_broker_unlearned_row_opens_trainer_popup: the popup gets the skill key, not a table", function()
+test("test_seam_unlearned_row_opens_trainer_popup: the popup gets the skill key, not a table", function()
     withWorld(function()
-        Br.OpenRow({ kind = "skill", key = "swords" })
+        NS.Interact.Open({ kind = "skill", entry = NS.Preview.Skill("swords") or { key = "swords", learned = false } })
         assertTrue(NS.TrainerPopup.IsShown(), "the trainer popup opened")
         local title = NS.TrainerPopup.Frame().title:GetText()
         assertTrue(title:find("Swords", 1, true) ~= nil, title)

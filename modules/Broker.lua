@@ -18,24 +18,22 @@ local addonName, NS = ...
 -- it is the shared GameTooltip exactly as before. The shared GameTooltip is never painted.
 --
 -- These are NOT the launcher: core/LauncherSetup.lua's one "launcher" object stays the only click
--- and menu implementation for the addon (launcher-§1). Nothing here is secure: a feed row's click
--- never casts, it opens a window (design §6.5, Feed row). In the Main window style a row opens as a
--- window row does, through the window's secure overlay: from anywhere on it with Tooltips >
--- Open a row from on Full row (round 8, R8-1, the default), from its go icon alone on Go icon only
--- (round 7, R7-6) (modules/BrokerPanel.lua, modules/SecureOverlay.lua). A feed cell's left click
--- toggles its family's window, its right click opens the Broker settings page.
+-- and menu implementation for the addon (launcher-§1). Nothing here is secure. A feed cell's left click
+-- toggles its family's window, its right click opens the Broker settings page. In the tooltip itself only
+-- a section's fold chevron takes a click (the owner's ask, SMW-07): it folds that section in the tooltip
+-- alone (tooltips.ldb.folds, modules/BrokerFolds.lua) and the tooltip redraws in place (B.RedrawTooltip);
+-- a row opens, links and menus nothing there, and keeps its hover.
 --
 -- Consumes SKILLS_UPDATED, SKILL_UP, STATS_UPDATED and BONUSES_UPDATED on its own bus target. The
 -- one client read is the main-hand weapon class for {equippedWeapon}, feature-detected.
 --
 -- B.source: nil for the models the bus handed over, or fn() -> { model, statsModel, statIndex,
--- gains = { total, byKey }, last, pins = { [family] = { key, ... } } } (test mode's sample character, modules/Preview.lua, T5.2). The
--- bus keeps feeding the live state underneath, so turning test mode off shows it again at once.
+-- gains = { total, byKey }, last, pins = { [family] = { key, ... } } } (test mode's sample character,
+-- modules/Preview.lua, T5.2). The bus keeps feeding the live state underneath, so turning test mode off shows it again at once.
 
 NS.Broker = {}
 local B = NS.Broker
 local L = NS.L
-local LAYERS = NS.Constants.LAYERS
 
 local MAIN_HAND = 16
 -- The Classic lines' name and value columns (modules/BrokerTooltip.lua): the bar's height is
@@ -401,110 +399,17 @@ end
 -- Clicks (design §6.5, Feed row): never secure
 -- ---------------------------------------------------------------------------------------------
 
-local function mainWindow()
-    local W = NS.MainWindow
-    return type(W) == "table" and W or nil
-end
-
 -- Feed `fid`'s own window (SMW-05): the Professions feed's is the window behind NS.MainWindow.
 local function toggleWindow(fid)
     if fid == B.DEFAULT_FEED or not NS.Windows then
-        local W = mainWindow()
+        local W = type(NS.MainWindow) == "table" and NS.MainWindow or nil
         if W and type(W.Toggle) == "function" then W.Toggle() end
         return
     end
     NS.Windows.Toggle(fid)
 end
 
---- A crafting row opens the window that docks it, scrolled to it (or just shown, before the blocks land).
-local function showInWindow(key)
-    local W = mainWindow()
-    if not W then return end
-    if type(W.ShowAndScrollTo) == "function" then return W.ShowAndScrollTo(key) end
-    if type(W.Show) == "function" then return W.Show() end
-end
-
-local function openCharacter(tab)
-    if type(ToggleCharacter) == "function" then ToggleCharacter(tab) end
-end
-
-local function openSkillRow(key)
-    local m = view().model
-    local e = m and m.byKey[key]
-    if e and not e.learned then
-        local popup = NS.TrainerPopup
-        if type(popup) == "table" and type(popup.Show) == "function" then return popup.Show(key) end
-        return showInWindow(key)
-    end
-    local cat = NS.SkillCatalog[key]
-    if cat and cat.openSpell then return showInWindow(key) end
-    local I = NS.Interact
-    if cat and cat.tradeSkill and I then return I.OpenTradeSkill(key) end
-    if I then return I.OpenSkills(key) end
-    return openCharacter("SkillsFrame")   -- Forever's Skills tab (round 4)
-end
-
 local current   -- the frame the feed's tooltip is on now (the showing machinery, below)
-
--- The row menu over the tooltip (owner feedback round 6, R6-10): the library's shared menu sits at
--- FULLSCREEN_DIALOG, under a tooltip's TOOLTIP strata, so the tooltip hid half of it. While it is
--- open from the tooltip it is lifted into the tooltip's strata above it; it goes back to its own
--- strata as it hides, for the next host that opens it.
-local menuHooked, menuOpen = {}, nil
-
-local function lowerMenu(m)
-    m:SetFrameStrata(LAYERS.STRATA.MENU)
-    if menuOpen == m then menuOpen = nil end
-end
-
-function B.RaiseMenu(m, tip)
-    if not (m and tip and m.SetFrameStrata) then return m end
-    m:SetFrameStrata(LAYERS.STRATA.TOOLTIP)
-    m:SetFrameLevel((tonumber(tip:GetFrameLevel()) or 0) + LAYERS.LEVEL.POPUP)
-    if not menuHooked[m] and m.HookScript then
-        menuHooked[m] = true
-        m:HookScript("OnHide", lowerMenu)
-    end
-    menuOpen = m
-    return m
-end
-
---- The row menu opened from the tooltip while it is still up (the tooltip stays while it is).
-function B.MenuOpen()
-    return menuOpen ~= nil and menuOpen:IsShown() == true
-end
-
---- The row menu for a tooltip row (owner feedback round 3): the window's own (NS.Interact.Menu,
---- pin, waypoint, trainers, hide) on the tooltip row's entry, drawn above the tooltip. Answers the
---- menu, or nil.
---- A tooltip row's entry in the models drawn now (the live one, or test mode's sample).
-local function entryOf(row)
-    local v = view()
-    if row.kind == "skill" then return v.model and v.model.byKey[row.key] end
-    if row.kind == "stat" then return v.statIndex and v.statIndex[row.key] end
-    return nil
-end
-
-function B.RowMenu(row, anchor)
-    local I, e = NS.Interact, entryOf(row)
-    if not (I and e) then return nil end
-    local m = I.Menu({ kind = row.kind, entry = e, frame = anchor, surface = "broker" })
-    return B.RaiseMenu(m, current)
-end
-
---- One tooltip row's click: left opens what the row opens, shift-left links it into chat (as a
---- window row does, round 7, R7-6), right the row menu.
-function B.OpenRow(row, button, anchor)
-    if type(row) ~= "table" then return end
-    if button == "RightButton" then return B.RowMenu(row, anchor) end
-    if type(IsShiftKeyDown) == "function" and IsShiftKeyDown() then
-        local e = entryOf(row)
-        if e and NS.Interact then NS.Interact.Link({ kind = row.kind, entry = e }) end
-        return
-    end
-    if row.kind == "stat" then return openCharacter("PaperDollFrame") end
-    if row.kind == "skill" then return openSkillRow(row.key) end
-end
 
 --- The feed options: the Broker settings page through the options library's page opener, else
 --- the main settings panel (the library absent: its stub prints why), else nothing.
@@ -581,7 +486,7 @@ end
 -- Showing and hiding the tooltip: it stays while the pointer is on the cell or the tooltip
 -- ---------------------------------------------------------------------------------------------
 
-local hooked, owner, poll = {}, nil, nil   -- `current`: declared above B.RowMenu
+local hooked, owner, poll = {}, nil, nil   -- `current`: declared above, with the clicks
 
 local function stopPoll()
     if poll then NS.addon:CancelTimer(poll) end
@@ -618,6 +523,18 @@ local function anchor(tip, frame)
     if top then tip:SetPoint("TOP", frame, "BOTTOM", 0, -2) else tip:SetPoint("BOTTOM", frame, "TOP", 0, 2) end
 end
 
+--- The Classic style's lines on `tip` for feed `which`, shown, skinned and sized; then the rows' hover
+--- areas and the sections' fold chevrons (modules/BrokerTooltip.lua B.AddHit).
+local function drawLines(tip, which)
+    local rows = B.FillTooltip(tip, which)
+    tip:Show()
+    if tip == ownTip then paintTip(tip) end
+    -- Tooltips > Font size, after the skin's fonts, then one more layout pass for both.
+    NS.Chrome.TooltipFontSize(tip, tipSettings().fontSize, 1)
+    tip:Show()   -- a shown tooltip lays itself out again for the new fonts
+    for _, row in ipairs(rows) do B.AddHit(tip, row) end
+end
+
 --- Take the feed's tooltip down, whichever frame it is on (the skin switch's write).
 function B.HideTooltip()
     stopPoll()
@@ -641,17 +558,26 @@ function B.OnEnter(frame, which)
         tip:Show()
         return
     end
-    local rows = B.FillTooltip(tip, which)
-    tip:Show()
-    if tip == ownTip then paintTip(tip) end
-    -- Tooltips > Font size, after the skin's fonts, then one more layout pass for both.
-    NS.Chrome.TooltipFontSize(tip, tipSettings().fontSize, 1)
-    tip:Show()   -- a shown tooltip lays itself out again for the new fonts
-    for _, row in ipairs(rows) do B.AddHit(tip, row) end
+    drawLines(tip, which)
+end
+
+--- Draw the tooltip showing now again where it stands (a fold chevron's click, SMW-07): the Main window
+--- style refills its body at the same scroll offset (clamped), the Classic style its lines. Answers whether
+--- a tooltip was up to redraw.
+function B.RedrawTooltip()
+    local tip = current
+    if not (tip and tip:IsShown()) then return false end
+    if panel() and tip == panel().Frame() then
+        panel().Fill(true)
+        return true
+    end
+    if tip.ClearLines then tip:ClearLines() end
+    drawLines(tip, feed)
+    return true
 end
 
 local function stillHovered(tip)
-    if tip:IsMouseOver() or B.MenuOpen() then return true end
+    if tip:IsMouseOver() then return true end
     return owner ~= nil and owner.IsMouseOver ~= nil and owner:IsMouseOver()
 end
 

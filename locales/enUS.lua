@@ -390,7 +390,6 @@ L["Your next rank"] = true
 L["Your next rank: %s (%d)"] = true
 L["Set waypoint"] = true
 L["Print to chat"] = true
-L["End test"] = true
 L["No map coordinates for this trainer yet; Print to chat gives directions."] = true
 L["Waypoint method is Chat only (Trainers and Waypoints page); Print to chat gives directions."] = true
 L["No TomTom and no map pin on this client; Print to chat gives directions."] = true
@@ -414,7 +413,6 @@ L["Utility"] = true
 
 -- ---- BEGIN M5 polish (the M3/M4 review leftovers) ----
 -- The broker tooltip's footer (modules/Broker.lua), as the mockup writes it.
-L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, shift-click to link, right-click for the menu"] = true
 -- The one-line gathering hint under a row (modules/Rows.lua, profile.skills.helperHint).
 L["Gathers %s \194\183 next: %s at %d"] = true
 L["Gathers %s"] = true
@@ -706,7 +704,6 @@ L["The simulator needs LibKa0s-Sim-1.0."] = true
 -- ---- END M5 integration ----
 
 -- Owner feedback round 3 (main thread): the broker title with nothing pinned
-L["Hide in this tooltip"] = true
 L["Default order"] = true
 L["Value, highest first"] = true
 L["Value, lowest first"] = true
@@ -822,7 +819,6 @@ L["Restore every Broker setting on this profile to its default. Hidden tooltip r
 -- ---- Round 6, R6-10: the LDB tooltip in the main window's style (settings/Tooltips.lua,
 -- modules/BrokerPanel.lua) ----
 L["Tooltip style"] = true
-L["Main window draws the LDB tooltip as the main window: its block headers, rows, bars and fonts, the window's collapse, sort and filter, at the Width and Height below. Classic is the tooltip lines with mini bars."] = true
 L["Main window"] = true
 L["Classic"] = true
 L["Width (px)"] = true
@@ -923,13 +919,11 @@ L["Which of the block's rows show, here, in its detached frame, in a merged wind
 L["Open a row from"] = true
 L["Full row"] = true
 L["Go icon only"] = true
-L["Main window style: what a left click on an LDB tooltip row opens from. Full row: anywhere on the row does what its go icon does, as the main window's (a profession window, the character panel, the trainers). Go icon only: the go icon alone opens it, and the rest of the row only links (shift-click) and opens the row menu (right-click). Classic style rows always open from the whole row."] = true
 L["What a left click on a row of the main window, a detached window or a merged window opens from. Full row: anywhere on the row does what its go icon does (a profession window, the character panel, the trainers). Go icon only: the go icon alone opens it, and the rest of the row only links (shift-click) and opens the row menu (right-click)."] = true
 L["Click: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"] = true
 L["Click: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"] = true
 L["Click: trainers and waypoint \194\183 Right-click: menu"] = true
 L["Click: character panel \194\183 Shift-click: link \194\183 Right-click: menu"] = true
-L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click the go icon to open, shift-click to link, right-click for the menu"] = true
 
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.

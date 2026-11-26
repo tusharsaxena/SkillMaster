@@ -398,15 +398,14 @@ local function onLeave(self)
     unhoverOverlay(self)
 end
 
--- The window's row hover, for the LDB panel's rows in its go icon mode (round 7, R7-6): the
--- overlay arming, the wash, the row tooltip and the mark's hot watch, as a window row has them.
+-- The window's row hover: the overlay arming, the wash, the row tooltip and the mark's hot watch.
 R.RowEnter, R.RowLeave = onEnter, onLeave
 
 --- Where a left click on `row` opens it from (Layout > Window > Open a row from, round 8, R8-1):
 --- "row" (Full row, the default: anywhere on the row does what its go icon does) or "icon" (Go icon
 --- only: the row's own plain click opens nothing). A main window, detached or merged window row
---- reads the window's setting; a row its host dressed with its own (`row.openFrom`, the LDB
---- panel's: Tooltips > LDB tooltip > Open a row from) reads that.
+--- reads the window's setting; a row its host dressed with its own (`row.openFrom`: the LDB panel's
+--- "none", SMW-07, where nothing opens) reads that.
 function R.OpenFrom(row)
     local own = row and row.openFrom
     if own then return own end

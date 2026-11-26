@@ -156,6 +156,7 @@ local HINTS = {
 }
 
 local function hint(out, kind, e, openFrom)
+    if openFrom == "none" then return end   -- a row nothing opens from (the LDB tooltip's, SMW-07)
     out[#out + 1] = { divider = true }
     local set = HINTS[openFrom == "icon" and "icon" or "row"]
     line(out, set[NS.Interact.Target({ kind = kind, entry = e })], nil, "muted")
