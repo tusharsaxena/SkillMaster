@@ -88,3 +88,23 @@ test("r5 review: the open Journal's Log shows a reputation or currency change as
         if not ok then error(err, 0) end
     end)
 end)
+
+-- R5-REV: Yesterday was the calendar day of now minus 86400 s, which skips a day in the first hour after a
+-- 23-hour (spring-forward) day: just after midnight on 9 March 2026 in a US zone it named 7 March. It is the
+-- local calendar's day before now's (run with TZ=America/New_York to see the old reading fail).
+test("r5 review: the Yesterday filter is the calendar's day before, across a daylight-saving change", function()
+    local JF = NS.JournalFilters
+    local now = os.time({ year = 2026, month = 3, day = 9, hour = 0, min = 30 })
+    local ctx = { now = now, nameOf = function(e) return e.key end }
+    local function at(day, hour) return { t = os.time({ year = 2026, month = 3, day = day, hour = hour }) } end
+    JF.Clear()
+    JF.Set("date", "yesterday")
+    local ok, err = pcall(function()
+        assertTrue(JF.Matches(at(8, 12), ctx), "8 March, noon: yesterday")
+        assertTrue(JF.Matches(at(8, 23), ctx), "8 March, late: yesterday")
+        assertTrue(not JF.Matches(at(7, 12), ctx), "7 March: the day before yesterday")
+        assertTrue(not JF.Matches(at(9, 0), ctx), "9 March: today")
+    end)
+    JF.Clear()
+    if not ok then error(err, 0) end
+end)

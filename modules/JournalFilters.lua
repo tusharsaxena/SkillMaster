@@ -18,7 +18,6 @@ local addonName, NS = ...
 NS.JournalFilters = {}
 local JF = NS.JournalFilters
 local L = NS.L
-local DAY = 86400
 
 JF.COLUMNS = { "date", "time", "name", "change", "zone" }
 JF.KINDS = { "skill", "reputation", "currency" }
@@ -68,13 +67,20 @@ function JF.KindOf(e) return e.kind or "skill" end
 
 local function day(t) return date("%Y-%m-%d", t) end
 
+--- The local calendar's day before `t`'s, as day() names it: noon of `t`'s day less a day, so a 23- or 25-hour day
+--- (a daylight-saving change) never skips or repeats one, as `t - 86400` did in the hour after a spring-forward.
+local function dayBefore(t)
+    local d = date("*t", t)
+    return day(time({ year = d.year, month = d.month, day = d.day - 1, hour = 12 }))
+end
+
 local function delta(e) return (tonumber(e.new) or 0) - (tonumber(e.old) or 0) end
 
 local MATCH = {
     date = function(e, v, ctx)
         local now = tonumber(ctx.now) or time()
         if v == "today" then return day(e.t) == day(now) end
-        if v == "yesterday" then return day(e.t) == day(now - DAY) end
+        if v == "yesterday" then return day(e.t) == dayBefore(now) end
         return day(e.t) == v
     end,
     time = function(e, v)
