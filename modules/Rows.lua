@@ -37,6 +37,10 @@ R.BAR_RIGHT = R.EDGE + R.GO_W + R.EDGE   -- the bar's end, in from the row's rig
 R.DIM = 0.8   -- an unlearned row's alpha (the mockup's)
 R.HINT_H = 12 -- the gathering hint's line under a row
 R.MARK = "> "   -- the equipped weapon's marker (Detached.dc.html), ASCII so every skin face draws it
+-- The pin mark (R5-SM-03, the owner's round 5): ph:push-pin on a row pinned to its broker's title, at the name
+-- column's right end (a fixed spot: it never follows the text), the name's text narrowed by PIN_W + PIN_GAP to
+-- make room; the bar and the value keep the column's own start.
+R.PIN_W, R.PIN_GAP = 10, 2
 
 -- ---------------------------------------------------------------------------------------------
 -- Pure helpers
@@ -278,6 +282,32 @@ local function setName(row, text, marked)
     NS.Skin.Text(row.name, marked and "accent" or "body")
 end
 
+--- Whether `row` is pinned to its family's broker now (NS.Pins.List: the sample's pins in test mode).
+function R.IsPinned(row)
+    local P, e = NS.Pins, row.entry
+    if not (P and type(e) == "table" and e.key ~= nil) then return false end
+    local fid = P.FamilyOfRow(row)
+    if not fid then return false end
+    for _, k in ipairs(P.List(fid)) do
+        if k == e.key then return true end
+    end
+    return false
+end
+
+--- The name column `w` px wide: the bar and the value start past it, and while the row is pinned the pin
+--- mark ends it and the name's text stops short of the mark (R5-SM-03): one spot down the column, whatever
+--- the name's length.
+local function fitName(row, w)
+    local pinned = R.IsPinned(row) and row.pin:GetTexture() ~= nil
+    row.name:SetWidth(pinned and math.max(20, w - R.PIN_W - R.PIN_GAP) or w)
+    row.bar:SetPoint("LEFT", row.name, "LEFT", w + R.PAD, 0)
+    row.where:SetPoint("LEFT", row.name, "LEFT", w + R.PAD, 0)
+    row.pin:ClearAllPoints()
+    row.pin:SetPoint("RIGHT", row.name, "LEFT", w, 0)
+    row.pin:SetShown(pinned)
+    if pinned then NS.Skin.Mark(row.pin, NS.Chrome.REST) end
+end
+
 local function setHint(row, text)
     row.hint:SetText(text or "")
     row.hint:SetShown(text ~= nil)
@@ -304,6 +334,7 @@ end
 function Row:SetSkill(e)
     self.kind, self.entry = "skill", e
     setName(self, e.name, self.marked)
+    fitName(self, R.NAME_W)
     setHint(self, R.HelperHint(e))
     local color = R.FillColor(e)
     paintIcon(self, color, "skill", e.key, e.learned)
@@ -332,6 +363,7 @@ end
 function Row:SetStat(e)
     self.kind, self.entry = "stat", e
     setName(self, e.label, false)
+    fitName(self, R.NAME_W)
     setHint(self, nil)
     local color = R.FillColor(e, true)
     paintIcon(self, color, "stat", e.key, true)
@@ -393,7 +425,7 @@ local function placeTree(row, r, icon)
     else
         row.name:SetPoint("LEFT", row, "LEFT", x, 0)
     end
-    row.name:SetWidth(math.max(40, R.TREE_NAME_W - (r.indent or 0) - (x - R.PAD - (r.indent or 0))))
+    fitName(row, math.max(40, R.TREE_NAME_W - (r.indent or 0) - (x - R.PAD - (r.indent or 0))))
 end
 
 local function treeIcon(row, spec, e)
@@ -545,6 +577,13 @@ local function buildText(row)
     row.hint:SetWordWrap(false)
     row.hint:Hide()
     NS.Skin.Text(row.hint, "muted")
+    -- The pin mark (R5-SM-03) at the name column's right end, centered on the name's line (fitName).
+    row.pin = row:CreateTexture(nil, "OVERLAY")
+    row.pin:SetSize(R.PIN_W, R.PIN_W)
+    row.pin:SetPoint("RIGHT", row.name, "LEFT", R.NAME_W, 0)
+    local path = NS.Icon("ph:push-pin")
+    if path then row.pin:SetTexture(path) end
+    row.pin:Hide()
 end
 
 --- The action mark (ph:sign-in, owner feedback rounds 3 and 4): one look on every row, crafting,
@@ -614,6 +653,7 @@ local function park(row)
     -- A tree row's own look goes with it, so the pool's next skill or stat row starts plain.
     row.tree, row.family, row.treeHeader, row.onFold = nil, nil, nil, nil
     if row.fold then row.fold:Hide() end
+    row.pin:Hide()
     row.name:SetWidth(R.NAME_W)
     row:ClearAllPoints()
 end

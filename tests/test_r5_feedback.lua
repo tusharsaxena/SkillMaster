@@ -5,7 +5,7 @@
 -- Test mode's sample fills every window and feed, so each case reads no live client state.
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
-local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
+local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
 local Br, BP = NS.Broker, NS.BrokerPanel
 
 -- The client's standing names, as tests/test_reputations.lua mocks them.
@@ -240,4 +240,129 @@ test("r5 sm-02: in the Classic LDB tooltip, a header line's hit spans the whole 
             assertTrue(depths[0] and depths[1], "top and nested headers both measured: " .. table.concat(seen, ","))
         end)
     end)
+end)
+
+-- ---------------------------------------------------------------------------------------------
+-- R5-SM-03: a pin mark on each row pinned to its broker's title
+-- ---------------------------------------------------------------------------------------------
+
+local function pinnedNow(row)
+    local fid = NS.Pins.FamilyOfRow(row)
+    if not (fid and row.entry and row.entry.key) then return false end
+    for _, k in ipairs(NS.Pins.List(fid)) do if k == row.entry.key then return true end end
+    return false
+end
+
+--- Every row's pin mark matches its pin, at the name column's right end; answers how many rows are pinned.
+local function checkPins(rows, where)
+    local pinned = 0
+    for _, row in ipairs(rows) do
+        local want = pinnedNow(row)
+        assertTrue(row.pin ~= nil, where .. ": every row has a pin mark")
+        assertEqual(row.pin:IsShown() == true, want, where .. ": " .. tostring(row.entry.name or row.entry.label)
+            .. (want and " is pinned: the mark shows" or " is not pinned: no mark"))
+        if want then
+            pinned = pinned + 1
+            local p, rel, rp, x = row.pin:GetPoint(1)
+            assertEqual(p, "RIGHT", where .. ": the mark's right edge")
+            assertTrue(rel == row.name and rp == "LEFT", where .. ": measured from the name column's start")
+            assertTrue(type(x) == "number" and x >= row.name:GetWidth() + NS.Rows.PIN_W,
+                where .. ": at the column's right end, past the narrowed name, never after the text")
+        end
+    end
+    return pinned
+end
+
+test("r5 sm-03: a pinned row shows the pin mark in every window, and only a pinned row", function()
+    withSample(function()
+        local pinned = 0
+        for _, fid in ipairs(NS.FAMILY_ORDER) do
+            local W = shownWindow(fid)
+            -- The tree families' pins sit under folded headers: open every header first.
+            local spec = NS.Families[fid]
+            if spec.tree then
+                for _ = 1, 3 do
+                    for _, row in ipairs(W.Rows()) do
+                        if row.treeHeader then NS.Tree.SetFolded(fid, row.entry.nodeKey, false) end
+                    end
+                    W.Refresh(true)
+                end
+            end
+            pinned = pinned + checkPins(W.Rows(), fid)
+            W.Hide()
+        end
+        assertTrue(pinned >= 2, "the sample's pinned skill and tree pins drew their marks: " .. pinned)
+    end)
+end)
+
+test("r5 sm-03: a pinned row's name gives the mark its room, so a long name never runs under it", function()
+    withSample(function()
+        local W = shownWindow("professions")
+        local R = NS.Rows
+        -- Each pooled bar records where its left edge goes on the redraw (the pool hands the same rows back).
+        local barLeft = {}
+        local bars = {}
+        for _, row in ipairs(W.Rows()) do
+            bars[#bars + 1] = row.bar
+            rawset(row.bar, "SetPoint", function(self, p, rel, _, x)
+                if p == "LEFT" and rel ~= nil then barLeft[self] = x end
+            end)
+        end
+        W.Refresh(true)
+        for _, bar in ipairs(bars) do rawset(bar, "SetPoint", nil) end
+        local any = false
+        for _, row in ipairs(W.Rows()) do
+            if pinnedNow(row) then
+                any = true
+                assertEqual(row.name:GetWidth(), R.NAME_W - R.PIN_W - R.PIN_GAP, "the name column less the mark")
+                assertEqual(barLeft[row.bar], R.NAME_W + R.PAD, "the bar still starts past the whole column")
+            else
+                assertEqual(row.name:GetWidth(), R.NAME_W, "an unpinned row's name keeps the whole column")
+            end
+        end
+        assertTrue(any, "the sample pins a profession")
+    end)
+end)
+
+test("r5 sm-03: the LDB tooltip draws the pin mark on its pinned rows, its Pinned section's included", function()
+    withSample(function()
+        withStyle("window", function()
+            local pinned = 0
+            for _, fid in ipairs(NS.FAMILY_ORDER) do
+                Br.OnEnter(M.UIParent, fid)
+                pinned = pinned + checkPins(BP.Rows(), "tooltip " .. fid)
+            end
+            assertTrue(pinned >= 2, "the Pinned sections' rows carry it: " .. pinned)
+        end)
+    end)
+end)
+
+test("r5 sm-03: pinning and unpinning a row shows and hides its mark at once", function()
+    local char = NS.db.char
+    local saved, savedModel = char.pins, NS.StatData.Model
+    char.pins = {}
+    -- The Character Stats window reads NS.StatData's model: one stat, whatever the mocks' scan answers.
+    local crit = { key = "rangedCrit", label = "Ranged Crit", value = 9.1, display = "9.1%", pct = 30, markers = {} }
+    local model = { base = { crit }, spell = {}, defense = {}, utility = {} }
+    NS.StatData.Model = function() return model end
+    local ok, err = pcall(function()
+        local W = shownWindow("stats")
+        local row = W.Rows()[1]
+        assertTrue(row ~= nil and row.kind == "stat", "a stat row")
+        local key = row.entry.key
+        assertFalse(row.pin:IsShown(), "not pinned: no mark")
+        NS.Pins.Toggle("stats", key)
+        M.__fireTimers()
+        local again
+        for _, r in ipairs(W.Rows()) do if r.entry.key == key then again = r end end
+        assertTrue(again.pin:IsShown(), "pinned: the mark shows")
+        NS.Pins.Toggle("stats", key)
+        M.__fireTimers()
+        for _, r in ipairs(W.Rows()) do if r.entry.key == key then again = r end end
+        assertFalse(again.pin:IsShown(), "unpinned: gone")
+    end)
+    NS.Windows.HideAll()
+    char.pins, NS.StatData.Model = saved, savedModel
+    M.__fireTimers()
+    if not ok then error(err, 0) end
 end)

@@ -1334,3 +1334,8 @@ none is passed until you say so.
   on a header line, a nested one included): each folds and unfolds in the tooltip alone, the window untouched.
   The footer reads "Click a header to fold".
   Result:
+- **SM-R5-3** (new, R5-SM-03) Pin two professions and a stat (row menu, Pin to the ... broker), and a reputation:
+  each pinned row shows a small pin mark at the right end of its name column, in its window and in its feed's
+  LDB tooltip (both its Pinned section and its own section). The marks stand in one column whatever the names'
+  lengths, a long name stops short of the mark, and the bars do not move. Unpin one: its mark goes at once.
+  Result:

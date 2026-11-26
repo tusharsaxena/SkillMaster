@@ -931,12 +931,16 @@ Total.
 - smw-rev: the skill windows' Expand / Collapse all still collapses and expands their blocks
 - smw-rev: the Character Stats window and feed title the stat blocks without the "Stats ·" prefix
 
-### test_r5_feedback.lua (4)
+### test_r5_feedback.lua (8)
 
 - r5 sm-01: no fold chevron carries a hint tooltip, in any window or in the LDB tooltip
 - r5 sm-02: in a window, a click on a block header's body and on a tree header's row folds it, at every depth
 - r5 sm-02: in the Main window style LDB tooltip, a click on a section header's body or a tree header's row folds it
 - r5 sm-02: in the Classic LDB tooltip, a header line's hit spans the whole line, at every depth
+- r5 sm-03: a pinned row shows the pin mark in every window, and only a pinned row
+- r5 sm-03: a pinned row's name gives the mark its room, so a long name never runs under it
+- r5 sm-03: the LDB tooltip draws the pin mark on its pinned rows, its Pinned section's included
+- r5 sm-03: pinning and unpinning a row shows and hides its mark at once
 
 ### test_preview_trees.lua (6)
 
@@ -1362,7 +1366,7 @@ Total.
 | test_currencies.lua | 9 |
 | test_statistics.lua | 15 |
 | test_smw_review.lua | 15 |
-| test_r5_feedback.lua | 4 |
+| test_r5_feedback.lua | 8 |
 | test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
@@ -1394,4 +1398,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **1016** |
+| **Total** | **1020** |
