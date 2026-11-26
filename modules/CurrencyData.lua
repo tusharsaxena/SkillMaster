@@ -309,7 +309,9 @@ local function amountLines(out, e)
     out[#out + 1] = { bar = true }
 end
 
-local function lines(e)
+-- `alt` (R6-SM-04): another character's snapshot row, from the Journal's Alts tab: no session line, the log
+-- being the player's.
+local function lines(e, alt)
     local out = { { left = e.name, tone = "heading" } }
     if e.header then return out end
     amountLines(out, e)
@@ -320,7 +322,7 @@ local function lines(e)
     if type(e.description) == "string" and e.description ~= "" then
         out[#out + 1] = { left = e.description, tone = "muted" }
     end
-    local log = NS.SessionLog
+    local log = not alt and NS.SessionLog
     local g = log and log.KindGainsFor and log:KindGainsFor(CD.KIND, e.key) or 0
     if g ~= 0 then
         out[#out + 1] = { left = L["This session"], right = (g > 0 and "+" or "") .. NS.Tree.Number(g),

@@ -126,8 +126,8 @@ test("journal: the alts matrix has a column per character, a row per skill, a mi
     assertTrue(math.abs(lw.cells[c].bar.geom.fill - 146 / 150) < 1e-9, "the shared bar widget draws it (Widgets Bar)")
     assertTrue(lw.cells[c].bar.style.key == "mini" and not lw.cells[c].bar.style.showText, "the mini style: no text")
     assertTrue(mining.cells[c].unlearned:IsShown() and not mining.cells[c].value:IsShown()
-        and not mining.cells[c].dash:IsShown(), "Unlearned for a profession it has not (round 4)")
-    assertEqual(mining.cells[c].unlearned:GetText(), "Unlearned")
+        and not mining.cells[c].dash:IsShown(), "unlearned for a profession it has not (round 4)")
+    assertEqual(mining.cells[c].unlearned:GetText(), "-", "reads - since R6-SM-04")
     assertFalse(lw.cells[3].value:IsShown() or lw.cells[3].dash:IsShown(), "no third character: an empty column")
     J.SelectFilter("weapon")
     -- The hunter's and the warrior's trainable weapons (NS.ClassWeapons_Forever), Riding excluded.

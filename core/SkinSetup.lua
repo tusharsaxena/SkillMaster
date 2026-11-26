@@ -53,6 +53,14 @@ NS.SKIN_OWNER_TOKENS = {
     ["sm.cat.stats"]     = { default = { 0.788, 0.627, 0.478, 1 } },   -- #c9a07a
     ["sm.bonusTemp"]     = { default = { 0.498, 0.847, 0.769, 1 } },   -- #7fd8c4
     ["sm.bonusPerm"]     = { default = { 0.553, 0.722, 1, 1 } },       -- #8db8ff
+    -- The Journal Log's Type column and its filter menu (R6-SM-03, owner feedback round 6: "Give every type a
+    -- unique color"). Like the categories they follow no library token, so the three stay apart under every
+    -- skin. Picked clear of the reputation standing ramp (red, orange, yellow, green: Compat.FactionBarColor)
+    -- and of the green and red a gain or loss reads as, and of the menu's gold selection: a sky blue for a
+    -- skill-up, an orchid for a reputation, a teal for a currency. Each is bright on the dark window.
+    ["sm.type.skill"]      = { default = { 0.435, 0.659, 0.941, 1 } },   -- #6fa8f0
+    ["sm.type.reputation"] = { default = { 0.753, 0.549, 0.910, 1 } },   -- #c08ce8
+    ["sm.type.currency"]   = { default = { 0.361, 0.839, 0.753, 1 } },   -- #5cd6c0
     -- T3.1 the bar's edges, threshold markers, spark and text; the row's timer, icon
     -- well and the unlearned row's muted line: what every skin draws.
     ["sm.barBorder"] = { default = { 0.24, 0.22, 0.20, 1 }, follow = "bar.border" },

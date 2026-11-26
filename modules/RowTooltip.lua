@@ -6,9 +6,14 @@ local _, NS = ...
 -- markers and scale, and the click hints. Drawn on GameTooltip with one tooltip-style Widgets Bar laid
 -- under its numbers line; GameTooltip is never re-skinned (Skin's Tooltip is for library tooltips).
 --
--- NS.RowTooltip.Lines(entry, kind, openFrom) -> { { left, right, tone, rightTone } | { bar = true } |
+-- NS.RowTooltip.Lines(entry, kind, openFrom[, alt]) -> { { left, right, tone, rightTone } | { bar = true } |
 --   { divider = true } }, pure; tones: body, muted, heading, accent, temp, perm, good, warn, bad.
--- NS.RowTooltip.Show(row), .Hide(row), .Bar()
+-- NS.RowTooltip.Show(row), .ShowEntry(owner, entry, kind, opts), .Hide(row), .Bar()
+--
+-- `alt` (R6-SM-04, the Journal's Alts cells): { level, faction, race } of another character, whose entry is its
+-- snapshot row (modules/Alts.lua). The lines then leave out what only the player's own client knows: the bonus
+-- breakdown (live buffs, items, racials), this session's gains and ETA (the log is the player's), the fishing
+-- helper (the player's zone); the next rank, its trainer and a weapon's cap are that character's own.
 
 NS.RowTooltip = {}
 local RT = NS.RowTooltip
@@ -80,17 +85,19 @@ local function trainerText(t)
     return text
 end
 
-local function rankLines(out, e)
-    local nr = NS.Trainers and NS.Trainers:NextRank(e.key, e.rank, e.max)
+local function rankLines(out, e, alt)
+    local nr = NS.Trainers and (alt and NS.Trainers:NextRank(e.key, e.rank, e.max, alt.level, alt.faction, alt.race)
+        or NS.Trainers:NextRank(e.key, e.rank, e.max))
     if not nr then return end
     line(out, L["Next rank"], L["%s at %d \194\183 Lv %d"]:format(nr.rankName, e.max, nr.minLevel), "muted", "body")
     if nr.trainers[1] then line(out, L["Trainer"], trainerText(nr.trainers[1]), "muted", "body") end
 end
 
-local function weaponLines(out, e)
-    local level = NS.Preview.Character().level or 0
+local function weaponLines(out, e, alt)
+    local level = tonumber(alt and alt.level or NS.Preview.Character().level) or 0
     local cap = NS.SkillHelpers.WeaponCap(level)
-    line(out, L["Cap at your level"], L["%d (5 \195\151 %d)"]:format(cap, level), "muted", "body")
+    line(out, alt and L["Cap at their level"] or L["Cap at your level"], L["%d (5 \195\151 %d)"]:format(cap, level),
+        "muted", "body")
     local gap = cap - e.rank   -- the base rank's distance, as the weapon-gap alert measures it
     local tone, word = "good", L["fine"]
     if gap >= 25 then tone, word = "bad", L["far below"] elseif gap > 10 then tone, word = "warn", L["low"] end
@@ -162,7 +169,10 @@ local function hint(out, kind, e, openFrom)
     line(out, set[NS.Interact.Target({ kind = kind, entry = e })], nil, "muted")
 end
 
-local function skillLines(e, openFrom)
+-- The helpers that read the player's own world (the zone's fishing need): never for another character.
+local LIVE_HELPERS = { fishing = true }
+
+local function skillLines(e, openFrom, alt)
     local out = {}
     line(out, e.name, CATEGORY[e.category] or L["Other"], "heading", "muted")
     if e.learned == false then
@@ -171,12 +181,12 @@ local function skillLines(e, openFrom)
         return out
     end
     numbers(out, e)
-    bonusLines(out, e)
+    if not alt then bonusLines(out, e) end
     out[#out + 1] = { divider = true }
-    sessionLines(out, e)
-    rankLines(out, e)
-    if e.category == "weapon" or e.key == "defense" then weaponLines(out, e) end
-    if HELPERS[e.key] and helpersOn() then HELPERS[e.key](out, e) end
+    if not alt then sessionLines(out, e) end
+    rankLines(out, e, alt)
+    if e.category == "weapon" or e.key == "defense" then weaponLines(out, e, alt) end
+    if HELPERS[e.key] and helpersOn() and not (alt and LIVE_HELPERS[e.key]) then HELPERS[e.key](out, e) end
     hint(out, "skill", e, openFrom)
     return out
 end
@@ -200,12 +210,12 @@ local function statLines(e, openFrom)
 end
 
 --- The tooltip's lines for a skill or stat entry; `openFrom` ("row", the default, or "icon": the
---- row's Open a row from, NS.Rows.OpenFrom) words the click hint.
-function RT.Lines(e, kind, openFrom)
+--- row's Open a row from, NS.Rows.OpenFrom) words the click hint; `alt` another character's (header).
+function RT.Lines(e, kind, openFrom, alt)
     local tree = NS.Tree.Kind(kind)   -- a tree family's row (SMW-08..10): its kind's own lines
-    if tree then return tree.lines(e) end
+    if tree then return tree.lines(e, alt) end
     if kind == "stat" then return statLines(e, openFrom) end
-    return skillLines(e, openFrom)
+    return skillLines(e, openFrom, alt)
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -289,7 +299,7 @@ local function sizeBarLine(n)
     sizedLine = fs
 end
 
-local function placeBar(row, n)
+local function placeBar(entry, kind, n)
     local b = ensureBar()
     b:ApplyStyle(Bar.Resolve("tooltip"))   -- each show, so a skin switch since the last one lands
     local anchor = _G["GameTooltipTextLeft" .. n]
@@ -300,12 +310,12 @@ local function placeBar(row, n)
         b:SetWidth(w)
         b.knownWidth = w   -- the width Layout uses when the tooltip answers its own as secret
     end
-    local tree = NS.Tree.Kind(row.kind)
-    local v = tree and tree.values(row.entry)
+    local tree = NS.Tree.Kind(kind)
+    local v = tree and tree.values(entry)
     if not v then
-        local stat = row.kind == "stat"
-        v = stat and NS.Rows.StatValues(row.entry) or (NS.Rows.SkillValues(row.entry))
-        v.color = NS.Rows.FillColor(row.entry, stat)   -- the row's own fill: Color mode, the palette, Bar > Fill
+        local stat = kind == "stat"
+        v = stat and NS.Rows.StatValues(entry) or (NS.Rows.SkillValues(entry))
+        v.color = NS.Rows.FillColor(entry, stat)   -- the row's own fill: Color mode, the palette, Bar > Fill
     end
     b:SetValues(v)
     b:Show()
@@ -317,12 +327,21 @@ end
 --- broker panel), right when it fits and otherwise left, level with the row. It was owned at
 --- ANCHOR_RIGHT, the corner offset the rule retires. The bar is laid after the placement.
 function RT.Show(row)
-    if not (GameTooltip and row.entry) then return end
+    if not row then return end
+    return RT.ShowEntry(row, row.entry, row.kind, { openFrom = NS.Rows.OpenFrom(row) })
+end
+
+--- Show `entry`'s tooltip (its `kind`'s lines and bar) owned by `owner`, as RT.Show does for a row. `opts`:
+--- { openFrom (the hint's wording; "none" for none), alt (RT.Lines), group (the window PlaceBeside sets it
+--- beside; nil, the owner's own group) }. The Journal's Alts cells call it with their character (R6-SM-04).
+function RT.ShowEntry(owner, entry, kind, opts)
+    if not (GameTooltip and owner and entry) then return end
+    opts = opts or {}
     hideBar()   -- shown again below only when this row's lines ask for it
-    GameTooltip:SetOwner(row, "ANCHOR_NONE")
+    GameTooltip:SetOwner(owner, "ANCHOR_NONE")
     local n = 0
     local barAt
-    for _, l in ipairs(RT.Lines(row.entry, row.kind, NS.Rows.OpenFrom(row))) do
+    for _, l in ipairs(RT.Lines(entry, kind, opts.openFrom, opts.alt)) do
         if l.bar then
             GameTooltip:AddLine(" ")
             n = n + 1
@@ -346,8 +365,8 @@ function RT.Show(row)
         widened = true
     end
     GameTooltip:Show()
-    NS.Chrome.PlaceBeside(GameTooltip, row, nil)
-    if barAt then placeBar(row, barAt) end
+    NS.Chrome.PlaceBeside(GameTooltip, owner, opts.group)
+    if barAt then placeBar(entry, kind, barAt) end
 end
 
 function RT.Hide(row)

@@ -59,7 +59,11 @@ the stats too (FB-33: `stats[key] = { group, value, display, pct }` from StatDat
 keeps the last snapshot's, and a snapshot from before FB-33 has none, a dash in the Journal). The
 Journal's Alts tab is a matrix, characters across and the rows of one main-window block down (a
 sub-tab per `NS.BLOCKS` id: a skill block's every skill some character has, a stat block's every
-`NS.STAT_DEFS` row). The Journal reads both at render time and repaints on `SKILLS_UPDATED`, which
+`NS.STAT_DEFS` row). Hovering a cell the character has shows the main window's row tooltip for that
+row (`NS.RowTooltip.ShowEntry`, R6-SM-04), its entry built from the snapshot (`J.AltTip`) and its lines in
+alt mode: no bonus breakdown, session gains, fishing helper or click hint (what only the player's client
+knows, or what the grid does not do), the next rank, trainer and weapon cap at that character's level,
+faction and race (`raceFile`); an unlearned cell reads "-" and has none. The Journal reads both at render time and repaints on `SKILLS_UPDATED`, which
 follows a pass's `SKILL_UP`s, and on `REPS_UPDATED` and `CURRENCIES_UPDATED`, which follow their
 `REP_CHANGED` and `CURRENCY_CHANGED` rows.
 

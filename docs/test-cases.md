@@ -998,7 +998,7 @@ Total.
 - r5 review: the Yesterday filter is the calendar's day before, across a daylight-saving change
 - r5 review: a detached sub-category this character's tree lacks shows no window, and keeps its row
 
-### test_r6_owner.lua (7)
+### test_r6_owner.lua (18)
 
 - r6 sm-01: the group's title reads Secondary Professions; its id and short label stay
 - r6 sm-01: a detached Secondary window is titled Secondary Professions
@@ -1007,6 +1007,17 @@ Total.
 - r6 sm-02: the Log has a Type column after Time: Skill-up, Reputation (a standing change too), Currency
 - r6 sm-02: the Type header filters by kind; Name keeps the names, of the picked type only
 - r6 sm-02: the Journal is wide enough at its minimum for every column and the side cards
+- r6 sm-03: each Type cell is drawn in its kind's own color, three distinct, none the muted style
+- r6 sm-03: the type colors are readable on the dark Journal and far apart from each other
+- r6 sm-03: the Type filter menu lists each type in its own color; Any type stays plain
+- r6 sm-04: an unlearned Alts cell reads '-' in the muted style, and has no tooltip
+- r6 sm-04: a learned profession cell shows the main window's tooltip, from that character's snapshot
+- r6 sm-04: a weapon cell measures the cap at that character's level
+- r6 sm-04: stat, reputation and currency cells show their windows' tooltips, no session line
+- r6 sm-04: the main window's own tooltip keeps its bonuses, session and hint lines
+- r6 sm-04: an alt's next rank and trainer are asked for that character's level, faction and race
+- r6 sm-04: a snapshot keeps the race's token beside its localized name
+- r6 review: a repaint under a hovered Alts cell redraws its tooltip, or hides it for a cell with none
 
 ### test_preview_trees.lua (6)
 
@@ -1437,7 +1448,7 @@ Total.
 | test_r5_subdetach.lua | 9 |
 | test_r5_journal.lua | 17 |
 | test_r5_review.lua | 5 |
-| test_r6_owner.lua | 7 |
+| test_r6_owner.lua | 18 |
 | test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
@@ -1469,4 +1480,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **1071** |
+| **Total** | **1082** |

@@ -1436,3 +1436,21 @@ none is passed until you say so.
   currency. Clear filters drops both. `/sm test`: the sample Log's rows each show their type. Alts tab: the
   character columns keep their width, one more character showing at the minimum width.
   Result:
+- **SM-R6-3** (new, R6-SM-03) `/sm journal`, Log tab (`/sm test` gives a mix): each TYPE reads in its own color,
+  Skill-up a sky blue, Reputation an orchid (violet), Currency a teal; all three easy to read on the dark window and
+  easy to tell apart, none of them the red, orange, yellow or green of a reputation standing. DATE, TIME and ZONE stay
+  in the muted gray. Click TYPE: Skill-up, Reputation and Currency each in its column's color, Any type in the menu's
+  plain text; the picked one turns the menu's gold while ticked. Switch the skin (Settings → General → Skin): the
+  three colors stay the same and stay apart.
+  Result:
+- **SM-R6-4** (new, R6-SM-04) Log in an alt or two first, then `/sm journal`, Alts tab. Primary: hover another
+  character's learned profession (Leatherworking 155/225): the tooltip is the Professions window's for that row, its
+  name and Primary, the rank and max, the bar, the next rank ("Artisan at 225 · Lv 35" or similar) and that
+  character's trainer (their faction's), with no Bonuses section, no This session or ETA lines and no
+  "Click: ... · Shift-click: link · Right-click: menu" hint. Leave it: the tooltip goes. Hover a cell reading "-" (the
+  old "Unlearned", now a muted dash) and a dash where the class cannot train it: no tooltip. Weapons: "Cap at their
+  level" with that character's level. Secondary and Other the same as Primary. Base & Combat, Spell & Regen, Defense &
+  Resists, Utility: the stat's name and value with its bar, no hint. Currencies: Amount and, for a capped one, Cap with
+  its bar. Reputations: Standing, Progress and the bar in the standing's color, no This session line. Your current
+  character's column shows the same kind of tooltip from its snapshot. Each tooltip stands beside the Journal.
+  Result:
