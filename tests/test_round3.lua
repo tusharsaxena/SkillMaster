@@ -100,7 +100,8 @@ end)
 test("round3 sort: the LDB tooltip lists a section in its block's order", function()
     withWorld(function()
         set("layout.blocks.weapon.sort", "valueAsc")
-        local rows = B.FillTooltip(M.CreateFrame("GameTooltip", "SkillMasterRound3Tip", M.UIParent, "GameTooltipTemplate"))
+        local rows = B.FillTooltip(M.CreateFrame("GameTooltip", "SkillMasterRound3Tip", M.UIParent, "GameTooltipTemplate"),
+            "skills")   -- SMW-05: the weapons are the Skills feed's
         local got = {}
         for _, r in ipairs(rows) do
             local c = r.kind == "skill" and NS.SkillCatalog[r.key]
@@ -168,7 +169,7 @@ end)
 
 -- ── the broker ──────────────────────────────────────────────────────────────────────────────
 
-test("round3 broker: a second Pin on the pinned skill unpins it, and the feed reads Professions and Skills", function()
+test("round3 broker: a second Pin on the pinned skill unpins it, and the feed reads Professions", function()
     local before = NS.db.char.pinned
     NS.db.char.pinned = false
     -- End any earlier suite's skill-up flash: a fresh flash, then its timer runs out.
@@ -183,7 +184,7 @@ test("round3 broker: a second Pin on the pinned skill unpins it, and the feed re
     pin.onClick()
     assertEqual(NS.db.char.pinned, false, "unpinned")
     B.Refresh()
-    assertEqual(B.Text(), "Professions and Skills")
+    assertEqual(B.Text(), "Professions", "its family's feed, nothing pinned (SMW-05)")
     NS.db.char.pinned = before
     B.Refresh()
 end)

@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 14
+NS.SCHEMA_VERSION = 15
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -35,7 +35,8 @@ local function oneBrokerFeed(_, profile)
     broker.templates = nil
     if type(old) ~= "string" then return end
     local kept = broker.template
-    if kept == nil or kept == NS.defaults.profile.broker.template then broker.template = old end
+    -- The default of the day (schemaVersion 15 moved it to broker.feeds.professions.template).
+    if kept == nil or kept == "{pinned} \194\183 +{gains}" then broker.template = old end
 end
 
 --- 3 -> 4 (feedback round 2, the owner's rulings): no Detached bar height and no rank tier ticks. A
@@ -193,6 +194,26 @@ local function windowsSplit(_, profile)
     end
 end
 
+--- 14 -> 15 (SMW-05): one broker feed per family, each with its own template. The one feed's stored
+--- `broker.template` was the "Skill Master" feed's, which is the Professions feed now, so it moves to
+--- `broker.feeds.professions.template` (rawget: only a stored choice moves; one already stored there,
+--- other than the default, wins); the old key goes. `broker.preset` was session-only and never stored.
+local function feedTemplatesSplit(_, profile)
+    local broker = type(profile) == "table" and rawget(profile, "broker")
+    if type(broker) ~= "table" then return end
+    local old = rawget(broker, "template")
+    broker.template = nil
+    if type(old) ~= "string" then return end
+    if type(rawget(broker, "feeds")) ~= "table" then broker.feeds = {} end
+    local feeds = broker.feeds
+    if type(rawget(feeds, "professions")) ~= "table" then feeds.professions = {} end
+    -- A stored copy of the new default is no choice (the active profile may carry one until logout).
+    local kept = rawget(feeds.professions, "template")
+    if kept == nil or kept == NS.defaults.profile.broker.feeds.professions.template then
+        feeds.professions.template = old
+    end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
 -- is the stamp the run started at (0 on a fresh install).
@@ -211,6 +232,7 @@ local STEPS = {
     { to = 12, run = iconRowColorKept, perProfile = true },
     { to = 13, run = foreverDBRetired, perProfile = true },
     { to = 14, run = windowsSplit, perProfile = true },
+    { to = 15, run = feedTemplatesSplit, perProfile = true },
 }
 
 function NS:InitDB()

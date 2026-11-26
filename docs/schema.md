@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (14)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (15)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "<ruleset>-<First Surname>" (forever-quirks-§4);
@@ -132,14 +132,19 @@ SkillMasterDB
                helperTooltip = true,   -- the gathering and fishing lines in a row's tooltip
                helperHint = false }    -- the one-line hint under the row (design §12 item 4)
     stats  = { hidden = { [key] = true } }   -- how a row draws is bars.rowDisplay (schemaVersion 2)
-    broker = {                   -- the one "Skill Master" feed (modules/Broker.lua; FB-12, schemaVersion 3)
-      flashSeconds = 5,
-      template = "{pinned} · +{gains}",   -- the feed's text (presets + Custom)
+    broker = {                   -- one feed per family (modules/Broker.lua; FB-12, schemaVersion 3; SMW-05)
+      flashSeconds = 5,          -- a skill-up flashes its own family's feed
+      feeds = {                  -- each feed's text (presets + Custom); schemaVersion 15 moved the one
+                                 -- broker.template here, to the Professions feed's
+        professions = { template = "{pinned} · +{gains}" },
+        skills, stats, currencies, reputations, statistics = { template = "{pinned}" },
+      },                         -- a {pinned} feed with nothing pinned reads its family's short name
       tooltip = {
         skin = true,             -- Apply skin to the tooltip (FB-13): the feed's own skinned frame
-        sections = { primary = true, secondary = true, weapon = true, other = true,   -- Skill Master
-                     stats_base = true, stats_spell = true, stats_defense = true,      -- Skill Master
-                     stats_utility = true },   -- Stats (round 6, R6-9; schemaVersion 9 dropped `stats`)
+        sections = { primary = true, secondary = true,   -- the Professions feed's
+                     weapon = true, other = true,         -- the Skills feed's
+                     stats_base = true, stats_spell = true, stats_defense = true,   -- Character Stats'
+                     stats_utility = true },   -- (round 6, R6-9; schemaVersion 9 dropped `stats`)
         hiddenSkills = { [key] = true },   -- left out of the tooltip only, apart from skills.hidden
                                            -- (all four hidden sets: the Rows page, round 5, R5-13)
         hiddenStats  = { [key] = true },   -- left out of the tooltip only, apart from stats.hidden

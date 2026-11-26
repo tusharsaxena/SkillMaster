@@ -188,9 +188,13 @@ modules\Journal.lua
 modules\Alerts.lua
 # T4.1: NS.Template, pure; read by modules\Broker.lua at CALL time.
 modules\Template.lua
-# T4.1 / FB-12: the one broker data feed; creates its LibDataBroker object and bus target at FILE SCOPE
-# (after core\Bus.lua, core\PoolSetup.lua and the # Libraries block); reads NS.StatData.GROUPS at call time.
+# T4.1 / FB-12 / SMW-05: the six broker data feeds, one per family; creates their LibDataBroker objects and its
+# bus target at FILE SCOPE (after core\Bus.lua, core\PoolSetup.lua, the # Libraries block and defaults\Families.lua,
+# read at FILE SCOPE); reads NS.StatData.GROUPS at call time.
 modules\Broker.lua
+# Conventional: the feeds' tooltip content and the Classic lines (SMW-05, split out of modules\Broker.lua);
+# reads NS.Broker and NS.Pool at FILE SCOPE (both load earlier).
+modules\BrokerTooltip.lua
 # R6-10: the LDB tooltip in the main window's style; reads NS.Broker, NS.Blocks, NS.Rows and NS.Journal at CALL time.
 modules\BrokerPanel.lua
 # T5.2: test mode's data swap; builds its models through SkillData, StatData and Bonuses at CALL time.

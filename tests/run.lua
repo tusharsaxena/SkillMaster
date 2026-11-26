@@ -274,6 +274,7 @@ Kit.run{
         "test_alerts",
         "test_template",
         "test_broker",
+        "test_feeds",
         "test_polish",
         "test_preview",
         "test_sample_names",

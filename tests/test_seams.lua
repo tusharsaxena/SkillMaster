@@ -119,7 +119,7 @@ test("test_seam_mini_bars_are_the_bar_widget: the broker tooltip draws the Widge
             _G[name] = _G[name] or M.CreateFrame("Frame", name, tip)
         end
         tip.AddLine, tip.AddDoubleLine = function(_, ...) add(...) end, function(_, ...) add(...) end
-        Br.FillTooltip(tip)
+        Br.FillTooltip(tip, "skills")   -- SMW-05: the weapons are the Skills feed's
         local bars = Br.Bars()
         assertTrue(#bars >= 2, "a bar per learned weapon row and Defense, drew " .. #bars)
         local guns

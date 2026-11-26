@@ -292,13 +292,23 @@ NS.defaults = {
         -- `broker.templates.all` here and dropped the other three feeds' templates (core/Database.lua).
         broker = {
             flashSeconds = 5,   -- how long "^ Bows 81" replaces the feed's text after a skill-up
-            template     = "{pinned} \194\183 +{gains}",
+            -- One text template per feed, one feed per family (SMW-05, modules/Broker.lua); schemaVersion 15
+            -- moved the one `broker.template` to the Professions feed's. A feed whose template shows
+            -- {pinned} with nothing pinned reads its family's short name.
+            feeds = {
+                professions = { template = "{pinned} \194\183 +{gains}" },
+                skills      = { template = "{pinned}" },
+                stats       = { template = "{pinned}" },
+                currencies  = { template = "{pinned}" },
+                reputations = { template = "{pinned}" },
+                statistics  = { template = "{pinned}" },
+            },
             -- The feed's tooltip: its sections, the rows it leaves out (sets of keys, apart from the
             -- main window's skills.hidden / stats.hidden) and whether it wears the skin (FB-13).
             tooltip = {
                 skin     = true,
-                -- The skills feed's four sections and the stats feed's four (round 6, R6-9: the Stats
-                -- section moved to its own feed; schemaVersion 9 dropped a stored `stats`).
+                -- One switch per block, each in its own family's feed (SMW-05: Professions' two, Skills'
+                -- two, Character Stats' four; round 6, R6-9; schemaVersion 9 dropped a stored `stats`).
                 sections = { primary = true, secondary = true, weapon = true, other = true,
                              stats_base = true, stats_spell = true, stats_defense = true, stats_utility = true },
                 hiddenSkills = {},

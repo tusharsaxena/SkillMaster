@@ -1108,3 +1108,24 @@ none is passed until you say so.
   Stats, Currencies, Reputations, Statistics). Change the Character Stats window's width and strata: only that
   window changes. Each window's corner grip writes its own Window width and Window height.
   Result:
+
+## Six brokers (SMW-05, 2026-11-26)
+
+- **SM-FEED-1** (new, SMW-05) In your broker display (Titan Panel, ChocolateBar, ...), the "Skill Master" and
+  "Skill Master Stats" cells you had are still in their places; the second is labeled "Skill Master Character
+  Stats". The display offers four new feeds: Skill Master Skills, Skill Master Currencies, Skill Master
+  Reputations and Skill Master Statistics.
+  Result:
+- **SM-FEED-2** (new, SMW-05) With nothing pinned, each feed reads its window's short name (Professions,
+  Skills, Character Stats, ...). Pin a weapon skill from a row's menu: the Skills feed shows it and the
+  Professions feed does not. Gain a weapon skill point: the Skills feed flashes, Professions does not.
+  Result:
+- **SM-FEED-3** (new, SMW-05) Hover each feed: its tooltip's title is its window's ("Skill Master ·
+  Professions" with Primary and Secondary only, "Skill Master · Skills" with Weapon and Other, "Skill Master ·
+  Character Stats" with the four stat blocks, the other three "Nothing to show yet."). Left-click each feed:
+  its own window toggles. Right-click: the Broker settings page opens.
+  Result:
+- **SM-FEED-4** (new, SMW-05) Settings > Broker > Feed: one subsection per feed, each with its own Feed text
+  presets and Custom box; your old feed text is now the Professions feed's. Tooltip: each feed's section
+  switches under its own name.
+  Result:

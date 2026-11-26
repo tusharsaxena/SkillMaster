@@ -48,5 +48,9 @@ L["Width of this window. Multiplied by Master scale on General > Master controls
 L["Height of this window; the rows scroll inside it."] = true
 L["This window's layer."] = true
 
+-- The broker feeds (modules/Broker.lua, settings/Broker.lua, SMW-05): the presets' names.
+L["Pinned stat"] = true
+L["Pinned element"] = true
+
 -- `true` only documents the key: replace each with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

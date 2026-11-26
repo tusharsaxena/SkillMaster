@@ -4,7 +4,8 @@ local _, NS = ...
 -- it does not know, or one whose data is missing, renders empty. Pure: it reads only ctx.
 --
 -- ctx = { skills = <SkillData model>, stat = { [statKey] = <StatData entry> }, gains = n,
---         last = { key, new } | nil, pinned = key | nil, level = n, mainHand = skill key | nil }
+--         last = { key, new } | nil, pinned = key | nil, level = n, mainHand = skill key | nil,
+--         pinnedText = the text {pinned} renders as-is (a feed whose pin is no skill) | nil }
 
 NS.Template = {}
 local Tpl = NS.Template
@@ -81,7 +82,8 @@ end
 
 -- name -> function(ctx, arg) -> string | nil. `arg` is the text after the colon, or nil.
 local RESOLVE = {
-    pinned         = function(ctx) return Tpl.FormatSkill(pinnedEntry(ctx)) end,
+    -- A feed whose pin is no skill hands its text in (the Character Stats feed's pinned stat, SMW-05).
+    pinned         = function(ctx) return ctx.pinnedText or Tpl.FormatSkill(pinnedEntry(ctx)) end,
     gains          = function(ctx) return ctx.gains and tostring(ctx.gains) or nil end,
     last           = lastText,
     lowestProf     = function(ctx) return Tpl.FormatSkill(Tpl.LowestProfession(ctx)) end,

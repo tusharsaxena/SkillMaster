@@ -263,30 +263,31 @@ end)
 
 -- ── R7-5: the LDB tooltips' titles ───────────────────────────────────────────────────────────
 
-test("round7 titles: the two feeds' tooltips read Skill Master · Professions and Skills and Skill Master · Stats", function()
+test("round7 titles: each feed's tooltip reads its window's title (SMW-05), Skill Master · Professions ...", function()
     local Br = NS.Broker
-    local SKILLS, STATS = "Skill Master \194\183 Professions and Skills", "Skill Master \194\183 Stats"
-    assertEqual(Br.FEEDS.skills.title, SKILLS)
+    local SKILLS, STATS = "Skill Master \194\183 Professions", "Skill Master \194\183 Character Stats"
+    assertEqual(Br.FEEDS.professions.title, SKILLS)
     assertEqual(Br.FEEDS.stats.title, STATS)
+    for fid, f in pairs(Br.FEEDS) do assertEqual(f.title, NS.Families[fid].title, fid) end
     -- Both styles read B.Heading: the Main window style's panel title and the Classic tooltip's first line.
     local lines = {}
     local tip = M.CreateFrame("GameTooltip", "SkillMasterR7TitleTip", M.UIParent)
     function tip:AddLine(s) lines[#lines + 1] = s end
     function tip:AddDoubleLine(l, r) lines[#lines + 1] = l .. " " .. tostring(r) end
     function tip:NumLines() return #lines end
-    Br.FillTooltip(tip, "skills")
+    Br.FillTooltip(tip, "professions")
     assertTrue(lines[1]:find(SKILLS, 1, true) ~= nil, "Classic skills title: " .. tostring(lines[1]))
     assertEqual((Br.Heading()), SKILLS, "the panel's title")
     lines = {}
     Br.FillTooltip(tip, "stats")
     assertTrue(lines[1]:find(STATS, 1, true) ~= nil, "Classic stats title: " .. tostring(lines[1]))
     assertEqual((Br.Heading()), STATS)
-    Br.FillTooltip(tip, "skills")
-    -- The LibDataBroker names and labels a display stores by are unchanged.
+    Br.FillTooltip(tip, "professions")
+    -- The LibDataBroker names a display stores by are unchanged; the stats feed is relabeled.
     assertEqual(Br.NAME, "Skill Master")
     assertEqual(Br.STATS_NAME, "Skill Master Stats")
     assertEqual(Br.Object().label, "Skill Master")
-    assertEqual(Br.StatsObject().label, "Skill Master Stats")
+    assertEqual(Br.StatsObject().label, "Skill Master Character Stats")
 end)
 
 -- R7 review: the longer title must not draw over the gains text in the Main window style.
@@ -584,7 +585,7 @@ test("round7 filters: both LDB tooltip styles honor every block's filter", funct
             function tip:AddLine(t) lines[#lines + 1] = t end
             function tip:AddDoubleLine(l) lines[#lines + 1] = l end
             function tip:NumLines() return #lines end
-            Br.FillTooltip(tip, "skills")
+            Br.FillTooltip(tip, "professions")
             local text = table.concat(lines, "\n")
             assertTrue(text:find("Tailoring", 1, true) and not text:find("Mining", 1, true), "Classic: Primary at cap: " .. text)
             lines = {}

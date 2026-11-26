@@ -611,7 +611,6 @@ L["How long the feed shows the skill that just went up (^ Bows 81) in place of i
 L["Tooltip"] = true
 L["Apply skin to the tooltip"] = true
 L["Draw the feed's tooltip in the skin's backdrop, border and fonts. Off, it is the game's plain tooltip. Classic style only: the Main window style always wears the skin."] = true
-L["Sections"] = true
 L["Draw this section in the feed's tooltip."] = true
 L["Broker"] = true
 L["Alerts"] = true
@@ -708,7 +707,6 @@ L["The simulator needs LibKa0s-Sim-1.0."] = true
 -- ---- END M5 integration ----
 
 -- Owner feedback round 3 (main thread): the broker title with nothing pinned
-L["Professions and Skills"] = true
 L["Hide in this tooltip"] = true
 L["Default order"] = true
 L["Value, highest first"] = true
@@ -835,12 +833,7 @@ L["The tallest the LDB tooltip grows in the Main window style; past it, it scrol
 L["Nothing to show in this tooltip."] = true
 
 -- ---- Round 6, R6-9: the Skill Master Stats feed (modules/Broker.lua, settings/Broker.lua) ----
-L["Skill Master Stats"] = true
-L["Stats feed sections"] = true
 -- Round 7, R7-5: the LDB tooltips' titles (modules/Broker.lua B.FEEDS)
-L["Skill Master \194\183 Professions and Skills"] = true
-L["Skill Master \194\183 Stats"] = true
-L["Draw this stat block in the Skill Master Stats feed's tooltip."] = true
 
 -- ---- Round 6, R6-11: Skill Master's waypoint arrow (modules/WaypointArrow.lua, settings/Trainers.lua) ----
 L["Show Skill Master's arrow"] = true

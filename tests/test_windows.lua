@@ -133,7 +133,7 @@ test("windows: schemaVersion 14 moves the old window's stored settings to the Pr
     p["Win-Fresh"] = {}
     NS.db.global.schemaVersion = 13
     NS:RunMigrations()
-    assertEqual(NS.db.global.schemaVersion, 14)
+    assertEqual(NS.db.global.schemaVersion, NS.SCHEMA_VERSION)
     local w = p["Win-Old"].windows.professions
     assertEqual(w.point.point, "TOP", "the drop point moves")
     assertEqual(w.width, 500) assertEqual(w.columns, 2) assertEqual(w.strata, "HIGH")

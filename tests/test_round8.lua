@@ -143,7 +143,7 @@ test("round8 ldb tooltip: its headers carry no sort or filter mark, on All or a 
         end
         assertTrue(NS.SetByPath("layout.blocks.weapon.filter", "belowCap"))
         M.__fireTimers()
-        Br.OnEnter(M.UIParent)
+        Br.OnEnter(M.UIParent, "skills")   -- SMW-05: the weapons are the Skills feed's
         local weapon = panelHeader("weapon")
         assertFalse(weapon.filter:IsShown(), "no filter mark while the filter narrows")
         assertFalse(weapon.sort:IsShown(), "and no sort mark")
@@ -578,6 +578,7 @@ test("round8 open a row from: the LDB tooltip's Full row arms the cast over the 
         b:GetScript("PostClick")(b, "RightButton", false)
         assertEqual(table.concat(got, ","), "skill:enchanting:RightButton", "the overlay's right-click: the row menu")
         SO8:Unhover(row)
+        Br.OnEnter(M.UIParent, "skills")   -- SMW-05: the weapons are the Skills feed's
         local maces = rowIn(BP.Rows(), "maces")
         maces:__fire("OnClick", "LeftButton")
         assertEqual(table.concat(world.opened, ","), "SkillsFrame", "a plain click opens what the go icon opens")
@@ -600,6 +601,7 @@ test("round8 open a row from: the LDB tooltip's Go icon only keeps the cast on t
         local row = rowIn(BP.Rows(), "enchanting")
         assertEqual(R8.OpenFrom(row), "icon")
         assertTrue(SO8.CoverFor(row) == row.act, "over the go icon")
+        Br.OnEnter(M.UIParent, "skills")   -- SMW-05: the weapons are the Skills feed's
         local maces = rowIn(BP.Rows(), "maces")
         maces:__fire("OnClick", "LeftButton")
         assertEqual(#world.opened, 0, "the row's plain click opens nothing")

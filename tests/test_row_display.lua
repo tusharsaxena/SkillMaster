@@ -134,15 +134,16 @@ test("rows show: the broker tooltip's skill and stat lines honor it", function()
     -- then Base & Combat on the stats feed (round 6, R6-9).
     local sections = NS.db.profile.broker.tooltip.sections
     local all, saved = {}, {}
-    for _, id in ipairs(B.SECTIONS) do all[#all + 1] = id end
-    for _, id in ipairs(B.STAT_SECTIONS) do all[#all + 1] = id end
+    for _, fid in ipairs({ "professions", "skills", "stats" }) do   -- SMW-05: each feed's own sections
+        for _, id in ipairs(B.FEEDS[fid].sections) do all[#all + 1] = id end
+    end
     for _, id in ipairs(all) do saved[id] = sections[id] end
     for _, mode in ipairs({ "both", "bar", "text" }) do
         NS.SetByPath("bars.rowDisplay", mode)
         for _, section in ipairs({ "secondary", "stats_base" }) do
             for _, id in ipairs(all) do sections[id] = id == section end
             local tip = recordingTip()
-            B.FillTooltip(tip, section == "stats_base" and "stats" or "skills")
+            B.FillTooltip(tip, section == "stats_base" and "stats" or "professions")
             local name = section == "stats_base" and "Agility" or "Fishing"
             local value = valueOf(tip, name)
             assertEqual(B.BarsDrawn(), want[mode].bars, mode .. " " .. section .. ": mini bars")
@@ -151,7 +152,7 @@ test("rows show: the broker tooltip's skill and stat lines honor it", function()
         end
     end
     for _, id in ipairs(all) do sections[id] = saved[id] end
-    B.FillTooltip(recordingTip(), "skills")
+    B.FillTooltip(recordingTip(), "professions")
     NS.SetByPath("bars.rowDisplay", NS.defaults.profile.bars.rowDisplay)
 end)
 

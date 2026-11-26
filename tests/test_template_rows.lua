@@ -57,7 +57,7 @@ end
 
 local function restoreBroker()
     NS.ForgetCustomTemplates()
-    NS.SetByPath("broker.template", NS.defaults.profile.broker.template)
+    NS.SetByPath("broker.feeds.professions.template", NS.defaults.profile.broker.feeds.professions.template)
     NS.SetByPath("bars.textTemplate", NS.defaults.profile.bars.textTemplate)
 end
 
@@ -74,7 +74,7 @@ test("templates: no string row in the whole schema renders as an empty dropdown"
     assertEqual(#bad, 0, "empty dropdowns: " .. table.concat(bad, ", "))
 end)
 
-test("templates: the Broker page renders with no empty-dropdown line, one dropdown for the feed", function()
+test("templates: the Broker page renders with no empty-dropdown line, one dropdown per feed (SMW-05)", function()
     restoreBroker()
     M.__resetPrinted()
     local from = #aceGUI().__created
@@ -82,7 +82,7 @@ test("templates: the Broker page renders with no empty-dropdown line, one dropdo
     assertEqual(#emptyDropdownLines(), 0, table.concat(emptyDropdownLines(), " | "))
     for _, label in ipairs({ "Feed text" }) do
         local dd = widgets(from, "Dropdown", label)
-        assertEqual(#dd, 1, label .. ": one presets dropdown")
+        assertEqual(#dd, #NS.FAMILY_ORDER, label .. ": one presets dropdown per feed")
         assertTrue(next(dd[1].list) ~= nil, label .. ": the dropdown lists its presets")
         assertTrue(dd[1].list[CUSTOM] ~= nil, label .. ": and Custom")
     end
@@ -91,15 +91,15 @@ test("templates: the Broker page renders with no empty-dropdown line, one dropdo
 end)
 
 test("templates: every template row's default is one of its presets", function()
-    assertEqual(NS.GetSetting("broker.preset"), NS.defaults.profile.broker.template, "the feed")
+    assertEqual(NS.GetSetting("broker.feeds.professions.preset"), NS.defaults.profile.broker.feeds.professions.template, "the feed")
     assertEqual(NS.GetSetting("bars.textPreset"), NS.defaults.profile.bars.textTemplate, "the bar text")
 end)
 
 test("templates: picking a preset writes its template", function()
     restoreBroker()
-    assertTrue(NS.SetByPath("broker.preset", "{pinned}"))
-    assertEqual(NS.db.profile.broker.template, "{pinned}", "the stored value is the template string")
-    assertEqual(NS.GetSetting("broker.preset"), "{pinned}", "and the picker reads that preset")
+    assertTrue(NS.SetByPath("broker.feeds.professions.preset", "{pinned}"))
+    assertEqual(NS.db.profile.broker.feeds.professions.template, "{pinned}", "the stored value is the template string")
+    assertEqual(NS.GetSetting("broker.feeds.professions.preset"), "{pinned}", "and the picker reads that preset")
     assertTrue(NS.SetByPath("bars.textPreset", "{rank} / {max}"))
     assertEqual(NS.BarStyle.Resolve("row").template, "{rank} / {max}", "the bars draw it")
     assertEqual(NS.Widgets.BarText(107, 25, 150, NS.BarStyle.Resolve("row").template), "107 / 150")
@@ -108,20 +108,20 @@ end)
 
 test("templates: Custom keeps the text, and the box edits it", function()
     restoreBroker()
-    local before = NS.db.profile.broker.template
-    assertTrue(NS.SetByPath("broker.preset", CUSTOM))
-    assertEqual(NS.db.profile.broker.template, before, "choosing Custom writes nothing")
-    assertEqual(NS.GetSetting("broker.preset"), CUSTOM, "the picker reads Custom")
-    assertTrue(NS.SetByPath("broker.template", "{equippedWeapon} Lv {level}"))
-    assertEqual(NS.db.profile.broker.template, "{equippedWeapon} Lv {level}")
-    assertEqual(NS.GetSetting("broker.preset"), CUSTOM, "free text stays Custom")
+    local before = NS.db.profile.broker.feeds.professions.template
+    assertTrue(NS.SetByPath("broker.feeds.professions.preset", CUSTOM))
+    assertEqual(NS.db.profile.broker.feeds.professions.template, before, "choosing Custom writes nothing")
+    assertEqual(NS.GetSetting("broker.feeds.professions.preset"), CUSTOM, "the picker reads Custom")
+    assertTrue(NS.SetByPath("broker.feeds.professions.template", "{equippedWeapon} Lv {level}"))
+    assertEqual(NS.db.profile.broker.feeds.professions.template, "{equippedWeapon} Lv {level}")
+    assertEqual(NS.GetSetting("broker.feeds.professions.preset"), CUSTOM, "free text stays Custom")
     restoreBroker()
 end)
 
 test("templates: a stored string matching no preset reads as Custom, its text in the box", function()
     restoreBroker()
-    NS.db.profile.broker.template = "{stat:armor} / {stat:dodge}"
-    assertEqual(NS.GetSetting("broker.preset"), CUSTOM)
+    NS.db.profile.broker.feeds.professions.template = "{stat:armor} / {stat:dodge}"
+    assertEqual(NS.GetSetting("broker.feeds.professions.preset"), CUSTOM)
     local from = #aceGUI().__created
     local panel = showPage("Broker")
     local boxes = widgets(from, "EditBox", "Custom text")
@@ -129,7 +129,7 @@ test("templates: a stored string matching no preset reads as Custom, its text in
     assertEqual(boxes[1].text, "{stat:armor} / {stat:dodge}")
     -- The box commits on Enter, through the write seam.
     boxes[1]:__fire("OnEnterPressed", "{stat:speed}")
-    assertEqual(NS.db.profile.broker.template, "{stat:speed}")
+    assertEqual(NS.db.profile.broker.feeds.professions.template, "{stat:speed}")
     hidePage(panel)
     restoreBroker()
 end)
@@ -144,13 +144,13 @@ test("templates: choosing Custom in the dropdown reveals the box; a preset hides
     M.__fireTimers()   -- the switched section re-renders on the next frame
     local boxes = widgets(from, "EditBox", "Custom text")
     assertEqual(#boxes, 1, "Custom shows the box")
-    assertEqual(boxes[1].text, NS.defaults.profile.broker.template, "holding the current text")
+    assertEqual(boxes[1].text, NS.defaults.profile.broker.feeds.professions.template, "holding the current text")
     dd = widgets(from, "Dropdown", "Feed text")[1]
     from = #aceGUI().__created
     dd:__fire("OnValueChanged", "{pinned}")
     M.__fireTimers()
-    assertEqual(NS.db.profile.broker.template, "{pinned}")
-    assertEqual(#widgets(from, "Dropdown", "Feed text"), 1, "the page drew again")
+    assertEqual(NS.db.profile.broker.feeds.professions.template, "{pinned}")
+    assertEqual(#widgets(from, "Dropdown", "Feed text"), #NS.FAMILY_ORDER, "the page drew again, a dropdown per feed")
     assertEqual(#widgets(from, "EditBox", "Custom text"), 0, "a preset hides it")
     hidePage(panel)
     restoreBroker()
@@ -158,13 +158,13 @@ end)
 
 test("templates: the page's Defaults lets go of Custom and restores the shipped template", function()
     restoreBroker()
-    NS.SetByPath("broker.preset", CUSTOM)
-    NS.SetByPath("broker.template", "{level}")
+    NS.SetByPath("broker.feeds.professions.preset", CUSTOM)
+    NS.SetByPath("broker.feeds.professions.template", "{level}")
     NS.Helpers.RestoreDefaults("broker")
     M.__fireTimers()
-    assertEqual(NS.db.profile.broker.template, NS.defaults.profile.broker.template)
-    assertEqual(NS.GetSetting("broker.preset"), NS.defaults.profile.broker.template)
-    assertFalse(rowFor("broker.preset").get() == CUSTOM)
+    assertEqual(NS.db.profile.broker.feeds.professions.template, NS.defaults.profile.broker.feeds.professions.template)
+    assertEqual(NS.GetSetting("broker.feeds.professions.preset"), NS.defaults.profile.broker.feeds.professions.template)
+    assertFalse(rowFor("broker.feeds.professions.preset").get() == CUSTOM)
     restoreBroker()
 end)
 

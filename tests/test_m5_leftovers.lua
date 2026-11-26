@@ -253,7 +253,7 @@ test("test mode: the broker's {pinned} and {equippedWeapon} are the sample chara
         NS.ToggleTestMode()
     end)
     if NS.IsTestMode() then NS.ToggleTestMode() end
-    local live = NS.Broker.Context()
+    local live = NS.Broker.Context("skills")   -- SMW-05: Riding (Other) shows on the Skills feed
     NS.SkillHelpers.WeaponSkillInSlot = realSlot
     NS.db.char.pinned = before
     if not ok then error(err, 0) end

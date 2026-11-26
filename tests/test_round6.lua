@@ -781,7 +781,7 @@ test("round6 ldb look: a new profile draws the Main window style on its own TOOL
         assertEqual(BP.ContentWidth(), NS.MainWindow.ContentWidth(), "one Width draws the window's body")
         Br.OnEnter(M.UIParent)
         assertTrue(f:IsShown(), "it shows on the feed's hover")
-        assertEqual(f.title:GetText(), Br.FEEDS.skills.title, "the feed's tooltip title (R7-5)")
+        assertEqual(f.title:GetText(), Br.FEEDS.professions.title, "the feed's tooltip title (R7-5: its window's, SMW-05)")
         assertEqual(f.footer:GetText(), Br.FooterText(), "the footer hints stay")
     end)
     withFeedTip("classic", function()
@@ -795,14 +795,19 @@ test("round6 ldb look: the window's headers and rows, the bar with its text insi
         Br.OnEnter(M.UIParent)
         local ids = {}
         for _, h in ipairs(BP.Headers()) do ids[#ids + 1] = h.id end
-        assertEqual(table.concat(ids, ","), "primary,secondary,weapon,other", "the shown sections, in the window's order")
+        assertEqual(table.concat(ids, ","), "primary,secondary", "the Professions feed's sections, in the window's order")
         local row = panelRow("tailoring")
         assertTrue(row ~= nil, "a window row")
         assertTrue(row.bar:IsShown(), "the shared bar")
         assertTrue(row.act:IsShown(), "the row's mark")
         assertEqual(row.baseH, NS.db.profile.bars.rowHeight, "the window's row height")
         assertTrue(row:GetParent() == BP.Frame().content, "in the panel's scrolled body")
-        assertTrue(panelRow("rangedCrit") == nil, "no stats in the skills feed (R6-9)")
+        assertTrue(panelRow("rangedCrit") == nil, "no stats in the Professions feed (R6-9)")
+        assertTrue(panelRow("bows") == nil, "nor weapons (SMW-05)")
+        Br.OnEnter(M.UIParent, "skills")
+        ids = {}
+        for _, h in ipairs(BP.Headers()) do ids[#ids + 1] = h.id end
+        assertEqual(table.concat(ids, ","), "weapon,other", "the Skills feed's own two")
         Br.OnEnter(M.UIParent, "stats")
         assertTrue(panelRow("rangedCrit") ~= nil, "the stats feed draws the stat blocks")
         Br.OnEnter(M.UIParent)
@@ -812,7 +817,7 @@ end)
 test("round6 ldb look: a block collapsed in the window is a collapsed header here, and nothing on a header acts", function()
     withFeedTip("window", function()
         NS.db.profile.layout.blocks.weapon.collapsed = true
-        Br.OnEnter(M.UIParent)
+        Br.OnEnter(M.UIParent, "skills")
         local weapon
         for _, h in ipairs(BP.Headers()) do if h.id == "weapon" then weapon = h end end
         assertTrue(weapon ~= nil and weapon.collapsed == true, "the header says collapsed (chevron right)")
@@ -822,7 +827,7 @@ test("round6 ldb look: a block collapsed in the window is a collapsed header her
         -- A recorder on the pooled header's EnableMouse, then the tooltip drawn again.
         local calls = {}
         rawset(weapon, "EnableMouse", function(_, on) calls[#calls + 1] = on end)
-        Br.OnEnter(M.UIParent)
+        Br.OnEnter(M.UIParent, "skills")
         rawset(weapon, "EnableMouse", nil)
         assertEqual(calls[1], false, "the header takes no click")
     end)
@@ -852,7 +857,7 @@ end)
 test("round6 ldb look: the window's weapon filter and sort reach both styles", function()
     withFeedTip("window", function()
         NS.db.profile.layout.blocks.weapon.filter = "learned"
-        Br.OnEnter(M.UIParent)
+        Br.OnEnter(M.UIParent, "skills")
         assertTrue(panelRow("bows") ~= nil and panelRow("swords") == nil, "Main window: Learned leaves Swords out")
     end)
     withFeedTip("classic", function()
@@ -862,7 +867,7 @@ test("round6 ldb look: the window's weapon filter and sort reach both styles", f
         function tip:AddLine(t) lines[#lines + 1] = t end
         function tip:AddDoubleLine(l) lines[#lines + 1] = l end
         function tip:NumLines() return #lines end
-        Br.FillTooltip(tip)
+        Br.FillTooltip(tip, "skills")
         local text = table.concat(lines, "\n")
         assertTrue(text:find("Bows", 1, true) ~= nil and text:find("Swords", 1, true) == nil, "Classic too: " .. text)
     end)
@@ -874,8 +879,8 @@ test("round6 ldb look: past its Height the body scrolls, by the wheel and by the
         local f = BP.Frame()
         assertEqual(select(2, BP.Scroll()), 0, "the default Height fits the fixture")
         assertFalse(f.scrollBar:IsEnabled(), "while it fits the bar is drawn disabled (round 7, R7-4)")
-        NS.db.profile.tooltips.ldb.height = 120
-        Br.OnEnter(M.UIParent)
+        NS.db.profile.tooltips.ldb.height = 80   -- SMW-05: under the Skills feed's three rows
+        Br.OnEnter(M.UIParent, "skills")   -- SMW-05: the fixture's longest feed (three rows)
         local _, most = BP.Scroll()
         assertTrue(most > 0, "the body overflows")
         assertTrue(f.scrollBar:IsShown(), "the scroll bar shows")
@@ -950,49 +955,49 @@ local function statsTip()
     return tip, lines
 end
 
-test("round6 stats feed: a second data source, its tooltip the four stat blocks, its clicks the skills feed's", function()
+test("round6 stats feed: its own data source, its tooltip the four stat blocks, its clicks its window's", function()
     local obj = M.__ldbObjects[Br.STATS_NAME]
     assertTrue(obj ~= nil and obj == Br.StatsObject(), "Skill Master Stats is registered")
     assertEqual(obj.type, "data source")
-    assertEqual(obj.label, "Skill Master Stats")
-    assertTrue(obj.OnClick == Br.OnClick, "the same label clicks")
-    assertEqual(table.concat(Br.STAT_SECTIONS, ","), "stats_base,stats_spell,stats_defense,stats_utility")
-    for _, id in ipairs(Br.STAT_SECTIONS) do
+    assertEqual(obj.label, "Skill Master Character Stats", "relabeled; its name stays (SMW-05)")
+    assertTrue(type(obj.OnClick) == "function", "its label clicks")
+    assertEqual(table.concat(Br.FEEDS.stats.sections, ","), "stats_base,stats_spell,stats_defense,stats_utility")
+    for _, id in ipairs(Br.FEEDS.stats.sections) do
         assertEqual(NS.defaults.profile.broker.tooltip.sections[id], true, id .. " on by default")
     end
     withFeedTip("window", function()
         obj.OnEnter(M.UIParent)
         assertEqual(Br.Feed(), "stats")
-        assertEqual(BP.Frame().title:GetText(), "Skill Master \194\183 Stats")
+        assertEqual(BP.Frame().title:GetText(), "Skill Master \194\183 Character Stats")
         local ids = {}
         for _, h in ipairs(BP.Headers()) do ids[#ids + 1] = h.id end
         assertEqual(table.concat(ids, ","), "stats_base", "the stat blocks with rows, no skill block")
         assertTrue(panelRow("tailoring") == nil, "no skills in the stats feed")
         M.__ldbObjects[Br.NAME].OnEnter(M.UIParent)
-        assertEqual(Br.Feed(), "skills", "the skills feed's hover takes it back")
+        assertEqual(Br.Feed(), "professions", "the Professions feed's hover takes it back")
     end)
     withFeedTip("classic", function()
         local tip, lines = statsTip()
         Br.FillTooltip(tip, "stats")
         local text = table.concat(lines, "\n")
-        assertTrue(text:find("Skill Master \194\183 Stats", 1, true) ~= nil and text:find("Ranged Crit", 1, true) ~= nil, text)
+        assertTrue(text:find("Skill Master \194\183 Character Stats", 1, true) ~= nil and text:find("Ranged Crit", 1, true) ~= nil, text)
         assertTrue(text:find("Tailoring", 1, true) == nil, "Classic: no skills either")
         NS.db.profile.broker.tooltip.hiddenStats = { rangedCrit = true }   -- the Rows page's LDB tooltip eye
         tip, lines = statsTip()
         Br.FillTooltip(tip, "stats")
         NS.db.profile.broker.tooltip.hiddenStats = {}
         assertTrue(table.concat(lines, "\n"):find("Ranged Crit", 1, true) == nil, "a stat's tooltip Hide reaches the stats feed")
-        Br.FillTooltip(statsTip(), "skills")
+        Br.FillTooltip(statsTip(), "professions")
     end)
 end)
 
-test("round6 stats feed: a stat row's menu pins its stat to the feed per character; with none it reads Stats", function()
+test("round6 stats feed: a stat row's menu pins its stat to the feed per character; with none it reads Character Stats", function()
     local crit = tipModels().statIndex.rangedCrit
     NS.bus:SendMessage(NS.MSG.STATS_UPDATED, { base = { crit }, spell = {}, defense = {}, utility = {} })
     local saved = NS.db.char.pinnedStat
     NS.db.char.pinnedStat = false
     Br.Refresh()
-    assertEqual(Br.StatsText(), "Stats", "nothing pinned")
+    assertEqual(Br.StatsText(), "Character Stats", "nothing pinned")
     local pin
     for _, r in ipairs(NS.Interact.MenuRows({ kind = "stat", entry = crit })) do
         if r.value == "pin" then pin = r end
@@ -1005,7 +1010,7 @@ test("round6 stats feed: a stat row's menu pins its stat to the feed per charact
     assertTrue(pin.selected(), "ticked")
     assertTrue(NS.db.char.pinned ~= "rangedCrit", "the skills feed's pin is apart")
     pin.onClick()
-    assertEqual(Br.StatsText(), "Stats", "a second click unpins")
+    assertEqual(Br.StatsText(), "Character Stats", "a second click unpins")
     NS.db.char.pinnedStat = saved
     Br.Refresh()
 end)

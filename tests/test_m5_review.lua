@@ -49,15 +49,15 @@ end)
 test("profile switch: the broker feed re-reads the new profile's template", function()
     -- red under: a reloadProfile that never calls NS.Broker.Refresh, so a feed keeps the old
     -- profile's text until the next skill pass.
-    local default = NS.defaults.profile.broker.template
-    NS.SetByPath("broker.template", "review {level}")
+    local default = NS.defaults.profile.broker.feeds.professions.template
+    NS.SetByPath("broker.feeds.professions.template", "review {level}")
     assertTrue(tostring(NS.Broker.Text()):find("^review ") ~= nil, "the write reached the feed")
     withProfile("ReviewBroker", function(db)
         db:SetProfile("ReviewBroker")
         assertTrue(tostring(NS.Broker.Text()):find("^review ") == nil,
             "the new profile's template is drawn, got " .. tostring(NS.Broker.Text()))
     end)
-    NS.SetByPath("broker.template", default)
+    NS.SetByPath("broker.feeds.professions.template", default)
 end)
 
 test("profile switch: the Journal takes the new profile's drop point and size", function()

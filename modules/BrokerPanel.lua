@@ -337,16 +337,17 @@ local function layBody()
         return LINE_H + 12
     end
     local skills, stats = B.Models()
+    local models = { skills = skills, stats = stats }   -- by provider source (modules/BlockProviders.lua)
     local y = 0
     for _, id in ipairs(B.ShownBlocks()) do
-        local stat = NS.BlockDefs[id].source == "stats"
-        if (stat and stats) or (not stat and skills) then y = layBlock(id, skills, stats, y) end
+        if models[NS.BlockDefs[id].source] then y = layBlock(id, skills, stats, y) end
     end
     for _, row in ipairs(rowPool.active) do dressRow(row) end
     if y > 0 then return y end
-    local have = NS.Broker.Feed() == "stats" and stats or (NS.Broker.Feed() ~= "stats" and skills)
-    local none = NS.Broker.Feed() == "stats" and L["No stats to show yet."] or L["No skills to show yet."]
-    frame.empty:SetText(have and L["Nothing to show in this tooltip."] or none)
+    -- The feed's family has a model and nothing showed, or has none yet (SMW-05: each feed's own line).
+    local fid = B.Feed()
+    local f = B.FEEDS[fid]
+    frame.empty:SetText(models[f and f.source] and L["Nothing to show in this tooltip."] or NS.Windows.EmptyText(fid))
     return LINE_H + 12
 end
 

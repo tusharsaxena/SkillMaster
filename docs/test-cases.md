@@ -48,7 +48,7 @@ Total.
 ### test_template_rows.lua (9)
 
 - templates: no string row in the whole schema renders as an empty dropdown
-- templates: the Broker page renders with no empty-dropdown line, one dropdown for the feed
+- templates: the Broker page renders with no empty-dropdown line, one dropdown per feed (SMW-05)
 - templates: every template row's default is one of its presets
 - templates: picking a preset writes its template
 - templates: Custom keeps the text, and the box edits it
@@ -415,7 +415,7 @@ Total.
 - round3 sort: the LDB tooltip lists a section in its block's order
 - round3 alerts: skip untrained by default; equipped only; every weapon; a muted weapon never
 - round3 window: collapsing every block keeps the window's height; Shrink to fit lets it shrink
-- round3 broker: a second Pin on the pinned skill unpins it, and the feed reads Professions and Skills
+- round3 broker: a second Pin on the pinned skill unpins it, and the feed reads Professions
 - round3 broker: a right-click on a tooltip row opens the row menu, whose Hide leaves it out of the tooltip only
 - round3 broker: the bars stop at the widest value, never past the old fixed column
 - round3 click: a weapon row opens the Skills tab with its line selected
@@ -563,8 +563,8 @@ Total.
 - round6 ldb look: the row menu draws above the tooltip in both styles, and goes back as it hides
 - round6 ldb look: the classic-only rows are dimmed in the Main window style, width and height in Classic
 - round6 ldb look: schemaVersion 8 keeps every stored profile on Classic; a fresh install starts on it new
-- round6 stats feed: a second data source, its tooltip the four stat blocks, its clicks the skills feed's
-- round6 stats feed: a stat row's menu pins its stat to the feed per character; with none it reads Stats
+- round6 stats feed: its own data source, its tooltip the four stat blocks, its clicks its window's
+- round6 stats feed: a stat row's menu pins its stat to the feed per character; with none it reads Character Stats
 - round6 stats feed: schemaVersion 9 drops a stored Stats section switch, the stat blocks' switches answer
 - round6 review: the Main window style's test strip opens its menu above the tooltip, and it ends test mode
 - round6 review: the Set waypoint button keeps the skin's hover look beside its own tooltip
@@ -603,7 +603,7 @@ Total.
 - round7 icon border: Use the row's color is off on a new profile, so the skin's icon border draws
 - round7 icon border: schemaVersion 12 keeps the row's color on every profile stored before
 - round7 header meta: no block header carries a line beside its title, Base & Combat included
-- round7 titles: the two feeds' tooltips read Skill Master · Professions and Skills and Skill Master · Stats
+- round7 titles: each feed's tooltip reads its window's title (SMW-05), Skill Master · Professions ...
 - round7 titles: the panel's title never overlaps its gains text, centered while it fits
 - round7 scroll bar: an always-shown bar is drawn disabled while nothing scrolls, enabled once it does
 - round7 scroll bar: the LDB panel builds its bar always shown
@@ -819,11 +819,11 @@ Total.
 
 ### test_broker.lua (17)
 
-- broker: two data sources, "Skill Master" and "Skill Master Stats" (R6-9), separate from the launcher object
+- broker: one data source per family (SMW-05), "Skill Master" and "Skill Master Stats" kept, separate from the launcher object
 - broker: the feed renders its template
 - broker: {equippedWeapon} follows the main hand's weapon class
-- test_broker_flash_reverts: any skill-up flashes the feed, then the template comes back
-- broker: the skills feed's tooltip has the four skill sections, on by default, and no stats
+- test_broker_flash_reverts: a skill-up flashes its own family's feed, then the template comes back
+- broker: the Professions and Skills feeds' tooltips have their own two sections each, on by default, and no stats
 - broker: each section has its own switch
 - broker: a tooltip Hide leaves the main window alone, and the window's Hide leaves the tooltip
 - broker: a tooltip Hide row per catalog skill and per stat, on the Rows page (R5-13), apart from the window's
@@ -836,6 +836,21 @@ Total.
 - broker: GameTooltip keeps its state, and its hide never takes the skinned tooltip's bars
 - broker: schemaVersion 3 carries the All template and drops the other feeds' keys
 - broker: schemaVersion 3 moves the active profile's All template past the copied default
+
+### test_feeds.lua (12)
+
+- feeds: one data source per family, in the family order, the two shipped names kept
+- feeds: with nothing pinned, a {pinned} feed reads its family's short name
+- feeds: each feed's template is its own
+- feeds: the one pinned skill shows on its own family's feed (until the pins per broker, SMW-06)
+- feeds: the Character Stats feed's {pinned} is its pinned stat, in any template
+- feeds: a skill-up flashes its own family's feed alone
+- feeds: a tree family's tooltip says it has nothing yet, in both styles
+- feeds: each feed's cell toggles its own window; a right click opens the Broker page
+- feeds: stood down, every feed reads Off
+- feeds: the Broker page has a template pair and the section switches per feed
+- feeds: schemaVersion 15 moves the one template to the Professions feed's
+- feeds: the tooltip content is its own file, and Broker.lua stays well under the cap
 
 ### test_polish.lua (12)
 
@@ -1245,6 +1260,7 @@ Total.
 | test_alerts.lua | 14 |
 | test_template.lua | 3 |
 | test_broker.lua | 17 |
+| test_feeds.lua | 12 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
 | test_sample_names.lua | 2 |
@@ -1275,4 +1291,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **933** |
+| **Total** | **945** |
