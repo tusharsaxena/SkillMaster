@@ -437,7 +437,7 @@ local function addTreeRow(tip, r, i)
         values.text = ""
         drawMiniBar(tip, n, values)
     end
-    if r.header then return { line = n, node = e.nodeKey, family = spec.family, depth = r.depth or 0 } end
+    if r.header then return { line = n, node = e.nodeKey, family = spec.family, depth = r.depth } end
     return { line = n, kind = r.kind, key = e.key }
 end
 
