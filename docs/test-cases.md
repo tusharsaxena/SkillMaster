@@ -923,7 +923,7 @@ Total.
 - smw-rev: the Statistics window reopened reads its unfolded categories afresh, not as it last saw them
 - smw-rev: the Statistics tooltip shown again reads what it unfolds afresh
 - smw-rev: with the window hidden and one statistic pinned, CRITERIA_UPDATE reads the pinned row alone
-- smw-rev: a reputation's later change moves its one Log line to the end, so the Log stays in time order
+- smw-rev: a reputation's later change is a row after the skill-up, so the Log stays in time order
 - smw-rev: the feeds read the main hand and the level only for a template that shows them
 - smw-rev: a nested header's chevron in the Classic tooltip is inside its hit, which spans the line
 - smw-rev: in the Statistics window, Expand all opens every category and Collapse all folds them, the block open
@@ -949,6 +949,46 @@ Total.
 - r5 sm-05: /sm toggle under the perf hold opens nothing and says the capture line once
 - r5 sm-06: the probe's doubled profession lines draw each profession once, in the windows and the tooltip
 - r5 sm-07: all six windows open while playing raise no Lua error, and /sm toggle closes them all
+
+### test_r5_join_resize.lua (5)
+
+- r5 sm-08: a merged window has a shown resize grip, its bounds per column at the content's height
+- r5 sm-08: a drag on the grip sets the column width, snapped, and keeps the drop point
+- r5 sm-08: Locked hides a merged window's grip and refuses a grab
+- r5 sm-08: a stored column width out of range is clamped, a malformed one dropped
+- r5 sm-08: migration 17 cleans a stored group's column width
+
+### test_r5_subdetach.lua (9)
+
+- r5 sm-09: every tree header in the Reputations, Currencies and Statistics windows has a detach mark
+- r5 sm-09: detaching Alliance makes its own window of its factions and takes it out of Reputations
+- r5 sm-09: docking a sub-category puts it back where it was and forgets its row
+- r5 sm-09: a nested Statistics category detaches, read whatever the window's folds say
+- r5 sm-09: a currency header detaches, keyed by its name
+- r5 sm-09: a detached sub-category collapses, resizes, joins a block and survives a reload
+- r5 sm-09: the LDB tooltip keeps the whole tree and shows no detach mark
+- r5 sm-09: the model normalizes a stored row and refuses what is no tree header
+- r5 sm-09: schemaVersion 18 normalizes a stored layout.subs and drops one that is no table
+
+### test_r5_journal.lua (17)
+
+- r5 sm-10: each reputation change is its own row, in time order, signed
+- r5 sm-10: a change that moves the standing records it, and the Change column says where it landed
+- r5 sm-10: a standing that moved on the bus lands as a row with both standings
+- r5 sm-10: RepData's changes carry the old and new reaction; the first read (the login baseline) has none
+- r5 sm-10: the Log draws a reputation row's name and its signed change with the standing
+- r5 sm-10: a reputation grind never pushes a skill-up out: the ring keeps journal.keep of each sort
+- r5 sm-10: schemaVersion 19 keeps every stored Log row and fills a change row's missing name
+- r5 sm-11: the five headers each open a filter menu; the third is Name
+- r5 sm-11: the Name filter narrows to a kind, or one name, and the summary counts that kind
+- r5 sm-11: Date, Time, Change and Zone filters, combined
+- r5 sm-11: an active header shows it, and Clear filters clears every one in one click
+- r5 sm-11: the ETA card follows the Name filter
+- r5 sm-12: the Log's empty lines and the Clear log question speak of every row, not skill-ups alone
+- r5 sm-12: with the Name filter on reputations, the ETA card says the filter leaves no skill-ups
+- r5 sm-12: the Alts tab's empty line and footer name reputations and currencies too
+- r5 sm-12: test mode's sample Log shows reputation and currency rows beside the skill-ups
+- r5 sm-12: the diagnostics count the Log's rows by sort
 
 ### test_preview_trees.lua (6)
 
@@ -1375,6 +1415,9 @@ Total.
 | test_statistics.lua | 15 |
 | test_smw_review.lua | 15 |
 | test_r5_feedback.lua | 16 |
+| test_r5_join_resize.lua | 5 |
+| test_r5_subdetach.lua | 9 |
+| test_r5_journal.lua | 17 |
 | test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
@@ -1406,4 +1449,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **1028** |
+| **Total** | **1059** |
