@@ -326,4 +326,6 @@ NS.Tree.RegisterKind(CD.KIND, {
     pinText = function(e) return ("%s %s"):format(e.name, CD.ValueText(e)) end,
     linkText = function(e) return ("[%s: %s]"):format(e.name, CD.ValueText(e)) end,
     icon = function(e) return (not e.header) and e.icon or nil end,
+    -- Every currency pins, a capped one or not (SMW-09); a header has no amount of its own.
+    pinnable = function(e) return not e.header end,
 })
