@@ -1351,3 +1351,7 @@ none is passed until you say so.
   Ka0s Skill Master → Toggle Professions window). `/sm help` lists `toggle` as "Show or hide every Skill Master
   window".
   Result:
+- **SM-R5-6** (new, R5-SM-06) With Leatherworking, Skinning, Cooking, First Aid and Fishing learned, open the
+  Professions and Skills windows and hover the Skill Master feed in both tooltip styles: each profession is listed
+  once (the client lists each twice, a parent and a child line), and none shows up again under Other.
+  Result:

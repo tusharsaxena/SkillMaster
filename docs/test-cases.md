@@ -931,7 +931,7 @@ Total.
 - smw-rev: the skill windows' Expand / Collapse all still collapses and expands their blocks
 - smw-rev: the Character Stats window and feed title the stat blocks without the "Stats ·" prefix
 
-### test_r5_feedback.lua (13)
+### test_r5_feedback.lua (14)
 
 - r5 sm-01: no fold chevron carries a hint tooltip, in any window or in the LDB tooltip
 - r5 sm-02: in a window, a click on a block header's body and on a tree header's row folds it, at every depth
@@ -946,6 +946,7 @@ Total.
 - r5 sm-05: /sm professions, the Show window entry and its key binding toggle the Professions window alone
 - r5 sm-05: the help says /sm toggle is every window and /sm professions the Professions window
 - r5 sm-05: /sm toggle under the perf hold opens nothing and says the capture line once
+- r5 sm-06: the probe's doubled profession lines draw each profession once, in the windows and the tooltip
 
 ### test_preview_trees.lua (6)
 
@@ -1371,7 +1372,7 @@ Total.
 | test_currencies.lua | 9 |
 | test_statistics.lua | 15 |
 | test_smw_review.lua | 15 |
-| test_r5_feedback.lua | 13 |
+| test_r5_feedback.lua | 14 |
 | test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
@@ -1403,4 +1404,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **1025** |
+| **Total** | **1026** |

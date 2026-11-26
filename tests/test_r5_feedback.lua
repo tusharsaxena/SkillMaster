@@ -459,3 +459,108 @@ test("r5 sm-05: /sm toggle under the perf hold opens nothing and says the captur
     NS.Windows.HideAll()
     if not ok then error(err, 0) end
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- R5-SM-06: the probe lists every profession twice (a parent line and a child line); no window or tooltip
+-- draws a profession twice. The model already folds the child into its parent's row (modules/SkillData.lua
+-- classify / addLearned, tests/test_skilldata.lua); this case pins it end to end on the probe's own list.
+-- ---------------------------------------------------------------------------------------------
+
+-- `/sm probe` on WoW Forever, 2026-11-26 (Ka0sAddonsCommonTasks docs/2026-11-26-OWNER_FEEDBACK_ROUND5/inputs/
+-- SM_PROBE_2026-11-26.md): a Night Elf Hunter's Skills tab in order, each profession as the classic line
+-- (parentSkillLineID 0) and a child line with the parent's ID and the same rank and max; Cooking's child first.
+local PROBE = {
+    { "Class Skills", { { "Beast Mastery", 1, 1, 50, 0 }, { "Marksmanship", 1, 1, 51, 0 }, { "Survival", 1, 1, 51, 0 } } },
+    { "Professions", { { "Leatherworking", 121, 150, 165, 0 }, { "Leatherworking", 121, 150, 2945, 165 },
+                       { "Skinning", 130, 150, 393, 0 }, { "Skinning", 130, 150, 2947, 393 } } },
+    { "Secondary Skills", { { "Cooking", 60, 75, 2939, 185 }, { "Cooking", 60, 75, 185, 0 },
+                            { "First Aid", 40, 75, 129, 0 }, { "First Aid", 40, 75, 2942, 129 },
+                            { "Fishing", 33, 75, 356, 0 }, { "Fishing", 33, 75, 2943, 356 } } },
+    { "Weapon Skills", { { "Bows", 80, 110, 45, 0 }, { "Daggers", 60, 110, 173, 0 } } },
+    { "Armor Proficiencies", { { "Cloth", 1, 1, 415, 0 }, { "Leather", 1, 1, 414, 0 } } },
+    { "Languages", { { "Common", 300, 300, 98, 0 }, { "Darnassian", 300, 300, 113, 0 } } },
+}
+
+local function probeLines()
+    local lines = {}
+    for _, h in ipairs(PROBE) do
+        for _, l in ipairs(h[2]) do
+            lines[#lines + 1] = { header = h[1], rec = { name = l[1], rank = l[2], max = l[3], tempPoints = 0,
+                modifier = 0, skillLineID = l[4], parentSkillLineID = l[5] } }
+        end
+    end
+    return lines
+end
+
+local PROFESSIONS = { "Leatherworking", "Skinning", "Cooking", "First Aid", "Fishing" }
+
+local function countNames(rows)
+    local n = {}
+    for _, row in ipairs(rows) do
+        local e = row.entry
+        local name = e and (e.name or e.label)
+        if name then n[name] = (n[name] or 0) + 1 end
+    end
+    return n
+end
+
+test("r5 sm-06: the probe's doubled profession lines draw each profession once, in the windows and the tooltip", function()
+    local m = NS.SkillData.Build(probeLines(), { classFile = "HUNTER", level = 22 })
+    for key in pairs(m.byKey) do
+        assertTrue(key:find("^other:") == nil, "no child line lands in Other: " .. key)
+    end
+    for _, c in ipairs(NS.SkillData.CATEGORIES) do
+        local seen = {}
+        for _, key in ipairs(m.order[c]) do
+            assertTrue(not seen[key], c .. ": " .. key .. " listed once")
+            seen[key] = true
+        end
+    end
+    assertEqual(m.byKey.cooking.rank, 60, "Cooking's child came first; one row, the same rank")
+    local savedModel, savedSource = NS.SkillData.Model, Br.source
+    NS.SkillData.Model = function() return m end
+    local ok, err = pcall(function()
+        NS.bus:SendMessage(NS.MSG.SKILLS_UPDATED, m)
+        M.__fireTimers()
+        local names = {}
+        for _, fid in ipairs({ "professions", "skills" }) do
+            for name, n in pairs(countNames(shownWindow(fid).Rows())) do names[name] = (names[name] or 0) + n end
+        end
+        for _, p in ipairs(PROFESSIONS) do
+            assertEqual(names[p], 1, "the windows draw " .. p .. " once")
+        end
+        -- The feeds read this model as tests/test_round6.lua hands them one (NS.Broker.source).
+        Br.source = function()
+            return { model = m, statsModel = { base = {}, spell = {}, defense = {}, utility = {} }, statIndex = {},
+                     gains = { total = 0, byKey = {} }, models = {} }
+        end
+        withStyle("window", function()
+            Br.OnEnter(M.UIParent, "professions")
+            local tip = countNames(BP.Rows())
+            for _, p in ipairs(PROFESSIONS) do
+                assertEqual(tip[p], 1, "the Main window style tooltip draws " .. p .. " once")
+            end
+        end)
+        withStyle("classic", function()
+            local lines = {}
+            local tip = M.CreateFrame("GameTooltip", "SkillMasterR5ProbeTip", M.UIParent)
+            function tip:AddLine(t) lines[#lines + 1] = t end
+            function tip:AddDoubleLine(l) lines[#lines + 1] = l end
+            function tip:NumLines() return #lines end
+            Br.FillTooltip(tip, "professions")
+            local text = table.concat(lines, "\n")
+            for _, p in ipairs(PROFESSIONS) do
+                local _, n = text:gsub(p:gsub("%s", "%%s"), "")
+                assertEqual(n, 1, "the Classic tooltip lists " .. p .. " once")
+            end
+        end)
+        Br.source = savedSource
+    end)
+    NS.Windows.HideAll()
+    NS.SkillData.Model = savedModel
+    Br.source = savedSource
+    local live = NS.SkillData:Model()
+    if live then NS.bus:SendMessage(NS.MSG.SKILLS_UPDATED, live) end   -- the feeds back on the live model
+    M.__fireTimers()
+    if not ok then error(err, 0) end
+end)
