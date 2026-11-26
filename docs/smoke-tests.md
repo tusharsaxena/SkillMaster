@@ -1355,3 +1355,8 @@ none is passed until you say so.
   Professions and Skills windows and hover the Skill Master feed in both tooltip styles: each profession is listed
   once (the client lists each twice, a parent and a child line), and none shows up again under Other.
   Result:
+- **SM-R5-7** (new, R5-SM-07) `/sm toggle` to open all six windows, then play for a while: gain reputation and a
+  currency, skill up, fight, level if you can, unfold categories in the Statistics and Reputations windows, and
+  hover every feed in both tooltip styles. No Lua error, and `/sm diagnostics` lists no rejected event. `/sm toggle`
+  closes all six.
+  Result:

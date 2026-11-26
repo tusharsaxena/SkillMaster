@@ -564,3 +564,183 @@ test("r5 sm-06: the probe's doubled profession lines draw each profession once, 
     M.__fireTimers()
     if not ok then error(err, 0) end
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- R5-SM-07: every window open while playing raises no Lua error. A headless session on the probe's own shapes:
+-- `/sm toggle` opens all six, the game's events fire as play sends them, every fold is clicked, every feed
+-- hovered in both styles, then `/sm toggle` closes them all. Each step must run without an error.
+-- ---------------------------------------------------------------------------------------------
+
+local statsFx = dofile("tests/fixture_statistics.lua")
+
+-- The probe's Reputation tab (all expanded): Alliance (469; isHeaderWithRep false, its standing fields filled
+-- in), Steamwheedle Cartel, then Other (factionID 0) with an at-war Bloodsail Buccaneers at -8500.
+local function probeFactions()
+    local function f(id, name, reaction, cur, extra)
+        local t = { factionID = id, name = name, isHeader = false, isChild = false, isHeaderWithRep = false,
+                    isCollapsed = false, reaction = reaction, currentReactionThreshold = 0, nextReactionThreshold = 3000,
+                    currentStanding = cur, atWarWith = false, isWatched = false, description = name }
+        for k, v in pairs(extra or {}) do t[k] = v end
+        return t
+    end
+    return {
+        f(469, "Alliance", 5, 4200, { isHeader = true }),
+        f(69, "Darnassus", 6, 9500, { isWatched = true }), f(54, "Gnomeregan Exiles", 5, 3100),
+        f(47, "Ironforge", 5, 3300), f(72, "Stormwind", 5, 3400),
+        f(169, "Steamwheedle Cartel", 4, 0, { isHeader = true }),
+        f(21, "Booty Bay", 4, 100), f(577, "Everlook", 4, 100), f(369, "Gadgetzan", 4, 100),
+        f(2827, "Powderfuse", 4, 0), f(470, "Ratchet", 4, 100),
+        f(0, "Other", 4, 0, { isHeader = true }),
+        f(529, "Argent Dawn", 4, 200), f(2586, "Azeroth Commerce Authority", 4, 0),
+        f(87, "Bloodsail Buccaneers", 1, -8500, { atWarWith = true, currentReactionThreshold = -42000,
+                                                  nextReactionThreshold = -6000 }),
+        f(2740, "Kirin Tor", 4, 0),
+    }
+end
+
+-- The probe's Currency tab: Player vs. Player -> Honor Points (85 / 25000); Professions & Tradeskills ->
+-- Merchant's Favor (80, quality 2).
+local function probeCurrencies()
+    return {
+        { name = "Player vs. Player", isHeader = true, isHeaderExpanded = true, currencyListDepth = 0, currencyID = 0,
+          quantity = 0, maxQuantity = 0 },
+        { name = "Honor Points", isHeader = false, currencyListDepth = 1, currencyID = 1792, quantity = 85,
+          maxQuantity = 25000 },
+        { name = "Professions & Tradeskills", isHeader = true, isHeaderExpanded = true, currencyListDepth = 0,
+          currencyID = 0, quantity = 0, maxQuantity = 0 },
+        { name = "Merchant's Favor", isHeader = false, currencyListDepth = 1, currencyID = 3402, quantity = 80,
+          maxQuantity = 0, quality = 2 },
+    }
+end
+
+local function installProbeClient()
+    local reps, curs = probeFactions(), probeCurrencies()
+    local byRep, byCur = {}, {}
+    for _, r in ipairs(reps) do byRep[r.factionID] = r end
+    for _, c in ipairs(curs) do byCur[c.currencyID] = c end
+    local saved = { M.C_Reputation, M.C_CurrencyInfo, M.FACTION_BAR_COLORS, M.InCombatLockdown }
+    M.C_Reputation = {
+        GetNumFactions = function() return #reps end,
+        GetFactionDataByIndex = function(i) return reps[i] end,
+        GetFactionDataByID = function(id) return byRep[id] end,
+        ExpandFactionHeader = function() end, CollapseFactionHeader = function() end,
+    }
+    M.C_CurrencyInfo = {
+        GetCurrencyListSize = function() return #curs end,
+        GetCurrencyListInfo = function(i) return curs[i] end,
+        GetCurrencyInfo = function(id) return byCur[id] end,
+        ExpandCurrencyList = function() end,
+    }
+    M.FACTION_BAR_COLORS = { [1] = { r = 0.8, g = 0.1, b = 0.1 }, [4] = { r = 1, g = 1, b = 0 },
+                             [5] = { r = 0, g = 0.6, b = 0.1 }, [6] = { r = 0, g = 0.7, b = 0.2 } }
+    local inCombat = false
+    M.InCombatLockdown = function() return inCombat end
+    local _, restoreStats = statsFx.install(M)
+    return {
+        reps = reps, curs = curs,
+        combat = function(on) inCombat = on end,
+        restore = function()
+            restoreStats()
+            M.C_Reputation, M.C_CurrencyInfo, M.FACTION_BAR_COLORS, M.InCombatLockdown = unpack(saved, 1, 4)
+        end,
+    }
+end
+
+test("r5 sm-07: all six windows open while playing raise no Lua error, and /sm toggle closes them all", function()
+    local saved = { M.GetText, M.UnitSex }
+    M.GetText = function(key) return LABELS[tonumber(tostring(key):match("(%d+)$"))] end
+    M.UnitSex = function() return 2 end
+    local savedFold, savedPins, savedLog = NS.db.char.fold, NS.db.char.pins, NS.db.char.log
+    NS.db.char.fold, NS.db.char.pins, NS.db.char.log = {}, {}, {}
+    local ldbFolds = NS.db.profile.tooltips.ldb.folds
+    NS.db.profile.tooltips.ldb.folds = { blocks = {}, nodes = {} }
+    NS.Windows.HideAll()
+    NS.RepData:Reset()
+    NS.CurrencyData:Reset()
+    NS.StatisticsData:Reset()
+    local client = installProbeClient()
+    local step = "setup"
+    local function run(name, fn, ...)
+        step = name
+        fn(...)
+        M.__fireTimers()
+    end
+    local function fire(event, ...) return run(event, M.__fireEvent, event, ...) end
+    local function clickEveryFold(fid)
+        local W = NS.Windows.Get(fid)
+        for _ = 1, 3 do
+            W.Refresh(true)
+            for _, row in ipairs(W.Rows()) do
+                if row.treeHeader and NS.Tree.IsFolded(fid, row.entry.nodeKey) then
+                    run(fid .. ": unfold " .. tostring(row.entry.name), row.GetScript(row, "OnClick"), row, "LeftButton")
+                end
+            end
+        end
+        for _, h in ipairs(W.Headers()) do
+            run(fid .. ": collapse " .. tostring(h.id), h.GetScript(h, "OnClick"), h, "LeftButton")
+        end
+        W.Refresh(true)
+        for _, h in ipairs(W.Headers()) do
+            run(fid .. ": expand " .. tostring(h.id), h.GetScript(h, "OnClick"), h, "LeftButton")
+        end
+    end
+    local ok, err = pcall(function()
+        run("/sm toggle (open)", NS.Slash.OnSlash, NS.Slash, "toggle")
+        assertEqual(shownSet(), ALL, "every window open")
+        fire("PLAYER_ENTERING_WORLD", false, true)
+        fire("SKILL_LINES_CHANGED")
+        fire("CHAT_MSG_SKILL", "Your skill in Skinning has increased to 131.")
+        fire("UPDATE_FACTION")
+        client.reps[2].currentStanding = 9600
+        fire("UPDATE_FACTION")
+        client.curs[2].quantity = 90
+        fire("CURRENCY_DISPLAY_UPDATE", 1792, 90, 5)
+        fire("CRITERIA_UPDATE")
+        fire("UNIT_STATS", "player")
+        fire("UNIT_AURA", "player")
+        fire("UNIT_INVENTORY_CHANGED", "player")
+        fire("PLAYER_EQUIPMENT_CHANGED", 16, false)
+        fire("UPDATE_INVENTORY_DURABILITY")
+        client.combat(true)
+        fire("PLAYER_REGEN_DISABLED")
+        fire("UPDATE_FACTION")
+        fire("CURRENCY_DISPLAY_UPDATE")
+        client.combat(false)
+        fire("PLAYER_REGEN_ENABLED")
+        fire("PLAYER_LEVEL_UP", 23)
+        for _, fid in ipairs({ "currencies", "reputations", "statistics" }) do
+            local W = NS.Windows.Get(fid)
+            W.Refresh(true)
+            assertTrue(#W.Rows() > 0, fid .. ": the window drew the probe's rows")
+        end
+        for _, fid in ipairs(NS.FAMILY_ORDER) do clickEveryFold(fid) end
+        local R = NS.Windows.Get("reputations")
+        R.Refresh(true)
+        local names = countNames(R.Rows())
+        assertEqual(names["Bloodsail Buccaneers"], 1, "every header unfolded: an at-war faction under Other drawn")
+        for _, style in ipairs({ "window", "classic" }) do
+            withStyle(style, function()
+                if style == "classic" then dressOwnTip() end
+                for _, fid in ipairs(NS.FAMILY_ORDER) do
+                    run(style .. " tooltip: " .. fid, Br.OnEnter, M.UIParent, fid)
+                end
+                run(style .. " tooltip: leave", Br.OnLeave)
+            end)
+        end
+        fire("CRITERIA_UPDATE")
+        fire("PLAYER_LOGOUT")
+        run("/sm toggle (close)", NS.Slash.OnSlash, NS.Slash, "toggle")
+        assertEqual(shownSet(), "", "every window closed")
+    end)
+    NS.Windows.HideAll()
+    Br.HideTooltip()
+    client.restore()
+    NS.RepData:Reset()
+    NS.CurrencyData:Reset()
+    NS.StatisticsData:Reset()
+    M.__fireTimers()
+    NS.db.char.fold, NS.db.char.pins, NS.db.char.log = savedFold, savedPins, savedLog
+    NS.db.profile.tooltips.ldb.folds = ldbFolds
+    M.GetText, M.UnitSex = saved[1], saved[2]
+    if not ok then error(("at %s: %s"):format(step, tostring(err)), 0) end
+end)
