@@ -998,6 +998,13 @@ Total.
 - r5 review: the Yesterday filter is the calendar's day before, across a daylight-saving change
 - r5 review: a detached sub-category this character's tree lacks shows no window, and keeps its row
 
+### test_r6_owner.lua (4)
+
+- r6 sm-01: the group's title reads Secondary Professions; its id and short label stay
+- r6 sm-01: a detached Secondary window is titled Secondary Professions
+- r6 sm-01: the settings labels and the Professions window's binding tip say secondary professions
+- r6 sm-01: the client's own header, Secondary Skills, still files its lines in the Secondary group
+
 ### test_preview_trees.lua (6)
 
 - preview trees: the sample's records come in the panels' shapes, built by the live builders
@@ -1427,6 +1434,7 @@ Total.
 | test_r5_subdetach.lua | 9 |
 | test_r5_journal.lua | 17 |
 | test_r5_review.lua | 5 |
+| test_r6_owner.lua | 4 |
 | test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
@@ -1458,4 +1466,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **1064** |
+| **Total** | **1068** |

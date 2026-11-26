@@ -181,7 +181,7 @@ the checks below that cover each item:
   move up, a thin strip at the top still drags the window. Detached block strata sits on this tab.
   `/sm skin` to another skin: every pick above survives the repaint.
 - **SM-DISP-26** (round 5, R5-6: the merged window) Detach
-  Primary Professions and Secondary Skills and drag Secondary onto Primary's bottom edge: one window
+  Primary Professions and Secondary Professions and drag Secondary onto Primary's bottom edge: one window
   titled `Primary · Secondary`, each section under its own sub-header (chevron, title, sort mark, split mark); the band's two marks collapse / expand both
   sections and dock both. Right-click a sub-header: Split from the group, Unmerge all, Dock in the main
   window, Dock all in the main window; on the band the two section rows are grayed. The split mark
@@ -307,7 +307,7 @@ the checks below that cover each item:
   Primary Professions' funnel: Show, then All (ticked), Below cap, At cap (needs training). Below
   cap: only learned professions under their rank's cap. At cap: only learned professions at their
   rank's cap with a higher rank to train (a profession at Artisan's top cap leaves); the funnel wears
-  the filled badge (SM-DISP-55). Unlearned professions show under All only. Secondary Skills the same. Other
+  the filled badge (SM-DISP-55). Unlearned professions show under All only. Secondary Professions the same. Other
   skills: All, Learned, Below cap. Each stat section: All, Non-zero; Non-zero leaves out every row
   reading `0` or `0.0%` (Armor `0 (0.0%)` too); a section left with nothing keeps its header and
   `No rows match this filter.` Detach a stat block: its band carries the funnel; merge two detached
@@ -609,7 +609,7 @@ In each check, the tooltip's words are what they were before this change.
 - **SM-OPT-18** (round 5, R5-11..R5-13) The sidebar lists Skills, Rows, Broker; no Stats page. Skills
   has one tab, General, with its three switches. Rows: a Window / LDB tooltip caption line over two
   eye columns, then the window's block headings in its block order (Primary Professions, Secondary
-  Skills, Weapon Skills, Other skills, the four stat groups), each skill or stat a boxed row with its
+  Professions, Weapon Skills, Other skills, the four stat groups), each skill or stat a boxed row with its
   icon, name and two eyes, the eyes aligned under the captions at any panel width; the names never
   wrap past the eyes. Broker shows Feed and Tooltip only.
 - **SM-OPT-19** (round 5, R5-13) Rows: Axes's Window eye hides it from the window and a detached
@@ -1088,7 +1088,7 @@ none is passed until you say so.
 
 - **SM-WIN-1** (new, SMW-04) After the upgrade, `/sm toggle`: the window titled "Skill Master · Professions"
   opens where your old Skill Master window stood, at its old width, columns and strata, and holds Primary
-  Professions and Secondary Skills only.
+  Professions and Secondary Professions only.
   Result:
 - **SM-WIN-2** (new, SMW-04) `/sm skills`, `/sm stats`, `/sm currencies`, `/sm reputations`, `/sm statistics`:
   each opens its own window ("Skill Master · Skills" with Weapon Skills and Other skills, "Skill Master ·
@@ -1158,8 +1158,8 @@ none is passed until you say so.
 ## The LDB tooltip: only the fold acts (SMW-07, 2026-11-26)
 
 - **SM-TIP-1** (new, SMW-07) Hover the Skill Master feed (Tooltips > Tooltip style: Main window). Click the
-  chevron on Secondary Skills: the section folds in the tooltip, which stays up where it was; click it again: it
-  opens. The Professions window's Secondary Skills block did not fold, and folding it in the window leaves the
+  chevron on Secondary Professions: the section folds in the tooltip, which stays up where it was; click it again: it
+  opens. The Professions window's Secondary Professions block did not fold, and folding it in the window leaves the
   tooltip's section open.
   Result:
 - **SM-TIP-2** (new, SMW-07) Set Tooltips > Height low enough that the tooltip scrolls, scroll down a little,
@@ -1412,4 +1412,13 @@ none is passed until you say so.
   names skill-ups, reputation and currency changes. `/sm test` (test mode): the Log shows Honor Points +34, an
   Ironforge row "+25, Revered", a Darkmoon Prize Ticket spend "-8" and a Stormwind gain among the sample skill-ups.
   `/sm diagnostics`: the model line counts skill-ups, reputation and currency rows apart.
+  Result:
+- **SM-R6-1** (new, R6-SM-01) `/sm show`: the Professions window's second group header reads "Secondary
+  Professions" over Cooking, First Aid and Fishing (no "Secondary Skills" anywhere Skill Master draws its own label).
+  Detach it: the window is titled "Secondary Professions". Hover the Professions LDB feed: its second section reads
+  "Secondary Professions". Settings, Broker, Tooltip: the switch reads "Secondary professions"; Bars, Colors: the swatch
+  reads "Secondary professions". Settings, General, Keybindings: hover Toggle Professions window: "primary and
+  secondary professions". The Journal's Alts sub-tab still reads "Secondary", and the Statistics window's Skills
+  category still lists the game's own "Secondary Skills" statistics. Every saved layout (detached, merged, folded,
+  sorted, filtered) of the group is as it was before the update.
   Result:

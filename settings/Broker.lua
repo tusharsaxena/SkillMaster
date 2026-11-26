@@ -80,7 +80,7 @@ rows[#rows + 1] = {
 -- Each feed's sections, its family's blocks (SMW-05), one subsection per feed in the family order. A
 -- family whose blocks are not built yet has none.
 local SECTION_LABEL = {
-    primary = L["Primary professions"], secondary = L["Secondary skills"], weapon = L["Weapon skills"],
+    primary = L["Primary professions"], secondary = L["Secondary professions"], weapon = L["Weapon skills"],
     other = L["Other skills"],
 }
 for _, fid in ipairs(NS.FAMILY_ORDER) do
