@@ -50,6 +50,18 @@ local function skillCounts(m)
     return total, learned
 end
 
+--- The session log's line (R5-SM-12): its rows by sort, the Log holding reputations and currencies besides the
+--- skill-ups since R5-SM-10, and this session's skill points.
+function NS.Diagnostics.SessionLogLine()
+    local n = { skill = 0, reputation = 0, currency = 0 }
+    for _, e in ipairs(NS.SessionLog:Entries()) do
+        local k = e.kind or "skill"
+        n[k] = (n[k] or 0) + 1
+    end
+    return ("model session log entries=%d skill-ups=%d reputation=%d currency=%d session gains=%s"):format(
+        #NS.SessionLog:Entries(), n.skill, n.reputation, n.currency, tostring(NS.SessionLog:Gains()))
+end
+
 local function statCount(m)
     local n = 0
     for _, group in ipairs(NS.StatData.GROUPS) do n = n + #((m and m[group]) or {}) end
@@ -66,8 +78,7 @@ local function model(out)
     out:add(TAG, "model rows %s", table.concat(cats, " "))
     local stats = NS.StatData:Model()
     out:add(TAG, "model stats=%s scanned=%s", statCount(stats), yesNo(stats))
-    local gains = NS.SessionLog:Gains()
-    out:add(TAG, "model session log entries=%s session gains=%s", #NS.SessionLog:Entries(), gains)
+    out:add(TAG, "%s", NS.Diagnostics.SessionLogLine())
     out:add(TAG, "model alts=%s preview source=%s", #NS.Alts:List(), NS.Blocks.source and "on" or "off")
     if NS.IsStoodDown() then out:add(TAG, "model stood down: the last scan is kept, nothing rescans") end
 end
@@ -153,6 +164,7 @@ local function layout(out)
     end
     out:joined(TAG, "docked order:", NS.Blocks.Docked())
     out:joined(TAG, "detached:", NS.Blocks.Undocked())
+    out:joined(TAG, "detached sub-categories:", NS.SubBlocks.Ids())   -- R5-SM-09
     groups(out, p.layout.groups)
 end
 

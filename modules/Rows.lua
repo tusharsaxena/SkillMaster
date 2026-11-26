@@ -404,6 +404,21 @@ local function foldMark(row)
     return row.fold
 end
 
+-- A tree header's detach mark (R5-SM-09): the block header's external-link mark, at the right end where a
+-- leaf row's go icon stands (a tree row has none). It pops the header's subtree out as its own window
+-- (NS.SubBlocks.Detach). The LDB tooltip's rows hide it (modules/BrokerPanel.lua): its folds are its own.
+local function subDetachMark(row)
+    if row.subDetach then return row.subDetach end
+    row.subDetach = NS.Chrome.HeaderMark(row, "external-link", "+", function()
+        local e = row.entry
+        if NS.SubBlocks and e and e.nodeKey ~= nil then NS.SubBlocks.Detach(row.family, e.nodeKey, e.name) end
+    end, NS.L["Detach this category into its own window"])
+    NS.Chrome.SetRestToken(row.subDetach, NS.Chrome.REST)
+    row.subDetach:SetPoint("CENTER", row.act, "CENTER", 0, 0)
+    row.subDetach:Hide()
+    return row.subDetach
+end
+
 local function placeTree(row, r, icon)
     local x = R.PAD + (r.indent or 0)
     local fold = foldMark(row)
@@ -448,6 +463,7 @@ function Row:SetTree(r)
     placeTree(self, r, icon)
     setLearnedLook(self, true)
     setAct(self, false)
+    subDetachMark(self):SetShown(r.header == true and e.nodeKey ~= nil and NS.SubBlocks ~= nil)
     self.bar:SetTimer(nil)
     local v = spec.values and spec.values(e)
     local mode = R.Display()
@@ -653,6 +669,7 @@ local function park(row)
     -- A tree row's own look goes with it, so the pool's next skill or stat row starts plain.
     row.tree, row.family, row.treeHeader, row.onFold = nil, nil, nil, nil
     if row.fold then row.fold:Hide() end
+    if row.subDetach then row.subDetach:Hide() end
     row.pin:Hide()
     row.name:SetWidth(R.NAME_W)
     row:ClearAllPoints()

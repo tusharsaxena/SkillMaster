@@ -75,6 +75,8 @@ files["modules/Journal.lua"] = {
   read_globals = { "time", "date", "RAID_CLASS_COLORS", "GameTooltip", "IsShiftKeyDown" },
 }
 -- T5.2: the sample's clock (test mode), and the simulator's clock and world refusals.
+-- R5-SM-11: the Journal Log's column filters read the clock for the day and the hour of a row.
+files["modules/JournalFilters.lua"] = { read_globals = { "time", "date" } }
 files["modules/Preview.lua"] = { read_globals = { "time" } }
 files["modules/Simulator.lua"] = { read_globals = { "time", "IsInInstance", "IsInGroup" } }
 

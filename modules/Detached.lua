@@ -10,12 +10,14 @@ local _, NS = ...
 -- cap are shown. An equipment change redraws it.
 --
 -- NS.Detached.Refresh(anchor) / .RefreshValues() / .StandDown() / .Frame(id) / .Rows(id) / .Render(id)
+-- NS.Detached.Ids(): the blocks and the detached sub-categories (R5-SM-09, modules/SubBlocks.lua)
 -- NS.Detached.Entries(id) -> the entries a detached frame draws, and how many the header's filter
 --   took out (NS.Blocks.FilterOf, round 5, R5-10); .StorePoint(id, p) (a split's landing)
 -- NS.Detached.ApplyStyle(f) / .Style() / .TopHeight(f) -> the shared Detached windows style (R5-7)
 -- NS.Detached.BandMarks(f, marks) -> gap: a band's settings mark (HeaderButtons) and its marks (AD-86-SM)
 -- NS.Detached.PlaceInward(anchor, marks, gap): the marks at the strip's pitch when no skin header placed them
 -- NS.Detached.Width(id) / .WidestOf(ids) / .ApplyLock(): the block's width and its grip (FB-SM-04)
+-- NS.Detached.SnapWidth(w): a width on the Blocks row's step grid inside its range (a merged window's grip too)
 
 NS.Detached = {}
 local D = NS.Detached
@@ -35,6 +37,14 @@ local frames = {}
 
 function D.Frame(id) return frames[id] end
 
+--- Every id a detached window can draw: the blocks, then the detached sub-categories (R5-SM-09).
+function D.Ids()
+    local out = {}
+    for i, id in ipairs(NS.BLOCKS) do out[i] = id end
+    for _, id in ipairs(NS.SubBlocks and NS.SubBlocks.Ids() or {}) do out[#out + 1] = id end
+    return out
+end
+
 --- The rows a detached frame is showing (the suites read them).
 function D.Rows(id)
     local f = frames[id]
@@ -51,7 +61,8 @@ function D.Strata()
 end
 
 local function isLocked(id)
-    return NS.GetSetting("locked") or settings(id).locked == true
+    local s = settings(id)   -- nil for a sub-category docked back since its frame was built (R5-SM-09)
+    return NS.GetSetting("locked") or (s ~= nil and s.locked == true)
 end
 
 --- Block `id`'s detached width (FB-SM-04): its stored width inside MIN_WIDTH..MAX_WIDTH, else WIDTH.
@@ -93,7 +104,7 @@ local function applyPoint(f)
     else
         -- A first detach lands right of center, stepped per block so two do not stack exactly.
         local step = 0
-        for i, id in ipairs(NS.BLOCKS) do if id == f.id then step = i end end
+        for i, id in ipairs(D.Ids()) do if id == f.id then step = i end end
         f:SetPoint("TOPLEFT", UIParent, "CENTER", 240, 200 - 24 * step)
     end
     -- The scale is the style's (D.ApplyStyle): the block's own times the Detached windows tab's.
@@ -405,6 +416,7 @@ local function snapWidth(w)
     w = D.MIN_WIDTH + math.floor((w - D.MIN_WIDTH) / D.WIDTH_STEP + 0.5) * D.WIDTH_STEP
     return math.max(D.MIN_WIDTH, math.min(D.MAX_WIDTH, w))
 end
+D.SnapWidth = snapWidth   -- a merged window's grip snaps its column width the same way (R5-SM-08)
 
 local function makeResizable(f)
     NS.Chrome.MakeResizable(f, {
@@ -415,6 +427,9 @@ local function makeResizable(f)
         end,
         save = function(w)
             savePoint(f)
+            -- A detached sub-category's width is its own row's (R5-SM-09: no schema row); a block's goes
+            -- through the seam.
+            if NS.SubBlocks and NS.SubBlocks.IsSub(f.id) then return NS.SubBlocks.SetWidth(f.id, snapWidth(w)) end
             NS.SetByPath("layout.blocks." .. f.id .. ".width", snapWidth(w))
         end,
         canResize = function()
@@ -447,10 +462,13 @@ function D.ApplyLock()
         f:SetMovable(not isLocked(id))
         if f.resizeGrip then f.resizeGrip:SetShown(not isLocked(id)) end
     end
+    if NS.Groups and NS.Groups.ApplyLock then NS.Groups.ApplyLock() end
 end
 
 local function build(id)
-    local f = CreateFrame("Frame", "SkillMasterBlock_" .. id, UIParent, "BackdropTemplate")
+    -- A detached sub-category's frame has no global name: its id carries a node key (R5-SM-09).
+    local sub = NS.SubBlocks and NS.SubBlocks.IsSub(id)
+    local f = CreateFrame("Frame", (not sub) and ("SkillMasterBlock_" .. id) or nil, UIParent, "BackdropTemplate")
     f:SetFrameStrata(LAYERS.STRATA.HUD)
     f.id = id
     f:SetWidth(D.Width(id))
@@ -485,6 +503,7 @@ function D.Render(id)
     local t0 = Perf.on and debugprofilestop()
     NS.Rows.ReleaseAll(f.rowPool)
     local collapsed = settings(id).collapsed
+    f.title:SetText(NS.BlockDefs[id].title)   -- a sub-category's name can arrive after its window (R5-SM-09)
     NS.Chrome.SetIcon(f.collapse, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")
     f.collapse.tip = nil   -- the chevron says it (R5-SM-01: no hint tooltip on a fold)
@@ -516,15 +535,26 @@ end
 function D.Refresh(anchor)
     local down = NS.IsStoodDown and NS.IsStoodDown()
     local G = NS.Groups
-    for _, id in ipairs(NS.BLOCKS) do
+    local seen = {}
+    for _, id in ipairs(D.Ids()) do
+        seen[id] = true
         local s = settings(id)
         local f = frames[id]
-        if s.docked == false and not down and not (G and G.Of(id)) then
+        -- A detached sub-category this character's tree lacks keeps its row but shows no window (R5-REV).
+        local absent = NS.SubBlocks and NS.SubBlocks.Absent(id)
+        if s and s.docked == false and not down and not (G and G.Of(id)) and not absent then
             f = f or build(id)
             if anchor ~= false or not f:IsShown() then applyPoint(f) end
             f:Show()
             D.Render(id)
         elseif f then
+            NS.Rows.ReleaseAll(f.rowPool)
+            f:Hide()
+        end
+    end
+    -- A sub-category docked back (R5-SM-09) is no id any more: its frame hides.
+    for id, f in pairs(frames) do
+        if not seen[id] and f:IsShown() then
             NS.Rows.ReleaseAll(f.rowPool)
             f:Hide()
         end

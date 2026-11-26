@@ -63,7 +63,9 @@ Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), th
 (`NS.Preview`), the simulator (`NS.Sim`, `NS.SimHost`) and the diagnostics sections. The six-windows run added the
 family registry (`NS.Families`, `defaults/Families.lua`), the window factory (`modules/Window.lua`, one instance
 per family; `NS.MainWindow` is the Professions window's shim), the block providers (`modules/BlockProviders.lua`),
-the tree row model and its addon-side folds (`NS.Tree`, `char.fold`), the shared-collapse reader
+the tree row model and its addon-side folds (`NS.Tree`, `char.fold`), the detached sub-categories
+(`NS.SubBlocks`, `modules/SubBlocks.lua`, R5-SM-09: a tree header popped out as its own window), the Journal Log's
+column filters (`NS.JournalFilters`, R5-SM-11), the shared-collapse reader
 (`NS.SharedList`) and the three tree models (`RepData`, `CurrencyData`, `StatisticsData`);
 `settings/` holds the schema,
 the slash table and the settings pages.
@@ -216,8 +218,28 @@ band (`noTopBar` and the frame's `bandParts` hidden for Never; for On hover a 0.
 `IsMouseOver` toggles both). `S.Shell` is re-called only when its opts change, and the skin's own
 repaint replays the recorded ones. A merged group's frame takes the same call.
 
+`profile.layout.subs` (R5-SM-09) is named non-setting state: the detached sub-categories, each
+`["sub:<family>:<nodeKey>"] = { docked = false, name, collapsed, point, width }`, a row only while one is detached.
+Its one owner is `modules/SubBlocks.lua` (`NS.SubBlocks`: `Detach` from a tree header's detach mark, `Dock` from
+the window's dock mark or Dock all, `SetCollapsed`, `SetWidth` on the grip's release; the drag's drop point goes
+through `NS.Detached` as a block's). The key is the header's fold key (a faction header's factionID, a currency
+header's `<name>#<depth>`, a Statistics categoryID), so it is stable across sessions. A sub-category reads as a
+block everywhere one is read: `NS.BlockDefs[id]` answers `NS.SubBlocks.Def(id)` (a metatable on the defs) and
+`NS.Blocks.Settings(id)` its row, so the detached frame, the merged window, the snap and the grip draw it with no
+branch. Its rows are the header's subtree rebased to depth 0 (the tree provider, `filter` = its node key); a
+window (the window's own folds) leaves out every sub-category detached from it, while the LDB tooltip keeps the
+whole tree. A detached Statistics category reads its rows whatever the window's folds say of it and its parents
+(`NS.SubBlocks.OpenStore`), and its window keeps `CRITERIA_UPDATE` watched (`SD.OnScreen`). The
+schemaVersion 18 step normalizes a stored `layout.subs`. The row is the profile's (shared by every character by
+default) while the trees are the character's, so a sub-category whose header this character's tree, read in full,
+lacks (another faction's header, a currency group never earned, a header another locale names otherwise;
+`NS.SubBlocks.Absent`) shows no window and no merged-window section or title part; its row is kept for the
+character that has it (R5-REV).
+
 `profile.layout.groups` (round 5, R5-6) is named non-setting state: the merged detached windows, each
-`[gid] = { point, columns = { { id, ... }, ... } }`, membership derived from the columns. Its one owner
+`[gid] = { point, columns = { { id, ... }, ... }, width }`, membership derived from the columns; `width`
+(R5-SM-08, optional) is the column width the merged window's corner grip set, else its widest member's, so a
+block that leaves keeps its own `layout.blocks.<id>.width`. Its one owner
 is `modules/Groups.lua` (`NS.Groups`): `Merge`, `Split`, `Unmerge`, `Leave` (called from
 `NS.Blocks.StoreDocked`, so a block docked by any path leaves its group), the band drag's
 `savePoint`, and the normalization every read runs (`NS.Groups.Model.Normalize`: a member no longer
@@ -292,9 +314,9 @@ when they show (SMW-10); the simulator (`modules/Simulator.lua`) sends `SIM_TICK
 | `STATS_UPDATED` | `Ka0s_SkillMaster_StatsUpdated` | `modules/StatData.lua` (T2.3) | the stats model | stat blocks, broker |
 | `BONUSES_UPDATED` | `Ka0s_SkillMaster_BonusesUpdated` | `modules/Bonuses.lua` (T2.2) | none | bars, tooltips, broker |
 | `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse, collapse all, move; a tree fold, `NS.Tree`; a pin, `NS.Pins`); the skin owner's look-change hook; `NS.ApplyLook` (every display row's write, `settings/OptionsSetup.lua`) | none | `modules/Blocks.lua`, which repaints the windows and the detached frames; the Journal; the trainer popup (`modules/TrainerPopup.lua`, its trainer names' color while it is shown); `modules/StatisticsData.lua` (whether to watch `CRITERIA_UPDATE`) |
-| `REPS_UPDATED` | `Ka0s_SkillMaster_RepsUpdated` | `modules/RepData.lua` (SMW-08); the simulator's stop | the reputations model | blocks, broker, alts |
-| `REP_CHANGED` | `Ka0s_SkillMaster_RepChanged` | `modules/RepData.lua`, a standing that moved between two reads | key, old, new, name | session log (the Journal's Log) |
-| `CURRENCIES_UPDATED` | `Ka0s_SkillMaster_CurrenciesUpdated` | `modules/CurrencyData.lua` (SMW-09); the simulator's stop | the currencies model | blocks, broker, alts |
+| `REPS_UPDATED` | `Ka0s_SkillMaster_RepsUpdated` | `modules/RepData.lua` (SMW-08); the simulator's stop | the reputations model | blocks, broker, alts, Journal |
+| `REP_CHANGED` | `Ka0s_SkillMaster_RepChanged` | `modules/RepData.lua`, a standing that moved between two reads (`RD.Changes`; none on the first read, the login baseline) | key, old, new, name, oldReaction, newReaction (R5-SM-10) | session log (the Journal's Log: a row per change) |
+| `CURRENCIES_UPDATED` | `Ka0s_SkillMaster_CurrenciesUpdated` | `modules/CurrencyData.lua` (SMW-09); the simulator's stop | the currencies model | blocks, broker, alts, Journal |
 | `CURRENCY_CHANGED` | `Ka0s_SkillMaster_CurrencyChanged` | `modules/CurrencyData.lua`, an amount that moved | key, old, new, name | session log, alerts (the cap alert) |
 | `STATISTICS_UPDATED` | `Ka0s_SkillMaster_StatisticsUpdated` | `modules/StatisticsData.lua` (SMW-10), the first use (unless a block's own pass asked) and each debounced re-read; the simulator's stop | the Statistics model | blocks, broker |
 | `WINDOW_TOGGLED` | `Ka0s_SkillMaster_WindowToggled` | `modules/Window.lua` (SMW-10), a family window's show, hide and `OnHide` | family id, shown | `modules/StatisticsData.lua` |
@@ -341,12 +363,13 @@ The bus subscribers on their own targets: `modules/Blocks.lua` hears `SKILLS_UPD
 session gains); `modules/TrainerPopup.lua` hears `LAYOUT_CHANGED` (the names' color while shown);
 `modules/SessionLog.lua` hears `SKILL_UP` (one log entry,
 with the zone); `modules/Alts.lua` hears `SKILLS_UPDATED` (one snapshot 2 s after a burst);
-`modules/Journal.lua` hears `SKILLS_UPDATED` and `LAYOUT_CHANGED` (a repaint while shown);
+`modules/Journal.lua` hears `SKILLS_UPDATED`, `REPS_UPDATED`, `CURRENCIES_UPDATED` and `LAYOUT_CHANGED` (a
+repaint while shown);
 `modules/Alerts.lua` hears `SKILL_UP` and `SKILLS_UPDATED` (the cap and weapon-gap checks);
 `modules/Broker.lua` hears `SKILLS_UPDATED`, `SKILL_UP`, `STATS_UPDATED` and `BONUSES_UPDATED`
 (the feed texts and the flash), and each tree family's model message (its feed's pins);
 `modules/Blocks.lua` hears each tree family's model message too (repaint); `modules/SessionLog.lua` hears
-`REP_CHANGED` and `CURRENCY_CHANGED` (one Log line per faction or currency per session); `modules/Alts.lua` hears
+`REP_CHANGED` and `CURRENCY_CHANGED` (a Log row per change, R5-SM-10); `modules/Alts.lua` hears
 `REPS_UPDATED` and `CURRENCIES_UPDATED` (the snapshot's standings and amounts); `modules/Alerts.lua` hears
 `CURRENCY_CHANGED` (the optional cap alert); `modules/StatisticsData.lua` hears `WINDOW_TOGGLED`,
 `FEED_TOOLTIP_TOGGLED` and `LAYOUT_CHANGED` (when to watch `CRITERIA_UPDATE`).

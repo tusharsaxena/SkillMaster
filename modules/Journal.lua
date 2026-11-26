@@ -116,10 +116,14 @@ function J.FormatETA(sec)
     return NS.RowTooltip.FormatETA(sec)
 end
 
---- A reputation's or currency's Log change: "+250", "-15".
+--- A reputation's or currency's Log change: "+250", "-15"; with the standing it reached when the standing moved
+--- (R5-SM-10): "+250, Honored".
 function J.ChangeText(e)
     local d = (tonumber(e.new) or 0) - (tonumber(e.old) or 0)
-    return (d > 0 and "+" or "") .. NS.Tree.Number(d)
+    local s = (d > 0 and "+" or "") .. NS.Tree.Number(d)
+    local reached = e.newReaction and NS.Compat.FactionStandingLabel(e.newReaction)
+    if reached and reached ~= "" then s = L["%s, %s"]:format(s, reached) end
+    return s
 end
 
 local function skillName(key)
@@ -128,6 +132,18 @@ local function skillName(key)
     local cat = NS.SkillCatalog and NS.SkillCatalog[key]
     if cat then return L[cat.name] end
     return (tostring(key):gsub("^other:", ""))
+end
+
+--- The name a Log row shows: a reputation's or currency's own (SMW-08, SMW-09), a skill-up's skill.
+function J.RowName(e) return e.kind and (e.name or e.key) or skillName(e.key) end
+
+local JF = NS.JournalFilters
+-- The column filters' context (R5-SM-11): how a row is named, the clock, and the repaint a pick asks for.
+local function filterCtx()
+    return { nameOf = J.RowName, now = time(), onChange = function()
+        state.logOffset = 0
+        J.Render()
+    end }
 end
 
 -- ── the mini bar: the shared bar widget (LibKa0s-Widgets-1.0 Bar, "mini" style), colored as the main window's ──
@@ -298,8 +314,8 @@ end
 local LOG_COLS = {
     { x = 6, w = 50, j = "LEFT" },                    -- Date
     { x = 58, w = 36, j = "LEFT" },                   -- Time
-    { x = 98, r = -(70 + 150 + 14), j = "LEFT" },     -- Skill
-    { r = -(150 + 10), w = 70, j = "RIGHT" },         -- Change
+    { x = 98, r = -(110 + 150 + 14), j = "LEFT" },    -- Name (a skill, a faction or a currency)
+    { r = -(150 + 10), w = 110, j = "RIGHT" },        -- Change: 110 for "+250, Honored" (R5-SM-10)
     { r = -6, w = 150, j = "RIGHT" },                 -- Zone: 150 (owner feedback round 4)
 }
 
@@ -354,7 +370,7 @@ local function bindLogRow(p, row, e, i)
     row.cols[1]:SetText(date(L["%m/%d/%y"], e.t))
     row.cols[2]:SetText(date("%H:%M", e.t))
     -- A reputation's or currency's change (SMW-08, SMW-09; SessionLog:AddChange): its name, and the change.
-    row.cols[3]:SetText(e.kind and (e.name or e.key) or skillName(e.key))
+    row.cols[3]:SetText(J.RowName(e))
     row.cols[4]:SetText(e.kind and J.ChangeText(e) or (tostring(e.old) .. ARROW .. tostring(e.new)))
     row.cols[5]:SetText(e.zone or "")
     row.entry = e
@@ -364,7 +380,8 @@ end
 
 local function renderLogRows(p, log, from)
     Pool.ReleaseAll(p.pool)
-    local list = log:Since(from)
+    local list = JF.Apply(log:Since(from), filterCtx())   -- the column filters on top of the range (R5-SM-11)
+    p.filtered = list
     local n = #list
     state.logOffset = clamp(state.logOffset, 0, max(n - state.logRows, 0))
     local shown, first = 0, n - state.logOffset
@@ -373,15 +390,23 @@ local function renderLogRows(p, log, from)
         bindLogRow(p, Pool.Acquire(p.pool, function() return newLogRow(p) end), list[i], shown)
     end
     p.empty:SetShown(n == 0)
-    p.empty:SetText(#log:Entries() == 0 and L["No skill-ups logged yet."] or L["No skill-ups in this range."])
+    -- The Log holds reputations and currencies too (R5-SM-10), so its empty lines speak of every row (R5-SM-12).
+    local why = L["Nothing logged in this range."]
+    if #log:Entries() == 0 then why = L["Nothing logged yet."] elseif JF.Active() then why = L["No rows match the filters."] end
+    p.empty:SetText(why)
     p.shown = shown
     p.scroll:Sync(max(n - state.logRows, 0), state.logOffset)
 end
 
---- The range's skills with an ETA, soonest first (`from`: the range's start; nil, this session).
-function J.EtaRows(from)
+--- The range's skills with an ETA, soonest first (`from`: the range's start; nil, this session); with `list` (the
+--- Log's filtered rows, R5-SM-11) only the skills among them.
+function J.EtaRows(from, list)
     local log = NS.Preview.Log()
     local _, byKey = log:Gains(from)
+    if list then
+        byKey = {}
+        for _, e in ipairs(list) do if not e.kind then byKey[e.key] = true end end
+    end
     local out = {}
     for key in pairs(byKey) do
         local sec = log:ETA(key, from)
@@ -398,36 +423,53 @@ end
 --- counts). The title names the count, "Skill-ups this session (1 h 20 m)" or "Skill-ups ·
 --- Last 7 days"; the rate line is the average and the span it is over: "6.0 an hour" for the session,
 --- "38.4 a day over 2 days" otherwise (all time: since the oldest entry, a day at least).
-local function summaryLines(SL, range, from, total, now)
-    if range == "session" then
+-- The card's title per counted kind (R5-SM-11: the Name filter's kind picks it): the range's own words.
+local SUMMARY_TITLE = { skill = L["Skill-ups \194\183 %s"], reputation = L["Reputation \194\183 %s"],
+                        currency = L["Currencies \194\183 %s"] }
+
+local function summaryLines(SL, range, from, total, now, kind, list)
+    if range == "session" and kind == "skill" then
         local span = now - SL:SessionStart()
         return L["Skill-ups this session (%s)"]:format(J.FormatDuration(span)),
-               L["Average: %.1f an hour"]:format(SL:Rate(span, now))
+               L["Average: %.1f an hour"]:format(span > 0 and total / span * 3600 or 0)
     end
     local days = J.RANGE_DAYS[range]
     if not days then
-        local oldest = SL:Since(from)[1]
+        local oldest = (list or SL:Since(from))[1]
+        if range == "session" then oldest = { t = SL:SessionStart() } end
         days = max((now - (oldest and oldest.t or now)) / DAY, 1)
     end
     local whole = max(floor(days + 0.5), 1)
     local over = whole == 1 and L["1 day"] or L["%d days"]:format(whole)
-    return L["Skill-ups \194\183 %s"]:format(J.RangeLabel(range)),
+    return SUMMARY_TITLE[kind]:format(J.RangeLabel(range)),
            L["Average: %.1f a day over %s"]:format(total / days, over)
 end
 
+--- The summary card's value: a skill-up count "+498", a reputation or currency net change signed ("-20").
+local function signed(n)
+    return (n > 0 and "+" or "") .. NS.Tree.Number(n)
+end
+
 local function renderSide(p, SL, range, from, now)
-    local total = SL:Gains(from)
-    local title, rate = summaryLines(SL, range, from, total, now)
+    -- The summary and the ETA count the Log's filtered rows (R5-SM-11).
+    local list = p.filtered or SL:Since(from)
+    local kind, total = JF.Summary(list)
+    local title, rate = summaryLines(SL, range, from, total, now, kind, list)
+    if JF.Active() then title = L["%s \194\183 filtered"]:format(title) end
     p.session.title:SetText(title)
-    p.session.value:SetText("+" .. total)
+    p.session.value:SetText(kind == "skill" and ("+" .. total) or signed(total))
     p.session.rate:SetText(rate)
-    local rows = J.EtaRows(from)
+    p.clearFilters:SetShown(JF.Active())
+    local rows = J.EtaRows(from, JF.Active() and list or nil)
     for i, line in ipairs(p.eta.lines) do
         local r = rows[i]
         line.name:SetText(r and skillName(r.key) or "")
         line.value:SetText(r and J.FormatETA(r.sec) or "")
     end
     p.eta.none:SetShown(#rows == 0)
+    -- With the Name filter on reputations or currencies the reason is the filter, not too few skill-ups (R5-SM-12).
+    p.eta.none:SetText(kind == "skill" and L["Two skill-ups of a skill give it an ETA."]
+        or L["The filter leaves no skill-ups to time."])
 end
 
 local function buildCard(p, h, anchor, y)
@@ -495,6 +537,90 @@ local function buildLogButtons(p)
     p.newSession:SetPoint("TOPLEFT", p.eta, "BOTTOMLEFT", 0, -10)
     p.clear = makeButton(p, L["Clear log"], function() J.ConfirmClear() end)
     p.clear:SetPoint("TOPRIGHT", p.eta, "BOTTOMRIGHT", 0, -10)
+    -- The column filters' one-click clear (R5-SM-11), shown while any filter is on.
+    p.clearFilters = makeButton(p, L["Clear filters"], function() J.ClearFilters() end)
+    p.clearFilters:SetWidth(SIDE_W)
+    p.clearFilters:SetPoint("TOPLEFT", p.newSession, "BOTTOMLEFT", 0, -8)
+    p.clearFilters:Hide()
+end
+
+-- ── the column filters (R5-SM-11) ───────────────────────────────────────────────────────────────
+
+local FILTER_MARK = 10   -- px: the filter mark beside an active header's label
+
+--- Open column `col`'s filter menu on `anchor` (its header), its choices those the range holds.
+function J.FilterMenu(col, anchor)
+    local SL = NS.Preview.Log()
+    local list = SL:Since(J.RangeStart(J.SelectedRange(), SL, time()))
+    if GameTooltip and GameTooltip:IsOwned(anchor) then GameTooltip:Hide() end
+    return JF.Menu(col, anchor, list, filterCtx())
+end
+
+--- Column `col`'s menu rows as J.FilterMenu would open them (the suites pick from them).
+function J.FilterMenuRowsForTest(col)
+    local SL = NS.Preview.Log()
+    return JF.MenuRows(col, SL:Since(J.RangeStart(J.SelectedRange(), SL, time())), filterCtx())
+end
+
+--- Clear every column filter (the side column's Clear filters).
+function J.ClearFilters()
+    JF.Clear()
+    state.logOffset = 0
+    J.Render()
+end
+
+-- A header's tooltip (a body element: beside the Journal, NS.Chrome.PlaceBeside): the filter in force, and the click.
+local function onFilterEnter(b)
+    if not GameTooltip then return end
+    GameTooltip:SetOwner(b, "ANCHOR_NONE")
+    local c = NS.SkinColor("gtip.title") or NS.SkinColor("gtip.body")
+    local on = JF.Label(b.col)
+    if c then GameTooltip:AddLine(on and L["Filter: %s"]:format(on) or L["No filter"], c[1], c[2], c[3]) end
+    local m = NS.SkinColor("gtip.muted")
+    if m then GameTooltip:AddLine(L["Click to filter this column."], m[1], m[2], m[3]) end
+    GameTooltip:Show()
+    NS.Chrome.PlaceBeside(GameTooltip, b, frame)
+end
+
+-- Each header label gets a button over it (its click opens the column's menu) and a filter mark beside it.
+local function buildHeaderFilters(p)
+    p.filterButtons = {}
+    for i, col in ipairs(JF.COLUMNS) do
+        local fs = p.headers[i]
+        local b = CreateFrame("Button", nil, p.header)
+        b.col, b.label = col, fs
+        b:SetPoint("TOP", p.header, "TOP", 0, 0)
+        b:SetPoint("BOTTOM", p.header, "BOTTOM", 0, 0)
+        b:SetPoint("LEFT", fs, "LEFT", 0, 0)
+        b:SetPoint("RIGHT", fs, "RIGHT", 0, 0)
+        b:RegisterForClicks("AnyUp")
+        b:SetScript("OnClick", function(self) J.FilterMenu(self.col, self) end)
+        b:SetScript("OnEnter", onFilterEnter)
+        b:SetScript("OnLeave", function() if GameTooltip then GameTooltip:Hide() end end)
+        b.mark = p.header:CreateTexture(nil, "OVERLAY")
+        b.mark:SetSize(FILTER_MARK, FILTER_MARK)
+        local path = NS.Icon and NS.Icon(NS.Blocks.FILTER_ICON)
+        if path then b.mark:SetTexture(path) end
+        b.mark:Hide()
+        p.filterButtons[col] = b
+    end
+end
+
+-- An active header in the accent with its filter mark beside the label (left of a right-aligned one).
+local function paintHeaderFilters(p)
+    for _, b in pairs(p.filterButtons or {}) do
+        local on = JF.Active(b.col)
+        NS.Skin.Text(b.label, on and "accent" or "heading")
+        b.mark:ClearAllPoints()
+        local w = tonumber(b.label:GetStringWidth()) or 0
+        if b.label:GetJustifyH() == "RIGHT" then
+            b.mark:SetPoint("RIGHT", b.label, "RIGHT", -(w + 3), 0)
+        else
+            b.mark:SetPoint("LEFT", b.label, "LEFT", w + 3, 0)
+        end
+        b.mark:SetShown(on and b.mark:GetTexture() ~= nil)
+        if on then NS.Skin.Mark(b.mark, { token = "text.accent" }) end
+    end
 end
 
 local function buildLog()
@@ -504,9 +630,11 @@ local function buildLog()
     p.header:SetPoint("TOPLEFT", p, "TOPLEFT", 0, 0)
     p.header:SetPoint("TOPRIGHT", p, "TOPRIGHT", -(SIDE_W + PAD + SCROLL_W + SCROLL_GAP), 0)
     makeBand(p.header)
-    -- The labels uppercase on the band, in the heading role (round 5).
-    p.headers = placeColumns(p.header, { L["Date"]:upper(), L["Time"]:upper(), L["Skill"]:upper(),
+    -- The labels uppercase on the band, in the heading role (round 5). The third column is Name since it lists
+    -- reputations and currencies too (R5-SM-10). Each header opens its filter's menu (R5-SM-11).
+    p.headers = placeColumns(p.header, { L["Date"]:upper(), L["Time"]:upper(), L["Name"]:upper(),
         L["Change"]:upper(), L["Zone"]:upper() }, "heading")
+    buildHeaderFilters(p)
     p.scroll = makeScrollBar(p, function(offset)
         state.logOffset = offset
         J.Render()
@@ -515,7 +643,7 @@ local function buildLog()
     p.scroll:SetPoint("BOTTOMLEFT", p, "BOTTOMRIGHT", -(SIDE_W + PAD + SCROLL_W), 0)
     p.empty = text(p, "muted")
     p.empty:SetPoint("TOPLEFT", p.header, "BOTTOMLEFT", 6, -8)
-    p.empty:SetText(L["No skill-ups logged yet."])
+    p.empty:SetText(L["Nothing logged yet."])
     buildSessionCard(p)
     buildEtaCard(p)
     buildLogButtons(p)
@@ -531,6 +659,7 @@ local function renderLog(p)
     local from = J.RangeStart(range, SL, now)
     if p.range then p.range:SelectValue(range) end
     renderLogRows(p, SL, from)
+    paintHeaderFilters(p)
     renderSide(p, SL, range, from, now)
 end
 
@@ -791,6 +920,13 @@ local function bindAltRow(p, row, key, name, kind, list, i)
     row:Show()
 end
 
+-- An Alts sub-tab with no row, in its kind's words (R5-SM-12: the reputation and currency sub-tabs said "skill").
+local ALT_EMPTY = {
+    skill = L["No character has a skill in this block yet."],
+    reputation = L["No character has a reputation recorded yet."],
+    currency = L["No character has a currency recorded yet."],
+}
+
 local function renderAlts(p)
     local list = NS.Preview.Alts():List()
     local keys, names, kind = J.AltRows(list, state.filter)
@@ -811,7 +947,7 @@ local function renderAlts(p)
         end
     end
     p.empty:SetShown(#list == 0 or #keys == 0)
-    p.empty:SetText(#list == 0 and L["No characters recorded yet."] or L["No character has a skill in this block yet."])
+    p.empty:SetText(#list == 0 and L["No characters recorded yet."] or ALT_EMPTY[kind] or ALT_EMPTY.skill)
     p.shown, p.rows, p.list = shown, keys, list
     p.scroll:Sync(#list > 0 and max(#keys - state.altRows, 0) or 0, state.altOffset)
 end
@@ -1081,7 +1217,7 @@ local function build()
     frame.logPanel = buildLog()
     frame.altsPanel = buildAlts()
     frame.altsFooter = NS.Chrome.Footer(frame, {
-        left = L["Snapshots update on login, logout and every skill change. Right-click a character to forget it."],
+        left = L["Snapshots update on login, logout and every skill, reputation or currency change. Right-click a character to forget it."],
         grip = true,   -- its right side clears the resize grip's corner
     })
     frame.altsFooter:Hide()
@@ -1155,7 +1291,7 @@ function J.ClearLog()
 end
 
 StaticPopupDialogs.SKILLMASTER_CLEAR_LOG = {
-    text         = L["Clear this character's skill-up log? Every entry is removed."],
+    text         = L["Clear this character's Journal log? Every skill-up, reputation and currency row is removed."],
     button1      = YES,
     button2      = NO,
     timeout      = 0,
@@ -1240,9 +1376,13 @@ function J.ApplyGeometry()
     J.Relayout(WIDTH, HEIGHT)
 end
 
--- A skill pass (after its SKILL_UPs, so the log is current) and a look change repaint it.
+-- A skill pass (after its SKILL_UPs, so the log is current) and a look change repaint it; so do a reputation and a
+-- currency pass (after their REP_CHANGED and CURRENCY_CHANGED: the Log's rows and the Alts tab, R5-REV). Each
+-- repaints only while the Journal shows.
 J.events = NS.NewBusTarget()
 if J.events then
     J.events:RegisterMessage(NS.MSG.SKILLS_UPDATED, function() J.Refresh() end)
+    J.events:RegisterMessage(NS.MSG.REPS_UPDATED, function() J.Refresh() end)
+    J.events:RegisterMessage(NS.MSG.CURRENCIES_UPDATED, function() J.Refresh() end)
     J.events:RegisterMessage(NS.MSG.LAYOUT_CHANGED, function() J.Refresh() end)
 end

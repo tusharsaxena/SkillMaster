@@ -192,11 +192,12 @@ test("reputations: later reads go by id, touch no header, and announce a moved s
         local log = NS.SessionLog:Since(nil)
         local mine = {}
         for _, e in ipairs(log) do if e.kind == "reputation" then mine[#mine + 1] = e end end
-        assertEqual(#mine, 1, "one Log line per faction per session")
-        assertEqual(mine[1].old .. ">" .. mine[1].new, "6000>6400")
+        assertEqual(#mine, 2, "a Log row per change (R5-SM-10)")
+        assertEqual(mine[1].old .. ">" .. mine[1].new, "6000>6250")
+        assertEqual(mine[2].old .. ">" .. mine[2].new, "6250>6400")
         assertEqual(NS.SessionLog:KindGainsFor("reputation", "21"), 400)
         assertEqual((NS.SessionLog:Gains()), 0, "a standing is no skill point")
-        assertEqual(NS.Journal.ChangeText(mine[1]), "+400")
+        assertEqual(NS.Journal.ChangeText(mine[2]), "+150")
     end)
 end)
 

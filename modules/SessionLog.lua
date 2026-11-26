@@ -1,7 +1,10 @@
 local _, NS = ...
 -- modules/SessionLog.lua — the per-character log of skill-ups (design §5.2, plan Task 4.3): a ring of
 -- the newest 500 { t, key, old, new, zone } in db.char.log, this session's gains, the session rate
--- (points an hour over a sliding window) and the per-skill ETA to the cap.
+-- (points an hour over a sliding window) and the per-skill ETA to the cap. Since R5-SM-10 every reputation
+-- and currency change is a row of its own too ({ t, kind, key, name, old, new, zone[, oldReaction,
+-- newReaction] }), and the ring keeps journal.keep of each sort: the skill-ups, and the changes besides, so a
+-- reputation grind never pushes a skill-up out.
 --
 -- Hears SKILL_UP on its own tracked bus target, so the stand-down takes it down with every other
 -- subscription. A session starts at login (this file's load) and again on "New session".
@@ -28,14 +31,54 @@ end
 
 local function liveEntry(key) return NS.SkillData and NS.SkillData:Get(key) end
 
+--- How many skill-ups and reputation and currency changes `log` holds.
+local function sortCounts(log)
+    local skills, changes = 0, 0
+    for _, e in ipairs(log) do
+        if e.kind then changes = changes + 1 else skills = skills + 1 end
+    end
+    return skills, changes
+end
+
+--- Trim `log` (oldest first) to `keepS` skill-ups and `keepC` reputation and currency changes (R5-SM-10), the
+--- oldest of each sort going first, in place and allocating nothing (it runs on every reputation tick).
+local function trimTo(log, keepS, keepC)
+    local skills, changes = sortCounts(log)
+    local dropS, dropC = math.max(skills - keepS, 0), math.max(changes - keepC, 0)
+    if dropS == 0 and dropC == 0 then return end
+    local n, j = #log, 0
+    for i = 1, n do
+        local e = log[i]
+        if e.kind and dropC > 0 then
+            dropC = dropC - 1
+        elseif not e.kind and dropS > 0 then
+            dropS = dropS - 1
+        else
+            j = j + 1
+            log[j] = e
+        end
+    end
+    for i = n, j + 1, -1 do log[i] = nil end
+end
+
 --- One log over `store()` (the list, or nil before the store exists), its session starting at
 --- `start`; `entryOf(key)` answers the model entry the ETA reads.
 local function newLog(store, start, entryOf)
     local SL = { CAP = CAP, WINDOW = WINDOW, Cap = cap }
     local sessionStart = start
-    -- What the log held when this session first wrote to it: a profile switch to a lower
-    -- journal.keep never trims below it (review F-015); only the setting's own write does (Trim).
-    local floor
+    -- What the log held of each sort (skill-ups, changes) when this session first wrote to it: a profile switch
+    -- to a lower journal.keep never trims a sort below it (review F-015); only the setting's own write does
+    -- (Trim). One floor per sort (R5-REV): a floor of the whole log's length let a sort grow by the other's
+    -- count at every login.
+    local floorS, floorC
+
+    -- Append `e` to `log`, then trim each sort to the larger of the keep and its floor.
+    local function append(log, e)
+        if not floorS then floorS, floorC = sortCounts(log) end
+        log[#log + 1] = e
+        local keep = cap()
+        trimTo(log, math.max(keep, floorS), math.max(keep, floorC))
+    end
 
     --- Record one skill-up. Answers the stored entry, or nil for a malformed one.
     --- @param key string the skill's key   @param old number   @param new number
@@ -45,39 +88,24 @@ local function newLog(store, start, entryOf)
         local log = store()
         if not log then return nil end
         local e = { t = tonumber(t) or time(), key = key, old = tonumber(old) or (new - 1), new = new, zone = zone }
-        floor = floor or #log
-        log[#log + 1] = e
-        local keep = math.max(cap(), floor)
-        while #log > keep do table.remove(log, 1) end
+        append(log, e)
         return e
     end
 
     --- Record a reputation's or currency's change (SMW-08, SMW-09): `kind` its row kind, `key` its id, `name`
-    --- what the Log shows. One entry per kind and key per session, its `new` (and time) moved on by each later
-    --- change and the entry moved to the end, so a session of kills is one line, not one per kill, and the log
-    --- stays in time order (the Journal draws it, and the trim drops from it, by position). Answers the entry.
-    function SL:AddChange(kind, key, name, old, new, t, zone)
+    --- what the Log shows. Each change is a row of its own (R5-SM-10, the owner's round 5: the Journal tracks
+    --- every gain and loss), so the Log reads each kill's reputation and each currency spent, in time order. A
+    --- reputation change that moved the standing keeps both standings (`oldReaction`, `newReaction`, 1..8); one
+    --- that did not keeps neither. Answers the entry.
+    function SL:AddChange(kind, key, name, old, new, t, zone, oldReaction, newReaction)
         if type(kind) ~= "string" or type(key) ~= "string" or type(new) ~= "number" then return nil end
         local log = store()
         if not log then return nil end
-        t = tonumber(t) or time()
-        for i = #log, 1, -1 do
-            local e = log[i]
-            if e.t < sessionStart then break end
-            if e.kind == kind and e.key == key then
-                e.new, e.t, e.zone = new, t, zone or e.zone
-                if i < #log then
-                    table.remove(log, i)
-                    log[#log + 1] = e
-                end
-                return e
-            end
-        end
-        local e = { t = t, kind = kind, key = key, name = name, old = tonumber(old) or new, new = new, zone = zone }
-        floor = floor or #log
-        log[#log + 1] = e
-        local keep = math.max(cap(), floor)
-        while #log > keep do table.remove(log, 1) end
+        local e = { t = tonumber(t) or time(), kind = kind, key = key, name = name, old = tonumber(old) or new,
+                    new = new, zone = zone }
+        local fromR, toR = tonumber(oldReaction), tonumber(newReaction)
+        if fromR and toR and fromR ~= toR then e.oldReaction, e.newReaction = fromR, toR end
+        append(log, e)
         return e
     end
 
@@ -86,12 +114,13 @@ local function newLog(store, start, entryOf)
         local log = store()
         n = tonumber(n)
         if not (log and n) then return end
-        while #log > n do table.remove(log, 1) end
-        floor = math.min(floor or #log, #log)
+        trimTo(log, n, n)
+        local skills, changes = sortCounts(log)
+        floorS, floorC = math.min(floorS or skills, skills), math.min(floorC or changes, changes)
     end
 
     --- Forget the floor (a profile reload, the suites): the next write takes it again.
-    function SL:ResetFloor() floor = nil end
+    function SL:ResetFloor() floorS, floorC = nil, nil end
 
     --- Every stored entry, oldest first (the live table: read, never write).
     function SL:Entries() return store() or {} end
@@ -230,9 +259,10 @@ local function onSkillUp(_, key, old, new)
     SL:Add(key, old, new, time(), GetZoneText and GetZoneText() or nil)
 end
 
--- A faction's standing moved (SMW-08): REP_CHANGED(key, old, new, name).
-local function onRepChanged(_, key, old, new, name)
-    SL:AddChange("reputation", key, name, old, new, time(), GetZoneText and GetZoneText() or nil)
+-- A faction's standing moved (SMW-08): REP_CHANGED(key, old, new, name, oldReaction, newReaction).
+local function onRepChanged(_, key, old, new, name, oldReaction, newReaction)
+    SL:AddChange("reputation", key, name, old, new, time(), GetZoneText and GetZoneText() or nil, oldReaction,
+        newReaction)
 end
 
 -- A currency's amount moved (SMW-09): CURRENCY_CHANGED(key, old, new, name).

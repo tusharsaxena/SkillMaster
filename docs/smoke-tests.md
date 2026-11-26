@@ -1362,3 +1362,54 @@ none is passed until you say so.
   hover every feed in both tooltip styles. No Lua error, and `/sm diagnostics` lists no rejected event. `/sm toggle`
   closes all six.
   Result:
+
+## Owner feedback round 5, addendum A1 (R5-SM-08..12, 2026-11-26)
+
+- **SM-R5-8** (new, R5-SM-08) Detach Primary Professions (its header's detach mark) and Reputations, then drag
+  Reputations onto the bottom edge of Primary until they join into one "Primary · Reputations" window. A resize
+  grip shows in its bottom-right corner: drag it wider and narrower; the window follows, the height stays the
+  rows', and on release it keeps the new width (`/reload`: still that width). Drag Reputations onto Primary's right
+  edge instead (two columns): the grip widens both columns together. `/sm lock`: the grip hides; `/sm unlock`: it
+  is back. Right-click the band, Unmerge all: each window has its own grip again at its own old width.
+  Result:
+- **SM-R5-9** (new, R5-SM-09) `/sm reputations`: each header (Alliance, Steamwheedle Cartel, Other) shows the detach
+  mark at its right end. Click Alliance's: a window titled "Alliance" opens with Darnassus, Gnomeregan Exiles,
+  Ironforge and Stormwind, and the Reputations window no longer lists Alliance or those four. Drag it somewhere,
+  collapse it with its chevron, resize it with its grip, then `/reload`: it comes back where you left it, collapsed
+  and at that width. Drag it onto a detached Primary Professions window's edge: they join ("Primary · Alliance").
+  Click its dock mark (or the joined window's Dock all): Alliance is back in the Reputations window in its place.
+  `/sm statistics`: open Character and detach Wealth (a nested category): a "Wealth" window shows its statistics
+  even with Character folded again in the Statistics window; detach Character too and its window lists its own
+  rows, Consumables, Reputation and Gear but not Wealth. `/sm currencies`: detach Player vs. Player: Honor Points
+  moves to its own window. Hover each feed: its tooltip still shows the whole tree and no detach mark. With
+  Alliance and Player vs. Player still detached, log in an alt on the same profile that lacks one (a Horde
+  character, or one with no Honor Points): no empty "Alliance" or "Player vs. Player" window shows; back on the
+  first character, both windows are where you left them.
+  Result:
+- **SM-R5-10** (new, R5-SM-10) `/reload`, then `/sm journal`, Log tab: no reputation or currency row appears for the
+  login itself. Kill a few mobs that give reputation, and earn or spend a currency (Honor Points, a Merchant's
+  Favor): each kill's reputation is its own row (the faction's name in the Name column, "+5" or the like in
+  Change), each currency change its own row, a spend reading negative ("-20"). When a standing changes (say
+  Friendly to Honored), that row reads "+25, Honored". Skill-ups still log beside them, newest first. Keep the
+  Journal open while you kill: each row appears as it happens, without closing and reopening the Journal.
+  Result:
+- **SM-R5-11** (new, R5-SM-11) `/sm journal`, Log tab: the headers read DATE, TIME, NAME, CHANGE, ZONE. Hover one: a
+  tooltip says "No filter" and "Click to filter this column." Click NAME: a menu offers Everything, Skill-ups,
+  Reputations, Currencies and a submenu per kind of the names in the range; pick Reputations: only faction rows
+  remain, the NAME header turns the accent color with a small funnel beside it, the summary card reads
+  "Reputation · All time · filtered" with the net change (signed), and a Clear filters button appears under New
+  session. Click ZONE and pick a zone: both filters apply together. Try DATE (Today, Yesterday, a listed day), TIME
+  (Morning and the like) and CHANGE (Gains, Losses, Standing changes). Click Clear filters: every row is back, the
+  headers return to their color and the button goes. `/reload`: the Log opens unfiltered.
+  Result:
+- **SM-R5-12** (new, R5-SM-12) The rest of the Journal: with nothing logged (Clear log, then accept), the Log reads
+  "Nothing logged yet."; pick Current session after an older row exists: "Nothing logged in this range." Clear log
+  asks "Clear this character's Journal log? Every skill-up, reputation and currency row is removed." Filter NAME to
+  Reputations: the ETA to cap card reads "The filter leaves no skill-ups to time." Alts tab, Reputations and
+  Currencies sub-tabs on a character with none recorded: "No character has a reputation (currency) recorded yet."; the
+  footer reads "Snapshots update on login, logout and every skill, reputation or currency change." Settings →
+  Journal: *Skill-ups to keep* says the Log keeps as many reputation and currency changes besides, and *Log shows*
+  names skill-ups, reputation and currency changes. `/sm test` (test mode): the Log shows Honor Points +34, an
+  Ironforge row "+25, Revered", a Darkmoon Prize Ticket spend "-8" and a Stormwind gain among the sample skill-ups.
+  `/sm diagnostics`: the model line counts skill-ups, reputation and currency rows apart.
+  Result:

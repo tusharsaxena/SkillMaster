@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (16)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (19)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "<ruleset>-<First Surname>" (forever-quirks-§4);
@@ -33,13 +33,15 @@ SkillMasterDB
                                  -- a one-item list in the skill's family, or in stats) and go; the
                                  -- runner has no per-character step
     log = {}                     -- the log's ring (modules/SessionLog.lua): the newest journal.keep
-                                 -- (500; 50 .. 2000) { t, key, old, new, zone }, oldest first; the
-                                 -- Journal's ranges reach no further back than it holds. A
+                                 -- (500; 50 .. 2000) skill-ups { t, key, old, new, zone }, and as many
+                                 -- reputation and currency changes besides (R5-SM-10), oldest first;
+                                 -- the Journal's ranges reach no further back than it holds. A
                                  -- reputation's change (SMW-08) is { t, kind = "reputation", key (its
-                                 -- factionID), name, old, new, zone }, one per faction per session,
-                                 -- its new standing moved on by each later change; it counts no
-                                 -- skill point. A currency's (SMW-09) is the same with kind =
-                                 -- "currency", key its currencyID, old and new its amounts
+                                 -- factionID), name, old, new, zone[, oldReaction, newReaction] }, a
+                                 -- row per change (R5-SM-10; one per faction per session before,
+                                 -- kept as it was), both reactions (1..8) only when the standing
+                                 -- moved; it counts no skill point. A currency's (SMW-09) is the same
+                                 -- with kind = "currency", key its currencyID, old and new its amounts
     fold = {}                    -- the tree windows' folds (modules/Tree.lua, SMW-03): { [family] = {
                                  -- [nodeKey] = true folded | false open } }; an absent node takes its
                                  -- family's default (Statistics folded, the others open). Keys are
@@ -100,6 +102,13 @@ SkillMasterDB
                                  -- modules/Groups.lua: [gid] = { point = { point, relPoint, x, y }
                                  -- | false, columns = { { id, ... }, ... } }; a member is a
                                  -- detached block, in one group at most; two or more per group
+                                 -- width = n | nil: the column width its corner grip set (R5-SM-08,
+                                 -- 200..600 step 10; schemaVersion 17), else its widest member's
+      subs = {}                  -- detached sub-categories (R5-SM-09), written only by
+                                 -- modules/SubBlocks.lua: ["sub:<family>:<nodeKey>"] = { docked =
+                                 -- false, name, collapsed, point, width }, a row only while one is
+                                 -- detached; nodeKey a faction header's factionID, a currency
+                                 -- header's "<name>#<depth>", a Statistics categoryID
     }
     icons = {                    -- Bars > Icons (feedback round 2): the rows' in-game icons
       show = true, size = 16, zoom = 7,   -- zoom: the % cropped from each side of the art
@@ -244,7 +253,9 @@ grip's release); `global.characters`, owned by `modules/Alts.lua` (`Snapshot`, `
 `modules/Alerts.lua` (the toast's `setPosition`); `profile.layout.blocks.<id>.point`, owned by
 `modules/Detached.lua` (`savePoint` on drag stop, `StorePoint` for a section split or unmerged from a
 merged window); `profile.layout.groups`, owned by `modules/Groups.lua` (`Merge`, `Split`, `Unmerge`,
-`Leave`, the band drag's `savePoint`, the normalization on read); `char.fold`, owned by `modules/Tree.lua` (`SetFolded`, `Toggle`, `SetAll`; a session store instead while test mode or a simulation runs); `char.pinned` and `char.pinnedStat`, owned by `modules/Interact.lua`
+`Leave`, the band drag's `savePoint`, the grip's column width, the normalization on read); `profile.layout.subs`,
+owned by `modules/SubBlocks.lua` (`Detach`, `Dock`, `SetCollapsed`, `SetWidth`; the drop point through
+`modules/Detached.lua`); `char.fold`, owned by `modules/Tree.lua` (`SetFolded`, `Toggle`, `SetAll`; a session store instead while test mode or a simulation runs); `char.pinned` and `char.pinnedStat`, owned by `modules/Interact.lua`
 (the row menu's Pin on a skill and on a stat row, refused while test mode or a simulation runs); `global.minimap.minimapPos`,
 LibDBIcon's own.
 
@@ -268,6 +279,9 @@ LibDBIcon's own.
 | 13 → 14 | `windowsSplit`, per profile | six family windows (SMW-04): a stored `window.point` and `layout.width`, `maxHeight`, `fitHeight`, `columns`, `summary` and `strata` (rawget: stored choices only) move to `windows.professions` (one already stored there wins), and the old keys go; the other windows start from their defaults, placed next to the Professions window the first time |
 | 14 → 15 | `feedTemplatesSplit`, per profile | one broker feed per family (SMW-05): a stored `broker.template` was the Skill Master feed's, the Professions feed's now, so it moves to `broker.feeds.professions.template` (one stored there other than the default wins) and the old key goes |
 | 15 → 16 | `tipOpenFromRetired`, per profile | in the LDB tooltip only a section's fold chevron acts (SMW-07): a stored `tooltips.ldb.openFrom` names nothing and goes, whatever it holds |
+| 16 → 17 | `groupWidthCleaned`, per profile | a merged window resizes (R5-SM-08): its column width is stored on its group, `layout.groups[gid].width` (optional; none is its widest member's width); a stored one out of a block's 200..600 is clamped and a non-number goes |
+| 17 → 18 | `subsNormalized`, per profile | detached sub-categories (R5-SM-09), `layout.subs`, a new key defaulting to `{}`: nothing carries over; a stored `layout.subs` that is not a table goes, a stored one is normalized (an id that is no tree header's and a row that is no table go; a kept row is detached, its point a table or false, its width clamped) |
+| 18 → 19 | `logRowsKept`, every character | a Log row per reputation or currency change (R5-SM-10), with `oldReaction` and `newReaction` when a standing moved (new optional fields): every stored row of every character's `char.<key>.log` is kept, a merged session row from before as it was; a change row with no name names its key, and an amount stored as text reads back as a number |
 
 No step for the waypoint arrow's keys (round 6, R6-11): `waypoints.arrow`, `waypoints.arrowScale` and
 `waypoints.arrowFrame` are new keys and nothing stored reshapes, so the defaults answer on every

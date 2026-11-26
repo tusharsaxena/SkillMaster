@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 16
+NS.SCHEMA_VERSION = 19
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -223,6 +223,46 @@ local function tipOpenFromRetired(_, profile)
     if type(ldb) == "table" then ldb.openFrom = nil end
 end
 
+--- 16 -> 17 (R5-SM-08, owner feedback round 5, addendum A1): a merged window resizes, its column width stored on
+--- its group (`layout.groups[gid].width`, optional: none is its widest member's width). A stored group is
+--- normalized again so a width out of a block's range is clamped and a non-number goes
+--- (modules/Groups.lua's NS.Groups.Model.Normalize, the same validator as step 6).
+local function groupWidthCleaned(_, profile)
+    local layout = type(profile) == "table" and rawget(profile, "layout")
+    local groups = type(layout) == "table" and rawget(layout, "groups")
+    if type(groups) ~= "table" then return end
+    for _, g in pairs(groups) do
+        if type(g) == "table" and g.width ~= nil then g.width = NS.Groups.Model.CleanWidth(g.width) end
+    end
+end
+
+--- 17 -> 18 (R5-SM-09): detached sub-categories, `layout.subs` (a new key with its own default {}): nothing carries
+--- over; a stored `layout.subs` that is not a table goes (the default answers), and a stored one is normalized
+--- (modules/SubBlocks.lua's NS.SubBlocks.Normalize: an id that is no sub-category's and a row that is no table go).
+local function subsNormalized(_, profile)
+    local layout = type(profile) == "table" and rawget(profile, "layout")
+    if type(layout) ~= "table" or rawget(layout, "subs") == nil then return end
+    if type(layout.subs) ~= "table" then layout.subs = nil return end
+    NS.SubBlocks.Normalize(layout.subs)
+end
+
+--- 18 -> 19 (R5-SM-10): every reputation and currency change is a Log row of its own, and one that moved a
+--- standing keeps both (`oldReaction`, `newReaction`: new optional fields). Each character's stored log
+--- (`char.<key>.log`) keeps every row: a session's merged change row from before stays as it was (its old and
+--- new the session's whole change); a change row with no name names its key, and an old or new amount stored as
+--- text is read back as a number. Character-scoped, so it walks the store's `char` table itself.
+local function logRowsKept(sv)
+    for _, c in pairs(type(sv) == "table" and type(sv.char) == "table" and sv.char or {}) do
+        local log = type(c) == "table" and c.log
+        for _, e in ipairs(type(log) == "table" and log or {}) do
+            if type(e) == "table" then
+                e.old, e.new = tonumber(e.old) or e.old, tonumber(e.new) or e.new
+                if e.kind and e.name == nil then e.name = tostring(e.key) end
+            end
+        end
+    end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
 -- is the stamp the run started at (0 on a fresh install).
@@ -243,6 +283,9 @@ local STEPS = {
     { to = 14, run = windowsSplit, perProfile = true },
     { to = 15, run = feedTemplatesSplit, perProfile = true },
     { to = 16, run = tipOpenFromRetired, perProfile = true },
+    { to = 17, run = groupWidthCleaned, perProfile = true },
+    { to = 18, run = subsNormalized, perProfile = true },
+    { to = 19, run = logRowsKept },
 }
 
 function NS:InitDB()

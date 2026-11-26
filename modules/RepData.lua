@@ -138,14 +138,25 @@ RD.LIST = {
     panel = panel,
 }
 
--- The standings that moved since `old`, as REP_CHANGED (a first build announces none).
-local function announceChanges(old, new)
-    if not (old and old.built) then return end
-    for _, e in ipairs(new.order) do
+--- The standings that moved from model `old` to `new` (pure): each { key, name, old, new, oldReaction,
+--- newReaction }. A first build (no `old`, or one never built: the login baseline) has none (R5-SM-10).
+function RD.Changes(old, new)
+    local out = {}
+    if not (old and old.built and new) then return out end
+    for _, e in ipairs(new.order or {}) do
         local was = old.byKey[e.key]
         if was and e.current and was.current and e.current ~= was.current then
-            NS.bus:SendMessage(NS.MSG.REP_CHANGED, e.key, was.current, e.current, e.name)
+            out[#out + 1] = { key = e.key, name = e.name, old = was.current, new = e.current,
+                              oldReaction = was.reaction, newReaction = e.reaction }
         end
+    end
+    return out
+end
+
+-- The standings that moved since `old`, as REP_CHANGED(key, old, new, name, oldReaction, newReaction).
+local function announceChanges(old, new)
+    for _, c in ipairs(RD.Changes(old, new)) do
+        NS.bus:SendMessage(NS.MSG.REP_CHANGED, c.key, c.old, c.new, c.name, c.oldReaction, c.newReaction)
     end
 end
 
