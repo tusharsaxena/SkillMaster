@@ -62,7 +62,7 @@ test("windows: the Character Stats window drops the Stats prefix nowhere it matt
     assertEqual(NS.Families.stats.title, "Skill Master \194\183 Character Stats")
     assertEqual(NS.Families.stats.short, "Character Stats")
     local empty = { currencies = "No currencies to show yet.", reputations = "No reputations to show yet.",
-                    statistics = "Nothing to show yet." }
+                    statistics = "No statistics to show yet." }
     for _, fid in ipairs({ "currencies", "reputations", "statistics" }) do
         local W = Windows.Get(fid)
         W.Show()

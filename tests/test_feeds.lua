@@ -146,7 +146,7 @@ test("feeds: a tree family's tooltip says it has nothing yet, in both styles", f
         local said = f.empty:GetText()
         B.HideTooltip()
         ldb.style = style
-        assertEqual(said, "Nothing to show yet.", "the Main window style's line")
+        assertEqual(said, "No statistics to show yet.", "the Main window style's line")
         B.SetFeed(B.DEFAULT_FEED)
     end)
 end)

@@ -99,3 +99,18 @@ P.reputations = treeProvider("reputations", "reputation", function()
     local RD = NS.RepData
     return RD and RD:Model() or nil
 end)
+
+-- Statistics (SMW-10): the same tree, read lazily. The block laying its rows asks NS.StatisticsData:Open with the
+-- folds it draws under (the window's, or the LDB tooltip's own), so only an unfolded category's rows are ever
+-- read; a sample model (test mode, the simulator) is drawn as it is.
+local statistics = treeProvider("statistics", "statistic", function()
+    local SD = NS.StatisticsData
+    return SD and SD:Model() or nil
+end)
+local drawTree = statistics.entries
+statistics.entries = function(m, filter, isHidden, folds)
+    local SD = NS.StatisticsData
+    if SD and SD.Live(m) then m = SD:Open(folds) end
+    return drawTree(m, filter, isHidden, folds)
+end
+P.statistics = statistics

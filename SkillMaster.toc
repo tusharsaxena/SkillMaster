@@ -186,6 +186,9 @@ modules\SharedList.lua
 modules\RepData.lua
 # SMW-09 (#7): the currencies model, RepData's sibling; the same load needs.
 modules\CurrencyData.lua
+# SMW-10: the Statistics model, read lazily (fold-driven); the same load needs, and hears WINDOW_TOGGLED,
+# FEED_TOOLTIP_TOGGLED and LAYOUT_CHANGED on its own bus target; reads NS.Windows, NS.Broker and NS.Pins at CALL time.
+modules\StatisticsData.lua
 # T4.3: subscribe on tracked bus targets at FILE SCOPE (after core\Bus.lua); read NS.SkillData at call time.
 modules\SessionLog.lua
 modules\Alts.lua

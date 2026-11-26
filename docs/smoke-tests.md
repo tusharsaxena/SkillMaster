@@ -1235,3 +1235,28 @@ none is passed until you say so.
   Result:
 - **SM-CUR-7** (new, SMW-09) The Journal's Alts tab has a Currencies sub-tab with each character's amounts.
   Result:
+
+## Statistics (SMW-10, 2026-11-26)
+
+- **SM-STAT-1** (new, SMW-10) `/sm statistics`: the Statistics window lists the character panel's Statistics tab's
+  categories (Character, Combat, ...), every one folded. Open Character: its rows first ("Times camped 58",
+  "Talent tree respecs --"), then its own folded sub-categories (Wealth, Consumables). Open Wealth: its rows under
+  it, one level deeper. Fold Character: Wealth goes with it; open Character again: Wealth is still open.
+  Result:
+- **SM-STAT-2** (new, SMW-10) Compare a few values with the Statistics tab itself: the same numbers, "--" where the
+  tab shows "--"; note what Total gold acquired shows (a number or money text).
+  Result:
+- **SM-STAT-3** (new, SMW-10) With the window open on an unfolded category, do something it counts (camp, post an
+  auction, kill something): the value moves within about a second. Close the window: `/sm debug` shows no
+  Statistics read while it is closed and nothing is pinned.
+  Result:
+- **SM-STAT-4** (new, SMW-10) Right-click a statistic: "Pin to the Statistics broker"; the Skill Master Statistics
+  feed reads "Times camped 58". Close the window and change that statistic: the feed text follows. `/reload`:
+  the feed shows it again at once. A category's menu has no pin.
+  Result:
+- **SM-STAT-5** (new, SMW-10) Hover the Skill Master Statistics feed (both tooltip styles): the categories, folded;
+  click a category's chevron: it opens in the tooltip only, the window's folds do not change.
+  Result:
+- **SM-STAT-6** (new, SMW-10) The Journal's Alts tab has no Statistics sub-tab. The window's title says
+  "Skill Master · Statistics", and nothing in it says "stats".
+  Result:

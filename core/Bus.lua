@@ -73,6 +73,13 @@ NS.MSG = Bus.Catalog(addonName, {
     CURRENCIES_UPDATED = "Ka0s_SkillMaster_CurrenciesUpdated",
     -- modules/CurrencyData.lua (SMW-09), a currency's amount moved. Payload: key, old amount, new amount, name.
     CURRENCY_CHANGED   = "Ka0s_SkillMaster_CurrencyChanged",
+    -- modules/StatisticsData.lua (SMW-10), after a debounced re-read. Payload: the Statistics model.
+    STATISTICS_UPDATED = "Ka0s_SkillMaster_StatisticsUpdated",
+    -- modules/Window.lua (SMW-10), a family window shown or hidden. Payload: the family id, shown (boolean).
+    WINDOW_TOGGLED     = "Ka0s_SkillMaster_WindowToggled",
+    -- modules/Broker.lua (SMW-10), a feed's tooltip shown (before it fills) or hidden. Payload: the family id,
+    -- shown (boolean).
+    FEED_TOOLTIP_TOGGLED = "Ka0s_SkillMaster_FeedTooltipToggled",
     -- the simulator (T5.2). Payload: the step's name.
     SIM_TICK        = "Ka0s_SkillMaster_SimTicked",
 })

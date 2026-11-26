@@ -94,5 +94,10 @@ L["Spend some before you earn more: what you earn past the cap is lost."] = true
 L["Currency cap alert"] = true
 L["A toast when a currency with a cap reaches it, once per currency per session."] = true
 
+-- Statistics (modules/StatisticsData.lua, SMW-10): the character panel's Statistics tab.
+L["No statistics to show yet."] = true
+L["Value"] = true
+L["Category"] = true
+
 -- `true` only documents the key: replace each with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

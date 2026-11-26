@@ -147,6 +147,7 @@ end
 --   pinText(e)        its text in its feed's {pinned}
 --   linkText(e)       its text in chat (a shift-click)
 --   icon(e)           its in-game icon texture, or nil
+--   pinnable(e)       optional: whether its row menu offers a pin (default: a row whose hasBar is not false)
 -- ---------------------------------------------------------------------------------------------
 
 local kinds = {}

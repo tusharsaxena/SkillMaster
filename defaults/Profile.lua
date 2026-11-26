@@ -79,6 +79,7 @@ NS.defaults = {
                 -- fold per header (char.fold), so no sort or filter of its own takes effect.
                 currencies    = { docked = true, order = 9, collapsed = false, point = false, scale = 1, width = 320, locked = false, shown = true },
                 reputations   = { docked = true, order = 10, collapsed = false, point = false, scale = 1, width = 320, locked = false, shown = true },
+                statistics    = { docked = true, order = 11, collapsed = false, point = false, scale = 1, width = 320, locked = false, shown = true },
             },
         },
         -- Rows a player hid from the row menu (T3.3) or the Skills and Stats pages, whether unlearned
@@ -320,7 +321,7 @@ NS.defaults = {
                 -- two, Character Stats' four; round 6, R6-9; schemaVersion 9 dropped a stored `stats`).
                 sections = { primary = true, secondary = true, weapon = true, other = true,
                              stats_base = true, stats_spell = true, stats_defense = true, stats_utility = true,
-                             currencies = true, reputations = true },
+                             currencies = true, reputations = true, statistics = true },
                 hiddenSkills = {},
                 hiddenStats  = {},
             },

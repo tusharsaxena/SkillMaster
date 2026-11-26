@@ -33,10 +33,13 @@ J.FRAME_NAME = "SkillMasterJournal"
 
 J.FILTER_ORDER = {}
 J.FILTERS = {}
-for i, id in ipairs(NS.BLOCKS) do
+for _, id in ipairs(NS.BLOCKS) do
     local d = NS.BlockDefs[id]
-    J.FILTER_ORDER[i] = id
-    J.FILTERS[id] = { source = d.source, filter = d.filter }
+    local fam = NS.FamilyOf(id)
+    if not (fam and fam.noAlts) then   -- Statistics has no Alts sub-tab (SMW-10, the spec's call)
+        J.FILTER_ORDER[#J.FILTER_ORDER + 1] = id
+        J.FILTERS[id] = { source = d.source, filter = d.filter }
+    end
 end
 --- The sub-tab's short label: the block's short name (NS.BlockDefs[id].short, shared with a merged
 --- window's title, round 5).

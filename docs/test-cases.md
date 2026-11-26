@@ -895,6 +895,24 @@ Total.
 - currencies: a pin shows its amount; the Alts snapshot and the Journal's Currencies sub-tab
 - currencies: a simulation never toggles the client's headers (the seam guards the toggle)
 
+### test_statistics.lua (15)
+
+- statistics: the category tree is depth first, a parent of -1 or one the list lacks a root, a cycle survives
+- statistics: a value shows as the tab shows it: the number, -- for none, a string verbatim
+- statistics: the first look reads the category tree only; every category starts folded
+- statistics: unfolding a category reads its rows alone, in Forever's two-argument form; names are cached
+- statistics: CRITERIA_UPDATE is registered only while the window or its tooltip shows, or one is pinned
+- statistics: a burst of CRITERIA_UPDATE is one re-read a second later, of the unfolded categories only
+- statistics: with nothing showing, CRITERIA_UPDATE reads nothing and the registration goes
+- statistics: a pinned statistic shows in its broker's text and is read alone, by its index, while hidden
+- statistics: at login a pinned statistic's category is read for the feed, and nothing else
+- statistics: the tooltip folds in its own folds and reads what it unfolds; the window's folds stay
+- statistics: the Classic tooltip lists the categories, each a chevron line
+- statistics: a row's tooltip says its value and category; no Alts sub-tab; the empty window says so
+- statistics: test mode reads nothing of the live tab
+- statistics: about 1000 rows read once each at two calls a row; a re-read costs one a row
+- statistics: the statisticsRead perf bucket is noted while a capture is on, and nothing while off
+
 ### test_polish.lua (12)
 
 - broker: the leave poll hides GameTooltip only while the feed still owns it
@@ -1308,6 +1326,7 @@ Total.
 | test_ldb_tooltip.lua | 6 |
 | test_reputations.lua | 13 |
 | test_currencies.lua | 9 |
+| test_statistics.lua | 15 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
 | test_sample_names.lua | 2 |
@@ -1338,4 +1357,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **976** |
+| **Total** | **991** |

@@ -56,7 +56,7 @@ end
 
 test("blocks: the eight skill and stat blocks, four skill categories then four stat groups, then the tree blocks", function()
     assertEqual(table.concat(NS.BLOCKS, ","),
-        "primary,secondary,weapon,other,stats_base,stats_spell,stats_defense,stats_utility,currencies,reputations")
+        "primary,secondary,weapon,other,stats_base,stats_spell,stats_defense,stats_utility,currencies,reputations,statistics")
     for _, id in ipairs(NS.BLOCKS) do
         local def = NS.BlockDefs[id]
         assertEqual(def.id, id)

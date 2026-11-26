@@ -230,9 +230,13 @@ end
 function I.MenuRows(row)
     local e = row.entry
     local rows = { { title = true, label = e.name or e.label } }
-    -- A tree row (SMW-08..10): pin a row with a value of its own; a tree row is never hidden.
-    if NS.Tree.Kind(row.kind) then
-        if e.hasBar ~= false then rows[#rows + 1] = pinRow(row) end
+    -- A tree row (SMW-08..10): pin a row with a value of its own (its kind's `pinnable`, else one with a bar);
+    -- a tree row is never hidden.
+    local tree = NS.Tree.Kind(row.kind)
+    if tree then
+        local can = tree.pinnable and tree.pinnable(e)
+        if can == nil then can = e.hasBar ~= false end
+        if can then rows[#rows + 1] = pinRow(row) end
         return rows
     end
     if row.kind == "stat" then rows[#rows + 1] = pinRow(row) end

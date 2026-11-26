@@ -42,6 +42,8 @@ SkillMasterDB
                                  -- strings: a faction header's factionID, a currency header's
                                  -- "<name>#<depth>", a Statistics categoryID. Never the client's own
                                  -- Expand/Collapse state
+                                 -- A pinned statistic's key (SMW-10, char.pins.statistics) is
+                                 -- "<categoryID>:<statID>"
   profiles.<name>
     enabled = true               -- Enable Ka0s Skill Master; /sm enable, /sm disable
     scale   = 1                  -- Master scale (0.5 .. 2)
@@ -153,7 +155,8 @@ SkillMasterDB
         sections = { primary = true, secondary = true,   -- the Professions feed's
                      weapon = true, other = true,         -- the Skills feed's
                      stats_base = true, stats_spell = true, stats_defense = true,   -- Character Stats'
-                     stats_utility = true },   -- (round 6, R6-9; schemaVersion 9 dropped `stats`)
+                     stats_utility = true,   -- (round 6, R6-9; schemaVersion 9 dropped `stats`)
+                     currencies = true, reputations = true, statistics = true },   -- the tree feeds' one each
         hiddenSkills = { [key] = true },   -- left out of the tooltip only, apart from skills.hidden
                                            -- (all four hidden sets: the Rows page, round 5, R5-13)
         hiddenStats  = { [key] = true },   -- left out of the tooltip only, apart from stats.hidden

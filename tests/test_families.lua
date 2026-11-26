@@ -54,7 +54,7 @@ end)
 
 test("blocks: NS.BLOCKS keeps the eight skill and stat blocks first, then the tree blocks (SMW-08..10)", function()
     assertEqual(table.concat(NS.BLOCKS, ","),
-        "primary,secondary,weapon,other,stats_base,stats_spell,stats_defense,stats_utility,currencies,reputations")
+        "primary,secondary,weapon,other,stats_base,stats_spell,stats_defense,stats_utility,currencies,reputations,statistics")
     assertEqual(NS.BlockDefs.stats_base.title, "Stats \194\183 Base & Combat")
 end)
 

@@ -279,6 +279,7 @@ Kit.run{
         "test_ldb_tooltip",
         "test_reputations",
         "test_currencies",
+        "test_statistics",
         "test_polish",
         "test_preview",
         "test_sample_names",

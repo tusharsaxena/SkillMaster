@@ -13,6 +13,7 @@ local _, NS = ...
 --   message        the NS.MSG key its model announces, read at CALL time (the newer ones land with their
 --                  data modules)
 --   tree           true for a family drawn by the tree row model (modules/Tree.lua)
+--   noAlts         true for a family with no Journal Alts sub-tab (Statistics, the spec's call)
 --   feed           its LibDataBroker feed: `name` (a display stores placements by it, so it never changes
 --                  once shipped) and `label`
 -- The window's own defaults (position, size, columns) are its profile rows, `windows.<family>`
@@ -59,7 +60,7 @@ NS.Families = {
     }),
     statistics = family("statistics", {
         title = L["Skill Master \194\183 Statistics"], short = L["Statistics"], blocks = { "statistics" },
-        source = "statistics", rowKind = "statistic", message = "STATISTICS_UPDATED", tree = true,
+        source = "statistics", rowKind = "statistic", message = "STATISTICS_UPDATED", tree = true, noAlts = true,
         feed = { name = "Skill Master Statistics", label = L["Skill Master Statistics"] },
     }),
 }

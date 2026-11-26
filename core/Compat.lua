@@ -25,6 +25,8 @@ local _, NS = ...
 --     list (SMW-08, C_Reputation); Compat.PanelShown(frame)  a character panel tab shown
 --   Compat.NumCurrencies() / CurrencyListInfo(i) / CurrencyInfo(id) / SetCurrencyHeaderExpanded(i, open)
 --     / CanToggleCurrencyHeaders()  the currency list (SMW-09, C_CurrencyInfo); gold is never in it
+--   Compat.StatisticsCategories() / StatisticsCategoryInfo(id) / NumStatistics(categoryID) / Statistic(categoryID,
+--     index) / StatisticName(statID)  the Statistics tab (SMW-10): GetStatistic in Forever's two-argument form
 -- PlayerLevel to SpellName (T5.2), and PlayerName (FB-17), exist so the simulator's seam (core/SimSetup.lua, LibKa0s-Sim-1.0) can answer
 -- every client read a simulated character needs (preview-mode, H1): a module reads them as
 -- `NS.Compat.Member(...)` at call time and never captures one in a local.
@@ -577,4 +579,59 @@ end
 --- Whether `frame` (ReputationFrame, TokenFrame: the panel tab that shares the list's collapse) is shown.
 function Compat.PanelShown(frame)
     return type(frame) == "table" and type(frame.IsShown) == "function" and frame:IsShown() == true
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- SMW-10: the Statistics tab (docs/forever-quirks.md, "Reputations, currencies and Statistics"). Blizzard's
+-- Forever StatisticsFrame reads GetStatisticsCategoryList, GetCategoryInfo (name, parent; -1 a root),
+-- GetCategoryNumAchievements and GetStatistic(categoryID, index) -> quantity, skip, statID, which is Forever's
+-- form and not Retail's GetStatistic(achievementID); a row's name is GetAchievementInfo(statID)'s second
+-- answer. Nothing here is shared with the panel (no collapse trap) and nothing acts on the client. Each read is
+-- feature-detected and runs under pcall; a missing API reads as an empty tree.
+-- ---------------------------------------------------------------------------------------------
+
+--- The Statistics categories' ids in the client's order (its list ordered by numeric key: the keys may be
+--- sparse); an empty table without the API.
+function Compat.StatisticsCategories()
+    if type(GetStatisticsCategoryList) ~= "function" then return {} end
+    local list = guarded(GetStatisticsCategoryList)
+    if type(list) ~= "table" then return {} end
+    local keys, out = {}, {}
+    for k in pairs(list) do if type(k) == "number" then keys[#keys + 1] = k end end
+    table.sort(keys)
+    for _, k in ipairs(keys) do
+        local id = tonumber(list[k])
+        if id then out[#out + 1] = id end
+    end
+    return out
+end
+
+--- Category `id`'s name and parent id (-1, or nil, for a root); nil without the API.
+function Compat.StatisticsCategoryInfo(id)
+    if type(GetCategoryInfo) ~= "function" then return nil end
+    local ok, name, parent = pcall(GetCategoryInfo, id)
+    if not ok then return nil end
+    return name, tonumber(parent)
+end
+
+--- How many rows category `categoryID` lists (GetCategoryNumAchievements), 0 without the API.
+function Compat.NumStatistics(categoryID)
+    if type(GetCategoryNumAchievements) ~= "function" then return 0 end
+    return tonumber(guarded(GetCategoryNumAchievements, categoryID)) or 0
+end
+
+--- Row `index` of category `categoryID`, in Forever's form: quantity, skip, statID; nil without the API.
+function Compat.Statistic(categoryID, index)
+    if type(GetStatistic) ~= "function" then return nil end
+    local ok, quantity, skip, statID = pcall(GetStatistic, categoryID, index)
+    if not ok then return nil end
+    return quantity, skip, statID
+end
+
+--- Statistic `statID`'s name (GetAchievementInfo's second answer), or nil.
+function Compat.StatisticName(statID)
+    if type(GetAchievementInfo) ~= "function" then return nil end
+    local ok, _, name = pcall(GetAchievementInfo, statID)
+    if not ok or type(name) ~= "string" then return nil end
+    return name
 end

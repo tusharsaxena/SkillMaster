@@ -73,7 +73,8 @@ end
 
 -- The empty window's line, by its family's data provider.
 local EMPTY = { skills = L["No skills to show yet."], stats = L["No stats to show yet."],
-                reputations = L["No reputations to show yet."], currencies = L["No currencies to show yet."] }
+                reputations = L["No reputations to show yet."], currencies = L["No currencies to show yet."],
+                statistics = L["No statistics to show yet."] }
 function Windows.EmptyText(fid)
     local fam = NS.Families[fid]
     return EMPTY[fam and fam.source] or L["Nothing to show yet."]
@@ -415,6 +416,8 @@ function Windows.New(fid)
         if NS.TrainerPopup then NS.TrainerPopup.Hide() end
         if NS.SecureOverlay then NS.SecureOverlay:Sync() end
         NS.Blocks.UpdateSpeedWatch()
+        -- Who reads only while a window shows hears it close (SMW-10: the Statistics model's CRITERIA_UPDATE).
+        NS.bus:SendMessage(NS.MSG.WINDOW_TOGGLED, fid, false)
     end
 
     -- The release: Window width and Window height take the dragged size, each through the seam
@@ -777,6 +780,7 @@ function Windows.New(fid)
         if refusal then NS.Print(refusal) return false end
         build():Show()
         lastSig = nil
+        NS.bus:SendMessage(NS.MSG.WINDOW_TOGGLED, fid, true)
         W.Render()
         return true
     end
@@ -785,6 +789,7 @@ function Windows.New(fid)
         if not frame then return end
         frame:Hide()
         if NS.SecureOverlay then NS.SecureOverlay:Sync() end   -- OnHide does too; an Escape reaches only that
+        NS.bus:SendMessage(NS.MSG.WINDOW_TOGGLED, fid, false)   -- the same
     end
 
     --- The window's ONE toggle handler: its slash verb, its launcher entry and its key binding.

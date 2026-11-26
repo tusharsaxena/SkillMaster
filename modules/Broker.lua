@@ -528,6 +528,7 @@ local function hookTooltip(tip)
     tip:HookScript("OnHide", function()
         if current ~= tip then return end
         B.ReleaseLines() owner = nil current = nil stopPoll()
+        B.TooltipToggled(nil)
     end)
     if tip.HasScript and tip:HasScript("OnTooltipCleared") then
         tip:HookScript("OnTooltipCleared", function() if current == tip then B.ReleaseLines() end end)
@@ -562,6 +563,20 @@ local function drawLines(tip, which)
     for _, row in ipairs(rows) do B.AddHit(tip, row) end
 end
 
+-- The feed whose tooltip is up, as WINDOW_TOGGLED's sibling FEED_TOOLTIP_TOGGLED tells it (SMW-10: the Statistics
+-- model reads only while its window or tooltip shows): `fid` now up (nil: none), the one before it down.
+local tipFeed = nil
+function B.TooltipToggled(fid)
+    if tipFeed == fid then return end
+    local was = tipFeed
+    tipFeed = fid
+    if was then NS.bus:SendMessage(NS.MSG.FEED_TOOLTIP_TOGGLED, was, false) end
+    if fid then NS.bus:SendMessage(NS.MSG.FEED_TOOLTIP_TOGGLED, fid, true) end
+end
+
+--- The feed whose tooltip is up, or nil.
+function B.TooltipFeed() return tipFeed end
+
 --- Take the feed's tooltip down, whichever frame it is on (the skin switch's write).
 function B.HideTooltip()
     stopPoll()
@@ -569,6 +584,7 @@ function B.HideTooltip()
     if tip and tip:IsShown() then tip:Hide() end
     B.ReleaseLines()
     owner, current = nil, nil
+    B.TooltipToggled(nil)
 end
 
 --- Show feed `which`'s tooltip (a family id, the Professions feed by default) on its display cell `frame`.
@@ -580,6 +596,7 @@ function B.OnEnter(frame, which)
     hookTooltip(tip)
     anchor(tip, frame)
     owner, current = frame, tip
+    B.TooltipToggled(which)   -- before the fill: a model that reads on first use reads now (SMW-10)
     if panel() and tip == panel().Frame() then
         panel().Fill()
         tip:Show()

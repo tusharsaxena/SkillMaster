@@ -34,6 +34,7 @@ NS.Perf = lib:New({
         { key = "skillScan" },      -- modules/SkillData.lua Scan: read the list, build the model
         { key = "statScan" },       -- modules/StatData.lua Scan: read every stat
         { key = "bonusRefresh" },   -- modules/Bonuses.lua Refresh: invalidate, the live-temp check
+        { key = "statisticsRead" }, -- modules/StatisticsData.lua Use / Open / Refresh: the tree, the unfolded rows
     },
     -- Each bracket closes before its module sends its message, so no bucket runs inside another.
     -- The stand-down latch: a capture holds `perf`, which is the same teardown as `disabled`.
