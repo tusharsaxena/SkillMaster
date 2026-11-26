@@ -952,6 +952,10 @@ local function bindCell(cell, item, key, kind, name)
     local v = type(set) == "table" and set[key] or nil
     cell.tip = J.AltTip(r, v, key, name, kind)
     cell.hit:EnableMouse(cell.tip ~= nil)
+    -- Re-bound under the pointer (a repaint, a scroll): the tooltip follows the cell's new row, or goes.
+    if GameTooltip and GameTooltip:IsShown() and GameTooltip:IsOwned(cell.hit) then
+        if cell.tip then cell.hit:GetScript("OnEnter")(cell.hit) else GameTooltip:Hide() end
+    end
     local unlearned = r ~= nil and not v and kind == "skill" and J.CanLearn(r, key)
     cell.unlearned:SetShown(unlearned)
     cell.dash:SetShown(r ~= nil and not v and not unlearned)   -- no character in the column: nothing at all

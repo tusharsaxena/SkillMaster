@@ -998,7 +998,7 @@ Total.
 - r5 review: the Yesterday filter is the calendar's day before, across a daylight-saving change
 - r5 review: a detached sub-category this character's tree lacks shows no window, and keeps its row
 
-### test_r6_owner.lua (17)
+### test_r6_owner.lua (18)
 
 - r6 sm-01: the group's title reads Secondary Professions; its id and short label stay
 - r6 sm-01: a detached Secondary window is titled Secondary Professions
@@ -1017,6 +1017,7 @@ Total.
 - r6 sm-04: the main window's own tooltip keeps its bonuses, session and hint lines
 - r6 sm-04: an alt's next rank and trainer are asked for that character's level, faction and race
 - r6 sm-04: a snapshot keeps the race's token beside its localized name
+- r6 review: a repaint under a hovered Alts cell redraws its tooltip, or hides it for a cell with none
 
 ### test_preview_trees.lua (6)
 
@@ -1447,7 +1448,7 @@ Total.
 | test_r5_subdetach.lua | 9 |
 | test_r5_journal.lua | 17 |
 | test_r5_review.lua | 5 |
-| test_r6_owner.lua | 17 |
+| test_r6_owner.lua | 18 |
 | test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
@@ -1479,4 +1480,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **1081** |
+| **Total** | **1082** |

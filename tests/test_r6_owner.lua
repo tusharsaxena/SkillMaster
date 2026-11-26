@@ -298,6 +298,9 @@ local function withAlt(fn)
     local rec = {}
     rawset(tip, "AddLine", function(_, l) rec[#rec + 1] = tostring(l) end)
     rawset(tip, "AddDoubleLine", function(_, l, r) rec[#rec + 1] = tostring(l) .. " | " .. tostring(r) end)
+    local owner
+    rawset(tip, "SetOwner", function(_, f) owner = f end)
+    rawset(tip, "IsOwned", function(_, f) return owner == f end)
     J.Show()
     J.SelectTab("alts")
     local ok, err = pcall(fn, rec)
@@ -306,6 +309,8 @@ local function withAlt(fn)
     J.Hide()
     rawset(tip, "AddLine", nil)
     rawset(tip, "AddDoubleLine", nil)
+    rawset(tip, "SetOwner", nil)
+    rawset(tip, "IsOwned", nil)
     tip:Hide()
     NS.db.global.characters = saved
     if not ok then error(err, 0) end
@@ -433,4 +438,19 @@ test("r6 sm-04: a snapshot keeps the race's token beside its localized name", fu
     keys.char, keys.realm = char, realm
     NS.db.global.characters = savedChars
     if not ok then error(err, 0) end
+end)
+
+test("r6 review: a repaint under a hovered Alts cell redraws its tooltip, or hides it for a cell with none", function()
+    withAlt(function(rec)
+        local cell = altCell("primary", "leatherworking")
+        hover(rec, cell)
+        for i = #rec, 1, -1 do rec[i] = nil end
+        NS.db.global.characters[ALT_KEY].skills.leatherworking.rank = 147
+        J.Render()   -- a snapshot change, a scroll: the pooled cell is re-bound under the pointer
+        assertTrue(M.GameTooltip:IsShown(), "still shown")
+        assertTrue(has(table.concat(rec, "\n"), "147"), "redrawn from the new row: " .. table.concat(rec, "\n"))
+        NS.db.global.characters[ALT_KEY].skills.leatherworking = nil
+        J.Render()
+        assertFalse(M.GameTooltip:IsShown(), "the cell has no row now: no tooltip left over")
+    end)
 end)
