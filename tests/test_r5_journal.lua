@@ -157,3 +157,135 @@ test("r5 sm-10: schemaVersion 19 keeps every stored Log row and fills a change r
     assertEqual(log[3].new, 113)
     sv.char["R5-Log"] = nil
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- R5-SM-11: a filter on every column header
+-- ---------------------------------------------------------------------------------------------
+
+local JF = NS.JournalFilters
+
+-- A day's log at fixed local times: two skill-ups, a faction's gain and loss with a standing reached, a currency.
+local function sampleDay(base)
+    SL:Add("fishing", 50, 51, base + 2 * 3600, "Elwynn Forest")                                -- 02:00
+    SL:AddChange("reputation", "72", "Stormwind", 8900, 9100, base + 9 * 3600, "Elwynn Forest", 5, 6)   -- 09:00
+    SL:AddChange("reputation", "72", "Stormwind", 9100, 9050, base + 10 * 3600, "Duskwood")    -- 10:00
+    SL:AddChange("currency", "1901", "Honor Points", 100, 113, base + 14 * 3600, "Duskwood")   -- 14:00
+    SL:Add("bows", 80, 81, base + 20 * 3600, "Duskwood")                                       -- 20:00
+end
+
+-- `fn(base)` on the sample day, today at local midnight, the Journal open on the Log over all time, unfiltered.
+local function withDay(fn)
+    local t = M.time()
+    local date = M.date or os.date
+    local base = t - (tonumber(date("%H", t)) * 3600 + tonumber(date("%M", t)) * 60 + tonumber(date("%S", t)))
+    withLog(base - 3600, function()
+        local savedRange = NS.db.profile.journal.range
+        NS.db.profile.journal.range = "all"
+        JF.Clear()
+        sampleDay(base)
+        J.Show()
+        J.SelectTab("log")
+        local ok, err = pcall(fn, base)
+        JF.Clear()
+        NS.db.profile.journal.range = savedRange
+        if not ok then error(err, 0) end
+    end)
+end
+
+local function shownNames()
+    local out = {}
+    for _, row in ipairs(logRows()) do out[#out + 1] = row.cols[3]:GetText() end
+    return table.concat(out, ",")
+end
+
+local function pick(col, label)
+    for _, r in ipairs(J.FilterMenuRowsForTest(col)) do
+        if r.label == label and r.onClick then r.onClick() return r end
+        for _, s in ipairs(r.submenu or {}) do
+            if s.label == label then s.onClick() return s end
+        end
+    end
+    error("no menu row " .. label .. " under " .. col)
+end
+
+test("r5 sm-11: the five headers each open a filter menu; the third is Name", function()
+    withDay(function()
+        local p = J.Frame().logPanel
+        assertEqual(p.headers[3]:GetText(), "NAME", "renamed for skills, factions and currencies")
+        for _, col in ipairs({ "date", "time", "name", "change", "zone" }) do
+            local b = p.filterButtons[col]
+            assertTrue(b ~= nil, col .. ": a header button")
+            local rows = J.FilterMenuRowsForTest(col)
+            assertTrue(rows[1] and rows[1].title, col .. ": its menu opens on a title")
+            assertTrue(#rows >= 3, col .. ": with choices")
+        end
+    end)
+end)
+
+test("r5 sm-11: the Name filter narrows to a kind, or one name, and the summary counts that kind", function()
+    withDay(function()
+        assertEqual(shownNames(), "Bows,Honor Points,Stormwind,Stormwind,Fishing", "everything, newest first")
+        pick("name", "Reputations")
+        assertEqual(shownNames(), "Stormwind,Stormwind", "only the faction rows")
+        local card = J.Frame().logPanel.session
+        assertEqual(card.value:GetText(), "+150", "the reputation's net change")
+        assertTrue(card.title:GetText():find("Reputation", 1, true) ~= nil, "the card says what it counts")
+        assertTrue(card.title:GetText():find("filtered", 1, true) ~= nil, "and that it is filtered")
+        pick("name", "Honor Points")
+        assertEqual(shownNames(), "Honor Points", "one name, from the Currencies submenu")
+        assertEqual(JF.Get("kind"), "currency", "its kind with it")
+        pick("name", "Skill-ups")
+        assertEqual(shownNames(), "Bows,Fishing", "a kind picked drops the name of another")
+        assertEqual(card.value:GetText(), "+2", "the skill-ups counted")
+    end)
+end)
+
+test("r5 sm-11: Date, Time, Change and Zone filters, combined", function()
+    withDay(function()
+        pick("date", "Yesterday")
+        assertEqual(shownNames(), "", "nothing yesterday")
+        assertTrue(J.Frame().logPanel.empty:GetText():find("filters", 1, true) ~= nil, "the empty line names the filters")
+        pick("date", "Today")
+        assertEqual(#logRows(), 5, "today: every row")
+        pick("time", "Morning (6:00 to 12:00)")
+        assertEqual(shownNames(), "Stormwind,Stormwind", "the morning's rows")
+        pick("change", "Losses")
+        assertEqual(shownNames(), "Stormwind", "and of those the loss")
+        pick("time", "Any time")
+        pick("change", "Standing changes")
+        assertEqual(shownNames(), "Stormwind", "the row that reached Honored")
+        pick("change", "All")
+        pick("zone", "Duskwood")
+        assertEqual(shownNames(), "Bows,Honor Points,Stormwind", "Duskwood's rows")
+        pick("name", "Skill-ups")
+        assertEqual(shownNames(), "Bows", "zone and kind together")
+    end)
+end)
+
+test("r5 sm-11: an active header shows it, and Clear filters clears every one in one click", function()
+    withDay(function()
+        local p = J.Frame().logPanel
+        assertFalse(p.clearFilters:IsShown(), "no Clear filters while none is on")
+        assertFalse(p.filterButtons.zone.mark:IsShown(), "no filter mark at rest")
+        pick("zone", "Duskwood")
+        pick("change", "Gains")
+        assertTrue(p.filterButtons.zone.mark:IsShown(), "the Zone header's mark shows")
+        assertTrue(p.filterButtons.change.mark:IsShown(), "and the Change header's")
+        assertFalse(p.filterButtons.date.mark:IsShown(), "not an unfiltered header's")
+        assertTrue(p.clearFilters:IsShown(), "Clear filters offered")
+        p.clearFilters:__fire("OnClick", "LeftButton")
+        assertFalse(JF.Active(), "every filter cleared")
+        assertEqual(#logRows(), 5, "every row back")
+        assertFalse(p.clearFilters:IsShown(), "and the button goes")
+    end)
+end)
+
+test("r5 sm-11: the ETA card follows the Name filter", function()
+    withDay(function()
+        SL:Add("fishing", 51, 52, M.time() - 30, "Duskwood")
+        J.Render()
+        assertTrue(#J.EtaRows(0) >= 0, "the ETA rows read")
+        pick("name", "Reputations")
+        assertEqual(#J.EtaRows(0, J.Frame().logPanel.filtered), 0, "no skill among the rows, no ETA")
+    end)
+end)

@@ -64,7 +64,8 @@ Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), th
 family registry (`NS.Families`, `defaults/Families.lua`), the window factory (`modules/Window.lua`, one instance
 per family; `NS.MainWindow` is the Professions window's shim), the block providers (`modules/BlockProviders.lua`),
 the tree row model and its addon-side folds (`NS.Tree`, `char.fold`), the detached sub-categories
-(`NS.SubBlocks`, `modules/SubBlocks.lua`, R5-SM-09: a tree header popped out as its own window), the shared-collapse reader
+(`NS.SubBlocks`, `modules/SubBlocks.lua`, R5-SM-09: a tree header popped out as its own window), the Journal Log's
+column filters (`NS.JournalFilters`, R5-SM-11), the shared-collapse reader
 (`NS.SharedList`) and the three tree models (`RepData`, `CurrencyData`, `StatisticsData`);
 `settings/` holds the schema,
 the slash table and the settings pages.

@@ -107,6 +107,31 @@ L["Detach this category into its own window"] = true
 
 -- The Journal (modules/Journal.lua, R5-SM-10..12): a reputation change with the standing it reached.
 L["%s, %s"] = true
+-- The Log's column filters (modules/JournalFilters.lua, R5-SM-11).
+L["Name"] = true
+L["Skill-ups"] = true
+L["Night (0:00 to 6:00)"] = true
+L["Morning (6:00 to 12:00)"] = true
+L["Afternoon (12:00 to 18:00)"] = true
+L["Evening (18:00 to 24:00)"] = true
+L["Gains"] = true
+L["Losses"] = true
+L["Standing changes"] = true
+L["Any day"] = true
+L["Today"] = true
+L["Yesterday"] = true
+L["Any time"] = true
+L["Everything"] = true
+L["One of the %s"] = true
+L["Any zone"] = true
+L["Filter: %s"] = true
+L["No filter"] = true
+L["Click to filter this column."] = true
+L["Clear filters"] = true
+L["No rows match the filters."] = true
+L["%s \194\183 filtered"] = true
+L["Reputation \194\183 %s"] = true
+L["Currencies \194\183 %s"] = true
 
 -- `true` only documents the key: replace each with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

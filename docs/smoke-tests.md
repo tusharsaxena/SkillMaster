@@ -1389,3 +1389,12 @@ none is passed until you say so.
   Change), each currency change its own row, a spend reading negative ("-20"). When a standing changes (say
   Friendly to Honored), that row reads "+25, Honored". Skill-ups still log beside them, newest first.
   Result:
+- **SM-R5-11** (new, R5-SM-11) `/sm journal`, Log tab: the headers read DATE, TIME, NAME, CHANGE, ZONE. Hover one: a
+  tooltip says "No filter" and "Click to filter this column." Click NAME: a menu offers Everything, Skill-ups,
+  Reputations, Currencies and a submenu per kind of the names in the range; pick Reputations: only faction rows
+  remain, the NAME header turns the accent color with a small funnel beside it, the summary card reads
+  "Reputation · All time · filtered" with the net change (signed), and a Clear filters button appears under New
+  session. Click ZONE and pick a zone: both filters apply together. Try DATE (Today, Yesterday, a listed day), TIME
+  (Morning and the like) and CHANGE (Gains, Losses, Standing changes). Click Clear filters: every row is back, the
+  headers return to their color and the button goes. `/reload`: the Log opens unfiltered.
+  Result:

@@ -194,6 +194,7 @@ modules\StatisticsData.lua
 modules\SessionLog.lua
 modules\Alts.lua
 # T4.3: the Journal window; reads NS.SessionLog and NS.Alts at call time.
+modules\JournalFilters.lua
 modules\Journal.lua
 # SMW-08: the tree families' Alts sub-tabs; registers with NS.Journal at FILE SCOPE, so it follows modules\Journal.lua.
 modules\AltsTrees.lua

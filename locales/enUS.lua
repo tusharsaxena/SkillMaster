@@ -25,7 +25,6 @@ L["Test mode cannot start in combat."] = true
 L["Skill Master \194\183 Journal"] = true
 L["Alts"] = true
 L["Time"] = true
-L["Skill"] = true
 L["Change"] = true
 L["Zone"] = true
 L["No skill-ups logged yet."] = true
