@@ -558,3 +558,41 @@ test("smw-rev: the skill windows' Expand / Collapse all still collapses and expa
     NS.Windows.HideAll()
     if not ok then error(err, 0) end
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- The stat blocks' titles in their own window and feed
+-- ---------------------------------------------------------------------------------------------
+
+test("smw-rev: the Character Stats window and feed title the stat blocks without the \"Stats \194\183\" prefix", function()
+    local W = NS.Windows.Get("stats")
+    if not NS.IsTestMode() then NS.ToggleTestMode() end   -- the sample's stats: every stat block draws
+    W.Show()
+    local ok, err = pcall(function()
+        W.Render()
+        local h = W.HeaderFor("stats_base")
+        assertTrue(h ~= nil, "Base & Combat's header in the Character Stats window")
+        assertEqual(h.title:GetText(), "Base & Combat", "its own window: the short title")
+        assertEqual(NS.Blocks.HomeTitle("stats_utility"), "Utility")
+        assertEqual(NS.Blocks.HomeTitle("primary"), "Primary Professions", "a skill block keeps its whole title")
+        assertEqual(NS.BlockDefs.stats_base.title, "Stats \194\183 Base & Combat",
+            "the long title stays where families mix (a merged window, a detached frame, the Journal)")
+        local lines = {}
+        local tip = { lines = lines }
+        function tip:AddLine(t) lines[#lines + 1] = t end
+        function tip:AddDoubleLine(a, b) lines[#lines + 1] = a .. " | " .. tostring(b) end
+        function tip:NumLines() return #lines end
+        local ldb = NS.db.profile.tooltips.ldb
+        local style = ldb.style
+        ldb.style = "classic"
+        local filled, ferr = pcall(NS.Broker.FillTooltip, tip, "stats")
+        ldb.style = style
+        if not filled then error(ferr, 0) end
+        local text = table.concat(lines, "\n")
+        assertTrue(text:find("Base & Combat", 1, true) ~= nil, text)
+        assertTrue(text:find("Stats \194\183", 1, true) == nil, "no prefix in the feed's own tooltip: " .. text)
+    end)
+    if NS.IsTestMode() then NS.ToggleTestMode() end
+    NS.Broker.SetFeed(NS.Broker.DEFAULT_FEED)
+    NS.Windows.HideAll()
+    if not ok then error(err, 0) end
+end)

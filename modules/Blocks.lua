@@ -35,10 +35,13 @@ NS.BLOCKS = { "primary", "secondary", "weapon", "other", "stats_base", "stats_sp
               "currencies", "reputations", "statistics" }
 
 -- `short`: the block's short name, the Journal's Alts sub-tab label and a merged window's title part
--- (round 5, R5-6: "Primary \194\183 Secondary").
-local function def(id, title, short, source, filter)
+-- (round 5, R5-6: "Primary \194\183 Secondary"). `home`: its title in its own family's window and feed tooltip,
+-- where every block is of one family (the stat blocks drop "Stats \194\183", the spec's family table); nil keeps
+-- `title` there too.
+local function def(id, title, short, source, filter, home)
     local fam = NS.FamilyOf and NS.FamilyOf(id)
-    return { id = id, title = title, short = short, source = source, filter = filter, family = fam and fam.id }
+    return { id = id, title = title, short = short, source = source, filter = filter, family = fam and fam.id,
+             home = home }
 end
 
 NS.BlockDefs = {
@@ -46,10 +49,13 @@ NS.BlockDefs = {
     secondary     = def("secondary", L["Secondary Skills"], L["Secondary"], "skills", "secondary"),
     weapon        = def("weapon", L["Weapon Skills"], L["Weapons"], "skills", "weapon"),
     other         = def("other", L["Other skills"], L["Other"], "skills", "other"),
-    stats_base    = def("stats_base", L["Stats \194\183 Base & Combat"], L["Base & Combat"], "stats", "base"),
-    stats_spell   = def("stats_spell", L["Stats \194\183 Spell & Regen"], L["Spell & Regen"], "stats", "spell"),
-    stats_defense = def("stats_defense", L["Stats \194\183 Defense & Resists"], L["Defense & Resists"], "stats", "defense"),
-    stats_utility = def("stats_utility", L["Stats \194\183 Utility"], L["Utility"], "stats", "utility"),
+    stats_base    = def("stats_base", L["Stats \194\183 Base & Combat"], L["Base & Combat"], "stats", "base",
+                        L["Base & Combat"]),
+    stats_spell   = def("stats_spell", L["Stats \194\183 Spell & Regen"], L["Spell & Regen"], "stats", "spell",
+                        L["Spell & Regen"]),
+    stats_defense = def("stats_defense", L["Stats \194\183 Defense & Resists"], L["Defense & Resists"], "stats",
+                        "defense", L["Defense & Resists"]),
+    stats_utility = def("stats_utility", L["Stats \194\183 Utility"], L["Utility"], "stats", "utility", L["Utility"]),
     -- The tree families' one block each (SMW-08..10): its rows are its family's tree (modules/Tree.lua),
     -- folded per header rather than sorted or filtered.
     currencies    = def("currencies", L["Currencies"], L["Currencies"], "currencies", nil),
@@ -67,6 +73,15 @@ end
 
 NS.Blocks = {}
 local B = NS.Blocks
+
+--- Block `id`'s title in its own family's window and feed tooltip: `home` (the stat blocks without "Stats \194\183"),
+--- else its title. A merged window, a detached frame and the Journal keep `title`, where families mix.
+function B.HomeTitle(id)
+    local d = NS.BlockDefs[id]
+    if not d then return id end
+    return d.home or d.title
+end
+
 B.HEADER_H = 24
 
 -- ---------------------------------------------------------------------------------------------
@@ -632,7 +647,7 @@ end
 function Header:SetBlock(id, collapsed, docked)
     self.id, self.collapsed = id, collapsed and true or false
     paintHeaderBg(self)   -- every layout, so a skin switch reaches a pooled header
-    self.title:SetText(NS.BlockDefs[id].title)
+    self.title:SetText(B.HomeTitle(id))   -- a header of SetBlock sits in its family's window or feed tooltip
     self.chevron:Show()   -- a label header (SetLabel) hid it; a header is a pool's own
     NS.Chrome.SetIcon(self.chevron, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")

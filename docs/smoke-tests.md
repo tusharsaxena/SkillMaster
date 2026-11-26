@@ -1315,3 +1315,7 @@ none is passed until you say so.
   Currencies windows do the same with their headers; the Professions, Skills and Character Stats windows still
   collapse and expand their blocks ("Collapse all blocks").
   Result:
+- **SM-REV-6** (new, SMW-REV) `/sm stats`: the Skill Master · Character Stats window's four blocks read Base &
+  Combat, Spell & Regen, Defense & Resists and Utility, with no "Stats ·" in front; so do the Character Stats
+  feed's tooltip sections in both styles. Detach one: the detached frame reads "Stats · Base & Combat" as before.
+  Result:

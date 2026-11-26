@@ -255,7 +255,7 @@ test("round7 header meta: no block header carries a line beside its title, Base 
     local h = NS.Blocks.AcquireHeader(pool, M.UIParent)
     h:SetBlock("stats_base", false, true)
     assertTrue(h.meta == nil, "no meta font string on the header")
-    assertEqual(h.title:GetText(), NS.BlockDefs.stats_base.title, "the title alone")
+    assertEqual(h.title:GetText(), NS.Blocks.HomeTitle("stats_base"), "the title alone (its own window's, SMW-REV)")
     h:SetBlock("weapon", true, false)
     assertTrue(h.collapsed and not h.docked, "SetBlock(id, collapsed, docked)")
     NS.Blocks.ReleaseHeaders(pool)

@@ -296,10 +296,9 @@ end
 -- Tooltip content
 -- ---------------------------------------------------------------------------------------------
 
---- A section's title: the window's block title (Primary Professions, Stats · Base & Combat, ...).
+--- A section's title: the block's title in its own family's window (Primary Professions, Base & Combat, ...).
 local function sectionTitle(id)
-    local d = NS.BlockDefs[id]
-    return d and d.title or id
+    return NS.Blocks.HomeTitle(id)
 end
 
 --- A skill's bar values, and the token its bonus number is colored in (temp or permanent).
