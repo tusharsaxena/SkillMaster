@@ -536,14 +536,14 @@ the reputation, currency and Statistics shapes the six-windows run built on Bliz
 
 | Doc | Status | Trigger |
 |---|---|---|
-| `slash-dispatch.md` | Present | `NS.COMMANDS` carries eight or more commands (23 as measured on 2026-11-10) |
+| `slash-dispatch.md` | Present | `NS.COMMANDS` carries eight or more commands (29 as measured on 2026-11-27) |
 | `forever-quirks.md` | Present | Clients includes Forever (forever-quirks-§1); holds the vendored Forever catalog and this addon's assumed-API table |
 | `midnight-quirks.md` | Not applicable | Clients is `Forever`; the Retail catalog is carried only where Clients includes Retail (client-quirks-§1) |
 | `debug.md` | Present | The diagnostics dump is a debug surface beyond the default console (debug-logging-§14) |
 | `profiles.md` | Present | The Profiles page ships in the options UI |
 | `perf-analysis/README.md` | Present | The performance harness is wired (`core/PerfSetup.lua`) |
 | `compat-layer.md` | Present | `core/Compat.lua` publishes three or more addon-specific shims (10 as measured on 2026-11-10: the skill list, the player, the weapon enchant, the item tooltip, the unit speed, the spell name) |
-| `message-bus.md` | Not applicable | More than ten messages (six as measured on 2026-11-10) |
+| `message-bus.md` | Owed | More than ten messages: 13 in `NS.MSG` as measured on 2026-11-27 (six on 2026-11-10), so the trigger has fired; until the doc is split out, `## Message Bus` above is the register |
 | `known-limitations.md` | Present | Known Limitations ran past 60 lines (132 on 2026-11-15) |
 | `taint.md` | Not applicable | Taint Notes is under 60 lines |
 
