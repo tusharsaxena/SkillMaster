@@ -6,7 +6,7 @@ local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
 
-local W, D, B = NS.MainWindow, NS.Detached, NS.Blocks
+local W, D, B = T.windows, NS.Detached, NS.Blocks
 
 local function aceGUI() return M.__libs["AceGUI-3.0"] end
 

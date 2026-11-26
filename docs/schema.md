@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (13)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (14)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "<ruleset>-<First Surname>" (forever-quirks-§4);
@@ -38,7 +38,13 @@ SkillMasterDB
     scale   = 1                  -- Master scale (0.5 .. 2)
     alpha   = 1                  -- Master opacity (0 .. 1)
     locked  = false              -- Lock frame (and hide the main window's resize grip); /sm lock, /sm unlock, the window's and the Journal's lock marks
-    window  = { point = false }  -- drop point, written only by modules/MainWindow.lua
+    windows = {                  -- the six family windows (SMW-04, modules/Window.lua; Layout > Window)
+      professions = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1,
+                      summary = true, strata = "MEDIUM" },   -- point: drop point, written only by modules/Window.lua
+      skills = { ... summary = true }, stats, currencies, reputations, statistics = { ... summary = false },
+    }                            -- schemaVersion 14 moved window.point and layout.width/maxHeight/fitHeight/
+                                 -- columns/summary/strata to windows.professions; a window never dragged
+                                 -- opens next to the Professions window, stacked down and right
     skin = {
       source = "ka0s", skin = <library default: WoW Forever>,
       ignorePanel = true, ignoreFonts = false,
@@ -46,13 +52,12 @@ SkillMasterDB
       pickerSeen = false,
     }
     layout = {                   -- the Layout page (T5.1)
-      width = 420, maxHeight = 560, blockGap = 0, summary = true,   -- width, maxHeight: also the resize grip's (AF-SM-RESIZE)
-      fitHeight = false,         -- off: the window stays maxHeight tall (owner feedback round 3)
-      columns = 1,               -- 1 | 2 columns of docked blocks, each `width` wide
+      blockGap = 0,              -- px between two docked blocks, every family window (the size, columns,
+                                 -- summary and strata are windows.<family>'s since SMW-04)
       openFrom = "row",          -- Open a row from (round 8, R8-1): "row" (Full row: a left click
                                  -- anywhere on a window, detached or merged row does what its go
                                  -- icon does) | "icon" (Go icon only); a new key, no migration
-      strata = "MEDIUM", detachedStrata = "MEDIUM",   -- BACKGROUND | LOW | MEDIUM | HIGH
+      detachedStrata = "MEDIUM", -- BACKGROUND | LOW | MEDIUM | HIGH
       detached = {               -- Layout > Detached windows (round 5, R5-7): every detached window
         scale = 1, alpha = 1,    -- scale multiplies blocks.<id>.scale
         bgColor, useClassColorBg = false, bgFromSkin = true,
@@ -211,8 +216,8 @@ The Minimap button row's path is `global.minimap.shown`; its get/set invert onto
 ## Writers
 
 Every row goes through `NS.SetByPath` (`settings/Schema.lua`). The named non-setting state and its
-writers: `profile.window.point`, owned by `modules/MainWindow.lua` (`savePoint` on drag stop,
-`W.ResetPosition`); `profile.journal.point` and `profile.journal.size`, owned by
+writers: `profile.windows.<family>.point`, owned by `modules/Window.lua` (each window's `savePoint` on drag
+stop, `W.ResetPosition`); `profile.journal.point` and `profile.journal.size`, owned by
 `modules/Journal.lua` (`savePoint` on drag stop and `J.ResetPosition`; `saveSize` on the resize
 grip's release); `global.characters`, owned by `modules/Alts.lua` (`Snapshot`, `Forget`);
 `char.log`, owned by `modules/SessionLog.lua` (`Add`, `Clear`); `profile.alerts.point`, owned by

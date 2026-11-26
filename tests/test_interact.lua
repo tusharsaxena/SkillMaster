@@ -3,7 +3,7 @@
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
-local B, W, SO, I = NS.Blocks, NS.MainWindow, NS.SecureOverlay, NS.Interact
+local B, W, SO, I = NS.Blocks, T.windows, NS.SecureOverlay, NS.Interact
 
 local function skill(key, name, category, rank, max, modifier, learned)
     return { key = key, name = name, category = category, kind = NS.SkillCatalog[key] and NS.SkillCatalog[key].kind,

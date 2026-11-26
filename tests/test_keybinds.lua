@@ -3,17 +3,23 @@ local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
 
-test("keybinds: Bindings.xml is two CLICK lines in this addon's category, no header, no default", function()
+test("keybinds: Bindings.xml is seven CLICK lines in this addon's category, no header, no default", function()
     local list = T.assertBindingsXml("Bindings.xml", {
         category = "BINDING_HEADER_SKILLMASTER",
         commands = NS.BINDINGS,
         brand    = NS.Constants.BRAND,
         env      = M,
     })
-    assertEqual(#list, 2)
+    assertEqual(#list, 7)
     assertEqual(NS.BINDINGS[1].command, "CLICK SkillMasterToggleWindow:LeftButton", "Show window is first")
-    assertEqual(NS.BINDINGS[2].command, "CLICK SkillMasterToggleJournal:LeftButton")
-    assertEqual(_G["BINDING_NAME_CLICK SkillMasterToggleWindow:LeftButton"], "Toggle skills window")
+    -- SMW-04: the other five family windows, in the family order, then the Journal.
+    local names = { "Skills", "Stats", "Currencies", "Reputations", "Statistics" }
+    for i, n in ipairs(names) do
+        assertEqual(NS.BINDINGS[i + 1].command, "CLICK SkillMasterToggle" .. n .. ":LeftButton")
+    end
+    assertEqual(NS.BINDINGS[7].command, "CLICK SkillMasterToggleJournal:LeftButton")
+    assertEqual(_G["BINDING_NAME_CLICK SkillMasterToggleWindow:LeftButton"], "Toggle Professions window")
+    assertEqual(_G["BINDING_NAME_CLICK SkillMasterToggleStats:LeftButton"], "Toggle Character Stats window")
     assertEqual(_G["BINDING_NAME_CLICK SkillMasterToggleJournal:LeftButton"], "Toggle journal")
 end)
 

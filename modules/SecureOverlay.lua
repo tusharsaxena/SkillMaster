@@ -257,6 +257,14 @@ local function place(b, row, clip)
     return true
 end
 
+--- Every shown family window that is not being dragged: `scan(rows, frame, its scroll)` each (SMW-04).
+local function scanWindows(scan)
+    for _, W in ipairs(NS.Windows and NS.Windows.Shown() or {}) do
+        local f = W.Frame()
+        if not moving[f] then scan(W.Rows(), f, f.scroll) end
+    end
+end
+
 --- Every shown row that wants an overlay, with its host frame and clip: [key] = { row, host, clip,
 --- kind, spell }. Only the hovered row (see the header).
 local function wanted()
@@ -269,8 +277,7 @@ local function wanted()
             end
         end
     end
-    local W = NS.MainWindow
-    if W and W.IsShown() and not moving[W.Frame()] then scan(W.Rows(), W.Frame(), W.Frame().scroll) end
+    scanWindows(scan)   -- every shown family window's rows (SMW-04)
     local D = NS.Detached
     for _, id in ipairs(D and NS.BLOCKS or {}) do
         local f = D.Frame(id)

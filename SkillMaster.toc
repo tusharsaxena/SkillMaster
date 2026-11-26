@@ -77,11 +77,11 @@ core\Bus.lua
 # FILE SCOPE; after core\CoreSetup.lua (NS.SafeRegisterUnitEvent is read at CALL time).
 core\UnitEventsSetup.lua
 core\PoolSetup.lua
-# LOAD-BEARING: NS.Widgets, captured at FILE SCOPE by modules\MainWindow.lua's chrome build path.
+# LOAD-BEARING: NS.Widgets, read by modules\Window.lua's chrome build path at CALL time.
 core\WidgetsSetup.lua
 # LOAD-BEARING: NS.Lifecycle, which core\PerfSetup.lua hands LibKa0s-Perf-1.0 at FILE SCOPE.
 core\LifecycleSetup.lua
-# LOAD-BEARING: NS.Perf, a FILE-SCOPE upvalue in modules\MainWindow.lua.
+# LOAD-BEARING: NS.Perf, a FILE-SCOPE upvalue in modules\Window.lua.
 core\PerfSetup.lua
 # LOAD-BEARING: after Constants (FONT_MONO), State (the flag) and CoreSetup (the printer); before any NS.Debug call.
 core\DebugLogSetup.lua
@@ -155,7 +155,12 @@ modules\Waypoints.lua
 # at FILE SCOPE (the # Modules -> # Settings order guarantees it); reads NS.Compat, NS.Trainers and
 # NS.Rows at CALL time.
 modules\WaypointArrow.lua
-# Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
+# LOAD-BEARING: NS.Windows, the six family windows (SMW-04), built at FILE SCOPE from NS.Families
+# (defaults\Families.lua) and NS.Perf (core\PerfSetup.lua); read by modules\MainWindow.lua at FILE SCOPE.
+modules\Window.lua
+# LOAD-BEARING: the NS.MainWindow shim over the Professions window, after modules\Window.lua (read at FILE
+# SCOPE). Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings
+# order guarantees it.
 modules\MainWindow.lua
 # Conventional: `/sm probe`; reads core\ members only at FILE SCOPE (NS.Widgets, NS.Constants).
 modules\Probe.lua

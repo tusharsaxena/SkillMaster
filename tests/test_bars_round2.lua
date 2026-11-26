@@ -23,7 +23,7 @@ local function set(path, value)
 end
 
 local function windowRow(key)
-    for _, row in ipairs(NS.MainWindow.Rows()) do
+    for _, row in ipairs(T.windows.Rows()) do
         if row.entry and row.entry.key == key then return row end
     end
 end
@@ -34,10 +34,10 @@ local function withWindow(fn)
     NS.Helpers.RestoreDefaults("trainers")
     M.__fireTimers()
     NS.Preview.Apply(true)
-    NS.MainWindow.Show()
+    T.windows.Show()
     local ok, err = pcall(fn)
     M.GameTooltip:Hide()
-    NS.MainWindow.Hide()
+    T.windows.Hide()
     NS.Preview.Apply(false)
     NS.Helpers.RestoreDefaults("bars")
     NS.Helpers.RestoreDefaults("trainers")
@@ -127,7 +127,7 @@ test("tooltip bar: a row tooltip with no bar line leaves no bar from the last on
         NS.RowTooltip.Show(windowRow("leatherworking"))
         assertTrue(NS.RowTooltip.Bar():IsShown(), "a learned row's tooltip has the bar")
         local unlearned
-        for _, row in ipairs(NS.MainWindow.Rows()) do
+        for _, row in ipairs(T.windows.Rows()) do
             if row.entry and row.entry.learned == false then unlearned = row break end
         end
         assertTrue(unlearned ~= nil, "the sample character has an unlearned row")

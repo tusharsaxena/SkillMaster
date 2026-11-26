@@ -366,7 +366,7 @@ end)
 
 -- ── R7-1: a filter on every block ────────────────────────────────────────────────────────────
 
-local B7, W7, D7, G7 = NS.Blocks, NS.MainWindow, NS.Detached, NS.Groups
+local B7, W7, D7, G7 = NS.Blocks, T.windows, NS.Detached, NS.Groups
 
 local function sk(key, name, category, rank, max, learned)
     return { key = key, name = name, category = category, rank = rank, max = max, modifier = 0,

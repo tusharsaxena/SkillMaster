@@ -18,7 +18,7 @@ local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
 
-local W, J, TP, WA, Br, C = NS.MainWindow, NS.Journal, NS.TrainerPopup, NS.WaypointArrow, NS.Broker, NS.Chrome
+local W, J, TP, WA, Br, C = T.windows, NS.Journal, NS.TrainerPopup, NS.WaypointArrow, NS.Broker, NS.Chrome
 
 --- Spy on the library's three placers while `fn` runs; answers the calls.
 local function spyPlacers(fn)

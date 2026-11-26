@@ -4,7 +4,7 @@
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
-local B, D, W, SO, J, R = NS.Broker, NS.Detached, NS.MainWindow, NS.SecureOverlay, NS.Journal, NS.Rows
+local B, D, W, SO, J, R = NS.Broker, NS.Detached, T.windows, NS.SecureOverlay, NS.Journal, NS.Rows
 local LAYERS = NS.Constants.LAYERS
 
 local function skill(key, name, category, rank, max, modifier, learned)

@@ -8,30 +8,32 @@ NS.defaults = {
         scale   = 1,        -- the main window's scale (0.5 .. 2)
         alpha   = 1,        -- the main window's opacity (0 .. 1)
         locked  = false,    -- the main window cannot be dragged while true
-        -- Drag-only geometry, no control sets it: written by modules/MainWindow.lua alone
-        -- (architecture-§5's named-owner rule; docs/ARCHITECTURE.md names the writer).
-        window = { point = false },
+        -- The six family windows (SMW-04, modules/Window.lua; defaults/Families.lua): each its own size,
+        -- columns, summary strip and strata (rows on Layout > Window), and its drop point, `point`, drag-only
+        -- geometry no control sets, written by modules/Window.lua alone (architecture-§5's named-owner rule;
+        -- docs/ARCHITECTURE.md names the writer). schemaVersion 14 moved the old one window's
+        -- `window.point` and `layout.width/maxHeight/fitHeight/columns/summary/strata` to `professions`.
+        -- The summary strip (level, session skill-ups, next rank) is on for the two skill windows only.
+        windows = {
+            professions = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1, summary = true, strata = "MEDIUM" },
+            skills      = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1, summary = true, strata = "MEDIUM" },
+            stats       = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1, summary = false, strata = "MEDIUM" },
+            currencies  = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1, summary = false, strata = "MEDIUM" },
+            reputations = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1, summary = false, strata = "MEDIUM" },
+            statistics  = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1, summary = false, strata = "MEDIUM" },
+        },
         -- T3.2 the main window's body and the blocks (modules/Blocks.lua). `blocks[id].point` is
         -- named non-setting state (the detached frames' drag writes it); every other key has a row
         -- on the Layout page (T5.1), and `docked`, `order` and `collapsed` write through NS.Blocks.
         layout = {
-            -- The main window's width, px: 420 since the rows' marks moved into the header's column
-            -- and the bar's timer inside it, which gave every bar 18 px back (feedback round 2).
-            width     = 420,
-            maxHeight = 560,     -- the window's height; it scrolls past this
-            -- Shrink the window to its rows (up to maxHeight). Off by default: the window keeps its
-            -- height when blocks collapse or expand (owner feedback round 3).
-            fitHeight = false,
-            blockGap  = 0,       -- px between two docked blocks
-            summary   = true,    -- the strip under the title: level, session gains, next alert
-            columns   = 1,       -- the window's body: 1 or 2 columns of docked blocks, each `width` wide
+            -- The window size, columns, summary strip and strata moved to `windows.<family>` (SMW-04).
+            blockGap  = 0,       -- px between two docked blocks, in every family window
             -- Open a row from (round 8, R8-1; NS.Rows.OpenFrom): "row" (Full row), a left click
             -- anywhere on a main window, detached or merged window row does what its go icon does;
             -- "icon" (Go icon only), the go icon alone opens it.
             openFrom  = "row",
-            -- The player's strata (frame-layering-§1: BACKGROUND, LOW, MEDIUM or HIGH): the main
-            -- window's, and every detached block's. The crafting overlays take their host's.
-            strata         = "MEDIUM",
+            -- The player's strata (frame-layering-§1: BACKGROUND, LOW, MEDIUM or HIGH) for every detached
+            -- block (each family window's own is `windows.<family>.strata`). The crafting overlays take their host's.
             detachedStrata = "MEDIUM",
             -- Layout > Detached windows (round 5, R5-7): one style for every detached window
             -- (modules/Detached.lua D.ApplyStyle). scale multiplies each block's own; alpha is the

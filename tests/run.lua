@@ -45,6 +45,10 @@ _G.SKM_TEST = Kit.expose{
     loadedLibFiles   = LIB_FILES,
 }
 
+-- The Professions, Skills and Character Stats windows as one (SMW-04): the cases written against the one
+-- window read their rows and headers through it.
+_G.SKM_TEST.windows = dofile("tests/fixture_windows.lua")(NS)
+
 -- The diagnostics contract's facts (tests/_kit/test_diagnostics_contract.lua).
 Kit.diagnostics = {
     brand       = NS.Constants.BRAND,
@@ -262,6 +266,7 @@ Kit.run{
         "test_blocks",
         "test_families",
         "test_tree",
+        "test_windows",
         "test_interact",
         "test_sessionlog",
         "test_alts",

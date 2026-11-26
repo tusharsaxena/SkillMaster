@@ -14,7 +14,7 @@ local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
 
-local W, B, D, G = NS.MainWindow, NS.Blocks, NS.Detached, NS.Groups
+local W, B, D, G = T.windows, NS.Blocks, NS.Detached, NS.Groups
 
 -- ── R5-10: the weapon filter ────────────────────────────────────────────────────────────────
 
@@ -704,7 +704,7 @@ test("round5 review: a block its filter emptied is content, so the window's empt
         M.__fireTimers()
         assertTrue(header("weapon") ~= nil, "the weapon header and its note are laid out")
         assertEqual(#W.Rows(), 0, "no row anywhere")
-        assertFalse(W.Frame().empty:IsShown(), "no 'No skills to show yet.' over the header")
+        assertFalse(W.WindowOf("weapon").Frame().empty:IsShown(), "no 'No skills to show yet.' over the header")
     end)
 end)
 

@@ -166,15 +166,17 @@ test("fb16: one Expand / Collapse all control, beside the settings mark (AD-86: 
         assertEqual(b.tip, NS.L["Collapse all blocks"])
         b:GetScript("OnClick")(b, "LeftButton")
         M.__fireTimers()
-        for _, id in ipairs(B.Docked()) do assertTrue(B.Settings(id).collapsed, id .. " collapsed") end
-        local hdr = W.HeaderFor("weapon")
+        -- SMW-04: the window's control folds its own family's blocks (Professions: Primary and Secondary).
+        for _, id in ipairs(B.DockedIn("professions")) do assertTrue(B.Settings(id).collapsed, id .. " collapsed") end
+        assertFalse(B.Settings("weapon").collapsed, "another window's block keeps its own state")
+        local hdr = W.HeaderFor("primary")
         assertTrue(hdr ~= nil and hdr.collapsed, "the headers redraw collapsed")
         W.Render()
         assertEqual(b.icon:GetTexture(), NS.Icon("fullscreen-enter"), "all collapsed: Expand all")
         assertEqual(b.tip, NS.L["Expand all blocks"])
         b:GetScript("OnClick")(b, "LeftButton")
         M.__fireTimers()
-        for _, id in ipairs(B.Docked()) do assertFalse(B.Settings(id).collapsed, id .. " expanded") end
+        for _, id in ipairs(B.DockedIn("professions")) do assertFalse(B.Settings(id).collapsed, id .. " expanded") end
         W.Render()
         assertEqual(b.icon:GetTexture(), NS.Icon("fullscreen-exit"), "and back to Collapse all")
     end)

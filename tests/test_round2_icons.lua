@@ -6,7 +6,7 @@ local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
 local assertNear = T.assertNear
 
-local W, R = NS.MainWindow, NS.Rows
+local W, R = T.windows, NS.Rows
 
 local function set(path, value)
     local ok, err = NS.SetByPath(path, value)

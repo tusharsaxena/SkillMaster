@@ -5,7 +5,7 @@ local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
 
-local W, D, R = NS.MainWindow, NS.Detached, NS.Rows
+local W, D, R = T.windows, NS.Detached, NS.Rows
 
 local function withWorld(fn)
     NS.Preview.Apply(true)
@@ -212,7 +212,7 @@ test("round5 test mode: /sm test shows the main window, the Journal and one stic
     M.__fireTimers()
     local ok, err = pcall(function()
         assertTrue(NS.IsTestMode(), "test mode on")
-        assertTrue(W.IsShown(), "the main window shows")
+        assertTrue(NS.MainWindow.IsShown(), "the main window shows")
         assertTrue(J.IsShown(), "the Journal shows")
         assertEqual(A.STACK, 3, "the stack holds the three")
         local keys = visibleKeys()
@@ -237,14 +237,14 @@ test("round5 test mode: ending it takes the toasts down and puts the windows bac
     J.Hide()
     NS.ToggleTestMode()
     M.__fireTimers()
-    assertTrue(visibleKeys()["test:cap"] and W.IsShown() and J.IsShown(), "test mode put them all up")
+    assertTrue(visibleKeys()["test:cap"] and NS.MainWindow.IsShown() and J.IsShown(), "test mode put them all up")
     NS.ToggleTestMode()
     M.__fireTimers()
     local keys = visibleKeys()
     for _, k in ipairs({ "test:cap", "test:weapon", "test:skillup" }) do
         assertFalse(keys[k], k .. " gone")
     end
-    assertFalse(W.IsShown(), "the main window, hidden before, is hidden again")
+    assertFalse(NS.MainWindow.IsShown(), "the main window, hidden before, is hidden again")
     assertFalse(J.IsShown(), "the Journal too")
     -- A window open before test mode stays open after it.
     J.Show()

@@ -1080,3 +1080,31 @@ Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/R2_SMOKE_FEEDBACK.md`, ite
   every name starting `Sample` or `Mock`. `/sm sim start fishingTrip`: the simulated character is
   Samplehunter Mockstride too.
   Result:
+
+## Six windows (SMW-04, 2026-11-26)
+
+`docs/superpowers/specs/2026-11-26-skillmaster-windows-design.md`. Record what you see on each Result line;
+none is passed until you say so.
+
+- **SM-WIN-1** (new, SMW-04) After the upgrade, `/sm toggle`: the window titled "Skill Master · Professions"
+  opens where your old Skill Master window stood, at its old width, columns and strata, and holds Primary
+  Professions and Secondary Skills only.
+  Result:
+- **SM-WIN-2** (new, SMW-04) `/sm skills`, `/sm stats`, `/sm currencies`, `/sm reputations`, `/sm statistics`:
+  each opens its own window ("Skill Master · Skills" with Weapon Skills and Other skills, "Skill Master ·
+  Character Stats" with the four stat blocks, the other three with "Nothing to show yet."), stacked down and
+  to the right of the Professions window the first time. A second verb hides that window alone; `/sm hide`
+  hides them all; Escape closes the one in front.
+  Result:
+- **SM-WIN-3** (new, SMW-04) Drag the Skills window somewhere, `/reload`: it comes back there, and the
+  Professions window stays where it was. General > Reset position puts every window back.
+  Result:
+- **SM-WIN-4** (new, SMW-04) Options > Keybindings > Ka0s Skill Master lists seven rows: Toggle Professions
+  window, Toggle Skills window, Toggle Character Stats window, Toggle Currencies window, Toggle Reputations
+  window, Toggle Statistics window, Toggle journal. A key you had on the old "Toggle skills window" row is now
+  on Toggle Professions window. Bind one to the Skills row: it toggles the Skills window alone.
+  Result:
+- **SM-WIN-5** (new, SMW-04) Layout > Window: one subsection per window (Professions, Skills, Character
+  Stats, Currencies, Reputations, Statistics). Change the Character Stats window's width and strata: only that
+  window changes. Each window's corner grip writes its own Window width and Window height.
+  Result:

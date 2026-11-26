@@ -7,7 +7,7 @@ local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
 
-local B8, W8, D8, G8 = NS.Blocks, NS.MainWindow, NS.Detached, NS.Groups
+local B8, W8, D8, G8 = NS.Blocks, T.windows, NS.Detached, NS.Groups
 
 --- Every block back on the window, All, expanded, no merged window; then the window hidden.
 local function withBlocks(fn)

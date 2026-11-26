@@ -2,7 +2,7 @@
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
-local W = NS.MainWindow
+local W = NS.Windows.Get("professions")   -- SMW-04: the window behind NS.MainWindow
 
 test("window: Toggle shows it, and again hides it", function()
     W.Hide()
@@ -15,7 +15,7 @@ end)
 test("window: the chrome is the shared one: the title, the wrapped close control, MEDIUM strata", function()
     W.Show()
     local f = W.Frame()
-    assertEqual(f.title:GetText(), "Skill Master")
+    assertEqual(f.title:GetText(), "Skill Master \194\183 Professions")
     assertTrue(f.close ~= nil, "the close control was built through NS.MakeCloseButton")
     assertEqual(f:GetFrameStrata(), NS.Constants.LAYERS.STRATA.WINDOW)
     local found = false
@@ -60,11 +60,11 @@ test("window: locked refuses the drag; unlocked drags and saves the drop point",
     f.GetPoint = function() return "TOPLEFT", M.UIParent, "TOPLEFT", 40, -50 end
     f:GetScript("OnDragStop")(f)
     f.GetPoint = realGetPoint
-    local p = NS.db.profile.window.point
+    local p = NS.db.profile.windows.professions.point
     assertEqual(p and p.point, "TOPLEFT")
     assertEqual(p and p.x, 40)
     W.ResetPosition()
-    assertFalse(NS.db.profile.window.point, "Reset position forgets the drop point")
+    assertFalse(NS.db.profile.windows.professions.point, "Reset position forgets the drop point")
     W.Hide()
 end)
 
@@ -73,7 +73,7 @@ end)
 -- Window width and Window height take the size on the release, and Locked hides and refuses it.
 -- ---------------------------------------------------------------------------------------------
 
-local function layout() return NS.db.profile.layout end
+local function layout() return NS.db.profile.windows.professions end   -- SMW-04: the Professions window's
 
 test("window: a grip drag reflows the columns at most once per frame and redraws once, after the release", function()
     -- red under: no grip on the main window; a handler that runs the full redraw (W.Render) from
@@ -81,7 +81,7 @@ test("window: a grip drag reflows the columns at most once per frame and redraws
     local L0 = layout()
     local savedW, savedH, savedCols = L0.width, L0.maxHeight, L0.columns
     L0.columns, L0.width, L0.maxHeight = 1, 420, 560
-    NS.db.profile.window.point = false
+    NS.db.profile.windows.professions.point = false
     W.Show()
     W.Refresh(true)
     local f = W.Frame()
@@ -141,7 +141,7 @@ test("window: a grip drag reflows the columns at most once per frame and redraws
     assertEqual(widths.frame, 530, "the redraw keeps the dragged width, snapped to the grid")
     for _, fr in ipairs({ f.content, f.columns[1], f }) do rawset(fr, "SetWidth", nil) end
     for _, k in ipairs({ "GetLeft", "GetTop", "SetPoint", "GetPoint" }) do rawset(f, k, nil) end
-    local p = NS.db.profile.window.point
+    local p = NS.db.profile.windows.professions.point
     assertTrue(p and p.point == "TOPLEFT" and p.relPoint == "BOTTOMLEFT" and p.x == 300 and p.y == 700,
         "the release saves the pinned point with the size")
 

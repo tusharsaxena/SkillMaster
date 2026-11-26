@@ -6,7 +6,7 @@ local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
 
-local W, Blocks, I, A, B = NS.MainWindow, NS.Blocks, NS.Interact, NS.Alerts, NS.Broker
+local W, Blocks, I, A, B = T.windows, NS.Blocks, NS.Interact, NS.Alerts, NS.Broker
 
 local function set(path, value)
     local ok, err = NS.SetByPath(path, value)
@@ -149,17 +149,17 @@ test("round3 window: collapsing every block keeps the window's height; Shrink to
         local ok, err = pcall(function()
             W.Refresh(true)
             local tall = h
-            assertEqual(tall, NS.db.profile.layout.maxHeight, "Window height")
+            assertEqual(tall, NS.db.profile.windows.professions.maxHeight, "Window height")
             Blocks:SetAllCollapsed(true)
             M.__fireTimers()
             W.Refresh(true)
             assertEqual(h, tall, "collapsed: the same height")
-            set("layout.fitHeight", true)
+            set("windows.professions.fitHeight", true)
             W.Refresh(true)
             assertTrue(h < tall, "Shrink to fit: the window shrinks to its headers")
         end)
         rawset(f, "SetHeight", nil)
-        set("layout.fitHeight", false)
+        set("windows.professions.fitHeight", false)
         Blocks:SetAllCollapsed(false)
         M.__fireTimers()
         if not ok then error(err, 0) end

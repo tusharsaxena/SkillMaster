@@ -4,7 +4,7 @@
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
-local W, Blk, Br = NS.MainWindow, NS.Blocks, NS.Broker
+local W, Blk, Br = T.windows, NS.Blocks, NS.Broker
 
 local function skill(key, name, category, rank, max, modifier, learned)
     return { key = key, name = name, category = category, kind = NS.SkillCatalog[key] and NS.SkillCatalog[key].kind,
@@ -43,34 +43,35 @@ local function withWorld(fn)
 end
 
 test("test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it", function()
-    -- red under: the broker calling W:ShowAndScrollTo (the key lands as the window table), or a
+    -- red under: the broker calling PW:ShowAndScrollTo (the key lands as the window table), or a
     -- collapsed block left shut, or the window shown unscrolled.
+    local PW = NS.Windows.Get("professions")   -- SMW-04: the window that docks the crafting rows
     withWorld(function(_, blocks)
         blocks.primary.order, blocks.primary.collapsed = 99, true   -- last in the window, and shut
         Blk.Changed()
-        W.Hide()
+        PW.Hide()
         local scrolled
-        local realShow = W.Show
-        W.Show = function()
+        local realShow = PW.Show
+        PW.Show = function()
             local r = realShow()
-            local scroll = W.Frame().scroll
+            local scroll = PW.Frame().scroll
             local realSet = scroll.SetVerticalScroll
             scroll.SetVerticalScroll = function(self, v) scrolled = v return realSet(self, v) end
-            W.Show = realShow
+            PW.Show = realShow
             return r
         end
         Br.OpenRow({ kind = "skill", key = "leatherworking" })
-        W.Show = realShow
-        assertTrue(W.IsShown(), "the main window opened")
+        PW.Show = realShow
+        assertTrue(PW.IsShown(), "the main window opened")
         assertEqual(blocks.primary.collapsed, false, "the collapsed block holding the row is expanded")
         local row
-        for _, r in ipairs(W.Rows()) do if r.entry.key == "leatherworking" then row = r end end
+        for _, r in ipairs(PW.Rows()) do if r.entry.key == "leatherworking" then row = r end end
         assertTrue(row ~= nil, "the crafting row is laid out")
         assertTrue(row.layY > Blk.HEADER_H, "the row sits under the other blocks: " .. tostring(row.layY))
         assertEqual(scrolled, row.layY - Blk.HEADER_H, "scrolled to the row, its header kept in view")
-        assertTrue(W.ShowAndScrollTo("leatherworking"), "already shown: it answers true")
-        assertEqual(W.ShowAndScrollTo("nope"), false, "an unknown key still shows the window, scrolls nowhere")
-        assertTrue(W.IsShown())
+        assertTrue(PW.ShowAndScrollTo("leatherworking"), "already shown: it answers true")
+        assertEqual(PW.ShowAndScrollTo("nope"), false, "an unknown key still shows the window, scrolls nowhere")
+        assertTrue(PW.IsShown())
     end)
 end)
 

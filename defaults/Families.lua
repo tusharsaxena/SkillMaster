@@ -6,6 +6,7 @@ local _, NS = ...
 -- split), Character Stats (the paper doll), Currencies, Reputations and Statistics (the Statistics tab:
 -- counters such as Times camped, never "stats"). Each entry carries:
 --   id, title      the window's title
+--   short          its short name: the launcher entry's, the Layout > Windows subsection's (SMW-04)
 --   blocks         its block ids, in default order (the tree families have one block each)
 --   source         the data provider's key in NS.Blocks.PROVIDERS (modules/BlockProviders.lua)
 --   rowKind        the row kind its rows carry ("skill", "stat", ...)
@@ -31,33 +32,33 @@ end
 
 NS.Families = {
     professions = family("professions", {
-        title = L["Skill Master \194\183 Professions"], blocks = { "primary", "secondary" },
+        title = L["Skill Master \194\183 Professions"], short = L["Professions"], blocks = { "primary", "secondary" },
         source = "skills", rowKind = "skill", message = "SKILLS_UPDATED",
         feed = { name = "Skill Master", label = L["Skill Master"] },
     }),
     skills = family("skills", {
-        title = L["Skill Master \194\183 Skills"], blocks = { "weapon", "other" },
+        title = L["Skill Master \194\183 Skills"], short = L["Skills"], blocks = { "weapon", "other" },
         source = "skills", rowKind = "skill", message = "SKILLS_UPDATED",
         feed = { name = "Skill Master Skills", label = L["Skill Master Skills"] },
     }),
     stats = family("stats", {
-        title = L["Skill Master \194\183 Character Stats"],
+        title = L["Skill Master \194\183 Character Stats"], short = L["Character Stats"],
         blocks = { "stats_base", "stats_spell", "stats_defense", "stats_utility" },
         source = "stats", rowKind = "stat", message = "STATS_UPDATED",
         feed = { name = "Skill Master Stats", label = L["Skill Master Character Stats"] },
     }),
     currencies = family("currencies", {
-        title = L["Skill Master \194\183 Currencies"], blocks = { "currencies" },
+        title = L["Skill Master \194\183 Currencies"], short = L["Currencies"], blocks = { "currencies" },
         source = "currencies", rowKind = "currency", message = "CURRENCIES_UPDATED", tree = true,
         feed = { name = "Skill Master Currencies", label = L["Skill Master Currencies"] },
     }),
     reputations = family("reputations", {
-        title = L["Skill Master \194\183 Reputations"], blocks = { "reputations" },
+        title = L["Skill Master \194\183 Reputations"], short = L["Reputations"], blocks = { "reputations" },
         source = "reputations", rowKind = "reputation", message = "REPS_UPDATED", tree = true,
         feed = { name = "Skill Master Reputations", label = L["Skill Master Reputations"] },
     }),
     statistics = family("statistics", {
-        title = L["Skill Master \194\183 Statistics"], blocks = { "statistics" },
+        title = L["Skill Master \194\183 Statistics"], short = L["Statistics"], blocks = { "statistics" },
         source = "statistics", rowKind = "statistic", message = "STATISTICS_UPDATED", tree = true,
         feed = { name = "Skill Master Statistics", label = L["Skill Master Statistics"] },
     }),

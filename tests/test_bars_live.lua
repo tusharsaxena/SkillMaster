@@ -54,7 +54,7 @@ end
 
 --- A learned skill row in the main window, by key.
 local function windowRow(key)
-    for _, row in ipairs(NS.MainWindow.Rows()) do
+    for _, row in ipairs(T.windows.Rows()) do
         if row.kind == "skill" and row.entry and row.entry.key == key then return row end
     end
 end
@@ -79,7 +79,7 @@ local function setUp()
     NS.Helpers.RestoreDefaults("bars")
     M.__fireTimers()
     NS.Preview.Apply(true)          -- the sample character: Fishing 107 +25 / 150, a lure's timer
-    NS.MainWindow.Show()
+    T.windows.Show()
     if NS.Blocks.Settings("secondary").docked ~= false then NS.Blocks:Detach("secondary") end
     M.__fireTimers()
     return surfaces()
@@ -89,7 +89,7 @@ local function tearDown()
     NS.Helpers.RestoreDefaults("bars")
     M.__fireTimers()
     if NS.Blocks.Settings("secondary").docked == false then NS.Blocks:Dock("secondary") end
-    NS.MainWindow.Hide()
+    T.windows.Hide()
     NS.Preview.Apply(false)
     M.__fireTimers()
 end
@@ -318,7 +318,7 @@ end)
 
 case("bars live: threshold markers hide on a stat's bar and come back", function()
     local bar
-    for _, row in ipairs(NS.MainWindow.Rows()) do
+    for _, row in ipairs(T.windows.Rows()) do
         if row.kind == "stat" and row.entry and #(row.entry.markers or {}) > 0 then bar = spy(row.bar) break end
     end
     assertTrue(bar ~= nil, "a stat row with a marker is on screen")

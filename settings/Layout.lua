@@ -1,5 +1,6 @@
 local _, NS = ...
--- settings/Layout.lua — the Layout page (design §6.6): the main window's size and summary strip,
+-- settings/Layout.lua — the Layout page (design §6.6): each family window's size, summary strip,
+-- columns and strata (SMW-04, one Window subsection per family),
 -- one subsection per block (show, dock, collapse, lock, scale), the detached windows' shared style
 -- (round 5) and the block order, dragged through LibKa0s-Widgets-1.0's ReorderList (options-ui-§18).
 --
@@ -20,24 +21,8 @@ local function row(t)
 end
 
 local rows = NS.Live({
-    row({ path = "layout.width", group = WINDOW, type = "number", default = P.width, min = 320, max = 800, step = 10,
-          label = L["Window width (px)"],
-          desc = L["Width of the Skill Master window. Multiplied by Master scale on General > Master controls."] }),
-    row({ path = "layout.maxHeight", group = WINDOW, type = "number", default = P.maxHeight, min = 200, max = 1200,
-          step = 10, label = L["Window height (px)"],
-          desc = L["Height of the Skill Master window; the rows scroll inside it."] }),
-    row({ path = "layout.fitHeight", group = WINDOW, type = "bool", default = P.fitHeight,
-          label = L["Shrink to fit the rows"],
-          desc = L["Shrink the window when its rows take less than Window height, so it grows and shrinks as blocks expand and collapse."] }),
     row({ path = "layout.blockGap", group = WINDOW, type = "number", default = P.blockGap, min = 0, max = 20, step = 1,
           label = L["Block spacing (px)"], desc = L["Space between two docked blocks."] }),
-    row({ path = "layout.summary", group = WINDOW, type = "bool", default = P.summary,
-          label = L["Show summary strip"],
-          desc = L["The line under the title: your level, this session's skill-ups and the next rank to train."] }),
-    row({ path = "layout.columns", group = WINDOW, type = "number", default = P.columns,
-          values = { { value = 1, text = L["One column"] }, { value = 2, text = L["Two columns"] } },
-          label = L["Columns"],
-          desc = L["Lay the docked blocks in one column, or in two side by side. Each column is Window width wide."] }),
     -- Round 8 (R8-1): where a left click opens a row (NS.Rows.OpenFrom); the detached and merged
     -- windows follow it. Its onChange (NS.ApplyLook) re-lays the windows and their overlays.
     row({ path = "layout.openFrom", group = WINDOW, type = "string", default = P.openFrom,
@@ -55,15 +40,41 @@ local function strataDesc(what)
     local tip = H.StrataTooltip and H.StrataTooltip(STRATA) or ""
     return tip ~= "" and (what .. " " .. tip) or what
 end
--- The window's own apply re-reads every stored look and re-syncs the crafting overlays.
+-- A window's own apply re-reads every stored look and re-syncs the crafting overlays.
 local function applyWindow()
-    if NS.MainWindow then NS.MainWindow.ApplySettings() end
+    if NS.Windows then NS.Windows.ApplyAll() end
     NS.ApplyLook()
 end
-rows[#rows + 1] = row({ path = "layout.strata", group = WINDOW, type = "string", default = P.strata,
-    values = strataValues, label = L["Window strata"], onChange = applyWindow,
-    desc = strataDesc(L["The Skill Master window's layer."]) })
-NS.Live(rows)
+
+-- Each family window's own rows (SMW-04): its size, its summary strip, its columns and its strata, one
+-- subsection per window in the family order, under profile.windows.<family> (defaults/Profile.lua).
+local function windowRows(fid)
+    local d, base, sub = NS.defaults.profile.windows[fid], "windows." .. fid .. ".", NS.Families[fid].short
+    local function w(t)
+        t.group, t.subgroup = WINDOW, sub
+        return row(t)
+    end
+    return NS.Live({
+        w({ path = base .. "width", type = "number", default = d.width, min = 320, max = 800, step = 10,
+            label = L["Window width (px)"],
+            desc = L["Width of this window. Multiplied by Master scale on General > Master controls."] }),
+        w({ path = base .. "maxHeight", type = "number", default = d.maxHeight, min = 200, max = 1200, step = 10,
+            label = L["Window height (px)"], desc = L["Height of this window; the rows scroll inside it."] }),
+        w({ path = base .. "fitHeight", type = "bool", default = d.fitHeight, label = L["Shrink to fit the rows"],
+            desc = L["Shrink the window when its rows take less than Window height, so it grows and shrinks as blocks expand and collapse."] }),
+        w({ path = base .. "summary", type = "bool", default = d.summary, label = L["Show summary strip"],
+            desc = L["The line under the title: your level, this session's skill-ups and the next rank to train."] }),
+        w({ path = base .. "columns", type = "number", default = d.columns,
+            values = { { value = 1, text = L["One column"] }, { value = 2, text = L["Two columns"] } },
+            label = L["Columns"],
+            desc = L["Lay the docked blocks in one column, or in two side by side. Each column is Window width wide."] }),
+        w({ path = base .. "strata", type = "string", default = d.strata, values = strataValues,
+            label = L["Window strata"], onChange = applyWindow, desc = strataDesc(L["This window's layer."]) }),
+    })
+end
+for _, fid in ipairs(NS.FAMILY_ORDER) do
+    for _, r in ipairs(windowRows(fid)) do rows[#rows + 1] = r end
+end
 
 -- ---------------------------------------------------------------------------------------------
 -- The Detached windows tab (round 5, R5-7): one style for every detached window, and for a merged

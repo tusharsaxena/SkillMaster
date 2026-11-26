@@ -110,7 +110,7 @@ Total.
 
 ### test_keybinds.lua (4)
 
-- keybinds: Bindings.xml is two CLICK lines in this addon's category, no header, no default
+- keybinds: Bindings.xml is seven CLICK lines in this addon's category, no header, no default
 - keybinds: the bound button runs the window's one toggle handler
 - keybinds: the Journal button runs the Journal's one toggle handler
 - keybinds: a Journal press while stood down refuses on the toggle verb's line
@@ -717,6 +717,20 @@ Total.
 - tree: while test mode runs, folds go to a session store and the character's stay as they were
 - tree: an explicit store is used as given (the LDB tooltip's own folds)
 
+### test_windows.lua (11)
+
+- windows: one window per family, in the family order, each its own frame and title
+- windows: each window draws its own family's docked blocks, and only those
+- windows: the Character Stats window drops the Stats prefix nowhere it matters; tree windows show their empty line
+- windows: each window's size and strata are its own rows, applied to it alone
+- windows: a window never dragged opens next to the Professions window, stacked down and right
+- windows: a drag saves that window's drop point alone; Reset position forgets every one
+- windows: schemaVersion 14 moves the old window's stored settings to the Professions window
+- windows: one slash verb per window toggles it; /sm hide hides them all
+- windows: each family's key binding button toggles its window
+- windows: a broker crafting row routes to the window that docks it
+- windows: a stood-down addon refuses every window
+
 ### test_interact.lua (17)
 
 - test_secure_overlay_deferred_in_combat: crafting overlays are made and moved only out of combat
@@ -1223,6 +1237,7 @@ Total.
 | test_blocks.lua | 10 |
 | test_families.lua | 7 |
 | test_tree.lua | 11 |
+| test_windows.lua | 11 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
 | test_alts.lua | 6 |
@@ -1260,4 +1275,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **922** |
+| **Total** | **933** |

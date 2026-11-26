@@ -191,7 +191,7 @@ end)
 
 -- ── R6-3: every header mark one size and one vertical center ─────────────────────────────────
 
-local C, D, G, W = NS.Chrome, NS.Detached, NS.Groups, NS.MainWindow
+local C, D, G, W = NS.Chrome, NS.Detached, NS.Groups, T.windows
 
 --- The ink box of a shipped TGA (32-bit, RLE or raw, either origin): { left, top, right, bottom }
 --- in pixels over every pixel with any alpha, the way C.INK was measured.
@@ -770,8 +770,8 @@ end
 test("round6 ldb look: a new profile draws the Main window style on its own TOOLTIP frame, the window's size", function()
     local LD = NS.defaults.profile.tooltips.ldb
     assertEqual(LD.style, "window", "new profiles start on the window's look")
-    assertEqual(LD.width, NS.defaults.profile.layout.width, "the window's default width")
-    assertEqual(LD.height, NS.defaults.profile.layout.maxHeight, "the window's default height")
+    assertEqual(LD.width, NS.defaults.profile.windows.professions.width, "the window's default width")
+    assertEqual(LD.height, NS.defaults.profile.windows.professions.maxHeight, "the window's default height")
     withFeedTip("window", function()
         assertEqual(Br.Style(), "window")
         local f = Br.Tip()

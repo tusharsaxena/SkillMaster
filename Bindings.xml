@@ -1,6 +1,12 @@
 <Bindings>
-	<!-- Show window (launcher-§6), first: clicks the plain, hidden SkillMasterToggleWindow button that modules/MainWindow.lua creates at load, whose click runs NS.MainWindow.Toggle, the handler the launcher's Show window entry and /sm toggle run. -->
+	<!-- Show window (launcher-§6), first: clicks the plain, hidden SkillMasterToggleWindow button that modules/MainWindow.lua creates at load, whose click toggles the Professions window, the handler the launcher's Show window entry, /sm toggle and /sm professions run. -->
 	<Binding name="CLICK SkillMasterToggleWindow:LeftButton" category="BINDING_HEADER_SKILLMASTER"/>
-	<!-- The Journal: clicks the plain, hidden SkillMasterToggleJournal button, created beside it, whose click runs NS.Journal.Toggle, the handler /sm journal and the title-bar mark run. Both labels and NS.BINDINGS are set in modules/MainWindow.lua. No default key: the player picks one under Options, Keybindings, Ka0s Skill Master, or on the General page's Keybindings tab. -->
+	<!-- The other five family windows (SMW-04), in the family order (defaults/Families.lua): each clicks a plain, hidden button created beside it, whose click toggles that window, the handler its /sm verb and its launcher entry run. The names are permanent once shipped. -->
+	<Binding name="CLICK SkillMasterToggleSkills:LeftButton" category="BINDING_HEADER_SKILLMASTER"/>
+	<Binding name="CLICK SkillMasterToggleStats:LeftButton" category="BINDING_HEADER_SKILLMASTER"/>
+	<Binding name="CLICK SkillMasterToggleCurrencies:LeftButton" category="BINDING_HEADER_SKILLMASTER"/>
+	<Binding name="CLICK SkillMasterToggleReputations:LeftButton" category="BINDING_HEADER_SKILLMASTER"/>
+	<Binding name="CLICK SkillMasterToggleStatistics:LeftButton" category="BINDING_HEADER_SKILLMASTER"/>
+	<!-- The Journal: clicks the plain, hidden SkillMasterToggleJournal button, created beside them, whose click runs NS.Journal.Toggle, the handler /sm journal and the title-bar mark run. Every label and NS.BINDINGS are set in modules/MainWindow.lua. No default key: the player picks one under Options, Keybindings, Ka0s Skill Master, or on the General page's Keybindings tab. -->
 	<Binding name="CLICK SkillMasterToggleJournal:LeftButton" category="BINDING_HEADER_SKILLMASTER"/>
 </Bindings>

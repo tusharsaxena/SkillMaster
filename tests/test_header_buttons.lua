@@ -87,20 +87,21 @@ end
 test("AD-86 main window: the expand / collapse all mark's tooltip follows what a click does", function()
     -- The library's HeaderButton shows `__tip` on hover, so that is the field pinned through a toggle
     -- (review fix: the mark's own `tip` alone is not what the player reads).
+    local SW = NS.Windows.Get("skills")   -- SMW-04: the one open block is a weapon skill, the Skills window's
     withOpenBlock(function()
-        W.Show()
-        W.Render()
-        local b = W.Frame().toggleAllButton
-        assertTrue(W.AnyExpanded(), "a block is open")
+        SW.Show()
+        SW.Render()
+        local b = SW.Frame().toggleAllButton
+        assertTrue(SW.AnyExpanded(), "a block is open")
         assertEqual(b.__tip, NS.L["Collapse all blocks"], "open: the library shows Collapse all")
         click(b)
         M.__fireTimers()
-        W.Render()
+        SW.Render()
         assertEqual(b.__tip, NS.L["Expand all blocks"], "all collapsed: the library shows Expand all")
         assertEqual(b.tip, b.__tip, "and the mark's own words agree")
         click(b)
         M.__fireTimers()
-        W.Render()
+        SW.Render()
         assertEqual(b.__tip, NS.L["Collapse all blocks"], "expanded again: back to Collapse all")
     end)
 end)

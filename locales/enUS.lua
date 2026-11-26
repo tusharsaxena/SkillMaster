@@ -20,7 +20,6 @@ L["Test mode: the skills shown are sample data."] = true
 L["Test mode"] = true
 L["Sample character"] = true   -- test mode's nameless stand-in when LibKa0s-Sim-1.0 is absent
 L["Test mode cannot start in combat."] = true
-L["Shows or hides the Skill Master window."] = true
 
 -- The Journal window (modules/Journal.lua).
 L["Skill Master \194\183 Journal"] = true
@@ -81,9 +80,6 @@ L["The block the Alts tab shows when the Journal opens."] = true
 L["List available commands"] = true
 L["Open the settings panel"] = true
 L["Choose a skin: open the skin picker"] = true
-L["Show the Skill Master window"] = true
-L["Hide the Skill Master window"] = true
-L["Show or hide the Skill Master window"] = true
 L["Show or hide the Journal: the skill-up log and your alts"] = true
 L["Lock the window in place"] = true
 L["Unlock the window so it can be dragged"] = true
@@ -445,7 +441,6 @@ L["HUD text only"] = true
 L["Ka0s Default"] = true
 L["Reload your interface (/reload) to finish changing the skin."] = true
 -- The key bindings (modules/MainWindow.lua, launcher-§6).
-L["Toggle skills window"] = true
 L["Toggle journal"] = true
 L["Shows or hides the Journal: the skill-up log and your alts."] = true
 -- ==== END T5.3 ====
@@ -545,7 +540,6 @@ L["Window"] = true
 L["Blocks"] = true
 L["Block order"] = true
 L["Window width (px)"] = true
-L["Width of the Skill Master window. Multiplied by Master scale on General > Master controls."] = true
 L["Block spacing (px)"] = true
 L["Space between two docked blocks."] = true
 L["Show summary strip"] = true
@@ -557,7 +551,6 @@ L["Low"] = true
 L["Medium"] = true
 L["High"] = true
 L["Window strata"] = true
-L["The Skill Master window's layer."] = true
 L["Detached block strata"] = true
 L["The layer every detached block's frame draws in."] = true
 L["Fill direction"] = true
@@ -734,7 +727,6 @@ L["The weapons the weapon skill alert never reads, as a set of keys."] = true
 L["Mute %s"] = true
 L["Never alert for this weapon, whatever its gap."] = true
 L["Window height (px)"] = true
-L["Height of the Skill Master window; the rows scroll inside it."] = true
 L["Shrink to fit the rows"] = true
 L["Shrink the window when its rows take less than Window height, so it grows and shrinks as blocks expand and collapse."] = true
 

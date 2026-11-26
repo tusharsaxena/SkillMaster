@@ -90,6 +90,16 @@ end
 
 --- The docked blocks, in their order.
 function B.Docked() return pick(true) end
+
+--- The docked blocks of family `fid` (defaults/Families.lua), in their order: what its window draws (SMW-04).
+function B.DockedIn(fid)
+    local out = {}
+    for _, id in ipairs(pick(true)) do
+        local d = NS.BlockDefs[id]
+        if d and d.family == fid then out[#out + 1] = id end
+    end
+    return out
+end
 --- The detached blocks.
 function B.Undocked() return pick(false) end
 
@@ -222,7 +232,8 @@ function B:SetOrder(id, n)
 end
 
 --- Collapse (true) or expand (false) every docked block, each through the seam as its chevron's
---- write is (the main window's Collapse all and Expand all, FB-16). A detached block keeps its own
+--- write is (a family window's Collapse all and Expand all, FB-16, takes its own: B:SetCollapsedFor with
+--- B.DockedIn). A detached block keeps its own
 --- state: its frame has its own chevron. One bracket, one LAYOUT_CHANGED; in combat each write
 --- waits for the end of combat, as a chevron's does. Answers how many blocks it changed.
 function B:SetAllCollapsed(collapsed)
@@ -761,7 +772,8 @@ function B.UpdateSpeedWatch()
     local s = B.Settings("stats_utility")
     local onScreen
     if s.docked ~= false then
-        onScreen = NS.MainWindow and NS.MainWindow.IsShown() and not s.collapsed
+        local win = NS.Windows and NS.Windows.ForBlock("stats_utility")   -- its family's window (SMW-04)
+        onScreen = win and win.IsShown() and not s.collapsed
     else
         -- Its own frame, or its merged window's (round 5).
         local gid = NS.Groups and NS.Groups.Of("stats_utility")
@@ -821,8 +833,11 @@ local function relayout()
     if NS.Detached then NS.Detached.Refresh() end
     -- The in-game check that a look write reached the bars (/sm debug): the bar height drawn now.
     if NS.State.debug then
-        NS.Debug("Set", "relayout: %d window rows restyled, bar height %s",
-            NS.MainWindow and #NS.MainWindow.Rows() or 0, tostring(NS.BarStyle.Resolve("row").height))
+        local n = 0
+        if NS.Windows then
+            for _, win in NS.Windows.Each() do n = n + #win.Rows() end
+        end
+        NS.Debug("Set", "relayout: %d window rows restyled, bar height %s", n, tostring(NS.BarStyle.Resolve("row").height))
     end
 end
 
