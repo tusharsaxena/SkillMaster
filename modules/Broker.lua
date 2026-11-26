@@ -142,7 +142,19 @@ end
 function B.View()
     local v = B.source and B.source()
     if type(v) == "table" then return v, true end
-    return { model = model, statsModel = statsModel, statIndex = statIndex, gains = gains, last = last }
+    return { model = model, statsModel = statsModel, statIndex = statIndex, gains = gains, last = last,
+             models = B.TreeModels() }
+end
+
+--- The tree families' live models (SMW-08..10), keyed by their provider source (NS.Blocks.PROVIDERS): only the
+--- tree families', so a read never makes the stat model scan.
+function B.TreeModels()
+    local out, P = {}, NS.Blocks and NS.Blocks.PROVIDERS or {}
+    for _, fam in pairs(NS.Families) do
+        local p = fam.tree and P[fam.source]
+        if p then out[fam.source] = p.model() end
+    end
+    return out
 end
 local view = B.View
 
@@ -202,7 +214,8 @@ end
 local function familyOfSkill(key, m) return NS.Pins.FamilyOfSkill(key, m) end
 
 -- A pin's row entry, by its family's provider source: { kind, entry } from the models drawn now, or nil
--- (a key the models do not hold yet). SMW-08..10 add the tree families' (`B.PIN_ENTRY[source]`).
+-- (a key the models do not hold yet). A tree family's (SMW-08..10) is its model's entry by key, its kind its
+-- family's row kind (B.PIN_ENTRY falls back to it, below).
 B.PIN_ENTRY = {
     skills = function(v, key)
         local e = v.model and v.model.byKey and v.model.byKey[key]
@@ -220,10 +233,18 @@ B.PIN_TEXT = {
 }
 
 --- Pin `key` of feed `fid` as a row entry ({ kind, entry }) from the models drawn now, or nil.
+local function treePin(fid, v, key)
+    local fam = NS.Families[fid]
+    local m = fam and fam.tree and v.models and v.models[fam.source]
+    local e = m and m.byKey and m.byKey[key]
+    return e and { kind = fam.rowKind, entry = e } or nil
+end
+
 function B.PinEntry(fid, key)
     local f = B.FEEDS[fid]
     local get = f and B.PIN_ENTRY[f.source]
-    return get and get(view(), key) or nil
+    if get then return get(view(), key) end
+    return f and treePin(fid, view(), key) or nil
 end
 
 --- Feed `fid`'s pins drawn now, in order, each { kind, entry, key } (a pin its models do not hold is left
@@ -243,7 +264,8 @@ end
 local function pinnedTexts(fid)
     local out = {}
     for _, r in ipairs(B.PinnedEntries(fid)) do
-        local fn = B.PIN_TEXT[r.kind]
+        local tree = NS.Tree.Kind(r.kind)
+        local fn = B.PIN_TEXT[r.kind] or (tree and tree.pinText)
         local text = fn and fn(r.entry)
         if text and text ~= "" then out[#out + 1] = text end
     end
@@ -392,6 +414,11 @@ if B.target then
     B.target:RegisterMessage(NS.MSG.SKILL_UP, onSkillUp)
     B.target:RegisterMessage(NS.MSG.STATS_UPDATED, onStatsUpdated)
     B.target:RegisterMessage(NS.MSG.BONUSES_UPDATED, function() B.Refresh() end)
+    -- A tree family's model (SMW-08..10): its feed's pins read it.
+    for _, fam in pairs(NS.Families) do
+        local msg = fam.tree and rawget(NS.MSG, fam.message)
+        if msg then B.target:RegisterMessage(msg, function() B.Refresh() end) end
+    end
 end
 
 

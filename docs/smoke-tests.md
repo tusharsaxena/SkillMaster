@@ -1178,3 +1178,33 @@ none is passed until you say so.
   click still toggles its window and its right click opens Broker settings. In test mode the tooltip's test
   strip takes no click.
   Result:
+
+## Reputations (SMW-08, GitHub issue #6, 2026-11-26)
+
+- **SM-REP-1** (new, SMW-08) `/sm probe` first; then `/sm reputations`: the Reputations window lists your
+  factions as the character panel's Reputation tab groups them (Alliance or Horde, Steamwheedle Cartel under it
+  with its own bar, Other, Inactive when you have one), each faction a bar "Honored 3,672 / 12,000" in the
+  standing's color; an Exalted faction is a full bar reading "Exalted".
+  Result:
+- **SM-REP-2** (new, SMW-08) Collapse Steamwheedle Cartel and Other in the character panel's Reputation tab,
+  close the panel, `/reload`: the window still lists their factions, and the Reputation tab is still collapsed
+  as you left it.
+  Result:
+- **SM-REP-3** (new, SMW-08) Click a header's chevron (or the header row) in the window: it folds there, and
+  the Reputation tab's own headers do not move. `/reload`: the fold is kept. Expand / Collapse all in the title
+  bar collapses the block.
+  Result:
+- **SM-REP-4** (new, SMW-08) Gain reputation (kill a faction's mob, or turn in a quest): the bar moves within a
+  moment, the Journal's Log shows one line for that faction with "+N", growing with each later gain this
+  session, and the row's tooltip says "This session +N". The skill-up counts do not change.
+  Result:
+- **SM-REP-5** (new, SMW-08) Right-click a faction: "Pin to the Reputations broker"; the Skill Master
+  Reputations feed then reads "Stormwind Honored 3,672 / 12,000" (your faction's). Hover the feed in both
+  tooltip styles: the Pinned section, then the tree; a header's chevron folds it in the tooltip only.
+  Result:
+- **SM-REP-6** (new, SMW-08) With the character panel's Reputation tab open, and again in combat, gain
+  reputation: nothing in the panel moves or flickers, and the window still updates.
+  Result:
+- **SM-REP-7** (new, SMW-08) The Journal's Alts tab has a Reputations sub-tab: each character's standing per
+  faction (log in on an alt first to record it).
+  Result:

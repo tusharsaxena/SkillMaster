@@ -52,9 +52,9 @@ test("families: every block belongs to exactly one family, and its def says whic
     assertEqual(NS.FamilyOf("nope"), nil)
 end)
 
-test("blocks: NS.BLOCKS and the block titles are unchanged (no visible change)", function()
+test("blocks: NS.BLOCKS keeps the eight skill and stat blocks first, then the tree blocks (SMW-08..10)", function()
     assertEqual(table.concat(NS.BLOCKS, ","),
-        "primary,secondary,weapon,other,stats_base,stats_spell,stats_defense,stats_utility")
+        "primary,secondary,weapon,other,stats_base,stats_spell,stats_defense,stats_utility,reputations")
     assertEqual(NS.BlockDefs.stats_base.title, "Stats \194\183 Base & Combat")
 end)
 

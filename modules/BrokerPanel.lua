@@ -112,6 +112,8 @@ local function dressRow(row)
     row:SetScript("OnLeave", rowLeave)
     row.overlayClick = nil
     row.openFrom = "none"
+    -- A tree header's chevron (SMW-08..10) folds it in the tooltip's own folds, never the window's.
+    row.onFold = row.tree and function(r) return NS.Broker.ToggleTipNode(r.family, r.entry.nodeKey) end or nil
     if row.act then
         row.act:SetScript("OnClick", nil)
         row.act:EnableMouse(false)
@@ -248,8 +250,13 @@ end
 
 --- Block `id` from `y` down in the body: its header (the tooltip's own fold, SMW-07), then, open, its
 --- rows and an emptied filter's muted line. Answers the y under it, or `y` for a block with nothing.
-local function layBlock(id, skills, stats, y)
-    local entries, removed = NS.Broker.TooltipEntries(id, skills, stats)
+local function blockEntries(id, skills, stats, models)
+    if NS.IsTreeBlock(id) then return NS.Broker.TreeEntries(id, models), 0 end
+    return NS.Broker.TooltipEntries(id, skills, stats)
+end
+
+local function layBlock(id, skills, stats, y, models)
+    local entries, removed = blockEntries(id, skills, stats, models)
     local note = NS.Blocks.FilterNote(entries, removed)
     if #entries == 0 and not note then return y end
     local host = frame.content
@@ -277,7 +284,12 @@ local PIN_KINDS = { skill = true, stat = true }
 local function layPins(y)
     local pins = {}
     for _, r in ipairs(NS.Broker.PinnedEntries(NS.Broker.Feed())) do
-        if PIN_KINDS[r.kind] then pins[#pins + 1] = r end
+        -- A tree pin (SMW-08..10) as a leaf at the section's edge.
+        if NS.Tree.Kind(r.kind) then
+            pins[#pins + 1] = { kind = r.kind, entry = r.entry, depth = 0, indent = 0 }
+        elseif PIN_KINDS[r.kind] then
+            pins[#pins + 1] = r
+        end
     end
     if #pins == 0 then return y end
     local host = frame.content
@@ -300,11 +312,12 @@ local function layBody()
         frame.empty:SetText(L["Ka0s Skill Master is disabled."])
         return LINE_H + 12
     end
-    local skills, stats = B.Models()
+    local skills, stats, more = B.Models()
     local models = { skills = skills, stats = stats }   -- by provider source (modules/BlockProviders.lua)
+    for k, m in pairs(more or {}) do models[k] = m end
     local y = layPins(0)
     for _, id in ipairs(B.ShownBlocks()) do
-        if models[NS.BlockDefs[id].source] then y = layBlock(id, skills, stats, y) end
+        if models[NS.BlockDefs[id].source] then y = layBlock(id, skills, stats, y, models) end
     end
     for _, row in ipairs(rowPool.active) do dressRow(row) end
     if y > 0 then return y end

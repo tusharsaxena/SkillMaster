@@ -135,3 +135,49 @@ function Tree.Visible(entries, family, store)
     end
     return out
 end
+
+-- ---------------------------------------------------------------------------------------------
+-- The tree families' row kinds (SMW-08..10): what a row of each kind draws and says, registered by its data
+-- module (modules/RepData.lua's "reputation", ...). The rows (NS.Rows SetTree), the row tooltip, the broker's
+-- pins and lines and the row menu's link read them, so a new kind adds a spec and no branch there. A spec:
+--   family            the family whose window draws it
+--   values(e)         the bar's values ({ value, max, text, color }), or nil for a row with no bar
+--   valueText(e)      the value as text (Rows show: Value only, the Classic tooltip's right column)
+--   lines(e)          the row tooltip's lines (NS.RowTooltip's shape)
+--   pinText(e)        its text in its feed's {pinned}
+--   linkText(e)       its text in chat (a shift-click)
+--   icon(e)           its in-game icon texture, or nil
+-- ---------------------------------------------------------------------------------------------
+
+local kinds = {}
+
+--- Register the row kind `kind` (see above).
+function Tree.RegisterKind(kind, spec)
+    spec.kind = kind
+    kinds[kind] = spec
+    return spec
+end
+
+--- The spec of row kind `kind`, or nil for a kind no tree family registered (a skill, a stat).
+function Tree.Kind(kind) return kind ~= nil and kinds[kind] or nil end
+
+--- `entries` (a tree model's order) as block rows under `family`'s folds (`store`, the window's when nil):
+--- each { kind, entry, depth, indent, header, folded, chevron, sigKey }, the shape NS.Blocks lays.
+function Tree.Rows(entries, family, kind, store)
+    local out = {}
+    for i, r in ipairs(Tree.Visible(entries, family, store)) do
+        r.kind = kind
+        r.sigKey = tostring(r.entry.key) .. (r.header and (r.folded and "-" or "+") or "")
+        out[i] = r
+    end
+    return out
+end
+
+--- `n` as a whole number with thousands separators ("12,000"); a non-number as text.
+function Tree.Number(n)
+    local v = tonumber(n)
+    if not v then return tostring(n or "") end
+    local s = tostring(math.floor(math.abs(v) + 0.5))
+    local out = s:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+    return (v < 0 and "-" or "") .. out
+end

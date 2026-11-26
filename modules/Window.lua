@@ -72,7 +72,8 @@ function Windows.Point(fid)
 end
 
 -- The empty window's line, by its family's data provider.
-local EMPTY = { skills = L["No skills to show yet."], stats = L["No stats to show yet."] }
+local EMPTY = { skills = L["No skills to show yet."], stats = L["No stats to show yet."],
+                reputations = L["No reputations to show yet."] }
 function Windows.EmptyText(fid)
     local fam = NS.Families[fid]
     return EMPTY[fam and fam.source] or L["Nothing to show yet."]
@@ -229,9 +230,9 @@ function Windows.New(fid)
     --- Whether any docked block that draws rows is expanded: the one Expand / Collapse all control
     --- then collapses, else it expands (the two are one control, feedback round 2).
     function W.AnyExpanded()
-        local skills, stats = NS.Blocks.Data()
+        local _, _, models = NS.Blocks.Data()
         for _, id in ipairs(NS.Blocks.DockedIn(fid)) do
-            if not NS.Blocks.Settings(id).collapsed and #NS.Blocks.Entries(id, skills, stats) > 0 then return true end
+            if not NS.Blocks.Settings(id).collapsed and #NS.Blocks.EntriesFrom(id, models) > 0 then return true end
         end
         return false
     end
@@ -493,22 +494,27 @@ function Windows.New(fid)
     -- The body
     -- ---------------------------------------------------------------------------------------------
 
-    local function plan(skills, stats)
+    -- One block's part of the layout signature: its state, then (open) its rows' keys. A tree row's key
+    -- carries its fold (NS.Tree.Rows' sigKey): a fold is a new layout.
+    local function signBlock(sig, id, entries, collapsed, note)
+        sig[#sig + 1] = id .. (collapsed and "-" or "+") .. NS.Blocks.SortOf(id) .. NS.Blocks.FilterOf(id)
+            .. (note and "!" or "")
+        if collapsed then return end
+        for _, r in ipairs(entries) do sig[#sig + 1] = r.sigKey or r.entry.key end
+    end
+
+    local function plan(models)
         -- `laid` counts the blocks laid out, not their rows: a block its filter emptied shows its
         -- header and note, so it is content and the window's empty message stays down (review, R5-followups).
         local out, sig, laid = {}, {}, 0
         for _, id in ipairs(NS.Blocks.DockedIn(fid)) do
-            local entries, removed = NS.Blocks.Entries(id, skills, stats)
+            local entries, removed = NS.Blocks.EntriesFrom(id, models)
             -- A block its filter emptied keeps its header and a muted line (round 5, R5-10).
             local note = NS.Blocks.FilterNote(entries, removed)
             if #entries > 0 or note then
                 local collapsed = NS.Blocks.Settings(id).collapsed and true or false
                 out[#out + 1] = { id = id, entries = entries, collapsed = collapsed, note = note }
-                sig[#sig + 1] = id .. (collapsed and "-" or "+") .. NS.Blocks.SortOf(id) .. NS.Blocks.FilterOf(id)
-                    .. (note and "!" or "")
-                if not collapsed then
-                    for _, r in ipairs(entries) do sig[#sig + 1] = r.entry.key end
-                end
+                signBlock(sig, id, entries, collapsed, note)
                 laid = laid + 1
             end
         end
@@ -693,8 +699,8 @@ function Windows.New(fid)
         local t0 = Perf.on and debugprofilestop()
         local test, sim = NS.IsTestMode(), NS.IsSimRunning and NS.IsSimRunning() or false
         renderTitle(test, sim)
-        local skills, stats = NS.Blocks.Data()
-        local blocks, sig, laid = plan(skills, stats)
+        local skills, _, models = NS.Blocks.Data()
+        local blocks, sig, laid = plan(models)
         sig = sig .. "|" .. markerSig(test, sim)
         local SO = NS.SecureOverlay
         if sig == lastSig then

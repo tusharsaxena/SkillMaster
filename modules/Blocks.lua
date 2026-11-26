@@ -31,7 +31,8 @@ local addonName, NS = ...
 
 local L = NS.L
 
-NS.BLOCKS = { "primary", "secondary", "weapon", "other", "stats_base", "stats_spell", "stats_defense", "stats_utility" }
+NS.BLOCKS = { "primary", "secondary", "weapon", "other", "stats_base", "stats_spell", "stats_defense", "stats_utility",
+              "reputations" }
 
 -- `short`: the block's short name, the Journal's Alts sub-tab label and a merged window's title part
 -- (round 5, R5-6: "Primary \194\183 Secondary").
@@ -49,7 +50,18 @@ NS.BlockDefs = {
     stats_spell   = def("stats_spell", L["Stats \194\183 Spell & Regen"], L["Spell & Regen"], "stats", "spell"),
     stats_defense = def("stats_defense", L["Stats \194\183 Defense & Resists"], L["Defense & Resists"], "stats", "defense"),
     stats_utility = def("stats_utility", L["Stats \194\183 Utility"], L["Utility"], "stats", "utility"),
+    -- The tree families' one block each (SMW-08..10): its rows are its family's tree (modules/Tree.lua),
+    -- folded per header rather than sorted or filtered.
+    reputations   = def("reputations", L["Reputations"], L["Reputations"], "reputations", nil),
 }
+
+--- Whether block `id` draws a tree family's rows (its family's `tree`, defaults/Families.lua): no sort, no
+--- filter, a fold per header.
+function NS.IsTreeBlock(id)
+    local d = NS.BlockDefs[id]
+    local fam = d and d.family and NS.Families[d.family]
+    return fam ~= nil and fam.tree == true
+end
 
 NS.Blocks = {}
 local B = NS.Blocks
@@ -404,6 +416,7 @@ local KEY = { value = numeric, valueAsc = numeric, progress = progress }
 --- `items` in block `id`'s order, in place: `entryOf(item)` is the item's model entry (default
 --- item.entry). A not-learned row stays below the learned ones; a tie keeps the catalog's order.
 function B.SortEntries(id, items, entryOf)
+    if NS.IsTreeBlock(id) then return items end   -- a tree keeps the client's order
     local mode = B.SortOf(id)
     local key = KEY[mode]
     if not key then return items end
@@ -584,11 +597,12 @@ end
 --- The rows block `id` shows, each { kind = "skill"|"stat", entry }, in its sort order, and how many
 --- its filter took out, from `models` (B.Models' shape). `isHidden(kind, key)` (kind "skills" | "stats")
 --- answers which rows are left out: the window's hidden sets when nil, the LDB tooltip's own for the
---- broker (round 6, R6-10). The block's provider (B.PROVIDERS[def.source]) makes the rows.
-function B.EntriesFrom(id, models, isHidden)
+--- broker (round 6, R6-10). The block's provider (B.PROVIDERS[def.source]) makes the rows. A tree block's
+--- rows are NS.Tree.Rows records under `folds` (a fold table: the LDB tooltip's own; the window's when nil).
+function B.EntriesFrom(id, models, isHidden, folds)
     local d, provider = providerOf(id)
     if not provider then return {}, 0 end
-    local rows = provider.entries((models or B.Models())[d.source], d.filter, isHidden or hidden)
+    local rows = provider.entries((models or B.Models())[d.source], d.filter, isHidden or hidden, folds)
     local entries, removed = applyFilter(id, rows)
     return B.SortEntries(id, entries), removed
 end
@@ -624,17 +638,23 @@ function Header:SetBlock(id, collapsed, docked)
     -- Detach is the external-link mark; dock (attach) is the same mark turned 180 degrees.
     NS.Chrome.SetIcon(self.detach, "external-link", docked and "+" or "-", not docked)
     self.detach.tip = docked and L["Detach this block into its own frame"] or L["Dock this block in the main window"]
-    B.PaintSort(self.sort, id)
-    self.sort:Show()   -- the LDB panel's headers hide it (round 8, R8-4); a header is a pool's own
     self.docked = docked
-    -- The filter mark (round 5, R5-10; every block, round 7, R7-1), left of sort; restore moves left
-    -- of whichever mark is the last one shown.
+    self:PaintMarks(id)
+    self:SetNote(nil)
+end
+
+--- The sort, filter and restore marks as block `id` has them. The LDB panel's headers hide the sort mark
+--- (round 8, R8-4) and a header is a pool's own, so each layout shows it again; a tree block has none. The
+--- filter mark (round 5, R5-10; every block, round 7, R7-1) sits left of sort; restore moves left of whichever
+--- mark is the last one shown.
+function Header:PaintMarks(id)
+    B.PaintSort(self.sort, id)
+    self.sort:SetShown(not NS.IsTreeBlock(id))
     B.PaintFilter(self.filter, id)
-    local left = self.filter:IsShown() and self.filter or self.sort
+    local left = (self.filter:IsShown() and self.filter) or (self.sort:IsShown() and self.sort) or self.detach
     self.restore:ClearAllPoints()
     self.restore:SetPoint("RIGHT", left, "LEFT", -4, 0)
     B.PaintRestore(self.restore, id)
-    self:SetNote(nil)
 end
 
 --- A header that names a section of no block (the LDB tooltip's Pinned, SMW-06): its title on the
@@ -762,15 +782,22 @@ function B.LayRows(entries, host, rowPool, y, styleKey, inset)
         row:SetPoint("TOPRIGHT", host, "TOPRIGHT", -inset, -y)
         row.layY = y
         row.marked = r.marked or nil
-        if r.kind == "skill" then row:SetSkill(r.entry) else row:SetStat(r.entry) end
+        if r.kind == "skill" then
+            row:SetSkill(r.entry)
+        elseif NS.Tree.Kind(r.kind) then
+            row:SetTree(r)
+        else
+            row:SetStat(r.entry)
+        end
         row:SetStripe(i)
         y = y + row:GetHeight()
     end
     return y
 end
 
---- The fresh entry for a row from the current models (by key), for a values-only refresh.
-function B.Lookup(skills, stats)
+--- The fresh entry for a row from the current models (by key), for a values-only refresh: `models` (B.Models'
+--- shape) answers a tree row's, by its kind's family's source.
+function B.Lookup(skills, stats, models)
     local index = {}
     for _, group in ipairs({ "base", "spell", "defense", "utility" }) do
         for _, e in ipairs(stats and stats[group] or {}) do index[e.key] = e end
@@ -778,6 +805,11 @@ function B.Lookup(skills, stats)
     return function(row)
         local e = row.entry
         if row.kind == "skill" then return skills and skills.byKey[e.key] end
+        if row.tree then
+            local fam = row.family and NS.Families[row.family]
+            local m = fam and models and models[fam.source]
+            return m and m.byKey and m.byKey[e.key] or nil
+        end
         return index[e.key]
     end
 end
@@ -869,6 +901,11 @@ if B.events then
     B.events:RegisterMessage(NS.MSG.STATS_UPDATED, repaint)
     B.events:RegisterMessage(NS.MSG.BONUSES_UPDATED, revalue)
     B.events:RegisterMessage(NS.MSG.LAYOUT_CHANGED, relayout)
+    -- The tree families' models (SMW-08..10): each family's own message, when its data module has landed.
+    for _, fam in pairs(NS.Families) do
+        local msg = fam.tree and rawget(NS.MSG, fam.message)   -- the catalog raises on an undeclared key
+        if msg then B.events:RegisterMessage(msg, repaint) end
+    end
     B.events:RegisterMessage(NS.MSG.SKILL_UP, function(_, _, old, new)
         NS.State.sessionGains = (NS.State.sessionGains or 0) + math.max(0, (new or 0) - (old or 0))
     end)

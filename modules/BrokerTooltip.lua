@@ -205,7 +205,11 @@ end
 local function newChevron()
     local b = CreateFrame("Button", nil, UIParent)
     b:RegisterForClicks("LeftButtonUp")
-    b:SetScript("OnClick", function(self) B.ToggleTipFold(self.row.fold) end)
+    b:SetScript("OnClick", function(self)
+        local row = self.row
+        if row.node ~= nil then return B.ToggleTipNode(row.family, row.node) end   -- a tree header (SMW-08..10)
+        B.ToggleTipFold(row.fold)
+    end)
     return b
 end
 
@@ -232,7 +236,7 @@ end
 function B.AddHit(tip, row)
     local line = lineRegion(tip, row.line)
     if not line then return end
-    if row.fold then return addChevron(tip, row, line) end
+    if row.fold or row.node ~= nil then return addChevron(tip, row, line) end
     local hit = NS.Pool.Acquire(hitPool, newHit)
     hit.row = row
     hit:SetParent(tip)
@@ -388,10 +392,46 @@ local function addStatSection(tip, rows, id, sm)
     if note then tip:AddLine(B.Colored("gtip.muted", note)) end
 end
 
+-- A tree family's rows (SMW-08..10): a header line leads with its fold chevron, indented by its depth, and
+-- answers its chevron's row ({ line, node, family }); a leaf a value line with its kind's mini bar.
+local INDENT = "    "
+
+local function addTreeRow(tip, r, i)
+    local e, spec = r.entry, NS.Tree.Kind(r.kind) or {}
+    local lead = INDENT:rep(r.depth or 0) .. (r.header and chevronMark(r.folded) or "")
+    local value = showsValue() and spec.valueText and spec.valueText(e) or ""
+    local token = r.header and "list.header.text" or "gtip.value"
+    tip:AddDoubleLine(lead .. B.Colored(token, e.name or e.key), B.Colored("gtip.value", value))
+    local n = tip:NumLines()
+    sizeRow(tip, n)
+    stripe(tip, n, i)
+    local values = showsBar() and spec.values and spec.values(e)
+    if values then
+        values.text = ""
+        drawMiniBar(tip, n, values)
+    end
+    if r.header then return { line = n, node = e.nodeKey, family = spec.family } end
+    return { line = n, kind = r.kind, key = e.key }
+end
+
+--- Tree block `id`'s rows in the tooltip, under the tooltip's own folds (tooltips.ldb.folds.nodes, SMW-07).
+function B.TreeEntries(id, models)
+    local d = NS.BlockDefs[id]
+    return NS.Blocks.EntriesFrom(id, models, nil, d and B.TipNodeStore(d.family))
+end
+
+local function addTreeSection(tip, rows, id, models)
+    local entries = B.TreeEntries(id, models)
+    if #entries == 0 then return end
+    rows[#rows + 1] = addTitle(tip, sectionTitle(id), id)
+    if B.TipFolded(id) then return end
+    for i, r in ipairs(entries) do rows[#rows + 1] = addTreeRow(tip, r, i) end
+end
+
 -- One shown section of the feed. Answers whether the no-model line has been written (once per
 -- tooltip, before the first test-mode or live model lands).
--- A section's lines, by its block's provider (modules/BlockProviders.lua): the skills' and the stats'. A
--- tree family's block draws in the Main window style only (SMW-08..10 give it Classic lines).
+-- A section's lines, by its block's provider (modules/BlockProviders.lua): the skills', the stats' and a tree
+-- family's (handed every model, keyed by source).
 local ADD = { skills = addSkillSection, stats = addStatSection }
 local function modelFor(v, source)
     if source == "skills" then return v.model end
@@ -401,10 +441,11 @@ end
 
 local function fillSection(tip, rows, section, v, told)
     local d = NS.BlockDefs[section]
-    local add = d and ADD[d.source]
+    local tree = d and NS.IsTreeBlock(section)
+    local add = d and (ADD[d.source] or (tree and addTreeSection))
     local m = add and modelFor(v, d.source)
     if m then
-        add(tip, rows, section, m)
+        add(tip, rows, section, tree and v.models or m)
         return told
     end
     if not told then tip:AddLine(B.Colored("gtip.muted", NS.Windows.EmptyText(B.Feed()))) end
@@ -413,15 +454,23 @@ end
 
 --- The feed's pins first (GitHub issue #11, SMW-06): a Pinned section, each pin a line as its block draws
 --- it. Nothing when the feed has none.
-local PIN_ROW = { skill = function(tip, e, i) return addSkillRow(tip, e, i) end,
-                  stat = function(tip, e, i) return addStatRow(tip, e, i) end }
+local PIN_ROW = { skill = function(tip, r, i) return addSkillRow(tip, r.entry, i) end,
+                  stat = function(tip, r, i) return addStatRow(tip, r.entry, i) end }
+-- A tree pin draws as a leaf at the section's edge (no indent, no chevron).
+local function pinRow(r)
+    if PIN_ROW[r.kind] then return PIN_ROW[r.kind] end
+    if NS.Tree.Kind(r.kind) then
+        return function(tip, p, i) return addTreeRow(tip, { kind = p.kind, entry = p.entry, depth = 0 }, i) end
+    end
+    return nil
+end
 local function addPinSection(tip, rows)
     local pins = B.PinnedEntries(B.Feed())
     local drawn = {}
-    for _, r in ipairs(pins) do if PIN_ROW[r.kind] then drawn[#drawn + 1] = r end end
+    for _, r in ipairs(pins) do if pinRow(r) then drawn[#drawn + 1] = r end end
     if #drawn == 0 then return end
     addTitle(tip, L["Pinned"])
-    for i, r in ipairs(drawn) do rows[#rows + 1] = PIN_ROW[r.kind](tip, r.entry, i) end
+    for i, r in ipairs(drawn) do rows[#rows + 1] = pinRow(r)(tip, r, i) end
 end
 
 local function fillSections(tip, rows)

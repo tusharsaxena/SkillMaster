@@ -209,7 +209,10 @@ local function blockRows(id)
 end
 
 for _, id in ipairs(NS.BLOCKS) do
-    for _, r in ipairs(blockRows(id)) do rows[#rows + 1] = r end
+    -- A tree block (SMW-08..10) keeps the client's order: no Sort rows by row of its own.
+    for _, r in ipairs(blockRows(id)) do
+        if not (NS.IsTreeBlock(id) and r.path:sub(-5) == ".sort") then rows[#rows + 1] = r end
+    end
     -- The weapon block's own filter for its detached compact preset (Detached.dc.html).
     if P.blocks[id].belowCapOnly ~= nil then
         rows[#rows + 1] = row({ path = "layout.blocks." .. id .. ".belowCapOnly", group = BLOCKS,

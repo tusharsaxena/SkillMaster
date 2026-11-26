@@ -120,6 +120,7 @@ function NS.StandUp()
     if NS.MainWindow then NS.MainWindow.ApplySettings() end
     if NS.Bonuses then NS.Bonuses.Refresh() end
     if NS.StatData then NS.StatData:Request() end
+    if NS.RepData then NS.RepData:Request(false) end   -- SMW-08: by id, or the first full read
     if NS.MainWindow then NS.MainWindow.Refresh() end
     if NS.Detached then NS.Detached.Refresh() end
     if NS.Broker then NS.Broker.Refresh() end

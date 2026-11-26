@@ -178,11 +178,19 @@ modules\Bonuses.lua
 modules\Diagnostics.lua
 # Conventional: registers its events on a tracked bus target at FILE SCOPE (after core\Bus.lua).
 modules\StatData.lua
+# Conventional: NS.SharedList, the expand-read-restore read of a list whose collapse is the character panel's
+# (SMW-08); reads NS.Compat at CALL time.
+modules\SharedList.lua
+# SMW-08 (#6): the reputations model. Registers its row kind with NS.Tree (modules\Tree.lua) and its events on a
+# tracked bus target at FILE SCOPE (after core\Bus.lua); reads NS.Compat and NS.SharedList at CALL time.
+modules\RepData.lua
 # T4.3: subscribe on tracked bus targets at FILE SCOPE (after core\Bus.lua); read NS.SkillData at call time.
 modules\SessionLog.lua
 modules\Alts.lua
 # T4.3: the Journal window; reads NS.SessionLog and NS.Alts at call time.
 modules\Journal.lua
+# SMW-08: the tree families' Alts sub-tabs; registers with NS.Journal at FILE SCOPE, so it follows modules\Journal.lua.
+modules\AltsTrees.lua
 # T4.2: subscribes to SKILL_UP / SKILLS_UPDATED on its own bus target at FILE SCOPE (after core\Bus.lua);
 # reads NS.SkillData, NS.Trainers and the settings at CALL time.
 modules\Alerts.lua

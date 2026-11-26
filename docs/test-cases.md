@@ -678,7 +678,7 @@ Total.
 
 ### test_blocks.lua (10)
 
-- blocks: the eight blocks, four skill categories then four stat groups
+- blocks: the eight skill and stat blocks, four skill categories then four stat groups, then the tree blocks
 - test_blocks_detach_dock_roundtrip: a block leaves the window, gets its own frame and comes back
 - blocks: a detached frame saves its drop point; locked refuses the drag
 - test_rows_unlearned_variant: an unlearned skill is a dimmed row with its trainer and the action mark
@@ -694,7 +694,7 @@ Total.
 - families: six families in the character panel's order, each with a title, blocks and a feed
 - families: the split and the kept broker names (the spec's calls)
 - families: every block belongs to exactly one family, and its def says which
-- blocks: NS.BLOCKS and the block titles are unchanged (no visible change)
+- blocks: NS.BLOCKS keeps the eight skill and stat blocks first, then the tree blocks (SMW-08..10)
 - blocks: the engine dispatches on B.PROVIDERS by the def's source
 - blocks: Models() keys every provider's model by source, and Data() still answers skills, stats
 - blocks: Entries(id, skills, stats) and EntriesFrom(id, models) answer the same rows
@@ -866,6 +866,22 @@ Total.
 - ldb tooltip: the Classic header line shows the chevron's state
 - ldb tooltip: a tree header's tooltip fold is the tooltip's own, never the window's
 - ldb tooltip: a redraw with no tooltip up does nothing
+
+### test_reputations.lua (13)
+
+- reputations: the first read opens every collapsed header, reads, and closes them again bottom up
+- reputations: a standing bar runs from the current threshold to the next, labeled and colored by the client
+- reputations: in combat or with the Reputation tab up the read opens nothing; combat's end reads in full
+- reputations: the read's own header toggles are latched: an UPDATE_FACTION meanwhile reads nothing
+- reputations: later reads go by id, touch no header, and announce a moved standing
+- reputations: a faction the model does not know asks for the full read again
+- reputations: the window draws the tree, and a fold is this addon's own, never the client's
+- reputations: the tooltip folds a header in its own folds; the window's stay
+- reputations: the Classic tooltip lists the tree, each header a chevron line
+- reputations: a row's menu pins it to the Reputations broker, whose text shows its standing
+- reputations: the Alts snapshot keeps each standing; the Journal has a Reputations sub-tab
+- reputations: a simulation never toggles the client's headers (the seam guards the toggle)
+- reputations: a detached Reputations block draws the same tree, and the Journal's sub-tab draws its standings
 
 ### test_polish.lua (12)
 
@@ -1278,6 +1294,7 @@ Total.
 | test_feeds.lua | 12 |
 | test_pins.lua | 8 |
 | test_ldb_tooltip.lua | 6 |
+| test_reputations.lua | 13 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
 | test_sample_names.lua | 2 |
@@ -1308,4 +1325,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **954** |
+| **Total** | **967** |

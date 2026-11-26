@@ -113,6 +113,12 @@ function J.FormatETA(sec)
     return NS.RowTooltip.FormatETA(sec)
 end
 
+--- A reputation's or currency's Log change: "+250", "-15".
+function J.ChangeText(e)
+    local d = (tonumber(e.new) or 0) - (tonumber(e.old) or 0)
+    return (d > 0 and "+" or "") .. NS.Tree.Number(d)
+end
+
 local function skillName(key)
     local e = NS.Preview.Skill(key)
     if e and e.name then return e.name end
@@ -344,8 +350,9 @@ local function bindLogRow(p, row, e, i)
     row:SetPoint("TOPRIGHT", p.header, "BOTTOMRIGHT", 0, -(i - 1) * ROW_H)
     row.cols[1]:SetText(date(L["%m/%d/%y"], e.t))
     row.cols[2]:SetText(date("%H:%M", e.t))
-    row.cols[3]:SetText(skillName(e.key))
-    row.cols[4]:SetText(tostring(e.old) .. ARROW .. tostring(e.new))
+    -- A reputation's or currency's change (SMW-08, SMW-09; SessionLog:AddChange): its name, and the change.
+    row.cols[3]:SetText(e.kind and (e.name or e.key) or skillName(e.key))
+    row.cols[4]:SetText(e.kind and J.ChangeText(e) or (tostring(e.old) .. ARROW .. tostring(e.new)))
     row.cols[5]:SetText(e.zone or "")
     row.entry = e
     NS.Skin.ListRow(row, (i % 2 == 0) and "stripe" or "normal")
@@ -584,9 +591,19 @@ end
 --- The rows sub-tab `filter` shows across `list` ({ key, record, isCurrent }): a skill block's every
 --- skill some character has or can learn (J.CanLearn), in catalog order; a stat block's every stat (statRows).
 --- @return table keys, table names by key, string "skill"|"stat"
+-- A tree family's rows on its sub-tab (SMW-08, SMW-09): every key any character's snapshot holds, by name.
+local ALT_ROWS = {}
+--- Register sub-tab rows for provider source `source`: fn(list) -> keys, names; `kind` the cells' kind.
+function J.RegisterAltRows(source, kind, fn) ALT_ROWS[source] = { kind = kind, fn = fn } end
+
 function J.AltRows(list, filter)
     local f = J.FILTERS[filter]
     if not f then return {}, {}, "skill" end
+    local tree = ALT_ROWS[f.source]
+    if tree then
+        local keys, names = tree.fn(list)
+        return keys, names, tree.kind
+    end
     if f.source == "stats" then
         local keys, names = statRows(f.filter)
         return keys, names, "stat"
@@ -727,22 +744,35 @@ local function newAltRow(p)
     return row
 end
 
+-- A record's snapshot set per row kind (modules/Alts.lua), and how one cell of each kind draws.
+local ALT_SET = { skill = "skills", stat = "stats" }
+local CELL = {}
+function CELL.stat(cell, v)
+    cell.value:SetText(v.display or tostring(v.value))
+    drawMiniBar(cell, clamp(tonumber(v.pct) or 0, 0, 100), 100, NS.Rows.FillColor(v, true))
+end
+function CELL.skill(cell, v)
+    cell.value:SetText(("%d/%d"):format(v.rank or 0, v.max or 0))
+    local e = { category = v.category or "other", rank = v.rank or 0, max = v.max or 0 }
+    drawMiniBar(cell, e.rank, e.max, NS.Rows.FillColor(e))
+end
+--- A tree family's Alts sub-tab (SMW-08, SMW-09): its snapshot set and its cell, registered by its module.
+function J.RegisterAltKind(kind, set, draw)
+    ALT_SET[kind], CELL[kind] = set, draw
+end
+--- Draw the mini bar on an Alts cell (the tree kinds' cells, J.RegisterAltKind).
+function J.CellBar(cell, value, maxValue, color) drawMiniBar(cell, value, maxValue, color) end
+
 local function bindCell(cell, item, key, kind)
-    local r, v = item and item.record, nil
-    if r and kind == "stat" then v = r.stats and r.stats[key] elseif r then v = r.skills and r.skills[key] end
+    local r = item and item.record
+    local set = r and r[ALT_SET[kind] or "skills"]
+    local v = type(set) == "table" and set[key] or nil
     local unlearned = r ~= nil and not v and kind == "skill" and J.CanLearn(r, key)
     cell.unlearned:SetShown(unlearned)
     cell.dash:SetShown(r ~= nil and not v and not unlearned)   -- no character in the column: nothing at all
     cell.value:SetShown(v and true or false)
     if not v then return cell.bar:Hide() end
-    if kind == "stat" then
-        cell.value:SetText(v.display or tostring(v.value))
-        drawMiniBar(cell, clamp(tonumber(v.pct) or 0, 0, 100), 100, NS.Rows.FillColor(v, true))
-        return
-    end
-    cell.value:SetText(("%d/%d"):format(v.rank or 0, v.max or 0))
-    local e = { category = v.category or "other", rank = v.rank or 0, max = v.max or 0 }
-    drawMiniBar(cell, e.rank, e.max, NS.Rows.FillColor(e))
+    return (CELL[kind] or CELL.skill)(cell, v)
 end
 
 local function bindAltRow(p, row, key, name, kind, list, i)

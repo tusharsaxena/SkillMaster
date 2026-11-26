@@ -63,6 +63,8 @@ read_globals = {
   "C_Reputation", "C_GossipInfo", "C_CurrencyInfo", "ReputationFrame", "TokenFrame",
   "GetStatisticsCategoryList", "GetCategoryInfo", "GetCategoryNumAchievements", "GetAchievementInfo",
   "GetStatistic", "GetNumFactions", "GetFactionInfo", "GetCurrencyListSize", "GetCurrencyListInfo",
+  -- SMW-08: a faction's standing name and bar color (core/Compat.lua FactionStandingLabel, FactionBarColor)
+  "GetText", "UnitSex", "FACTION_BAR_COLORS",
 }
 
 -- T4.3: the session log's clock and zone, the alt snapshot's identity reads, the Journal's popup,

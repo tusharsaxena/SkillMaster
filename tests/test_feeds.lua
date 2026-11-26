@@ -136,7 +136,7 @@ test("feeds: a tree family's tooltip says it has nothing yet, in both styles", f
         local text = table.concat(lines, "\n")
         assertEqual(#rows, 0, "no rows")
         assertTrue(text:find("Skill Master \194\183 Reputations", 1, true) ~= nil, text)
-        assertTrue(text:find("Nothing to show yet.", 1, true) ~= nil, text)
+        assertTrue(text:find(NS.Windows.EmptyText("reputations"), 1, true) ~= nil, text)
         assertEqual(select(2, B.Heading()), "", "no session gains line on a feed that gains no skill")
         local ldb = NS.db.profile.tooltips.ldb
         local style = ldb.style

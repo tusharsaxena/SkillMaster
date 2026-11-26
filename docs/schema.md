@@ -18,15 +18,21 @@ SkillMasterDB
                                  -- AceDB 40's db.keys: "<ruleset>-<First Surname>" (forever-quirks-§4);
                                  -- each { name, class, className, race, faction, level, updated,
                                  -- skills = { [key] = { name, category, rank, max } },
-                                 -- stats = { [key] = { group, value, display, pct } } } (FB-33;
-                                 -- absent in an older snapshot: the Journal draws a dash)
+                                 -- stats = { [key] = { group, value, display, pct } } (FB-33;
+                                 -- absent in an older snapshot: the Journal draws a dash),
+                                 -- reps = { [factionID] = { name, reaction, standing, value, max,
+                                 -- exalted } } (SMW-08: the Alts tab's Reputations sub-tab) }
   char.<db.keys.char>
     pinned = false               -- the skill key the broker's {pinned} shows (the row menu's Pin)
     pinnedStat = false           -- the stat key the Skill Master Stats feed shows (a stat row's Pin;
                                  -- round 6, R6-9); none: the feed reads "Stats"
     log = {}                     -- the log's ring (modules/SessionLog.lua): the newest journal.keep
                                  -- (500; 50 .. 2000) { t, key, old, new, zone }, oldest first; the
-                                 -- Journal's ranges reach no further back than it holds
+                                 -- Journal's ranges reach no further back than it holds. A
+                                 -- reputation's change (SMW-08) is { t, kind = "reputation", key (its
+                                 -- factionID), name, old, new, zone }, one per faction per session,
+                                 -- its new standing moved on by each later change; it counts no
+                                 -- skill point
     fold = {}                    -- the tree windows' folds (modules/Tree.lua, SMW-03): { [family] = {
                                  -- [nodeKey] = true folded | false open } }; an absent node takes its
                                  -- family's default (Statistics folded, the others open). Keys are

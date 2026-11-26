@@ -441,7 +441,17 @@ test("round7 filters: each block's own set, a Show rows row for every block, All
         weapon = "all,learned,equipped,belowCap", other = "all,learned,belowCap",
         stats_base = "all,nonZero", stats_spell = "all,nonZero", stats_defense = "all,nonZero", stats_utility = "all,nonZero",
     }
+    -- A tree block (SMW-08..10) keeps the client's order and folds: no filter set, no Show rows row.
+    local filtered = {}
     for _, id in ipairs(NS.BLOCKS) do
+        if NS.IsTreeBlock(id) then
+            assertEqual(table.concat(B7.FiltersOf(id), ","), "all", id .. ": no filter of its own")
+            assertTrue(NS.FindSchemaRow("layout.blocks." .. id .. ".filter") == nil, id .. ": no Show rows row")
+        else
+            filtered[#filtered + 1] = id
+        end
+    end
+    for _, id in ipairs(filtered) do
         assertEqual(table.concat(B7.FiltersOf(id), ","), want[id], id .. ": its set")
         assertEqual(NS.defaults.profile.layout.blocks[id].filter, "all", id .. ": All on a new profile")
         local row = NS.FindSchemaRow("layout.blocks." .. id .. ".filter")
@@ -516,7 +526,9 @@ test("round7 filters: every window header carries the funnel, the filled badge w
             assertTrue(h.filter:IsShown(), h.id .. ": the filter mark")
             assertEqual(h.filter.restToken, "icon.tint", h.id .. ": the marks' tint on All (smoke round 1, ruling 4)")
         end
-        assertEqual(#seen, #NS.BLOCKS, "every block drew a header")
+        local blocks = 0
+        for _, id in ipairs(NS.BLOCKS) do if not NS.IsTreeBlock(id) then blocks = blocks + 1 end end
+        assertEqual(#seen, blocks, "every skill and stat block drew a header (a tree block has no filter)")
         local opened
         NS.Widgets.ContextMenu = function(anchor, rows) opened = { anchor = anchor, rows = rows } return {} end
         local h

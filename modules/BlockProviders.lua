@@ -70,3 +70,27 @@ P.stats = {
         return nil
     end,
 }
+
+-- ---------------------------------------------------------------------------------------------
+-- The tree families (SMW-08..10): one block each, its rows its model's tree under the folds (modules/Tree.lua).
+-- A tree model is { order = { entries in the panel's order }, byKey = { [key] = entry } }; a provider answers
+-- no rows until its data module has built one. No hidden set: a tree row is never hidden from its window.
+-- ---------------------------------------------------------------------------------------------
+
+local function treeProvider(family, kind, modelOf)
+    return {
+        hiddenSet = family,
+        model = modelOf,
+        entries = function(m, _, _, folds)
+            if type(m) ~= "table" or type(m.order) ~= "table" then return {} end
+            return NS.Tree.Rows(m.order, family, kind, folds)
+        end,
+        groupOf = function() return nil end,
+    }
+end
+B.TreeProvider = treeProvider
+
+P.reputations = treeProvider("reputations", "reputation", function()
+    local RD = NS.RepData
+    return RD and RD:Model() or nil
+end)

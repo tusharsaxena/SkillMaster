@@ -73,5 +73,16 @@ L["Fold this section in the tooltip"] = true
 L["Unfold this section in the tooltip"] = true
 L["Main window draws the LDB tooltip as the main window: its block headers, rows, bars and fonts, the window's sort and filter, at the Width and Height below. Classic is the tooltip lines with mini bars. In both, a section's chevron folds it in the tooltip alone."] = true
 
+-- The tree rows (modules/Rows.lua SetTree, SMW-08): a header's fold chevron.
+L["Fold"] = true
+L["Unfold"] = true
+
+-- Reputations (modules/RepData.lua, modules/Window.lua, SMW-08, #6).
+L["No reputations to show yet."] = true
+L["%s %s / %s"] = true
+L["Standing"] = true
+L["Progress"] = true
+L["At war"] = true
+
 -- `true` only documents the key: replace each with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

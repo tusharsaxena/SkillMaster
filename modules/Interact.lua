@@ -29,6 +29,8 @@ local L = NS.L
 --- Where a plain left click on `row` goes.
 function I.Target(row)
     local e = row.entry
+    -- A tree family's row (SMW-08..10) opens no panel: its header folds (NS.Rows), its leaf does nothing.
+    if NS.Tree.Kind(row.kind) then return "none" end
     if row.kind == "stat" then return "paperdoll" end
     if e.learned == false then return "trainer" end
     local cat = NS.SkillCatalog[e.key]
@@ -123,6 +125,7 @@ local function plainPanel(fn)
 end
 
 local OPEN = {
+    none = function() end,
     skills = plainPanel(function(row) I.OpenSkills(row.entry.key) end),
     tradeskill = function(row) I.OpenTradeSkill(row.entry.key) end,
     paperdoll = plainPanel(function() toggleCharacter(I.PAPERDOLL_TAB) end),
@@ -152,6 +155,8 @@ end
 --- The row as chat text: "[Guns 105 +5 / 110]", "[Hit 2.0%]".
 function I.LinkText(row)
     local e = row.entry
+    local tree = NS.Tree.Kind(row.kind)
+    if tree then return tree.linkText(e) end
     if row.kind == "stat" then return ("[%s %s]"):format(e.label, e.display or "") end
     if e.learned == false then return ("[%s: %s]"):format(e.name, L["Not learned"]) end
     return ("[%s %s]"):format(e.name, NS.Widgets.BarText(e.rank, tonumber(e.modifier) or 0, e.max))
@@ -225,6 +230,11 @@ end
 function I.MenuRows(row)
     local e = row.entry
     local rows = { { title = true, label = e.name or e.label } }
+    -- A tree row (SMW-08..10): pin a row with a value of its own; a tree row is never hidden.
+    if NS.Tree.Kind(row.kind) then
+        if e.hasBar ~= false then rows[#rows + 1] = pinRow(row) end
+        return rows
+    end
     if row.kind == "stat" then rows[#rows + 1] = pinRow(row) end
     if row.kind == "skill" then
         rows[#rows + 1] = pinRow(row)

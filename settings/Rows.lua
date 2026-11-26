@@ -134,7 +134,7 @@ function Rows.Groups(order)
                     g.rows[#g.rows + 1] = entry("skill", key, L[c.name])
                 end
             end
-        else
+        elseif d.source == "stats" then
             for _, def in ipairs(NS.STAT_DEFS) do
                 if (STAT_GROUPS[def.group] and def.group or "utility") == d.filter then
                     g.rows[#g.rows + 1] = entry("stat", def.key, def.label)

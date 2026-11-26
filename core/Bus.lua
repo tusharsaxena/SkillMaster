@@ -64,6 +64,11 @@ NS.MSG = Bus.Catalog(addonName, {
     BONUSES_UPDATED = "Ka0s_SkillMaster_BonusesUpdated",
     -- modules/Blocks.lua (T3.2), after a dock, detach, reorder or a layout setting. No payload.
     LAYOUT_CHANGED  = "Ka0s_SkillMaster_LayoutChanged",
+    -- modules/RepData.lua (SMW-08). Payload: the reputations model.
+    REPS_UPDATED    = "Ka0s_SkillMaster_RepsUpdated",
+    -- modules/RepData.lua (SMW-08), a faction's standing moved between two reads. Payload: key, old
+    -- standing, new standing, the faction's name.
+    REP_CHANGED     = "Ka0s_SkillMaster_RepChanged",
     -- the simulator (T5.2). Payload: the step's name.
     SIM_TICK        = "Ka0s_SkillMaster_SimTicked",
 })

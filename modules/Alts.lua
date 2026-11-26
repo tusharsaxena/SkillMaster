@@ -3,7 +3,8 @@ local _, NS = ...
 -- §7, plan Task 4.3): on SKILLS_UPDATED (debounced) and at PLAYER_LOGOUT.
 --
 -- record = { name, class, className, race, level, faction, updated, skills = { [key] = { name,
---   category, rank, max } }, stats = { [key] = { group, value, display, pct } } }, learned rows only.
+--   category, rank, max } }, stats = { [key] = { group, value, display, pct } }, reps = { [factionID] = { name,
+--   reaction, standing, value, max, exalted } } (SMW-08) }, learned rows only.
 -- `stats` (FB-33) mirrors the main window's four stat blocks; a snapshot taken before it existed has
 -- none, and the Journal draws a dash for every stat it does not know (no migration: absent = unknown).
 -- THE KEY (forever-quirks-§4): "<realm>-<name>" from AceDB 40's db.keys, which is the ruleset
@@ -63,6 +64,26 @@ function A.StatsOf(m)
     return any and out or nil
 end
 
+--- A reputations model (NS.RepData's shape) as a snapshot's reps table (SMW-08): each faction with a bar of its
+--- own, { name, reaction, standing, value, max, exalted }; nil for no model or none. Pure.
+function A.RepsOf(m)
+    if type(m) ~= "table" or type(m.order) ~= "table" then return nil end
+    local out, any = {}, false
+    for _, e in ipairs(m.order) do
+        if e.hasBar and e.key then
+            out[e.key] = { name = e.name, reaction = e.reaction, standing = e.standing, value = e.value, max = e.max,
+                           exalted = e.exalted or nil }
+            any = true
+        end
+    end
+    return any and out or nil
+end
+
+local function repSnapshot()
+    local RD = NS.RepData
+    return A.RepsOf(RD and RD:Model() or nil)
+end
+
 --- This character's stats for the snapshot; nil when there is no model yet (a read before the
 --- first scan must not wipe the last good snapshot). Read as the blocks read it (NS.Blocks.Data):
 --- the kept model, scanned once when nothing has scanned yet.
@@ -92,6 +113,7 @@ function A:Snapshot(t)
     rec.updated = tonumber(t) or time()
     rec.skills = learnedSkills() or rec.skills or {}
     rec.stats = statSnapshot() or rec.stats
+    rec.reps = repSnapshot() or rec.reps   -- a read before the first full one keeps the last good snapshot
     chars[key] = rec
     return rec
 end
@@ -146,5 +168,6 @@ end
 A.events = NS.NewBusTarget()
 if A.events then
     A.events:RegisterMessage(NS.MSG.SKILLS_UPDATED, function() A:RequestSnapshot() end)
+    A.events:RegisterMessage(NS.MSG.REPS_UPDATED, function() A:RequestSnapshot() end)
     NS.SafeRegisterEvent(A.events, "PLAYER_LOGOUT", function() A:Snapshot() end, NS.rejectedEvents)
 end
