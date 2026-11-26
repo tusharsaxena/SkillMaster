@@ -19,7 +19,7 @@ local _, NS = ...
 -- keeps the whole tree: a detached sub-category leaves its window, not its feed.
 --
 -- NS.SubBlocks.Id(family, nodeKey) / .Parse(id) / .IsSub(id) / .Ids() / .Settings(id) / .Def(id) / .Name(id) /
---   .Detach(family, nodeKey, name) / .Dock(id) / .SetCollapsed(id, v) / .SetWidth(id, w) / .Normalize(subs) /
+--   .Absent(id) / .Detach(family, nodeKey, name) / .Dock(id) / .SetCollapsed(id, v) / .SetWidth(id, w) / .Normalize(subs) /
 --   .Subtree(order, node) / .Without(order, family) / .OpenStore(order, family, node) / .Shown(family)
 
 NS.SubBlocks = {}
@@ -115,6 +115,18 @@ function SB.Name(id)
     if e and e.name and e.name ~= "" then return e.name end
     local s = SB.Settings(id)
     return (s and s.name) or tostring(node)
+end
+
+--- Whether sub-block `id`'s header is missing from this character's tree (R5-REV): its family's model, read in
+--- full, holds no such header (another character's faction header or currency group on a shared profile, a
+--- header another locale names otherwise). Its window then stays hidden and its row is kept. Unknown is not
+--- missing: no model yet, an empty one, or a partial read (combat, the panel up).
+function SB.Absent(id)
+    local family, node = SB.Parse(id)
+    if not family then return false end
+    local m = modelOf(family)
+    if type(m) ~= "table" or type(m.order) ~= "table" or #m.order == 0 or m.complete == false then return false end
+    return headerIn(m.order, node) == nil
 end
 
 --- Sub-block `id` as a block def (NS.BlockDefs' shape), or nil for any other id.

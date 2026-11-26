@@ -540,7 +540,9 @@ function D.Refresh(anchor)
         seen[id] = true
         local s = settings(id)
         local f = frames[id]
-        if s and s.docked == false and not down and not (G and G.Of(id)) then
+        -- A detached sub-category this character's tree lacks keeps its row but shows no window (R5-REV).
+        local absent = NS.SubBlocks and NS.SubBlocks.Absent(id)
+        if s and s.docked == false and not down and not (G and G.Of(id)) and not absent then
             f = f or build(id)
             if anchor ~= false or not f:IsShown() then applyPoint(f) end
             f:Show()

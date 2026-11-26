@@ -108,3 +108,41 @@ test("r5 review: the Yesterday filter is the calendar's day before, across a day
     JF.Clear()
     if not ok then error(err, 0) end
 end)
+
+-- R5-REV: a detached sub-category is stored on the profile (shared by every character by default), but the trees
+-- differ per character: a faction header (Alliance on a Horde alt), a currency group the alt never earned, a header
+-- renamed by another locale. Such a sub-category drew an empty window titled by its stored name, and docking it
+-- there docked it for every character. Its window now stays hidden while the model read in full lacks the header,
+-- its row kept, and a merged window leaves its section and its title part out.
+test("r5 review: a detached sub-category this character's tree lacks shows no window, and keeps its row", function()
+    local SB, D, G = NS.SubBlocks, NS.Detached, NS.Groups
+    local layout = NS.db.profile.layout
+    local savedSex, savedFaction = M.UnitSex, M.UnitFactionGroup
+    M.UnitSex = function() return 2 end
+    M.UnitFactionGroup = function() return "Alliance", "Alliance" end
+    layout.subs, layout.groups = {}, {}
+    if not NS.IsTestMode() then NS.ToggleTestMode() end
+    M.__fireTimers()
+    local ok, err = pcall(function()
+        local here = SB.Detach("reputations", "469", "Alliance")
+        local gone = SB.Detach("reputations", "67", "Horde")   -- another character's header: not in this tree
+        M.__fireTimers()
+        assertTrue(D.Frame(here) ~= nil and D.Frame(here):IsShown(), "a header the tree has: its window")
+        assertTrue(D.Frame(gone) == nil or not D.Frame(gone):IsShown(), "a header it lacks: no window")
+        assertTrue(layout.subs[gone] ~= nil, "its row kept for the character that has it")
+        -- Merged with a header the tree has: no section and no title part for the absent one.
+        local gid = G.Merge(gone, here, "bottom")
+        M.__fireTimers()
+        assertTrue(gid ~= nil, "the two merge")
+        assertEqual(G.Title(gid), "Alliance", "the title names what draws")
+        local f = G.Frame(gid)
+        assertTrue(f.sections[here] ~= nil, "the present section draws")
+        assertEqual(f.sections[gone], nil, "the absent one does not")
+    end)
+    layout.subs, layout.groups = {}, {}
+    D.Refresh()
+    if NS.IsTestMode() then NS.ToggleTestMode() end
+    M.UnitSex, M.UnitFactionGroup = savedSex, savedFaction
+    M.__fireTimers()
+    if not ok then error(err, 0) end
+end)

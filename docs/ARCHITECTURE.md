@@ -230,7 +230,11 @@ branch. Its rows are the header's subtree rebased to depth 0 (the tree provider,
 window (the window's own folds) leaves out every sub-category detached from it, while the LDB tooltip keeps the
 whole tree. A detached Statistics category reads its rows whatever the window's folds say of it and its parents
 (`NS.SubBlocks.OpenStore`), and its window keeps `CRITERIA_UPDATE` watched (`SD.OnScreen`). The
-schemaVersion 18 step normalizes a stored `layout.subs`.
+schemaVersion 18 step normalizes a stored `layout.subs`. The row is the profile's (shared by every character by
+default) while the trees are the character's, so a sub-category whose header this character's tree, read in full,
+lacks (another faction's header, a currency group never earned, a header another locale names otherwise;
+`NS.SubBlocks.Absent`) shows no window and no merged-window section or title part; its row is kept for the
+character that has it (R5-REV).
 
 `profile.layout.groups` (round 5, R5-6) is named non-setting state: the merged detached windows, each
 `[gid] = { point, columns = { { id, ... }, ... }, width }`, membership derived from the columns; `width`

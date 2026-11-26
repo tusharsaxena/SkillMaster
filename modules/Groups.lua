@@ -250,11 +250,14 @@ function G.Width(key)
 end
 
 --- The window's title: its sections' short names joined by " · ".
+-- A member that draws nothing: a detached sub-category this character's tree lacks (R5-REV, NS.SubBlocks.Absent).
+local function absent(id) return NS.SubBlocks ~= nil and NS.SubBlocks.Absent(id) end
+
 function G.Title(gid)
     local parts = {}
     for _, id in ipairs(G.Members(gid)) do
         local d = NS.BlockDefs[id]
-        parts[#parts + 1] = d and d.short or id
+        if not absent(id) then parts[#parts + 1] = d and d.short or id end
     end
     return table.concat(parts, G.SEPARATOR)
 end
@@ -766,25 +769,32 @@ end
 
 -- One column's sections from `y`: each sub-header, then its rows unless collapsed. Answers the y
 -- under the last.
+-- Member `id`'s section in column `c` of `host` at `y`: its header, then its rows unless collapsed. Answers the y
+-- under it.
+local function laySection(f, c, id, host, y)
+    local sh = NS.Pool.Acquire(f.subPool, function() return buildSub(f) end)
+    sh:SetParent(host)
+    sh:ClearAllPoints()
+    sh:SetPoint("TOPLEFT", host, "TOPLEFT", 0, -y)
+    sh:SetPoint("TOPRIGHT", host, "TOPRIGHT", 0, -y)
+    sh:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CONTENT + 1)
+    sh:Show()
+    setSub(sh, id)
+    local sec = { header = sh, col = c, y = y }
+    f.sections[id] = sec
+    y = y + G.SUB_H
+    if not NS.Blocks.Settings(id).collapsed then
+        y = NS.Detached.LayEntries(id, host, f.rowPool, y, sh.note)
+    end
+    sec.h = y - sec.y   -- its drawn extent (a top merge raises a group by it)
+    return y
+end
+
 local function layColumn(f, c, ids, host)
-    local D = NS.Detached
     local y = 0
     for _, id in ipairs(ids) do
-        local sh = NS.Pool.Acquire(f.subPool, function() return buildSub(f) end)
-        sh:SetParent(host)
-        sh:ClearAllPoints()
-        sh:SetPoint("TOPLEFT", host, "TOPLEFT", 0, -y)
-        sh:SetPoint("TOPRIGHT", host, "TOPRIGHT", 0, -y)
-        sh:SetFrameLevel(f:GetFrameLevel() + LAYERS.LEVEL.CONTENT + 1)
-        sh:Show()
-        setSub(sh, id)
-        local sec = { header = sh, col = c, y = y }
-        f.sections[id] = sec
-        y = y + G.SUB_H
-        if not NS.Blocks.Settings(id).collapsed then
-            y = D.LayEntries(id, host, f.rowPool, y, sh.note)
-        end
-        sec.h = y - sec.y   -- its drawn extent (a top merge raises a group by it)
+        -- A sub-category this character's tree lacks draws no section (R5-REV).
+        if not absent(id) then y = laySection(f, c, id, host, y) end
     end
     return y
 end

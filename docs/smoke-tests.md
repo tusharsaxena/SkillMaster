@@ -1381,13 +1381,17 @@ none is passed until you say so.
   `/sm statistics`: open Character and detach Wealth (a nested category): a "Wealth" window shows its statistics
   even with Character folded again in the Statistics window; detach Character too and its window lists its own
   rows, Consumables, Reputation and Gear but not Wealth. `/sm currencies`: detach Player vs. Player: Honor Points
-  moves to its own window. Hover each feed: its tooltip still shows the whole tree and no detach mark.
+  moves to its own window. Hover each feed: its tooltip still shows the whole tree and no detach mark. With
+  Alliance and Player vs. Player still detached, log in an alt on the same profile that lacks one (a Horde
+  character, or one with no Honor Points): no empty "Alliance" or "Player vs. Player" window shows; back on the
+  first character, both windows are where you left them.
   Result:
 - **SM-R5-10** (new, R5-SM-10) `/reload`, then `/sm journal`, Log tab: no reputation or currency row appears for the
   login itself. Kill a few mobs that give reputation, and earn or spend a currency (Honor Points, a Merchant's
   Favor): each kill's reputation is its own row (the faction's name in the Name column, "+5" or the like in
   Change), each currency change its own row, a spend reading negative ("-20"). When a standing changes (say
-  Friendly to Honored), that row reads "+25, Honored". Skill-ups still log beside them, newest first.
+  Friendly to Honored), that row reads "+25, Honored". Skill-ups still log beside them, newest first. Keep the
+  Journal open while you kill: each row appears as it happens, without closing and reopening the Journal.
   Result:
 - **SM-R5-11** (new, R5-SM-11) `/sm journal`, Log tab: the headers read DATE, TIME, NAME, CHANGE, ZONE. Hover one: a
   tooltip says "No filter" and "Click to filter this column." Click NAME: a menu offers Everything, Skill-ups,
