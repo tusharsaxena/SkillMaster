@@ -323,6 +323,19 @@ yet: `/sm probe`'s three sections (SMW-01) settle each row, and the owner's run 
 *Source:* the recon `wf_29cd618e-8fa` of 2026-11-26, recorded in
 `docs/superpowers/specs/2026-11-26-skillmaster-windows-recon.md` (its *api* findings).
 
+What the build does with them (SMW-08..10), so a probe result that differs says what to change:
+
+- **Reputations** (`modules/RepData.lua`) and **currencies** (`modules/CurrencyData.lua`) read the list in full once
+  through `modules/SharedList.lua` (the trap's *Do* above, with a re-entry latch for the client's echo event), then
+  by id. The windows' folds are this addon's own (`char.fold`), never `Expand`/`CollapseFactionHeader` or
+  `ExpandCurrencyList`. If `factions.byIDCollapsed` shows `GetFactionDataByID` does not answer under a collapsed
+  header, the by-id refresh of such a faction keeps its last values until the next full read.
+- **Statistics** (`modules/StatisticsData.lua`) call `GetStatistic` in the two-argument form only, read a category's
+  rows only once it unfolds, and keep a string quantity verbatim (a number above 0 is shown with thousands
+  separators, 0 or none as `--`). `CRITERIA_UPDATE` is registered only while the Statistics show or one is pinned,
+  debounced to one re-read a second. If the probe shows the one-argument form is the one that works
+  (`statistics.retailForm`), `NS.Compat.Statistic` is the one place to change.
+
 ### Trainer NPCs are not client data (offline probe, 2026-11-23)
 
 Forever's client tables hold no trainer NPC (its Creature table is the companions and mounts;

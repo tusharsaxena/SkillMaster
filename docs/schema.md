@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (15)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (16)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "<ruleset>-<First Surname>" (forever-quirks-§4);
@@ -25,9 +25,13 @@ SkillMasterDB
                                  -- currencies = { [currencyID] = { name, quantity, maxQuantity,
                                  -- icon } } (SMW-09: its Currencies sub-tab; never gold) }
   char.<db.keys.char>
-    pinned = false               -- the skill key the broker's {pinned} shows (the row menu's Pin)
-    pinnedStat = false           -- the stat key the Skill Master Stats feed shows (a stat row's Pin;
-                                 -- round 6, R6-9); none: the feed reads "Stats"
+    pins = {}                    -- the pins per broker (modules/Pins.lua, SMW-06, GitHub issue #11): {
+                                 -- [family] = { key, ... } }, in order, up to 5 per feed; a skill's key,
+                                 -- a stat's, a factionID, a currencyID, a statistic's
+                                 -- "<categoryID>:<statID>". The old one-pin fields `pinned` (a skill)
+                                 -- and `pinnedStat` (a stat) are folded in when read (Pins.Normalize:
+                                 -- a one-item list in the skill's family, or in stats) and go; the
+                                 -- runner has no per-character step
     log = {}                     -- the log's ring (modules/SessionLog.lua): the newest journal.keep
                                  -- (500; 50 .. 2000) { t, key, old, new, zone }, oldest first; the
                                  -- Journal's ranges reach no further back than it holds. A
@@ -42,8 +46,6 @@ SkillMasterDB
                                  -- strings: a faction header's factionID, a currency header's
                                  -- "<name>#<depth>", a Statistics categoryID. Never the client's own
                                  -- Expand/Collapse state
-                                 -- A pinned statistic's key (SMW-10, char.pins.statistics) is
-                                 -- "<categoryID>:<statID>"
   profiles.<name>
     enabled = true               -- Enable Ka0s Skill Master; /sm enable, /sm disable
     scale   = 1                  -- Master scale (0.5 .. 2)
@@ -168,10 +170,10 @@ SkillMasterDB
                                  -- schemaVersion 8 kept earlier profiles on "classic")
               width = 420, height = 560,   -- the Main window style's size (the window's defaults)
               barWidth = 128, fontSize = 12,   -- the Classic style's
-              openFrom = "row" },    -- Main window style: a row opens from anywhere on it ("row", Full
-                                     -- row) or its go icon alone ("icon", Go icon only); round 7,
-                                     -- R7-6; "row" by default since round 8, R8-1 (unreleased: no
-                                     -- migration)
+              folds = { blocks = {}, nodes = {} } },   -- the tooltip's own folds (SMW-07,
+                                     -- modules/BrokerFolds.lua): blocks[id] a section folded,
+                                     -- nodes[family][nodeKey] a tree header's; never the window's.
+                                     -- `openFrom` (round 7) is retired: schemaVersion 16
     }
     journal = { point = false, size = false, keep = 500, range = "all", filter = "primary" }
                                  -- range: session | 1d | 3d | 7d | 30d | all (the Log tab, FB-32;
@@ -263,6 +265,9 @@ LibDBIcon's own.
 | 10 → 11 | `waypointMethodFolded`, per profile | no TomTom (round 7, R7-7): `waypoints.method` keeps `"auto"` (the map pin, else chat) and `"chat"`; a stored `"tomtom"` or `"native"` meant the map pin once TomTom is gone, so it goes and the default `"auto"` answers; `"chat"` stays |
 | 11 → 12 | `iconRowColorKept`, per profile | Bars > Icons' Use the row's color (`icons.borderColorFromRow`) defaults off on a new profile (round 7, R7-2): every profile an earlier install stored gets the old `true`, which AceDB stripped, where none is stored, an empty stored profile included (as step 8); a stored value stays; only a fresh install (stamp 0) passes through |
 | 12 → 13 | `foreverDBRetired`, per profile | Skill Master stops reading ForeverDB (ISF-SM-01; only Drop Watcher reads it): a stored `trainers.foreverDB`, SF-SM-02's Use ForeverDB switch, goes whatever it holds; nothing carries over |
+| 13 → 14 | `windowsSplit`, per profile | six family windows (SMW-04): a stored `window.point` and `layout.width`, `maxHeight`, `fitHeight`, `columns`, `summary` and `strata` (rawget: stored choices only) move to `windows.professions` (one already stored there wins), and the old keys go; the other windows start from their defaults, placed next to the Professions window the first time |
+| 14 → 15 | `feedTemplatesSplit`, per profile | one broker feed per family (SMW-05): a stored `broker.template` was the Skill Master feed's, the Professions feed's now, so it moves to `broker.feeds.professions.template` (one stored there other than the default wins) and the old key goes |
+| 15 → 16 | `tipOpenFromRetired`, per profile | in the LDB tooltip only a section's fold chevron acts (SMW-07): a stored `tooltips.ldb.openFrom` names nothing and goes, whatever it holds |
 
 No step for the waypoint arrow's keys (round 6, R6-11): `waypoints.arrow`, `waypoints.arrowScale` and
 `waypoints.arrowFrame` are new keys and nothing stored reshapes, so the defaults answer on every

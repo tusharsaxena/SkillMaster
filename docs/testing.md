@@ -28,6 +28,12 @@ cases, among them the display-glyph guard (`Kit.assertDisplayGlyphs` over `modul
 `locales/`, `core/` and `defaults/`: no string literal carries a character a shipped skin face cannot
 draw) and the profile pin's own cases.
 
+Shared fixtures beside the suites (not suites themselves): `tests/fixture_windows.lua` (the three skill and stat
+windows seen as one, for the cases written before the split), `tests/fixture_icon_widget.lua` and
+`tests/fixture_statistics.lua` (SMW-10: the Statistics tab in Forever's shapes with counted calls, a small tree and a
+1000-row one, read by `tests/test_statistics.lua` and the `statisticsFullRead` / `statisticsRefresh` scenarios of
+`tests/perf.lua`).
+
 Several kit suites read `git ls-files`, so a new file must be staged before it is checked.
 
 ## Lint

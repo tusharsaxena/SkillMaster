@@ -84,9 +84,29 @@ switches on, less the keys in `broker.tooltip.hiddenSkills` / `hiddenStats` (nev
 `skills.hidden` / `stats.hidden`), drawn on the feed's own skinned frame or, with
 `broker.tooltip.skin` off, the shared GameTooltip. The only client read is the main hand's weapon class, for `{equippedWeapon}`;
 in test mode the context's `{pinned}` and `{equippedWeapon}` are the sample's own (`NS.Preview`'s
-broker source carries `pinned` and `mainHand`), so a sample feed reads neither `db.char.pinned` nor
-the live gear.
+broker source carries `pins` and `mainHand`), so a sample feed reads neither `db.char.pins` nor
+the live gear. Each family has its own feed (SMW-05): its text renders its own pins (`char.pins.<family>`, SMW-06),
+and a tree family's feed reads its model (`REPS_UPDATED`, `CURRENCIES_UPDATED`, `STATISTICS_UPDATED`).
 The stand-down shows "Off" on the feed; the stand-up re-renders.
+
+## The tree families: reputations, currencies, Statistics (SMW-08..10)
+
+`RepData` and `CurrencyData` read their list once in full through `NS.SharedList` (the character panel's collapsed
+headers opened for the read and closed again bottom up; never in combat or while that tab shows; a latch for the
+client's echo event), then by id on `UPDATE_FACTION` / `CURRENCY_DISPLAY_UPDATE` (debounced 0.2 s), and send
+`REPS_UPDATED` / `CURRENCIES_UPDATED`; a standing or amount that moved is `REP_CHANGED` / `CURRENCY_CHANGED`, which
+the session log keeps as one Log line per faction or currency per session and the cap alert checks.
+
+`StatisticsData` builds the category tree on first use (the Statistics window or a block of it drawn,
+`FEED_TOOLTIP_TOGGLED` for its feed, or a pinned statistic at `PLAYER_ENTERING_WORLD`). The block provider
+(`modules/BlockProviders.lua`) asks `SD:Open(store)` as it lays the rows, with the folds it draws under (the window's
+`char.fold`, or the LDB tooltip's own), so only an unfolded category's rows are read. `SD:Watch` registers
+`CRITERIA_UPDATE` while the Statistics show (`WINDOW_TOGGLED`, `FEED_TOOLTIP_TOGGLED`, `LAYOUT_CHANGED`) or one is
+pinned; the event starts a one-shot 1 s timer whose `SD:Refresh` re-reads the unfolded categories and the pinned rows
+and sends `STATISTICS_UPDATED`.
+
+Every tree window draws through `NS.Tree` (`Tree.Rows`: a header row's chevron folds it in `char.fold`, never the
+client's state), and `modules/Blocks.lua` and `modules/Broker.lua` hear each family's model message.
 
 ## Test mode and the simulator (T5.2)
 
@@ -95,18 +115,23 @@ Test mode swaps every source for the sample character (`modules/Preview.lua` ove
 (`SkillData.Build` from its skill lines, `StatData.Build` from its stat values, `Bonuses.Compute`
 with its lure as a candidate), and the displays read them through `NS.Blocks.source`,
 `NS.Bonuses.source`, `NS.Broker.source` and `NS.Preview.Log()` / `.Alts()` / `.Skill()` /
-`.Character()`. The live modules keep running underneath; turning test mode off (or combat, or the
-stand-down) clears every source and repaints.
+`.Character()`. The tree families' samples (SMW-11) are the client's own records built from the fixture
+(`NS.Preview.FactionRows`, `CurrencyRows`, `StatisticsList`) and modeled by `RepData.Build`, `CurrencyData.Build` and
+`StatisticsData.Build`; `NS.Blocks.source`'s third answer and the broker source's `models` carry them, and a test-mode
+fold goes to the session's own store. The live modules keep running underneath (StatisticsData reads nothing live
+while test mode is on); turning test mode off (or combat, or the stand-down) clears every source and repaints.
 
 The simulator feeds the engine instead. `core/SimSetup.lua` wraps `NS.Compat`; while a session runs,
 `modules/Simulator.lua` answers the skill list, the player and the main hand from its world (the
 sample character), and each step fires the client's event into the module that registered it:
 `CHAT_MSG_SKILL` into SkillData (a scan, then `SKILL_UP`: the broker flash, the session log, the
 alerts), `UNIT_INVENTORY_CHANGED` and `SKILL_LINES_CHANGED` for the lure, `UNIT_AURA` and the speed
-ticker's read for the mount, then `SIM_TICK`. The session starts from an empty skills model (no
-`SKILL_UP` for the jump to the sample), logs into a session-only list and takes no alt snapshot;
-the stop puts the live model, the alerts' and the broker's session state and the live log back and
-repaints once.
+ticker's read for the mount, `UPDATE_FACTION` and `CURRENCY_DISPLAY_UPDATE` for the trip's last two steps (a
+reputation and a currency gain, SMW-11), then `SIM_TICK`. The world also answers the faction, currency and
+Statistics reads. The session starts from an empty skills model (no `SKILL_UP` for the jump to the sample) and from
+empty tree models (`RepData:Adopt`, `CurrencyData:Adopt`, `StatisticsData:Adopt`, read afresh from the world),
+logs into a session-only list and takes no alt snapshot; the stop puts the live models, the alerts' and the
+broker's session state and the live log back and repaints once.
 
 ## The lifecycle
 

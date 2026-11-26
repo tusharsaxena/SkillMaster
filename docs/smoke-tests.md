@@ -1276,3 +1276,13 @@ none is passed until you say so.
   and Honor Points by 150, the windows and feeds follow, and the Journal's Log gains a line for each. Stop: your
   own reputations, currencies and Statistics are back, and the saved Log has no simulated line.
   Result:
+
+## The six windows, end to end (SMW-12, 2026-11-26)
+
+- **SM-SMW-1** (new, SMW-12) Open all six windows (`/sm professions`, `skills`, `stats`, `currencies`,
+  `reputations`, `statistics`) and play for a while: no Lua error, and `/sm diagnostics` lists no rejected event
+  (`UPDATE_FACTION`, `CURRENCY_DISPLAY_UPDATE`, `CRITERIA_UPDATE` among the accepted).
+  Result:
+- **SM-SMW-2** (new, SMW-12) `/sm help` lists the six window verbs; the README's Usage and FAQ match what you see
+  (Character Stats are the paper doll's numbers, Statistics the Statistics tab's counters; no gold row).
+  Result:
