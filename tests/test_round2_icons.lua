@@ -163,7 +163,7 @@ test("round2 icons: the LDB tooltip draws the window's block titles on header ba
         end
         local joined = table.concat(titles, "|")
         assertTrue(joined:find(NS.BlockDefs.primary.title, 1, true) ~= nil, "Primary Professions, as the window says it")
-        assertTrue(joined:find(NS.BlockDefs.secondary.title, 1, true) ~= nil, "Secondary Skills (SMW-05: its feed's two)")
+        assertTrue(joined:find(NS.BlockDefs.secondary.title, 1, true) ~= nil, "Secondary Professions (SMW-05: its feed's two)")
         local bands = NS.Broker.Bands(tip)
         -- One band per header, one per even row of each section.
         assertTrue(#bands > 0 and #bands < #rows + #titles, "headers and every other row, not every row")

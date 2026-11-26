@@ -105,10 +105,10 @@ test("r5 sm-10: the Log draws a reputation row's name and its signed change with
         J.SelectTab("log")
         local rows = logRows()
         assertEqual(#rows, 2)
-        assertEqual(rows[1].cols[3]:GetText(), "Honor Points", "newest first")
-        assertEqual(rows[1].cols[4]:GetText(), "+13")
-        assertEqual(rows[2].cols[3]:GetText(), "Stormwind")
-        assertEqual(rows[2].cols[4]:GetText(), "+200, Honored")
+        assertEqual(rows[1].cols[4]:GetText(), "Honor Points", "newest first")   -- Type is column 3 (R6-SM-02)
+        assertEqual(rows[1].cols[5]:GetText(), "+13")
+        assertEqual(rows[2].cols[4]:GetText(), "Stormwind")
+        assertEqual(rows[2].cols[5]:GetText(), "+200, Honored")
     end)
 end)
 
@@ -194,7 +194,7 @@ end
 
 local function shownNames()
     local out = {}
-    for _, row in ipairs(logRows()) do out[#out + 1] = row.cols[3]:GetText() end
+    for _, row in ipairs(logRows()) do out[#out + 1] = row.cols[4]:GetText() end
     return table.concat(out, ",")
 end
 
@@ -208,11 +208,11 @@ local function pick(col, label)
     error("no menu row " .. label .. " under " .. col)
 end
 
-test("r5 sm-11: the five headers each open a filter menu; the third is Name", function()
+test("r5 sm-11: every header opens a filter menu; Name is the fourth, after Type (R6-SM-02)", function()
     withDay(function()
         local p = J.Frame().logPanel
-        assertEqual(p.headers[3]:GetText(), "NAME", "renamed for skills, factions and currencies")
-        for _, col in ipairs({ "date", "time", "name", "change", "zone" }) do
+        assertEqual(p.headers[4]:GetText(), "NAME", "renamed for skills, factions and currencies")
+        for _, col in ipairs({ "date", "time", "type", "name", "change", "zone" }) do
             local b = p.filterButtons[col]
             assertTrue(b ~= nil, col .. ": a header button")
             local rows = J.FilterMenuRowsForTest(col)
@@ -222,24 +222,24 @@ test("r5 sm-11: the five headers each open a filter menu; the third is Name", fu
     end)
 end)
 
-test("r5 sm-11: the Name filter narrows to a kind, or one name, and the summary counts that kind", function()
+test("r5 sm-11: the Type filter (R6-SM-02) narrows to a kind, Name to one name, and the summary counts that kind", function()
     withDay(function()
         assertEqual(shownNames(), "Bows,Honor Points,Stormwind,Stormwind,Fishing", "everything, newest first")
-        pick("name", "Reputations")
+        pick("type", "Reputation")
         assertEqual(shownNames(), "Stormwind,Stormwind", "only the faction rows")
         local card = J.Frame().logPanel.session
         assertEqual(card.value:GetText(), "+150", "the reputation's net change")
         assertTrue(card.title:GetText():find("Reputation", 1, true) ~= nil, "the card says what it counts")
         assertTrue(card.title:GetText():find("filtered", 1, true) ~= nil, "and that it is filtered")
+        pick("type", "Any type")
         pick("name", "Honor Points")
         assertEqual(shownNames(), "Honor Points", "one name, from the Currencies submenu")
-        assertEqual(JF.Get("kind"), "currency", "its kind with it")
-        pick("name", "Skill-ups")
+        assertTrue(card.title:GetText():find("Currencies", 1, true) ~= nil, "the card counts its kind")
+        pick("type", "Skill-up")
         assertEqual(shownNames(), "Bows,Fishing", "a kind picked drops the name of another")
         assertEqual(card.value:GetText(), "+2", "the skill-ups counted")
-        pick("name", "Honor Points")
-        pick("name", "Everything")
-        assertFalse(JF.Active("name"), "Everything drops the kind and the name")
+        pick("type", "Any type")
+        assertFalse(JF.Active(), "Any type drops the kind")
         assertEqual(#logRows(), 5, "every row back")
     end)
 end)
@@ -261,7 +261,7 @@ test("r5 sm-11: Date, Time, Change and Zone filters, combined", function()
         pick("change", "All")
         pick("zone", "Duskwood")
         assertEqual(shownNames(), "Bows,Honor Points,Stormwind", "Duskwood's rows")
-        pick("name", "Skill-ups")
+        pick("type", "Skill-up")
         assertEqual(shownNames(), "Bows", "zone and kind together")
     end)
 end)
@@ -284,12 +284,12 @@ test("r5 sm-11: an active header shows it, and Clear filters clears every one in
     end)
 end)
 
-test("r5 sm-11: the ETA card follows the Name filter", function()
+test("r5 sm-11: the ETA card follows the Type filter", function()
     withDay(function()
         SL:Add("fishing", 51, 52, M.time() - 30, "Duskwood")
         J.Render()
         assertTrue(#J.EtaRows(0) >= 0, "the ETA rows read")
-        pick("name", "Reputations")
+        pick("type", "Reputation")
         assertEqual(#J.EtaRows(0, J.Frame().logPanel.filtered), 0, "no skill among the rows, no ETA")
     end)
 end)
@@ -316,7 +316,7 @@ test("r5 sm-12: the Log's empty lines and the Clear log question speak of every 
     end)
 end)
 
-test("r5 sm-12: with the Name filter on reputations, the ETA card says the filter leaves no skill-ups", function()
+test("r5 sm-12: with the Type filter on reputations, the ETA card says the filter leaves no skill-ups", function()
     withLog(M.time() - 600, function()
         SL:Add("fishing", 50, 51, M.time() - 500)
         SL:AddChange("reputation", "72", "Stormwind", 1, 6, M.time() - 400)

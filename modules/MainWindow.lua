@@ -44,7 +44,7 @@ local LABEL = {
     reputations = L["Toggle Reputations window"], statistics = L["Toggle Statistics window"],
 }
 local TIP = {
-    professions = L["Shows or hides the Professions window: primary professions and secondary skills."],
+    professions = L["Shows or hides the Professions window: primary and secondary professions."],
     skills = L["Shows or hides the Skills window: weapon skills and other skills."],
     stats = L["Shows or hides the Character Stats window: the character panel's stats."],
     currencies = L["Shows or hides the Currencies window."],

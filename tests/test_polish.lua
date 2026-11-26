@@ -349,7 +349,7 @@ test("journal: a grip drag lays out at most once per frame and redraws once, aft
     local grip = f.resizeGrip
     assertTrue(grip ~= nil, "the Journal has a resize grip")
     local minW, minH = f:GetResizeBounds()
-    assertEqual(minW, 720, "never narrower than its default (720 since round 4)")
+    assertEqual(minW, 840, "never narrower than its default (720 since round 4, 840 since R6-SM-02)")
     assertEqual(minH, 420, "never shorter")
     NS.db.profile.journal.size = false
 
@@ -365,7 +365,7 @@ test("journal: a grip drag lays out at most once per frame and redraws once, aft
     for i = 1, 3 do
         local before = layouts
         for step = 1, 3 do
-            f:__setGeom(640 + i * 30 + step, 420 + i * 40 + step)
+            f:__setGeom(760 + i * 30 + step, 420 + i * 40 + step)
             f:__fire("OnSizeChanged", f:GetWidth(), f:GetHeight())
         end
         frameTick()
@@ -378,7 +378,7 @@ test("journal: a grip drag lays out at most once per frame and redraws once, aft
     frameTick()
     assertEqual(renders, 1, "the full redraw runs once, after the release")
     local size = NS.db.profile.journal.size
-    assertEqual(size and size.w, 733)
+    assertEqual(size and size.w, 853)
     assertEqual(size and size.h, 543)
     -- The body starts under the title band's bottom (NS.Chrome.TITLE_BOTTOM, AD-88-SM), the tabs and their
     -- 8 px under it: 31 + 24 + 8, where it was 26 + 24 + 8 before the strip docked under the band.
@@ -396,10 +396,10 @@ test("journal: the saved size is restored, clamped to the minimum; locked refuse
     rawset(f, "SetSize", function(_, w, h) sizes[#sizes + 1] = w .. "x" .. h end)
     NS.db.profile.journal.size = { w = 300, h = 900 }
     J.ApplySize()
-    NS.db.profile.journal.size = { w = 800, h = 500 }
+    NS.db.profile.journal.size = { w = 900, h = 500 }
     J.ApplySize()
     rawset(f, "SetSize", nil)
-    assertEqual(table.concat(sizes, ","), "720x900,800x500")
+    assertEqual(table.concat(sizes, ","), "840x900,900x500")
 
     NS.SetByPath("locked", true)
     local before = f.__sizingCount

@@ -59,13 +59,16 @@ local RANGE_LABEL = {
 --- The range's label.
 function J.RangeLabel(range) return RANGE_LABEL[range] or range end
 
--- 720 wide (owner feedback round 4): the Zone column took 150 px and the Skill column kept room.
+-- 720 wide (owner feedback round 4): the Zone column took 150 px and the Skill column kept room. 840 since the
+-- Type column (R6-SM-02, owner feedback round 6: "Increase min width of the window to accommodate"): its 76 px
+-- and a Name column of 150 px, room for a 20-letter faction, at the minimum (J.LogColumnWidths).
 -- TITLE_H is the title band's bottom edge with no band measured (NS.Chrome.TITLE_BOTTOM): the tabs
 -- are laid under it, and shift() moves them by how far the band's own bottom (NS.Chrome.TitleBottom,
 -- read from the band the skin lays) differs from it. The strip docks between the bar and the tabs
 -- (AD-88-SM). The Alts tab's hint line rides a window footer (NS.Chrome.Footer, FOOTER.HEIGHT tall;
 -- standalone-windows, *The footer*), shown with that tab only, so the Log body keeps its PAD.
-local WIDTH, HEIGHT, TAB_H, PAD = 720, 420, 24, 12
+local WIDTH, HEIGHT, TAB_H, PAD = 840, 420, 24, 12
+local ALT_BASE_W = 720   -- the width the Alts tab's character column pitch is set from (five across it)
 local TITLE_H = NS.Chrome.TITLE_BOTTOM
 local FOOT_GAP = 8   -- between the Alts body's bottom and its footer's hairline
 local SIDE_W, ROW_H, ALT_ROW_H, LABEL_W, ETA_LINES = 190, 18, 32, 150, 5
@@ -78,9 +81,9 @@ local ALT_CHROME_H = BODY_TOP + 26 + ALT_HEAD_H + NS.Chrome.FooterHeight() + FOO
 J.MIN_W, J.MIN_H = WIDTH, HEIGHT
 J.LOG_ROWS = floor((HEIGHT - LOG_CHROME_H) / ROW_H)
 J.ALT_ROWS = floor((HEIGHT - ALT_CHROME_H) / ALT_ROW_H)
--- The character column's pitch: five across the default width, kept as the window widens (more
--- characters show instead). J.MAX_COLS is how many a row builds.
-J.COL_W = floor((WIDTH - PAD * 2 - LABEL_W - SCROLL_W - SCROLL_GAP) / 5)
+-- The character column's pitch: five across the round 4 default width (720), kept as the window widens (more
+-- characters show instead: six at the 840 minimum). J.MAX_COLS is how many a row builds.
+J.COL_W = floor((ALT_BASE_W - PAD * 2 - LABEL_W - SCROLL_W - SCROLL_GAP) / 5)
 J.MAX_COLS = 12
 local COL_W = J.COL_W
 local ARROW = " -> "   -- ASCII: every shipped skin face draws it (the old U+2192 was a box in some)
@@ -138,6 +141,10 @@ end
 function J.RowName(e) return e.kind and (e.name or e.key) or skillName(e.key) end
 
 local JF = NS.JournalFilters
+
+--- The type a Log row shows (R6-SM-02): "Skill-up", "Reputation" (a standing change too), "Currency".
+function J.TypeText(e) return JF.KindLabel(JF.KindOf(e)) end
+
 -- The column filters' context (R5-SM-11): how a row is named, the clock, and the repaint a pick asks for.
 local function filterCtx()
     return { nameOf = J.RowName, now = time(), onChange = function()
@@ -308,16 +315,28 @@ end
 
 -- ── Log ──────────────────────────────────────────────────────────────────────────────────────
 
--- Each column from the list's left (x) or its right edge (r), a fixed width or (Skill) stretching
+-- Each column from the list's left (x) or its right edge (r), a fixed width or (Name) stretching
 -- between the two, so the list follows the window's width with no per-tick work. Every cell keeps
--- to its width and truncates (no wrap): nothing runs into the next column at the default width.
+-- to its width and truncates (no wrap): nothing runs into the next column at the minimum width.
 local LOG_COLS = {
     { x = 6, w = 50, j = "LEFT" },                    -- Date
     { x = 58, w = 36, j = "LEFT" },                   -- Time
-    { x = 98, r = -(110 + 150 + 14), j = "LEFT" },    -- Name (a skill, a faction or a currency)
+    { x = 98, w = 76, j = "LEFT" },                   -- Type: 76 for "Reputation" in a 12 px body face (R6-SM-02)
+    { x = 178, r = -(110 + 150 + 14), j = "LEFT" },   -- Name (a skill, a faction or a currency)
     { r = -(150 + 10), w = 110, j = "RIGHT" },        -- Change: 110 for "+250, Honored" (R5-SM-10)
     { r = -6, w = 150, j = "RIGHT" },                 -- Zone: 150 (owner feedback round 4)
 }
+
+-- The Log's header band (and its rows) run from the panel's left to the scroll bar, left of the side cards.
+local LOG_LIST_INSET = SIDE_W + PAD + SCROLL_W + SCROLL_GAP
+
+--- Each Log column's width at window width `w`: the fixed ones as laid, Name what is left between its edges.
+function J.LogColumnWidths(w)
+    local list = (tonumber(w) or WIDTH) - PAD * 2 - LOG_LIST_INSET
+    local out = {}
+    for i, c in ipairs(LOG_COLS) do out[i] = c.w or (list - c.x + c.r) end
+    return out
+end
 
 local function placeColumns(parent, cols, role)
     local out = {}
@@ -359,7 +378,8 @@ local function newLogRow(p)
     row.cols = placeColumns(row, nil, "body")
     NS.Skin.Text(row.cols[1], "muted")
     NS.Skin.Text(row.cols[2], "muted")
-    NS.Skin.Text(row.cols[5], "muted")
+    NS.Skin.Text(row.cols[3], "muted")
+    NS.Skin.Text(row.cols[6], "muted")
     return row
 end
 
@@ -369,10 +389,11 @@ local function bindLogRow(p, row, e, i)
     row:SetPoint("TOPRIGHT", p.header, "BOTTOMRIGHT", 0, -(i - 1) * ROW_H)
     row.cols[1]:SetText(date(L["%m/%d/%y"], e.t))
     row.cols[2]:SetText(date("%H:%M", e.t))
+    row.cols[3]:SetText(J.TypeText(e))   -- R6-SM-02
     -- A reputation's or currency's change (SMW-08, SMW-09; SessionLog:AddChange): its name, and the change.
-    row.cols[3]:SetText(J.RowName(e))
-    row.cols[4]:SetText(e.kind and J.ChangeText(e) or (tostring(e.old) .. ARROW .. tostring(e.new)))
-    row.cols[5]:SetText(e.zone or "")
+    row.cols[4]:SetText(J.RowName(e))
+    row.cols[5]:SetText(e.kind and J.ChangeText(e) or (tostring(e.old) .. ARROW .. tostring(e.new)))
+    row.cols[6]:SetText(e.zone or "")
     row.entry = e
     NS.Skin.ListRow(row, (i % 2 == 0) and "stripe" or "normal")
     row:Show()
@@ -423,7 +444,7 @@ end
 --- counts). The title names the count, "Skill-ups this session (1 h 20 m)" or "Skill-ups ·
 --- Last 7 days"; the rate line is the average and the span it is over: "6.0 an hour" for the session,
 --- "38.4 a day over 2 days" otherwise (all time: since the oldest entry, a day at least).
--- The card's title per counted kind (R5-SM-11: the Name filter's kind picks it): the range's own words.
+-- The card's title per counted kind (R5-SM-11; the Type filter's kind picks it since R6-SM-02): the range's own words.
 local SUMMARY_TITLE = { skill = L["Skill-ups \194\183 %s"], reputation = L["Reputation \194\183 %s"],
                         currency = L["Currencies \194\183 %s"] }
 
@@ -467,7 +488,7 @@ local function renderSide(p, SL, range, from, now)
         line.value:SetText(r and J.FormatETA(r.sec) or "")
     end
     p.eta.none:SetShown(#rows == 0)
-    -- With the Name filter on reputations or currencies the reason is the filter, not too few skill-ups (R5-SM-12).
+    -- With the Type filter on reputations or currencies the reason is the filter, not too few skill-ups (R5-SM-12).
     p.eta.none:SetText(kind == "skill" and L["Two skill-ups of a skill give it an ETA."]
         or L["The filter leaves no skill-ups to time."])
 end
@@ -628,11 +649,11 @@ local function buildLog()
     p.header = CreateFrame("Frame", nil, p)
     p.header:SetHeight(LOG_HEAD_H)
     p.header:SetPoint("TOPLEFT", p, "TOPLEFT", 0, 0)
-    p.header:SetPoint("TOPRIGHT", p, "TOPRIGHT", -(SIDE_W + PAD + SCROLL_W + SCROLL_GAP), 0)
+    p.header:SetPoint("TOPRIGHT", p, "TOPRIGHT", -LOG_LIST_INSET, 0)
     makeBand(p.header)
-    -- The labels uppercase on the band, in the heading role (round 5). The third column is Name since it lists
-    -- reputations and currencies too (R5-SM-10). Each header opens its filter's menu (R5-SM-11).
-    p.headers = placeColumns(p.header, { L["Date"]:upper(), L["Time"]:upper(), L["Name"]:upper(),
+    -- The labels uppercase on the band, in the heading role (round 5). Name since it lists reputations and
+    -- currencies too (R5-SM-10), Type before it saying which (R6-SM-02). Each header opens its filter's menu (R5-SM-11).
+    p.headers = placeColumns(p.header, { L["Date"]:upper(), L["Time"]:upper(), L["Type"]:upper(), L["Name"]:upper(),
         L["Change"]:upper(), L["Zone"]:upper() }, "heading")
     buildHeaderFilters(p)
     p.scroll = makeScrollBar(p, function(offset)

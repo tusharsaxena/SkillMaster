@@ -101,7 +101,7 @@ rows[#rows + 1] = row({
 })
 add(rows, {
     swatch("primary", L["Primary professions"], L["Fill of a primary profession's bar (By category)."]),
-    swatch("secondary", L["Secondary skills"], L["Fill of a secondary skill's bar (By category)."]),
+    swatch("secondary", L["Secondary professions"], L["Fill of a secondary profession's bar (By category)."]),
     swatch("weapon", L["Weapon skills"], L["Fill of a weapon skill's bar (By category)."]),
     swatch("other", L["Other skills"], L["Fill of the Other block's bars (By category)."]),
     swatch("stats", L["Stats"], L["Fill of a stat's bar (By category)."]),

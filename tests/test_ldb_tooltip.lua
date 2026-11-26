@@ -58,7 +58,7 @@ test("ldb tooltip: a section's chevron folds it in the tooltip alone, and the to
     withTip("window", function()
         B.OnEnter(M.UIParent)
         local f = BP.Frame()
-        assertTrue(panelRow("cooking") ~= nil, "Secondary Skills open to start")
+        assertTrue(panelRow("cooking") ~= nil, "Secondary Professions open to start")
         local h = header("secondary")
         h.chevron:__fire("OnClick", "LeftButton")
         assertTrue(f:IsShown(), "the tooltip stays up")
@@ -100,7 +100,7 @@ test("ldb tooltip: Classic sections carry chevrons that fold them, and its rows 
         assertEqual(#chevrons, 2, "one chevron per section: Primary, Secondary")
         local secondary
         for _, c in ipairs(chevrons) do if c.row.fold == "secondary" then secondary = c end end
-        assertTrue(secondary ~= nil, "Secondary Skills' chevron")
+        assertTrue(secondary ~= nil, "Secondary Professions' chevron")
         local before = #B.Hits()
         assertEqual(before, 4, "a hover area per row")
         for _, hit in ipairs(B.Hits()) do

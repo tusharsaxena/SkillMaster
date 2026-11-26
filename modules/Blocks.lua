@@ -46,7 +46,7 @@ end
 
 NS.BlockDefs = {
     primary       = def("primary", L["Primary Professions"], L["Primary"], "skills", "primary"),
-    secondary     = def("secondary", L["Secondary Skills"], L["Secondary"], "skills", "secondary"),
+    secondary     = def("secondary", L["Secondary Professions"], L["Secondary"], "skills", "secondary"),
     weapon        = def("weapon", L["Weapon Skills"], L["Weapons"], "skills", "weapon"),
     other         = def("other", L["Other skills"], L["Other"], "skills", "other"),
     stats_base    = def("stats_base", L["Stats \194\183 Base & Combat"], L["Base & Combat"], "stats", "base",

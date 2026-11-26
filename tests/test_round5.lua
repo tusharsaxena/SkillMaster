@@ -106,7 +106,7 @@ test("round5 table headers: the Log and Alts headers stand on a band of the bloc
     local log = J.Frame().logPanel
     assertBand(log.header, "the Log header")
     assertEqual(log.headers[1]:GetText(), NS.L["Date"]:upper(), "the Log labels read uppercase")
-    assertEqual(log.headers[5]:GetText(), NS.L["Zone"]:upper(), "every one")
+    assertEqual(log.headers[6]:GetText(), NS.L["Zone"]:upper(), "every one")
     J.SelectTab("alts")
     assertBand(J.Frame().altsPanel.header, "the Alts header")
     J.SelectTab("log")

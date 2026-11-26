@@ -1,9 +1,11 @@
 local addonName, NS = ...
 -- modules/JournalFilters.lua — the Journal Log's column filters (R5-SM-11, owner feedback round 5, addendum A1:
--- "add filters for all column headers"). Each of the Log's five column headers opens a menu of its filter:
+-- "add filters for all column headers"). Each of the Log's six column headers opens a menu of its filter:
 --   Date    any day, today, yesterday, or one of the days the range holds (newest first)
 --   Time    any time, or a part of the day (night 0-6, morning 6-12, afternoon 12-18, evening 18-24)
---   Name    a kind (skill-ups, reputations, currencies) and, from a kind's submenu, one name of it
+--   Type    a kind: skill-up, reputation (a standing change is one), currency (R6-SM-02, owner feedback round 6:
+--           the kind filtering the Name header held until then)
+--   Name    one name: the picked type's names, or with no type a submenu per kind present
 --   Change  all, gains, losses, or the reputation changes that moved a standing
 --   Zone    any zone, or one of the zones the range holds (most rows first)
 -- Filters combine (every one must match), apply on top of the range picker, and are session-only: the window
@@ -12,18 +14,21 @@ local addonName, NS = ...
 -- (modules/Journal.lua).
 --
 -- NS.JournalFilters.Get(col) / .Set(col, value) / .Clear() / .Active([col]) / .Matches(e, ctx) / .Apply(list, ctx)
---   / .MenuRows(col, list, ctx) / .Menu(col, anchor, list, ctx) / .KindOf(e) / .Summary(list) / .Label(col)
+--   / .MenuRows(col, list, ctx) / .Menu(col, anchor, list, ctx) / .KindOf(e) / .KindLabel(kind) / .Summary(list)
+--   / .Label(col)
 -- `ctx` = { nameOf = fn(e) -> the name the Log shows, now = epoch seconds, onChange = fn() }.
 
 NS.JournalFilters = {}
 local JF = NS.JournalFilters
 local L = NS.L
 
-JF.COLUMNS = { "date", "time", "name", "change", "zone" }
+JF.COLUMNS = { "date", "time", "type", "name", "change", "zone" }
 JF.KINDS = { "skill", "reputation", "currency" }
 JF.MAX_CHOICES = 20   -- a menu lists at most this many days, names or zones (the shared menu does not scroll)
 
-local KIND_LABEL = { skill = L["Skill-ups"], reputation = L["Reputations"], currency = L["Currencies"] }
+-- A kind's name in the Type column and its menu (singular, as a row reads), and in the Name menu's submenus (plural).
+local KIND_LABEL = { skill = L["Skill-up"], reputation = L["Reputation"], currency = L["Currency"] }
+local KIND_PLURAL = { skill = L["Skill-ups"], reputation = L["Reputations"], currency = L["Currencies"] }
 local TIME_ORDER = { "night", "morning", "afternoon", "evening" }
 local TIME_HOURS = { night = { 0, 6 }, morning = { 6, 12 }, afternoon = { 12, 18 }, evening = { 18, 24 } }
 local TIME_LABEL = {
@@ -33,8 +38,12 @@ local TIME_LABEL = {
 local CHANGE_ORDER = { "gain", "loss", "standing" }
 local CHANGE_LABEL = { gain = L["Gains"], loss = L["Losses"], standing = L["Standing changes"] }
 
--- The filters in force, session-only: date, time, kind, name, change, zone (nil each: no filter).
+-- The filters in force, session-only: date, time, kind, name, change, zone (nil each: no filter). Session-only,
+-- so the Type column (R6-SM-02) took the kind over from Name with nothing saved to migrate.
 local filters = {}
+-- The kind of the name filter in force (the Name menu knows it): a type picked drops a name of another, and the
+-- summary counts a name's own kind with no type picked.
+local nameKind
 
 function JF.Get(key) return filters[key] end
 
@@ -42,15 +51,18 @@ function JF.Get(key) return filters[key] end
 function JF.Set(key, value)
     if filters[key] == value then return false end
     filters[key] = value
+    if key == "name" then nameKind = nil end   -- set from outside the Name menu, its kind is not known
     return true
 end
 
 function JF.Clear()
     for k in pairs(filters) do filters[k] = nil end
+    nameKind = nil
 end
 
--- The filter keys each column's header owns: the Name column owns the kind and the name.
-local OWNS = { date = { "date" }, time = { "time" }, name = { "kind", "name" }, change = { "change" }, zone = { "zone" } }
+-- The filter keys each column's header owns: Type the kind, Name the name (R6-SM-02).
+local OWNS = { date = { "date" }, time = { "time" }, type = { "kind" }, name = { "name" }, change = { "change" },
+               zone = { "zone" } }
 
 --- Whether column `col`'s filter is on, or with no column whether any is.
 function JF.Active(col)
@@ -64,6 +76,9 @@ end
 
 --- A row's kind: "skill" for a skill-up, else its own ("reputation", "currency").
 function JF.KindOf(e) return e.kind or "skill" end
+
+--- A kind's label, as the Type column shows it: "Skill-up", "Reputation", "Currency" (R6-SM-02).
+function JF.KindLabel(kind) return KIND_LABEL[kind or "skill"] or tostring(kind) end
 
 local function day(t) return date("%Y-%m-%d", t) end
 
@@ -118,10 +133,10 @@ function JF.Apply(list, ctx)
 end
 
 --- What `list` (the filtered rows) sums to, for the summary card: the kind it counts and its total. Reputation
---- and currency rows sum their signed changes while the Name filter's kind is theirs; otherwise the skill-ups'
---- points.
+--- and currency rows sum their signed changes while the Type filter is theirs (or, with no type, the Name filter's
+--- name is of theirs); otherwise the skill-ups' points.
 function JF.Summary(list)
-    local kind = filters.kind
+    local kind = filters.kind or (filters.name ~= nil and nameKind) or nil
     if kind ~= "reputation" and kind ~= "currency" then kind = "skill" end
     local total = 0
     for _, e in ipairs(list) do
@@ -181,39 +196,53 @@ function MENUS.time(_, ctx)
     return rows
 end
 
--- The Name column: a kind, then a submenu per kind present of its names (picking one sets the kind too).
-function MENUS.name(list, ctx)
-    local every = radio(L["Everything"], "kind", nil, ctx)
-    every.selected = function() return filters.kind == nil and filters.name == nil end
-    every.onClick = function()   -- no kind and no name
-        filters.kind, filters.name = nil, nil
-        if ctx.onChange then ctx.onChange() end
-    end
-    local rows = { { title = true, label = L["Name"] }, every }
+-- The Type column (R6-SM-02): any type, or one kind. A kind picked drops a name of another kind.
+function MENUS.type(_, ctx)
+    local rows = { { title = true, label = L["Type"] }, radio(L["Any type"], "kind", nil, ctx) }
     for _, k in ipairs(JF.KINDS) do
         local row = radio(KIND_LABEL[k], "kind", k, ctx)
         local onClick = row.onClick
-        row.onClick = function()   -- a kind picked drops a name of another kind
-            if filters.name ~= nil then filters.name = nil end
+        row.onClick = function()
+            if filters.name ~= nil and nameKind ~= k then filters.name, nameKind = nil, nil end
             onClick()
         end
         rows[#rows + 1] = row
     end
-    local any = false
+    return rows
+end
+
+-- One name of kind `k` as a radio: picking it sets the name alone (the Type filter stays as it is).
+local function nameRadio(n, k, ctx)
+    return { value = n, label = n, radio = true,
+             selected = function() return filters.name == n end,
+             onClick = function()
+                 filters.name, nameKind = n, k
+                 if ctx.onChange then ctx.onChange() end
+             end }
+end
+
+local function namesOf(list, k, ctx)
+    return distinct(list, function(e) return JF.KindOf(e) == k and ctx.nameOf(e) or nil end)
+end
+
+-- The Name column: any name, then the picked type's names flat, or with no type a submenu per kind present.
+function MENUS.name(list, ctx)
+    local rows = { { title = true, label = L["Name"] }, radio(L["Any name"], "name", nil, ctx) }
+    local only = filters.kind
+    if only then
+        local names = namesOf(list, only, ctx)
+        if #names > 0 then rows[#rows + 1] = { divider = true } end
+        for _, n in ipairs(names) do rows[#rows + 1] = nameRadio(n, only, ctx) end
+        return rows
+    end
+    local divided = false
     for _, k in ipairs(JF.KINDS) do
-        local names = distinct(list, function(e) return JF.KindOf(e) == k and ctx.nameOf(e) or nil end)
+        local names = namesOf(list, k, ctx)
         if #names > 0 then
-            if not any then rows[#rows + 1] = { divider = true } any = true end
+            if not divided then rows[#rows + 1] = { divider = true } divided = true end
             local sub = {}
-            for _, n in ipairs(names) do
-                sub[#sub + 1] = { value = n, label = n, radio = true,
-                    selected = function() return filters.name == n end,
-                    onClick = function()
-                        filters.kind, filters.name = k, n
-                        if ctx.onChange then ctx.onChange() end
-                    end }
-            end
-            rows[#rows + 1] = { value = "names:" .. k, label = L["One of the %s"]:format(KIND_LABEL[k]), submenu = sub }
+            for _, n in ipairs(names) do sub[#sub + 1] = nameRadio(n, k, ctx) end
+            rows[#rows + 1] = { value = "names:" .. k, label = L["One of the %s"]:format(KIND_PLURAL[k]), submenu = sub }
         end
     end
     return rows
@@ -254,7 +283,8 @@ function JF.Label(col)
         return filters.date
     end
     if col == "time" and filters.time then return TIME_LABEL[filters.time] end
-    if col == "name" and (filters.name or filters.kind) then return filters.name or KIND_LABEL[filters.kind] end
+    if col == "type" and filters.kind then return KIND_LABEL[filters.kind] end
+    if col == "name" and filters.name then return filters.name end
     if col == "change" and filters.change then return CHANGE_LABEL[filters.change] end
     if col == "zone" and filters.zone then return filters.zone end
     return nil

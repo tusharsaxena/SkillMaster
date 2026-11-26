@@ -185,7 +185,7 @@ test("broker: the Professions and Skills feeds' tooltips have their own two sect
     local rows = B.FillTooltip(tip, "professions")
     local text = joined(tip)
     for _, want in ipairs({ "Skill Master \194\183 Professions", "+1 this session", "Primary Professions",
-                            "Secondary Skills", "Skinning" }) do
+                            "Secondary Professions", "Skinning" }) do
         assertTrue(text:find(want, 1, true) ~= nil, "tooltip has " .. want .. "\n" .. text)
     end
     assertFalse(text:find("Weapon Skills", 1, true) ~= nil, "the weapons are the Skills feed's\n" .. text)
