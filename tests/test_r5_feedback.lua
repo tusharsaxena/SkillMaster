@@ -337,6 +337,47 @@ test("r5 sm-03: the LDB tooltip draws the pin mark on its pinned rows, its Pinne
     end)
 end)
 
+-- R5-REV: the Classic style is the LDB tooltip too: its pinned lines carry the mark, at a fixed spot (the name
+-- column's right end, where the mini bar starts), and only its pinned lines.
+test("r5 sm-03: the Classic LDB tooltip draws the pin mark on its pinned lines, and only those", function()
+    withSample(function()
+        withStyle("classic", function()
+            local tip = dressOwnTip()
+            local pinned = 0
+            for _, fid in ipairs(NS.FAMILY_ORDER) do
+                tip:ClearLines()
+                local rows = Br.FillTooltip(tip, fid)
+                local want = {}
+                for _, k in ipairs(NS.Pins.List(fid)) do want[k] = true end
+                local wantLines = {}
+                for _, r in ipairs(rows) do
+                    if r.key ~= nil and want[r.key] then wantLines[r.line] = true end
+                end
+                local got = {}
+                for _, t in ipairs(Br.PinMarks(tip)) do
+                    assertTrue(t:IsShown() == true, fid .. ": a drawn mark shows")
+                    got[t.skmLine] = true
+                    local p, rel, rp, x = t:GetPoint(1)
+                    assertEqual(p, "RIGHT", fid .. ": the mark's right edge")
+                    assertTrue(rel == _G[Br.TIP_NAME .. "TextLeft" .. t.skmLine] and rp == "LEFT",
+                        fid .. ": measured from its line's left edge")
+                    assertEqual(x, Br.NAME_W - NS.Rows.PIN_GAP, fid .. ": at the name column's end, never after the text")
+                end
+                for line in pairs(wantLines) do
+                    assertTrue(got[line], fid .. ": pinned line " .. line .. " carries the mark")
+                    pinned = pinned + 1
+                end
+                for line in pairs(got) do
+                    assertTrue(wantLines[line], fid .. ": line " .. line .. " is not pinned: no mark")
+                end
+            end
+            assertTrue(pinned >= 2, "the sample's pins drew their marks: " .. pinned)
+            Br.ReleaseLines()
+            assertEqual(#Br.PinMarks(tip), 0, "the marks go with the lines")
+        end)
+    end)
+end)
+
 test("r5 sm-03: pinning and unpinning a row shows and hides its mark at once", function()
     local char = NS.db.char
     local saved, savedModel = char.pins, NS.StatData.Model

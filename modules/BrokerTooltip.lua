@@ -14,7 +14,8 @@ local _, NS = ...
 --
 -- B.FillTooltip(tip, which) / B.ReleaseLines() / B.AddHit(tip, row) / B.TooltipEntries(id, skills, stats) /
 -- B.ShownBlocks() / B.Heading() / B.FooterText() / B.AddTestModeLine(tip) / B.Models() / B.Bars() /
--- B.Bands(tip) / B.Hits() / B.Chevrons() / B.HoverWash(tip) / B.ValueInset(tip) / B.BarsDrawn()
+-- B.Bands(tip) / B.PinMarks(tip) / B.Hits() / B.Chevrons() / B.HoverWash(tip) / B.ValueInset(tip) /
+-- B.BarsDrawn()
 
 local B = NS.Broker
 local L = NS.L
@@ -158,6 +159,60 @@ local function stripe(tip, n, i)
 end
 
 -- ---------------------------------------------------------------------------------------------
+-- The pin mark (R5-SM-03, the owner's round 5; the Classic style's, R5-REV): ph:push-pin on a line pinned to
+-- the feed's title, at the name column's right end (where the mini bar starts: a fixed spot, never after the
+-- text), as the window rows draw it (NS.Rows). A texture on the tooltip in its OVERLAY layer, one pool per
+-- tooltip, hidden again with the bars.
+-- ---------------------------------------------------------------------------------------------
+
+local pinMarks = {}   -- [tooltip] = { textures, used = n }
+
+--- Whether `key` is pinned to the feed showing now (NS.Pins.List: the sample's pins in test mode).
+local function pinnedKey(key)
+    if key == nil or not NS.Pins then return false end
+    for _, k in ipairs(NS.Pins.List(B.Feed())) do
+        if k == key then return true end
+    end
+    return false
+end
+
+local function pinMark(tip, n, key)
+    if not pinnedKey(key) then return nil end
+    local line, path = lineRegion(tip, n), NS.Icon("ph:push-pin")
+    if not (line and path and tip.CreateTexture) then return nil end
+    local pool = pinMarks[tip]
+    if not pool then pool = { used = 0 } pinMarks[tip] = pool end
+    pool.used = pool.used + 1
+    local t = pool[pool.used]
+    if not t then
+        t = tip:CreateTexture(nil, "OVERLAY")
+        pool[pool.used] = t
+    end
+    t:SetTexture(path)
+    t:SetSize(NS.Rows.PIN_W, NS.Rows.PIN_W)
+    t:ClearAllPoints()
+    t:SetPoint("RIGHT", line, "LEFT", B.NAME_W - NS.Rows.PIN_GAP, 0)
+    NS.Skin.Mark(t, NS.Chrome.REST)
+    t.skmLine = n
+    t:Show()
+    return t
+end
+
+local function releasePinMarks()
+    for _, pool in pairs(pinMarks) do
+        for i = 1, pool.used do pool[i]:Hide() end
+        pool.used = 0
+    end
+end
+
+--- The pin marks drawn on `tip` now (the suites read them).
+function B.PinMarks(tip)
+    local pool, out = pinMarks[tip], {}
+    for i = 1, pool and pool.used or 0 do out[i] = pool[i] end
+    return out
+end
+
+-- ---------------------------------------------------------------------------------------------
 -- Row hover areas over the tooltip's lines (the wash, never a click), and the sections' fold chevrons
 -- ---------------------------------------------------------------------------------------------
 
@@ -263,6 +318,7 @@ function B.ReleaseLines()
     if ownTip then NS.Chrome.RestoreTooltipFonts(ownTip) end
     if GameTooltip then NS.Chrome.RestoreTooltipFonts(GameTooltip) end
     releaseBands()
+    releasePinMarks()
     hideHovers()
     NS.Widgets.ReleaseBars(barPool)
     NS.Pool.ReleaseAll(hitPool)
@@ -315,6 +371,7 @@ local function addSkillRow(tip, e, i)
     sizeRow(tip, n)
     stripe(tip, n, i)
     if e.learned and (e.max or 0) > 0 and showsBar() then drawMiniBar(tip, n, values) end
+    pinMark(tip, n, e.key)
     return { line = n, kind = "skill", key = e.key }
 end
 
@@ -383,6 +440,7 @@ local function addStatRow(tip, e, i)
         values.color = NS.Rows.FillColor(e, true)
         drawMiniBar(tip, n, values)
     end
+    pinMark(tip, n, e.key)
     return { line = n, kind = "stat", key = e.key }
 end
 
@@ -414,6 +472,7 @@ local function addTreeRow(tip, r, i)
         drawMiniBar(tip, n, values)
     end
     if r.header then return { line = n, node = e.nodeKey, family = spec.family, depth = r.depth } end
+    pinMark(tip, n, e.key)
     return { line = n, kind = r.kind, key = e.key }
 end
 
