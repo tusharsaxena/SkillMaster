@@ -30,16 +30,15 @@ function SL.Blocked(list)
     return nil
 end
 
--- Open every collapsed header top down (a parent's children then list below it and are visited in turn);
--- answers the keys opened.
-local function openAll(list)
-    local opened, i = {}, 1
+-- Open every collapsed header top down (a parent's children then list below it and are visited in turn),
+-- noting each key opened in `opened` as it goes, so a raise part way still knows what to close.
+local function openAll(list, opened)
+    local i = 1
     while i <= list.count() do
         local r = list.row(i)
         if r and list.isClosed(r) and list.toggle(i, true) then opened[list.key(r)] = true end
         i = i + 1
     end
-    return opened
 end
 
 -- Close what openAll opened, bottom up so the earlier rows keep their indices.
@@ -69,12 +68,14 @@ function SL.Read(list)
     if reading[list.name] then return nil, false, "busy" end
     local why = SL.Blocked(list)
     local rows, closed
+    local opened = {}   -- outside the pcall: a raise after some header opened still closes it again
     reading[list.name] = true
     local ok, err = pcall(function()
-        local opened = why == nil and openAll(list) or {}
+        if why == nil then openAll(list, opened) end
         rows, closed = readRows(list)
         closeAgain(list, opened)
     end)
+    if not ok then pcall(closeAgain, list, opened) end
     reading[list.name] = nil
     if not ok then error(err, 0) end
     if closed then return rows, false, why or "closed" end

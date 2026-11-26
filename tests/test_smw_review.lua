@@ -241,3 +241,50 @@ test("smw-rev: a new currency met in combat keeps every currency under a collaps
         assertTrue(CD:Get(1792) ~= nil and CD:Get(515) ~= nil, "the new currency and the collapsed one both")
     end)
 end)
+
+test("smw-rev: a list read that raises after opening a header still closes what it opened, then raises", function()
+    local rows = {
+        { key = "A", isHeader = true, closed = true },
+        { key = "a1" },
+        { key = "B", isHeader = true, closed = true },
+    }
+    local shown = { rows[1], rows[3] }   -- A and B, both collapsed
+    local opens, closes, raised = 0, 0, false
+    local list = {
+        name = "smw-rev-raise",
+        count = function() return #shown end,
+        row = function(i)
+            if opens == 1 and not raised and shown[i] == rows[3] then
+                raised = true
+                error("an odd row")
+            end
+            return shown[i]
+        end,
+        isClosed = function(r) return r.isHeader == true and r.closed == true end,
+        key = function(r) return r.key end,
+        toggle = function(i, open)
+            local r = shown[i]
+            if open then
+                opens = opens + 1
+                r.closed = false
+                if r == rows[1] then table.insert(shown, i + 1, rows[2]) end
+            else
+                closes = closes + 1
+                r.closed = true
+                if r == rows[1] then table.remove(shown, i + 1) end
+            end
+            return true
+        end,
+        canToggle = function() return true end,
+    }
+    local saved = M.InCombatLockdown
+    M.InCombatLockdown = function() return false end
+    local ok, err = pcall(NS.SharedList.Read, list)
+    M.InCombatLockdown = saved
+    assertFalse(ok, "the error still reaches the caller")
+    assertTrue(tostring(err):find("an odd row", 1, true) ~= nil, tostring(err))
+    assertEqual(opens, 1, "A opened before the raise")
+    assertEqual(closes, opens, "and closed again: the panel's collapse is as it was")
+    assertTrue(rows[1].closed, "A is collapsed")
+    assertFalse(NS.SharedList.Busy(list.name), "the latch is down")
+end)
