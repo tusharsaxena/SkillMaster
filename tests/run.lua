@@ -285,6 +285,7 @@ Kit.run{
         "test_r5_join_resize",
         "test_r5_subdetach",
         "test_r5_journal",
+        "test_r5_review",
         "test_preview_trees",
         "test_polish",
         "test_preview",

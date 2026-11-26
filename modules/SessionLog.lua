@@ -31,26 +31,34 @@ end
 
 local function liveEntry(key) return NS.SkillData and NS.SkillData:Get(key) end
 
---- Trim `log` (oldest first) to `keep` skill-ups and `keep` reputation and currency changes (R5-SM-10), the
---- oldest of each sort going first, in place.
-local function trimTo(log, keep)
+--- How many skill-ups and reputation and currency changes `log` holds.
+local function sortCounts(log)
     local skills, changes = 0, 0
     for _, e in ipairs(log) do
         if e.kind then changes = changes + 1 else skills = skills + 1 end
     end
-    local dropS, dropC = math.max(skills - keep, 0), math.max(changes - keep, 0)
+    return skills, changes
+end
+
+--- Trim `log` (oldest first) to `keepS` skill-ups and `keepC` reputation and currency changes (R5-SM-10), the
+--- oldest of each sort going first, in place and allocating nothing (it runs on every reputation tick).
+local function trimTo(log, keepS, keepC)
+    local skills, changes = sortCounts(log)
+    local dropS, dropC = math.max(skills - keepS, 0), math.max(changes - keepC, 0)
     if dropS == 0 and dropC == 0 then return end
-    local out = {}
-    for _, e in ipairs(log) do
+    local n, j = #log, 0
+    for i = 1, n do
+        local e = log[i]
         if e.kind and dropC > 0 then
             dropC = dropC - 1
         elseif not e.kind and dropS > 0 then
             dropS = dropS - 1
         else
-            out[#out + 1] = e
+            j = j + 1
+            log[j] = e
         end
     end
-    for i = #log, 1, -1 do log[i] = out[i] end
+    for i = n, j + 1, -1 do log[i] = nil end
 end
 
 --- One log over `store()` (the list, or nil before the store exists), its session starting at
@@ -58,9 +66,19 @@ end
 local function newLog(store, start, entryOf)
     local SL = { CAP = CAP, WINDOW = WINDOW, Cap = cap }
     local sessionStart = start
-    -- What the log held when this session first wrote to it: a profile switch to a lower
-    -- journal.keep never trims below it (review F-015); only the setting's own write does (Trim).
-    local floor
+    -- What the log held of each sort (skill-ups, changes) when this session first wrote to it: a profile switch
+    -- to a lower journal.keep never trims a sort below it (review F-015); only the setting's own write does
+    -- (Trim). One floor per sort (R5-REV): a floor of the whole log's length let a sort grow by the other's
+    -- count at every login.
+    local floorS, floorC
+
+    -- Append `e` to `log`, then trim each sort to the larger of the keep and its floor.
+    local function append(log, e)
+        if not floorS then floorS, floorC = sortCounts(log) end
+        log[#log + 1] = e
+        local keep = cap()
+        trimTo(log, math.max(keep, floorS), math.max(keep, floorC))
+    end
 
     --- Record one skill-up. Answers the stored entry, or nil for a malformed one.
     --- @param key string the skill's key   @param old number   @param new number
@@ -70,9 +88,7 @@ local function newLog(store, start, entryOf)
         local log = store()
         if not log then return nil end
         local e = { t = tonumber(t) or time(), key = key, old = tonumber(old) or (new - 1), new = new, zone = zone }
-        floor = floor or #log
-        log[#log + 1] = e
-        trimTo(log, math.max(cap(), floor))
+        append(log, e)
         return e
     end
 
@@ -89,9 +105,7 @@ local function newLog(store, start, entryOf)
                     new = new, zone = zone }
         local fromR, toR = tonumber(oldReaction), tonumber(newReaction)
         if fromR and toR and fromR ~= toR then e.oldReaction, e.newReaction = fromR, toR end
-        floor = floor or #log
-        log[#log + 1] = e
-        trimTo(log, math.max(cap(), floor))
+        append(log, e)
         return e
     end
 
@@ -100,12 +114,13 @@ local function newLog(store, start, entryOf)
         local log = store()
         n = tonumber(n)
         if not (log and n) then return end
-        trimTo(log, n)
-        floor = math.min(floor or #log, #log)
+        trimTo(log, n, n)
+        local skills, changes = sortCounts(log)
+        floorS, floorC = math.min(floorS or skills, skills), math.min(floorC or changes, changes)
     end
 
     --- Forget the floor (a profile reload, the suites): the next write takes it again.
-    function SL:ResetFloor() floor = nil end
+    function SL:ResetFloor() floorS, floorC = nil, nil end
 
     --- Every stored entry, oldest first (the live table: read, never write).
     function SL:Entries() return store() or {} end
