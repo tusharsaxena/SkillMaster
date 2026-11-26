@@ -230,8 +230,14 @@ local function onRepChanged(_, key, old, new, name)
     SL:AddChange("reputation", key, name, old, new, time(), GetZoneText and GetZoneText() or nil)
 end
 
+-- A currency's amount moved (SMW-09): CURRENCY_CHANGED(key, old, new, name).
+local function onCurrencyChanged(_, key, old, new, name)
+    SL:AddChange("currency", key, name, old, new, time(), GetZoneText and GetZoneText() or nil)
+end
+
 SL.events = NS.NewBusTarget()
 if SL.events then
     SL.events:RegisterMessage(NS.MSG.SKILL_UP, onSkillUp)
     SL.events:RegisterMessage(NS.MSG.REP_CHANGED, onRepChanged)
+    SL.events:RegisterMessage(NS.MSG.CURRENCY_CHANGED, onCurrencyChanged)
 end

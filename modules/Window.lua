@@ -73,7 +73,7 @@ end
 
 -- The empty window's line, by its family's data provider.
 local EMPTY = { skills = L["No skills to show yet."], stats = L["No stats to show yet."],
-                reputations = L["No reputations to show yet."] }
+                reputations = L["No reputations to show yet."], currencies = L["No currencies to show yet."] }
 function Windows.EmptyText(fid)
     local fam = NS.Families[fid]
     return EMPTY[fam and fam.source] or L["Nothing to show yet."]

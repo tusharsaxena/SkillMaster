@@ -32,7 +32,7 @@ local addonName, NS = ...
 local L = NS.L
 
 NS.BLOCKS = { "primary", "secondary", "weapon", "other", "stats_base", "stats_spell", "stats_defense", "stats_utility",
-              "reputations" }
+              "currencies", "reputations" }
 
 -- `short`: the block's short name, the Journal's Alts sub-tab label and a merged window's title part
 -- (round 5, R5-6: "Primary \194\183 Secondary").
@@ -52,6 +52,7 @@ NS.BlockDefs = {
     stats_utility = def("stats_utility", L["Stats \194\183 Utility"], L["Utility"], "stats", "utility"),
     -- The tree families' one block each (SMW-08..10): its rows are its family's tree (modules/Tree.lua),
     -- folded per header rather than sorted or filtered.
+    currencies    = def("currencies", L["Currencies"], L["Currencies"], "currencies", nil),
     reputations   = def("reputations", L["Reputations"], L["Reputations"], "reputations", nil),
 }
 

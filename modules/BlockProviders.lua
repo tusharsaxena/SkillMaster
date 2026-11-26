@@ -90,6 +90,11 @@ local function treeProvider(family, kind, modelOf)
 end
 B.TreeProvider = treeProvider
 
+P.currencies = treeProvider("currencies", "currency", function()
+    local CD = NS.CurrencyData
+    return CD and CD:Model() or nil
+end)
+
 P.reputations = treeProvider("reputations", "reputation", function()
     local RD = NS.RepData
     return RD and RD:Model() or nil

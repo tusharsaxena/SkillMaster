@@ -21,7 +21,9 @@ SkillMasterDB
                                  -- stats = { [key] = { group, value, display, pct } } (FB-33;
                                  -- absent in an older snapshot: the Journal draws a dash),
                                  -- reps = { [factionID] = { name, reaction, standing, value, max,
-                                 -- exalted } } (SMW-08: the Alts tab's Reputations sub-tab) }
+                                 -- exalted } } (SMW-08: the Alts tab's Reputations sub-tab),
+                                 -- currencies = { [currencyID] = { name, quantity, maxQuantity,
+                                 -- icon } } (SMW-09: its Currencies sub-tab; never gold) }
   char.<db.keys.char>
     pinned = false               -- the skill key the broker's {pinned} shows (the row menu's Pin)
     pinnedStat = false           -- the stat key the Skill Master Stats feed shows (a stat row's Pin;
@@ -32,7 +34,8 @@ SkillMasterDB
                                  -- reputation's change (SMW-08) is { t, kind = "reputation", key (its
                                  -- factionID), name, old, new, zone }, one per faction per session,
                                  -- its new standing moved on by each later change; it counts no
-                                 -- skill point
+                                 -- skill point. A currency's (SMW-09) is the same with kind =
+                                 -- "currency", key its currencyID, old and new its amounts
     fold = {}                    -- the tree windows' folds (modules/Tree.lua, SMW-03): { [family] = {
                                  -- [nodeKey] = true folded | false open } }; an absent node takes its
                                  -- family's default (Statistics folded, the others open). Keys are
@@ -212,6 +215,7 @@ SkillMasterDB
       skillUp = true,            -- the skill-up toast (owner feedback round 4)
       skillUpScope = "all",      -- "all" | "professions" (primary and secondary) | "combat" (weapon and Other)
       skillUpSound = false,      -- the skill-up toast's own sound
+      currencyCap = false,       -- a currency reaching its cap toasts, once per currency per session (SMW-09)
       point = false,             -- toast drop point, written only by modules/Alerts.lua
     }
 ```

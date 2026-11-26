@@ -24,6 +24,10 @@ NS.RegisterSchemaRows({
       desc = L["Skip untrained weapons leaves out a weapon still at 5 points or fewer. Equipped weapons only reads the main hand, off hand and ranged weapons you wear now."] },
     { path = "alerts.sound", page = PAGE, group = ALERTS, type = "bool", default = P.sound,
       label = L["Play a sound"], desc = L["Play the toast's sound as each rank cap or weapon skill alert shows."] },
+    -- A currency at its cap (SMW-09, GitHub issue #7): off by default.
+    { path = "alerts.currencyCap", page = PAGE, group = ALERTS, type = "bool", default = P.currencyCap,
+      label = L["Currency cap alert"],
+      desc = L["A toast when a currency with a cap reaches it, once per currency per session."] },
     -- The skill-up toast (owner feedback round 4), in its own subgroup.
     { path = "alerts.skillUp", page = PAGE, group = ALERTS, subgroup = L["Skill ups"], type = "bool",
       default = P.skillUp, label = L["Skill-up alert"],

@@ -883,6 +883,18 @@ Total.
 - reputations: a simulation never toggles the client's headers (the seam guards the toggle)
 - reputations: a detached Reputations block draws the same tree, and the Journal's sub-tab draws its standings
 
+### test_currencies.lua (9)
+
+- currencies: the first read opens every collapsed header, reads, closes it again, and never reads gold
+- currencies: a capped currency is a bar, one without a cap a plain value; the tooltip says the week's cap
+- currencies: CURRENCY_DISPLAY_UPDATE with an id reads that one by id, touching no header, and logs the gain
+- currencies: a nil currencyType reads every known one again; an unknown id asks for the full read
+- currencies: in combat or with the Currency tab up the read opens nothing; the latch holds its own echo
+- currencies: an empty list is the window's empty line; the window draws icons, bars and plain values
+- currencies: the cap alert is off by default; on, it toasts once as a currency reaches its cap
+- currencies: a pin shows its amount; the Alts snapshot and the Journal's Currencies sub-tab
+- currencies: a simulation never toggles the client's headers (the seam guards the toggle)
+
 ### test_polish.lua (12)
 
 - broker: the leave poll hides GameTooltip only while the feed still owns it
@@ -1295,6 +1307,7 @@ Total.
 | test_pins.lua | 8 |
 | test_ldb_tooltip.lua | 6 |
 | test_reputations.lua | 13 |
+| test_currencies.lua | 9 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
 | test_sample_names.lua | 2 |
@@ -1325,4 +1338,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **967** |
+| **Total** | **976** |

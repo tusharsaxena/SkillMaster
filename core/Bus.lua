@@ -69,6 +69,10 @@ NS.MSG = Bus.Catalog(addonName, {
     -- modules/RepData.lua (SMW-08), a faction's standing moved between two reads. Payload: key, old
     -- standing, new standing, the faction's name.
     REP_CHANGED     = "Ka0s_SkillMaster_RepChanged",
+    -- modules/CurrencyData.lua (SMW-09). Payload: the currencies model.
+    CURRENCIES_UPDATED = "Ka0s_SkillMaster_CurrenciesUpdated",
+    -- modules/CurrencyData.lua (SMW-09), a currency's amount moved. Payload: key, old amount, new amount, name.
+    CURRENCY_CHANGED   = "Ka0s_SkillMaster_CurrencyChanged",
     -- the simulator (T5.2). Payload: the step's name.
     SIM_TICK        = "Ka0s_SkillMaster_SimTicked",
 })

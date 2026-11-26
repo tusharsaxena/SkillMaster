@@ -1208,3 +1208,30 @@ none is passed until you say so.
 - **SM-REP-7** (new, SMW-08) The Journal's Alts tab has a Reputations sub-tab: each character's standing per
   faction (log in on an alt first to record it).
   Result:
+
+## Currencies (SMW-09, GitHub issue #7, 2026-11-26)
+
+- **SM-CUR-1** (new, SMW-09) `/sm currencies`: the Currencies window lists your currencies under the Currency tab's
+  own headers, each with its icon; a currency with a cap is a bar "1,200 / 75,000", one without a cap a plain
+  amount. Gold is not in the list. A character with no currencies sees "No currencies to show yet.".
+  Result:
+- **SM-CUR-2** (new, SMW-09) Collapse a header in the character panel's Currency tab, close the panel, `/reload`:
+  the window still lists that header's currencies, and the Currency tab is still collapsed as you left it.
+  Fold a header in the window: the Currency tab does not change.
+  Result:
+- **SM-CUR-3** (new, SMW-09) Hover a capped currency: its amount, its cap, "This week 800 / 10,000" where it has a
+  weekly cap, and its description.
+  Result:
+- **SM-CUR-4** (new, SMW-09) Earn a currency (or spend one): its row moves at once; the Journal's Log shows one
+  line for it with "+N" (or "-N") for this session, and the skill-up counts do not change. Do it with the
+  Currency tab open, and again in combat: nothing in the panel moves.
+  Result:
+- **SM-CUR-5** (new, SMW-09) Right-click a currency: "Pin to the Currencies broker"; the Skill Master Currencies
+  feed reads its name and amount; its tooltip (both styles) lists the Pinned section, then the tree.
+  Result:
+- **SM-CUR-6** (new, SMW-09) Settings > Alerts > Currency cap alert is off; turn it on, and bring a capped
+  currency to its cap: one toast, in the warning color, with the currency's icon. It does not toast again this
+  session.
+  Result:
+- **SM-CUR-7** (new, SMW-09) The Journal's Alts tab has a Currencies sub-tab with each character's amounts.
+  Result:

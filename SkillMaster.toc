@@ -184,6 +184,8 @@ modules\SharedList.lua
 # SMW-08 (#6): the reputations model. Registers its row kind with NS.Tree (modules\Tree.lua) and its events on a
 # tracked bus target at FILE SCOPE (after core\Bus.lua); reads NS.Compat and NS.SharedList at CALL time.
 modules\RepData.lua
+# SMW-09 (#7): the currencies model, RepData's sibling; the same load needs.
+modules\CurrencyData.lua
 # T4.3: subscribe on tracked bus targets at FILE SCOPE (after core\Bus.lua); read NS.SkillData at call time.
 modules\SessionLog.lua
 modules\Alts.lua

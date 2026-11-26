@@ -23,6 +23,8 @@ local _, NS = ...
 --   Compat.NumFactions() / FactionDataByIndex(i) / FactionDataByID(id) / SetFactionHeaderExpanded(i, open)
 --     / CanToggleFactionHeaders() / FactionStandingLabel(reaction) / FactionBarColor(reaction)  the faction
 --     list (SMW-08, C_Reputation); Compat.PanelShown(frame)  a character panel tab shown
+--   Compat.NumCurrencies() / CurrencyListInfo(i) / CurrencyInfo(id) / SetCurrencyHeaderExpanded(i, open)
+--     / CanToggleCurrencyHeaders()  the currency list (SMW-09, C_CurrencyInfo); gold is never in it
 -- PlayerLevel to SpellName (T5.2), and PlayerName (FB-17), exist so the simulator's seam (core/SimSetup.lua, LibKa0s-Sim-1.0) can answer
 -- every client read a simulated character needs (preview-mode, H1): a module reads them as
 -- `NS.Compat.Member(...)` at call time and never captures one in a local.
@@ -529,6 +531,47 @@ function Compat.FactionBarColor(reaction)
     local c = type(colors) == "table" and colors[tonumber(reaction) or -1]
     if type(c) ~= "table" or type(c.r) ~= "number" then return nil end
     return { c.r, c.g, c.b, 1 }
+end
+
+local function currencyApi()
+    local api = C_CurrencyInfo
+    if type(api) == "table" and type(api.GetCurrencyListSize) == "function"
+        and type(api.GetCurrencyListInfo) == "function" then return api end
+    return nil
+end
+
+--- The listed currency rows' count (only expanded headers' children are listed), 0 without the API.
+function Compat.NumCurrencies()
+    local api = currencyApi()
+    return api and tonumber(guarded(api.GetCurrencyListSize)) or 0
+end
+
+--- Listed currency row `i`: one CurrencyInfo table, or nil.
+function Compat.CurrencyListInfo(i)
+    local api = currencyApi()
+    local t = api and guarded(api.GetCurrencyListInfo, i)
+    return type(t) == "table" and t or nil
+end
+
+--- One currency by its id, touching no list state: a CurrencyInfo table, or nil.
+function Compat.CurrencyInfo(id)
+    local api = C_CurrencyInfo
+    if type(api) ~= "table" or type(api.GetCurrencyInfo) ~= "function" then return nil end
+    local t = guarded(api.GetCurrencyInfo, id)
+    return type(t) == "table" and t or nil
+end
+
+--- Open (true) or close currency header row `i`. Answers whether a call ran.
+function Compat.SetCurrencyHeaderExpanded(i, open)
+    local api = currencyApi()
+    if not (api and type(api.ExpandCurrencyList) == "function") then return false end
+    return (pcall(api.ExpandCurrencyList, i, open and true or false))
+end
+
+--- Whether the client can open and close currency headers.
+function Compat.CanToggleCurrencyHeaders()
+    local api = currencyApi()
+    return api ~= nil and type(api.ExpandCurrencyList) == "function"
 end
 
 --- Whether `frame` (ReputationFrame, TokenFrame: the panel tab that shares the list's collapse) is shown.

@@ -61,7 +61,7 @@ end)
 test("windows: the Character Stats window drops the Stats prefix nowhere it matters; tree windows show their empty line", function()
     assertEqual(NS.Families.stats.title, "Skill Master \194\183 Character Stats")
     assertEqual(NS.Families.stats.short, "Character Stats")
-    local empty = { currencies = "Nothing to show yet.", reputations = "No reputations to show yet.",
+    local empty = { currencies = "No currencies to show yet.", reputations = "No reputations to show yet.",
                     statistics = "Nothing to show yet." }
     for _, fid in ipairs({ "currencies", "reputations", "statistics" }) do
         local W = Windows.Get(fid)
