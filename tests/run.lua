@@ -232,6 +232,7 @@ Kit.run{
         "test_skinsetup",
         "test_perf",
         "test_probe",
+        "test_probe_sections",
         "test_skilldata",
         "test_trainers",
         "test_trainer_probe",

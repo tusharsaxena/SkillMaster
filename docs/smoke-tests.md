@@ -12,7 +12,7 @@ the checks below that cover each item:
 
 | Design §9 item | Checks |
 |---|---|
-| The probe | SM-PROBE-1, SM-PROBE-2 |
+| The probe | SM-PROBE-1, SM-PROBE-2, SM-PROBE-3, SM-PROBE-4 |
 | Each category | SM-DISP-1, SM-TEST-1, SM-FB2-4 |
 | The lure timer | SM-DISP-2, SM-SIM-1, SM-FB2-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
@@ -781,6 +781,17 @@ In each check, the tooltip's words are what they were before this change.
 - **SM-PROBE-2** (new, AD-79-SM) With debug logging off (`/sm debug off`) and the console closed,
   `/sm probe`: chat shows exactly one line, `probe: 2 lines written to the debug console. Use Copy to
   share it.`, and the report is in the console all the same. `/sm list` still prints in chat.
+- **SM-PROBE-3** (new, SMW-01) In the character panel, collapse one Reputation header (for example
+  Other) and one Currency header, then close the panel. `/sm probe`: the JSON holds `factions`, `currencies`
+  and `statistics`. `factions.rows` lists up to 60 factions, the collapsed header's factions among them, and
+  `factions.byIDCollapsed` names that header; `currencies.rows` lists every currency; `statistics.categories`
+  lists the categories (Character, Wealth, ...) with up to 3 rows each. Open the character panel: the headers
+  you collapsed are still collapsed. Copy the report and send it to the author; it settles
+  `docs/forever-quirks.md`'s "Reputations, currencies and Statistics" rows.
+  Result:
+- **SM-PROBE-4** (new, SMW-01) With the Reputation tab shown, `/sm probe`: no Lua error, the panel's headers do
+  not move, and `factions.skipped` reads `panel shown`.
+  Result:
 
 ## Trainer data (the offline probe, GitHub issue #3)
 

@@ -47,6 +47,27 @@ P.APIS = {
     { "SetSelectedSkill",              function() return SetSelectedSkill end },
     { "SkillFrame_SetSelection",       function() return SkillFrame_SetSelection end },
     { "SkillFrame_UpdateSkills",       function() return SkillFrame_UpdateSkills end },
+    -- Six windows (SMW-01): reputations, currencies and Statistics, named from Blizzard's Forever UI
+    -- source; the 1.12 globals beside them are reported too, expected absent (modules/ProbeSections.lua).
+    { "C_Reputation.GetNumFactions",         function() return C_Reputation and C_Reputation.GetNumFactions end },
+    { "C_Reputation.GetFactionDataByIndex",  function() return C_Reputation and C_Reputation.GetFactionDataByIndex end },
+    { "C_Reputation.GetFactionDataByID",     function() return C_Reputation and C_Reputation.GetFactionDataByID end },
+    { "C_Reputation.ExpandFactionHeader",    function() return C_Reputation and C_Reputation.ExpandFactionHeader end },
+    { "C_Reputation.CollapseFactionHeader",  function() return C_Reputation and C_Reputation.CollapseFactionHeader end },
+    { "C_GossipInfo.GetFriendshipReputation", function() return C_GossipInfo and C_GossipInfo.GetFriendshipReputation end },
+    { "C_CurrencyInfo.GetCurrencyListSize",  function() return C_CurrencyInfo and C_CurrencyInfo.GetCurrencyListSize end },
+    { "C_CurrencyInfo.GetCurrencyListInfo",  function() return C_CurrencyInfo and C_CurrencyInfo.GetCurrencyListInfo end },
+    { "C_CurrencyInfo.ExpandCurrencyList",   function() return C_CurrencyInfo and C_CurrencyInfo.ExpandCurrencyList end },
+    { "C_CurrencyInfo.GetCurrencyInfo",      function() return C_CurrencyInfo and C_CurrencyInfo.GetCurrencyInfo end },
+    { "GetStatisticsCategoryList",  function() return GetStatisticsCategoryList end },
+    { "GetCategoryInfo",            function() return GetCategoryInfo end },
+    { "GetCategoryNumAchievements", function() return GetCategoryNumAchievements end },
+    { "GetAchievementInfo",         function() return GetAchievementInfo end },
+    { "GetStatistic",               function() return GetStatistic end },
+    { "GetNumFactions",             function() return GetNumFactions end },
+    { "GetFactionInfo",             function() return GetFactionInfo end },
+    { "GetCurrencyListSize",        function() return GetCurrencyListSize end },
+    { "GetCurrencyListInfo",        function() return GetCurrencyListInfo end },
 }
 
 -- A nil inside a return list cannot travel through a JSON array, so it is written as this string.
@@ -160,7 +181,8 @@ local function readEnchant(report)
 end
 
 --- Build the report. Every value comes from the client; nothing is interpreted.
---- @return table { client, build, skillLines, headers, apis, enchant, enchantTries, enchantSlotEnum }
+--- @return table { client, build, skillLines, headers, apis, enchant, enchantTries, enchantSlotEnum,
+---   factions, currencies, statistics }
 function P.Run()
     local version, build, date, interface = GetBuildInfo()
     local report = {
@@ -177,6 +199,7 @@ function P.Run()
     readSkills(report)
     for _, api in ipairs(P.APIS) do report.apis[api[1]] = type(api[2]()) == "function" end
     readEnchant(report)
+    if P.Sections then P.Sections(report) end   -- factions, currencies, statistics (modules/ProbeSections.lua)
     NS.Debug("Probe", "%d skill lines, %d headers", #report.skillLines, #report.headers)
     return report
 end

@@ -152,6 +152,20 @@ Total.
 - probe: a slot-taking C_Item.GetWeaponEnchantInfo does not error, and each try is recorded
 - compat: WeaponEnchantInfo passes a slot and normalizes Forever's table to the 1.12 shape
 
+### test_probe_sections.lua (11)
+
+- probe sections: the report carries factions, currencies and statistics
+- probe sections: the new API presence rows are reported, the absent legacy globals false
+- probe sections: factions lists every row with collapsed headers opened, then restores them
+- probe sections: at most 60 faction rows are written
+- probe sections: GetFactionDataByID is asked for a child of a collapsed header
+- probe sections: never expands while the Reputation panel is shown or in combat
+- probe sections: currencies lists the whole list, opened and restored, with a by-id read
+- probe sections: never opens the currency list while the Currency tab is shown
+- probe sections: an absent API answers its section's source as none, never raises
+- probe sections: statistics is the category tree with up to 3 raw rows each
+- probe sections: statistics records whether the Retail form GetStatistic(statID) answers, under pcall
+
 ### test_skilldata.lua (26)
 
 - skillcatalog: every vanilla profession, the 16 weapon lines, Defense, Lockpicking and Riding
@@ -1155,6 +1169,7 @@ Total.
 | test_skinsetup.lua | 5 |
 | test_perf.lua | 2 |
 | test_probe.lua | 10 |
+| test_probe_sections.lua | 11 |
 | test_skilldata.lua | 26 |
 | test_trainers.lua | 35 |
 | test_trainer_probe.lua | 18 |
@@ -1219,4 +1234,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **893** |
+| **Total** | **904** |

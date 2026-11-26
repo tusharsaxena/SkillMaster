@@ -148,6 +148,8 @@ modules\WaypointArrow.lua
 modules\MainWindow.lua
 # Conventional: `/sm probe`; reads core\ members only at FILE SCOPE (NS.Widgets, NS.Constants).
 modules\Probe.lua
+# Conventional: the probe's factions, currencies and statistics sections; reads NS.Probe at FILE SCOPE.
+modules\ProbeSections.lua
 # Conventional: builds NS.SkillNameToKey from the catalog and NS.L at FILE SCOPE (both load earlier).
 modules\SkillData.lua
 # Conventional: pure lookups over the defaults\*_Forever.lua tables, read at CALL time (T2.4).
