@@ -1339,3 +1339,8 @@ none is passed until you say so.
   LDB tooltip (both its Pinned section and its own section). The marks stand in one column whatever the names'
   lengths, a long name stops short of the mark, and the bars do not move. Unpin one: its mark goes at once.
   Result:
+- **SM-R5-4** (new, R5-SM-04) Put the six Skill Master feeds on your display bar (Titan Panel or the like): each
+  draws its own icon (Professions an anvil and hammer, Skills a sword, Character Stats the Strength icon,
+  Currencies a pile of coins, Reputations a guild tabard, Statistics a note), none a green or blank square and
+  none the Ka0s logo. The addon's own control broker (Ka0s Skill Master) and the minimap button keep the logo.
+  Result:

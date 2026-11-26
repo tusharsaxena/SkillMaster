@@ -366,3 +366,25 @@ test("r5 sm-03: pinning and unpinning a row shows and hides its mark at once", f
     M.__fireTimers()
     if not ok then error(err, 0) end
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- R5-SM-04: each display broker draws an icon that says what it shows; the control broker keeps the logo
+-- ---------------------------------------------------------------------------------------------
+
+test("r5 sm-04: the six display brokers each draw their own in-game icon; the addon's control broker keeps the logo", function()
+    local LDB = M.LibStub("LibDataBroker-1.1")
+    local seen = {}
+    for _, fid in ipairs(NS.FAMILY_ORDER) do
+        local f = Br.FEEDS[fid]
+        local obj = LDB:GetDataObjectByName(f.name)
+        assertTrue(obj ~= nil, fid .. ": its feed is registered")
+        assertTrue(obj.icon ~= NS.Constants.LOGO_ICON_PATH, fid .. ": not the Ka0s logo")
+        assertEqual(obj.icon, NS.Families[fid].feed.icon, fid .. ": its family's icon")
+        assertTrue(type(obj.icon) == "string" and obj.icon:find("^Interface\\Icons\\") ~= nil,
+            fid .. ": a client icon texture, on both clients: " .. tostring(obj.icon))
+        assertTrue(not seen[obj.icon], fid .. ": an icon of its own")
+        seen[obj.icon] = true
+    end
+    if not NS.Launcher:IsRegistered() then NS.addon:OnEnable() end   -- registered on enable (tests/test_launcher.lua)
+    assertEqual(NS.Launcher:Object().icon, NS.Constants.LOGO_ICON_PATH, "the control broker keeps the logo")
+end)
