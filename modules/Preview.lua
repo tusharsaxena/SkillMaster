@@ -142,6 +142,11 @@ local function buildAlts(c, skills, now, stats)
     return NS.Alts.View(list)
 end
 
+local function samplePins(key)
+    local fid = key and NS.Pins.FamilyOfSkill(key)
+    return fid and { [fid] = { key } } or {}
+end
+
 local function buildBroker(d)
     local total, byKey = d.log:Gains()
     local last = fixture().last
@@ -149,8 +154,9 @@ local function buildBroker(d)
     return { model = d.skills, statsModel = d.stats, statIndex = d.statIndex,
              gains = { total = total, byKey = byKey },
              last = last and { key = keyOf(last.skill), new = last.new } or nil,
-             -- {pinned} and {equippedWeapon}: the sample's, never this character's store or gear
-             pinned = fx.pinned and keyOf(fx.pinned) or nil,
+             -- {pinned} and {equippedWeapon}: the sample's, never this character's store or gear (its
+             -- one pinned skill on its own family's broker, SMW-06)
+             pins = samplePins(fx.pinned and keyOf(fx.pinned)),
              mainHand = fx.mainHand and keyOf(fx.mainHand) or nil }
 end
 

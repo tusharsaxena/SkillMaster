@@ -617,6 +617,7 @@ function Header:SetBlock(id, collapsed, docked)
     self.id, self.collapsed = id, collapsed and true or false
     paintHeaderBg(self)   -- every layout, so a skin switch reaches a pooled header
     self.title:SetText(NS.BlockDefs[id].title)
+    self.chevron:Show()   -- a label header (SetLabel) hid it; a header is a pool's own
     NS.Chrome.SetIcon(self.chevron, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")
     self.chevron.tip = collapsed and L["Expand this block"] or L["Collapse this block"]
@@ -633,6 +634,16 @@ function Header:SetBlock(id, collapsed, docked)
     self.restore:ClearAllPoints()
     self.restore:SetPoint("RIGHT", left, "LEFT", -4, 0)
     B.PaintRestore(self.restore, id)
+    self:SetNote(nil)
+end
+
+--- A header that names a section of no block (the LDB tooltip's Pinned, SMW-06): its title on the
+--- header band, no chevron and no marks.
+function Header:SetLabel(text)
+    self.id, self.collapsed = nil, false
+    paintHeaderBg(self)
+    self.title:SetText(text)
+    for _, k in ipairs({ "chevron", "detach", "sort", "filter", "restore" }) do self[k]:Hide() end
     self:SetNote(nil)
 end
 

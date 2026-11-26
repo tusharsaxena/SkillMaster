@@ -1129,3 +1129,28 @@ none is passed until you say so.
   presets and Custom box; your old feed text is now the Professions feed's. Tooltip: each feed's section
   switches under its own name.
   Result:
+
+## Pins per broker (SMW-06, GitHub issue #11, 2026-11-26)
+
+- **SM-PIN-1** (new, SMW-06) After the upgrade, a skill you had pinned is still on its feed: a profession on
+  the Skill Master (Professions) feed, a weapon skill on Skill Master Skills; a stat you had pinned on Skill
+  Master Character Stats.
+  Result:
+- **SM-PIN-2** (new, SMW-06) Right-click Cooking in the Professions window: the menu reads "Pin to the
+  Professions broker" with a tick box. Tick it, then pin Fishing the same way: the Skill Master feed shows
+  both, joined by " · ", and Cooking stays pinned. Right-click Cooking again: its tick is on; click it and only
+  Cooking goes.
+  Result:
+- **SM-PIN-3** (new, SMW-06) Pin five rows to one broker: a sixth row's "Pin to the ... broker" is grayed and
+  its tooltip says five are pinned. Another window's rows can still pin to their own broker.
+  Result:
+- **SM-PIN-4** (new, SMW-06) Hover a feed with pins, in both Tooltip styles (Tooltips > Tooltip style): a
+  "Pinned" section comes first, its rows in pin order, then the feed's own sections.
+  Result:
+- **SM-PIN-5** (new, SMW-06) Settings > Broker > Pins: each broker's pins in order, each with move up, move
+  down and unpin marks; a broker with none says "Nothing pinned.". Move one and unpin one: the feed text and
+  its tooltip follow at once. Custom feed text `{pinned2}` shows the second pin alone.
+  Result:
+- **SM-PIN-6** (new, SMW-06) `/sm test`: the Professions feed shows the sample's Fishing pin and a row's Pin is
+  grayed; end test mode: your own pins are back, unchanged.
+  Result:

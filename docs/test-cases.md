@@ -404,7 +404,7 @@ Total.
 - round2 icons: size, zoom, border and its color reach the drawn icon; off hides it
 - round2 icons: the LDB tooltip draws the window's block titles on header bands and stripes every other row
 - round2 icons: a skill's name in the LDB tooltip is white, a weapon below its cap included
-- round2 icons: Pin to the broker feed redraws the feed at once
+- round2 icons: Pin to the Professions broker redraws the feed at once
 - round2 header: the detach mark wears the marks' rest color at rest and the hot color under the pointer
 - round2 hammer: the action mark lights up while the pointer is on it, as the detach mark does
 
@@ -842,7 +842,7 @@ Total.
 - feeds: one data source per family, in the family order, the two shipped names kept
 - feeds: with nothing pinned, a {pinned} feed reads its family's short name
 - feeds: each feed's template is its own
-- feeds: the one pinned skill shows on its own family's feed (until the pins per broker, SMW-06)
+- feeds: a pinned skill shows on its own family's feed
 - feeds: the Character Stats feed's {pinned} is its pinned stat, in any template
 - feeds: a skill-up flashes its own family's feed alone
 - feeds: a tree family's tooltip says it has nothing yet, in both styles
@@ -851,6 +851,17 @@ Total.
 - feeds: the Broker page has a template pair and the section switches per feed
 - feeds: schemaVersion 15 moves the one template to the Professions feed's
 - feeds: the tooltip content is its own file, and Broker.lua stays well under the cap
+
+### test_pins.lua (8)
+
+- pins: a row's menu ticks its own family's broker, and a second pin keeps the first
+- pins: {pinned} joins the feed's pins, {pinned1}..{pinned5} render one each
+- pins: five per broker; a sixth row's pin is disabled and says why, other brokers unaffected
+- pins: the old one-pin fields fold into their families' lists when read, once
+- pins: the Classic tooltip lists the feed's pins first, under Pinned
+- pins: the Main window style tooltip lists them first too, a Pinned header over their rows
+- pins: the Broker page's Pins tab lists each broker's pins, moves and unpins them
+- pins: in test mode the feeds draw the sample's pins, and this character's store stays
 
 ### test_polish.lua (12)
 
@@ -1261,6 +1272,7 @@ Total.
 | test_template.lua | 3 |
 | test_broker.lua | 17 |
 | test_feeds.lua | 12 |
+| test_pins.lua | 8 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
 | test_sample_names.lua | 2 |
@@ -1291,4 +1303,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **945** |
+| **Total** | **953** |

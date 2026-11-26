@@ -328,7 +328,28 @@ local function layBlock(id, skills, stats, y)
     return y + layoutGap()
 end
 
---- The body's content: the shown blocks, or the one muted line that says why there are none.
+--- The feed's pins first (GitHub issue #11, SMW-06): a Pinned header, then each pin as its block's row.
+--- Answers the y under them, or `y` when the feed has none.
+local PIN_KINDS = { skill = true, stat = true }
+local function layPins(y)
+    local pins = {}
+    for _, r in ipairs(NS.Broker.PinnedEntries(NS.Broker.Feed())) do
+        if PIN_KINDS[r.kind] then pins[#pins + 1] = r end
+    end
+    if #pins == 0 then return y end
+    local host = frame.content
+    local h = NS.Blocks.AcquireHeader(headerPool, host)
+    h:ClearAllPoints()
+    h:SetPoint("TOPLEFT", host, "TOPLEFT", 0, -y)
+    h:SetPoint("TOPRIGHT", host, "TOPRIGHT", 0, -y)
+    h:SetLabel(L["Pinned"])
+    h:EnableMouse(false)
+    y = NS.Blocks.LayRows(pins, host, rowPool, y + NS.Blocks.HEADER_H, "row", 0)
+    return y + layoutGap()
+end
+
+--- The body's content: the feed's pins and its shown blocks, or the one muted line that says why there
+--- are none.
 local function layBody()
     local B = NS.Broker
     frame.empty:SetText("")
@@ -338,7 +359,7 @@ local function layBody()
     end
     local skills, stats = B.Models()
     local models = { skills = skills, stats = stats }   -- by provider source (modules/BlockProviders.lua)
-    local y = 0
+    local y = layPins(0)
     for _, id in ipairs(B.ShownBlocks()) do
         if models[NS.BlockDefs[id].source] then y = layBlock(id, skills, stats, y) end
     end

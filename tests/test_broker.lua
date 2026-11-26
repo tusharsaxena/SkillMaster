@@ -135,10 +135,9 @@ test("broker: the feed renders its template", function()
     reset()
     B.Refresh()
     assertEqual(B.Text(), "Professions", "nothing pinned (the default): the feed's plain name")
-    NS.db.char.pinned = "skinning"
-    B.Refresh()
+    NS.Pins.Toggle("professions", "skinning")
     assertEqual(B.Text(), "Skinning 122/150 · +0", "a pinned skill and the session's gains")
-    NS.db.char.pinned = false
+    NS.Pins.Remove("professions", "skinning")
     B.Refresh()
     NS.SetByPath("broker.feeds.professions.template", "{stat:crit} crit · {stat:speed}")
     assertEqual(B.Text(), "9.1% crit · 100%", "a stat token on the same feed")

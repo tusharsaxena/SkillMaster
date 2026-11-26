@@ -320,10 +320,12 @@ NS.defaults = {
     -- (savedvariables-§1). `minimap` is LibDBIcon's own table (launcher-§3), per installation.
     -- `characters` is the alt overview's store (modules/Alts.lua), keyed "<realm>-<name>".
     global = { schemaVersion = 0, minimap = { hide = false }, characters = {} },
-    -- Per character: the pinned skill the broker's {pinned} token shows (design §7), set from the
-    -- row menu (T3.3), and the session log's ring (modules/SessionLog.lua).
-    -- pinnedStat (round 6, R6-9): the stat the Skill Master Stats feed shows, from a stat row's menu.
+    -- Per character: the pins per broker (GitHub issue #11, SMW-06; modules/Pins.lua, its one writer),
+    -- { [family] = { key, ... } } in order, up to five each, set from a row's menu and the Broker page's
+    -- Pins tab: each feed's {pinned}. The one-pin fields of before (pinned, the Skill Master feed's skill;
+    -- pinnedStat, round 6's Skill Master Stats stat) are folded into it when read. And the session log's
+    -- ring (modules/SessionLog.lua).
     -- fold: the tree windows' folds, { [family] = { [nodeKey] = true folded | false open } } (modules/Tree.lua,
     -- its one writer; SMW-03); an absent node takes its family's default.
-    char = { pinned = false, pinnedStat = false, log = {}, fold = {} },
+    char = { pins = {}, log = {}, fold = {} },
 }

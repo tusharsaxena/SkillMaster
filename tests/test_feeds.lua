@@ -29,11 +29,11 @@ local function withFeeds(fn)
     M.__fireTimers()
     B.ResetSession()
     publish()
-    local char, pinned, pinnedStat = NS.db.char, NS.db.char.pinned, NS.db.char.pinnedStat
-    char.pinned, char.pinnedStat = false, false
+    local char, pins = NS.db.char, NS.db.char.pins
+    char.pins = {}
     B.Refresh()
     local ok, err = pcall(fn)
-    char.pinned, char.pinnedStat = pinned, pinnedStat
+    char.pins = pins
     for fid in pairs(B.FEEDS) do
         NS.SetByPath("broker.feeds." .. fid .. ".template", NS.defaults.profile.broker.feeds[fid].template)
     end
@@ -93,14 +93,13 @@ test("feeds: each feed's template is its own", function()
     end)
 end)
 
-test("feeds: the one pinned skill shows on its own family's feed (until the pins per broker, SMW-06)", function()
+test("feeds: a pinned skill shows on its own family's feed", function()
     withFeeds(function()
-        NS.db.char.pinned = "bows"
-        B.Refresh()
+        NS.Pins.Toggle("skills", "bows")
         assertEqual(B.TextFor("skills"), "Bows 80/110", "a weapon pin on the Skills feed")
         assertEqual(B.Text(), "Professions", "not on the Professions feed")
-        NS.db.char.pinned = "cooking"
-        B.Refresh()
+        NS.Pins.Remove("skills", "bows")
+        NS.Pins.Toggle("professions", "cooking")
         assertEqual(B.Text(), "Cooking 133/150 \194\183 +0", "a profession pin on the Professions feed")
         assertEqual(B.TextFor("skills"), "Skills")
     end)
@@ -108,8 +107,7 @@ end)
 
 test("feeds: the Character Stats feed's {pinned} is its pinned stat, in any template", function()
     withFeeds(function()
-        NS.db.char.pinnedStat = "rangedCrit"
-        B.Refresh()
+        NS.Pins.Toggle("stats", "rangedCrit")
         assertEqual(B.StatsText(), "Ranged Crit 9.1%")
         assertTrue(NS.SetByPath("broker.feeds.stats.template", "{pinned} \194\183 Lv {level}"))
         assertEqual(B.StatsText():find("Ranged Crit 9.1% \194\183 Lv ", 1, true), 1, B.StatsText())

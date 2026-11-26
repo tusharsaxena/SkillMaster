@@ -274,8 +274,8 @@ test("interact: shift-click links the row to chat; right-click opens the row men
         local pin
         for _, r in ipairs(I.MenuRows(rowFor("fishing"))) do if r.value == "pin" then pin = r end end
         pin.onClick("pin", pin)
-        assertEqual(NS.db.char.pinned, "fishing", "pinned for the broker's {pinned}")
-        NS.db.char.pinned = false
+        assertEqual(NS.Pins.Stored("professions")[1], "fishing", "pinned for the Professions broker's {pinned}")
+        NS.Pins.Remove("professions", "fishing")
         assertEqual(I.OnRowClick(rowFor("fishing"), "RightButton"), "menu")
     end)
 end)

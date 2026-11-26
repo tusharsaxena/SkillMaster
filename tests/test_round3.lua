@@ -170,8 +170,8 @@ end)
 -- ── the broker ──────────────────────────────────────────────────────────────────────────────
 
 test("round3 broker: a second Pin on the pinned skill unpins it, and the feed reads Professions", function()
-    local before = NS.db.char.pinned
-    NS.db.char.pinned = false
+    local before = NS.db.char.pins
+    NS.db.char.pins = {}
     -- End any earlier suite's skill-up flash: a fresh flash, then its timer runs out.
     B.Flash("cooking", 1)
     M.__now = M.__now + B.FlashSeconds() + 1
@@ -180,12 +180,12 @@ test("round3 broker: a second Pin on the pinned skill unpins it, and the feed re
     local pin
     for _, r in ipairs(I.MenuRows(row)) do if r.value == "pin" then pin = r end end
     pin.onClick()
-    assertEqual(NS.db.char.pinned, "cooking", "pinned")
+    assertEqual(NS.Pins.Stored("professions")[1], "cooking", "pinned")
     pin.onClick()
-    assertEqual(NS.db.char.pinned, false, "unpinned")
+    assertEqual(#NS.Pins.Stored("professions"), 0, "unpinned")
     B.Refresh()
     assertEqual(B.Text(), "Professions", "its family's feed, nothing pinned (SMW-05)")
-    NS.db.char.pinned = before
+    NS.db.char.pins = before
     B.Refresh()
 end)
 

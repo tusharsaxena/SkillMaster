@@ -12,7 +12,7 @@ local addonName, NS = ...
 --                (both through the mark's secure overlay when the micro menu is there, so the panel
 --                opens untainted); an unlearned row: the trainer popup
 --   shift-click  a profession's trade link, any other row as text, into the chat edit box
---   right-click  the row menu (LibKa0s-Widgets-1.0 ContextMenu): pin to the broker feed, hide the
+--   right-click  the row menu (LibKa0s-Widgets-1.0 ContextMenu): pin to its family's broker, hide the
 --                row, set a waypoint to the trainer, show the trainers
 -- Never secure itself; the broker's rows (T4.1) reuse Target and Open, never the overlays.
 --
@@ -211,28 +211,26 @@ function I.HideInTooltip(row)
     return NS.SetByPath("broker.tooltip." .. setKey, set)
 end
 
---- The row menu's Pin row: `field` of this character's store (char.pinned for a skill, the Skill
---- Master feed's; char.pinnedStat for a stat, the Skill Master Stats feed's, round 6, R6-9).
-local function pinRow(field, key)
+--- The row menu's Pin row (GitHub issue #11, SMW-06): a tick that pins `row` to its own family's broker
+--- (NS.Pins.FamilyOfRow: "Pin to the Professions broker"), or unpins it. Pinning never removes another
+--- pin; with NS.Pins.MAX pinned there already, an unpinned row's Pin is disabled and says why.
+local function pinRow(row)
+    local key, fid = row.entry.key, NS.Pins.FamilyOfRow(row)
+    local fam = fid and NS.Families[fid]
     -- A test-mode or simulated row is the sample character's: pinning it would write the sample's
     -- row into this character's store (preview-mode: nothing of the live state is written while
     -- either runs).
     local sample = NS.IsTestMode() or (NS.IsSimRunning ~= nil and NS.IsSimRunning())
-    -- A second click on a pinned row unpins it; nothing pinned is the default, and the feed then
-    -- reads "Professions and Skills" / "Stats" (owner feedback round 3).
-    local function pinned() return NS.db.char ~= nil and NS.db.char[field] == key end
-    return { value = "pin", label = L["Pin to the broker feed"], radio = true, disabled = sample,
-        selected = pinned,
+    local function pinned() return fid ~= nil and NS.Pins.Has(fid, key) end
+    local full = fid ~= nil and not pinned() and NS.Pins.Full(fid)
+    return { value = "pin", label = L["Pin to the %s broker"]:format(fam and fam.short or ""),
+        disabled = sample or fid == nil or full, selected = pinned,
+        tooltip = full and L["%d elements are pinned to this broker. Unpin one first."]:format(NS.Pins.MAX) or nil,
         onClick = function()
-            if sample then return end
-            local was = pinned()
-            if NS.db.char then NS.db.char[field] = not was and key or false end
-            NS.Debug("Click", "%s %s on the broker feed", was and "unpinned" or "pinned", key)
-            -- The feed's text reads the pin: redraw it now. A layout message alone never reached
-            -- the feed, which redraws on the data messages, so the pin waited for the next
-            -- skill-up to show (feedback round 2).
-            if NS.Broker and NS.Broker.Refresh then NS.Broker.Refresh() end
-            NS.Blocks.Changed()
+            if sample or not fid then return end
+            -- NS.Pins redraws the feeds' text at once: a layout message alone never reached a feed,
+            -- which redraws on the data messages (feedback round 2).
+            NS.Pins.Toggle(fid, key)
         end }
 end
 
@@ -240,9 +238,9 @@ end
 function I.MenuRows(row)
     local e = row.entry
     local rows = { { title = true, label = e.name or e.label } }
-    if row.kind == "stat" then rows[#rows + 1] = pinRow("pinnedStat", e.key) end
+    if row.kind == "stat" then rows[#rows + 1] = pinRow(row) end
     if row.kind == "skill" then
-        rows[#rows + 1] = pinRow("pinned", e.key)
+        rows[#rows + 1] = pinRow(row)
         local trainer = trainerOf(e)
         rows[#rows + 1] = { value = "waypoint", label = L["Set a waypoint to the trainer"], disabled = trainer == nil,
             onClick = function() if trainer then NS.Waypoints:Set(trainer) end end }

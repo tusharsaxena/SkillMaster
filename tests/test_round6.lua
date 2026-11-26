@@ -994,24 +994,24 @@ end)
 test("round6 stats feed: a stat row's menu pins its stat to the feed per character; with none it reads Character Stats", function()
     local crit = tipModels().statIndex.rangedCrit
     NS.bus:SendMessage(NS.MSG.STATS_UPDATED, { base = { crit }, spell = {}, defense = {}, utility = {} })
-    local saved = NS.db.char.pinnedStat
-    NS.db.char.pinnedStat = false
+    local saved = NS.db.char.pins
+    NS.db.char.pins = {}
     Br.Refresh()
     assertEqual(Br.StatsText(), "Character Stats", "nothing pinned")
     local pin
     for _, r in ipairs(NS.Interact.MenuRows({ kind = "stat", entry = crit })) do
         if r.value == "pin" then pin = r end
     end
-    assertTrue(pin ~= nil and pin.label == "Pin to the broker feed", "the stat row menu offers the pin")
+    assertTrue(pin ~= nil and pin.label == "Pin to the Character Stats broker", "the stat row menu offers the pin")
     assertFalse(pin.selected(), "not pinned yet")
     pin.onClick()
-    assertEqual(NS.db.char.pinnedStat, "rangedCrit", "stored per character")
+    assertEqual(NS.Pins.Stored("stats")[1], "rangedCrit", "stored per character")
     assertEqual(Br.StatsText(), "Ranged Crit 9.1%", "the feed shows the pinned stat at once")
     assertTrue(pin.selected(), "ticked")
-    assertTrue(NS.db.char.pinned ~= "rangedCrit", "the skills feed's pin is apart")
+    assertEqual(#NS.Pins.Stored("professions"), 0, "the skills feeds' pins are apart")
     pin.onClick()
     assertEqual(Br.StatsText(), "Character Stats", "a second click unpins")
-    NS.db.char.pinnedStat = saved
+    NS.db.char.pins = saved
     Br.Refresh()
 end)
 

@@ -190,7 +190,7 @@ test("round2 icons: a skill's name in the LDB tooltip is white, a weapon below i
     end)
 end)
 
-test("round2 icons: Pin to the broker feed redraws the feed at once", function()
+test("round2 icons: Pin to the Professions broker redraws the feed at once", function()
     local prevTpl = NS.GetSetting("broker.feeds.professions.template")
     NS.SetByPath("broker.feeds.professions.template", "{pinned}")
     local row = { kind = "skill", entry = { key = "cooking", name = "Cooking", learned = true, rank = 140, max = 150 } }
@@ -204,8 +204,8 @@ test("round2 icons: Pin to the broker feed redraws the feed at once", function()
     NS.Broker.Refresh = prev
     assertTrue(ok, tostring(err))
     assertTrue(refreshed, "the feed redraws on the pin, not at the next skill-up")
-    assertEqual(NS.db.char.pinned, "cooking")
-    NS.db.char.pinned = nil
+    assertEqual(NS.Pins.Stored("professions")[1], "cooking")
+    NS.Pins.Remove("professions", "cooking")
     NS.SetByPath("broker.feeds.professions.template", prevTpl)
 end)
 

@@ -188,6 +188,8 @@ modules\Journal.lua
 modules\Alerts.lua
 # T4.1: NS.Template, pure; read by modules\Broker.lua at CALL time.
 modules\Template.lua
+# SMW-06: the pins per broker (char.pins), reached at CALL time by Interact, Broker, Preview and the Broker page.
+modules\Pins.lua
 # T4.1 / FB-12 / SMW-05: the six broker data feeds, one per family; creates their LibDataBroker objects and its
 # bus target at FILE SCOPE (after core\Bus.lua, core\PoolSetup.lua, the # Libraries block and defaults\Families.lua,
 # read at FILE SCOPE); reads NS.StatData.GROUPS at call time.
@@ -221,6 +223,8 @@ settings\Bars.lua
 settings\Skills.lua
 # R5-13 the Rows page: reads NS.SortedSkillKeys (Skills.lua) at FILE SCOPE.
 settings\Rows.lua
+# SMW-06: the Broker page's Pins tab; read by settings\Broker.lua at FILE SCOPE.
+settings\BrokerPins.lua
 settings\Broker.lua
 settings\Tooltips.lua
 settings\Alerts.lua

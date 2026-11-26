@@ -218,21 +218,21 @@ end
 test("sim: a row's menu cannot pin while a simulation runs, and can again after it", function()
     -- red under: the pin guard reading test mode alone, so a simulated row writes db.char.pinned.
     NS.db.char = NS.db.char or {}
-    local before = NS.db.char.pinned
+    local before = #NS.Pins.Stored("skills")
     assertTrue(NS.Sim:Start({ scenario = NS.SimHost.SCENARIO }) ~= false, "the simulation starts")
     local ok, err = pcall(function()
         local pin = pinRow("bows")
         assertTrue(pin.disabled == true, "grayed out while the simulation runs")
         pin.onClick("pin", pin)
-        assertEqual(NS.db.char.pinned, before, "and a click writes nothing")
+        assertEqual(#NS.Pins.Stored("skills"), before, "and a click writes nothing")
     end)
     NS.Sim:Stop("stop")
-    if not ok then NS.db.char.pinned = before error(err, 0) end
+    if not ok then error(err, 0) end
     local pin = pinRow("bows")
     assertTrue(not pin.disabled, "live again once it stops")
     pin.onClick("pin", pin)
-    assertEqual(NS.db.char.pinned, "bows", "a live pin writes")
-    NS.db.char.pinned = before
+    assertEqual(NS.Pins.Stored("skills")[#NS.Pins.Stored("skills")], "bows", "a live pin writes")
+    NS.Pins.Remove("skills", "bows")
 end)
 
 -- ---------------------------------------------------------------------------------------------

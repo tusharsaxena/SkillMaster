@@ -52,5 +52,20 @@ L["This window's layer."] = true
 L["Pinned stat"] = true
 L["Pinned element"] = true
 
+-- The pins per broker (modules/Pins.lua, modules/Interact.lua, settings/BrokerPins.lua, SMW-06, #11).
+L["Pin to the %s broker"] = true
+L["%d elements are pinned to this broker. Unpin one first."] = true
+L["Pinned"] = true
+L["Pins"] = true
+L["Move up"] = true
+L["Move down"] = true
+L["Unpin"] = true
+L["Show this pin earlier in the feed's text and tooltip."] = true
+L["Show this pin later in the feed's text and tooltip."] = true
+L["Take this pin off the broker."] = true
+L["Each broker shows its own pins, up to %d, in this order: {pinned} joins them, {pinned1} to {pinned5} show one each, and the tooltip lists them first. Pin a row from its menu in its window (right-click). Pins are kept per character."] = true
+L["Nothing pinned."] = true
+L["Each broker's pins: their order, and unpin."] = true
+
 -- `true` only documents the key: replace each with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

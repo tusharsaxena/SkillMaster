@@ -5,6 +5,7 @@ local _, NS = ...
 --
 --   Feed            -- one subsection per feed: the template (presets + Custom)   -- Skill-up flash
 --   Tooltip         -- one subsection per feed: a switch per section (the skin row is on the Tooltips page)
+--   Pins            -- each feed's pins, reordered and removed (settings/BrokerPins.lua, SMW-06)
 --
 -- The template is a presets dropdown plus "Custom", which shows a text box taking the tokens
 -- (NS.TemplateRows, settings/OptionsSetup.lua). A preset whose text carries a word goes through L;
@@ -98,5 +99,8 @@ end
 NS.RegisterSchemaRows(NS.Live(rows, refresh))
 
 NS.RegisterSchemaPage(PAGE, L["Broker"], {
+    -- Each broker's pins (SMW-06): their order and unpin, per character (settings/BrokerPins.lua).
+    tabs = { NS.OptionsBrokerPins.tab },
+    beforeRender = NS.OptionsList.Cancel,
     defaultsTooltip = L["Restore every Broker setting on this profile to its default. Hidden tooltip rows stay hidden: the Rows page's Defaults shows them again."],
 })

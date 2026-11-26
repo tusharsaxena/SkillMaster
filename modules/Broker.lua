@@ -8,6 +8,8 @@ local addonName, NS = ...
 -- modules/Template.lua), a skill feed's flashed on a skill-up of its family; its tooltip's sections are its
 -- family's blocks, each with its own switch (broker.tooltip.sections.<block id>), and each skill and stat
 -- its own tooltip Hide (profile.broker.tooltip), apart from the windows' skills.hidden / stats.hidden.
+-- Each feed draws its own pins (GitHub issue #11, SMW-06; modules/Pins.lua): {pinned} joins them, {pinned1}..
+-- {pinned5} render one each, and its tooltip lists them first (modules/BrokerTooltip.lua, modules/BrokerPanel.lua).
 -- Every feed shares the clicks and the one tooltip machinery below (one tooltip shows at a time); B.Feed()
 -- names the one showing. The tooltip's content and the Classic style's lines are modules/BrokerTooltip.lua.
 --
@@ -27,7 +29,7 @@ local addonName, NS = ...
 -- one client read is the main-hand weapon class for {equippedWeapon}, feature-detected.
 --
 -- B.source: nil for the models the bus handed over, or fn() -> { model, statsModel, statIndex,
--- gains = { total, byKey }, last } (test mode's sample character, modules/Preview.lua, T5.2). The
+-- gains = { total, byKey }, last, pins = { [family] = { key, ... } } } (test mode's sample character, modules/Preview.lua, T5.2). The
 -- bus keeps feeding the live state underneath, so turning test mode off shows it again at once.
 
 NS.Broker = {}
@@ -198,46 +200,72 @@ function B.MainHandSkill()
     return NS.SkillHelpers.WeaponSkillInSlot(MAIN_HAND)
 end
 
-local function pinnedKey(field)
-    local char = NS.db and NS.db.char
-    local key = type(char) == "table" and char[field or "pinned"] or nil
-    return type(key) == "string" and key or nil
+--- The family a skill belongs to (NS.Pins.FamilyOfSkill): the flash's feed.
+local function familyOfSkill(key, m) return NS.Pins.FamilyOfSkill(key, m) end
+
+-- A pin's row entry, by its family's provider source: { kind, entry } from the models drawn now, or nil
+-- (a key the models do not hold yet). SMW-08..10 add the tree families' (`B.PIN_ENTRY[source]`).
+B.PIN_ENTRY = {
+    skills = function(v, key)
+        local e = v.model and v.model.byKey and v.model.byKey[key]
+        return e and { kind = "skill", entry = e } or nil
+    end,
+    stats = function(v, key)
+        local e = v.statIndex and v.statIndex[key]
+        return e and { kind = "stat", entry = e } or nil
+    end,
+}
+-- A pin's text in its feed's {pinned}, by its row kind: "Fishing 107+25/150", "Ranged Crit 9.1%".
+B.PIN_TEXT = {
+    skill = function(e) return NS.Template.FormatSkill(e) end,
+    stat = function(e) return ("%s %s"):format(e.label or e.key, e.display or "") end,
+}
+
+--- Pin `key` of feed `fid` as a row entry ({ kind, entry }) from the models drawn now, or nil.
+function B.PinEntry(fid, key)
+    local f = B.FEEDS[fid]
+    local get = f and B.PIN_ENTRY[f.source]
+    return get and get(view(), key) or nil
 end
 
---- The family a skill belongs to: its block's (its category is its block id), else nil.
-local function familyOfSkill(key, m)
-    local e = m and m.byKey and m.byKey[key]
-    local cat = (e and e.category) or (NS.SkillCatalog[key] and NS.SkillCatalog[key].category)
-    local fam = cat and NS.FamilyOf(cat)
-    return fam and fam.id or nil
+--- Feed `fid`'s pins drawn now, in order, each { kind, entry, key } (a pin its models do not hold is left
+--- out): the tooltip's Pinned section, and the texts of {pinned}.
+function B.PinnedEntries(fid)
+    local out = {}
+    for _, key in ipairs(NS.Pins.List(fid)) do
+        local r = B.PinEntry(fid, key)
+        if r then
+            r.key = key
+            out[#out + 1] = r
+        end
+    end
+    return out
 end
 
---- The skill pinned to feed `fid`: this character's char.pinned (or the sample's while a source is set)
---- when it belongs to that family, else nil. Until the pins per broker land (SMW-06), the one pinned
---- skill shows on its own family's feed.
-local function skillPin(fid, v, sourced)
-    local key = sourced and v.pinned or pinnedKey()
-    if key and familyOfSkill(key, v.model) == fid then return key end
-    return nil
+local function pinnedTexts(fid)
+    local out = {}
+    for _, r in ipairs(B.PinnedEntries(fid)) do
+        local fn = B.PIN_TEXT[r.kind]
+        local text = fn and fn(r.entry)
+        if text and text ~= "" then out[#out + 1] = text end
+    end
+    return out
 end
 
 --- The template context for feed `fid` (the Professions feed by default). While a source is set (test
---- mode) the pin and the main hand are its own, so a sample feed never reads this character's store or
---- gear. A Character Stats feed's {pinned} is its pinned stat's text (`pinnedText`).
+--- mode) the pins and the main hand are its own, so a sample feed never reads this character's store or
+--- gear. `pinnedTexts` are the feed's pins as {pinned} and {pinned1}..{pinned5} render them.
 function B.Context(fid)
     fid = fid or B.DEFAULT_FEED
     local v, sourced = view()
-    local ctx = {
+    local pins = NS.Pins.List(fid)
+    return {
         skills = v.model, stat = v.statIndex, gains = v.gains.total, last = v.last,
-        pinned = skillPin(fid, v, sourced),
+        pinned = B.FEEDS[fid] and B.FEEDS[fid].source == "skills" and pins[1] or nil,
+        pinnedTexts = pinnedTexts(fid),
         mainHand = sourced and v.mainHand or B.MainHandSkill(),
         level = NS.Preview.Character().level,
     }
-    if fid == "stats" then
-        local e = B.PinnedStat()
-        ctx.pinnedText = e and ("%s %s"):format(e.label or e.key, e.display or "") or nil
-    end
-    return ctx
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -261,11 +289,11 @@ local function flashText(name, new)
     return B.Colored("sem.good", ("%s %s %d"):format(mark, name, new))
 end
 
---- A template that shows the pinned element, with nothing pinned to the feed, reads the feed's short
+--- A template that shows the pinned elements, with nothing pinned to the feed, reads the feed's short
 --- name ("Professions", "Character Stats": owner feedback round 3, no pin is the default, and a feed then
 --- never guesses one).
 local function unpinned(fid, ctx)
-    return ctx.pinned == nil and ctx.pinnedText == nil and B.Template(fid):find("{pinned}", 1, true) ~= nil
+    return #ctx.pinnedTexts == 0 and B.Template(fid):find("{pinned}", 1, true) ~= nil
 end
 
 --- Feed `fid`'s text now.
@@ -280,13 +308,10 @@ function B.FeedText(fid)
     return out
 end
 
---- The stat pinned to the Character Stats feed (the row menu's Pin on a stat row, R6-9): this
---- character's char.pinnedStat, or the sample's while a source is set. Its stat entry, or nil.
+--- The first stat pinned to the Character Stats feed: its stat entry, or nil.
 function B.PinnedStat()
-    local v, sourced = view()
-    local key
-    if sourced then key = v.pinnedStat else key = pinnedKey("pinnedStat") end
-    return key and v.statIndex and v.statIndex[key] or nil
+    local r = B.PinnedEntries("stats")[1]
+    return r and r.entry or nil
 end
 
 --- Re-render every feed's text; an unchanged text is not re-assigned (each write is a display callback).

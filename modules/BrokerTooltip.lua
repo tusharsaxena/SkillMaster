@@ -367,7 +367,21 @@ local function fillSection(tip, rows, section, v, told)
     return true
 end
 
+--- The feed's pins first (GitHub issue #11, SMW-06): a Pinned section, each pin a line as its block draws
+--- it. Nothing when the feed has none.
+local PIN_ROW = { skill = function(tip, e, i) return addSkillRow(tip, e, i) end,
+                  stat = function(tip, e, i) return addStatRow(tip, e, i) end }
+local function addPinSection(tip, rows)
+    local pins = B.PinnedEntries(B.Feed())
+    local drawn = {}
+    for _, r in ipairs(pins) do if PIN_ROW[r.kind] then drawn[#drawn + 1] = r end end
+    if #drawn == 0 then return end
+    addTitle(tip, L["Pinned"])
+    for i, r in ipairs(drawn) do rows[#rows + 1] = PIN_ROW[r.kind](tip, r.entry, i) end
+end
+
 local function fillSections(tip, rows)
+    addPinSection(tip, rows)
     local v, told = B.View(), false
     for _, section in ipairs(B.FEEDS[B.Feed()].sections) do
         if B.SectionShown(section) then told = fillSection(tip, rows, section, v, told) end

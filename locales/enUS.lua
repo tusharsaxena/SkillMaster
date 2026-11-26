@@ -336,7 +336,6 @@ L["Collapse this block"] = true
 -- The interactions: the click map, the row menu, the row tooltip, the trainer popup, the waypoints (T3.3).
 L["Profession windows open from Skill Master out of combat."] = true
 L["The character panel opens from Skill Master out of combat."] = true
-L["Pin to the broker feed"] = true
 L["Set a waypoint to the trainer"] = true
 L["Show trainers"] = true
 L["Hide this row"] = true
