@@ -105,5 +105,8 @@ L["Collapse all headers"] = true
 -- Detached sub-categories (modules/SubBlocks.lua, R5-SM-09): a tree header's detach mark.
 L["Detach this category into its own window"] = true
 
+-- The Journal (modules/Journal.lua, R5-SM-10..12): a reputation change with the standing it reached.
+L["%s, %s"] = true
+
 -- `true` only documents the key: replace each with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 18
+NS.SCHEMA_VERSION = 19
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -246,6 +246,23 @@ local function subsNormalized(_, profile)
     NS.SubBlocks.Normalize(layout.subs)
 end
 
+--- 18 -> 19 (R5-SM-10): every reputation and currency change is a Log row of its own, and one that moved a
+--- standing keeps both (`oldReaction`, `newReaction`: new optional fields). Each character's stored log
+--- (`char.<key>.log`) keeps every row: a session's merged change row from before stays as it was (its old and
+--- new the session's whole change); a change row with no name names its key, and an old or new amount stored as
+--- text is read back as a number. Character-scoped, so it walks the store's `char` table itself.
+local function logRowsKept(sv)
+    for _, c in pairs(type(sv) == "table" and type(sv.char) == "table" and sv.char or {}) do
+        local log = type(c) == "table" and c.log
+        for _, e in ipairs(type(log) == "table" and log or {}) do
+            if type(e) == "table" then
+                e.old, e.new = tonumber(e.old) or e.old, tonumber(e.new) or e.new
+                if e.kind and e.name == nil then e.name = tostring(e.key) end
+            end
+        end
+    end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
 -- is the stamp the run started at (0 on a fresh install).
@@ -268,6 +285,7 @@ local STEPS = {
     { to = 16, run = tipOpenFromRetired, perProfile = true },
     { to = 17, run = groupWidthCleaned, perProfile = true },
     { to = 18, run = subsNormalized, perProfile = true },
+    { to = 19, run = logRowsKept },
 }
 
 function NS:InitDB()

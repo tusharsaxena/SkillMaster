@@ -385,7 +385,8 @@ end)
 -- The session log
 -- ---------------------------------------------------------------------------------------------
 
-test("smw-rev: a reputation's later change moves its one Log line to the end, so the Log stays in time order", function()
+-- R5-SM-10 (owner feedback round 5) made each change a row of its own; the Log stays in time order.
+test("smw-rev: a reputation's later change is a row after the skill-up, so the Log stays in time order", function()
     local SL = NS.SessionLog
     local savedLog, savedStart = NS.db.char.log, SL:SessionStart()
     NS.db.char.log = {}
@@ -396,11 +397,11 @@ test("smw-rev: a reputation's later change moves its one Log line to the end, so
         SL:Add("fishing", 50, 51, 1100)
         local e = SL:AddChange("reputation", "21", "Booty Bay", 6100, 6250, 1200)
         local log = SL:Entries()
-        assertEqual(#log, 2, "still one line for the faction")
-        assertEqual(log[1].key, "fishing", "the skill-up first")
-        assertEqual(log[2], e, "the faction's line last")
-        assertEqual(e.t, 1200, "at its latest change")
-        assertEqual(e.old .. ">" .. e.new, "6000>6250", "the session's whole change")
+        assertEqual(#log, 3, "a row per change (R5-SM-10)")
+        assertEqual(log[2].key, "fishing", "the skill-up between the two changes")
+        assertEqual(log[3], e, "the later change last")
+        assertEqual(e.t, 1200, "at its own time")
+        assertEqual(e.old .. ">" .. e.new, "6100>6250", "its own change")
         for i = 2, #log do assertTrue(log[i - 1].t <= log[i].t, "in time order") end
         assertEqual(SL:KindGainsFor("reputation", "21"), 250)
     end)

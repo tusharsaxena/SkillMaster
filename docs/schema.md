@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (18)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (19)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "<ruleset>-<First Surname>" (forever-quirks-§4);
@@ -33,13 +33,15 @@ SkillMasterDB
                                  -- a one-item list in the skill's family, or in stats) and go; the
                                  -- runner has no per-character step
     log = {}                     -- the log's ring (modules/SessionLog.lua): the newest journal.keep
-                                 -- (500; 50 .. 2000) { t, key, old, new, zone }, oldest first; the
-                                 -- Journal's ranges reach no further back than it holds. A
+                                 -- (500; 50 .. 2000) skill-ups { t, key, old, new, zone }, and as many
+                                 -- reputation and currency changes besides (R5-SM-10), oldest first;
+                                 -- the Journal's ranges reach no further back than it holds. A
                                  -- reputation's change (SMW-08) is { t, kind = "reputation", key (its
-                                 -- factionID), name, old, new, zone }, one per faction per session,
-                                 -- its new standing moved on by each later change; it counts no
-                                 -- skill point. A currency's (SMW-09) is the same with kind =
-                                 -- "currency", key its currencyID, old and new its amounts
+                                 -- factionID), name, old, new, zone[, oldReaction, newReaction] }, a
+                                 -- row per change (R5-SM-10; one per faction per session before,
+                                 -- kept as it was), both reactions (1..8) only when the standing
+                                 -- moved; it counts no skill point. A currency's (SMW-09) is the same
+                                 -- with kind = "currency", key its currencyID, old and new its amounts
     fold = {}                    -- the tree windows' folds (modules/Tree.lua, SMW-03): { [family] = {
                                  -- [nodeKey] = true folded | false open } }; an absent node takes its
                                  -- family's default (Statistics folded, the others open). Keys are
@@ -279,6 +281,7 @@ LibDBIcon's own.
 | 15 → 16 | `tipOpenFromRetired`, per profile | in the LDB tooltip only a section's fold chevron acts (SMW-07): a stored `tooltips.ldb.openFrom` names nothing and goes, whatever it holds |
 | 16 → 17 | `groupWidthCleaned`, per profile | a merged window resizes (R5-SM-08): its column width is stored on its group, `layout.groups[gid].width` (optional; none is its widest member's width); a stored one out of a block's 200..600 is clamped and a non-number goes |
 | 17 → 18 | `subsNormalized`, per profile | detached sub-categories (R5-SM-09), `layout.subs`, a new key defaulting to `{}`: nothing carries over; a stored `layout.subs` that is not a table goes, a stored one is normalized (an id that is no tree header's and a row that is no table go; a kept row is detached, its point a table or false, its width clamped) |
+| 18 → 19 | `logRowsKept`, every character | a Log row per reputation or currency change (R5-SM-10), with `oldReaction` and `newReaction` when a standing moved (new optional fields): every stored row of every character's `char.<key>.log` is kept, a merged session row from before as it was; a change row with no name names its key, and an amount stored as text reads back as a number |
 
 No step for the waypoint arrow's keys (round 6, R6-11): `waypoints.arrow`, `waypoints.arrowScale` and
 `waypoints.arrowFrame` are new keys and nothing stored reshapes, so the defaults answer on every

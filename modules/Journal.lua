@@ -116,10 +116,14 @@ function J.FormatETA(sec)
     return NS.RowTooltip.FormatETA(sec)
 end
 
---- A reputation's or currency's Log change: "+250", "-15".
+--- A reputation's or currency's Log change: "+250", "-15"; with the standing it reached when the standing moved
+--- (R5-SM-10): "+250, Honored".
 function J.ChangeText(e)
     local d = (tonumber(e.new) or 0) - (tonumber(e.old) or 0)
-    return (d > 0 and "+" or "") .. NS.Tree.Number(d)
+    local s = (d > 0 and "+" or "") .. NS.Tree.Number(d)
+    local reached = e.newReaction and NS.Compat.FactionStandingLabel(e.newReaction)
+    if reached and reached ~= "" then s = L["%s, %s"]:format(s, reached) end
+    return s
 end
 
 local function skillName(key)
@@ -298,8 +302,8 @@ end
 local LOG_COLS = {
     { x = 6, w = 50, j = "LEFT" },                    -- Date
     { x = 58, w = 36, j = "LEFT" },                   -- Time
-    { x = 98, r = -(70 + 150 + 14), j = "LEFT" },     -- Skill
-    { r = -(150 + 10), w = 70, j = "RIGHT" },         -- Change
+    { x = 98, r = -(110 + 150 + 14), j = "LEFT" },    -- Name (a skill, a faction or a currency)
+    { r = -(150 + 10), w = 110, j = "RIGHT" },        -- Change: 110 for "+250, Honored" (R5-SM-10)
     { r = -6, w = 150, j = "RIGHT" },                 -- Zone: 150 (owner feedback round 4)
 }
 

@@ -95,7 +95,7 @@ The stand-down shows "Off" on the feed; the stand-up re-renders.
 headers opened for the read and closed again bottom up; never in combat or while that tab shows; a latch for the
 client's echo event), then by id on `UPDATE_FACTION` / `CURRENCY_DISPLAY_UPDATE` (debounced 0.2 s), and send
 `REPS_UPDATED` / `CURRENCIES_UPDATED`; a standing or amount that moved is `REP_CHANGED` / `CURRENCY_CHANGED`, which
-the session log keeps as one Log line per faction or currency per session and the cap alert checks.
+the session log keeps as a Log row per change (R5-SM-10) and the cap alert checks.
 
 `StatisticsData` builds the category tree on first use (the Statistics window or a block of it drawn,
 `FEED_TOOLTIP_TOGGLED` for its feed, or a pinned statistic at `PLAYER_ENTERING_WORLD`). The block provider

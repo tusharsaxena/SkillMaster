@@ -310,7 +310,7 @@ when they show (SMW-10); the simulator (`modules/Simulator.lua`) sends `SIM_TICK
 | `BONUSES_UPDATED` | `Ka0s_SkillMaster_BonusesUpdated` | `modules/Bonuses.lua` (T2.2) | none | bars, tooltips, broker |
 | `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse, collapse all, move; a tree fold, `NS.Tree`; a pin, `NS.Pins`); the skin owner's look-change hook; `NS.ApplyLook` (every display row's write, `settings/OptionsSetup.lua`) | none | `modules/Blocks.lua`, which repaints the windows and the detached frames; the Journal; the trainer popup (`modules/TrainerPopup.lua`, its trainer names' color while it is shown); `modules/StatisticsData.lua` (whether to watch `CRITERIA_UPDATE`) |
 | `REPS_UPDATED` | `Ka0s_SkillMaster_RepsUpdated` | `modules/RepData.lua` (SMW-08); the simulator's stop | the reputations model | blocks, broker, alts |
-| `REP_CHANGED` | `Ka0s_SkillMaster_RepChanged` | `modules/RepData.lua`, a standing that moved between two reads | key, old, new, name | session log (the Journal's Log) |
+| `REP_CHANGED` | `Ka0s_SkillMaster_RepChanged` | `modules/RepData.lua`, a standing that moved between two reads (`RD.Changes`; none on the first read, the login baseline) | key, old, new, name, oldReaction, newReaction (R5-SM-10) | session log (the Journal's Log: a row per change) |
 | `CURRENCIES_UPDATED` | `Ka0s_SkillMaster_CurrenciesUpdated` | `modules/CurrencyData.lua` (SMW-09); the simulator's stop | the currencies model | blocks, broker, alts |
 | `CURRENCY_CHANGED` | `Ka0s_SkillMaster_CurrencyChanged` | `modules/CurrencyData.lua`, an amount that moved | key, old, new, name | session log, alerts (the cap alert) |
 | `STATISTICS_UPDATED` | `Ka0s_SkillMaster_StatisticsUpdated` | `modules/StatisticsData.lua` (SMW-10), the first use (unless a block's own pass asked) and each debounced re-read; the simulator's stop | the Statistics model | blocks, broker |
@@ -363,7 +363,7 @@ with the zone); `modules/Alts.lua` hears `SKILLS_UPDATED` (one snapshot 2 s afte
 `modules/Broker.lua` hears `SKILLS_UPDATED`, `SKILL_UP`, `STATS_UPDATED` and `BONUSES_UPDATED`
 (the feed texts and the flash), and each tree family's model message (its feed's pins);
 `modules/Blocks.lua` hears each tree family's model message too (repaint); `modules/SessionLog.lua` hears
-`REP_CHANGED` and `CURRENCY_CHANGED` (one Log line per faction or currency per session); `modules/Alts.lua` hears
+`REP_CHANGED` and `CURRENCY_CHANGED` (a Log row per change, R5-SM-10); `modules/Alts.lua` hears
 `REPS_UPDATED` and `CURRENCIES_UPDATED` (the snapshot's standings and amounts); `modules/Alerts.lua` hears
 `CURRENCY_CHANGED` (the optional cap alert); `modules/StatisticsData.lua` hears `WINDOW_TOGGLED`,
 `FEED_TOOLTIP_TOGGLED` and `LAYOUT_CHANGED` (when to watch `CRITERIA_UPDATE`).

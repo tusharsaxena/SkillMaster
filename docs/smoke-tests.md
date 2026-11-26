@@ -1383,3 +1383,9 @@ none is passed until you say so.
   rows, Consumables, Reputation and Gear but not Wealth. `/sm currencies`: detach Player vs. Player: Honor Points
   moves to its own window. Hover each feed: its tooltip still shows the whole tree and no detach mark.
   Result:
+- **SM-R5-10** (new, R5-SM-10) `/reload`, then `/sm journal`, Log tab: no reputation or currency row appears for the
+  login itself. Kill a few mobs that give reputation, and earn or spend a currency (Honor Points, a Merchant's
+  Favor): each kill's reputation is its own row (the faction's name in the Name column, "+5" or the like in
+  Change), each currency change its own row, a spend reading negative ("-20"). When a standing changes (say
+  Friendly to Honored), that row reads "+25, Honored". Skill-ups still log beside them, newest first.
+  Result:
