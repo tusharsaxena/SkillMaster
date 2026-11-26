@@ -190,13 +190,24 @@ local function listed()
     return byKey, unknown
 end
 
+-- A listed currency the model does not know wants the full read. Answers whether to read now: unless combat or the
+-- panel blocks it, when a read would build from the listed rows alone and drop every currency under a collapsed
+-- header; the refresh then keeps the model whole and marks it partial, so combat's end or the panel's OnHide
+-- reads in full.
+local function readNow()
+    local why = NS.SharedList.Blocked(CD.LIST)
+    if why == "panel shown" then retryOnPanelHide() end
+    return why ~= "combat" and why ~= "panel shown"
+end
+
 --- The read after the first, touching no list state: every known currency again (the listed row first, then
 --- GetCurrencyInfo, else its last values), or only `ids` (a set of keys) when given; `changes` (key ->
---- quantityChange) sets the gains. A currency the model does not know asks for the full read instead.
+--- quantityChange) sets the gains. A currency the model does not know asks for the full read instead (or, while
+--- one is blocked, for one later: see readNow).
 function CD:Refresh(ids, changes)
     if not model.built then return CD:Read() end
     local byKey, unknown = listed()
-    if unknown then return CD:Read() end
+    if unknown and readNow() then return CD:Read() end
     local m = emptyModel()
     for _, e in ipairs(model.order) do
         local fresh = e
@@ -207,7 +218,7 @@ function CD:Refresh(ids, changes)
         m.order[#m.order + 1] = fresh
         m.byKey[fresh.key] = fresh
     end
-    m.complete, m.built = model.complete, true
+    m.complete, m.built = model.complete and not unknown, true
     return publish(m, changes)
 end
 

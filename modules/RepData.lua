@@ -191,13 +191,23 @@ local function listed()
     return byId, unknown
 end
 
+-- A listed faction the model does not know wants the full read. Answers whether to read now: unless combat or the
+-- panel blocks it, when a read would build from the listed rows alone and drop every faction under a collapsed
+-- header; the by-id refresh then keeps the model whole and marks it partial, so combat's end or the panel's
+-- OnHide reads in full.
+local function readNow()
+    local why = NS.SharedList.Blocked(RD.LIST)
+    if why == "panel shown" then retryOnPanelHide() end
+    return why ~= "combat" and why ~= "panel shown"
+end
+
 --- The read after the first: each known faction again by id (the listed row first, then GetFactionDataByID,
 --- else its last values), in the model's order, touching no list state. A listed faction the model does not
---- know asks for a full read instead.
+--- know asks for a full read instead (or, while one is blocked, for one later: see readNow).
 function RD:Refresh()
     if not model.built then return RD:Read() end
     local byId, unknown = listed()
-    if unknown then return RD:Read() end
+    if unknown and readNow() then return RD:Read() end
     local m = emptyModel()
     for _, e in ipairs(model.order) do
         local d = byId[e.key] or (e.factionID and NS.Compat.FactionDataByID(e.factionID))
@@ -205,7 +215,7 @@ function RD:Refresh()
         m.order[#m.order + 1] = fresh
         m.byKey[fresh.key] = fresh
     end
-    m.complete, m.built = model.complete, true
+    m.complete, m.built = model.complete and not unknown, true
     return publish(m)
 end
 

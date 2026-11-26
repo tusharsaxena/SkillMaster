@@ -197,3 +197,47 @@ test("smw-rev: a Reputation or Currency tab left selected in a closed character 
         assertEqual(spy.expand, 1)
     end)
 end)
+
+test("smw-rev: a new faction met in combat keeps every faction under a collapsed header; combat's end reads in full", function()
+    withFactions(function()
+        local tree = factions()
+        local spy = installFactions(tree)
+        RD:Read()
+        assertTrue(RD:Get(59) ~= nil, "the full read has Thorium Brotherhood, under the collapsed Other")
+        M.InCombatLockdown = function() return true end
+        table.insert(tree[1].kids, { id = 930, name = "Exodar", reaction = 4, lo = 0, hi = 3000, cur = 10 })
+        spy.byID[930] = tree[1].kids[2]
+        local expands = spy.expand
+        RD:Refresh()
+        assertTrue(RD:Get(59) ~= nil, "Thorium Brotherhood is still in the model")
+        assertTrue(RD:Get(72) ~= nil, "and Stormwind")
+        assertFalse(RD:Model().complete, "the model waits for the full read")
+        assertEqual(spy.expand, expands, "no header opened in combat")
+        M.InCombatLockdown = function() return false end
+        M.__fireTimers()
+        RD.OnEvent("PLAYER_REGEN_ENABLED")
+        M.__fireTimers()
+        assertTrue(RD:Model().complete, "read in full as combat ends")
+        assertTrue(RD:Get(930) ~= nil and RD:Get(59) ~= nil, "the new faction and the collapsed one both")
+    end)
+end)
+
+test("smw-rev: a new currency met in combat keeps every currency under a collapsed header; combat's end reads in full", function()
+    withCurrencies(function()
+        local tree = currencies()
+        installCurrencies(tree)
+        CD:Read()
+        assertTrue(CD:Get(515) ~= nil, "Darkmoon Prize Ticket, under the collapsed Miscellaneous")
+        M.InCombatLockdown = function() return true end
+        table.insert(tree[1].kids, { id = 1792, name = "Marks of Honor", quantity = 3, max = 0, depth = 1 })
+        CD:Refresh()
+        assertTrue(CD:Get(515) ~= nil, "Darkmoon Prize Ticket is still in the model")
+        assertFalse(CD:Model().complete, "the model waits for the full read")
+        M.InCombatLockdown = function() return false end
+        M.__fireTimers()
+        CD.OnEvent("PLAYER_REGEN_ENABLED")
+        M.__fireTimers()
+        assertTrue(CD:Model().complete, "read in full as combat ends")
+        assertTrue(CD:Get(1792) ~= nil and CD:Get(515) ~= nil, "the new currency and the collapsed one both")
+    end)
+end)

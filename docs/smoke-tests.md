@@ -1294,3 +1294,8 @@ none is passed until you say so.
   on another tab first, and the Reputation tab is still collapsed as you left it. Do the same on the Currency tab
   for the Currencies window.
   Result:
+- **SM-REV-2** (new, SMW-REV) Collapse Other in the Reputation tab and close the panel. In combat, gain
+  reputation with a faction you have not met yet: the Reputations window keeps every faction under Other while
+  you fight, and the new faction joins the list as combat ends. Likewise earn a currency new to you in combat
+  with a Currency tab header collapsed: the Currencies window keeps that header's currencies.
+  Result:
