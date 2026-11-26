@@ -159,7 +159,14 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   header and what a Wealth statistic answers (copper or text) wait on the owner's `/sm probe`. Friendship and
   major-faction bars are drawn as standard standings until then.
 - A first reputation or currency read refused by combat or an open Reputation or Currency tab is partial; it is
-  read again when combat ends or the tab closes.
+  read again when combat ends or the tab closes. A faction or currency first met while the read is refused joins
+  the window then too; the ones already listed stay meanwhile (SMW-REV).
+- The minimap and broker launcher menu reaches two of the six windows: Show window opens Professions, and the
+  Journal has its own row. The spec ("A window factory") gives every family a launcher menu entry, but LibKa0s's
+  Launcher takes at most two host rows (`MAX_EXTRAS`, `libs/LibKa0s/Launcher.lua:179`, minor 11), and Show
+  window and the Journal hold them. The Skills, Character Stats, Currencies, Reputations and Statistics windows
+  open from their slash verbs (`/sm skills`, `stats`, `currencies`, `reputations`, `statistics`) and their key
+  bindings until LibKa0s raises the limit or lets a row open a submenu (not yet filed; the run's lead files it).
 - A Statistics value folded away, or on a surface that was not showing, when `CRITERIA_UPDATE` fired is stale
   until its category opens again on a shown surface, when it is read afresh (a closed window or a tooltip shown
   again reads its unfolded categories anew); a pinned statistic is read on every debounced pass.

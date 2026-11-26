@@ -67,7 +67,7 @@ NS.Launcher = lib:New({
     -- handler (launcher-§2); gated by default, so it grays while the addon is disabled.
     -- Show window is the Professions window (SMW-04). The other five family windows have no row yet: the
     -- library takes at most two (Launcher minor 11, MAX_EXTRAS), so they wait on a LibKa0s change; their
-    -- slash verbs and key bindings reach them meanwhile.
+    -- slash verbs and key bindings reach them meanwhile (docs/known-limitations.md).
     extraEntries = {
         { label   = NS.L["Journal"],
           checked = function() return NS.Journal.IsShown() end,
