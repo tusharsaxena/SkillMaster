@@ -330,8 +330,6 @@ L["Lv %d \194\183 %s %s"] = true
 L["\194\183 %s"] = true
 L["Expand all blocks"] = true
 L["Collapse all blocks"] = true
-L["Expand this block"] = true
-L["Collapse this block"] = true
 
 -- The interactions: the click map, the row menu, the row tooltip, the trainer popup, the waypoints (T3.3).
 L["Profession windows open from Skill Master out of combat."] = true

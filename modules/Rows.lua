@@ -380,7 +380,7 @@ local function placeTree(row, r, icon)
         fold:ClearAllPoints()
         fold:SetPoint("LEFT", row, "LEFT", x, 0)
         NS.Chrome.SetIcon(fold, r.chevron or "chevron-down", r.folded and ">" or "v")
-        fold.tip = r.folded and L["Unfold"] or L["Fold"]
+        fold.tip = nil   -- the chevron says it (R5-SM-01: no hint tooltip on a fold)
         x = x + R.FOLD_W + 2
     end
     row.iconFrame:SetShown(icon ~= nil)

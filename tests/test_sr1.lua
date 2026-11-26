@@ -102,10 +102,12 @@ local function withWindows(fn)
           marks = { main.lockButton, main.journalButton, main.settingsButton, main.toggleAllButton } },
         { name = "the journal", close = J.Frame().close, marks = { J.Frame().lockButton, J.Frame().settingsButton } },
         { name = "the trainer popup", close = TP.Frame().close, marks = { TP.Frame().settingsButton } },
-        { name = "a block header", marks = { header.chevron, header.detach, header.sort, header.filter } },
-        { name = "a detached block's band", marks = { band.dock, band.collapse, band.sort, band.filter, band.settingsButton } },
+        -- A fold chevron shows no hint tooltip (R5-SM-01, the owner's round 5: the chevron says it): `folds`.
+        { name = "a block header", marks = { header.detach, header.sort, header.filter }, folds = { header.chevron } },
+        { name = "a detached block's band", marks = { band.dock, band.sort, band.filter, band.settingsButton },
+          folds = { band.collapse } },
         { name = "a merged window's band", marks = { merged.dockAll, merged.collapseAll, merged.settingsButton } },
-        { name = "a merged section's sub-header", marks = { sub.chevron, sub.split, sub.sort, sub.filter } },
+        { name = "a merged section's sub-header", marks = { sub.split, sub.sort, sub.filter }, folds = { sub.chevron } },
     }
     local ok, err = pcall(fn, windows)
     TP.Hide()
@@ -151,6 +153,7 @@ for idx, name in ipairs(WINDOW_NAMES) do
             assertEqual(w.name, name, "the window table and the names agree")
             if w.close then assertTip(w.close, w.name .. " close") end
             for i, b in ipairs(w.marks) do assertTip(b, w.name .. " mark " .. i) end
+            for i, b in ipairs(w.folds or {}) do assertEqual(b.tip, nil, w.name .. " fold " .. i .. ": no hint tooltip") end
         end)
     end)
 end
@@ -164,6 +167,7 @@ test("sr1 title-bar colors: every mark icon.tint at rest and text.link hot, the 
                 for _, w in ipairs(windows) do
                     if w.close then assertCloseColors(w.close, key .. ": " .. w.name .. " close") end
                     for i, b in ipairs(w.marks) do assertMarkColors(b, key .. ": " .. w.name .. " mark " .. i) end
+                    for i, b in ipairs(w.folds or {}) do assertMarkColors(b, key .. ": " .. w.name .. " fold " .. i) end
                 end
             end)
         end)

@@ -931,6 +931,10 @@ Total.
 - smw-rev: the skill windows' Expand / Collapse all still collapses and expands their blocks
 - smw-rev: the Character Stats window and feed title the stat blocks without the "Stats ·" prefix
 
+### test_r5_feedback.lua (1)
+
+- r5 sm-01: no fold chevron carries a hint tooltip, in any window or in the LDB tooltip
+
 ### test_preview_trees.lua (6)
 
 - preview trees: the sample's records come in the panels' shapes, built by the live builders
@@ -1355,6 +1359,7 @@ Total.
 | test_currencies.lua | 9 |
 | test_statistics.lua | 15 |
 | test_smw_review.lua | 15 |
+| test_r5_feedback.lua | 1 |
 | test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
@@ -1386,4 +1391,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **1012** |
+| **Total** | **1013** |

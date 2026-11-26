@@ -128,7 +128,7 @@ local function foldClick(h) NS.Broker.ToggleTipFold(h.id) end
 --- A header as the tooltip's: the chevron says and flips the tooltip's own fold; the header's body and
 --- every other mark take no pointer, and are not drawn (detach and restore are window actions, and the
 --- sort and filter marks went in round 8, R8-4, the rows following the window's order and filter).
-local function stillHeader(h, folded)
+local function stillHeader(h)
     h:EnableMouse(false)
     for _, k in ipairs(MARKS) do
         if h[k] then h[k]:EnableMouse(false) end
@@ -139,7 +139,7 @@ local function stillHeader(h, folded)
     h.filter:Hide()
     h.onFold = foldClick
     h.chevron:EnableMouse(true)
-    h.chevron.tip = folded and L["Unfold this section in the tooltip"] or L["Fold this section in the tooltip"]
+    h.chevron.tip = nil   -- the chevron says it (R5-SM-01: no hint tooltip on a fold)
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -266,7 +266,7 @@ local function layBlock(id, skills, stats, y, models)
     h:SetPoint("TOPRIGHT", host, "TOPRIGHT", 0, -y)
     local collapsed = NS.Broker.TipFolded(id)
     h:SetBlock(id, collapsed, true)
-    stillHeader(h, collapsed)
+    stillHeader(h)
     y = y + NS.Blocks.HEADER_H
     if not collapsed then
         y = NS.Blocks.LayRows(entries, host, rowPool, y, "row", 0)

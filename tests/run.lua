@@ -281,6 +281,7 @@ Kit.run{
         "test_currencies",
         "test_statistics",
         "test_smw_review",
+        "test_r5_feedback",
         "test_preview_trees",
         "test_polish",
         "test_preview",

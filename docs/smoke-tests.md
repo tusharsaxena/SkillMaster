@@ -1319,3 +1319,11 @@ none is passed until you say so.
   Combat, Spell & Regen, Defense & Resists and Utility, with no "Stats ·" in front; so do the Character Stats
   feed's tooltip sections in both styles. Detach one: the detached frame reads "Stats · Base & Combat" as before.
   Result:
+
+## Owner feedback round 5 (R5-SM, 2026-11-26)
+
+- **SM-R5-1** (new, R5-SM-01) Hover a fold chevron in each window (a block header's in Professions, a category's
+  in Statistics, a header's in Reputations) and in the LDB tooltip (a section's chevron, a tree header's): no hint
+  tooltip appears ("Fold this section in the tooltip", "Unfold", "Collapse this block" are gone). The other header
+  marks (detach, sort, filter) still show theirs.
+  Result:
