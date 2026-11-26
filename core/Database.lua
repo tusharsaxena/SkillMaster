@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 16
+NS.SCHEMA_VERSION = 17
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -223,6 +223,19 @@ local function tipOpenFromRetired(_, profile)
     if type(ldb) == "table" then ldb.openFrom = nil end
 end
 
+--- 16 -> 17 (R5-SM-08, owner feedback round 5, addendum A1): a merged window resizes, its column width stored on
+--- its group (`layout.groups[gid].width`, optional: none is its widest member's width). A stored group is
+--- normalized again so a width out of a block's range is clamped and a non-number goes
+--- (modules/Groups.lua's NS.Groups.Model.Normalize, the same validator as step 6).
+local function groupWidthCleaned(_, profile)
+    local layout = type(profile) == "table" and rawget(profile, "layout")
+    local groups = type(layout) == "table" and rawget(layout, "groups")
+    if type(groups) ~= "table" then return end
+    for _, g in pairs(groups) do
+        if type(g) == "table" and g.width ~= nil then g.width = NS.Groups.Model.CleanWidth(g.width) end
+    end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
 -- is the stamp the run started at (0 on a fresh install).
@@ -243,6 +256,7 @@ local STEPS = {
     { to = 14, run = windowsSplit, perProfile = true },
     { to = 15, run = feedTemplatesSplit, perProfile = true },
     { to = 16, run = tipOpenFromRetired, perProfile = true },
+    { to = 17, run = groupWidthCleaned, perProfile = true },
 }
 
 function NS:InitDB()

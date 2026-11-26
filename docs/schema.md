@@ -12,7 +12,7 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (16)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (17)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "<ruleset>-<First Surname>" (forever-quirks-§4);
@@ -100,6 +100,8 @@ SkillMasterDB
                                  -- modules/Groups.lua: [gid] = { point = { point, relPoint, x, y }
                                  -- | false, columns = { { id, ... }, ... } }; a member is a
                                  -- detached block, in one group at most; two or more per group
+                                 -- width = n | nil: the column width its corner grip set (R5-SM-08,
+                                 -- 200..600 step 10; schemaVersion 17), else its widest member's
     }
     icons = {                    -- Bars > Icons (feedback round 2): the rows' in-game icons
       show = true, size = 16, zoom = 7,   -- zoom: the % cropped from each side of the art
@@ -268,6 +270,7 @@ LibDBIcon's own.
 | 13 → 14 | `windowsSplit`, per profile | six family windows (SMW-04): a stored `window.point` and `layout.width`, `maxHeight`, `fitHeight`, `columns`, `summary` and `strata` (rawget: stored choices only) move to `windows.professions` (one already stored there wins), and the old keys go; the other windows start from their defaults, placed next to the Professions window the first time |
 | 14 → 15 | `feedTemplatesSplit`, per profile | one broker feed per family (SMW-05): a stored `broker.template` was the Skill Master feed's, the Professions feed's now, so it moves to `broker.feeds.professions.template` (one stored there other than the default wins) and the old key goes |
 | 15 → 16 | `tipOpenFromRetired`, per profile | in the LDB tooltip only a section's fold chevron acts (SMW-07): a stored `tooltips.ldb.openFrom` names nothing and goes, whatever it holds |
+| 16 → 17 | `groupWidthCleaned`, per profile | a merged window resizes (R5-SM-08): its column width is stored on its group, `layout.groups[gid].width` (optional; none is its widest member's width); a stored one out of a block's 200..600 is clamped and a non-number goes |
 
 No step for the waypoint arrow's keys (round 6, R6-11): `waypoints.arrow`, `waypoints.arrowScale` and
 `waypoints.arrowFrame` are new keys and nothing stored reshapes, so the defaults answer on every

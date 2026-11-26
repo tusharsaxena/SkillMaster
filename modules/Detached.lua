@@ -16,6 +16,7 @@ local _, NS = ...
 -- NS.Detached.BandMarks(f, marks) -> gap: a band's settings mark (HeaderButtons) and its marks (AD-86-SM)
 -- NS.Detached.PlaceInward(anchor, marks, gap): the marks at the strip's pitch when no skin header placed them
 -- NS.Detached.Width(id) / .WidestOf(ids) / .ApplyLock(): the block's width and its grip (FB-SM-04)
+-- NS.Detached.SnapWidth(w): a width on the Blocks row's step grid inside its range (a merged window's grip too)
 
 NS.Detached = {}
 local D = NS.Detached
@@ -405,6 +406,7 @@ local function snapWidth(w)
     w = D.MIN_WIDTH + math.floor((w - D.MIN_WIDTH) / D.WIDTH_STEP + 0.5) * D.WIDTH_STEP
     return math.max(D.MIN_WIDTH, math.min(D.MAX_WIDTH, w))
 end
+D.SnapWidth = snapWidth   -- a merged window's grip snaps its column width the same way (R5-SM-08)
 
 local function makeResizable(f)
     NS.Chrome.MakeResizable(f, {
@@ -447,6 +449,7 @@ function D.ApplyLock()
         f:SetMovable(not isLocked(id))
         if f.resizeGrip then f.resizeGrip:SetShown(not isLocked(id)) end
     end
+    if NS.Groups and NS.Groups.ApplyLock then NS.Groups.ApplyLock() end
 end
 
 local function build(id)

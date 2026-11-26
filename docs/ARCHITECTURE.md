@@ -217,7 +217,9 @@ band (`noTopBar` and the frame's `bandParts` hidden for Never; for On hover a 0.
 repaint replays the recorded ones. A merged group's frame takes the same call.
 
 `profile.layout.groups` (round 5, R5-6) is named non-setting state: the merged detached windows, each
-`[gid] = { point, columns = { { id, ... }, ... } }`, membership derived from the columns. Its one owner
+`[gid] = { point, columns = { { id, ... }, ... }, width }`, membership derived from the columns; `width`
+(R5-SM-08, optional) is the column width the merged window's corner grip set, else its widest member's, so a
+block that leaves keeps its own `layout.blocks.<id>.width`. Its one owner
 is `modules/Groups.lua` (`NS.Groups`): `Merge`, `Split`, `Unmerge`, `Leave` (called from
 `NS.Blocks.StoreDocked`, so a block docked by any path leaves its group), the band drag's
 `savePoint`, and the normalization every read runs (`NS.Groups.Model.Normalize`: a member no longer

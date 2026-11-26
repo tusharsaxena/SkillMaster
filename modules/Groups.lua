@@ -3,8 +3,9 @@ local addonName, NS = ...
 -- blocks drawn as ONE window. The model, its one owner and the merged window's frame.
 --
 -- A group is profile.layout.groups[gid] = { point = { point, relPoint, x, y } | false,
--- columns = { { id, id, ... }, ... } }: ordered columns side by side, each an ordered list of block
--- ids stacked top to bottom. Membership is derived from the groups (a block is in at most one), and a
+-- columns = { { id, id, ... }, ... }, width = n | nil }: ordered columns side by side, each an ordered list of
+-- block ids stacked top to bottom; `width`, the column width the window's resize grip set (R5-SM-08), else
+-- its widest member's. Membership is derived from the groups (a block is in at most one), and a
 -- member is always a detached block (layout.blocks.<id>.docked false). A group of one is no group:
 -- it dissolves, and its last block is a plain detached window again, at its own stored point
 -- (layout.blocks.<id>.point, kept while it is grouped). Docking a block (NS.Blocks.StoreDocked)
@@ -166,6 +167,14 @@ function M.Split(groups, gid, id)
     return true
 end
 
+--- A stored column width (R5-SM-08) inside a block's range, or nil for none or a non-number.
+function M.CleanWidth(w)
+    w = tonumber(w)
+    if not w then return nil end
+    local D = NS.Detached
+    return math.max(D.MIN_WIDTH, math.min(D.MAX_WIDTH, w))
+end
+
 --- Make `groups` well formed, in place: a malformed group goes; a member `valid(id)` refuses (an
 --- unknown or docked block), or already seen in an earlier group, is dropped; an empty column goes;
 --- a group left with fewer than two blocks dissolves. Answers `groups`.
@@ -195,6 +204,7 @@ function M.Normalize(groups, valid)
             -- Rebuilt only when something went: a well-formed group keeps its tables.
             if dropped then g.columns = cols end
             if type(g.point) ~= "table" then g.point = false end
+            g.width = M.CleanWidth(g.width)
         end
     end
     return groups
@@ -231,10 +241,11 @@ end
 
 function G.Members(gid) return M.Members(G.All()[gid]) end
 
---- The column width of `key`'s window (FB-SM-04): a group's widest member's width, a block's own.
+--- The column width of `key`'s window (FB-SM-04): a group's own (its grip's, R5-SM-08), else its widest
+--- member's width; a block's own.
 function G.Width(key)
     local g = G.All()[key]
-    if g then return NS.Detached.WidestOf(M.Members(g)) end
+    if g then return M.CleanWidth(g.width) or NS.Detached.WidestOf(M.Members(g)) end
     return NS.Detached.Width(key)
 end
 
@@ -656,6 +667,59 @@ local function buildBand(f)
     end
 end
 
+-- ---------------------------------------------------------------------------------------------
+-- The resize grip (R5-SM-08, the owner's "Detached windows, when joined, are no longer resizable"): the same
+-- corner grip a detached window has (NS.Chrome.MakeResizable). It sets the window's column width only, stored
+-- on the group (layout.groups[gid].width, its own, so an unmerged block keeps its own width), on the Blocks
+-- row's step grid; its bounds are a column's range times the columns, at the content's height. The grab pins
+-- the top-left and the release saves the drop point first, as a detached window's does. Locked (the global
+-- lock or a member's own) hides it and refuses a grab.
+-- ---------------------------------------------------------------------------------------------
+
+local function storeWidth(gid, w, ncols)
+    local g = store()[gid]
+    if not g then return end
+    g.width = NS.Detached.SnapWidth((tonumber(w) or 0) / math.max(ncols or 1, 1))
+    NS.Debug("Layout", "resized %s: column width %d", gid, g.width)
+    changed()
+end
+
+local function makeResizable(f)
+    NS.Chrome.MakeResizable(f, {
+        layout = function() end,   -- the columns' rows follow the frame by their anchors
+        redraw = function()
+            f.sizing = nil
+            if NS.SecureOverlay then NS.SecureOverlay:SetMoving(f, false) end
+        end,
+        save = function(w)
+            if not f.gid then return end
+            savePoint(f)
+            storeWidth(f.gid, w, #G.Columns(f.gid))
+        end,
+        canResize = function()
+            if not f.gid or isLocked(f.gid) then return false end
+            NS.Chrome.PinTopLeft(f)
+            f.sizing = true
+            if NS.SecureOverlay then NS.SecureOverlay:SetMoving(f, true) end
+            return true
+        end,
+    })
+end
+
+-- The grip's bounds (a column's range times `ncols`, the height pinned at `h`) and its showing.
+local function applyGrip(f, gid, ncols, h)
+    local grip = f.resizeGrip
+    if not grip then return end
+    local D = NS.Detached
+    if type(f.SetResizeBounds) == "function" then
+        f:SetResizeBounds(ncols * D.MIN_WIDTH, h, ncols * D.MAX_WIDTH, h)
+    else
+        if type(f.SetMinResize) == "function" then f:SetMinResize(ncols * D.MIN_WIDTH, h) end
+        if type(f.SetMaxResize) == "function" then f:SetMaxResize(ncols * D.MAX_WIDTH, h) end
+    end
+    grip:SetShown(not isLocked(gid))
+end
+
 local function build()
     local f = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
     f:SetFrameStrata(LAYERS.STRATA.HUD)
@@ -676,6 +740,7 @@ local function build()
     buildBand(f)
     f.ownScale = 1
     f.bandParts = { f.title, f.settingsButton, f.dockAll, f.collapseAll }
+    makeResizable(f)
     return f
 end
 
@@ -732,9 +797,9 @@ function G.Render(gid)
     local t0 = Perf.on and debugprofilestop()
     local D = NS.Detached
     release(f)
-    local width = D.WidestOf(M.Members(g))   -- FB-SM-04: every column the widest member's width
+    local width = G.Width(gid)   -- every column one width: the grip's (R5-SM-08), else the widest member's
     local ncols = #g.columns
-    f:SetWidth(ncols * width)
+    if not f.sizing then f:SetWidth(ncols * width) end
     f.title:SetText(G.Title(gid))
     -- Truncated to the band: the marks' room off the right (two marks and the pad).
     f.title:SetWidth(math.max(40, ncols * width - 16 - 2 * (NS.Chrome.SIZE or 18) - 3 * D.PAD))
@@ -761,6 +826,7 @@ function G.Render(gid)
     f.band:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, 0)
     f.band:SetHeight(top)
     f:SetHeight(top + tallest + D.PAD)
+    applyGrip(f, gid, ncols, top + tallest + D.PAD)
     f:SetMovable(not isLocked(gid))
     if t0 then Perf.Note("detachedRender", debugprofilestop() - t0) end   -- a merged window is a detached one
 end
@@ -794,6 +860,14 @@ function G.Refresh(anchor)
         if fresh or anchor ~= false or not f:IsShown() then applyPoint(f, groups[gid]) end
         f:Show()
         G.Render(gid)
+    end
+end
+
+--- The lock changed (NS.Detached.ApplyLock): every merged window's drag and grip follow it at once.
+function G.ApplyLock()
+    for gid, f in pairs(frames) do
+        f:SetMovable(not isLocked(gid))
+        if f.resizeGrip then f.resizeGrip:SetShown(not isLocked(gid)) end
     end
 end
 

@@ -1362,3 +1362,13 @@ none is passed until you say so.
   hover every feed in both tooltip styles. No Lua error, and `/sm diagnostics` lists no rejected event. `/sm toggle`
   closes all six.
   Result:
+
+## Owner feedback round 5, addendum A1 (R5-SM-08..12, 2026-11-26)
+
+- **SM-R5-8** (new, R5-SM-08) Detach Primary Professions (its header's detach mark) and Reputations, then drag
+  Reputations onto the bottom edge of Primary until they join into one "Primary · Reputations" window. A resize
+  grip shows in its bottom-right corner: drag it wider and narrower; the window follows, the height stays the
+  rows', and on release it keeps the new width (`/reload`: still that width). Drag Reputations onto Primary's right
+  edge instead (two columns): the grip widens both columns together. `/sm lock`: the grip hides; `/sm unlock`: it
+  is back. Right-click the band, Unmerge all: each window has its own grip again at its own old width.
+  Result:
