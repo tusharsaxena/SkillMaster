@@ -703,6 +703,20 @@ Total.
 - blocks: Models() keys every provider's model by source, and Data() still answers skills, stats
 - blocks: Entries(id, skills, stats) and EntriesFrom(id, models) answer the same rows
 
+### test_tree.lua (11)
+
+- tree: char.fold defaults to an empty store
+- tree: Statistics categories start folded; reputation and currency headers start open
+- tree: Visible skips the children of a folded node, at every depth
+- tree: a visible row carries its depth, indent, header flag and chevron
+- tree: Toggle flips one node and answers the new state
+- tree: a fold never calls the client's Expand or Collapse
+- tree: SetAll folds or opens every header it is given
+- tree: the node keys the spec names, per family
+- tree: a header with no key is drawn open and never stored
+- tree: while test mode runs, folds go to a session store and the character's stay as they were
+- tree: an explicit store is used as given (the LDB tooltip's own folds)
+
 ### test_interact.lua (17)
 
 - test_secure_overlay_deferred_in_combat: crafting overlays are made and moved only out of combat
@@ -1208,6 +1222,7 @@ Total.
 | test_sr1.lua | 10 |
 | test_blocks.lua | 10 |
 | test_families.lua | 7 |
+| test_tree.lua | 11 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
 | test_alts.lua | 6 |
@@ -1245,4 +1260,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **911** |
+| **Total** | **922** |

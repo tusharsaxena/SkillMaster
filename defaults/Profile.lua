@@ -311,5 +311,7 @@ NS.defaults = {
     -- Per character: the pinned skill the broker's {pinned} token shows (design §7), set from the
     -- row menu (T3.3), and the session log's ring (modules/SessionLog.lua).
     -- pinnedStat (round 6, R6-9): the stat the Skill Master Stats feed shows, from a stat row's menu.
-    char = { pinned = false, pinnedStat = false, log = {} },
+    -- fold: the tree windows' folds, { [family] = { [nodeKey] = true folded | false open } } (modules/Tree.lua,
+    -- its one writer; SMW-03); an absent node takes its family's default.
+    char = { pinned = false, pinnedStat = false, log = {}, fold = {} },
 }

@@ -27,6 +27,12 @@ SkillMasterDB
     log = {}                     -- the log's ring (modules/SessionLog.lua): the newest journal.keep
                                  -- (500; 50 .. 2000) { t, key, old, new, zone }, oldest first; the
                                  -- Journal's ranges reach no further back than it holds
+    fold = {}                    -- the tree windows' folds (modules/Tree.lua, SMW-03): { [family] = {
+                                 -- [nodeKey] = true folded | false open } }; an absent node takes its
+                                 -- family's default (Statistics folded, the others open). Keys are
+                                 -- strings: a faction header's factionID, a currency header's
+                                 -- "<name>#<depth>", a Statistics categoryID. Never the client's own
+                                 -- Expand/Collapse state
   profiles.<name>
     enabled = true               -- Enable Ka0s Skill Master; /sm enable, /sm disable
     scale   = 1                  -- Master scale (0.5 .. 2)
@@ -213,7 +219,7 @@ grip's release); `global.characters`, owned by `modules/Alts.lua` (`Snapshot`, `
 `modules/Alerts.lua` (the toast's `setPosition`); `profile.layout.blocks.<id>.point`, owned by
 `modules/Detached.lua` (`savePoint` on drag stop, `StorePoint` for a section split or unmerged from a
 merged window); `profile.layout.groups`, owned by `modules/Groups.lua` (`Merge`, `Split`, `Unmerge`,
-`Leave`, the band drag's `savePoint`, the normalization on read); `char.pinned` and `char.pinnedStat`, owned by `modules/Interact.lua`
+`Leave`, the band drag's `savePoint`, the normalization on read); `char.fold`, owned by `modules/Tree.lua` (`SetFolded`, `Toggle`, `SetAll`; a session store instead while test mode or a simulation runs); `char.pinned` and `char.pinnedStat`, owned by `modules/Interact.lua`
 (the row menu's Pin on a skill and on a stat row, refused while test mode or a simulation runs); `global.minimap.minimapPos`,
 LibDBIcon's own.
 

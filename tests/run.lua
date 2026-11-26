@@ -261,6 +261,7 @@ Kit.run{
         "test_sr1",
         "test_blocks",
         "test_families",
+        "test_tree",
         "test_interact",
         "test_sessionlog",
         "test_alts",
