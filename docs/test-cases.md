@@ -913,6 +913,24 @@ Total.
 - statistics: about 1000 rows read once each at two calls a row; a re-read costs one a row
 - statistics: the statisticsRead perf bucket is noted while a capture is on, and nothing while off
 
+### test_smw_review.lua (15)
+
+- smw-rev: a currency with no cap is pinnable from its row's menu; a header is not
+- smw-rev: a Reputation or Currency tab left selected in a closed character panel does not block the full read
+- smw-rev: a new faction met in combat keeps every faction under a collapsed header; combat's end reads in full
+- smw-rev: a new currency met in combat keeps every currency under a collapsed header; combat's end reads in full
+- smw-rev: a list read that raises after opening a header still closes what it opened, then raises
+- smw-rev: the Statistics window reopened reads its unfolded categories afresh, not as it last saw them
+- smw-rev: the Statistics tooltip shown again reads what it unfolds afresh
+- smw-rev: with the window hidden and one statistic pinned, CRITERIA_UPDATE reads the pinned row alone
+- smw-rev: a reputation's later change moves its one Log line to the end, so the Log stays in time order
+- smw-rev: the feeds read the main hand and the level only for a template that shows them
+- smw-rev: a nested header's chevron in the Classic tooltip sits over its chevron, past the indent
+- smw-rev: in the Statistics window, Expand all opens every category and Collapse all folds them, the block open
+- smw-rev: in the Reputations window, Collapse all folds the headers; a collapsed block opens on Expand all
+- smw-rev: the skill windows' Expand / Collapse all still collapses and expands their blocks
+- smw-rev: the Character Stats window and feed title the stat blocks without the "Stats ·" prefix
+
 ### test_preview_trees.lua (6)
 
 - preview trees: the sample's records come in the panels' shapes, built by the live builders
@@ -1336,6 +1354,7 @@ Total.
 | test_reputations.lua | 13 |
 | test_currencies.lua | 9 |
 | test_statistics.lua | 15 |
+| test_smw_review.lua | 15 |
 | test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
@@ -1367,4 +1386,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **997** |
+| **Total** | **1012** |
