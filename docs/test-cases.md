@@ -693,6 +693,16 @@ Total.
 - mainwindow: an empty model shows the empty state, and data hides it
 - mainwindow: a skin switch restyles every bar, header and icon well, not only the values
 
+### test_families.lua (7)
+
+- families: six families in the character panel's order, each with a title, blocks and a feed
+- families: the split and the kept broker names (the spec's calls)
+- families: every block belongs to exactly one family, and its def says which
+- blocks: NS.BLOCKS and the block titles are unchanged (no visible change)
+- blocks: the engine dispatches on B.PROVIDERS by the def's source
+- blocks: Models() keys every provider's model by source, and Data() still answers skills, stats
+- blocks: Entries(id, skills, stats) and EntriesFrom(id, models) answer the same rows
+
 ### test_interact.lua (17)
 
 - test_secure_overlay_deferred_in_combat: crafting overlays are made and moved only out of combat
@@ -1197,6 +1207,7 @@ Total.
 | test_round9.lua | 14 |
 | test_sr1.lua | 10 |
 | test_blocks.lua | 10 |
+| test_families.lua | 7 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
 | test_alts.lua | 6 |
@@ -1234,4 +1245,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **904** |
+| **Total** | **911** |

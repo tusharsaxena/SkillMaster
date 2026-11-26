@@ -260,6 +260,7 @@ Kit.run{
         "test_round9",
         "test_sr1",
         "test_blocks",
+        "test_families",
         "test_interact",
         "test_sessionlog",
         "test_alts",

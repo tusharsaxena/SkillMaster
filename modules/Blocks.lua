@@ -4,7 +4,9 @@ local addonName, NS = ...
 -- each one shows, the collapsible block header, and the one row layout pass the main window and
 -- the detached frames both draw with. Detach, Dock and a collapse send LAYOUT_CHANGED.
 --
--- NS.BLOCKS = { ids in default order }; NS.BlockDefs[id] = { id, title, short, source, filter }
+-- NS.BLOCKS = { ids in default order }; NS.BlockDefs[id] = { id, title, short, source, filter, family }
+--   (`source` names the data provider, NS.Blocks.PROVIDERS[source], modules/BlockProviders.lua; `family` the
+--   owning family's id, defaults/Families.lua, SMW-02)
 -- profile.layout.blocks[id] = { docked, order, collapsed, point, scale, locked }
 -- NS.Blocks:Detach(id) / :Dock(id) / :SetCollapsed(id, v) / :ToggleCollapsed(id) / :SetAllCollapsed(v) /
 --   :Move(from, to) / :SetOrder(id, n) / .Ordered() (every block, shown or not, in its order) /
@@ -22,8 +24,10 @@ local addonName, NS = ...
 --   "learned", "equipped" (main hand, off hand, ranged), "belowCap"; other skills "all", "learned",
 --   "belowCap"; each stat section "all", "nonZero". Picked from the header's filter mark on every
 --   surface that draws the block; B.Entries answers the rows it took out second.
--- NS.Blocks.source: nil for the live models, or fn() -> skills, stats (test mode's preview, T5.2;
---   the suites' fixtures).
+-- NS.Blocks.source: nil for the live models, or fn() -> skills, stats[, models] (test mode's preview,
+--   T5.2; the suites' fixtures); `models` is a table keyed by provider source for the other providers.
+-- NS.Blocks.Models() -> { [source] = model }; .Data() -> skills, stats, models; .EntriesFrom(id, models,
+--   isHidden): the provider dispatch (SMW-02).
 
 local L = NS.L
 
@@ -32,7 +36,8 @@ NS.BLOCKS = { "primary", "secondary", "weapon", "other", "stats_base", "stats_sp
 -- `short`: the block's short name, the Journal's Alts sub-tab label and a merged window's title part
 -- (round 5, R5-6: "Primary \194\183 Secondary").
 local function def(id, title, short, source, filter)
-    return { id = id, title = title, short = short, source = source, filter = filter }
+    local fam = NS.FamilyOf and NS.FamilyOf(id)
+    return { id = id, title = title, short = short, source = source, filter = filter, family = fam and fam.id }
 end
 
 NS.BlockDefs = {
@@ -275,13 +280,25 @@ end
 -- Data: what each block shows
 -- ---------------------------------------------------------------------------------------------
 
---- The two models the blocks draw: B.source's when set, else the live ones.
+--- Every provider's model, keyed by its source (modules/BlockProviders.lua): B.source's when set, else
+--- the live ones.
+function B.Models()
+    if B.source then
+        local skills, stats, more = B.source()
+        local out = {}
+        for k, v in pairs(more or {}) do out[k] = v end
+        out.skills, out.stats = skills, stats
+        return out
+    end
+    local out = {}
+    for src, provider in pairs(B.PROVIDERS or {}) do out[src] = provider.model() end
+    return out
+end
+
+--- The two models the skill and stat blocks draw, and every provider's (B.Models) third.
 function B.Data()
-    if B.source then return B.source() end
-    local SD, ST = NS.SkillData, NS.StatData
-    local skills = SD and type(SD.Model) == "function" and SD:Model() or nil
-    local stats = ST and type(ST.Model) == "function" and (ST:Model() or ST:Scan()) or nil
-    return skills, stats
+    local models = B.Models()
+    return models.skills, models.stats, models
 end
 
 local function hidden(kind, key)
@@ -290,45 +307,29 @@ local function hidden(kind, key)
     return list and list[key] == true
 end
 
-local function skillEntries(skills, category, isHidden)
-    local out = {}
-    local showUnlearned = not (NS.db and NS.db.profile.skills.showUnlearned == false)
-    for _, key in ipairs(skills and skills.order[category] or {}) do
-        local e = skills.byKey[key]
-        if e and not isHidden("skills", key) and (e.learned ~= false or showUnlearned) then
-            out[#out + 1] = { kind = "skill", entry = e }
-        end
-    end
-    return out
+local function providerOf(id)
+    local d = NS.BlockDefs[id]
+    return d, d and B.PROVIDERS and B.PROVIDERS[d.source]
 end
 
---- The keys hidden from block `id` (skills.hidden / stats.hidden, set true): a skill whose
---- catalog category, else model category, is the block's; a stat whose group is the block's.
---- @return table keys, string "skills"|"stats"
+--- The keys hidden from block `id` (its provider's hidden set, `<hiddenSet>.hidden`, set true) whose
+--- group, by the provider's groupOf, is the block's filter: a skill's catalog category, else its model
+--- category; a stat's group.
+--- @return table keys, string the hidden set's profile key ("skills"|"stats")
 function B.HiddenKeys(id)
-    local d = NS.BlockDefs[id]
-    if not d then return {}, "skills" end
-    local kind = d.source == "skills" and "skills" or "stats"
+    local d, provider = providerOf(id)
+    if not provider then return {}, "skills" end
+    local kind = provider.hiddenSet
     local p = NS.db and NS.db.profile
     local set = p and p[kind] and p[kind].hidden or {}
-    local groupOf = {}
-    if kind == "stats" then
-        for _, sd in ipairs(NS.STAT_DEFS or {}) do groupOf[sd.key] = sd.group end
+    local model   -- read once, and only by a provider whose groups need it (a stat's need none)
+    local function modelOf()
+        if model == nil then model = provider.model() or false end
+        return model or nil
     end
-    local model = kind == "skills" and NS.SkillData and type(NS.SkillData.Model) == "function" and NS.SkillData:Model()
     local out = {}
     for key, on in pairs(set) do
-        if on == true then
-            local group
-            if kind == "stats" then
-                group = groupOf[key]
-            else
-                local cat = NS.SkillCatalog[key]
-                local e = model and model.byKey and model.byKey[key]
-                group = (cat and cat.category) or (e and e.category)
-            end
-            if group == d.filter then out[#out + 1] = key end
-        end
+        if on == true and provider.groupOf(key, modelOf) == d.filter then out[#out + 1] = key end
     end
     table.sort(out)
     return out, kind
@@ -354,14 +355,6 @@ function B.RestoreHidden(id)
     end
     NS.Debug("Click", "restored %d hidden row(s) in %s", #keys, id)
     return #keys
-end
-
-local function statEntries(stats, group, isHidden)
-    local out = {}
-    for _, e in ipairs(stats and stats[group] or {}) do
-        if not isHidden("stats", e.key) then out[#out + 1] = { kind = "stat", entry = e } end
-    end
-    return out
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -578,19 +571,22 @@ function B.FilterNote(entries, removed)
 end
 
 --- The rows block `id` shows, each { kind = "skill"|"stat", entry }, in its sort order, and how many
---- its filter took out. `isHidden(kind, key)` (kind "skills" | "stats") answers which rows are left
---- out: the window's hidden sets when nil, the LDB tooltip's own for the broker (round 6, R6-10).
-function B.Entries(id, skills, stats, isHidden)
-    local d = NS.BlockDefs[id]
-    if not d then return {}, 0 end
-    if skills == nil and stats == nil then skills, stats = B.Data() end
-    isHidden = isHidden or hidden
-    if d.source == "skills" then
-        local entries, removed = applyFilter(id, skillEntries(skills, d.filter, isHidden))
-        return B.SortEntries(id, entries), removed
-    end
-    local entries, removed = applyFilter(id, statEntries(stats, d.filter, isHidden))
+--- its filter took out, from `models` (B.Models' shape). `isHidden(kind, key)` (kind "skills" | "stats")
+--- answers which rows are left out: the window's hidden sets when nil, the LDB tooltip's own for the
+--- broker (round 6, R6-10). The block's provider (B.PROVIDERS[def.source]) makes the rows.
+function B.EntriesFrom(id, models, isHidden)
+    local d, provider = providerOf(id)
+    if not provider then return {}, 0 end
+    local rows = provider.entries((models or B.Models())[d.source], d.filter, isHidden or hidden)
+    local entries, removed = applyFilter(id, rows)
     return B.SortEntries(id, entries), removed
+end
+
+--- B.EntriesFrom with the skill and stat models passed apart (every caller before SMW-02); both nil
+--- reads B.Models().
+function B.Entries(id, skills, stats, isHidden)
+    if skills == nil and stats == nil then return B.EntriesFrom(id, nil, isHidden) end
+    return B.EntriesFrom(id, { skills = skills, stats = stats }, isHidden)
 end
 
 -- ---------------------------------------------------------------------------------------------

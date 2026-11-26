@@ -36,6 +36,8 @@ libs\LibDBIcon-1.0\lib.xml
 # Locales
 # LOAD-BEARING: creates NS.L, which core\DebugLogSetup.lua and every settings\ file read at FILE SCOPE.
 locales\enUS.lua
+# Conventional: the six windows' strings, a topic file of NS.L (after locales\enUS.lua, which creates it).
+locales\enUS_Windows.lua
 # LOAD-BEARING: each translation fills NS.L (created by locales\enUS.lua) at FILE SCOPE, after every
 # enUS file; each is gated on its own GetLocale() (localization-§1) and is a stub until filled.
 locales\deDE.lua
@@ -110,6 +112,9 @@ defaults\Stats_Forever.lua
 # Conventional: NS.Preview_Forever, test mode's sample character, read by modules\Preview.lua and
 # modules\Simulator.lua at CALL time.
 defaults\Preview_Forever.lua
+# LOAD-BEARING: NS.Families and NS.FamilyOf (SMW-02), read at FILE SCOPE by modules\Blocks.lua; reads NS.L
+# at FILE SCOPE (after locales\enUS_Windows.lua).
+defaults\Families.lua
 
 # Modules -- each reaches the others at CALL time
 # Conventional: NS.BarStyle, the bars' settings as a LibKa0s-Widgets-1.0 Bar style (AD-80-SM); reads
@@ -122,6 +127,9 @@ modules\Rows.lua
 # Conventional: NS.Blocks (T3.2); declares NS.BLOCKS and NS.BlockDefs through NS.L at FILE SCOPE and
 # subscribes on its own bus target (after core\Bus.lua).
 modules\Blocks.lua
+# Conventional: NS.Blocks.PROVIDERS, the block engine's data providers (SMW-02); reads NS.Blocks at
+# FILE SCOPE, every model at CALL time.
+modules\BlockProviders.lua
 # Conventional: NS.Detached, a detached block's frame (T3.2); reads NS.Blocks at CALL time.
 modules\Detached.lua
 # Conventional: NS.Groups, the merged detached windows (round 5, R5-6); reads NS.Blocks and
