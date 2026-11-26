@@ -99,5 +99,9 @@ L["No statistics to show yet."] = true
 L["Value"] = true
 L["Category"] = true
 
+-- The simulator's tree steps (modules/Simulator.lua, SMW-11).
+L["Reputation: %s +%d"] = true
+L["Currency: %s +%d"] = true
+
 -- `true` only documents the key: replace each with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

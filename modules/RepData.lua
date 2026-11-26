@@ -50,6 +50,15 @@ function RD:Reset()
     timer, wantFull = nil, nil
 end
 
+--- Swap the model for `m` (an empty one when nil) and answer the one held: the simulator's start (SMW-11: its
+--- world is read afresh) and stop (the live model back). Sends nothing, so no standing reads as moved.
+function RD:Adopt(m)
+    local old = model
+    if timer and NS.addon then NS.addon:CancelTimer(timer) end
+    model, timer, wantFull = m or emptyModel(), nil, nil
+    return old
+end
+
 -- ---------------------------------------------------------------------------------------------
 -- Building: the client's FactionData rows, in the panel's order, to entries
 -- ---------------------------------------------------------------------------------------------

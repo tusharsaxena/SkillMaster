@@ -1260,3 +1260,19 @@ none is passed until you say so.
 - **SM-STAT-6** (new, SMW-10) The Journal's Alts tab has no Statistics sub-tab. The window's title says
   "Skill Master · Statistics", and nothing in it says "stats".
   Result:
+
+## Test mode and the simulator: the tree families (SMW-11, 2026-11-26)
+
+- **SM-PRE-1** (new, SMW-11) `/sm test`: the Reputations window shows the sample's standings under Alliance,
+  Steamwheedle Cartel and Other (Stormwind "Honored 3,672 / 12,000"); the Currencies window Honor Points
+  "1,200 / 75,000" and Darkmoon Prize Ticket "12"; the Statistics window Character, Combat and Deaths, folded, and
+  Character opens on "Times camped 58". Folding there and turning test mode off leaves your own folds as they were.
+  Result:
+- **SM-PRE-2** (new, SMW-11) In test mode the Reputations, Currencies and Statistics feeds read the sample's pins
+  ("Stormwind Honored 3,672 / 12,000", "Honor Points 1,200 / 75,000", "Times camped 58"); your own pins come back
+  when test mode ends. The Journal's Alts tab shows the sample's standings and currencies.
+  Result:
+- **SM-PRE-3** (new, SMW-11) `/sm sim`, run the fishing trip to its end: its last two steps raise Stormwind by 250
+  and Honor Points by 150, the windows and feeds follow, and the Journal's Log gains a line for each. Stop: your
+  own reputations, currencies and Statistics are back, and the saved Log has no simulated line.
+  Result:

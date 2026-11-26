@@ -50,6 +50,15 @@ function CD:Reset()
     timer, wantFull, wantAll, wantIds = nil, nil, nil, {}
 end
 
+--- Swap the model for `m` (an empty one when nil) and answer the one held: the simulator's start and stop
+--- (SMW-11), as RepData's. Sends nothing.
+function CD:Adopt(m)
+    local old = model
+    if timer and NS.addon then NS.addon:CancelTimer(timer) end
+    model, timer, wantFull, wantAll, wantIds = m or emptyModel(), nil, nil, nil, {}
+    return old
+end
+
 -- ---------------------------------------------------------------------------------------------
 -- Building: the client's CurrencyInfo rows, in the panel's order, to entries
 -- ---------------------------------------------------------------------------------------------

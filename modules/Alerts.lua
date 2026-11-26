@@ -58,12 +58,15 @@ local function copy(t)
 end
 
 --- What this session has alerted, as a copy (the simulator takes it at start).
-function A.State() return { cap = copy(shownCap), gap = copy(shownGap), max = copy(lastMax) } end
+function A.State()
+    return { cap = copy(shownCap), gap = copy(shownGap), max = copy(lastMax), currency = copy(shownCurrency) }
+end
 
 --- Put a State() back (the simulator's stop): a simulated alert never silences a real one.
 function A.RestoreState(s)
     if type(s) ~= "table" then return end
     shownCap, shownGap, lastMax = copy(s.cap or {}), copy(s.gap or {}), copy(s.max or {})
+    shownCurrency = copy(s.currency or {})   -- a simulated currency at its cap never silences a real one (SMW-11)
 end
 
 local function setting(key) return NS.GetSetting and NS.GetSetting("alerts." .. key) end

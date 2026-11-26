@@ -8,8 +8,8 @@ local _, NS = ...
 -- model = { order = { entries, the tab's order }, byKey = { [key] = entry }, complete, built }
 -- entry = a category { key "c:<categoryID>", categoryID, name, family, depth, header = true, nodeKey (its
 --   categoryID as a string), hasBar = false } or a row { key "<categoryID>:<statID>", categoryID, statID, index,
---   name, family, depth, header = false, quantity (the client's, raw), text (as Blizzard shows it: the number,
---   or "--"; a string quantity verbatim) }. A category's rows come first, then its sub-categories, as the tab
+--   name, category (its category's name), family, depth, header = false, quantity (the client's, raw), text (as
+--   Blizzard shows it: the number, or "--"; a string quantity verbatim) }. A category's rows come first, then its sub-categories, as the tab
 --   lays them.
 --
 -- LAZY, FOLD-DRIVEN READS. The category tree is built once, on first use (one GetCategoryInfo per category):
@@ -25,8 +25,13 @@ local _, NS = ...
 -- category read earlier but folded now is marked stale and read again when it next unfolds. Statistics share
 -- no state with the panel: nothing here expands or collapses anything of the client's.
 --
+-- Test mode draws a sample built by SD.Build from defaults/Preview_Forever.lua (modules/Preview.lua) and reads
+-- nothing live; a simulation reads through the seam (core/SimSetup.lua) from its own world, on state of its own
+-- (SD:Adopt), and the stop puts the live state back.
+--
 -- NS.StatisticsData:Model() / :Get(key) / :Use([silent]) / :Open([store]) / :Refresh() / :Watch() /
---   :IsWatching() / :Reset() / .BuildTree(list) (pure) / .Display(quantity) / .ValueText(e) / .Live(m)
+--   :IsWatching() / :Reset() / :Adopt(state) / .BuildTree(list) (pure) / .Build(list) (pure) / .Display(quantity)
+--   / .ValueText(e) / .Live(m)
 
 NS.StatisticsData = {}
 local SD = NS.StatisticsData
@@ -49,11 +54,11 @@ local watching, timer, tipUp = false, nil, false
 function SD:Model() return (model.built and #model.order > 0) and model or nil end
 function SD:Get(key) return model.byKey[tostring(key)] end
 
---- Whether `m` is the live model or no model at all, outside test mode and a simulation: a block provider then
---- reads through SD:Open. A sample (test mode's, the simulator's) is drawn as it is.
+--- Whether `m` is the live model, or no model at all outside test mode: a block provider then reads through
+--- SD:Open (a simulation's reads go through the seam to its world). A sample (test mode's) is drawn as it is.
 function SD.Live(m)
     if m ~= nil then return m == model end
-    return not (NS.IsTestMode() or (NS.IsSimRunning ~= nil and NS.IsSimRunning()))
+    return not NS.IsTestMode()
 end
 
 function SD:IsWatching() return watching end
@@ -127,10 +132,10 @@ local function nameOf(statID)
     return n or tostring(statID)
 end
 
-local function rowEntry(c, index, quantity, statID)
+local function rowEntry(c, index, quantity, statID, name)
     return { key = c.id .. ":" .. tostring(statID), categoryID = c.id, statID = statID, index = index,
-             name = nameOf(statID), family = SD.FAMILY, depth = c.depth + 1, header = false,
-             quantity = quantity, text = SD.Display(quantity) }
+             name = name or nameOf(statID), category = c.name, family = SD.FAMILY, depth = c.depth + 1,
+             header = false, quantity = quantity, text = SD.Display(quantity) }
 end
 
 -- Category `c`'s rows, read now: a row with `skip` or no statID is left out, as the tab leaves it out.
@@ -158,6 +163,40 @@ local function rebuild()
         for _, e in ipairs(rows[c.id] or {}) do order[#order + 1], byKey[e.key] = e, e end
     end
     model.order, model.byKey = order, byKey
+end
+
+--- A whole model from `list` ({ { id, name, parent, rows = { { statID, name, quantity, skip } } } }, the tab's
+--- order), every row in (pure: test mode's sample is built so, through the same entries as the live read).
+function SD.Build(list)
+    local tree = SD.BuildTree(list)
+    local byId = {}
+    for _, c in ipairs(list or {}) do if c.id ~= nil then byId[c.id] = c end end
+    local m = emptyModel()
+    for _, c in ipairs(tree) do
+        local h = headerEntry(c)
+        m.order[#m.order + 1], m.byKey[h.key] = h, h
+        for i, r in ipairs(byId[c.id] and byId[c.id].rows or {}) do
+            if r.statID ~= nil and not r.skip then
+                local e = rowEntry(c, i, r.quantity, r.statID, r.name)
+                m.order[#m.order + 1], m.byKey[e.key] = e, e
+            end
+        end
+    end
+    m.built = true
+    return m
+end
+
+--- Swap this module's whole state (the model, the tree, the rows read, the names) for `state` (a fresh one when
+--- nil) and answer the one it held: the simulator's start and stop. Sends nothing; watching is unchanged.
+function SD:Adopt(state)
+    local old = { model = model, cats = cats, catById = catById, rows = rows, readAt = readAt, stale = stale,
+                  names = names }
+    if timer and NS.addon then NS.addon:CancelTimer(timer) end
+    timer = nil
+    state = state or {}
+    model, cats, catById = state.model or emptyModel(), state.cats or {}, state.catById or {}
+    rows, readAt, stale, names = state.rows or {}, state.readAt or {}, state.stale or {}, state.names or {}
+    return old
 end
 
 local function publish()
@@ -369,8 +408,7 @@ local function lines(e)
     local out = { { left = e.name, tone = "heading" } }
     if e.header then return out end
     out[#out + 1] = { left = L["Value"], right = SD.ValueText(e), tone = "muted", rightTone = "body" }
-    local c = catById[e.categoryID]
-    if c then out[#out + 1] = { left = L["Category"], right = c.name, tone = "muted", rightTone = "body" } end
+    if e.category then out[#out + 1] = { left = L["Category"], right = e.category, tone = "muted", rightTone = "body" } end
     return out
 end
 

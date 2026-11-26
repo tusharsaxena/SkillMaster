@@ -913,6 +913,15 @@ Total.
 - statistics: about 1000 rows read once each at two calls a row; a re-read costs one a row
 - statistics: the statisticsRead perf bucket is noted while a capture is on, and nothing while off
 
+### test_preview_trees.lua (6)
+
+- preview trees: the sample's records come in the panels' shapes, built by the live builders
+- preview trees: test mode draws the sample in the three windows, reading nothing of the live client
+- preview trees: the tree feeds draw the sample's own pins and tree, never this character's store
+- preview trees: the sample's Alts record carries its standings and currencies
+- preview trees: the simulator's world is read through the seam; its steps raise a reputation and a currency
+- preview trees: a simulated currency at its cap never silences a real one (the alerts' state)
+
 ### test_polish.lua (12)
 
 - broker: the leave poll hides GameTooltip only while the feed still owns it
@@ -1327,6 +1336,7 @@ Total.
 | test_reputations.lua | 13 |
 | test_currencies.lua | 9 |
 | test_statistics.lua | 15 |
+| test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
 | test_sample_names.lua | 2 |
@@ -1357,4 +1367,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **991** |
+| **Total** | **997** |
