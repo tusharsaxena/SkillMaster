@@ -35,6 +35,7 @@ L["Shows or hides the Statistics window: the character panel's Statistics tab."]
 L["Show the Professions window"] = true
 L["Hide every Skill Master window"] = true
 L["Show or hide the Professions window"] = true
+L["Show or hide every Skill Master window"] = true
 L["Show or hide the Skills window: weapon skills and other skills"] = true
 L["Show or hide the Character Stats window"] = true
 L["Show or hide the Currencies window"] = true

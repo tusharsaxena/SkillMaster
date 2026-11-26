@@ -388,3 +388,74 @@ test("r5 sm-04: the six display brokers each draw their own in-game icon; the ad
     if not NS.Launcher:IsRegistered() then NS.addon:OnEnable() end   -- registered on enable (tests/test_launcher.lua)
     assertEqual(NS.Launcher:Object().icon, NS.Constants.LOGO_ICON_PATH, "the control broker keeps the logo")
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- R5-SM-05: `/sm toggle` shows or hides every window; `/sm professions` is the Professions window's
+-- ---------------------------------------------------------------------------------------------
+
+local function shownSet()
+    local out = {}
+    for _, fid in ipairs(NS.FAMILY_ORDER) do
+        if NS.Windows.Get(fid).IsShown() then out[#out + 1] = fid end
+    end
+    return table.concat(out, ",")
+end
+
+local ALL = table.concat(NS.FAMILY_ORDER, ",")
+
+test("r5 sm-05: /sm toggle shows all six windows when none shows, and hides them all when any shows", function()
+    NS.Windows.HideAll()
+    local ok, err = pcall(function()
+        NS.Slash:OnSlash("toggle")
+        assertEqual(shownSet(), ALL, "none shown: every window opens")
+        NS.Slash:OnSlash("toggle")
+        assertEqual(shownSet(), "", "all shown: every window closes")
+        NS.Slash:OnSlash("statistics")
+        assertEqual(shownSet(), "statistics", "one window open")
+        NS.Slash:OnSlash("toggle")
+        assertEqual(shownSet(), "", "any shown: every window closes, the rest staying closed")
+    end)
+    NS.Windows.HideAll()
+    if not ok then error(err, 0) end
+end)
+
+test("r5 sm-05: /sm professions, the Show window entry and its key binding toggle the Professions window alone", function()
+    NS.Windows.HideAll()
+    local ok, err = pcall(function()
+        NS.Slash:OnSlash("professions")
+        assertEqual(shownSet(), "professions", "/sm professions opens Professions alone")
+        NS.Slash:OnSlash("professions")
+        assertEqual(shownSet(), "", "and closes it")
+        local button = NS.MainWindow.__toggleButton
+        button:GetScript("OnClick")(button, "LeftButton")
+        assertEqual(shownSet(), "professions", "the key binding is still the Professions window's")
+        button:GetScript("OnClick")(button, "LeftButton")
+        assertEqual(_G["BINDING_NAME_CLICK " .. NS.MainWindow.TOGGLE_BUTTON .. ":LeftButton"], "Toggle Professions window",
+            "its label says so")
+    end)
+    NS.Windows.HideAll()
+    if not ok then error(err, 0) end
+end)
+
+test("r5 sm-05: the help says /sm toggle is every window and /sm professions the Professions window", function()
+    local desc = {}
+    for _, row in ipairs(NS.COMMANDS) do desc[row[1]] = row[2] end
+    assertEqual(desc.toggle, "Show or hide every Skill Master window")
+    assertEqual(desc.professions, "Show or hide the Professions window")
+end)
+
+test("r5 sm-05: /sm toggle under the perf hold opens nothing and says the capture line once", function()
+    NS.Windows.HideAll()
+    local saved, printed = NS.Print, {}
+    local savedRefusal = NS.StoodDownRefusal
+    NS.StoodDownRefusal = function() return "Not available during a performance capture." end
+    NS.Print = function(line) printed[#printed + 1] = line end
+    local ok, err = pcall(function()
+        NS.Windows.ToggleAll()
+        assertEqual(shownSet(), "", "nothing opens")
+        assertEqual(#printed, 1, "one line, not one per window: " .. table.concat(printed, " | "))
+    end)
+    NS.Print, NS.StoodDownRefusal = saved, savedRefusal
+    NS.Windows.HideAll()
+    if not ok then error(err, 0) end
+end)

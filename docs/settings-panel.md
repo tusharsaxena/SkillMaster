@@ -86,7 +86,7 @@ Toggle journal. Keys stay the client's and are never stored in a profile (option
 
 The launcher's right-click menu lists Enabled, Locked, Test mode, Sim mode, Show window and Journal; Show window
 is the Professions window (SMW-04; the other five have no row while the library takes two extras at most) and
-shares its handler with `/sm toggle` and its key binding, and Sim mode its handler (`NS.ToggleSim`)
+shares its handler with `/sm professions` and its key binding (`/sm toggle` shows or hides every window, R5-SM-05), and Sim mode its handler (`NS.ToggleSim`)
 with the Master-controls Sim mode box and the bare `/sm sim`.
 
 ## Layout

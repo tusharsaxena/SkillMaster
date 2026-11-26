@@ -1344,3 +1344,10 @@ none is passed until you say so.
   Currencies a pile of coins, Reputations a guild tabard, Statistics a note), none a green or blank square and
   none the Ka0s logo. The addon's own control broker (Ka0s Skill Master) and the minimap button keep the logo.
   Result:
+- **SM-R5-5** (new, R5-SM-05) With every window closed, `/sm toggle`: all six windows open (Professions where the
+  old window stood, each other where you last dropped it). `/sm toggle` again: all six close. Open one window
+  (`/sm statistics`) and `/sm toggle`: it closes and nothing else opens. `/sm professions` opens and closes the
+  Professions window alone; so do the minimap button's Show window and its key binding (Options → Keybindings →
+  Ka0s Skill Master → Toggle Professions window). `/sm help` lists `toggle` as "Show or hide every Skill Master
+  window".
+  Result:

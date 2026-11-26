@@ -3,7 +3,7 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-1021%2F1021_passing-green)
+![Tests](https://img.shields.io/badge/Tests-1025%2F1025_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
@@ -21,7 +21,7 @@ You set it up in the game's Settings → AddOns → Ka0s Skill Master, or with `
 
 ## Usage
 
-Each window has its own command: `/sm professions`, `/sm skills`, `/sm stats`, `/sm currencies`, `/sm reputations` and `/sm statistics` open or close it (`/sm toggle` and the minimap button's Show window are the Professions window, and `/sm hide` closes them all). The game's Options → Keybindings → Ka0s Skill Master has a key for each window and one for the Journal, and the General page's Keybindings tab in this addon's settings sets the same ones. Each window remembers where you dropped it; the first time, the new ones open next to the Professions window. Drag the grip in its bottom-right corner to resize it; the new size becomes Window width and Window height on the Layout page. `/sm lock` (or the lock button in its title bar) stops it from moving and hides the grip, and `/sm unlock` lets you drag and resize it again; the close button or Escape puts it away. The LDB tooltip keeps its own size.
+Each window has its own command: `/sm professions`, `/sm skills`, `/sm stats`, `/sm currencies`, `/sm reputations` and `/sm statistics` open or close it (`/sm toggle` opens all six, or closes them all when any is open; the minimap button's Show window is the Professions window, and `/sm hide` closes them all). The game's Options → Keybindings → Ka0s Skill Master has a key for each window and one for the Journal, and the General page's Keybindings tab in this addon's settings sets the same ones. Each window remembers where you dropped it; the first time, the new ones open next to the Professions window. Drag the grip in its bottom-right corner to resize it; the new size becomes Window width and Window height on the Layout page. `/sm lock` (or the lock button in its title bar) stops it from moving and hides the grip, and `/sm unlock` lets you drag and resize it again; the close button or Escape puts it away. The LDB tooltip keeps its own size.
 
 Each block has a header. Click it to collapse the block, or use the mark on its right to pull the block out into a frame of its own that you can place anywhere; the same mark on the frame docks it again. Hover a row for the details. Click a profession to open its window (out of combat), click a weapon or Defense for the Skills tab, and click an unlearned skill to see its trainers and set a waypoint. Shift-click puts the skill into chat. Right-click gives you the row menu, where you can pin the row to its window's broker feed (up to five per feed; Broker → Pins orders and removes them; a pinned row shows a pin mark at the end of its name, in the windows and the feed's tooltip) or hide the row. A row opens from anywhere on it; to open it from its go icon only, set Layout → Window → *Open a row from* to *Go icon only* (the detached and merged windows follow it). In a broker feed's tooltip only a section's header can be clicked: a click anywhere on it folds that section in the tooltip alone, and hovering a row still shows its details.
 

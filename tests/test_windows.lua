@@ -166,9 +166,10 @@ test("windows: one slash verb per window toggles it; /sm hide hides them all", f
     assertFalse(Windows.Get("statistics").IsShown(), "a second /sm statistics hides it")
     NS.Slash:OnSlash("hide")
     assertFalse(Windows.AnyShown(), "/sm hide hides every window")
+    -- Re-pinned by R5-SM-05 (the owner's round 5): /sm toggle is every window, /sm professions the Professions one.
     NS.Slash:OnSlash("toggle")
-    assertTrue(Windows.Get("professions").IsShown() and not Windows.Get("skills").IsShown(),
-        "/sm toggle is the Professions window's")
+    assertTrue(Windows.Get("professions").IsShown() and Windows.Get("skills").IsShown(),
+        "/sm toggle shows every window")
     hideAll()
 end)
 
