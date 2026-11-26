@@ -160,5 +160,6 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   major-faction bars are drawn as standard standings until then.
 - A first reputation or currency read refused by combat or an open Reputation or Currency tab is partial; it is
   read again when combat ends or the tab closes.
-- A Statistics value folded away when `CRITERIA_UPDATE` fired is stale until its category opens again, when it is
-  read afresh; a pinned statistic is read on every debounced pass.
+- A Statistics value folded away, or on a surface that was not showing, when `CRITERIA_UPDATE` fired is stale
+  until its category opens again on a shown surface, when it is read afresh (a closed window or a tooltip shown
+  again reads its unfolded categories anew); a pinned statistic is read on every debounced pass.

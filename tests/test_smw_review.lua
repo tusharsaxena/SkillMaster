@@ -288,3 +288,95 @@ test("smw-rev: a list read that raises after opening a header still closes what 
     assertTrue(rows[1].closed, "A is collapsed")
     assertFalse(NS.SharedList.Busy(list.name), "the latch is down")
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- The Statistics tab (tests/fixture_statistics.lua's small tree: Character 130 > Wealth 140, Combat 150)
+-- ---------------------------------------------------------------------------------------------
+
+local SD = NS.StatisticsData
+local fx = dofile("tests/fixture_statistics.lua")
+
+local function withStatistics(fn)
+    local savedFold, savedPins = NS.db.char.fold, NS.db.char.pins
+    NS.db.char.fold, NS.db.char.pins = {}, {}
+    SD:Reset()
+    M.__fireTimers()
+    local spy, restore = fx.install(M)
+    local ok, err = pcall(fn, spy)
+    NS.Broker.HideTooltip()
+    NS.Broker.SetFeed(NS.Broker.DEFAULT_FEED)
+    NS.Windows.HideAll()
+    restore()
+    NS.db.char.fold, NS.db.char.pins = savedFold, savedPins
+    SD:Reset()
+    M.__fireTimers()
+    if not ok then error(err, 0) end
+end
+
+local function statisticsRows()
+    local W = NS.Windows.Get("statistics")
+    W.Refresh(true)
+    return W.Rows()
+end
+
+test("smw-rev: the Statistics window reopened reads its unfolded categories afresh, not as it last saw them", function()
+    withStatistics(function(spy)
+        local W = NS.Windows.Get("statistics")
+        W.Show()
+        statisticsRows()
+        NS.Tree.SetFolded("statistics", 130, false)
+        statisticsRows()
+        assertEqual(SD:Get("130:9001").text, "58")
+        W.Hide()
+        assertFalse(SD:IsWatching(), "closed: nothing kept it current")
+        spy.stat[9001] = 61
+        W.Show()
+        statisticsRows()
+        assertEqual(SD:Get("130:9001").text, "61", "the value read again as the window came back")
+        local reads = spy.calls.GetStatistic
+        statisticsRows()
+        assertEqual(spy.calls.GetStatistic, reads, "a redraw while it shows reads nothing more")
+    end)
+end)
+
+test("smw-rev: the Statistics tooltip shown again reads what it unfolds afresh", function()
+    withStatistics(function(spy)
+        NS.Broker.TooltipToggled("statistics")
+        SD:Open(NS.Broker.TipNodeStore("statistics"))
+        NS.Tree.SetFolded("statistics", 150, false, NS.Broker.TipNodeStore("statistics"))
+        SD:Open(NS.Broker.TipNodeStore("statistics"))
+        assertEqual(SD:Get("150:9301").text, "1,200")
+        NS.Broker.TooltipToggled(nil)
+        spy.stat[9301] = 1300
+        NS.Broker.TooltipToggled("statistics")
+        SD:Open(NS.Broker.TipNodeStore("statistics"))
+        assertEqual(SD:Get("150:9301").text, "1,300", "the tooltip's unfolded Combat read again")
+        NS.Broker.TooltipToggled(nil)
+        local ldb = NS.db.profile.tooltips.ldb
+        if ldb.folds and ldb.folds.nodes then ldb.folds.nodes.statistics = nil end
+    end)
+end)
+
+test("smw-rev: with the window hidden and one statistic pinned, CRITERIA_UPDATE reads the pinned row alone", function()
+    withStatistics(function(spy)
+        local W = NS.Windows.Get("statistics")
+        W.Show()
+        statisticsRows()
+        NS.Tree.SetFolded("statistics", 130, false)
+        NS.Tree.SetFolded("statistics", 150, false)
+        statisticsRows()
+        NS.Pins.Toggle("statistics", "150:9301")
+        W.Hide()
+        assertTrue(SD:IsWatching(), "pinned: still watching")
+        local before = spy.calls.GetStatistic
+        spy.stat[9301] = 1250
+        M.__fireEvent("CRITERIA_UPDATE")
+        M.__fireTimers()
+        assertEqual(spy.calls.GetStatistic - before, 1, "Total kills alone; Character, unfolded in the hidden window, not")
+        assertEqual(NS.Broker.FeedText("statistics"), "Total kills 1,250")
+        spy.stat[9001] = 70
+        W.Show()
+        statisticsRows()
+        assertEqual(SD:Get("130:9001").text, "70", "the hidden window's categories read as it comes back")
+    end)
+end)

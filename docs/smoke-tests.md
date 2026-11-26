@@ -1299,3 +1299,8 @@ none is passed until you say so.
   you fight, and the new faction joins the list as combat ends. Likewise earn a currency new to you in combat
   with a Currency tab header collapsed: the Currencies window keeps that header's currencies.
   Result:
+- **SM-REV-3** (new, SMW-REV) Open the Statistics window on an unfolded category, close it, do something that
+  category counts (camp, kill something), and open the window again: the new value shows at once. Hover the
+  Statistics feed with a category unfolded in its tooltip, leave, change that statistic, hover again: the tooltip
+  shows the new value.
+  Result:

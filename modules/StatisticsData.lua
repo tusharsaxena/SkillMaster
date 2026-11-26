@@ -21,9 +21,10 @@ local _, NS = ...
 -- CRITERIA_UPDATE (noisy, no payload) is registered ONLY while the Statistics window or a block of it shows,
 -- while its broker tooltip shows, or while a statistic is pinned (SD:Watch), and it is debounced: the first
 -- event starts a one-shot SD.DEBOUNCE timer (an event-started debounce, not a poll) whose read takes the
--- unfolded categories again and the pinned rows (each by its index, re-resolved by statID when it moved). A
--- category read earlier but folded now is marked stale and read again when it next unfolds. Statistics share
--- no state with the panel: nothing here expands or collapses anything of the client's.
+-- categories unfolded on a surface that shows again and the pinned rows (each by its index, re-resolved by
+-- statID when it moved). Any other category read earlier is marked stale and read again when it next unfolds on
+-- a shown surface; so is every one while nothing watched (a closed window shows fresh values as it opens again,
+-- SMW-REV). Statistics share no state with the panel: nothing here expands or collapses anything of the client's.
 --
 -- Test mode draws a sample built by SD.Build from defaults/Preview_Forever.lua (modules/Preview.lua) and reads
 -- nothing live; a simulation reads through the seam (core/SimSetup.lua) from its own world, on state of its own
@@ -281,11 +282,19 @@ local function openUnder(store, into)
     return into
 end
 
+-- Every category read so far is stale: nothing kept it current (CRITERIA_UPDATE was not registered), so the next
+-- surface to unfold it reads it again rather than drawing the values it had when it was last on screen.
+local function markAllStale()
+    for id in pairs(readAt) do stale[id] = true end
+end
+
 --- The model with every category unfolded under `store` (the window's folds when nil, the tooltip's own when
---- given) read: a category never read, or read and folded since, reads now. No message: the caller is laying
---- the rows. Also starts watching CRITERIA_UPDATE when a surface now shows the Statistics (SD:Watch).
+--- given) read: a category never read, or read and folded since, or read while nothing watched since, reads
+--- now. No message: the caller is laying the rows. Also starts watching CRITERIA_UPDATE when a surface now
+--- shows the Statistics (SD:Watch).
 function SD:Open(store)
     SD:Use(true)
+    if not watching then markAllStale() end   -- a surface laid before its toggle message, or no watch at all
     local t0 = Perf.on and debugprofilestop()
     local n = 0
     for id, c in pairs(openUnder(store)) do
@@ -305,13 +314,16 @@ local function tipStore()
     return B and B.TipNodeStore and B.TipNodeStore(SD.FAMILY) or nil
 end
 
---- The debounced re-read: every category unfolded in the window or the tooltip again, every pinned row by its
---- index; a category read earlier but folded in both now is stale (read again when it next unfolds). Sends
+--- The debounced re-read: every category unfolded on a surface that shows now (the window's folds while the
+--- Statistics block is on screen, the tooltip's own while it is up) again, every pinned row by its index; any
+--- other category read earlier is stale (read again when it next unfolds on a shown surface). Sends
 --- STATISTICS_UPDATED. Nothing while test mode or a simulation runs (their samples are drawn instead).
 function SD:Refresh()
     if not model.built or not SD.Live(nil) then return nil end
     local t0 = Perf.on and debugprofilestop()
-    local open = openUnder(tipStore(), openUnder(nil))
+    local open = {}
+    if SD.OnScreen() then openUnder(nil, open) end
+    if tipUp then openUnder(tipStore(), open) end
     for id in pairs(readAt) do
         if open[id] then readCategory(catById[id]) else stale[id] = true end
     end
@@ -341,6 +353,7 @@ local function onScreen()
     local g = gid and G.Frame(gid)
     return g ~= nil and g:IsShown() == true
 end
+SD.OnScreen = onScreen   -- SD:Refresh reads through it (tests/perf.lua stands a shown window in)
 
 --- Whether CRITERIA_UPDATE is wanted now: a surface shows the Statistics, its tooltip is up, or a
 --- statistic is pinned.
@@ -364,6 +377,7 @@ SD.OnCriteria = onCriteria   -- the suites
 function SD:Watch()
     local want = SD.watch ~= nil and not NS.IsStoodDown() and SD.Wanted()
     if want and not watching then
+        markAllStale()   -- nothing kept the categories current while unwatched: the surface now showing reads afresh
         watching = NS.SafeRegisterEvent(SD.watch, SD.EVENT, onCriteria, NS.rejectedEvents) and true or false
     elseif not want and watching then
         SD.watch:UnregisterEvent(SD.EVENT)
