@@ -254,6 +254,7 @@ test("test mode: the broker's {pinned} and {equippedWeapon} are the sample chara
     end)
     if NS.IsTestMode() then NS.ToggleTestMode() end
     local live = NS.Broker.Context("skills")   -- SMW-05: Riding (Other) shows on the Skills feed
+    local liveHand = live.mainHand   -- read on first use (SMW-REV), so while the slot answers "maces"
     NS.SkillHelpers.WeaponSkillInSlot = realSlot
     NS.db.char.pinned = before
     if not ok then error(err, 0) end
@@ -262,7 +263,7 @@ test("test mode: the broker's {pinned} and {equippedWeapon} are the sample chara
     assertTrue(tostring(NS.Template.Render("{equippedWeapon}", ctx)):find("^" .. NS.L["Guns"]) ~= nil,
         "the token renders the sample's Guns")
     assertEqual(live.pinned, "riding", "off, the live pin again")
-    assertEqual(live.mainHand, "maces", "and the live main hand")
+    assertEqual(liveHand, "maces", "and the live main hand")
 end)
 
 -- ---------------------------------------------------------------------------------------------

@@ -272,20 +272,33 @@ local function pinnedTexts(fid)
     return out
 end
 
+-- The context's fields that cost a client read, each read only when a template asks for it ({equippedWeapon},
+-- {level}): six feeds re-render on every skills, stats and bonus pass, and most never show either.
+local LAZY = {
+    mainHand = function(v, sourced) return sourced and v.mainHand or B.MainHandSkill() end,
+    level    = function() return NS.Preview.Character().level end,
+}
+
 --- The template context for feed `fid` (the Professions feed by default). While a source is set (test
 --- mode) the pins and the main hand are its own, so a sample feed never reads this character's store or
---- gear. `pinnedTexts` are the feed's pins as {pinned} and {pinned1}..{pinned5} render them.
+--- gear. `pinnedTexts` are the feed's pins as {pinned} and {pinned1}..{pinned5} render them. `mainHand` and
+--- `level` are read on first use (LAZY).
 function B.Context(fid)
     fid = fid or B.DEFAULT_FEED
     local v, sourced = view()
     local pins = NS.Pins.List(fid)
-    return {
+    local ctx = {
         skills = v.model, stat = v.statIndex, gains = v.gains.total, last = v.last,
         pinned = B.FEEDS[fid] and B.FEEDS[fid].source == "skills" and pins[1] or nil,
         pinnedTexts = pinnedTexts(fid),
-        mainHand = sourced and v.mainHand or B.MainHandSkill(),
-        level = NS.Preview.Character().level,
     }
+    return setmetatable(ctx, { __index = function(t, k)
+        local fn = LAZY[k]
+        if not fn then return nil end
+        local value = fn(v, sourced)
+        rawset(t, k, value)
+        return value
+    end })
 end
 
 -- ---------------------------------------------------------------------------------------------

@@ -409,3 +409,31 @@ test("smw-rev: a reputation's later change moves its one Log line to the end, so
     SL:ResetFloor()
     if not ok then error(err, 0) end
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- The broker feeds' context
+-- ---------------------------------------------------------------------------------------------
+
+test("smw-rev: the feeds read the main hand and the level only for a template that shows them", function()
+    local H, P = NS.SkillHelpers, NS.Preview
+    local realSlot, realChar = H.WeaponSkillInSlot, P.Character
+    local slots, chars = 0, 0
+    H.WeaponSkillInSlot = function(...) slots = slots + 1 return realSlot(...) end
+    P.Character = function(...) chars = chars + 1 return realChar(...) end
+    local tpl = NS.db.profile.broker.feeds.professions
+    local saved = tpl.template
+    local ok, err = pcall(function()
+        NS.Broker.Refresh()
+        assertEqual(slots, 0, "no feed's template shows {equippedWeapon}: the main hand is not read")
+        assertEqual(chars, 0, "nor {level}: the level is not read")
+        tpl.template = "{equippedWeapon} {level}"
+        NS.Broker.Refresh()
+        assertEqual(slots, 1, "the one feed that shows the weapon reads it once")
+        assertEqual(chars, 1, "and the level once")
+        assertEqual(NS.Broker.Context().level ~= nil, true, "a context still answers its level when asked")
+    end)
+    tpl.template = saved
+    H.WeaponSkillInSlot, P.Character = realSlot, realChar
+    NS.Broker.Refresh()
+    if not ok then error(err, 0) end
+end)
