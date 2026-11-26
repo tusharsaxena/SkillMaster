@@ -351,7 +351,9 @@ local function onScreen()
     local G = NS.Groups
     local gid = G and G.Of and G.Of(SD.BLOCK)
     local g = gid and G.Frame(gid)
-    return g ~= nil and g:IsShown() == true
+    if g ~= nil and g:IsShown() == true then return true end
+    -- A detached category's window (R5-SM-09), or a merged window holding one.
+    return NS.SubBlocks ~= nil and NS.SubBlocks.Shown(SD.FAMILY)
 end
 SD.OnScreen = onScreen   -- SD:Refresh reads through it (tests/perf.lua stands a shown window in)
 

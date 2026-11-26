@@ -102,5 +102,8 @@ L["Currency: %s +%d"] = true
 L["Expand all headers"] = true
 L["Collapse all headers"] = true
 
+-- Detached sub-categories (modules/SubBlocks.lua, R5-SM-09): a tree header's detach mark.
+L["Detach this category into its own window"] = true
+
 -- `true` only documents the key: replace each with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

@@ -283,6 +283,7 @@ Kit.run{
         "test_smw_review",
         "test_r5_feedback",
         "test_r5_join_resize",
+        "test_r5_subdetach",
         "test_preview_trees",
         "test_polish",
         "test_preview",

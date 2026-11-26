@@ -63,7 +63,8 @@ Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), th
 (`NS.Preview`), the simulator (`NS.Sim`, `NS.SimHost`) and the diagnostics sections. The six-windows run added the
 family registry (`NS.Families`, `defaults/Families.lua`), the window factory (`modules/Window.lua`, one instance
 per family; `NS.MainWindow` is the Professions window's shim), the block providers (`modules/BlockProviders.lua`),
-the tree row model and its addon-side folds (`NS.Tree`, `char.fold`), the shared-collapse reader
+the tree row model and its addon-side folds (`NS.Tree`, `char.fold`), the detached sub-categories
+(`NS.SubBlocks`, `modules/SubBlocks.lua`, R5-SM-09: a tree header popped out as its own window), the shared-collapse reader
 (`NS.SharedList`) and the three tree models (`RepData`, `CurrencyData`, `StatisticsData`);
 `settings/` holds the schema,
 the slash table and the settings pages.
@@ -215,6 +216,20 @@ gradient and art and under the band), the border (the skin's edge while `borderF
 band (`noTopBar` and the frame's `bandParts` hidden for Never; for On hover a 0.1 s `OnUpdate` poll of
 `IsMouseOver` toggles both). `S.Shell` is re-called only when its opts change, and the skin's own
 repaint replays the recorded ones. A merged group's frame takes the same call.
+
+`profile.layout.subs` (R5-SM-09) is named non-setting state: the detached sub-categories, each
+`["sub:<family>:<nodeKey>"] = { docked = false, name, collapsed, point, width }`, a row only while one is detached.
+Its one owner is `modules/SubBlocks.lua` (`NS.SubBlocks`: `Detach` from a tree header's detach mark, `Dock` from
+the window's dock mark or Dock all, `SetCollapsed`, `SetWidth` on the grip's release; the drag's drop point goes
+through `NS.Detached` as a block's). The key is the header's fold key (a faction header's factionID, a currency
+header's `<name>#<depth>`, a Statistics categoryID), so it is stable across sessions. A sub-category reads as a
+block everywhere one is read: `NS.BlockDefs[id]` answers `NS.SubBlocks.Def(id)` (a metatable on the defs) and
+`NS.Blocks.Settings(id)` its row, so the detached frame, the merged window, the snap and the grip draw it with no
+branch. Its rows are the header's subtree rebased to depth 0 (the tree provider, `filter` = its node key); a
+window (the window's own folds) leaves out every sub-category detached from it, while the LDB tooltip keeps the
+whole tree. A detached Statistics category reads its rows whatever the window's folds say of it and its parents
+(`NS.SubBlocks.OpenStore`), and its window keeps `CRITERIA_UPDATE` watched (`SD.OnScreen`). The
+schemaVersion 18 step normalizes a stored `layout.subs`.
 
 `profile.layout.groups` (round 5, R5-6) is named non-setting state: the merged detached windows, each
 `[gid] = { point, columns = { { id, ... }, ... }, width }`, membership derived from the columns; `width`

@@ -153,6 +153,7 @@ local function layout(out)
     end
     out:joined(TAG, "docked order:", NS.Blocks.Docked())
     out:joined(TAG, "detached:", NS.Blocks.Undocked())
+    out:joined(TAG, "detached sub-categories:", NS.SubBlocks.Ids())   -- R5-SM-09
     groups(out, p.layout.groups)
 end
 

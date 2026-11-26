@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 17
+NS.SCHEMA_VERSION = 18
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -236,6 +236,16 @@ local function groupWidthCleaned(_, profile)
     end
 end
 
+--- 17 -> 18 (R5-SM-09): detached sub-categories, `layout.subs` (a new key with its own default {}): nothing carries
+--- over; a stored `layout.subs` that is not a table goes (the default answers), and a stored one is normalized
+--- (modules/SubBlocks.lua's NS.SubBlocks.Normalize: an id that is no sub-category's and a row that is no table go).
+local function subsNormalized(_, profile)
+    local layout = type(profile) == "table" and rawget(profile, "layout")
+    if type(layout) ~= "table" or rawget(layout, "subs") == nil then return end
+    if type(layout.subs) ~= "table" then layout.subs = nil return end
+    NS.SubBlocks.Normalize(layout.subs)
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
 -- is the stamp the run started at (0 on a fresh install).
@@ -257,6 +267,7 @@ local STEPS = {
     { to = 15, run = feedTemplatesSplit, perProfile = true },
     { to = 16, run = tipOpenFromRetired, perProfile = true },
     { to = 17, run = groupWidthCleaned, perProfile = true },
+    { to = 18, run = subsNormalized, perProfile = true },
 }
 
 function NS:InitDB()

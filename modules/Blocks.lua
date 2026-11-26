@@ -63,6 +63,13 @@ NS.BlockDefs = {
     statistics    = def("statistics", L["Statistics"], L["Statistics"], "statistics", nil),
 }
 
+-- A detached sub-category (R5-SM-09, modules/SubBlocks.lua) reads as a block: its def is made on demand from
+-- its id ("sub:<family>:<nodeKey>"), so the detached and merged windows draw it as any block.
+setmetatable(NS.BlockDefs, { __index = function(_, id)
+    local SB = NS.SubBlocks
+    return SB and SB.Def(id) or nil
+end })
+
 --- Whether block `id` draws a tree family's rows (its family's `tree`, defaults/Families.lua): no sort, no
 --- filter, a fold per header.
 function NS.IsTreeBlock(id)
@@ -90,7 +97,11 @@ B.HEADER_H = 24
 
 local function layout() return (NS.db and NS.db.profile.layout) or NS.defaults.profile.layout end
 
-function B.Settings(id) return layout().blocks[id] end
+function B.Settings(id)
+    local SB = NS.SubBlocks
+    if SB and SB.IsSub(id) then return SB.Settings(id) end   -- a detached sub-category's own row (R5-SM-09)
+    return layout().blocks[id]
+end
 
 local function byOrder(ids)
     table.sort(ids, function(a, b)
@@ -203,7 +214,7 @@ end
 --- Pop block `id` out of the window into its own frame. Persisted; sends LAYOUT_CHANGED.
 function B:Detach(id)
     local s = B.Settings(id)
-    if not s or s.docked == false then return false end
+    if not s or s.docked == false or (NS.SubBlocks and NS.SubBlocks.IsSub(id)) then return false end
     return seam(path(id, "docked"), false)
 end
 
@@ -211,11 +222,16 @@ end
 function B:Dock(id)
     local s = B.Settings(id)
     if not s or s.docked ~= false then return false end
+    if NS.SubBlocks and NS.SubBlocks.IsSub(id) then return NS.SubBlocks.Dock(id) end   -- back into its window
     return seam(path(id, "docked"), true)
 end
 
 function B:SetCollapsed(id, collapsed)
     if not B.Settings(id) then return false end
+    if NS.SubBlocks and NS.SubBlocks.IsSub(id) then   -- a detached sub-category's own row (R5-SM-09)
+        NS.SubBlocks.SetCollapsed(id, collapsed)
+        return true
+    end
     return seam(path(id, "collapsed"), collapsed and true or false)
 end
 

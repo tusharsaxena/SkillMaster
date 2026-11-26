@@ -77,13 +77,27 @@ P.stats = {
 -- no rows until its data module has built one. No hidden set: a tree row is never hidden from its window.
 -- ---------------------------------------------------------------------------------------------
 
+-- A detached sub-category (R5-SM-09, modules/SubBlocks.lua) is the block whose `filter` is its header's node key:
+-- its rows are the header's subtree, rebased to depth 0. A window (`folds` nil: the window's own folds) leaves out
+-- every sub-category detached from it; the LDB tooltip (its own folds) keeps the whole tree.
 local function treeProvider(family, kind, modelOf)
     return {
         hiddenSet = family,
         model = modelOf,
-        entries = function(m, _, _, folds)
+        entries = function(m, node, _, folds)
             if type(m) ~= "table" or type(m.order) ~= "table" then return {} end
-            return NS.Tree.Rows(m.order, family, kind, folds)
+            local SB = NS.SubBlocks
+            local order, base = m.order, 0
+            if node ~= nil then order, base = SB.Subtree(order, node) end
+            if folds == nil then order = SB.Without(order, family) end
+            local rows = NS.Tree.Rows(order, family, kind, folds)
+            if base > 0 then
+                for _, r in ipairs(rows) do
+                    r.depth = r.depth - base
+                    r.indent = r.depth * NS.Tree.INDENT
+                end
+            end
+            return rows
         end,
         groupOf = function() return nil end,
     }
@@ -110,7 +124,15 @@ end)
 local drawTree = statistics.entries
 statistics.entries = function(m, filter, isHidden, folds)
     local SD = NS.StatisticsData
-    if SD and SD.Live(m) then m = SD:Open(folds) end
+    if SD and SD.Live(m) then
+        -- A detached category reads its rows whatever the window's folds say of it and the categories above it.
+        local read = folds
+        if filter ~= nil and folds == nil then
+            local used = SD:Use(true)
+            read = NS.SubBlocks.OpenStore(used and used.order, "statistics", filter)
+        end
+        m = SD:Open(read)
+    end
     return drawTree(m, filter, isHidden, folds)
 end
 P.statistics = statistics

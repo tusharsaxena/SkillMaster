@@ -125,6 +125,8 @@ local function dressRow(row)
         row.act:SetScript("OnClick", nil)
         row.act:EnableMouse(false)
     end
+    -- A tree header's detach mark (R5-SM-09) acts on the windows; the tooltip keeps its whole tree.
+    if row.subDetach then row.subDetach:Hide() end
 end
 
 -- A header's marks that act in the window; here only the chevron takes the pointer.

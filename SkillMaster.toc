@@ -133,6 +133,7 @@ modules\BlockProviders.lua
 # Conventional: NS.Tree, the tree row model and its folds (SMW-03); reads NS.db, NS.Blocks and the
 # test-mode state at CALL time.
 modules\Tree.lua
+modules\SubBlocks.lua
 # Conventional: NS.Detached, a detached block's frame (T3.2); reads NS.Blocks at CALL time.
 modules\Detached.lua
 # Conventional: NS.Groups, the merged detached windows (round 5, R5-6); reads NS.Blocks and

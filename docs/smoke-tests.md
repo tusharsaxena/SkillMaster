@@ -1372,3 +1372,14 @@ none is passed until you say so.
   edge instead (two columns): the grip widens both columns together. `/sm lock`: the grip hides; `/sm unlock`: it
   is back. Right-click the band, Unmerge all: each window has its own grip again at its own old width.
   Result:
+- **SM-R5-9** (new, R5-SM-09) `/sm reputations`: each header (Alliance, Steamwheedle Cartel, Other) shows the detach
+  mark at its right end. Click Alliance's: a window titled "Alliance" opens with Darnassus, Gnomeregan Exiles,
+  Ironforge and Stormwind, and the Reputations window no longer lists Alliance or those four. Drag it somewhere,
+  collapse it with its chevron, resize it with its grip, then `/reload`: it comes back where you left it, collapsed
+  and at that width. Drag it onto a detached Primary Professions window's edge: they join ("Primary · Alliance").
+  Click its dock mark (or the joined window's Dock all): Alliance is back in the Reputations window in its place.
+  `/sm statistics`: open Character and detach Wealth (a nested category): a "Wealth" window shows its statistics
+  even with Character folded again in the Statistics window; detach Character too and its window lists its own
+  rows, Consumables, Reputation and Gear but not Wealth. `/sm currencies`: detach Player vs. Player: Honor Points
+  moves to its own window. Hover each feed: its tooltip still shows the whole tree and no detach mark.
+  Result:

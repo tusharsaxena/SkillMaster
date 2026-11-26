@@ -59,6 +59,9 @@ NS.defaults = {
             -- non-setting state, no row sets it): [gid] = { point = {...} | false, columns = { { id,
             -- ... }, ... } }, each column a list of detached block ids, top to bottom.
             groups = {},
+            -- Detached sub-categories (R5-SM-09, modules/SubBlocks.lua): ["sub:<family>:<nodeKey>"] = { docked =
+            -- false, name, collapsed, point, width }, a row only while one is detached. Named state, no schema row.
+            subs = {},
             -- sort: the block's row order (modules/Blocks.lua B.SORTS; owner feedback round 3).
             -- filter: the header's filter mark (modules/Blocks.lua B.FILTER_SETS; the weapon block's,
             -- round 5, R5-10; every block's, round 7, R7-1), "all" by default.

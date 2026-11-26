@@ -123,7 +123,7 @@ end
 --- detached windows (key: the block id) and merged windows (key: the group id, `cols` its columns).
 function S.Targets(exclude)
     local out = {}
-    for _, id in ipairs(NS.BLOCKS) do
+    for _, id in ipairs(NS.Detached.Ids()) do   -- the blocks and the detached sub-categories (R5-SM-09)
         local f = NS.Detached.Frame(id)
         if f and f:IsShown() and not excluded(exclude, id) then
             local r = S.Rect(f)
