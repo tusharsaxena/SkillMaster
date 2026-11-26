@@ -3,7 +3,7 @@
 ![WoW](https://img.shields.io/badge/WoW-Forever_1.60.1-purple)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 ![Standard](https://img.shields.io/badge/Ka0s-WoW_Addon_Standard-yellow)
-![Tests](https://img.shields.io/badge/Tests-1074%2F1074_passing-green)
+![Tests](https://img.shields.io/badge/Tests-1081%2F1081_passing-green)
 
 WoW Forever only. Weapon skills, Defense, level-based skill caps and weapon masters don't exist on Retail, so there is nothing for this addon to show there.
 
@@ -54,7 +54,7 @@ Everything else lives under Settings → AddOns → Ka0s Skill Master, and `/sm 
 | Why does a cooking, first aid or fishing teacher say "Sells" or "Quest"? | Those ranks aren't trained. You buy a book from that vendor or do that NPC's quest, and the card says which. Artisan in those three is always a quest, and the popup says so. |
 | Where do I train Artisan in a craft? | From a master trainer outside the capitals, such as Drakk Stonehand in the Hinterlands for Alliance leatherworkers. The capitals' trainers stop at Expert. |
 | Can I see every trainer, not just my next rank's? | Tick Show all trainers in the trainer window. It lists every rank, Artisan first, and marks the trainers for your next rank. |
-| Can I see my alts' skills? | Yes. Log each character in once and the Journal's Alts tab shows them all, with their reputations and currencies. |
+| Can I see my alts' skills? | Yes. Log each character in once and the Journal's Alts tab shows them all, with their reputations and currencies. Hover a cell for the same tooltip the main window shows for that row, from that character's last snapshot (without the bonuses and session lines only your current character's client knows). A profession or weapon a character could learn and has not reads "-". |
 | What is the difference between Character Stats and Statistics? | Character Stats are the paper doll's numbers (Strength, crit, armor). Statistics are the character panel's Statistics tab: counters such as Times camped or Auctions posted. |
 | Does Skill Master show my gold? | No. The Currencies window shows only the currencies the game lists. |
 | Where are my settings stored? | In your own profile, so characters can share a layout or keep their own. |

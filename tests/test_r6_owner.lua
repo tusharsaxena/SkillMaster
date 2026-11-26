@@ -270,3 +270,167 @@ test("r6 sm-03: the Type filter menu lists each type in its own color; Any type 
         end
     end)
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- R6-SM-04: the Alts cells' tooltips ("Add tooltips here, which should match the tooltip from the main window"),
+-- none on an unlearned cell, which reads "-"
+-- ---------------------------------------------------------------------------------------------
+
+local RT = NS.RowTooltip
+local ALT_KEY = "Samplerealm-Samplehunter Mockstride"
+
+-- One alt (a level 22 Alliance dwarf hunter) with a skill of each kind, a stat, a faction and a currency; the
+-- Journal open on the Alts tab. The tooltip's lines are recorded off GameTooltip. Everything put back after.
+local function withAlt(fn)
+    local saved = NS.db.global.characters
+    NS.db.global.characters = {
+        [ALT_KEY] = {
+            name = "Samplehunter Mockstride", class = "HUNTER", className = "Hunter", race = "Dwarf", raceFile = "Dwarf",
+            faction = "Alliance", level = 22,
+            skills = { leatherworking = { name = "Leatherworking", category = "primary", rank = 146, max = 150 },
+                       bows = { name = "Bows", category = "weapon", rank = 80, max = 110 } },
+            stats = { strength = { group = "base", value = 61, display = "61", pct = 80 } },
+            reps = { ["72"] = { name = "Stormwind", reaction = 6, standing = "Honored", value = 3000, max = 12000 } },
+            currencies = { ["1901"] = { name = "Honor Points", quantity = 1200, maxQuantity = 75000 } },
+        },
+    }
+    local tip = M.GameTooltip
+    local rec = {}
+    rawset(tip, "AddLine", function(_, l) rec[#rec + 1] = tostring(l) end)
+    rawset(tip, "AddDoubleLine", function(_, l, r) rec[#rec + 1] = tostring(l) .. " | " .. tostring(r) end)
+    J.Show()
+    J.SelectTab("alts")
+    local ok, err = pcall(fn, rec)
+    J.SelectFilter("primary")
+    J.SelectTab("log")
+    J.Hide()
+    rawset(tip, "AddLine", nil)
+    rawset(tip, "AddDoubleLine", nil)
+    tip:Hide()
+    NS.db.global.characters = saved
+    if not ok then error(err, 0) end
+end
+
+local function altCell(filter, key)
+    J.SelectFilter(filter)
+    local p = J.Frame().altsPanel
+    local c
+    for i, item in ipairs(p.list) do if item.key == ALT_KEY then c = i end end
+    for _, row in ipairs(p.pool.active) do
+        if row:IsShown() and row.key == key then return row.cells[c] end
+    end
+    error("no row " .. key .. " on " .. filter)
+end
+
+-- Hover `cell`: its lines, joined, and whether the tooltip showed.
+local function hover(rec, cell)
+    for i = #rec, 1, -1 do rec[i] = nil end
+    M.GameTooltip:Hide()
+    local enter = cell.hit:GetScript("OnEnter")
+    if enter then enter(cell.hit) end
+    return table.concat(rec, "\n"), M.GameTooltip:IsShown()
+end
+
+local function has(s, part) return s:find(part, 1, true) ~= nil end
+
+test("r6 sm-04: an unlearned Alts cell reads '-' in the muted style, and has no tooltip", function()
+    withAlt(function(rec)
+        local cell = altCell("primary", "mining")
+        assertTrue(cell.unlearned:IsShown(), "the hunter can learn Mining and has not")
+        assertEqual(cell.unlearned:GetText(), "-", "renamed from Unlearned")
+        local muted = NS.SkinColor("text.muted") or NS.SkinColor("sm.muted")
+        assertEqual(rgb(cell.unlearned:GetTextColor()), rgb(muted[1], muted[2], muted[3]), "muted")
+        local s, shown = hover(rec, cell)
+        assertFalse(shown, "no tooltip on an unlearned cell")
+        assertEqual(s, "", "and no line")
+    end)
+end)
+
+test("r6 sm-04: a learned profession cell shows the main window's tooltip, from that character's snapshot", function()
+    withAlt(function(rec)
+        local cell = altCell("primary", "leatherworking")
+        local s, shown = hover(rec, cell)
+        assertTrue(shown, "a tooltip")
+        local first = rec[1] or ""
+        assertEqual(first, "Leatherworking | Primary", "the main window's title line")
+        assertTrue(has(s, "146") and has(s, "150"), "its rank and max: " .. s)
+        assertTrue(RT.Bar() ~= nil and RT.Bar():IsShown(), "the tooltip bar")
+        assertTrue(math.abs(RT.Bar().geom.fill - 146 / 150) < 1e-9, "drawn from the snapshot")
+        assertTrue(has(s, "Next rank"), "the next rank: " .. s)
+        assertFalse(has(s, "Bonuses"), "no live bonuses for an alt")
+        assertFalse(has(s, "This session"), "no session gains: the log is this character's")
+        assertFalse(has(s, "Click") or has(s, "Arrow:") or has(s, "Right-click"), "no click hints in the grid")
+        cell.hit:GetScript("OnLeave")(cell.hit)
+        assertFalse(M.GameTooltip:IsShown(), "leaving hides it")
+    end)
+end)
+
+test("r6 sm-04: a weapon cell measures the cap at that character's level", function()
+    withAlt(function(rec)
+        local s = hover(rec, altCell("weapon", "bows"))
+        assertTrue(has(s, "Cap at their level | 110 (5 \195\151 22)"), s)
+        assertFalse(has(s, "Cap at your level"), "not the player's level")
+        assertTrue(has(s, "Below cap by | 30"), s)
+    end)
+end)
+
+test("r6 sm-04: stat, reputation and currency cells show their windows' tooltips, no session line", function()
+    withAlt(function(rec)
+        local s = hover(rec, altCell("stats_base", "strength"))
+        assertEqual(rec[1], "Strength | 61", "the stat's title line")
+        assertTrue(RT.Bar():IsShown() and math.abs(RT.Bar().geom.fill - 0.8) < 1e-9, "its bar")
+        assertFalse(has(s, "Click") or has(s, "Scale:"), "no hint, no live scale: " .. s)
+        local savedGains = SL.KindGainsFor
+        SL.KindGainsFor = function() return 50 end   -- this character's log has gains: not the alt's
+        s = hover(rec, altCell("reputations", "72"))
+        SL.KindGainsFor = savedGains
+        assertEqual(rec[1], "Stormwind", "the faction")
+        assertTrue(has(s, "Standing | Honored") and has(s, "Progress | 3,000 / 12,000"), s)
+        assertFalse(has(s, "This session"), "no session line for an alt")
+        s = hover(rec, altCell("currencies", "1901"))
+        assertTrue(has(s, "Amount | 1,200") and has(s, "Cap | 75,000"), s)
+    end)
+end)
+
+test("r6 sm-04: the main window's own tooltip keeps its bonuses, session and hint lines", function()
+    local e = { key = "leatherworking", name = "Leatherworking", category = "primary", rank = 146, max = 150,
+                modifier = 0, tempPoints = 0, learned = true }
+    local live, alt = {}, {}
+    for _, l in ipairs(RT.Lines(e, "skill", "row")) do live[#live + 1] = l.left or "" end
+    for _, l in ipairs(RT.Lines(e, "skill", "none", { level = 22, faction = "Alliance", race = "Dwarf" })) do
+        alt[#alt + 1] = l.left or ""
+    end
+    assertTrue(has(table.concat(live, "\n"), "Bonuses"), "the main window's")
+    assertFalse(has(table.concat(alt, "\n"), "Bonuses"), "the alt's")
+end)
+
+test("r6 sm-04: an alt's next rank and trainer are asked for that character's level, faction and race", function()
+    withAlt(function(rec)
+        local Tr = NS.Trainers
+        local saved, asked = Tr.NextRank, nil
+        Tr.NextRank = function(self, ...) asked = { ... } return saved(self, ...) end
+        local ok, err = pcall(hover, rec, altCell("primary", "leatherworking"))
+        Tr.NextRank = saved
+        if not ok then error(err, 0) end
+        assertEqual(table.concat({ tostring(asked[4]), tostring(asked[5]), tostring(asked[6]) }, ","),
+            "22,Alliance,Dwarf", "the alt's level, faction and race token")
+    end)
+end)
+
+test("r6 sm-04: a snapshot keeps the race's token beside its localized name", function()
+    local keys, savedChars, savedRace = NS.db.keys, NS.db.global.characters, M.UnitRace
+    local char, realm = keys.char, keys.realm
+    NS.db.global.characters = {}
+    keys.char, keys.realm = "Samplenain Mockbeard", "Samplerealm"
+    M.UnitRace = function() return "Nain", "Dwarf" end
+    local ok, err = pcall(function()
+        local r = NS.Alts:Snapshot(10)
+        assertTrue(r ~= nil, "a record")
+        assertEqual(r.race, "Nain", "the name, as before")
+        assertEqual(r.raceFile, "Dwarf", "and the token")
+    end)
+    M.UnitRace = savedRace
+    keys.char, keys.realm = char, realm
+    NS.db.global.characters = savedChars
+    if not ok then error(err, 0) end
+end)

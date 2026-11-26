@@ -16,7 +16,9 @@ SkillMasterDB
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "<ruleset>-<First Surname>" (forever-quirks-§4);
-                                 -- each { name, class, className, race, faction, level, updated,
+                                 -- each { name, class, className, race, raceFile (UnitRace's token,
+                                 -- R6-SM-04: the Alts tooltips' trainer order; absent in an older
+                                 -- snapshot: no race first), faction, level, updated,
                                  -- skills = { [key] = { name, category, rank, max } },
                                  -- stats = { [key] = { group, value, display, pct } } (FB-33;
                                  -- absent in an older snapshot: the Journal draws a dash),

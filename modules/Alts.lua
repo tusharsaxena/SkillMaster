@@ -2,7 +2,7 @@ local _, NS = ...
 -- modules/Alts.lua — every character's skills, snapshotted into db.global.characters (design §5.2,
 -- §7, plan Task 4.3): on SKILLS_UPDATED (debounced) and at PLAYER_LOGOUT.
 --
--- record = { name, class, className, race, level, faction, updated, skills = { [key] = { name,
+-- record = { name, class, className, race, raceFile, level, faction, updated, skills = { [key] = { name,
 --   category, rank, max } }, stats = { [key] = { group, value, display, pct } }, reps = { [factionID] = { name,
 --   reaction, standing, value, max, exalted } } (SMW-08), currencies = { [currencyID] = { name, quantity,
 --   maxQuantity, icon } } (SMW-09) }, learned rows only.
@@ -137,6 +137,9 @@ function A:Snapshot(t)
     rec.name = NS.db.keys.char
     rec.class, rec.className = classFile, className
     rec.race = UnitRace and UnitRace("player") or rec.race
+    -- The race's token (UnitRace's second return, R6-SM-04): the Journal's Alts tooltips sort that character's
+    -- trainers by it, as NS.Trainers sorts the player's.
+    rec.raceFile = UnitRace and select(2, UnitRace("player")) or rec.raceFile
     rec.faction = UnitFactionGroup and UnitFactionGroup("player") or rec.faction
     rec.level = UnitLevel("player")
     rec.updated = tonumber(t) or time()

@@ -880,8 +880,19 @@ local function newCell(row, c)
     cell.unlearned:SetPoint("TOPLEFT", row, "TOPLEFT", x, -10)
     cell.unlearned:SetWidth(COL_W - 12)
     cell.unlearned:SetJustifyH("LEFT")
-    cell.unlearned:SetText(L["Unlearned"])
+    cell.unlearned:SetText("-")   -- "rename Unlearned to -" (R6-SM-04)
     cell.unlearned:Hide()
+    -- The cell's hover (R6-SM-04): the main window's row tooltip for that character's row, mouse-enabled only
+    -- while the cell has one (bindCell), so an empty, dashed or unlearned cell takes no mouse.
+    cell.hit = CreateFrame("Frame", nil, row)
+    cell.hit:SetPoint("TOPLEFT", row, "TOPLEFT", x - 4, 0)
+    cell.hit:SetSize(COL_W, ALT_ROW_H)
+    cell.hit:EnableMouse(false)
+    cell.hit:SetScript("OnEnter", function(self)
+        local t = cell.tip
+        if t then NS.RowTooltip.ShowEntry(self, t.entry, t.kind, { openFrom = "none", alt = t.alt, group = frame }) end
+    end)
+    cell.hit:SetScript("OnLeave", function(self) NS.RowTooltip.Hide(self) end)
     return cell
 end
 
@@ -909,17 +920,38 @@ function CELL.skill(cell, v)
     local e = { category = v.category or "other", rank = v.rank or 0, max = v.max or 0 }
     drawMiniBar(cell, e.rank, e.max, NS.Rows.FillColor(e))
 end
---- A tree family's Alts sub-tab (SMW-08, SMW-09): its snapshot set and its cell, registered by its module.
-function J.RegisterAltKind(kind, set, draw)
-    ALT_SET[kind], CELL[kind] = set, draw
+-- A snapshot row as the entry its main window's row tooltip reads (R6-SM-04, NS.RowTooltip.Lines): what the
+-- snapshot holds, and nothing it cannot know (no modifier, no stat markers or reference, no description).
+local ALT_ENTRY = {}
+function ALT_ENTRY.skill(v, key, name)
+    return { key = key, name = v.name or name, category = v.category or "other", rank = v.rank or 0,
+             max = v.max or 0, modifier = 0, tempPoints = 0, learned = true }
+end
+function ALT_ENTRY.stat(v, key, name)
+    return { key = key, label = name or key, value = v.value, display = v.display or tostring(v.value), pct = v.pct }
+end
+--- A tree family's Alts sub-tab (SMW-08, SMW-09): its snapshot set, its cell, and its snapshot row as its row
+--- tooltip's entry (`toEntry(v, key, name)`, R6-SM-04), registered by its module.
+function J.RegisterAltKind(kind, set, draw, toEntry)
+    ALT_SET[kind], CELL[kind], ALT_ENTRY[kind] = set, draw, toEntry
+end
+
+--- The tooltip a cell of `kind` shows for character record `r`'s snapshot row `v`: { entry, kind, alt }, or nil.
+function J.AltTip(r, v, key, name, kind)
+    local fn = ALT_ENTRY[kind]
+    if not (r and v and fn) then return nil end
+    return { entry = fn(v, key, name), kind = kind,
+             alt = { level = r.level, faction = r.faction, race = r.raceFile or "" } }
 end
 --- Draw the mini bar on an Alts cell (the tree kinds' cells, J.RegisterAltKind).
 function J.CellBar(cell, value, maxValue, color) drawMiniBar(cell, value, maxValue, color) end
 
-local function bindCell(cell, item, key, kind)
+local function bindCell(cell, item, key, kind, name)
     local r = item and item.record
     local set = r and r[ALT_SET[kind] or "skills"]
     local v = type(set) == "table" and set[key] or nil
+    cell.tip = J.AltTip(r, v, key, name, kind)
+    cell.hit:EnableMouse(cell.tip ~= nil)
     local unlearned = r ~= nil and not v and kind == "skill" and J.CanLearn(r, key)
     cell.unlearned:SetShown(unlearned)
     cell.dash:SetShown(r ~= nil and not v and not unlearned)   -- no character in the column: nothing at all
@@ -935,7 +967,7 @@ local function bindAltRow(p, row, key, name, kind, list, i)
     row.key, row.kind = key, kind
     row.label:SetText(name or key)
     for c = 1, J.MAX_COLS do
-        bindCell(row.cells[c], c <= state.altCols and list[c + state.colOffset] or nil, key, kind)
+        bindCell(row.cells[c], c <= state.altCols and list[c + state.colOffset] or nil, key, kind, name)
     end
     NS.Skin.ListRow(row, (i % 2 == 0) and "stripe" or "normal")
     row:Show()

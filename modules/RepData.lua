@@ -296,7 +296,9 @@ function RD.BarValues(e)
     return { value = e.value or 0, max = math.max(e.max or 1, 1), text = RD.ValueText(e), color = color(e) }
 end
 
-local function lines(e)
+-- `alt` (R6-SM-04): another character's snapshot row, from the Journal's Alts tab: no session line, the log
+-- being the player's.
+local function lines(e, alt)
     local out = { { left = e.name, tone = "heading" } }
     if e.hasBar then
         out[#out + 1] = { left = L["Standing"], right = e.standing or "", tone = "muted", rightTone = "body" }
@@ -310,7 +312,7 @@ local function lines(e)
     if type(e.description) == "string" and e.description ~= "" then
         out[#out + 1] = { left = e.description, tone = "muted" }
     end
-    local log = NS.SessionLog
+    local log = not alt and NS.SessionLog
     local g = log and log.KindGainsFor and log:KindGainsFor(RD.KIND, e.key) or 0
     if g ~= 0 then
         out[#out + 1] = { left = L["This session"], right = (g > 0 and "+" or "") .. NS.Tree.Number(g),
