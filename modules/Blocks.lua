@@ -651,7 +651,7 @@ function Header:SetBlock(id, collapsed, docked)
     self.chevron:Show()   -- a label header (SetLabel) hid it; a header is a pool's own
     NS.Chrome.SetIcon(self.chevron, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")
-    self.chevron.tip = collapsed and L["Expand this block"] or L["Collapse this block"]
+    self.chevron.tip = nil   -- the chevron says it (R5-SM-01: no hint tooltip on a fold)
     -- Detach is the external-link mark; dock (attach) is the same mark turned 180 degrees.
     NS.Chrome.SetIcon(self.detach, "external-link", docked and "+" or "-", not docked)
     self.detach.tip = docked and L["Detach this block into its own frame"] or L["Dock this block in the main window"]

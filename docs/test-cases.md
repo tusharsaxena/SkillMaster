@@ -556,7 +556,7 @@ Total.
 - round6 trainer ranks: past the max height the cards scroll under a skin scroll bar, the wheel and the bar drive it
 - round6 ldb look: a new profile draws the Main window style on its own TOOLTIP frame, the window's size
 - round6 ldb look: the window's headers and rows, the bar with its text inside and the mark at its right
-- round6 ldb look: a block collapsed in the window stays open here; only the header's chevron takes the pointer
+- round6 ldb look: a block collapsed in the window stays open here; the header and its chevron take the pointer
 - round6 ldb look: a row's left and right clicks open nothing
 - round6 ldb look: the window's weapon filter and sort reach both styles
 - round6 ldb look: past its Height the body scrolls, by the wheel and by the skin's scroll bar
@@ -925,11 +925,30 @@ Total.
 - smw-rev: with the window hidden and one statistic pinned, CRITERIA_UPDATE reads the pinned row alone
 - smw-rev: a reputation's later change moves its one Log line to the end, so the Log stays in time order
 - smw-rev: the feeds read the main hand and the level only for a template that shows them
-- smw-rev: a nested header's chevron in the Classic tooltip sits over its chevron, past the indent
+- smw-rev: a nested header's chevron in the Classic tooltip is inside its hit, which spans the line
 - smw-rev: in the Statistics window, Expand all opens every category and Collapse all folds them, the block open
 - smw-rev: in the Reputations window, Collapse all folds the headers; a collapsed block opens on Expand all
 - smw-rev: the skill windows' Expand / Collapse all still collapses and expands their blocks
 - smw-rev: the Character Stats window and feed title the stat blocks without the "Stats ·" prefix
+
+### test_r5_feedback.lua (16)
+
+- r5 sm-01: no fold chevron carries a hint tooltip, in any window or in the LDB tooltip
+- r5 sm-02: in a window, a click on a block header's body and on a tree header's row folds it, at every depth
+- r5 sm-02: in the Main window style LDB tooltip, a click on a section header's body or a tree header's row folds it
+- r5 sm-02: in the Classic LDB tooltip, a header line's hit spans the whole line, at every depth
+- r5 sm-03: a pinned row shows the pin mark in every window, and only a pinned row
+- r5 sm-03: a pinned row's name gives the mark its room, so a long name never runs under it
+- r5 sm-03: the LDB tooltip draws the pin mark on its pinned rows, its Pinned section's included
+- r5 sm-03: the Classic LDB tooltip draws the pin mark on its pinned lines, and only those
+- r5 sm-03: pinning and unpinning a row shows and hides its mark at once
+- r5 sm-04: the six display brokers each draw their own in-game icon; the addon's control broker keeps the logo
+- r5 sm-05: /sm toggle shows all six windows when none shows, and hides them all when any shows
+- r5 sm-05: /sm professions, the Show window entry and its key binding toggle the Professions window alone
+- r5 sm-05: the help says /sm toggle is every window and /sm professions the Professions window
+- r5 sm-05: /sm toggle under the perf hold opens nothing and says the capture line once
+- r5 sm-06: the probe's doubled profession lines draw each profession once, in the windows and the tooltip
+- r5 sm-07: all six windows open while playing raise no Lua error, and /sm toggle closes them all
 
 ### test_preview_trees.lua (6)
 
@@ -1355,6 +1374,7 @@ Total.
 | test_currencies.lua | 9 |
 | test_statistics.lua | 15 |
 | test_smw_review.lua | 15 |
+| test_r5_feedback.lua | 16 |
 | test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
@@ -1386,4 +1406,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **1012** |
+| **Total** | **1028** |

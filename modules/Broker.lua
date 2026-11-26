@@ -72,8 +72,8 @@ local HIDE_POLL = 0.1          -- seconds between the tooltip's leave checks
 
 B.FEEDS = {}
 for fid, fam in NS.EachFamily() do
-    B.FEEDS[fid] = { family = fid, name = fam.feed.name, label = fam.feed.label, title = fam.title,
-                     sections = fam.blocks, short = fam.short, source = fam.source }
+    B.FEEDS[fid] = { family = fid, name = fam.feed.name, label = fam.feed.label, icon = fam.feed.icon,
+                     title = fam.title, sections = fam.blocks, short = fam.short, source = fam.source }
 end
 B.DEFAULT_FEED = "professions"
 -- The two names shipped before the split (a display stores by them).
@@ -673,7 +673,7 @@ if LDB then
             type  = "data source",
             label = f.label,
             text  = f.short,
-            icon  = NS.Constants.LOGO_ICON_PATH,
+            icon  = f.icon or NS.Constants.LOGO_ICON_PATH,   -- its family's (R5-SM-04); the launcher keeps the logo
             OnClick = function(frame, button) B.OnClick(frame, button, fid) end,
             OnEnter = function(frame) B.OnEnter(frame, fid) end,
             OnLeave = function() B.OnLeave() end,

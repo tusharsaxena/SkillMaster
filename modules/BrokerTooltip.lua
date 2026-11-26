@@ -6,14 +6,16 @@ local _, NS = ...
 -- and hover wash, and the content both styles share: each feed's sections (its family's blocks, read
 -- through NS.Blocks.Entries with the tooltip's own Hide sets), its heading, its footer and test mode's line.
 --
--- ONLY THE FOLD TAKES A CLICK (the owner's ask, SMW-07). A section's header carries a chevron; its click
--- folds or unfolds that section in the tooltip alone (B.ToggleTipFold, modules/BrokerFolds.lua) and the
--- lines are drawn again in place. A row's line takes the pointer for its hover wash only: no open, link or
+-- ONLY THE FOLD TAKES A CLICK (the owner's ask, SMW-07). A section's header carries a chevron; a click
+-- anywhere on the header's line (R5-SM-02, the owner's round 5: the whole line is the hit area, at every
+-- depth) folds or unfolds that section in the tooltip alone (B.ToggleTipFold, modules/BrokerFolds.lua) and
+-- the lines are drawn again in place. A row's line takes the pointer for its hover wash only: no open, link or
 -- menu.
 --
 -- B.FillTooltip(tip, which) / B.ReleaseLines() / B.AddHit(tip, row) / B.TooltipEntries(id, skills, stats) /
 -- B.ShownBlocks() / B.Heading() / B.FooterText() / B.AddTestModeLine(tip) / B.Models() / B.Bars() /
--- B.Bands(tip) / B.Hits() / B.Chevrons() / B.HoverWash(tip) / B.ValueInset(tip) / B.BarsDrawn()
+-- B.Bands(tip) / B.PinMarks(tip) / B.Hits() / B.Chevrons() / B.HoverWash(tip) / B.ValueInset(tip) /
+-- B.BarsDrawn()
 
 local B = NS.Broker
 local L = NS.L
@@ -157,6 +159,60 @@ local function stripe(tip, n, i)
 end
 
 -- ---------------------------------------------------------------------------------------------
+-- The pin mark (R5-SM-03, the owner's round 5; the Classic style's, R5-REV): ph:push-pin on a line pinned to
+-- the feed's title, at the name column's right end (where the mini bar starts: a fixed spot, never after the
+-- text), as the window rows draw it (NS.Rows). A texture on the tooltip in its OVERLAY layer, one pool per
+-- tooltip, hidden again with the bars.
+-- ---------------------------------------------------------------------------------------------
+
+local pinMarks = {}   -- [tooltip] = { textures, used = n }
+
+--- Whether `key` is pinned to the feed showing now (NS.Pins.List: the sample's pins in test mode).
+local function pinnedKey(key)
+    if key == nil or not NS.Pins then return false end
+    for _, k in ipairs(NS.Pins.List(B.Feed())) do
+        if k == key then return true end
+    end
+    return false
+end
+
+local function pinMark(tip, n, key)
+    if not pinnedKey(key) then return nil end
+    local line, path = lineRegion(tip, n), NS.Icon("ph:push-pin")
+    if not (line and path and tip.CreateTexture) then return nil end
+    local pool = pinMarks[tip]
+    if not pool then pool = { used = 0 } pinMarks[tip] = pool end
+    pool.used = pool.used + 1
+    local t = pool[pool.used]
+    if not t then
+        t = tip:CreateTexture(nil, "OVERLAY")
+        pool[pool.used] = t
+    end
+    t:SetTexture(path)
+    t:SetSize(NS.Rows.PIN_W, NS.Rows.PIN_W)
+    t:ClearAllPoints()
+    t:SetPoint("RIGHT", line, "LEFT", B.NAME_W - NS.Rows.PIN_GAP, 0)
+    NS.Skin.Mark(t, NS.Chrome.REST)
+    t.skmLine = n
+    t:Show()
+    return t
+end
+
+local function releasePinMarks()
+    for _, pool in pairs(pinMarks) do
+        for i = 1, pool.used do pool[i]:Hide() end
+        pool.used = 0
+    end
+end
+
+--- The pin marks drawn on `tip` now (the suites read them).
+function B.PinMarks(tip)
+    local pool, out = pinMarks[tip], {}
+    for i = 1, pool and pool.used or 0 do out[i] = pool[i] end
+    return out
+end
+
+-- ---------------------------------------------------------------------------------------------
 -- Row hover areas over the tooltip's lines (the wash, never a click), and the sections' fold chevrons
 -- ---------------------------------------------------------------------------------------------
 
@@ -201,7 +257,7 @@ local function newHit()
     return hit
 end
 
--- A section header's chevron: the one thing in the tooltip a click acts on.
+-- A section header's fold: the one thing in the tooltip a click acts on, laid over the header's whole line.
 local function newChevron()
     local b = CreateFrame("Button", nil, UIParent)
     b:RegisterForClicks("LeftButtonUp")
@@ -218,34 +274,8 @@ function B.Hits() return hitPool.active or {} end
 --- The tooltip's section chevrons now (the suites read them).
 function B.Chevrons() return chevronPool.active or {} end
 
-B.CHEVRON_W = 16   -- the chevron's hit width at a header line's left end
-B.INDENT_PX = 12   -- one tree level's indent, when the client cannot measure it in the line's font
-
 -- A tree header's line leads with its depth's indent (four spaces a level, addTreeRow) and then its chevron.
 local INDENT = "    "
-local measure   -- a hidden font string the indent is measured on, made on first use
-
---- The width of `depth` levels of indent in `line`'s font: measured as "<indent>x" less "x" (so a trailing
---- space is never trimmed off), else depth * B.INDENT_PX.
-function B.IndentWidth(line, depth)
-    depth = depth or 0
-    if depth <= 0 then return 0 end
-    local face, size, flags
-    if line and line.GetFont then face, size, flags = line:GetFont() end
-    if face and not measure then
-        local host = CreateFrame("Frame", nil, UIParent)   -- hidden: the string is measured, never drawn
-        host:Hide()
-        measure = host:CreateFontString(nil, "BACKGROUND")
-    end
-    if face and measure and measure:SetFont(face, size, flags) ~= false then
-        measure:SetText(INDENT:rep(depth) .. "x")
-        local with = tonumber(measure:GetStringWidth()) or 0
-        measure:SetText("x")
-        local w = with - (tonumber(measure:GetStringWidth()) or 0)
-        if w > 0 then return w end
-    end
-    return depth * B.INDENT_PX
-end
 
 local function addChevron(tip, row, line)
     local b = NS.Pool.Acquire(chevronPool, newChevron)
@@ -253,9 +283,11 @@ local function addChevron(tip, row, line)
     b:SetParent(tip)
     b:SetFrameLevel(tip:GetFrameLevel() + LAYERS.LEVEL.CHROME)
     b:ClearAllPoints()
-    -- Over the chevron where it is drawn: a nested tree header's sits past its indent (SMW-REV).
-    b:SetPoint("LEFT", line, "LEFT", -2 + B.IndentWidth(line, row.depth), 0)
-    b:SetSize(B.CHEVRON_W, (line.GetHeight and line:GetHeight() or 12) + 2)
+    -- Over the header's whole line, as a row's hover area lies (R5-SM-02): a click anywhere on it folds,
+    -- a nested tree header's included (its chevron past the indent, SMW-REV, is inside the line).
+    b:SetPoint("LEFT", line, "LEFT", -2, 0)
+    b:SetPoint("RIGHT", tip, "RIGHT", -4, 0)
+    b:SetHeight((line.GetHeight and line:GetHeight() or 12) + 2)
     b:Show()
 end
 
@@ -286,6 +318,7 @@ function B.ReleaseLines()
     if ownTip then NS.Chrome.RestoreTooltipFonts(ownTip) end
     if GameTooltip then NS.Chrome.RestoreTooltipFonts(GameTooltip) end
     releaseBands()
+    releasePinMarks()
     hideHovers()
     NS.Widgets.ReleaseBars(barPool)
     NS.Pool.ReleaseAll(hitPool)
@@ -338,6 +371,7 @@ local function addSkillRow(tip, e, i)
     sizeRow(tip, n)
     stripe(tip, n, i)
     if e.learned and (e.max or 0) > 0 and showsBar() then drawMiniBar(tip, n, values) end
+    pinMark(tip, n, e.key)
     return { line = n, kind = "skill", key = e.key }
 end
 
@@ -406,6 +440,7 @@ local function addStatRow(tip, e, i)
         values.color = NS.Rows.FillColor(e, true)
         drawMiniBar(tip, n, values)
     end
+    pinMark(tip, n, e.key)
     return { line = n, kind = "stat", key = e.key }
 end
 
@@ -437,6 +472,7 @@ local function addTreeRow(tip, r, i)
         drawMiniBar(tip, n, values)
     end
     if r.header then return { line = n, node = e.nodeKey, family = spec.family, depth = r.depth } end
+    pinMark(tip, n, e.key)
     return { line = n, kind = r.kind, key = e.key }
 end
 
@@ -518,7 +554,7 @@ end
 
 --- The tooltip's footer: what the feed's label does on a click, and the one click the tooltip takes.
 function B.FooterText()
-    return L["Click label: toggle window \194\183 Right-click label: options \194\183 Click a chevron to fold"]
+    return L["Click label: toggle window \194\183 Right-click label: options \194\183 Click a header to fold"]
 end
 
 --- The blocks the Main window style draws for the feed showing now, in the window's block order

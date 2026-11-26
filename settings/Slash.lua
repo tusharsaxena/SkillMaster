@@ -34,7 +34,9 @@ NS.COMMANDS = {
     {"skin",        L["Choose a skin: open the skin picker"],     function() NS.RunSkinVerb() end},
     {"show",        L["Show the Professions window"],             function() NS.MainWindow.Show() end},
     {"hide",        L["Hide every Skill Master window"],          function() NS.Windows.HideAll() end},
-    {"toggle",      L["Show or hide the Professions window"],     function() NS.MainWindow.Toggle() end},
+    -- Every window at once (R5-SM-05, the owner's round 5): `/sm professions` is the Professions window's verb,
+    -- the one the launcher's Show window entry and its key binding share (Documented deviations, launcher-§6).
+    {"toggle",      L["Show or hide every Skill Master window"],  function() NS.Windows.ToggleAll() end},
     -- One verb per family window (SMW-04), in the family order: each its window's one toggle handler.
     {"professions", L["Show or hide the Professions window"],     function() NS.Windows.Toggle("professions") end},
     {"skills",      L["Show or hide the Skills window: weapon skills and other skills"],

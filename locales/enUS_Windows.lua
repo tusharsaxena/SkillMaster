@@ -35,6 +35,7 @@ L["Shows or hides the Statistics window: the character panel's Statistics tab."]
 L["Show the Professions window"] = true
 L["Hide every Skill Master window"] = true
 L["Show or hide the Professions window"] = true
+L["Show or hide every Skill Master window"] = true
 L["Show or hide the Skills window: weapon skills and other skills"] = true
 L["Show or hide the Character Stats window"] = true
 L["Show or hide the Currencies window"] = true
@@ -68,14 +69,8 @@ L["Nothing pinned."] = true
 L["Each broker's pins: their order, and unpin."] = true
 
 -- The LDB tooltip: only the fold acts (modules/BrokerTooltip.lua, modules/BrokerPanel.lua, settings/Tooltips.lua, SMW-07).
-L["Click label: toggle window \194\183 Right-click label: options \194\183 Click a chevron to fold"] = true
-L["Fold this section in the tooltip"] = true
-L["Unfold this section in the tooltip"] = true
-L["Main window draws the LDB tooltip as the main window: its block headers, rows, bars and fonts, the window's sort and filter, at the Width and Height below. Classic is the tooltip lines with mini bars. In both, a section's chevron folds it in the tooltip alone."] = true
-
--- The tree rows (modules/Rows.lua SetTree, SMW-08): a header's fold chevron.
-L["Fold"] = true
-L["Unfold"] = true
+L["Click label: toggle window \194\183 Right-click label: options \194\183 Click a header to fold"] = true
+L["Main window draws the LDB tooltip as the main window: its block headers, rows, bars and fonts, the window's sort and filter, at the Width and Height below. Classic is the tooltip lines with mini bars. In both, a click on a section's header folds it in the tooltip alone."] = true
 
 -- Reputations (modules/RepData.lua, modules/Window.lua, SMW-08, #6).
 L["No reputations to show yet."] = true

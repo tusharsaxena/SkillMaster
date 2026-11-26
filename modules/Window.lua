@@ -17,6 +17,7 @@ local addonName, NS = ...
 --
 -- NS.Windows.New(fid) -> W (once per family, at load) / .Get(fid) / .Each() / .Settings(fid) / .Point(fid)
 --   / .EmptyText(fid) / .HasLegend(fid) / .ForBlock(id) (the window a docked block draws in) / .Toggle(fid)
+--   / .ToggleAll() (`/sm toggle`: every window)
 --   / .RefreshAll(relayout) / .RefreshValuesAll() / .ApplyAll() / .HideAll() / .StandDownAll()
 --   / .ResetPositions() / .AnyShown() / .AllRows() (every shown window's rows, the overlay sync's)
 --   / .ShowAndScrollTo(key) / .TopStrata() (the highest window strata, the trainer popup's)
@@ -922,6 +923,21 @@ end
 function Windows.Toggle(fid)
     local W = byFamily[fid]
     return W and W.Toggle() or false
+end
+
+--- `/sm toggle` (R5-SM-05, the owner's round 5): hide every family window while any shows, else show all six.
+--- While stood down it opens nothing and answers the one refusal line once, as each window's toggle would.
+--- Answers whether the windows are shown after.
+function Windows.ToggleAll()
+    local refusal = NS.StoodDownRefusal()
+    if refusal then NS.Print(refusal) return false end
+    if Windows.AnyShown() then
+        Windows.HideAll()
+        return false
+    end
+    local shown = true
+    for _, W in Windows.Each() do shown = W.Show() and shown end
+    return shown
 end
 
 function Windows.RefreshAll(relayout)

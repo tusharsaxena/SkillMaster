@@ -1,5 +1,5 @@
 <Bindings>
-	<!-- Show window (launcher-§6), first: clicks the plain, hidden SkillMasterToggleWindow button that modules/MainWindow.lua creates at load, whose click toggles the Professions window, the handler the launcher's Show window entry, /sm toggle and /sm professions run. -->
+	<!-- Show window (launcher-§6), first: clicks the plain, hidden SkillMasterToggleWindow button that modules/MainWindow.lua creates at load, whose click toggles the Professions window, the handler the launcher's Show window entry and /sm professions run (/sm toggle shows or hides every window, R5-SM-05). -->
 	<Binding name="CLICK SkillMasterToggleWindow:LeftButton" category="BINDING_HEADER_SKILLMASTER"/>
 	<!-- The other five family windows (SMW-04), in the family order (defaults/Families.lua): each clicks a plain, hidden button created beside it, whose click toggles that window, the handler its /sm verb and its launcher entry run. The names are permanent once shipped. -->
 	<Binding name="CLICK SkillMasterToggleSkills:LeftButton" category="BINDING_HEADER_SKILLMASTER"/>

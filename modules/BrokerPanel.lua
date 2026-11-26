@@ -11,11 +11,12 @@ local addonName, NS = ...
 -- the tooltip's own Width and Height (tooltips.ldb.width / .height, the window's default size to
 -- start). The footer keeps the feed's click hints.
 --
--- ONLY THE FOLD TAKES A CLICK (the owner's ask, SMW-07). A block header's chevron folds or unfolds that
--- section in the tooltip alone (NS.Broker.ToggleTipFold, tooltips.ldb.folds; the window's collapse is
--- untouched), and the body is drawn again in place at its scroll offset; the rest of the header takes no
--- pointer. A row opens, links and menus nothing here and arms no secure overlay; it keeps the window's
--- hover, the wash and the row tooltip (with no click hint). Test mode's strip takes no click either.
+-- ONLY THE FOLD TAKES A CLICK (the owner's ask, SMW-07). A click anywhere on a block header, or on a tree
+-- header's row, folds or unfolds that section in the tooltip alone (R5-SM-02, the owner's round 5: the whole
+-- header row is the hit area; NS.Broker.ToggleTipFold / ToggleTipNode, tooltips.ldb.folds; the window's
+-- collapse is untouched), and the body is drawn again in place at its scroll offset. The header's other
+-- marks take no pointer. A leaf row opens, links and menus nothing here and arms no secure overlay; it keeps
+-- the window's hover, the wash and the row tooltip (with no click hint). Test mode's strip takes no click.
 --
 -- Shown, hidden and kept up by NS.Broker's showing machinery (OnEnter / OnLeave / HideTooltip):
 -- NS.Broker.Tip() answers this frame in this style. P.Frame() / P.Fill([keepScroll]) / P.Scroll() /
@@ -103,10 +104,16 @@ local function rowLeave(self)
     if NS.RowTooltip then NS.RowTooltip.Hide(self) end
 end
 
---- A pooled window row dressed for the panel on each fill: no click of any button on the row or its
---- go icon, the panel's own hover, and `openFrom` "none" (the row tooltip then gives no click hint).
+-- A tree header's row: a click anywhere on it folds it in the tooltip's own folds (R5-SM-02; row.onFold).
+local function treeHeaderClick(row, button)
+    if button ~= "RightButton" then NS.Rows.Fold(row) end
+end
+
+--- A pooled window row dressed for the panel on each fill: no click of any button on a leaf row or its go
+--- icon (a tree header's row folds), the panel's own hover, and `openFrom` "none" (the row tooltip then
+--- gives no click hint).
 local function dressRow(row)
-    row:SetScript("OnClick", nil)
+    row:SetScript("OnClick", row.treeHeader and treeHeaderClick or nil)
     row:SetScript("OnMouseDown", nil)
     row:SetScript("OnEnter", rowEnter)
     row:SetScript("OnLeave", rowLeave)
@@ -125,11 +132,12 @@ local MARKS = { "sort", "filter", "detach", "restore" }
 
 local function foldClick(h) NS.Broker.ToggleTipFold(h.id) end
 
---- A header as the tooltip's: the chevron says and flips the tooltip's own fold; the header's body and
---- every other mark take no pointer, and are not drawn (detach and restore are window actions, and the
---- sort and filter marks went in round 8, R8-4, the rows following the window's order and filter).
-local function stillHeader(h, folded)
-    h:EnableMouse(false)
+--- A header as the tooltip's: the chevron says the tooltip's own fold, and a click anywhere on the header
+--- flips it (R5-SM-02); every other mark takes no pointer and is not drawn (detach and restore are window
+--- actions, and the sort and filter marks went in round 8, R8-4, the rows following the window's order and
+--- filter).
+local function stillHeader(h)
+    h:EnableMouse(true)
     for _, k in ipairs(MARKS) do
         if h[k] then h[k]:EnableMouse(false) end
     end
@@ -139,7 +147,7 @@ local function stillHeader(h, folded)
     h.filter:Hide()
     h.onFold = foldClick
     h.chevron:EnableMouse(true)
-    h.chevron.tip = folded and L["Unfold this section in the tooltip"] or L["Fold this section in the tooltip"]
+    h.chevron.tip = nil   -- the chevron says it (R5-SM-01: no hint tooltip on a fold)
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -266,7 +274,7 @@ local function layBlock(id, skills, stats, y, models)
     h:SetPoint("TOPRIGHT", host, "TOPRIGHT", 0, -y)
     local collapsed = NS.Broker.TipFolded(id)
     h:SetBlock(id, collapsed, true)
-    stillHeader(h, collapsed)
+    stillHeader(h)
     y = y + NS.Blocks.HEADER_H
     if not collapsed then
         y = NS.Blocks.LayRows(entries, host, rowPool, y, "row", 0)

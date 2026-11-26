@@ -2,8 +2,8 @@ local _, NS = ...
 -- modules/MainWindow.lua — NS.MainWindow, the thin shim over the Professions window (item SMW-04 of
 -- docs/superpowers/plans/2026-11-26-skillmaster-windows.md), and the key bindings. The window itself is
 -- modules/Window.lua's factory, one instance per family; the Professions one keeps the old window's
--- frame name, its `/sm show|hide|toggle` verbs, the launcher's Show window entry and the
--- SkillMasterToggleWindow binding. A call that concerned the old one window as a whole (a refresh, the
+-- frame name, its `/sm show` verb, the launcher's Show window entry and the SkillMasterToggleWindow binding
+-- (`/sm professions` runs the same toggle; `/sm toggle` is every window's since R5-SM-05). A call that concerned the old one window as a whole (a refresh, the
 -- applied settings, a stand-down, Reset position, scroll to a skill) now reaches every family window.
 
 local L = NS.L

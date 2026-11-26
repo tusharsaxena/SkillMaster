@@ -487,7 +487,7 @@ function D.Render(id)
     local collapsed = settings(id).collapsed
     NS.Chrome.SetIcon(f.collapse, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")
-    f.collapse.tip = collapsed and NS.L["Expand this block"] or NS.L["Collapse this block"]
+    f.collapse.tip = nil   -- the chevron says it (R5-SM-01: no hint tooltip on a fold)
     NS.Blocks.PaintSort(f.sort, id)
     if f.filter then NS.Blocks.PaintFilter(f.filter, id) end
     f.ownScale = settings(id).scale or 1

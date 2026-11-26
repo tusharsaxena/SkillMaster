@@ -694,7 +694,7 @@ test("round7 go icon: a tooltip row's left, shift and right clicks do nothing, o
         row.act:__fire("OnClick", "LeftButton")
         assertEqual(table.concat(got, ","), "", "no open, no menu, no link")
         assertEqual(BP6.Frame().footer:GetText(), Br6.FooterText(), "the footer says a chevron folds")
-        assertTrue(Br6.FooterText():find("chevron", 1, true) ~= nil)
+        assertTrue(Br6.FooterText():find("header to fold", 1, true) ~= nil)   -- R5-SM-02: a click on the header
     end)
 end)
 

@@ -9,9 +9,10 @@
 | `help` | the library's help | answers |
 | `config` | `NS.OpenOptionsPanel` | answers |
 | `skin` | `NS.RunSkinVerb` → `O.SkinVerb` | refused (one line) |
-| `show` / `toggle` | `NS.MainWindow.Show` / `Toggle`: the Professions window (the shim over `NS.Windows`, SMW-04) | refused |
+| `show` | `NS.MainWindow.Show`: the Professions window (the shim over `NS.Windows`, SMW-04) | refused |
+| `toggle` | `NS.Windows.ToggleAll`: every family window, hidden while any shows, else all six shown (R5-SM-05; Documented deviations, launcher-§6) | refused |
 | `hide` | `NS.Windows.HideAll`: every family window | refused |
-| `professions` / `skills` / `stats` / `currencies` / `reputations` / `statistics` | `NS.Windows.Toggle(<family>)`: that window's one toggle handler, shared with its key binding (SMW-04) | refused |
+| `professions` / `skills` / `stats` / `currencies` / `reputations` / `statistics` | `NS.Windows.Toggle(<family>)`: that window's one toggle handler, shared with its key binding (SMW-04); `professions`' is also the launcher's Show window entry's | refused |
 | `journal` | `NS.Journal.Toggle`: the Journal window | refused |
 | `lock` / `unlock` | `NS.SetByPath("locked", ...)` then the stored echo | refused |
 | `test` | `NS.ToggleTestMode` | refused |

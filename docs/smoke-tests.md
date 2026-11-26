@@ -1319,3 +1319,46 @@ none is passed until you say so.
   Combat, Spell & Regen, Defense & Resists and Utility, with no "Stats ·" in front; so do the Character Stats
   feed's tooltip sections in both styles. Detach one: the detached frame reads "Stats · Base & Combat" as before.
   Result:
+
+## Owner feedback round 5 (R5-SM, 2026-11-26)
+
+- **SM-R5-1** (new, R5-SM-01) Hover a fold chevron in each window (a block header's in Professions, a category's
+  in Statistics, a header's in Reputations) and in the LDB tooltip (a section's chevron, a tree header's): no hint
+  tooltip appears ("Fold this section in the tooltip", "Unfold", "Collapse this block" are gone). The other header
+  marks (detach, sort, filter) still show theirs.
+  Result:
+- **SM-R5-2** (new, R5-SM-02) In the Professions window, click a block header's title or the empty band right of
+  it: the block collapses, and a second click opens it. In the Statistics window, click a category's name (not
+  its chevron): it unfolds; click a sub-category's name one level in: it unfolds too. Do the same in the LDB
+  tooltip, Tooltip style Main window (a section header's band, a Statistics category's row) and Classic (anywhere
+  on a header line, a nested one included): each folds and unfolds in the tooltip alone, the window untouched.
+  The footer reads "Click a header to fold".
+  Result:
+- **SM-R5-3** (new, R5-SM-03) Pin two professions and a stat (row menu, Pin to the ... broker), and a reputation:
+  each pinned row shows a small pin mark at the right end of its name column, in its window and in its feed's
+  LDB tooltip (both its Pinned section and its own section). The marks stand in one column whatever the names'
+  lengths, a long name stops short of the mark, and the bars do not move. Switch Tooltips > Tooltip style to
+  Classic and hover the feed again: each pinned line shows the mark just left of its mini bar (R5-REV). Unpin
+  one: its mark goes at once.
+  Result:
+- **SM-R5-4** (new, R5-SM-04) Put the six Skill Master feeds on your display bar (Titan Panel or the like): each
+  draws its own icon (Professions an anvil and hammer, Skills a sword, Character Stats the Strength icon,
+  Currencies a pile of coins, Reputations a guild tabard, Statistics a note), none a green or blank square and
+  none the Ka0s logo. The addon's own control broker (Ka0s Skill Master) and the minimap button keep the logo.
+  Result:
+- **SM-R5-5** (new, R5-SM-05) With every window closed, `/sm toggle`: all six windows open (Professions where the
+  old window stood, each other where you last dropped it). `/sm toggle` again: all six close. Open one window
+  (`/sm statistics`) and `/sm toggle`: it closes and nothing else opens. `/sm professions` opens and closes the
+  Professions window alone; so do the minimap button's Show window and its key binding (Options → Keybindings →
+  Ka0s Skill Master → Toggle Professions window). `/sm help` lists `toggle` as "Show or hide every Skill Master
+  window".
+  Result:
+- **SM-R5-6** (new, R5-SM-06) With Leatherworking, Skinning, Cooking, First Aid and Fishing learned, open the
+  Professions and Skills windows and hover the Skill Master feed in both tooltip styles: each profession is listed
+  once (the client lists each twice, a parent and a child line), and none shows up again under Other.
+  Result:
+- **SM-R5-7** (new, R5-SM-07) `/sm toggle` to open all six windows, then play for a while: gain reputation and a
+  currency, skill up, fight, level if you can, unfold categories in the Statistics and Reputations windows, and
+  hover every feed in both tooltip styles. No Lua error, and `/sm diagnostics` lists no rejected event. `/sm toggle`
+  closes all six.
+  Result:

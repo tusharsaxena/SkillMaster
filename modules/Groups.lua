@@ -610,7 +610,7 @@ local function setSub(sh, id)
     sh.title:SetText(NS.BlockDefs[id].title)
     local collapsed = NS.Blocks.Settings(id).collapsed
     NS.Chrome.SetIcon(sh.chevron, collapsed and "chevron-right" or "chevron-down", collapsed and ">" or "v")
-    sh.chevron.tip = collapsed and L["Expand this block"] or L["Collapse this block"]
+    sh.chevron.tip = nil   -- the chevron says it (R5-SM-01: no hint tooltip on a fold)
     NS.Blocks.PaintSort(sh.sort, id)
     NS.Blocks.PaintFilter(sh.filter, id)
     sh.note:Hide()

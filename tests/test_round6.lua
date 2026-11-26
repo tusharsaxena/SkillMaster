@@ -816,8 +816,9 @@ test("round6 ldb look: the window's headers and rows, the bar with its text insi
 end)
 
 -- Re-pinned by SMW-07 (the owner's ruling: the tooltip keeps its own fold state): a block collapsed in the
--- window is open here until its tooltip chevron folds it, and only that chevron takes the pointer.
-test("round6 ldb look: a block collapsed in the window stays open here; only the header's chevron takes the pointer", function()
+-- window is open here until its tooltip header folds it. Re-pinned by R5-SM-02 (the owner's round 5): the
+-- whole header takes the click, its chevron included.
+test("round6 ldb look: a block collapsed in the window stays open here; the header and its chevron take the pointer", function()
     withFeedTip("window", function()
         NS.db.profile.layout.blocks.weapon.collapsed = true
         Br.OnEnter(M.UIParent, "skills")
@@ -834,7 +835,7 @@ test("round6 ldb look: a block collapsed in the window stays open here; only the
         Br.OnEnter(M.UIParent, "skills")
         rawset(weapon, "EnableMouse", nil)
         rawset(weapon.chevron, "EnableMouse", nil)
-        assertEqual(calls[1], false, "the header's body takes no click")
+        assertEqual(calls[1], true, "the header's body takes the click (R5-SM-02)")
         assertEqual(chev[#chev], true, "its chevron does")
     end)
 end)

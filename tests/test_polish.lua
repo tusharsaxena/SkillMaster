@@ -129,7 +129,7 @@ test("broker: the footer reads as the mockup; a right-click opens the Broker set
     B.FillTooltip(tip)
     local footer = lines[#lines]
     -- SMW-07: a row takes no click in the tooltip; a section's chevron folds it.
-    assertTrue(footer:find("Click label: toggle window \194\183 Right-click label: options \194\183 Click a chevron to fold",
+    assertTrue(footer:find("Click label: toggle window \194\183 Right-click label: options \194\183 Click a header to fold",
         1, true) ~= nil, footer)
 
     local H, opened = NS.Helpers, {}
