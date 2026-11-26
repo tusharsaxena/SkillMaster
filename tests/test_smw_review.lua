@@ -380,3 +380,32 @@ test("smw-rev: with the window hidden and one statistic pinned, CRITERIA_UPDATE 
         assertEqual(SD:Get("130:9001").text, "70", "the hidden window's categories read as it comes back")
     end)
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- The session log
+-- ---------------------------------------------------------------------------------------------
+
+test("smw-rev: a reputation's later change moves its one Log line to the end, so the Log stays in time order", function()
+    local SL = NS.SessionLog
+    local savedLog, savedStart = NS.db.char.log, SL:SessionStart()
+    NS.db.char.log = {}
+    SL:ResetFloor()
+    SL:NewSession(1000)
+    local ok, err = pcall(function()
+        SL:AddChange("reputation", "21", "Booty Bay", 6000, 6100, 1000)
+        SL:Add("fishing", 50, 51, 1100)
+        local e = SL:AddChange("reputation", "21", "Booty Bay", 6100, 6250, 1200)
+        local log = SL:Entries()
+        assertEqual(#log, 2, "still one line for the faction")
+        assertEqual(log[1].key, "fishing", "the skill-up first")
+        assertEqual(log[2], e, "the faction's line last")
+        assertEqual(e.t, 1200, "at its latest change")
+        assertEqual(e.old .. ">" .. e.new, "6000>6250", "the session's whole change")
+        for i = 2, #log do assertTrue(log[i - 1].t <= log[i].t, "in time order") end
+        assertEqual(SL:KindGainsFor("reputation", "21"), 250)
+    end)
+    NS.db.char.log = savedLog
+    SL:NewSession(savedStart)
+    SL:ResetFloor()
+    if not ok then error(err, 0) end
+end)

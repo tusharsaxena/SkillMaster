@@ -54,7 +54,8 @@ local function newLog(store, start, entryOf)
 
     --- Record a reputation's or currency's change (SMW-08, SMW-09): `kind` its row kind, `key` its id, `name`
     --- what the Log shows. One entry per kind and key per session, its `new` (and time) moved on by each later
-    --- change, so a session of kills is one line, not one per kill. Answers the entry, or nil.
+    --- change and the entry moved to the end, so a session of kills is one line, not one per kill, and the log
+    --- stays in time order (the Journal draws it, and the trim drops from it, by position). Answers the entry.
     function SL:AddChange(kind, key, name, old, new, t, zone)
         if type(kind) ~= "string" or type(key) ~= "string" or type(new) ~= "number" then return nil end
         local log = store()
@@ -65,6 +66,10 @@ local function newLog(store, start, entryOf)
             if e.t < sessionStart then break end
             if e.kind == kind and e.key == key then
                 e.new, e.t, e.zone = new, t, zone or e.zone
+                if i < #log then
+                    table.remove(log, i)
+                    log[#log + 1] = e
+                end
                 return e
             end
         end
