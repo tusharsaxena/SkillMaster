@@ -479,3 +479,82 @@ test("smw-rev: a nested header's chevron in the Classic tooltip sits over its ch
         if not ok then error(err, 0) end
     end, tree)
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- Expand / Collapse all in a tree window
+-- ---------------------------------------------------------------------------------------------
+
+local function clickToggleAll(W)
+    local b = W.Frame().toggleAllButton
+    b:GetScript("OnClick")(b, "LeftButton")
+    M.__fireTimers()
+    W.Render()
+    return b
+end
+
+test("smw-rev: in the Statistics window, Expand all opens every category and Collapse all folds them, the block open", function()
+    withStatistics(function(spy)
+        local W = NS.Windows.Get("statistics")
+        W.Show()
+        statisticsRows()
+        local block = NS.Blocks.DockedIn("statistics")[1]
+        assertFalse(W.AnyExpanded(), "every category folded: the control expands")
+        local b = clickToggleAll(W)
+        assertFalse(NS.Blocks.Settings(block).collapsed, "the block stays open")
+        for _, id in ipairs({ 130, 140, 141, 150 }) do
+            assertFalse(NS.Tree.IsFolded("statistics", id), id .. " open")
+        end
+        assertTrue(spy.calls.GetStatistic > 0, "the opened categories read")
+        assertTrue(W.AnyExpanded(), "now it collapses")
+        assertEqual(b.tip, NS.L["Collapse all headers"])
+        clickToggleAll(W)
+        for _, id in ipairs({ 130, 140, 141, 150 }) do
+            assertTrue(NS.Tree.IsFolded("statistics", id), id .. " folded")
+        end
+        assertFalse(NS.Blocks.Settings(block).collapsed, "the block itself still open: its categories show")
+        assertEqual(b.tip, NS.L["Expand all headers"])
+    end)
+end)
+
+test("smw-rev: in the Reputations window, Collapse all folds the headers; a collapsed block opens on Expand all", function()
+    withFactions(function()
+        installFactions(factions())
+        RD:Read()
+        local W = NS.Windows.Get("reputations")
+        W.Show()
+        W.Refresh(true)
+        local block = NS.Blocks.DockedIn("reputations")[1]
+        local was = NS.Blocks.Settings(block).collapsed
+        local ok, err = pcall(function()
+            assertTrue(W.AnyExpanded(), "Alliance is open")
+            clickToggleAll(W)
+            assertTrue(NS.Tree.IsFolded("reputations", "469") and NS.Tree.IsFolded("reputations", "1169"),
+                "Alliance and Other folded")
+            assertFalse(NS.Blocks.Settings(block).collapsed, "the block open")
+            NS.Blocks:SetCollapsed(block, true)
+            assertFalse(W.AnyExpanded(), "a collapsed block: the control expands")
+            clickToggleAll(W)
+            assertFalse(NS.Blocks.Settings(block).collapsed, "the block opened")
+            assertFalse(NS.Tree.IsFolded("reputations", "469"), "and its headers")
+        end)
+        NS.Blocks:SetCollapsed(block, was)
+        if not ok then error(err, 0) end
+    end)
+end)
+
+test("smw-rev: the skill windows' Expand / Collapse all still collapses and expands their blocks", function()
+    local W = NS.Windows.Get("professions")
+    W.Show()
+    local ids = NS.Blocks.DockedIn("professions")
+    local saved = {}
+    for i, id in ipairs(ids) do saved[i] = NS.Blocks.Settings(id).collapsed end
+    local ok, err = pcall(function()
+        NS.Blocks:SetCollapsedFor(ids, false)
+        W.Render()
+        local b = W.Frame().toggleAllButton
+        assertEqual(b.tip, NS.L["Collapse all blocks"])
+    end)
+    for i, id in ipairs(ids) do NS.Blocks:SetCollapsed(id, saved[i]) end
+    NS.Windows.HideAll()
+    if not ok then error(err, 0) end
+end)

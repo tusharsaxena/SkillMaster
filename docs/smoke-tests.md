@@ -1192,7 +1192,7 @@ none is passed until you say so.
   Result:
 - **SM-REP-3** (new, SMW-08) Click a header's chevron (or the header row) in the window: it folds there, and
   the Reputation tab's own headers do not move. `/reload`: the fold is kept. Expand / Collapse all in the title
-  bar collapses the block.
+  bar folds and opens every header, the block left open (SMW-REV).
   Result:
 - **SM-REP-4** (new, SMW-08) Gain reputation (kill a faction's mob, or turn in a quest): the bar moves within a
   moment, the Journal's Log shows one line for that faction with "+N", growing with each later gain this
@@ -1308,4 +1308,10 @@ none is passed until you say so.
   tooltip, then click Wealth's chevron (one level in): Wealth unfolds. On the Reputations feed, click Steamwheedle
   Cartel's chevron (under Alliance or Horde): it folds and unfolds. A click on the chevron where it is drawn acts,
   at every depth.
+  Result:
+- **SM-REV-5** (new, SMW-REV) In the Statistics window, with every category folded, the title bar's control reads
+  "Expand all headers": click it, and every category and sub-category opens with its values. It then reads
+  "Collapse all headers": click it, and every category folds, the categories still listed. The Reputations and
+  Currencies windows do the same with their headers; the Professions, Skills and Character Stats windows still
+  collapse and expand their blocks ("Collapse all blocks").
   Result:

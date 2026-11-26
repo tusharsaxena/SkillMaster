@@ -103,5 +103,9 @@ L["Category"] = true
 L["Reputation: %s +%d"] = true
 L["Currency: %s +%d"] = true
 
+-- A tree window's Expand / Collapse all control folds and opens its headers (modules/Window.lua, SMW-REV).
+L["Expand all headers"] = true
+L["Collapse all headers"] = true
+
 -- `true` only documents the key: replace each with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

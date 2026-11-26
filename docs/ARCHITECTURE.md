@@ -177,7 +177,9 @@ settings like any other, with schema rows on the Layout page (T5.1), and every a
 through `NS.SetByPath` (architecture-§5): the block header and the detached frame's buttons
 (`NS.Blocks:Detach` / `:Dock` / `:SetCollapsed`), the Block order drag list (`:Move`, every changed
 `order` inside one bulk bracket, one `LAYOUT_CHANGED`), the window's one Expand / Collapse all control
-(`:SetAllCollapsed`, every docked block's `collapsed` inside one bulk bracket, one `LAYOUT_CHANGED`)
+(`:SetAllCollapsed`, every docked block's `collapsed` inside one bulk bracket, one `LAYOUT_CHANGED`; in a tree
+window, Reputations, Currencies and Statistics, it folds and opens the tree's headers instead, `NS.Tree.SetAll`, the
+block left open, SMW-REV)
 and `/sm set`. The `docked` and `collapsed`
 rows' `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`) stores the value and waits out combat;
 `order` stores plainly, its `onChange` `NS.Blocks.OrderChanged`. The seam logs each write

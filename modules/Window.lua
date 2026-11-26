@@ -228,17 +228,51 @@ function Windows.New(fid)
     local function openJournal()
         if NS.Journal and NS.Journal.Toggle then NS.Journal.Toggle() end
     end
-    --- Whether any docked block that draws rows is expanded: the one Expand / Collapse all control
-    --- then collapses, else it expands (the two are one control, feedback round 2).
-    function W.AnyExpanded()
-        local _, _, models = NS.Blocks.Data()
-        for _, id in ipairs(NS.Blocks.DockedIn(fid)) do
-            if not NS.Blocks.Settings(id).collapsed and #NS.Blocks.EntriesFrom(id, models) > 0 then return true end
+    -- A tree family's window (SMW-08..10; SMW-REV): its control folds and opens the tree's headers
+    -- (NS.Tree.SetAll), the block itself left open, so Expand all opens every Statistics category; a tree
+    -- with no header, and the skill and stat windows, collapse and expand their blocks.
+    local isTree = NS.Families[fid] ~= nil and NS.Families[fid].tree == true
+
+    -- Block `id`'s tree entries in `models` when it has a header to fold, else nil.
+    local function headedTree(id, models)
+        local d = isTree and NS.BlockDefs[id]
+        local m = d and models[d.source]
+        if type(m) ~= "table" or type(m.order) ~= "table" then return nil end
+        for _, e in ipairs(m.order) do if e.header and e.nodeKey ~= nil then return m.order end end
+        return nil
+    end
+
+    local function anyHeaderOpen(entries)
+        for _, e in ipairs(entries) do
+            if e.header and e.nodeKey ~= nil and not NS.Tree.IsFolded(fid, e.nodeKey) then return true end
         end
         return false
     end
 
-    local function toggleAll() NS.Blocks:SetCollapsedFor(NS.Blocks.DockedIn(fid), W.AnyExpanded()) end
+    --- Whether any docked block that draws rows is expanded (a tree's: open, with a header unfolded): the one
+    --- Expand / Collapse all control then collapses, else it expands (the two are one control, feedback round 2).
+    function W.AnyExpanded()
+        local _, _, models = NS.Blocks.Data()
+        for _, id in ipairs(NS.Blocks.DockedIn(fid)) do
+            if not NS.Blocks.Settings(id).collapsed and #NS.Blocks.EntriesFrom(id, models) > 0 then
+                local tree = headedTree(id, models)
+                if not tree or anyHeaderOpen(tree) then return true end
+            end
+        end
+        return false
+    end
+
+    local function toggleAll()
+        local collapse = W.AnyExpanded()
+        local _, _, models = NS.Blocks.Data()
+        local blocks = {}
+        for _, id in ipairs(NS.Blocks.DockedIn(fid)) do
+            local tree = headedTree(id, models)
+            if tree then NS.Tree.SetAll(fid, tree, collapse) end
+            if not (tree and collapse) then blocks[#blocks + 1] = id end   -- a tree's block stays open
+        end
+        NS.Blocks:SetCollapsedFor(blocks, collapse)
+    end
 
     --- Show the control as what a click does now: Collapse all (inward arrows) while a block is open,
     --- Expand all (outward arrows) once every one is collapsed.
@@ -247,7 +281,11 @@ function Windows.New(fid)
         if not b then return end
         local collapse = W.AnyExpanded()
         NS.Chrome.SetIcon(b, collapse and "fullscreen-exit" or "fullscreen-enter", collapse and "-" or "+")
-        NS.Chrome.SetTip(b, collapse and L["Collapse all blocks"] or L["Expand all blocks"])
+        if isTree then
+            NS.Chrome.SetTip(b, collapse and L["Collapse all headers"] or L["Expand all headers"])
+        else
+            NS.Chrome.SetTip(b, collapse and L["Collapse all blocks"] or L["Expand all blocks"])
+        end
         b.collapses = collapse
     end
 
