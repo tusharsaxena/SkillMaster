@@ -576,9 +576,13 @@ function Compat.CanToggleCurrencyHeaders()
     return api ~= nil and type(api.ExpandCurrencyList) == "function"
 end
 
---- Whether `frame` (ReputationFrame, TokenFrame: the panel tab that shares the list's collapse) is shown.
+--- Whether `frame` (ReputationFrame, TokenFrame: the panel tab that shares the list's collapse) is on screen.
+--- Visible, not shown: the character panel hides the tabs it leaves and never clears the shown flag of the one
+--- it closes on, so a Reputation tab last viewed stays IsShown() with CharacterFrame closed.
 function Compat.PanelShown(frame)
-    return type(frame) == "table" and type(frame.IsShown) == "function" and frame:IsShown() == true
+    if type(frame) ~= "table" then return false end
+    if type(frame.IsVisible) == "function" then return frame:IsVisible() == true end
+    return type(frame.IsShown) == "function" and frame:IsShown() == true
 end
 
 -- ---------------------------------------------------------------------------------------------

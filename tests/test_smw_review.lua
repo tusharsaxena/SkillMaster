@@ -98,3 +98,102 @@ test("smw-rev: a currency with no cap is pinnable from its row's menu; a header 
         assertEqual(pinRowOf(header), nil, "a header pins nothing")
     end)
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- A Reputation tab: Alliance (Stormwind), then Other (collapsed: Thorium Brotherhood)
+-- ---------------------------------------------------------------------------------------------
+
+local RD = NS.RepData
+
+local function factions()
+    return {
+        { id = 469, name = "Alliance", header = true, kids = {
+            { id = 72, name = "Stormwind", reaction = 6, lo = 9000, hi = 21000, cur = 12672 },
+        } },
+        { id = 1169, name = "Other", header = true, collapsed = true, kids = {
+            { id = 59, name = "Thorium Brotherhood", reaction = 5, lo = 3000, hi = 9000, cur = 4000 },
+        } },
+    }
+end
+
+local function flatFactions(tree)
+    local out = {}
+    local function walk(nodes)
+        for _, n in ipairs(nodes) do
+            out[#out + 1] = n
+            if n.kids and not n.collapsed then walk(n.kids) end
+        end
+    end
+    walk(tree)
+    return out
+end
+
+local function factionData(n)
+    return { factionID = n.id, name = n.name, isHeader = n.header or false, isChild = false,
+             isHeaderWithRep = false, isCollapsed = n.collapsed or false, reaction = n.reaction or 4,
+             currentReactionThreshold = n.lo or 0, nextReactionThreshold = n.hi or 0, currentStanding = n.cur or 0 }
+end
+
+local function installFactions(tree)
+    local spy, byID = { expand = 0, collapse = 0 }, {}
+    local function index(nodes)
+        for _, n in ipairs(nodes) do byID[n.id] = n; if n.kids then index(n.kids) end end
+    end
+    index(tree)
+    spy.byID = byID
+    M.C_Reputation = {
+        GetNumFactions = function() return #flatFactions(tree) end,
+        GetFactionDataByIndex = function(i) local n = flatFactions(tree)[i]; return n and factionData(n) end,
+        GetFactionDataByID = function(id) local n = byID[id]; return n and factionData(n) end,
+        ExpandFactionHeader = function(i)
+            spy.expand = spy.expand + 1
+            flatFactions(tree)[i].collapsed = false
+        end,
+        CollapseFactionHeader = function(i) spy.collapse = spy.collapse + 1; flatFactions(tree)[i].collapsed = true end,
+    }
+    return spy
+end
+
+local function withFactions(fn)
+    local saved = { M.C_Reputation, M.ReputationFrame, M.InCombatLockdown, M.GetText, M.UnitSex }
+    local savedFold, savedPins, savedLog = NS.db.char.fold, NS.db.char.pins, NS.db.char.log
+    NS.db.char.fold, NS.db.char.pins, NS.db.char.log = {}, {}, {}
+    M.GetText = function() return "Friendly" end
+    M.UnitSex = function() return 2 end
+    M.InCombatLockdown = function() return false end
+    RD:Reset()
+    local ok, err = pcall(fn)
+    M.C_Reputation, M.ReputationFrame, M.InCombatLockdown, M.GetText, M.UnitSex = unpack(saved, 1, 5)
+    NS.db.char.fold, NS.db.char.pins, NS.db.char.log = savedFold, savedPins, savedLog
+    RD:Reset()
+    NS.Windows.HideAll()
+    if not ok then error(err, 0) end
+end
+
+-- A panel tab the character panel last showed, then closed: its own shown flag stays up, but it is not visible.
+local function closedPanelTab()
+    return { IsShown = function() return true end, IsVisible = function() return false end,
+             HookScript = function() end }
+end
+
+test("smw-rev: a Reputation or Currency tab left selected in a closed character panel does not block the full read", function()
+    withFactions(function()
+        local spy = installFactions(factions())
+        M.ReputationFrame = closedPanelTab()
+        assertEqual(NS.SharedList.Blocked(RD.LIST), nil, "the panel is closed: nothing blocks")
+        local m = RD:Read()
+        assertTrue(m.complete, "read in full")
+        assertEqual(spy.expand, 1, "the collapsed Other opened")
+        assertTrue(RD:Get(59) ~= nil, "Thorium Brotherhood, under it, is in")
+        M.ReputationFrame = { IsShown = function() return true end, IsVisible = function() return true end,
+                              HookScript = function() end }
+        assertEqual(NS.SharedList.Blocked(RD.LIST), "panel shown", "a tab on screen still blocks")
+    end)
+    withCurrencies(function()
+        local spy = installCurrencies(currencies())
+        M.TokenFrame = closedPanelTab()
+        local m = CD:Read()
+        assertTrue(m.complete, "the currencies read in full too")
+        assertEqual(spy.expand, 1)
+    end)
+end)

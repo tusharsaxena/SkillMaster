@@ -1286,3 +1286,11 @@ none is passed until you say so.
 - **SM-SMW-2** (new, SMW-12) `/sm help` lists the six window verbs; the README's Usage and FAQ match what you see
   (Character Stats are the paper doll's numbers, Statistics the Statistics tab's counters; no gold row).
   Result:
+
+## Review fixes (SMW-REV, 2026-11-26)
+
+- **SM-REV-1** (new, SMW-REV) Collapse Other in the character panel's Reputation tab, leave the panel on that tab
+  and close it, then `/reload`: the Reputations window lists Other's factions at once, without opening the panel
+  on another tab first, and the Reputation tab is still collapsed as you left it. Do the same on the Currency tab
+  for the Currencies window.
+  Result:
