@@ -89,11 +89,14 @@ function SB.Ids()
     return out
 end
 
--- The model family `family` draws now (test mode's sample, or the live one), through the block engine.
+-- The model family `family` draws now: test mode's sample (the block engine's source), else its own provider's
+-- live model alone (never every provider's: a def is read on every render).
 local function modelOf(family)
-    local fam = NS.Families[family]
-    local models = NS.Blocks and NS.Blocks.Models and NS.Blocks.Models() or {}
-    return fam and models[fam.source] or nil
+    local fam, B = NS.Families[family], NS.Blocks
+    if not (fam and B) then return nil end
+    if B.source then return (B.Models() or {})[fam.source] end
+    local provider = B.PROVIDERS and B.PROVIDERS[fam.source]
+    return provider and provider.model() or nil
 end
 
 local function headerIn(order, node)
