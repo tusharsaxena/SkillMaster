@@ -49,15 +49,15 @@ end)
 test("profile switch: the broker feed re-reads the new profile's template", function()
     -- red under: a reloadProfile that never calls NS.Broker.Refresh, so a feed keeps the old
     -- profile's text until the next skill pass.
-    local default = NS.defaults.profile.broker.template
-    NS.SetByPath("broker.template", "review {level}")
+    local default = NS.defaults.profile.broker.feeds.professions.template
+    NS.SetByPath("broker.feeds.professions.template", "review {level}")
     assertTrue(tostring(NS.Broker.Text()):find("^review ") ~= nil, "the write reached the feed")
     withProfile("ReviewBroker", function(db)
         db:SetProfile("ReviewBroker")
         assertTrue(tostring(NS.Broker.Text()):find("^review ") == nil,
             "the new profile's template is drawn, got " .. tostring(NS.Broker.Text()))
     end)
-    NS.SetByPath("broker.template", default)
+    NS.SetByPath("broker.feeds.professions.template", default)
 end)
 
 test("profile switch: the Journal takes the new profile's drop point and size", function()
@@ -113,7 +113,7 @@ test("test mode: a sample row's menu cannot pin the sample skill into the charac
     -- red under: a pin row that writes db.char.pinned from a test-mode row, so the sample
     -- character's skill outlives the preview in SavedVariables and drives the live {pinned}.
     NS.db.char = NS.db.char or {}
-    local before = NS.db.char.pinned
+    local before = #NS.Pins.Stored("skills")
     assertTrue(NS.ToggleTestMode() == true, "test mode on")
     local ok, err = pcall(function()
         local row = { kind = "skill", entry = { key = "guns", name = "Guns", category = "weapon", rank = 105,
@@ -123,10 +123,9 @@ test("test mode: a sample row's menu cannot pin the sample skill into the charac
         assertTrue(pin ~= nil, "the menu still lists the pin")
         assertTrue(pin.disabled == true, "grayed out while test mode is on")
         pin.onClick("pin", pin)
-        assertEqual(NS.db.char.pinned, before, "and a click writes nothing")
+        assertEqual(#NS.Pins.Stored("skills"), before, "and a click writes nothing")
     end)
     NS.ToggleTestMode()
-    NS.db.char.pinned = before
     if not ok then error(err, 0) end
     assertTrue(not NS.IsTestMode(), "test mode off again")
 end)

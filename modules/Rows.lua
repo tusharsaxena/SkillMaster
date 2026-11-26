@@ -8,7 +8,8 @@ local _, NS = ...
 -- only). Pooled (NS.Pool, ordered).
 --
 -- NS.Rows.NewPool() / Acquire(pool, parent, styleKey) / ReleaseAll(pool)
--- row:SetSkill(entry), row:SetStat(entry), row:SetStripe(index), row.entry, row.kind ("skill"|"stat"),
+-- row:SetSkill(entry), row:SetStat(entry), row:SetTree(treeRow) (a tree family's, SMW-08), row:SetStripe(index),
+-- row.entry, row.kind ("skill"|"stat"|a tree kind), row.tree (a tree row's NS.Tree.Rows record),
 -- R.OpenFrom(row) -> "row"|"icon" (row.openFrom, a host's own, else Layout > Window's)
 -- Pure helpers the tooltip, the broker and the journal reuse: SkillValues(entry), FillColor(entry),
 -- StatValues(entry), UnlearnedText(entry), TrainerFor(entry), Place(trainer), Money(copper),
@@ -240,7 +241,7 @@ end
 
 --- The icon well: the entry's icon, gray while unlearned, sized, cropped and edged as Bars > Icons
 --- says (by default 16 px, the 0.07 crop and a 1 px border in the row's color, FB-14).
-local function paintIcon(row, color, kind, key, learned)
+local function paintIcon(row, color, kind, key, learned, tex)
     local h = row.baseH or bars().rowHeight or 20
     local st = R.IconStyle(color or NS.SkinColor("sm.barFill"), h)
     local f = row.iconFrame
@@ -255,7 +256,7 @@ local function paintIcon(row, color, kind, key, learned)
     row.icon:ClearAllPoints()
     row.icon:SetPoint("TOPLEFT", f, "TOPLEFT", inset, -inset)
     row.icon:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -inset, inset)
-    row.icon:SetTexture(R.Icon(kind, key))
+    row.icon:SetTexture(tex or R.Icon(kind, key))
     row.icon:SetTexCoord(st.crop, 1 - st.crop, st.crop, 1 - st.crop)
     row.icon:SetDesaturated(learned == false)
 end
@@ -345,6 +346,86 @@ function Row:SetStat(e)
     self.bar:SetValues(v)
 end
 
+-- ---------------------------------------------------------------------------------------------
+-- A tree family's row (SMW-08..10; modules/Tree.lua): a header (its fold chevron and title, indented by its
+-- depth, with a bar when its kind gives it values) or a leaf (a bar or a value). What each kind draws is its
+-- spec's (NS.Tree.Kind); the row has no action mark, and its plain click folds a header in the window.
+-- ---------------------------------------------------------------------------------------------
+
+R.FOLD_W = 14   -- the fold chevron's width at a tree header's left
+R.TREE_NAME_W = R.NAME_W + 40   -- a reputation or currency name is longer than a skill's
+
+--- A tree header's fold chevron: the window's fold (NS.Tree.Toggle), or the host's own (`row.onFold`, the LDB
+--- tooltip's: SMW-07, its folds are its alone).
+function R.Fold(row)
+    local e = row.entry
+    if not (e and e.nodeKey ~= nil) then return nil end
+    if row.onFold then return row.onFold(row) end
+    return NS.Tree.Toggle(row.family, e.nodeKey)
+end
+
+local function foldMark(row)
+    if row.fold then return row.fold end
+    row.fold = NS.Chrome.HeaderMark(row, "chevron-down", "v", function() R.Fold(row) end)
+    NS.Chrome.SetRestToken(row.fold, NS.Chrome.REST)
+    row.fold:Hide()
+    return row.fold
+end
+
+local function placeTree(row, r, icon)
+    local x = R.PAD + (r.indent or 0)
+    local fold = foldMark(row)
+    fold:SetShown(r.header == true)
+    if r.header then
+        fold:ClearAllPoints()
+        fold:SetPoint("LEFT", row, "LEFT", x, 0)
+        NS.Chrome.SetIcon(fold, r.chevron or "chevron-down", r.folded and ">" or "v")
+        fold.tip = r.folded and L["Unfold"] or L["Fold"]
+        x = x + R.FOLD_W + 2
+    end
+    row.iconFrame:SetShown(icon ~= nil)
+    row.name:ClearAllPoints()
+    if icon then
+        row.iconFrame:ClearAllPoints()
+        row.iconFrame:SetPoint("LEFT", row, "LEFT", x, 0)
+        row.name:SetPoint("LEFT", row.iconFrame, "RIGHT", R.PAD, 0)
+        x = x + R.ICON + R.PAD
+    else
+        row.name:SetPoint("LEFT", row, "LEFT", x, 0)
+    end
+    row.name:SetWidth(math.max(40, R.TREE_NAME_W - (r.indent or 0) - (x - R.PAD - (r.indent or 0))))
+end
+
+local function treeIcon(row, spec, e)
+    local tex = spec.icon and spec.icon(e)
+    if not (tex and icons().show ~= false) then return nil end
+    paintIcon(row, nil, row.kind, e.key, true, tex)
+    return tex
+end
+
+--- Draw tree row `r` (NS.Tree.Rows' shape: { kind, entry, depth, indent, header, folded, chevron }) as its
+--- kind's spec says and Rows show allows.
+function Row:SetTree(r)
+    local e, spec = r.entry, NS.Tree.Kind(r.kind) or {}
+    self.kind, self.entry, self.tree, self.family = r.kind, e, r, spec.family
+    self.treeHeader = r.header == true
+    setName(self, e.name or "", false)
+    if r.header then NS.Skin.Text(self.name, "heading") end
+    setHint(self, nil)
+    local icon = treeIcon(self, spec, e)
+    placeTree(self, r, icon)
+    setLearnedLook(self, true)
+    setAct(self, false)
+    self.bar:SetTimer(nil)
+    local v = spec.values and spec.values(e)
+    local mode = R.Display()
+    if not v or mode == "text" then
+        return showValueOnly(self, spec.valueText and spec.valueText(e) or "")
+    end
+    if mode == "bar" then v.text = "" end
+    self.bar:SetValues(v)
+end
+
 --- The alternate-row stripe (list.stripe), or the plain row.
 function Row:SetStripe(i)
     self.stripe = i % 2 == 0
@@ -398,15 +479,14 @@ local function onLeave(self)
     unhoverOverlay(self)
 end
 
--- The window's row hover, for the LDB panel's rows in its go icon mode (round 7, R7-6): the
--- overlay arming, the wash, the row tooltip and the mark's hot watch, as a window row has them.
+-- The window's row hover: the overlay arming, the wash, the row tooltip and the mark's hot watch.
 R.RowEnter, R.RowLeave = onEnter, onLeave
 
 --- Where a left click on `row` opens it from (Layout > Window > Open a row from, round 8, R8-1):
 --- "row" (Full row, the default: anywhere on the row does what its go icon does) or "icon" (Go icon
 --- only: the row's own plain click opens nothing). A main window, detached or merged window row
---- reads the window's setting; a row its host dressed with its own (`row.openFrom`, the LDB
---- panel's: Tooltips > LDB tooltip > Open a row from) reads that.
+--- reads the window's setting; a row its host dressed with its own (`row.openFrom`: the LDB panel's
+--- "none", SMW-07, where nothing opens) reads that.
 function R.OpenFrom(row)
     local own = row and row.openFrom
     if own then return own end
@@ -419,6 +499,7 @@ end
 -- crafting or character-panel row's plain left click lands on its secure overlay first, which in
 -- Full row is laid over the whole row (modules/SecureOverlay.lua SO.CoverFor).
 local function onClick(self, button)
+    if self.treeHeader and button ~= "RightButton" then return R.Fold(self) end
     if not (NS.Interact and self.entry) then return end
     if R.OpenFrom(self) == "row" then return NS.Interact.OnMarkClick(self, button) end
     NS.Interact.OnRowClick(self, button)
@@ -530,6 +611,10 @@ local function park(row)
     if NS.SecureOverlay and NS.SecureOverlay.Forget then NS.SecureOverlay.Forget(row) end
     row.bar:SetTimer(nil)
     row.entry, row.kind, row.marked = nil, nil, nil
+    -- A tree row's own look goes with it, so the pool's next skill or stat row starts plain.
+    row.tree, row.family, row.treeHeader, row.onFold = nil, nil, nil, nil
+    if row.fold then row.fold:Hide() end
+    row.name:SetWidth(R.NAME_W)
     row:ClearAllPoints()
 end
 
@@ -540,6 +625,9 @@ function R.ReleaseAll(pool) NS.Pool.ReleaseAll(pool, park) end
 function R.RefreshValues(pool, lookup)
     for _, row in ipairs(pool.active) do
         local e = row.entry and (lookup(row) or row.entry)
-        if e and row.kind == "skill" then row:SetSkill(e) elseif e then row:SetStat(e) end
+        if e and row.tree then
+            row.tree.entry = e
+            row:SetTree(row.tree)
+        elseif e and row.kind == "skill" then row:SetSkill(e) elseif e then row:SetStat(e) end
     end
 end

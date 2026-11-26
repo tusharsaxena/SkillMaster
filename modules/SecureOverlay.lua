@@ -4,8 +4,8 @@ local _, NS = ...
 --
 -- Two kinds, each laid over the hovered row's ACTION MARK alone in Open a row from's Go icon only
 -- (owner feedback round 4: the mark is the action), or over the WHOLE ROW in its Full row, the
--- default (round 8, R8-1; SO.CoverFor), on the main window's, the detached frames', the merged
--- windows' and (round 7, R7-6) the LDB panel's rows (its own Open a row from):
+-- default (round 8, R8-1; SO.CoverFor), on the main window's, the detached frames' and the merged
+-- windows' rows (never the LDB tooltip's, which open nothing since SMW-07):
 --   * "spell": one SecureActionButtonTemplate per profession that opens a window by a cast (catalog
 --     `openSpell`: the crafts, Cooking, First Aid, Smelting for Mining), `type1 = "spell"`, `spell =`
 --     the localized spell name.
@@ -257,6 +257,14 @@ local function place(b, row, clip)
     return true
 end
 
+--- Every shown family window that is not being dragged: `scan(rows, frame, its scroll)` each (SMW-04).
+local function scanWindows(scan)
+    for _, W in ipairs(NS.Windows and NS.Windows.Shown() or {}) do
+        local f = W.Frame()
+        if not moving[f] then scan(W.Rows(), f, f.scroll) end
+    end
+end
+
 --- Every shown row that wants an overlay, with its host frame and clip: [key] = { row, host, clip,
 --- kind, spell }. Only the hovered row (see the header).
 local function wanted()
@@ -269,8 +277,7 @@ local function wanted()
             end
         end
     end
-    local W = NS.MainWindow
-    if W and W.IsShown() and not moving[W.Frame()] then scan(W.Rows(), W.Frame(), W.Frame().scroll) end
+    scanWindows(scan)   -- every shown family window's rows (SMW-04)
     local D = NS.Detached
     for _, id in ipairs(D and NS.BLOCKS or {}) do
         local f = D.Frame(id)
@@ -282,11 +289,7 @@ local function wanted()
         local f = G.Frame(gid)
         if not moving[f] then scan(G.Rows(gid), f, nil) end
     end
-    -- The LDB tooltip's Main window style (round 7, R7-6; either Open a row from since round 8): its
-    -- rows, clipped to its scrolled body, while it shows.
-    local P = NS.BrokerPanel
-    local pf = P and P.Armed and P.Armed() and P.Frame()
-    if pf then scan(P.Rows(), pf, pf.list) end
+    -- The LDB tooltip's rows are never scanned: nothing opens from them (SMW-07, the owner's ask).
     return out
 end
 

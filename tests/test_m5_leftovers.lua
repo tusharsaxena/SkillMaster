@@ -101,9 +101,9 @@ test("settings: fill direction, both strata and the column count each have a liv
     -- red under: none of the four rows (the player's "customization options for every visual element").
     local want = {
         ["bars.fillDirection"]    = { "LEFT,RIGHT", "LEFT" },
-        ["layout.strata"]         = { "BACKGROUND,HIGH,LOW,MEDIUM", "MEDIUM" },
+        ["windows.professions.strata"] = { "BACKGROUND,HIGH,LOW,MEDIUM", "MEDIUM" },   -- SMW-04: each window's
         ["layout.detachedStrata"] = { "BACKGROUND,HIGH,LOW,MEDIUM", "MEDIUM" },
-        ["layout.columns"]        = { "1,2", 1 },
+        ["windows.stats.columns"] = { "1,2", 1 },
     }
     for path, w in pairs(want) do
         local row = rowOf(path)
@@ -116,7 +116,7 @@ end)
 
 test("settings: a strata row's tooltip is the library's, over the row's own values (frame-layering-§1)", function()
     local O = NS.Helpers
-    for _, path in ipairs({ "layout.strata", "layout.detachedStrata" }) do
+    for _, path in ipairs({ "windows.professions.strata", "windows.statistics.strata", "layout.detachedStrata" }) do
         local row = rowOf(path)
         local tip = O.StrataTooltip(NS.Constants.LAYERS.STRATA_CHOICES)
         assertTrue(type(row.desc) == "string" and row.desc:find(tip, 1, true) ~= nil, path .. " carries StrataTooltip")
@@ -139,10 +139,10 @@ test("fill direction: right to left anchors the fill, the bonus and the spark on
 end)
 
 test("strata: the window and a detached block take their rows' strata live; overlays sit one strata over the host's", function()
-    local W, D, layout = NS.MainWindow, NS.Detached, NS.db.profile.layout
+    local W, D, layout = T.windows, NS.Detached, NS.db.profile.layout
     NS.ToggleTestMode()   -- the sample's Leatherworking row carries a crafting overlay
     W.Show()
-    NS.SetByPath("layout.strata", "LOW")
+    NS.SetByPath("windows.professions.strata", "LOW")
     assertEqual(W.Frame():GetFrameStrata(), "LOW", "the window")
     local lw
     for _, row in ipairs(W.Rows()) do if row.entry and row.entry.key == "leatherworking" then lw = row end end
@@ -162,9 +162,9 @@ test("strata: the window and a detached block take their rows' strata live; over
     assertEqual(D.Frame("other"):GetFrameStrata(), "HIGH", "the detached block")
     assertEqual(NS.TrainerPopup.Strata(), "DIALOG", "the trainer popup sits over a High detached block")
     NS.SetByPath("layout.detachedStrata", "MEDIUM")
-    NS.SetByPath("layout.strata", "HIGH")
+    NS.SetByPath("windows.professions.strata", "HIGH")
     assertEqual(NS.TrainerPopup.Strata(), "DIALOG", "and over a High window")
-    NS.SetByPath("layout.strata", "MEDIUM")
+    NS.SetByPath("windows.professions.strata", "MEDIUM")
     assertEqual(NS.TrainerPopup.Strata(), "HIGH", "and is High over Medium ones")
     layout.blocks.other.docked = true
     D.Refresh()
@@ -179,17 +179,17 @@ test("columns: two columns lay the docked blocks side by side in a window twice 
         W.Show()
         local one = W.ContentWidth()
         local seen = {}
-        for _, id in ipairs(NS.Blocks.Docked()) do
+        for _, id in ipairs(NS.Blocks.DockedIn("professions")) do
             local h = W.HeaderFor(id)
             if h then seen[h:GetParent()] = true end
         end
         local n = 0
         for _ in pairs(seen) do n = n + 1 end
         assertEqual(n, 1, "one column by default")
-        NS.SetByPath("layout.columns", 2)
+        NS.SetByPath("windows.professions.columns", 2)
         assertTrue(W.ContentWidth() > one * 1.9, "the body is two columns wide")
         seen, n = {}, 0
-        for _, id in ipairs(NS.Blocks.Docked()) do
+        for _, id in ipairs(NS.Blocks.DockedIn("professions")) do
             local h = W.HeaderFor(id)
             if h then seen[h:GetParent()] = true end
         end
@@ -199,7 +199,7 @@ test("columns: two columns lay the docked blocks side by side in a window twice 
             assertTrue(seen[row:GetParent()] ~= nil, "every row sits in a column")
         end
     end)
-    NS.SetByPath("layout.columns", 1)
+    NS.SetByPath("windows.professions.columns", 1)
     NS.ToggleTestMode()
     W.Hide()
     if not ok then error(err, 0) end
@@ -218,21 +218,21 @@ end
 test("sim: a row's menu cannot pin while a simulation runs, and can again after it", function()
     -- red under: the pin guard reading test mode alone, so a simulated row writes db.char.pinned.
     NS.db.char = NS.db.char or {}
-    local before = NS.db.char.pinned
+    local before = #NS.Pins.Stored("skills")
     assertTrue(NS.Sim:Start({ scenario = NS.SimHost.SCENARIO }) ~= false, "the simulation starts")
     local ok, err = pcall(function()
         local pin = pinRow("bows")
         assertTrue(pin.disabled == true, "grayed out while the simulation runs")
         pin.onClick("pin", pin)
-        assertEqual(NS.db.char.pinned, before, "and a click writes nothing")
+        assertEqual(#NS.Pins.Stored("skills"), before, "and a click writes nothing")
     end)
     NS.Sim:Stop("stop")
-    if not ok then NS.db.char.pinned = before error(err, 0) end
+    if not ok then error(err, 0) end
     local pin = pinRow("bows")
     assertTrue(not pin.disabled, "live again once it stops")
     pin.onClick("pin", pin)
-    assertEqual(NS.db.char.pinned, "bows", "a live pin writes")
-    NS.db.char.pinned = before
+    assertEqual(NS.Pins.Stored("skills")[#NS.Pins.Stored("skills")], "bows", "a live pin writes")
+    NS.Pins.Remove("skills", "bows")
 end)
 
 -- ---------------------------------------------------------------------------------------------
@@ -253,7 +253,8 @@ test("test mode: the broker's {pinned} and {equippedWeapon} are the sample chara
         NS.ToggleTestMode()
     end)
     if NS.IsTestMode() then NS.ToggleTestMode() end
-    local live = NS.Broker.Context()
+    local live = NS.Broker.Context("skills")   -- SMW-05: Riding (Other) shows on the Skills feed
+    local liveHand = live.mainHand   -- read on first use (SMW-REV), so while the slot answers "maces"
     NS.SkillHelpers.WeaponSkillInSlot = realSlot
     NS.db.char.pinned = before
     if not ok then error(err, 0) end
@@ -262,7 +263,7 @@ test("test mode: the broker's {pinned} and {equippedWeapon} are the sample chara
     assertTrue(tostring(NS.Template.Render("{equippedWeapon}", ctx)):find("^" .. NS.L["Guns"]) ~= nil,
         "the token renders the sample's Guns")
     assertEqual(live.pinned, "riding", "off, the live pin again")
-    assertEqual(live.mainHand, "maces", "and the live main hand")
+    assertEqual(liveHand, "maces", "and the live main hand")
 end)
 
 -- ---------------------------------------------------------------------------------------------

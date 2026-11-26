@@ -8,30 +8,32 @@ NS.defaults = {
         scale   = 1,        -- the main window's scale (0.5 .. 2)
         alpha   = 1,        -- the main window's opacity (0 .. 1)
         locked  = false,    -- the main window cannot be dragged while true
-        -- Drag-only geometry, no control sets it: written by modules/MainWindow.lua alone
-        -- (architecture-§5's named-owner rule; docs/ARCHITECTURE.md names the writer).
-        window = { point = false },
+        -- The six family windows (SMW-04, modules/Window.lua; defaults/Families.lua): each its own size,
+        -- columns, summary strip and strata (rows on Layout > Window), and its drop point, `point`, drag-only
+        -- geometry no control sets, written by modules/Window.lua alone (architecture-§5's named-owner rule;
+        -- docs/ARCHITECTURE.md names the writer). schemaVersion 14 moved the old one window's
+        -- `window.point` and `layout.width/maxHeight/fitHeight/columns/summary/strata` to `professions`.
+        -- The summary strip (level, session skill-ups, next rank) is on for the two skill windows only.
+        windows = {
+            professions = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1, summary = true, strata = "MEDIUM" },
+            skills      = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1, summary = true, strata = "MEDIUM" },
+            stats       = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1, summary = false, strata = "MEDIUM" },
+            currencies  = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1, summary = false, strata = "MEDIUM" },
+            reputations = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1, summary = false, strata = "MEDIUM" },
+            statistics  = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1, summary = false, strata = "MEDIUM" },
+        },
         -- T3.2 the main window's body and the blocks (modules/Blocks.lua). `blocks[id].point` is
         -- named non-setting state (the detached frames' drag writes it); every other key has a row
         -- on the Layout page (T5.1), and `docked`, `order` and `collapsed` write through NS.Blocks.
         layout = {
-            -- The main window's width, px: 420 since the rows' marks moved into the header's column
-            -- and the bar's timer inside it, which gave every bar 18 px back (feedback round 2).
-            width     = 420,
-            maxHeight = 560,     -- the window's height; it scrolls past this
-            -- Shrink the window to its rows (up to maxHeight). Off by default: the window keeps its
-            -- height when blocks collapse or expand (owner feedback round 3).
-            fitHeight = false,
-            blockGap  = 0,       -- px between two docked blocks
-            summary   = true,    -- the strip under the title: level, session gains, next alert
-            columns   = 1,       -- the window's body: 1 or 2 columns of docked blocks, each `width` wide
+            -- The window size, columns, summary strip and strata moved to `windows.<family>` (SMW-04).
+            blockGap  = 0,       -- px between two docked blocks, in every family window
             -- Open a row from (round 8, R8-1; NS.Rows.OpenFrom): "row" (Full row), a left click
             -- anywhere on a main window, detached or merged window row does what its go icon does;
             -- "icon" (Go icon only), the go icon alone opens it.
             openFrom  = "row",
-            -- The player's strata (frame-layering-§1: BACKGROUND, LOW, MEDIUM or HIGH): the main
-            -- window's, and every detached block's. The crafting overlays take their host's.
-            strata         = "MEDIUM",
+            -- The player's strata (frame-layering-§1: BACKGROUND, LOW, MEDIUM or HIGH) for every detached
+            -- block (each family window's own is `windows.<family>.strata`). The crafting overlays take their host's.
             detachedStrata = "MEDIUM",
             -- Layout > Detached windows (round 5, R5-7): one style for every detached window
             -- (modules/Detached.lua D.ApplyStyle). scale multiplies each block's own; alpha is the
@@ -73,6 +75,11 @@ NS.defaults = {
                 stats_spell   = { docked = true, order = 6, collapsed = false, point = false, scale = 1, width = 280, locked = false, shown = true, sort = "name", filter = "all" },
                 stats_defense = { docked = true, order = 7, collapsed = false, point = false, scale = 1, width = 280, locked = false, shown = true, sort = "name", filter = "all" },
                 stats_utility = { docked = true, order = 8, collapsed = false, point = false, scale = 1, width = 280, locked = false, shown = true, sort = "name", filter = "all" },
+                -- The tree families' one block each (SMW-08..10): its rows keep the client's order (no sort) and
+                -- fold per header (char.fold), so no sort or filter of its own takes effect.
+                currencies    = { docked = true, order = 9, collapsed = false, point = false, scale = 1, width = 320, locked = false, shown = true },
+                reputations   = { docked = true, order = 10, collapsed = false, point = false, scale = 1, width = 320, locked = false, shown = true },
+                statistics    = { docked = true, order = 11, collapsed = false, point = false, scale = 1, width = 320, locked = false, shown = true },
             },
         },
         -- Rows a player hid from the row menu (T3.3) or the Skills and Stats pages, whether unlearned
@@ -197,10 +204,12 @@ NS.defaults = {
             -- window's default size to start), or "classic", the tooltip lines with mini bars (barWidth,
             -- 128 keeps its old 380 px, and fontSize, read by that style only). A new profile starts on
             -- "window"; schemaVersion 8 kept every profile that existed before on "classic".
-            -- openFrom (round 7, R7-6): "row" (Full row), a Main window style row opens from anywhere
-            -- on it, doing what its go icon does, or "icon" (Go icon only), from its go icon alone.
-            -- "row" since round 8 (R8-1; unreleased, no migration).
-            ldb = { style = "window", width = 420, height = 560, barWidth = 128, fontSize = 12, openFrom = "row" },
+            -- SMW-07: only a section's fold chevron acts in the LDB tooltip, so Open a row from
+            -- (openFrom, round 7) is retired (schemaVersion 16). folds: the tooltip's own folds, named
+            -- non-setting state (modules/BrokerFolds.lua, its one writer): blocks[id] = true folded,
+            -- nodes[family] a tree family's header folds.
+            ldb = { style = "window", width = 420, height = 560, barWidth = 128, fontSize = 12,
+                    folds = { blocks = {}, nodes = {} } },
         },
         -- T5.1 the Trainers and Waypoints page (modules/Waypoints.lua, modules/TrainerPopup.lua).
         waypoints = {
@@ -283,6 +292,9 @@ NS.defaults = {
             skillUp      = true,
             skillUpScope = "all",
             skillUpSound = false,
+            -- A currency reaching its cap (SMW-09, GitHub issue #7): a toast, once per currency per session; off
+            -- by default (the spec's call: an optional alert).
+            currencyCap = false,
             point     = false,  -- the toast stack's drop point, in UIParent's units
         },
         -- The one broker data feed, "Skill Master" (modules/Broker.lua, design §6.7; feedback round
@@ -290,15 +302,26 @@ NS.defaults = {
         -- `broker.templates.all` here and dropped the other three feeds' templates (core/Database.lua).
         broker = {
             flashSeconds = 5,   -- how long "^ Bows 81" replaces the feed's text after a skill-up
-            template     = "{pinned} \194\183 +{gains}",
+            -- One text template per feed, one feed per family (SMW-05, modules/Broker.lua); schemaVersion 15
+            -- moved the one `broker.template` to the Professions feed's. A feed whose template shows
+            -- {pinned} with nothing pinned reads its family's short name.
+            feeds = {
+                professions = { template = "{pinned} \194\183 +{gains}" },
+                skills      = { template = "{pinned}" },
+                stats       = { template = "{pinned}" },
+                currencies  = { template = "{pinned}" },
+                reputations = { template = "{pinned}" },
+                statistics  = { template = "{pinned}" },
+            },
             -- The feed's tooltip: its sections, the rows it leaves out (sets of keys, apart from the
             -- main window's skills.hidden / stats.hidden) and whether it wears the skin (FB-13).
             tooltip = {
                 skin     = true,
-                -- The skills feed's four sections and the stats feed's four (round 6, R6-9: the Stats
-                -- section moved to its own feed; schemaVersion 9 dropped a stored `stats`).
+                -- One switch per block, each in its own family's feed (SMW-05: Professions' two, Skills'
+                -- two, Character Stats' four; round 6, R6-9; schemaVersion 9 dropped a stored `stats`).
                 sections = { primary = true, secondary = true, weapon = true, other = true,
-                             stats_base = true, stats_spell = true, stats_defense = true, stats_utility = true },
+                             stats_base = true, stats_spell = true, stats_defense = true, stats_utility = true,
+                             currencies = true, reputations = true, statistics = true },
                 hiddenSkills = {},
                 hiddenStats  = {},
             },
@@ -308,8 +331,12 @@ NS.defaults = {
     -- (savedvariables-§1). `minimap` is LibDBIcon's own table (launcher-§3), per installation.
     -- `characters` is the alt overview's store (modules/Alts.lua), keyed "<realm>-<name>".
     global = { schemaVersion = 0, minimap = { hide = false }, characters = {} },
-    -- Per character: the pinned skill the broker's {pinned} token shows (design §7), set from the
-    -- row menu (T3.3), and the session log's ring (modules/SessionLog.lua).
-    -- pinnedStat (round 6, R6-9): the stat the Skill Master Stats feed shows, from a stat row's menu.
-    char = { pinned = false, pinnedStat = false, log = {} },
+    -- Per character: the pins per broker (GitHub issue #11, SMW-06; modules/Pins.lua, its one writer),
+    -- { [family] = { key, ... } } in order, up to five each, set from a row's menu and the Broker page's
+    -- Pins tab: each feed's {pinned}. The one-pin fields of before (pinned, the Skill Master feed's skill;
+    -- pinnedStat, round 6's Skill Master Stats stat) are folded into it when read. And the session log's
+    -- ring (modules/SessionLog.lua).
+    -- fold: the tree windows' folds, { [family] = { [nodeKey] = true folded | false open } } (modules/Tree.lua,
+    -- its one writer; SMW-03); an absent node takes its family's default.
+    char = { pins = {}, log = {}, fold = {} },
 }

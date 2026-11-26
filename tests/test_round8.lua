@@ -7,7 +7,7 @@ local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
 
-local B8, W8, D8, G8 = NS.Blocks, NS.MainWindow, NS.Detached, NS.Groups
+local B8, W8, D8, G8 = NS.Blocks, T.windows, NS.Detached, NS.Groups
 
 --- Every block back on the window, All, expanded, no merged window; then the window hidden.
 local function withBlocks(fn)
@@ -143,7 +143,7 @@ test("round8 ldb tooltip: its headers carry no sort or filter mark, on All or a 
         end
         assertTrue(NS.SetByPath("layout.blocks.weapon.filter", "belowCap"))
         M.__fireTimers()
-        Br.OnEnter(M.UIParent)
+        Br.OnEnter(M.UIParent, "skills")   -- SMW-05: the weapons are the Skills feed's
         local weapon = panelHeader("weapon")
         assertFalse(weapon.filter:IsShown(), "no filter mark while the filter narrows")
         assertFalse(weapon.sort:IsShown(), "and no sort mark")
@@ -330,7 +330,7 @@ local function valuesOf(row)
     return table.concat(v, ","), table.concat(t, ",")
 end
 
-test("round8 open a row from: Layout > Window's Open a row from, Full row by default; the LDB tooltip's too", function()
+test("round8 open a row from: Layout > Window's Open a row from, Full row by default (the LDB tooltip's went, SMW-07)", function()
     assertEqual(NS.defaults.profile.layout.openFrom, "row", "a main window row opens from anywhere on it")
     local row = NS.FindSchemaRow("layout.openFrom")
     assertTrue(row ~= nil, "the schema row")
@@ -341,12 +341,9 @@ test("round8 open a row from: Layout > Window's Open a row from, Full row by def
     local values, texts = valuesOf(row)
     assertEqual(values, "row,icon")
     assertEqual(texts, L8["Full row"] .. "," .. L8["Go icon only"])
-    assertEqual(NS.defaults.profile.tooltips.ldb.openFrom, "row", "the LDB tooltip's (R7-6) defaults to Full row")
-    local ldb = NS.FindSchemaRow("tooltips.ldb.openFrom")
-    assertEqual(ldb.default, "row")
-    values, texts = valuesOf(ldb)
-    assertEqual(values, "row,icon")
-    assertEqual(texts, L8["Full row"] .. "," .. L8["Go icon only"], "the same two choices, named the same")
+    -- SMW-07: the LDB tooltip's rows open nothing, so its own Open a row from (R7-6) is retired.
+    assertTrue(NS.defaults.profile.tooltips.ldb.openFrom == nil, "no LDB tooltip default")
+    assertTrue(NS.FindSchemaRow("tooltips.ldb.openFrom") == nil, "and no row")
 end)
 
 test("round8 open a row from: Full row lays the crafting cast over the whole row, Go icon only over the icon", function()
@@ -531,11 +528,13 @@ test("round8 open a row from: the row tooltip's click hint says the mode", funct
     end
 end)
 
--- The LDB tooltip's Main window style (R7-6's setting, Full row by default since round 8).
+-- The LDB tooltip's Main window style: R7-6's Open a row from, both modes, went with SMW-07 (the owner's
+-- ask: in the tooltip only a section's fold chevron acts). Whichever mode the windows are in, a tooltip row
+-- opens nothing and arms no cast.
 
-local function withLdb(openFrom, fn)
-    local p = NS.db.profile.tooltips.ldb
-    local saved = { source = Br.source, style = p.style, from = p.openFrom, open = Br.OpenRow }
+local function withLdb(mode, fn)
+    local p, lay = NS.db.profile.tooltips.ldb, NS.db.profile.layout
+    local saved = { source = Br.source, style = p.style, mode = lay.openFrom }
     local byKey = { enchanting = tipSkill("enchanting", "Enchanting", "primary", 120, 150),
                     maces = tipSkill("maces", "Maces", "weapon", 100, 110) }
     local v = { model = { byKey = byKey, order = { primary = { "enchanting" }, secondary = {},
@@ -543,70 +542,37 @@ local function withLdb(openFrom, fn)
                 statsModel = { base = {}, spell = {}, defense = {}, utility = {} }, statIndex = {},
                 gains = { total = 0, byKey = {} } }
     Br.source = function() return v end
-    p.style, p.openFrom = "window", openFrom
+    p.style, lay.openFrom = "window", mode
     local world, putBack = clickWorld()
     local ok, err = pcall(fn, world)
-    Br.OpenRow = saved.open
     local f = BP.Frame()
     Br.HideTooltip()
     f:__fire("OnHide")
-    Br.source, p.style, p.openFrom = saved.source, saved.style, saved.from
+    Br.source, p.style, lay.openFrom = saved.source, saved.style, saved.mode
     putBack()
     SO8:Sync()
     closeMenus()
     if not ok then error(err, 0) end
 end
 
-local function recordOpenRow8()
-    local got = {}
-    Br.OpenRow = function(r, button) got[#got + 1] = r.kind .. ":" .. r.key .. ":" .. tostring(button) end
-    return got
-end
-
-test("round8 open a row from: the LDB tooltip's Full row arms the cast over the whole row and opens from anywhere", function()
-    withLdb("row", function(world)
-        assertEqual(Br.OpenFrom(), "row")
-        Br.OnEnter(M.UIParent)
-        assertTrue(BP.Armed(), "the overlay scans the panel's rows in both modes")
-        local row = rowIn(BP.Rows(), "enchanting")
-        assertEqual(R8.OpenFrom(row), "row", "the panel's row follows the tooltip's setting")
-        row:__fire("OnEnter")
-        local b = SO8.Overlay("enchanting")
-        assertTrue(b ~= nil and b:IsShown() and b.row == row, "armed on the hover")
-        assertTrue(SO8.CoverFor(row) == row, "over the whole row")
-        local got = recordOpenRow8()
-        b:GetScript("PostClick")(b, "RightButton", false)
-        assertEqual(table.concat(got, ","), "skill:enchanting:RightButton", "the overlay's right-click: the row menu")
-        SO8:Unhover(row)
-        local maces = rowIn(BP.Rows(), "maces")
-        maces:__fire("OnClick", "LeftButton")
-        assertEqual(table.concat(world.opened, ","), "SkillsFrame", "a plain click opens what the go icon opens")
-        assertEqual(#got, 1, "not the Classic row's open")
-        maces:__fire("OnClick", "RightButton")
-        M.IsShiftKeyDown = function() return true end
-        maces:__fire("OnClick", "LeftButton")
-        M.IsShiftKeyDown = function() return false end
-        assertEqual(table.concat(got, ",", 2), "skill:maces:RightButton,skill:maces:LeftButton", "the menu, the link")
-        local footer = BP.Frame().footer:GetText()
-        assertEqual(footer, Br.FooterText("row"))
-        assertTrue(footer:find("shift-click to link", 1, true) ~= nil, "the footer names the link")
-        assertTrue(footer:find("go icon", 1, true) == nil, "and no go icon")
-    end)
-end)
-
-test("round8 open a row from: the LDB tooltip's Go icon only keeps the cast on the icon and the row inert", function()
-    withLdb("icon", function(world)
-        Br.OnEnter(M.UIParent)
-        local row = rowIn(BP.Rows(), "enchanting")
-        assertEqual(R8.OpenFrom(row), "icon")
-        assertTrue(SO8.CoverFor(row) == row.act, "over the go icon")
-        local maces = rowIn(BP.Rows(), "maces")
-        maces:__fire("OnClick", "LeftButton")
-        assertEqual(#world.opened, 0, "the row's plain click opens nothing")
-        maces.act:__fire("OnClick", "LeftButton")
-        assertEqual(table.concat(world.opened, ","), "SkillsFrame", "its go icon does")
-        assertEqual(BP.Frame().footer:GetText(), Br.FooterText("icon"))
-    end)
+test("round8 open a row from: a tooltip row opens nothing and arms no cast, in either window mode", function()
+    for _, mode in ipairs({ "row", "icon" }) do
+        withLdb(mode, function(world)
+            Br.OnEnter(M.UIParent)
+            local row = rowIn(BP.Rows(), "enchanting")
+            assertEqual(R8.OpenFrom(row), "none", mode .. ": the panel's row opens from nowhere")
+            row:__fire("OnEnter")
+            local b = SO8.Overlay("enchanting")
+            assertTrue(b == nil or not b:IsShown() or b.row ~= row, mode .. ": nothing armed on the hover")
+            row:__fire("OnLeave")
+            Br.OnEnter(M.UIParent, "skills")   -- SMW-05: the weapons are the Skills feed's
+            local maces = rowIn(BP.Rows(), "maces")
+            maces:__fire("OnClick", "LeftButton")
+            maces.act:__fire("OnClick", "LeftButton")
+            assertEqual(#world.opened, 0, mode .. ": neither the row nor its go icon opens")
+            assertEqual(BP.Frame().footer:GetText(), Br.FooterText())
+        end)
+    end
 end)
 
 -- ── R8-5: the waypoint arrow on LibKa0s-WaypointArrow-1.0 ────────────────────────────────────

@@ -10,7 +10,7 @@ local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
 
-local W, J, B, D, G, TP = NS.MainWindow, NS.Journal, NS.Blocks, NS.Detached, NS.Groups, NS.TrainerPopup
+local W, J, B, D, G, TP = T.windows, NS.Journal, NS.Blocks, NS.Detached, NS.Groups, NS.TrainerPopup
 local Skin = M.LibStub("LibKa0s-Skin-1.0")
 
 local function rgb(r, g, b) return ("%.3f,%.3f,%.3f"):format(r or -1, g or -1, b or -1) end

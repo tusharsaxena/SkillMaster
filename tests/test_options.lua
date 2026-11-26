@@ -259,7 +259,7 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- The detached background and border omit OptionsCompose minor 20's per-part companions.
     -- Round 2 of the trainer probe (GitHub issue #3): the hand-written Show all trainers row, +1 both.
     -- 2026-11-25 (the owner): the hand-written Mark unverified trainers row is gone, -1 both.
-    assertEqual(full, 375, "the full schema (round 2: Show all trainers; FB-SM-04: eight Block width rows; 2026-11-25: no Mark unverified trainers row)")
-    assertEqual(degraded, 302, "the library-absent schema")
+    assertEqual(full, 439, "the full schema (round 2: Show all trainers; FB-SM-04: eight Block width rows; 2026-11-25: no Mark unverified trainers row; SMW-04: six rows per family window in place of the one window's six; SMW-05: a template pair per feed in place of the one; SMW-07: no LDB Open a row from; SMW-08: the Reputations block's seven Layout rows, no sort or filter, and its tooltip section switch; SMW-09: the Currencies block's eight and the Currency cap alert; SMW-10: the Statistics block's eight)")
+    assertEqual(degraded, 366, "the library-absent schema (SMW-04: six rows per family window; SMW-05: a template pair per feed; SMW-07: no LDB Open a row from; SMW-08: the Reputations block's eight; SMW-09: the Currencies block's eight and the Currency cap alert; SMW-10: the Statistics block's eight)")
     assertEqual(full - degraded, 73, "Master controls (8, Sim mode among them), the Bars blocks (25), the icon border block (8), the trainer name color (3), the detached background and border (9) and the waypoint arrow's blocks (20)")
 end)

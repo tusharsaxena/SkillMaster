@@ -36,6 +36,8 @@ libs\LibDBIcon-1.0\lib.xml
 # Locales
 # LOAD-BEARING: creates NS.L, which core\DebugLogSetup.lua and every settings\ file read at FILE SCOPE.
 locales\enUS.lua
+# Conventional: the six windows' strings, a topic file of NS.L (after locales\enUS.lua, which creates it).
+locales\enUS_Windows.lua
 # LOAD-BEARING: each translation fills NS.L (created by locales\enUS.lua) at FILE SCOPE, after every
 # enUS file; each is gated on its own GetLocale() (localization-§1) and is a stub until filled.
 locales\deDE.lua
@@ -75,11 +77,11 @@ core\Bus.lua
 # FILE SCOPE; after core\CoreSetup.lua (NS.SafeRegisterUnitEvent is read at CALL time).
 core\UnitEventsSetup.lua
 core\PoolSetup.lua
-# LOAD-BEARING: NS.Widgets, captured at FILE SCOPE by modules\MainWindow.lua's chrome build path.
+# LOAD-BEARING: NS.Widgets, read by modules\Window.lua's chrome build path at CALL time.
 core\WidgetsSetup.lua
 # LOAD-BEARING: NS.Lifecycle, which core\PerfSetup.lua hands LibKa0s-Perf-1.0 at FILE SCOPE.
 core\LifecycleSetup.lua
-# LOAD-BEARING: NS.Perf, a FILE-SCOPE upvalue in modules\MainWindow.lua.
+# LOAD-BEARING: NS.Perf, a FILE-SCOPE upvalue in modules\Window.lua.
 core\PerfSetup.lua
 # LOAD-BEARING: after Constants (FONT_MONO), State (the flag) and CoreSetup (the printer); before any NS.Debug call.
 core\DebugLogSetup.lua
@@ -110,6 +112,9 @@ defaults\Stats_Forever.lua
 # Conventional: NS.Preview_Forever, test mode's sample character, read by modules\Preview.lua and
 # modules\Simulator.lua at CALL time.
 defaults\Preview_Forever.lua
+# LOAD-BEARING: NS.Families and NS.FamilyOf (SMW-02), read at FILE SCOPE by modules\Blocks.lua; reads NS.L
+# at FILE SCOPE (after locales\enUS_Windows.lua).
+defaults\Families.lua
 
 # Modules -- each reaches the others at CALL time
 # Conventional: NS.BarStyle, the bars' settings as a LibKa0s-Widgets-1.0 Bar style (AD-80-SM); reads
@@ -122,6 +127,12 @@ modules\Rows.lua
 # Conventional: NS.Blocks (T3.2); declares NS.BLOCKS and NS.BlockDefs through NS.L at FILE SCOPE and
 # subscribes on its own bus target (after core\Bus.lua).
 modules\Blocks.lua
+# Conventional: NS.Blocks.PROVIDERS, the block engine's data providers (SMW-02); reads NS.Blocks at
+# FILE SCOPE, every model at CALL time.
+modules\BlockProviders.lua
+# Conventional: NS.Tree, the tree row model and its folds (SMW-03); reads NS.db, NS.Blocks and the
+# test-mode state at CALL time.
+modules\Tree.lua
 # Conventional: NS.Detached, a detached block's frame (T3.2); reads NS.Blocks at CALL time.
 modules\Detached.lua
 # Conventional: NS.Groups, the merged detached windows (round 5, R5-6); reads NS.Blocks and
@@ -144,10 +155,17 @@ modules\Waypoints.lua
 # at FILE SCOPE (the # Modules -> # Settings order guarantees it); reads NS.Compat, NS.Trainers and
 # NS.Rows at CALL time.
 modules\WaypointArrow.lua
-# Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings order guarantees it.
+# LOAD-BEARING: NS.Windows, the six family windows (SMW-04), built at FILE SCOPE from NS.Families
+# (defaults\Families.lua) and NS.Perf (core\PerfSetup.lua); read by modules\MainWindow.lua at FILE SCOPE.
+modules\Window.lua
+# LOAD-BEARING: the NS.MainWindow shim over the Professions window, after modules\Window.lua (read at FILE
+# SCOPE). Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings
+# order guarantees it.
 modules\MainWindow.lua
 # Conventional: `/sm probe`; reads core\ members only at FILE SCOPE (NS.Widgets, NS.Constants).
 modules\Probe.lua
+# Conventional: the probe's factions, currencies and statistics sections; reads NS.Probe at FILE SCOPE.
+modules\ProbeSections.lua
 # Conventional: builds NS.SkillNameToKey from the catalog and NS.L at FILE SCOPE (both load earlier).
 modules\SkillData.lua
 # Conventional: pure lookups over the defaults\*_Forever.lua tables, read at CALL time (T2.4).
@@ -160,19 +178,40 @@ modules\Bonuses.lua
 modules\Diagnostics.lua
 # Conventional: registers its events on a tracked bus target at FILE SCOPE (after core\Bus.lua).
 modules\StatData.lua
+# Conventional: NS.SharedList, the expand-read-restore read of a list whose collapse is the character panel's
+# (SMW-08); reads NS.Compat at CALL time.
+modules\SharedList.lua
+# SMW-08 (#6): the reputations model. Registers its row kind with NS.Tree (modules\Tree.lua) and its events on a
+# tracked bus target at FILE SCOPE (after core\Bus.lua); reads NS.Compat and NS.SharedList at CALL time.
+modules\RepData.lua
+# SMW-09 (#7): the currencies model, RepData's sibling; the same load needs.
+modules\CurrencyData.lua
+# SMW-10: the Statistics model, read lazily (fold-driven); the same load needs, and hears WINDOW_TOGGLED,
+# FEED_TOOLTIP_TOGGLED and LAYOUT_CHANGED on its own bus target; reads NS.Windows, NS.Broker and NS.Pins at CALL time.
+modules\StatisticsData.lua
 # T4.3: subscribe on tracked bus targets at FILE SCOPE (after core\Bus.lua); read NS.SkillData at call time.
 modules\SessionLog.lua
 modules\Alts.lua
 # T4.3: the Journal window; reads NS.SessionLog and NS.Alts at call time.
 modules\Journal.lua
+# SMW-08: the tree families' Alts sub-tabs; registers with NS.Journal at FILE SCOPE, so it follows modules\Journal.lua.
+modules\AltsTrees.lua
 # T4.2: subscribes to SKILL_UP / SKILLS_UPDATED on its own bus target at FILE SCOPE (after core\Bus.lua);
 # reads NS.SkillData, NS.Trainers and the settings at CALL time.
 modules\Alerts.lua
 # T4.1: NS.Template, pure; read by modules\Broker.lua at CALL time.
 modules\Template.lua
-# T4.1 / FB-12: the one broker data feed; creates its LibDataBroker object and bus target at FILE SCOPE
-# (after core\Bus.lua, core\PoolSetup.lua and the # Libraries block); reads NS.StatData.GROUPS at call time.
+# SMW-06: the pins per broker (char.pins), reached at CALL time by Interact, Broker, Preview and the Broker page.
+modules\Pins.lua
+# T4.1 / FB-12 / SMW-05: the six broker data feeds, one per family; creates their LibDataBroker objects and its
+# bus target at FILE SCOPE (after core\Bus.lua, core\PoolSetup.lua, the # Libraries block and defaults\Families.lua,
+# read at FILE SCOPE); reads NS.StatData.GROUPS at call time.
 modules\Broker.lua
+# Conventional: the feeds' tooltip content and the Classic lines (SMW-05, split out of modules\Broker.lua);
+# reads NS.Broker and NS.Pool at FILE SCOPE (both load earlier).
+modules\BrokerTooltip.lua
+# SMW-07: the LDB tooltip's own folds (tooltips.ldb.folds); reads NS.Broker at FILE SCOPE.
+modules\BrokerFolds.lua
 # R6-10: the LDB tooltip in the main window's style; reads NS.Broker, NS.Blocks, NS.Rows and NS.Journal at CALL time.
 modules\BrokerPanel.lua
 # T5.2: test mode's data swap; builds its models through SkillData, StatData and Bonuses at CALL time.
@@ -199,6 +238,8 @@ settings\Bars.lua
 settings\Skills.lua
 # R5-13 the Rows page: reads NS.SortedSkillKeys (Skills.lua) at FILE SCOPE.
 settings\Rows.lua
+# SMW-06: the Broker page's Pins tab; read by settings\Broker.lua at FILE SCOPE.
+settings\BrokerPins.lua
 settings\Broker.lua
 settings\Tooltips.lua
 settings\Alerts.lua

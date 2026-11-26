@@ -3,7 +3,7 @@ local addonName, NS = ...
 -- The defaults tree is defaults/Profile.lua's NS.defaults, read at InitDB time.
 
 -- The runner's target: the highest step's `to`.
-NS.SCHEMA_VERSION = 13
+NS.SCHEMA_VERSION = 16
 
 --- 1 -> 2 (feedback round 1, FB-3): one Rows show for skill and stat rows. A stored
 --- `stats.display` moves to `bars.rowDisplay` and the old key goes. Only a value other than the
@@ -35,7 +35,8 @@ local function oneBrokerFeed(_, profile)
     broker.templates = nil
     if type(old) ~= "string" then return end
     local kept = broker.template
-    if kept == nil or kept == NS.defaults.profile.broker.template then broker.template = old end
+    -- The default of the day (schemaVersion 15 moved it to broker.feeds.professions.template).
+    if kept == nil or kept == "{pinned} \194\183 +{gains}" then broker.template = old end
 end
 
 --- 3 -> 4 (feedback round 2, the owner's rulings): no Detached bar height and no rank tier ticks. A
@@ -161,6 +162,67 @@ local function foreverDBRetired(_, profile)
     if type(t) == "table" then t.foreverDB = nil end
 end
 
+--- 13 -> 14 (SMW-04, docs/superpowers/specs/2026-11-26-skillmaster-windows-design.md, "Migration, schema
+--- 14"): one window per family. The old one window became the Professions window, so its stored drop point
+--- (`window.point`, a table only: false was the default) and its stored `layout.width`, `maxHeight`,
+--- `fitHeight`, `columns`, `summary` and `strata` move to `windows.professions`; the old keys go. Only a
+--- stored value moves (rawget: the active profile may already wear AceDB's defaults, which are no choice),
+--- and one already stored under `windows.professions` wins. The other windows keep their defaults and
+--- open next to it the first time (modules/Window.lua Windows.Point). A fresh profile passes through.
+local MOVED_WINDOW_KEYS = { "width", "maxHeight", "fitHeight", "columns", "summary", "strata" }
+local function windowsSplit(_, profile)
+    if type(profile) ~= "table" then return end
+    local moved, any = {}, false
+    local old = rawget(profile, "window")
+    if type(old) == "table" and type(rawget(old, "point")) == "table" then moved.point, any = old.point, true end
+    profile.window = nil
+    local layout = rawget(profile, "layout")
+    if type(layout) == "table" then
+        for _, k in ipairs(MOVED_WINDOW_KEYS) do
+            local v = rawget(layout, k)
+            if v ~= nil then moved[k], any = v, true end
+            layout[k] = nil
+        end
+    end
+    if not any then return end
+    if type(rawget(profile, "windows")) ~= "table" then profile.windows = {} end
+    local windows = profile.windows
+    if type(rawget(windows, "professions")) ~= "table" then windows.professions = {} end
+    local w = windows.professions
+    for k, v in pairs(moved) do
+        if rawget(w, k) == nil then w[k] = v end
+    end
+end
+
+--- 14 -> 15 (SMW-05): one broker feed per family, each with its own template. The one feed's stored
+--- `broker.template` was the "Skill Master" feed's, which is the Professions feed now, so it moves to
+--- `broker.feeds.professions.template` (rawget: only a stored choice moves; one already stored there,
+--- other than the default, wins); the old key goes. `broker.preset` was session-only and never stored.
+local function feedTemplatesSplit(_, profile)
+    local broker = type(profile) == "table" and rawget(profile, "broker")
+    if type(broker) ~= "table" then return end
+    local old = rawget(broker, "template")
+    broker.template = nil
+    if type(old) ~= "string" then return end
+    if type(rawget(broker, "feeds")) ~= "table" then broker.feeds = {} end
+    local feeds = broker.feeds
+    if type(rawget(feeds, "professions")) ~= "table" then feeds.professions = {} end
+    -- A stored copy of the new default is no choice (the active profile may carry one until logout).
+    local kept = rawget(feeds.professions, "template")
+    if kept == nil or kept == NS.defaults.profile.broker.feeds.professions.template then
+        feeds.professions.template = old
+    end
+end
+
+--- 15 -> 16 (SMW-07, the owner's ask: in the LDB tooltip only a section's fold chevron acts): a tooltip
+--- row opens nothing any more, so Tooltips > Open a row from is retired and a stored
+--- `tooltips.ldb.openFrom` names nothing: it goes, whatever it holds.
+local function tipOpenFromRetired(_, profile)
+    local t = type(profile) == "table" and rawget(profile, "tooltips")
+    local ldb = type(t) == "table" and rawget(t, "ldb")
+    if type(ldb) == "table" then ldb.openFrom = nil end
+end
+
 -- Each step is idempotent against a fresh default profile. A profile-scoped step sets
 -- `perProfile = true` and runs for every stored profile. A step is handed (sv, profile, from): `from`
 -- is the stamp the run started at (0 on a fresh install).
@@ -178,6 +240,9 @@ local STEPS = {
     { to = 11, run = waypointMethodFolded, perProfile = true },
     { to = 12, run = iconRowColorKept, perProfile = true },
     { to = 13, run = foreverDBRetired, perProfile = true },
+    { to = 14, run = windowsSplit, perProfile = true },
+    { to = 15, run = feedTemplatesSplit, perProfile = true },
+    { to = 16, run = tipOpenFromRetired, perProfile = true },
 }
 
 function NS:InitDB()

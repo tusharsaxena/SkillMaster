@@ -68,6 +68,29 @@ local rows = {
     measure("skillScan", 1000, function() NS.SkillData:Scan() end),
     measure("detachedRender", 1000, function() NS.Detached.Render("other") end),
 }
+
+-- The Statistics tab at about 1000 rows (SMW-10; tests/fixture_statistics.lua, 40 categories of 25): the
+-- category tree and every row read with every category unfolded (a cold session's Expand all), then the
+-- debounced re-read CRITERIA_UPDATE starts while the window shows (the names cached, one GetStatistic a row;
+-- hidden, it reads only the pinned rows).
+do
+    local SD = NS.StatisticsData
+    local fx = dofile("tests/fixture_statistics.lua")
+    local _, restore = fx.install(mocks, fx.large(40, 25))
+    for _, n in ipairs({ "GetStatisticsCategoryList", "GetCategoryInfo", "GetCategoryNumAchievements", "GetStatistic",
+                         "GetAchievementInfo" }) do mocks[n] = counted(mocks[n]) end   -- installed after the wrap
+    local open = {}
+    for c = 1, 40 do open[tostring(1000 + c)] = false end
+    NS.db.char.fold = { statistics = open }
+    rows[#rows + 1] = measure("statisticsFullRead", 50, function() SD:Reset(); SD:Open() end)
+    -- As if the window showed (SD.OnScreen), without its redraw on each STATISTICS_UPDATED in the measure.
+    local onScreen = SD.OnScreen
+    SD.OnScreen = function() return true end
+    rows[#rows + 1] = measure("statisticsRefresh", 50, function() SD:Refresh() end)
+    SD.OnScreen = onScreen
+    restore()
+    SD:Reset()
+end
 NS.Perf.on = false
 
 print(("Ka0s Skill Master — offline perf  (v%s, label '%s')"):format(NS.Version(), opts.label))

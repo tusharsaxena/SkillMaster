@@ -158,10 +158,14 @@ end)
 
 test("journal: the alts sub-tabs are the main window's blocks, in its order", function()
     -- red under: the three Professions / Weapons / Other chips
-    assertEqual(table.concat(J.FILTER_ORDER, ","), table.concat(NS.BLOCKS, ","))
+    -- Every block but Statistics' (SMW-10: no Alts sub-tab, the spec's call).
+    local want = {}
+    for _, id in ipairs(NS.BLOCKS) do if id ~= "statistics" then want[#want + 1] = id end end
+    assertEqual(table.concat(J.FILTER_ORDER, ","), table.concat(want, ","))
     J.Show()
     local p = J.Frame().altsPanel
-    for _, id in ipairs(NS.BLOCKS) do assertTrue(p.chips[id] ~= nil, "a chip for " .. id) end
+    for _, id in ipairs(want) do assertTrue(p.chips[id] ~= nil, "a chip for " .. id) end
+    assertEqual(p.chips.statistics, nil, "no Statistics chip")
     assertEqual(p.chips.stats_defense.text:GetText(), "Defense & Resists")
     local right = 0
     for _, chip in pairs(p.chips) do

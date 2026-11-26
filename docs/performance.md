@@ -11,6 +11,7 @@ The harness is LibKa0s-Perf-1.0 (`core/PerfSetup.lua`), with captures in `SkillM
 | `skillScan` | `modules/SkillData.lua` `SD:Scan` | reading the skill list and building the model, before its messages |
 | `statScan` | `modules/StatData.lua` `S:Scan` | reading every stat (the throttled flush, a speed change) |
 | `bonusRefresh` | `modules/Bonuses.lua` `B.Refresh` | the invalidate and live-temp check, before `BONUSES_UPDATED` |
+| `statisticsRead` | `modules/StatisticsData.lua` `SD:Use`, `SD:Open`, `SD:Refresh` | the Statistics category tree's first build, an unfolded category's rows, the debounced re-read (SMW-10); `tests/perf.lua`'s `statisticsFullRead` and `statisticsRefresh` time it on a 1000-row fixture |
 
 Each bracket closes before its module sends its message, so the displays the message repaints are
 measured by their own buckets and no bucket is declared `within` another. `statScan` can run inside

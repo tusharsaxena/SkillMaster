@@ -6,7 +6,7 @@ local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
 local assertNear = T.assertNear
 
-local W, R = NS.MainWindow, NS.Rows
+local W, R = T.windows, NS.Rows
 
 local function set(path, value)
     local ok, err = NS.SetByPath(path, value)
@@ -163,7 +163,7 @@ test("round2 icons: the LDB tooltip draws the window's block titles on header ba
         end
         local joined = table.concat(titles, "|")
         assertTrue(joined:find(NS.BlockDefs.primary.title, 1, true) ~= nil, "Primary Professions, as the window says it")
-        assertTrue(joined:find(NS.BlockDefs.weapon.title, 1, true) ~= nil, "Weapon Skills")
+        assertTrue(joined:find(NS.BlockDefs.secondary.title, 1, true) ~= nil, "Secondary Skills (SMW-05: its feed's two)")
         local bands = NS.Broker.Bands(tip)
         -- One band per header, one per even row of each section.
         assertTrue(#bands > 0 and #bands < #rows + #titles, "headers and every other row, not every row")
@@ -177,7 +177,7 @@ end)
 test("round2 icons: a skill's name in the LDB tooltip is white, a weapon below its cap included", function()
     withWorld(function()
         local tip = recordingTip()
-        NS.Broker.FillTooltip(tip)
+        NS.Broker.FillTooltip(tip, "skills")   -- SMW-05: the weapons are the Skills feed's
         local r, g, b = NS.Skin.Color("gtip.value")
         local white = r and ("|cff%02x%02x%02x"):format(r * 255, g * 255, b * 255) or nil
         local axes
@@ -190,9 +190,9 @@ test("round2 icons: a skill's name in the LDB tooltip is white, a weapon below i
     end)
 end)
 
-test("round2 icons: Pin to the broker feed redraws the feed at once", function()
-    local prevTpl = NS.GetSetting("broker.template")
-    NS.SetByPath("broker.template", "{pinned}")
+test("round2 icons: Pin to the Professions broker redraws the feed at once", function()
+    local prevTpl = NS.GetSetting("broker.feeds.professions.template")
+    NS.SetByPath("broker.feeds.professions.template", "{pinned}")
     local row = { kind = "skill", entry = { key = "cooking", name = "Cooking", learned = true, rank = 140, max = 150 } }
     local pin
     for _, r in ipairs(NS.Interact.MenuRows(row)) do if r.value == "pin" then pin = r end end
@@ -204,9 +204,9 @@ test("round2 icons: Pin to the broker feed redraws the feed at once", function()
     NS.Broker.Refresh = prev
     assertTrue(ok, tostring(err))
     assertTrue(refreshed, "the feed redraws on the pin, not at the next skill-up")
-    assertEqual(NS.db.char.pinned, "cooking")
-    NS.db.char.pinned = nil
-    NS.SetByPath("broker.template", prevTpl)
+    assertEqual(NS.Pins.Stored("professions")[1], "cooking")
+    NS.Pins.Remove("professions", "cooking")
+    NS.SetByPath("broker.feeds.professions.template", prevTpl)
 end)
 
 -- ── round 2, the header and the hammer ───────────────────────────────────────────────────────

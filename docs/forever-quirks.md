@@ -202,12 +202,14 @@ WoW Forever's API is only partly known (LibKa0s#44). The data modules are built 
 listed below as **assumed (1.12)** until the owner runs `/sm probe` in game and sends the JSON back.
 The probe (`modules/Probe.lua`) reports each row's presence under `apis`, the raw returns of every
 skill line under `skillLines` (and under `skillSource` which API it read them from), the localized
-header names under `headers` and the weapon-enchant returns under `enchant`. A `"<nil>"` in the report
+header names under `headers` and the weapon-enchant returns under `enchant`. From SMW-01 it also writes the
+`factions`, `currencies` and `statistics` sections (`modules/ProbeSections.lua`; the next section says what
+each settles). A `"<nil>"` in the report
 is a nil the client returned at that position; a table return is kept whole.
 
 **What the kit's Forever API set already says.** The testkit's generated name sets
 (`tests/_kit/client_globals_forever.lua`, Ketho/BlizzardInterfaceResources branch `forever`, sha
-`d1ee569`, 2026-10-21) list the skill list as **`C_SkillInfo.GetNumSkillLines`,
+`e230342`, 2026-11-14, kit revision 62; the first draft read sha `d1ee569` of 2026-10-21) list the skill list as **`C_SkillInfo.GetNumSkillLines`,
 `C_SkillInfo.GetSkillLineInfo`, `C_SkillInfo.GetSkillLineInfoByID`, `C_SkillInfo.ExpandSkillHeader`
 and `C_SkillInfo.CollapseSkillHeader`**, and the weapon enchant as **`C_Item.GetWeaponEnchantInfo`**,
 with none of the 1.12 bare globals (`GetSkillLineInfo`, `GetNumSkillLines`, `GetWeaponEnchantInfo`).
@@ -287,6 +289,52 @@ can list a name the client lacks); it is not a measurement. *Source:* this addon
 (`docs/superpowers/specs/2026-11-10-skill-master-design.md` §5.4) and the kit's
 `tests/_kit/client_globals_forever.lua`, read when the missing-globals gate flagged the probe's first
 draft for calling the bare `GetSkillLineInfo` (2026-11-10).
+
+### Reputations, currencies and Statistics: the Blizzard-source shapes (open probe)
+
+The Reputations, Currencies and Statistics windows (SMW, `docs/superpowers/specs/2026-11-26-skillmaster-windows-design.md`)
+are built on the shapes Blizzard's own Forever UI source uses (Gethe/wow-ui-source branch `forever`, the Camelot
+`ReputationFrame`, `TokenFrame` and `Blizzard_Statistics`), behind presence tests. Nothing here is measured in game
+yet: `/sm probe`'s three sections (SMW-01) settle each row, and the owner's run promotes it.
+
+- **Client:** Forever 1.60.1, *not measured*. The kit's Forever set lists every name below; the bare 1.12
+  `GetNumFactions`, `GetFactionInfo`, `ExpandFactionHeader`, `GetCurrencyListSize` and `GetCurrencyListInfo` are in
+  neither set, and the probe reports them under `apis`, expected false.
+- **The collapse trap.** Reputation and currency headers are client state shared with the character panel, and the
+  index APIs list only expanded rows. *Do:* open, read and close again bottom up (as the skill read does), never in
+  combat and never while `ReputationFrame` or `TokenFrame` is shown; later refreshes go by id. The probe does exactly
+  this and says under `skipped` why it could not (`combat`, `panel shown`, `no expand API`).
+- **Cost:** a wrong shape is a wrong bar shown as fact; a header left open changes the player's own panel.
+
+| API | Shape from Blizzard's Forever source | Status | The probe's field |
+|---|---|---|---|
+| `C_Reputation.GetNumFactions()`, `GetFactionDataByIndex(i)` | the count of listed rows; one FactionData table: `factionID, name, description, reaction (1-8), currentReactionThreshold, nextReactionThreshold, currentStanding, atWarWith, canToggleAtWar, isChild, isHeader, isHeaderWithRep, isCollapsed, isWatched, hasBonusRepGain, canSetInactive, isAccountWide` | source, not probed | `factions.rows` (the first 60, headers opened), `factions.count` |
+| `C_Reputation.ExpandFactionHeader(i)` / `CollapseFactionHeader(i)` | open / close listed row `i`; the rows below shift | source, not probed | `factions.expanded`, `factions.skipped` |
+| `C_Reputation.GetFactionDataByID(id)` | the same table for one faction, touching no state | source; whether it answers for a child of a collapsed header is the open question | `factions.byIDCollapsed` (`answered`) |
+| Headers | a top header is `isHeader` and not `isChild` (Alliance, Other); a sub-header is both, with its own bar when `isHeaderWithRep` (Steamwheedle Cartel); whether an Inactive header, friendships or major factions occur is open | source, not probed | `factions.rows` |
+| Standing bar | `currentStanding` between the two thresholds; `reaction` 8 (Exalted) drawn full; label `GetText("FACTION_STANDING_LABEL"..reaction, UnitSex("player"))`, color `FACTION_BAR_COLORS[reaction]` | source, not probed | `factions.rows` |
+| `C_CurrencyInfo.GetCurrencyListSize()`, `GetCurrencyListInfo(i)` | the count; one CurrencyInfo table: `name, currencyID, isHeader, isHeaderExpanded, currencyListDepth, quantity, maxQuantity, canEarnPerWeek, quantityEarnedThisWeek, maxWeeklyQuantity, iconFileID, description, ...`; gold is not in the list | source, not probed | `currencies.rows` (the whole list), `currencies.count` |
+| `C_CurrencyInfo.ExpandCurrencyList(i, expand)` | opens or closes header `i` | source, not probed | `currencies.expanded`, `currencies.skipped` |
+| `C_CurrencyInfo.GetCurrencyInfo(id)` | one currency by id, touching no state | source, not probed | `currencies.byID` |
+| `GetStatisticsCategoryList()`, `GetCategoryInfo(id)` | a table of category ids, ordered by numeric key; `name, parentID` (-1 for a root), any depth | source, not probed | `statistics.categories` (`id, name, parent`) |
+| `GetCategoryNumAchievements(id)`, `GetStatistic(categoryID, i)`, `GetAchievementInfo(statID)` | the row count; `quantity, skip, statID` (Forever's form; Retail's is `GetStatistic(achievementID)`); the name is the second return. Blizzard skips a row with `skip` or no `statID`, and shows a number or `--` | source, not probed; whether a Wealth row answers copper or a money string is open | `statistics.categories[].rows` (3 per category), `statistics.retailForm` |
+| `UPDATE_FACTION`, `CURRENCY_DISPLAY_UPDATE` (`currencyType`, nil for a bulk refresh), `CRITERIA_UPDATE` (no payload, noisy) | the refresh events Blizzard's panels use | source, not probed | none (an event is not a one-shot read) |
+
+*Source:* the recon `wf_29cd618e-8fa` of 2026-11-26, recorded in
+`docs/superpowers/specs/2026-11-26-skillmaster-windows-recon.md` (its *api* findings).
+
+What the build does with them (SMW-08..10), so a probe result that differs says what to change:
+
+- **Reputations** (`modules/RepData.lua`) and **currencies** (`modules/CurrencyData.lua`) read the list in full once
+  through `modules/SharedList.lua` (the trap's *Do* above, with a re-entry latch for the client's echo event), then
+  by id. The windows' folds are this addon's own (`char.fold`), never `Expand`/`CollapseFactionHeader` or
+  `ExpandCurrencyList`. If `factions.byIDCollapsed` shows `GetFactionDataByID` does not answer under a collapsed
+  header, the by-id refresh of such a faction keeps its last values until the next full read.
+- **Statistics** (`modules/StatisticsData.lua`) call `GetStatistic` in the two-argument form only, read a category's
+  rows only once it unfolds, and keep a string quantity verbatim (a number above 0 is shown with thousands
+  separators, 0 or none as `--`). `CRITERIA_UPDATE` is registered only while the Statistics show or one is pinned,
+  debounced to one re-read a second. If the probe shows the one-argument form is the one that works
+  (`statistics.retailForm`), `NS.Compat.Statistic` is the one place to change.
 
 ### Trainer NPCs are not client data (offline probe, 2026-11-23)
 

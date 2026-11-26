@@ -156,6 +156,7 @@ local HINTS = {
 }
 
 local function hint(out, kind, e, openFrom)
+    if openFrom == "none" then return end   -- a row nothing opens from (the LDB tooltip's, SMW-07)
     out[#out + 1] = { divider = true }
     local set = HINTS[openFrom == "icon" and "icon" or "row"]
     line(out, set[NS.Interact.Target({ kind = kind, entry = e })], nil, "muted")
@@ -201,6 +202,8 @@ end
 --- The tooltip's lines for a skill or stat entry; `openFrom` ("row", the default, or "icon": the
 --- row's Open a row from, NS.Rows.OpenFrom) words the click hint.
 function RT.Lines(e, kind, openFrom)
+    local tree = NS.Tree.Kind(kind)   -- a tree family's row (SMW-08..10): its kind's own lines
+    if tree then return tree.lines(e) end
     if kind == "stat" then return statLines(e, openFrom) end
     return skillLines(e, openFrom)
 end
@@ -297,9 +300,13 @@ local function placeBar(row, n)
         b:SetWidth(w)
         b.knownWidth = w   -- the width Layout uses when the tooltip answers its own as secret
     end
-    local stat = row.kind == "stat"
-    local v = stat and NS.Rows.StatValues(row.entry) or (NS.Rows.SkillValues(row.entry))
-    v.color = NS.Rows.FillColor(row.entry, stat)   -- the row's own fill: Color mode, the palette, Bar > Fill
+    local tree = NS.Tree.Kind(row.kind)
+    local v = tree and tree.values(row.entry)
+    if not v then
+        local stat = row.kind == "stat"
+        v = stat and NS.Rows.StatValues(row.entry) or (NS.Rows.SkillValues(row.entry))
+        v.color = NS.Rows.FillColor(row.entry, stat)   -- the row's own fill: Color mode, the palette, Bar > Fill
+    end
     b:SetValues(v)
     b:Show()
 end

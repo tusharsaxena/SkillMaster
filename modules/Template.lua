@@ -4,13 +4,15 @@ local _, NS = ...
 -- it does not know, or one whose data is missing, renders empty. Pure: it reads only ctx.
 --
 -- ctx = { skills = <SkillData model>, stat = { [statKey] = <StatData entry> }, gains = n,
---         last = { key, new } | nil, pinned = key | nil, level = n, mainHand = skill key | nil }
+--         last = { key, new } | nil, pinned = key | nil, level = n, mainHand = skill key | nil,
+--         pinnedTexts = { text, ... } | nil (a feed's pins, SMW-06: {pinned} joins them with " · ",
+--         {pinned1}..{pinned5} render one each) }
 
 NS.Template = {}
 local Tpl = NS.Template
 
 -- The tokens, for the Broker settings page's hint line (T5.1).
-Tpl.TOKENS = { "{pinned}", "{gains}", "{last}", "{lowestProf}", "{equippedWeapon}", "{skill:<key>}",
+Tpl.TOKENS = { "{pinned}", "{pinned1}..{pinned5}", "{gains}", "{last}", "{lowestProf}", "{equippedWeapon}", "{skill:<key>}",
                "{stat:<key>}", "{level}" }
 
 -- A stat alias stands for the highest of several StatData keys ("{stat:crit}" in the default).
@@ -79,9 +81,21 @@ local function lastText(ctx)
     return ("%s %d"):format(e.name or "", last.new or e.rank or 0)
 end
 
+-- The joint between a feed's pins in {pinned} (GitHub issue #11).
+Tpl.PIN_JOINT = " \194\183 "
+Tpl.MAX_PIN_TOKEN = 5   -- {pinned1}..{pinned5}
+
+local function pinnedText(ctx)
+    local texts = ctx.pinnedTexts
+    if type(texts) == "table" and #texts > 0 then return table.concat(texts, Tpl.PIN_JOINT) end
+    return Tpl.FormatSkill(pinnedEntry(ctx))
+end
+
 -- name -> function(ctx, arg) -> string | nil. `arg` is the text after the colon, or nil.
 local RESOLVE = {
-    pinned         = function(ctx) return Tpl.FormatSkill(pinnedEntry(ctx)) end,
+    -- A feed's pins (SMW-06), every one in order; with none, the pinned skill, the last skill-up or
+    -- the lowest profession (the feed itself reads its short name then: modules/Broker.lua).
+    pinned         = pinnedText,
     gains          = function(ctx) return ctx.gains and tostring(ctx.gains) or nil end,
     last           = lastText,
     lowestProf     = function(ctx) return Tpl.FormatSkill(Tpl.LowestProfession(ctx)) end,
@@ -93,6 +107,12 @@ local RESOLVE = {
     end,
     level          = function(ctx) return ctx.level and tostring(ctx.level) or nil end,
 }
+for n = 1, Tpl.MAX_PIN_TOKEN do
+    RESOLVE["pinned" .. n] = function(ctx)
+        local texts = ctx.pinnedTexts
+        return type(texts) == "table" and texts[n] or nil
+    end
+end
 -- The tokens that take an argument; every other one refuses it.
 local TAKES_ARG = { skill = true, stat = true }
 

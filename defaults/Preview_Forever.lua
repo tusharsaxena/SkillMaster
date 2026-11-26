@@ -20,6 +20,16 @@ local _, NS = ...
 --   alts       the other characters' snapshots, each skill { rank, max }; `sample` is each one's
 --              shared row, as for the character.
 --   pinned, mainHand  catalog English names: the broker's {pinned} and {equippedWeapon} skills.
+--   reputations  the Reputation tab as the panel groups it (SMW-11): each top `header` { name, id, kids }, a
+--              kid { name, id, reaction (1..8), standing (currentStanding) } or a sub-header (`header` with
+--              its own kids, `withRep` and a standing for its own bar). The thresholds are the standard ones
+--              (Neutral 0, Friendly 3,000, Honored 9,000, Revered 21,000, Exalted 42,000).
+--   currencies the Currency tab (SMW-11): each `header` { name, kids }, a kid { name, id, quantity, max (0 no
+--              cap), weekly?, earned?, icon }. Never gold (the owner's ruling).
+--   statistics the Statistics tab (SMW-11): each category { id, name, parent (-1 a root), rows = { { statID,
+--              name, quantity } } }, in the tab's order.
+--   treePins   the tree feeds' {pinned} in test mode, one key per family (a factionID, a currencyID, a
+--              statistic's "<categoryID>:<statID>").
 --
 -- Kept current at every release (preview-mode): every display element the release adds appears
 -- here, and the data names Forever's content.
@@ -96,6 +106,54 @@ NS.Preview_Forever = {
         { ago = 6480, skill = "Leatherworking",  old = 143, new = 144, zone = "Wetlands" },
         { ago = 6660, skill = "Fishing",         old = 103, new = 104, zone = "Wetlands" },
     },
+
+    -- The tree families (SMW-11): a level-22 Dwarf's standings, a few currencies, a Statistics tab.
+    reputations = {
+        { header = "Alliance", id = 469, kids = {
+            { name = "Ironforge", id = 47, reaction = 7, standing = 25300 },
+            { name = "Stormwind", id = 72, reaction = 6, standing = 12672 },
+            { name = "Gnomeregan Exiles", id = 54, reaction = 5, standing = 5200 },
+            { name = "Darnassus", id = 69, reaction = 5, standing = 3450 },
+        } },
+        { header = "Steamwheedle Cartel", id = 169, kids = {
+            { name = "Booty Bay", id = 21, reaction = 4, standing = 1450 },
+            { name = "Gadgetzan", id = 369, reaction = 4, standing = 600 },
+            { name = "Ratchet", id = 470, reaction = 4, standing = 300 },
+        } },
+        { header = "Other", id = 1169, kids = {
+            { name = "Darkmoon Faire", id = 909, reaction = 4, standing = 250 },
+        } },
+    },
+    currencies = {
+        { header = "Player vs. Player", kids = {
+            { name = "Honor Points", id = 1901, quantity = 1200, max = 75000, weekly = 10000, earned = 800,
+              icon = 1455894 },
+        } },
+        { header = "Miscellaneous", kids = {
+            { name = "Darkmoon Prize Ticket", id = 515, quantity = 12, max = 0, icon = 134481 },
+        } },
+    },
+    statistics = {
+        { id = 130, name = "Character", parent = -1, rows = {
+            { statID = 1532, name = "Times camped", quantity = 58 },
+            { statID = 1533, name = "Talent tree respecs", quantity = 0 },
+        } },
+        { id = 140, name = "Wealth", parent = 130, rows = {
+            { statID = 328, name = "Total gold acquired", quantity = 412 },
+            { statID = 1149, name = "Auctions posted", quantity = 33 },
+        } },
+        { id = 145, name = "Consumables", parent = 130, rows = {
+            { statID = 346, name = "Beverages consumed", quantity = 71 },
+            { statID = 344, name = "Bandages used", quantity = 14 },
+        } },
+        { id = 141, name = "Combat", parent = -1, rows = {
+            { statID = 1197, name = "Total kills", quantity = 1840 },
+        } },
+        { id = 122, name = "Deaths", parent = -1, rows = {
+            { statID = 60, name = "Total deaths", quantity = 9 },
+        } },
+    },
+    treePins = { reputations = "72", currencies = "1901", statistics = "130:1532" },
 
     alts = {
         { sample = 5, level = 41,   -- row 5, the Warrior

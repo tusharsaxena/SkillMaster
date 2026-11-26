@@ -20,6 +20,13 @@ local _, NS = ...
 --   Compat.MapWorldPos(mapID, x, y)        a map point's (0..1) world position: instance, x, y; or nil
 --   Compat.PlayerWorldPos()                the player's world position: instance, x, y; or nil
 --   Compat.TomTom()                        the real TomTom addon's table (loaded by name), or nil
+--   Compat.NumFactions() / FactionDataByIndex(i) / FactionDataByID(id) / SetFactionHeaderExpanded(i, open)
+--     / CanToggleFactionHeaders() / FactionStandingLabel(reaction) / FactionBarColor(reaction)  the faction
+--     list (SMW-08, C_Reputation); Compat.PanelShown(frame)  a character panel tab shown
+--   Compat.NumCurrencies() / CurrencyListInfo(i) / CurrencyInfo(id) / SetCurrencyHeaderExpanded(i, open)
+--     / CanToggleCurrencyHeaders()  the currency list (SMW-09, C_CurrencyInfo); gold is never in it
+--   Compat.StatisticsCategories() / StatisticsCategoryInfo(id) / NumStatistics(categoryID) / Statistic(categoryID,
+--     index) / StatisticName(statID)  the Statistics tab (SMW-10): GetStatistic in Forever's two-argument form
 -- PlayerLevel to SpellName (T5.2), and PlayerName (FB-17), exist so the simulator's seam (core/SimSetup.lua, LibKa0s-Sim-1.0) can answer
 -- every client read a simulated character needs (preview-mode, H1): a module reads them as
 -- `NS.Compat.Member(...)` at call time and never captures one in a local.
@@ -448,4 +455,187 @@ function Compat.TomTom()
     local tt = TomTom
     if type(tt) ~= "table" or type(tt.AddWaypoint) ~= "function" then return nil end
     return tt
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- SMW-08 / SMW-09: the reputation and currency lists (docs/forever-quirks.md, "Reputations, currencies
+-- and Statistics": Blizzard's Forever source, C_Reputation and C_CurrencyInfo only; the bare 1.12 globals
+-- are absent). Each read is feature-detected and runs under pcall; a missing API reads as an empty list.
+-- The two header toggles act on the client's own list, the character panel's, so the simulator's seam
+-- guards them (core/SimSetup.lua) and modules/SharedList.lua is their one caller.
+-- ---------------------------------------------------------------------------------------------
+
+local function repApi()
+    local api = C_Reputation
+    if type(api) == "table" and type(api.GetNumFactions) == "function"
+        and type(api.GetFactionDataByIndex) == "function" then return api end
+    return nil
+end
+
+local function guarded(fn, ...)
+    local ok, a = pcall(fn, ...)
+    if ok then return a end
+    return nil
+end
+
+--- The listed faction rows' count (only expanded headers' children are listed), 0 without the API.
+function Compat.NumFactions()
+    local api = repApi()
+    return api and tonumber(guarded(api.GetNumFactions)) or 0
+end
+
+--- Listed faction row `i`: one FactionData table, or nil.
+function Compat.FactionDataByIndex(i)
+    local api = repApi()
+    local t = api and guarded(api.GetFactionDataByIndex, i)
+    return type(t) == "table" and t or nil
+end
+
+--- One faction by its id, touching no list state: a FactionData table, or nil.
+function Compat.FactionDataByID(id)
+    local api = repApi()
+    if not (api and type(api.GetFactionDataByID) == "function") then return nil end
+    local t = guarded(api.GetFactionDataByID, id)
+    return type(t) == "table" and t or nil
+end
+
+--- Open (true) or close faction header row `i`. Answers whether a call ran.
+function Compat.SetFactionHeaderExpanded(i, open)
+    local api = repApi()
+    local fn = api and (open and api.ExpandFactionHeader or api.CollapseFactionHeader)
+    if type(fn) ~= "function" then return false end
+    return (pcall(fn, i))
+end
+
+--- Whether the client can open and close faction headers (the full read needs both).
+function Compat.CanToggleFactionHeaders()
+    local api = repApi()
+    return api ~= nil and type(api.ExpandFactionHeader) == "function" and type(api.CollapseFactionHeader) == "function"
+end
+
+--- The client's standing name for reaction `reaction` (1..8): GetText("FACTION_STANDING_LABELn", sex) where
+--- the client has it, else the bare global, else nil.
+function Compat.FactionStandingLabel(reaction)
+    local n = tonumber(reaction)
+    if not n then return nil end
+    local key = "FACTION_STANDING_LABEL" .. math.floor(n)
+    if type(GetText) == "function" and type(UnitSex) == "function" then
+        local ok, s = pcall(GetText, key, UnitSex("player"))
+        if ok and type(s) == "string" and s ~= "" then return s end
+    end
+    local s = _G[key]
+    return type(s) == "string" and s or nil
+end
+
+--- The client's bar color for reaction `reaction`: { r, g, b } from FACTION_BAR_COLORS, or nil.
+function Compat.FactionBarColor(reaction)
+    local colors = FACTION_BAR_COLORS
+    local c = type(colors) == "table" and colors[tonumber(reaction) or -1]
+    if type(c) ~= "table" or type(c.r) ~= "number" then return nil end
+    return { c.r, c.g, c.b, 1 }
+end
+
+local function currencyApi()
+    local api = C_CurrencyInfo
+    if type(api) == "table" and type(api.GetCurrencyListSize) == "function"
+        and type(api.GetCurrencyListInfo) == "function" then return api end
+    return nil
+end
+
+--- The listed currency rows' count (only expanded headers' children are listed), 0 without the API.
+function Compat.NumCurrencies()
+    local api = currencyApi()
+    return api and tonumber(guarded(api.GetCurrencyListSize)) or 0
+end
+
+--- Listed currency row `i`: one CurrencyInfo table, or nil.
+function Compat.CurrencyListInfo(i)
+    local api = currencyApi()
+    local t = api and guarded(api.GetCurrencyListInfo, i)
+    return type(t) == "table" and t or nil
+end
+
+--- One currency by its id, touching no list state: a CurrencyInfo table, or nil.
+function Compat.CurrencyInfo(id)
+    local api = C_CurrencyInfo
+    if type(api) ~= "table" or type(api.GetCurrencyInfo) ~= "function" then return nil end
+    local t = guarded(api.GetCurrencyInfo, id)
+    return type(t) == "table" and t or nil
+end
+
+--- Open (true) or close currency header row `i`. Answers whether a call ran.
+function Compat.SetCurrencyHeaderExpanded(i, open)
+    local api = currencyApi()
+    if not (api and type(api.ExpandCurrencyList) == "function") then return false end
+    return (pcall(api.ExpandCurrencyList, i, open and true or false))
+end
+
+--- Whether the client can open and close currency headers.
+function Compat.CanToggleCurrencyHeaders()
+    local api = currencyApi()
+    return api ~= nil and type(api.ExpandCurrencyList) == "function"
+end
+
+--- Whether `frame` (ReputationFrame, TokenFrame: the panel tab that shares the list's collapse) is on screen.
+--- Visible, not shown: the character panel hides the tabs it leaves and never clears the shown flag of the one
+--- it closes on, so a Reputation tab last viewed stays IsShown() with CharacterFrame closed.
+function Compat.PanelShown(frame)
+    if type(frame) ~= "table" then return false end
+    if type(frame.IsVisible) == "function" then return frame:IsVisible() == true end
+    return type(frame.IsShown) == "function" and frame:IsShown() == true
+end
+
+-- ---------------------------------------------------------------------------------------------
+-- SMW-10: the Statistics tab (docs/forever-quirks.md, "Reputations, currencies and Statistics"). Blizzard's
+-- Forever StatisticsFrame reads GetStatisticsCategoryList, GetCategoryInfo (name, parent; -1 a root),
+-- GetCategoryNumAchievements and GetStatistic(categoryID, index) -> quantity, skip, statID, which is Forever's
+-- form and not Retail's GetStatistic(achievementID); a row's name is GetAchievementInfo(statID)'s second
+-- answer. Nothing here is shared with the panel (no collapse trap) and nothing acts on the client. Each read is
+-- feature-detected and runs under pcall; a missing API reads as an empty tree.
+-- ---------------------------------------------------------------------------------------------
+
+--- The Statistics categories' ids in the client's order (its list ordered by numeric key: the keys may be
+--- sparse); an empty table without the API.
+function Compat.StatisticsCategories()
+    if type(GetStatisticsCategoryList) ~= "function" then return {} end
+    local list = guarded(GetStatisticsCategoryList)
+    if type(list) ~= "table" then return {} end
+    local keys, out = {}, {}
+    for k in pairs(list) do if type(k) == "number" then keys[#keys + 1] = k end end
+    table.sort(keys)
+    for _, k in ipairs(keys) do
+        local id = tonumber(list[k])
+        if id then out[#out + 1] = id end
+    end
+    return out
+end
+
+--- Category `id`'s name and parent id (-1, or nil, for a root); nil without the API.
+function Compat.StatisticsCategoryInfo(id)
+    if type(GetCategoryInfo) ~= "function" then return nil end
+    local ok, name, parent = pcall(GetCategoryInfo, id)
+    if not ok then return nil end
+    return name, tonumber(parent)
+end
+
+--- How many rows category `categoryID` lists (GetCategoryNumAchievements), 0 without the API.
+function Compat.NumStatistics(categoryID)
+    if type(GetCategoryNumAchievements) ~= "function" then return 0 end
+    return tonumber(guarded(GetCategoryNumAchievements, categoryID)) or 0
+end
+
+--- Row `index` of category `categoryID`, in Forever's form: quantity, skip, statID; nil without the API.
+function Compat.Statistic(categoryID, index)
+    if type(GetStatistic) ~= "function" then return nil end
+    local ok, quantity, skip, statID = pcall(GetStatistic, categoryID, index)
+    if not ok then return nil end
+    return quantity, skip, statID
+end
+
+--- Statistic `statID`'s name (GetAchievementInfo's second answer), or nil.
+function Compat.StatisticName(statID)
+    if type(GetAchievementInfo) ~= "function" then return nil end
+    local ok, _, name = pcall(GetAchievementInfo, statID)
+    if not ok or type(name) ~= "string" then return nil end
+    return name
 end

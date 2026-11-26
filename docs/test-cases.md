@@ -48,7 +48,7 @@ Total.
 ### test_template_rows.lua (9)
 
 - templates: no string row in the whole schema renders as an empty dropdown
-- templates: the Broker page renders with no empty-dropdown line, one dropdown for the feed
+- templates: the Broker page renders with no empty-dropdown line, one dropdown per feed (SMW-05)
 - templates: every template row's default is one of its presets
 - templates: picking a preset writes its template
 - templates: Custom keeps the text, and the box edits it
@@ -110,7 +110,7 @@ Total.
 
 ### test_keybinds.lua (4)
 
-- keybinds: Bindings.xml is two CLICK lines in this addon's category, no header, no default
+- keybinds: Bindings.xml is seven CLICK lines in this addon's category, no header, no default
 - keybinds: the bound button runs the window's one toggle handler
 - keybinds: the Journal button runs the Journal's one toggle handler
 - keybinds: a Journal press while stood down refuses on the toggle verb's line
@@ -151,6 +151,20 @@ Total.
 - probe: C_SkillInfo and C_Item are read first, a table-shaped line kept whole
 - probe: a slot-taking C_Item.GetWeaponEnchantInfo does not error, and each try is recorded
 - compat: WeaponEnchantInfo passes a slot and normalizes Forever's table to the 1.12 shape
+
+### test_probe_sections.lua (11)
+
+- probe sections: the report carries factions, currencies and statistics
+- probe sections: the new API presence rows are reported, the absent legacy globals false
+- probe sections: factions lists every row with collapsed headers opened, then restores them
+- probe sections: at most 60 faction rows are written
+- probe sections: GetFactionDataByID is asked for a child of a collapsed header
+- probe sections: never expands while the Reputation panel is shown or in combat
+- probe sections: currencies lists the whole list, opened and restored, with a by-id read
+- probe sections: never opens the currency list while the Currency tab is shown
+- probe sections: an absent API answers its section's source as none, never raises
+- probe sections: statistics is the category tree with up to 3 raw rows each
+- probe sections: statistics records whether the Retail form GetStatistic(statID) answers, under pcall
 
 ### test_skilldata.lua (26)
 
@@ -390,7 +404,7 @@ Total.
 - round2 icons: size, zoom, border and its color reach the drawn icon; off hides it
 - round2 icons: the LDB tooltip draws the window's block titles on header bands and stripes every other row
 - round2 icons: a skill's name in the LDB tooltip is white, a weapon below its cap included
-- round2 icons: Pin to the broker feed redraws the feed at once
+- round2 icons: Pin to the Professions broker redraws the feed at once
 - round2 header: the detach mark wears the marks' rest color at rest and the hot color under the pointer
 - round2 hammer: the action mark lights up while the pointer is on it, as the detach mark does
 
@@ -401,8 +415,8 @@ Total.
 - round3 sort: the LDB tooltip lists a section in its block's order
 - round3 alerts: skip untrained by default; equipped only; every weapon; a muted weapon never
 - round3 window: collapsing every block keeps the window's height; Shrink to fit lets it shrink
-- round3 broker: a second Pin on the pinned skill unpins it, and the feed reads Professions and Skills
-- round3 broker: a right-click on a tooltip row opens the row menu, whose Hide leaves it out of the tooltip only
+- round3 broker: a second Pin on the pinned skill unpins it, and the feed reads Professions
+- round3 broker: a tooltip row opens no menu; the tooltip's own Hide set still leaves it out of the tooltip only
 - round3 broker: the bars stop at the widest value, never past the old fixed column
 - round3 click: a weapon row opens the Skills tab with its line selected
 - round3 click: Compat.OpenTradeSkill answers false without the call, and the call's own answer with it
@@ -516,7 +530,7 @@ Total.
 - round5 review: a hide written elsewhere while the Rows page is on screen redraws it; a show-all draws once
 - round9 rows: one tab per block in the default block order, each drawing only its block
 
-### test_round6.lua (54)
+### test_round6.lua (53)
 
 - round6 toast: the gap and skill-up toasts wear the cap toast's skin shell, no tint or edge of their own
 - round6 toast: the value stays red or green and carries its delta in brackets
@@ -542,17 +556,16 @@ Total.
 - round6 trainer ranks: past the max height the cards scroll under a skin scroll bar, the wheel and the bar drive it
 - round6 ldb look: a new profile draws the Main window style on its own TOOLTIP frame, the window's size
 - round6 ldb look: the window's headers and rows, the bar with its text inside and the mark at its right
-- round6 ldb look: a block collapsed in the window is a collapsed header here, and nothing on a header acts
-- round6 ldb look: a row's left click opens and its right click opens the row menu
+- round6 ldb look: a block collapsed in the window stays open here; only the header's chevron takes the pointer
+- round6 ldb look: a row's left and right clicks open nothing
 - round6 ldb look: the window's weapon filter and sort reach both styles
 - round6 ldb look: past its Height the body scrolls, by the wheel and by the skin's scroll bar
-- round6 ldb look: the row menu draws above the tooltip in both styles, and goes back as it hides
 - round6 ldb look: the classic-only rows are dimmed in the Main window style, width and height in Classic
 - round6 ldb look: schemaVersion 8 keeps every stored profile on Classic; a fresh install starts on it new
-- round6 stats feed: a second data source, its tooltip the four stat blocks, its clicks the skills feed's
-- round6 stats feed: a stat row's menu pins its stat to the feed per character; with none it reads Stats
+- round6 stats feed: its own data source, its tooltip the four stat blocks, its clicks its window's
+- round6 stats feed: a stat row's menu pins its stat to the feed per character; with none it reads Character Stats
 - round6 stats feed: schemaVersion 9 drops a stored Stats section switch, the stat blocks' switches answer
-- round6 review: the Main window style's test strip opens its menu above the tooltip, and it ends test mode
+- round6 review: the Main window style's test strip shows in test mode and takes no click
 - round6 review: the Set waypoint button keeps the skin's hover look beside its own tooltip
 - round6 review: schemaVersion 8 keeps an empty stored profile on Classic too; only a fresh install starts new
 - round6 review: schemaVersion 10 keeps Spell and Defense collapsed on a profile from before R6-8
@@ -573,7 +586,7 @@ Total.
 - round6 arrow review: a profile switch re-applies the shown arrow's scale and position
 - round6 arrow review: right-clicking test mode's sample over a real waypoint brings the real arrow back
 
-### test_round7.lua (34)
+### test_round7.lua (32)
 
 - round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Skill Master's arrow always
 - round7 no TomTom: the arrow off super-tracks the pin (the client's arrow)
@@ -589,7 +602,7 @@ Total.
 - round7 icon border: Use the row's color is off on a new profile, so the skin's icon border draws
 - round7 icon border: schemaVersion 12 keeps the row's color on every profile stored before
 - round7 header meta: no block header carries a line beside its title, Base & Combat included
-- round7 titles: the two feeds' tooltips read Skill Master · Professions and Skills and Skill Master · Stats
+- round7 titles: each feed's tooltip reads its window's title (SMW-05), Skill Master · Professions ...
 - round7 titles: the panel's title never overlaps its gains text, centered while it fits
 - round7 scroll bar: an always-shown bar is drawn disabled while nothing scrolls, enabled once it does
 - round7 scroll bar: the LDB panel builds its bar always shown
@@ -600,17 +613,15 @@ Total.
 - round7 filters: every window header carries the funnel, the filled badge while it narrows, and its menu
 - round7 filters: a detached stat frame and a merged section carry the mark and follow the filter
 - round7 filters: both LDB tooltip styles honor every block's filter
-- round7 go icon: Open a row from, Main window style only (Full row by default since round 8)
-- round7 go icon: the row's left click opens nothing; shift-click and right-click stay on the row
-- round7 go icon: the whole row mode (round 8: Full row) arms the cast over the row, the icon live
-- round7 go icon: a hovered crafting row's icon gets the window's secure cast; the panel's hide disarms it
-- round7 go icon: in combat a hover arms nothing and the icon's click says why, as the window's
-- round7 go icon: a tooltip row's shift-click links it into chat
+- round7 go icon: Open a row from is gone from the LDB tooltip; schemaVersion 16 drops a stored one
+- round7 go icon: a tooltip row's left, shift and right clicks do nothing, on the row and on its go icon
+- round7 go icon: a hovered crafting row arms no secure cast, and its go icon takes no mouse
+- round7 go icon: a tooltip row keeps its hover: the window's wash and its row tooltip, with no click hint
 - FB-SM-05 test mode: the arrow off still shows a labeled sample
 - FB-SM-05 test mode: with TomTom loaded the sample is Skill Master's, labeled, and TomTom is never written
 - FB-SM-05 test mode: turning the arrow off while it runs keeps the sample
 
-### test_round8.lua (23)
+### test_round8.lua (22)
 
 - round8 header marks: a detached band's marks rest in the main window header's color
 - round8 header marks: a merged window's band and section sub-headers match the main window header
@@ -618,7 +629,7 @@ Total.
 - round8 ldb tooltip: the main window's headers keep their sort and filter marks
 - round8 filter badge: the window header's funnel on a solid square while it narrows, hover readable
 - round8 filter badge: a detached band and a merged sub-header wear the same badge
-- round8 open a row from: Layout > Window's Open a row from, Full row by default; the LDB tooltip's too
+- round8 open a row from: Layout > Window's Open a row from, Full row by default (the LDB tooltip's went, SMW-07)
 - round8 open a row from: Full row lays the crafting cast over the whole row, Go icon only over the icon
 - round8 open a row from: a Full row click opens what the go icon opens; Go icon only, the row opens nothing
 - round8 open a row from: shift-click links and right-click opens the menu in both modes, on the row and its overlay
@@ -626,8 +637,7 @@ Total.
 - round8 open a row from: in combat a Full row arms nothing and its click says why; armed again after
 - round8 open a row from: detached and merged windows follow the main window's setting
 - round8 open a row from: the row tooltip's click hint says the mode
-- round8 open a row from: the LDB tooltip's Full row arms the cast over the whole row and opens from anywhere
-- round8 open a row from: the LDB tooltip's Go icon only keeps the cast on the icon and the row inert
+- round8 open a row from: a tooltip row opens nothing and arms no cast, in either window mode
 - round8 arrow: the profile's arrow defaults are the library's, Raised and the skin's colors
 - round8 arrow: the Waypoint arrow subgroup is the library's settings block at Skill Master's paths
 - round8 arrow: each of the five looks reaches the shown arrow through its setting
@@ -668,7 +678,7 @@ Total.
 
 ### test_blocks.lua (10)
 
-- blocks: the eight blocks, four skill categories then four stat groups
+- blocks: the eight skill and stat blocks, four skill categories then four stat groups, then the tree blocks
 - test_blocks_detach_dock_roundtrip: a block leaves the window, gets its own frame and comes back
 - blocks: a detached frame saves its drop point; locked refuses the drag
 - test_rows_unlearned_variant: an unlearned skill is a dimmed row with its trainer and the action mark
@@ -678,6 +688,44 @@ Total.
 - mainwindow: the title bar carries lock, journal, settings and close; the summary and legend show
 - mainwindow: an empty model shows the empty state, and data hides it
 - mainwindow: a skin switch restyles every bar, header and icon well, not only the values
+
+### test_families.lua (7)
+
+- families: six families in the character panel's order, each with a title, blocks and a feed
+- families: the split and the kept broker names (the spec's calls)
+- families: every block belongs to exactly one family, and its def says which
+- blocks: NS.BLOCKS keeps the eight skill and stat blocks first, then the tree blocks (SMW-08..10)
+- blocks: the engine dispatches on B.PROVIDERS by the def's source
+- blocks: Models() keys every provider's model by source, and Data() still answers skills, stats
+- blocks: Entries(id, skills, stats) and EntriesFrom(id, models) answer the same rows
+
+### test_tree.lua (11)
+
+- tree: char.fold defaults to an empty store
+- tree: Statistics categories start folded; reputation and currency headers start open
+- tree: Visible skips the children of a folded node, at every depth
+- tree: a visible row carries its depth, indent, header flag and chevron
+- tree: Toggle flips one node and answers the new state
+- tree: a fold never calls the client's Expand or Collapse
+- tree: SetAll folds or opens every header it is given
+- tree: the node keys the spec names, per family
+- tree: a header with no key is drawn open and never stored
+- tree: while test mode runs, folds go to a session store and the character's stay as they were
+- tree: an explicit store is used as given (the LDB tooltip's own folds)
+
+### test_windows.lua (11)
+
+- windows: one window per family, in the family order, each its own frame and title
+- windows: each window draws its own family's docked blocks, and only those
+- windows: the Character Stats window drops the Stats prefix nowhere it matters; tree windows show their empty line
+- windows: each window's size and strata are its own rows, applied to it alone
+- windows: a window never dragged opens next to the Professions window, stacked down and right
+- windows: a drag saves that window's drop point alone; Reset position forgets every one
+- windows: schemaVersion 14 moves the old window's stored settings to the Professions window
+- windows: one slash verb per window toggles it; /sm hide hides them all
+- windows: each family's key binding button toggles its window
+- windows: a broker crafting row routes to the window that docks it
+- windows: a stood-down addon refuses every window
 
 ### test_interact.lua (17)
 
@@ -765,18 +813,17 @@ Total.
 - test_template_tokens: no pin falls back to the last skill-up, then to the lowest profession
 - test_template_unknown_token_empty: unknown tokens and missing data render empty
 
-### test_broker.lua (17)
+### test_broker.lua (16)
 
-- broker: two data sources, "Skill Master" and "Skill Master Stats" (R6-9), separate from the launcher object
+- broker: one data source per family (SMW-05), "Skill Master" and "Skill Master Stats" kept, separate from the launcher object
 - broker: the feed renders its template
 - broker: {equippedWeapon} follows the main hand's weapon class
-- test_broker_flash_reverts: any skill-up flashes the feed, then the template comes back
-- broker: the skills feed's tooltip has the four skill sections, on by default, and no stats
+- test_broker_flash_reverts: a skill-up flashes its own family's feed, then the template comes back
+- broker: the Professions and Skills feeds' tooltips have their own two sections each, on by default, and no stats
 - broker: each section has its own switch
 - broker: a tooltip Hide leaves the main window alone, and the window's Hide leaves the tooltip
 - broker: a tooltip Hide row per catalog skill and per stat, on the Rows page (R5-13), apart from the window's
 - broker: clicks follow design §6.5 and never touch a secure frame
-- broker: a crafting row without ShowAndScrollTo still opens the main window
 - broker: a hovered tooltip row wears the window's hover wash, under its text, until the pointer leaves
 - broker: stood down, the feed reads Off and its tooltip says so; standing up re-renders
 - broker: the tooltip wears the skin by default, on its own frame, never on GameTooltip
@@ -784,6 +831,114 @@ Total.
 - broker: GameTooltip keeps its state, and its hide never takes the skinned tooltip's bars
 - broker: schemaVersion 3 carries the All template and drops the other feeds' keys
 - broker: schemaVersion 3 moves the active profile's All template past the copied default
+
+### test_feeds.lua (12)
+
+- feeds: one data source per family, in the family order, the two shipped names kept
+- feeds: with nothing pinned, a {pinned} feed reads its family's short name
+- feeds: each feed's template is its own
+- feeds: a pinned skill shows on its own family's feed
+- feeds: the Character Stats feed's {pinned} is its pinned stat, in any template
+- feeds: a skill-up flashes its own family's feed alone
+- feeds: a tree family's tooltip says it has nothing yet, in both styles
+- feeds: each feed's cell toggles its own window; a right click opens the Broker page
+- feeds: stood down, every feed reads Off
+- feeds: the Broker page has a template pair and the section switches per feed
+- feeds: schemaVersion 15 moves the one template to the Professions feed's
+- feeds: the tooltip content is its own file, and Broker.lua stays well under the cap
+
+### test_pins.lua (8)
+
+- pins: a row's menu ticks its own family's broker, and a second pin keeps the first
+- pins: {pinned} joins the feed's pins, {pinned1}..{pinned5} render one each
+- pins: five per broker; a sixth row's pin is disabled and says why, other brokers unaffected
+- pins: the old one-pin fields fold into their families' lists when read, once
+- pins: the Classic tooltip lists the feed's pins first, under Pinned
+- pins: the Main window style tooltip lists them first too, a Pinned header over their rows
+- pins: the Broker page's Pins tab lists each broker's pins, moves and unpins them
+- pins: in test mode the feeds draw the sample's pins, and this character's store stays
+
+### test_ldb_tooltip.lua (6)
+
+- ldb tooltip: a section's chevron folds it in the tooltip alone, and the tooltip redraws in place
+- ldb tooltip: a fold's redraw keeps the body's scroll offset, clamped to the new overflow
+- ldb tooltip: Classic sections carry chevrons that fold them, and its rows take no click
+- ldb tooltip: the Classic header line shows the chevron's state
+- ldb tooltip: a tree header's tooltip fold is the tooltip's own, never the window's
+- ldb tooltip: a redraw with no tooltip up does nothing
+
+### test_reputations.lua (13)
+
+- reputations: the first read opens every collapsed header, reads, and closes them again bottom up
+- reputations: a standing bar runs from the current threshold to the next, labeled and colored by the client
+- reputations: in combat or with the Reputation tab up the read opens nothing; combat's end reads in full
+- reputations: the read's own header toggles are latched: an UPDATE_FACTION meanwhile reads nothing
+- reputations: later reads go by id, touch no header, and announce a moved standing
+- reputations: a faction the model does not know asks for the full read again
+- reputations: the window draws the tree, and a fold is this addon's own, never the client's
+- reputations: the tooltip folds a header in its own folds; the window's stay
+- reputations: the Classic tooltip lists the tree, each header a chevron line
+- reputations: a row's menu pins it to the Reputations broker, whose text shows its standing
+- reputations: the Alts snapshot keeps each standing; the Journal has a Reputations sub-tab
+- reputations: a simulation never toggles the client's headers (the seam guards the toggle)
+- reputations: a detached Reputations block draws the same tree, and the Journal's sub-tab draws its standings
+
+### test_currencies.lua (9)
+
+- currencies: the first read opens every collapsed header, reads, closes it again, and never reads gold
+- currencies: a capped currency is a bar, one without a cap a plain value; the tooltip says the week's cap
+- currencies: CURRENCY_DISPLAY_UPDATE with an id reads that one by id, touching no header, and logs the gain
+- currencies: a nil currencyType reads every known one again; an unknown id asks for the full read
+- currencies: in combat or with the Currency tab up the read opens nothing; the latch holds its own echo
+- currencies: an empty list is the window's empty line; the window draws icons, bars and plain values
+- currencies: the cap alert is off by default; on, it toasts once as a currency reaches its cap
+- currencies: a pin shows its amount; the Alts snapshot and the Journal's Currencies sub-tab
+- currencies: a simulation never toggles the client's headers (the seam guards the toggle)
+
+### test_statistics.lua (15)
+
+- statistics: the category tree is depth first, a parent of -1 or one the list lacks a root, a cycle survives
+- statistics: a value shows as the tab shows it: the number, -- for none, a string verbatim
+- statistics: the first look reads the category tree only; every category starts folded
+- statistics: unfolding a category reads its rows alone, in Forever's two-argument form; names are cached
+- statistics: CRITERIA_UPDATE is registered only while the window or its tooltip shows, or one is pinned
+- statistics: a burst of CRITERIA_UPDATE is one re-read a second later, of the unfolded categories only
+- statistics: with nothing showing, CRITERIA_UPDATE reads nothing and the registration goes
+- statistics: a pinned statistic shows in its broker's text and is read alone, by its index, while hidden
+- statistics: at login a pinned statistic's category is read for the feed, and nothing else
+- statistics: the tooltip folds in its own folds and reads what it unfolds; the window's folds stay
+- statistics: the Classic tooltip lists the categories, each a chevron line
+- statistics: a row's tooltip says its value and category; no Alts sub-tab; the empty window says so
+- statistics: test mode reads nothing of the live tab
+- statistics: about 1000 rows read once each at two calls a row; a re-read costs one a row
+- statistics: the statisticsRead perf bucket is noted while a capture is on, and nothing while off
+
+### test_smw_review.lua (15)
+
+- smw-rev: a currency with no cap is pinnable from its row's menu; a header is not
+- smw-rev: a Reputation or Currency tab left selected in a closed character panel does not block the full read
+- smw-rev: a new faction met in combat keeps every faction under a collapsed header; combat's end reads in full
+- smw-rev: a new currency met in combat keeps every currency under a collapsed header; combat's end reads in full
+- smw-rev: a list read that raises after opening a header still closes what it opened, then raises
+- smw-rev: the Statistics window reopened reads its unfolded categories afresh, not as it last saw them
+- smw-rev: the Statistics tooltip shown again reads what it unfolds afresh
+- smw-rev: with the window hidden and one statistic pinned, CRITERIA_UPDATE reads the pinned row alone
+- smw-rev: a reputation's later change moves its one Log line to the end, so the Log stays in time order
+- smw-rev: the feeds read the main hand and the level only for a template that shows them
+- smw-rev: a nested header's chevron in the Classic tooltip sits over its chevron, past the indent
+- smw-rev: in the Statistics window, Expand all opens every category and Collapse all folds them, the block open
+- smw-rev: in the Reputations window, Collapse all folds the headers; a collapsed block opens on Expand all
+- smw-rev: the skill windows' Expand / Collapse all still collapses and expands their blocks
+- smw-rev: the Character Stats window and feed title the stat blocks without the "Stats ·" prefix
+
+### test_preview_trees.lua (6)
+
+- preview trees: the sample's records come in the panels' shapes, built by the live builders
+- preview trees: test mode draws the sample in the three windows, reading nothing of the live client
+- preview trees: the tree feeds draw the sample's own pins and tree, never this character's store
+- preview trees: the sample's Alts record carries its standings and currencies
+- preview trees: the simulator's world is read through the seam; its steps raise a reputation and a currency
+- preview trees: a simulated currency at its cap never silences a real one (the alerts' state)
 
 ### test_polish.lua (12)
 
@@ -914,8 +1069,8 @@ Total.
 
 ### test_seams.lua (5)
 
-- test_seam_broker_crafting_row_scrolls_window: a broker crafting row expands, shows and scrolls to it
-- test_seam_broker_unlearned_row_opens_trainer_popup: the popup gets the skill key, not a table
+- test_seam_crafting_row_scrolls_window: ShowAndScrollTo expands, shows and scrolls to a crafting row
+- test_seam_unlearned_row_opens_trainer_popup: the popup gets the skill key, not a table
 - test_seam_alert_click_sets_waypoint: a cap toast's click goes through the real NS.Waypoints
 - test_seam_mini_bars_are_the_bar_widget: the broker tooltip draws the Widgets Bar's mini style (the Journal's: test_journal)
 - test_seam_title_bar_journal_button: the main window's journal mark toggles the Journal
@@ -1155,6 +1310,7 @@ Total.
 | test_skinsetup.lua | 5 |
 | test_perf.lua | 2 |
 | test_probe.lua | 10 |
+| test_probe_sections.lua | 11 |
 | test_skilldata.lua | 26 |
 | test_trainers.lua | 35 |
 | test_trainer_probe.lua | 18 |
@@ -1176,19 +1332,30 @@ Total.
 | test_round5_groups.lua | 28 |
 | test_round5_snap.lua | 19 |
 | test_round5_followups.lua | 27 |
-| test_round6.lua | 54 |
-| test_round7.lua | 34 |
-| test_round8.lua | 23 |
+| test_round6.lua | 53 |
+| test_round7.lua | 32 |
+| test_round8.lua | 22 |
 | test_round9.lua | 14 |
 | test_sr1.lua | 10 |
 | test_blocks.lua | 10 |
+| test_families.lua | 7 |
+| test_tree.lua | 11 |
+| test_windows.lua | 11 |
 | test_interact.lua | 17 |
 | test_sessionlog.lua | 6 |
 | test_alts.lua | 6 |
 | test_journal.lua | 22 |
 | test_alerts.lua | 14 |
 | test_template.lua | 3 |
-| test_broker.lua | 17 |
+| test_broker.lua | 16 |
+| test_feeds.lua | 12 |
+| test_pins.lua | 8 |
+| test_ldb_tooltip.lua | 6 |
+| test_reputations.lua | 13 |
+| test_currencies.lua | 9 |
+| test_statistics.lua | 15 |
+| test_smw_review.lua | 15 |
+| test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
 | test_sample_names.lua | 2 |
@@ -1219,4 +1386,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **893** |
+| **Total** | **1012** |

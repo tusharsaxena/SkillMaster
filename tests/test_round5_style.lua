@@ -59,7 +59,7 @@ test("round5 detached style: every row is on the Layout page's Detached windows 
         assertEqual(row.group, NS.L["Detached windows"], path .. " is on the Detached windows tab")
         assertTrue(row.onChange ~= nil, path .. " restyles on a write")
     end
-    assertEqual(byPath["layout.strata"].group, NS.L["Window"], "the window's own strata stays on the Window tab")
+    assertEqual(byPath["windows.professions.strata"].group, NS.L["Window"], "each family window's own strata stays on the Window tab (SMW-04)")
 end)
 
 test("round5 detached style: the companions start on the skin, in the composer and in the defaults", function()

@@ -38,14 +38,16 @@ A.SKILLUP_SECONDS = 4   -- a skill-up toast's life (the others keep the library'
 A.FOLD_SECONDS = 5      -- skill-ups this close together share one toast
 -- The semantic color each kind's label and numbers take (the skin's tokens): skill up green,
 -- weapon gap red. The toast itself is the skin's shell, as the cap toast's (round 6).
-A.KIND_TOKEN = { skillup = "sem.good", weapon = "sem.bad" }
+A.KIND_TOKEN = { skillup = "sem.good", weapon = "sem.bad", currency = "sem.warn" }
 
 local shownCap, shownGap, lastMax = {}, {}, {}
+local shownCurrency = {}   -- the currencies whose cap alert showed this session (SMW-09)
 local recentUps, lastUpAt = {}, nil   -- the skill-ups the open skill-up toast folds
 
 --- Forget what this session alerted (the suites; a session otherwise never resets).
 function A.Reset()
     shownCap, shownGap, lastMax = {}, {}, {}
+    shownCurrency = {}
     recentUps, lastUpAt = {}, nil
 end
 
@@ -56,12 +58,15 @@ local function copy(t)
 end
 
 --- What this session has alerted, as a copy (the simulator takes it at start).
-function A.State() return { cap = copy(shownCap), gap = copy(shownGap), max = copy(lastMax) } end
+function A.State()
+    return { cap = copy(shownCap), gap = copy(shownGap), max = copy(lastMax), currency = copy(shownCurrency) }
+end
 
 --- Put a State() back (the simulator's stop): a simulated alert never silences a real one.
 function A.RestoreState(s)
     if type(s) ~= "table" then return end
     shownCap, shownGap, lastMax = copy(s.cap or {}), copy(s.gap or {}), copy(s.max or {})
+    shownCurrency = copy(s.currency or {})   -- a simulated currency at its cap never silences a real one (SMW-11)
 end
 
 local function setting(key) return NS.GetSetting and NS.GetSetting("alerts." .. key) end
@@ -214,6 +219,22 @@ function A.CheckSkillUp(e)
     lastUpAt = t
     if A.toast.Remove then A.toast:Remove("skillup") end
     show(A.SkillUpPayload(recentUps), "skillup")
+    return true
+end
+
+--- CURRENCY_CHANGED(key, old, new) (SMW-09, GitHub issue #7): a currency that reached its cap from below toasts,
+--- once per currency per session, while alerts.currencyCap is on (off by default). Answers whether it toasted.
+function A.CheckCurrencyCap(key, old, new)
+    if setting("currencyCap") ~= true or shownCurrency[key] then return false end
+    local e = NS.CurrencyData and NS.CurrencyData:Get(key)
+    local max = e and tonumber(e.maxQuantity) or 0
+    if not (e and e.hasBar and max > 0 and (tonumber(new) or 0) >= max and (tonumber(old) or 0) < max) then
+        return false
+    end
+    shownCurrency[key] = true
+    show({ kind = "currency", key = key, name = e.name, icon = e.icon, label = L["Currency at cap"],
+           title = ("%s %d / %d"):format(e.name, new, max), delta = "",
+           detail = L["Spend some before you earn more: what you earn past the cap is lost."] }, "currency:" .. key)
     return true
 end
 
@@ -394,7 +415,7 @@ function A.Build(frame, p)
     if type(p) ~= "table" then return false end
     rows(frame)
     frame.skmPayload = p
-    frame.skmIcon.art:SetTexture(NS.Rows.Icon("skill", p.key))
+    frame.skmIcon.art:SetTexture(p.icon or NS.Rows.Icon("skill", p.key))   -- a currency's own (SMW-09)
     local size, padY = layout(frame, p)
     local cap = p.kind == "cap"
     A.lastKind = p.kind   -- the duration and sound getters run right after the build
@@ -467,4 +488,5 @@ A.events = NS.NewBusTarget()
 if A.events then
     A.events:RegisterMessage(NS.MSG.SKILL_UP, function(_, key) A.OnSkillUp(key) end)
     A.events:RegisterMessage(NS.MSG.SKILLS_UPDATED, function(_, model) A.OnSkillsUpdated(model) end)
+    A.events:RegisterMessage(NS.MSG.CURRENCY_CHANGED, function(_, key, old, new) A.CheckCurrencyCap(key, old, new) end)
 end

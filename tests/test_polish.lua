@@ -4,7 +4,7 @@
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
-local B, D, W, SO, J, R = NS.Broker, NS.Detached, NS.MainWindow, NS.SecureOverlay, NS.Journal, NS.Rows
+local B, D, W, SO, J, R = NS.Broker, NS.Detached, T.windows, NS.SecureOverlay, NS.Journal, NS.Rows
 local LAYERS = NS.Constants.LAYERS
 
 local function skill(key, name, category, rank, max, modifier, learned)
@@ -128,7 +128,8 @@ test("broker: the footer reads as the mockup; a right-click opens the Broker set
     function tip:NumLines() return #lines end
     B.FillTooltip(tip)
     local footer = lines[#lines]
-    assertTrue(footer:find("Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, shift-click to link, right-click for the menu",
+    -- SMW-07: a row takes no click in the tooltip; a section's chevron folds it.
+    assertTrue(footer:find("Click label: toggle window \194\183 Right-click label: options \194\183 Click a chevron to fold",
         1, true) ~= nil, footer)
 
     local H, opened = NS.Helpers, {}

@@ -3,7 +3,7 @@
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
-local B, R, W, D = NS.Blocks, NS.Rows, NS.MainWindow, NS.Detached
+local B, R, W, D = NS.Blocks, NS.Rows, T.windows, NS.Detached
 
 local function skill(key, name, category, rank, max, modifier, learned)
     return { key = key, name = name, category = category, kind = NS.SkillCatalog[key] and NS.SkillCatalog[key].kind,
@@ -54,13 +54,13 @@ local function rowsOf(category)
     return n
 end
 
-test("blocks: the eight blocks, four skill categories then four stat groups", function()
+test("blocks: the eight skill and stat blocks, four skill categories then four stat groups, then the tree blocks", function()
     assertEqual(table.concat(NS.BLOCKS, ","),
-        "primary,secondary,weapon,other,stats_base,stats_spell,stats_defense,stats_utility")
+        "primary,secondary,weapon,other,stats_base,stats_spell,stats_defense,stats_utility,currencies,reputations,statistics")
     for _, id in ipairs(NS.BLOCKS) do
         local def = NS.BlockDefs[id]
         assertEqual(def.id, id)
-        assertTrue(def.source == "skills" or def.source == "stats", id .. " source")
+        assertTrue(def.source == "skills" or def.source == "stats" or NS.IsTreeBlock(id), id .. " source")
         assertTrue(type(def.title) == "string" and def.title ~= "", id .. " title")
         assertTrue(type(NS.db.profile.layout.blocks[id]) == "table", id .. " has its layout row")
     end

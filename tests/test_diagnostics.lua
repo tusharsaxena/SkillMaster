@@ -120,7 +120,10 @@ test("diagnostics: layout prints the window and every block's stored state, deta
     NS.db.profile.layout.blocks.weapon.docked = false
     local text = sectionLines("layout")
     NS.db.profile.layout.blocks.weapon.docked = true
-    assertTrue(text:find("layout window scale=", 1, true) ~= nil, text)
+    assertTrue(text:find("layout scale=", 1, true) ~= nil, text)
+    for _, fid in ipairs(NS.FAMILY_ORDER) do   -- SMW-04: one line per family window
+        assertTrue(text:find("layout window " .. fid .. " ", 1, true) ~= nil, "missing window " .. fid .. ":\n" .. text)
+    end
     for _, id in ipairs(NS.BLOCKS) do
         assertTrue(text:find("block " .. id .. " ", 1, true) ~= nil, "missing block " .. id .. ":\n" .. text)
     end
@@ -131,9 +134,9 @@ end)
 test("diagnostics: the settings section lists only the rows off their default, with their values", function()
     -- red under: a getter handed the row instead of its path (every row read nil, so all printed
     -- as "path = nil (default)", owner's dump 2026-11-12).
-    NS.SetByPath("layout.width", 500)
+    NS.SetByPath("windows.skills.width", 500)
     local text = flat(NS.DebugLog:BuildDiagnostics())
-    NS.SetByPath("layout.width", NS.defaults.profile.layout.width)
-    assertTrue(text:find("layout.width = 500 (", 1, true) ~= nil, text)
-    assertTrue(not text:find("layout.maxHeight =", 1, true), "a row at its default printed:\n" .. text)
+    NS.SetByPath("windows.skills.width", NS.defaults.profile.windows.skills.width)
+    assertTrue(text:find("windows.skills.width = 500 (", 1, true) ~= nil, text)
+    assertTrue(not text:find("windows.skills.maxHeight =", 1, true), "a row at its default printed:\n" .. text)
 end)

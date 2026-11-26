@@ -4,7 +4,9 @@ local addonName, NS = ...
 -- the addon's real engine. Every 3 s a step changes the simulated world and fires the events the
 -- client would: skill-ups (CHAT_MSG_SKILL, so SkillData scans and sends SKILL_UP: the broker flashes,
 -- the session log records it, the alerts check it), a fishing lure on and off (the bonus segment and
--- its timer) and a mount's speed change (the Speed stats).
+-- its timer) and a mount's speed change (the Speed stats). The tree families too (SMW-11): the sample's
+-- reputations, currencies and Statistics tab are the world's, read through the seam as the live client is read,
+-- and a step raises a reputation (UPDATE_FACTION) and a currency (CURRENCY_DISPLAY_UPDATE).
 --
 -- The world answers through the seam (core/SimSetup.lua): the skill list, the player's level, class
 -- and race, the weapon enchant, the main hand's tooltip and the speed, each an NS.Compat member.
@@ -29,6 +31,8 @@ H.LURE_SECONDS = 600   -- the lure the "lure on" step applies
 H.MOUNT_YARDS = 11.2   -- 160% of the 7 yards/s run speed
 H.RUN_YARDS, H.SWIM_YARDS = 7, 4.69
 H.MAIN_HAND = 16
+H.REP_STEP = { faction = 72, amount = 250 }        -- Stormwind, the sample's pinned faction
+H.CURRENCY_STEP = { currency = 1901, amount = 150 } -- Honor Points, the sample's pinned currency
 
 -- ── the simulated world ───────────────────────────────────────────────────────────────────────
 
@@ -40,7 +44,9 @@ function H.NewWorld()
     local c = NS.Preview.SampleCharacter()
     local w = { lines = NS.Preview.SkillLines(), level = c.level, classFile = c.classFile, name = c.name,
                 className = L[c.class], raceFile = c.raceFile, raceName = L[c.race],
-                lure = nil, run = H.RUN_YARDS, swim = H.SWIM_YARDS }
+                lure = nil, run = H.RUN_YARDS, swim = H.SWIM_YARDS,
+                factions = NS.Preview.FactionRows(), currencies = NS.Preview.CurrencyRows(),
+                statistics = NS.Preview.StatisticsList() }
     H.SetModifier(w, "fishing", 0)   -- the fixture's lure is the step's to put on
     return w
 end
@@ -64,6 +70,50 @@ local function copy(r)
     for k, v in pairs(r) do out[k] = v end
     return out
 end
+
+local function byField(list, field, value)
+    for _, r in ipairs(list or {}) do
+        if r[field] == value then return r end
+    end
+    return nil
+end
+
+local function category(w, id) return byField(w.statistics, "id", id) end
+
+-- The tree families' reads (SMW-11): the world's faction and currency lists (every header open, so the full
+-- read toggles nothing; the toggles are guarded anyway) and its Statistics tab, in Forever's shapes.
+local TREE_PROVIDERS = {
+    NumFactions = function(w) return #w.factions end,
+    FactionDataByIndex = function(w, i) local r = w.factions[i] return r and copy(r) or nil end,
+    FactionDataByID = function(w, id) local r = byField(w.factions, "factionID", tonumber(id)) return r and copy(r) or nil end,
+    NumCurrencies = function(w) return #w.currencies end,
+    CurrencyListInfo = function(w, i) local r = w.currencies[i] return r and copy(r) or nil end,
+    CurrencyInfo = function(w, id) local r = byField(w.currencies, "currencyID", tonumber(id)) return r and copy(r) or nil end,
+    StatisticsCategories = function(w)
+        local out = {}
+        for i, c in ipairs(w.statistics) do out[i] = c.id end
+        return out
+    end,
+    StatisticsCategoryInfo = function(w, id)
+        local c = category(w, id)
+        if c then return c.name, c.parent end
+        return nil
+    end,
+    NumStatistics = function(w, id) local c = category(w, id) return c and #c.rows or 0 end,
+    Statistic = function(w, id, i)
+        local c = category(w, id)
+        local r = c and c.rows[i]
+        if r then return r.quantity, false, r.statID end
+        return nil
+    end,
+    StatisticName = function(w, statID)
+        for _, c in ipairs(w.statistics) do
+            local r = byField(c.rows, "statID", statID)
+            if r then return r.name end
+        end
+        return nil
+    end,
+}
 
 -- The providers: each answers from the world while a session has one, else the live fallback.
 local PROVIDERS = {
@@ -119,6 +169,14 @@ local PROVIDERS = {
     end,
 }
 
+for key, fn in pairs(TREE_PROVIDERS) do
+    PROVIDERS[key] = function(fallback, ...)
+        local w = world()
+        if not w then return fallback(...) end
+        return fn(w, ...)
+    end
+end
+
 -- ── delivery: the handlers the client's registrations would call (H3) ─────────────────────────
 
 local function skillEvent(event, ...) return NS.SkillData.OnEvent(event, ...) end
@@ -131,6 +189,8 @@ H.HANDLERS = {
     UNIT_AURA              = { bonusEvent },
     -- The speed ticker's read (modules/StatData.lua, WatchSpeed): the client fires no event for it.
     ["hook:speedTick"]     = { function() NS.StatData:Request() return 1 end },
+    UPDATE_FACTION         = { function(event, ...) return NS.RepData.OnEvent(event, ...) end },
+    CURRENCY_DISPLAY_UPDATE = { function(event, ...) return NS.CurrencyData.OnEvent(event, ...) end },
 }
 
 local function rejected(event)
@@ -152,7 +212,8 @@ end
 
 local function skillUp(key) return { kind = "skillUp", skill = key } end
 
---- The steps, in order: six skill-ups around a lure on and off and a mount up and down.
+--- The steps, in order: six skill-ups around a lure on and off and a mount up and down, then a reputation gain
+--- and a currency gain (SMW-11).
 function H.Timeline()
     return {
         skillUp("fishing"),
@@ -165,6 +226,8 @@ function H.Timeline()
         { kind = "speed", yards = H.RUN_YARDS },
         { kind = "lure", on = false },
         skillUp("skinning"),
+        { kind = "rep", faction = H.REP_STEP.faction, amount = H.REP_STEP.amount },
+        { kind = "currency", currency = H.CURRENCY_STEP.currency, amount = H.CURRENCY_STEP.amount },
     }
 end
 
@@ -173,7 +236,22 @@ local function skillName(key)
     return cat and L[cat.name] or key
 end
 
+local function treeName(list, field, id)
+    local r = byField(NS.Preview and list(), field, id)
+    return r and r.name or tostring(id)
+end
+
+local STEP_LABEL = {
+    rep = function(step)
+        return L["Reputation: %s +%d"]:format(treeName(NS.Preview.FactionRows, "factionID", step.faction), step.amount)
+    end,
+    currency = function(step)
+        return L["Currency: %s +%d"]:format(treeName(NS.Preview.CurrencyRows, "currencyID", step.currency), step.amount)
+    end,
+}
+
 function H.StepLabel(step)
+    if STEP_LABEL[step.kind] then return STEP_LABEL[step.kind](step) end
     if step.kind == "skillUp" then return L["Skill-up: %s"]:format(skillName(step.skill)) end
     if step.kind == "lure" then return step.on and L["Fishing lure on"] or L["Fishing lure off"] end
     if step.kind == "speed" then
@@ -196,6 +274,24 @@ local PLAY = {
         sim:Fire("UNIT_INVENTORY_CHANGED", "player")
         sim:Fire("SKILL_LINES_CHANGED")
         return step.on and "+25" or "0"
+    end,
+    -- A reputation gain (SMW-11): the faction's standing moves; the client says so with UPDATE_FACTION.
+    rep = function(step, w, sim)
+        local r = byField(w.factions, "factionID", step.faction)
+        if not r then return "absent" end
+        r.currentStanding = math.min((r.currentStanding or 0) + step.amount, r.nextReactionThreshold or math.huge)
+        sim:Fire("UPDATE_FACTION")
+        return ("%s +%d"):format(r.name, step.amount)
+    end,
+    -- A currency gain (SMW-11): CURRENCY_DISPLAY_UPDATE names the currency, its amount and the change.
+    currency = function(step, w, sim)
+        local r = byField(w.currencies, "currencyID", step.currency)
+        if not r then return "absent" end
+        local max = (r.maxQuantity or 0) > 0 and r.maxQuantity or math.huge
+        local before = r.quantity or 0
+        r.quantity = math.min(before + step.amount, max)
+        sim:Fire("CURRENCY_DISPLAY_UPDATE", r.currencyID, r.quantity, r.quantity - before)
+        return ("%s +%d"):format(r.name, r.quantity - before)
     end,
     speed = function(step, w, sim)
         w.run = step.yards
@@ -244,6 +340,9 @@ function H.Prepare(s, _, _, ready)
         alerts = NS.Alerts.State(),
         broker = NS.Broker.SessionState(),
         gains  = NS.State.sessionGains,
+        -- The tree families' live state (SMW-11): the world is read afresh, the stop puts these back.
+        reps = NS.RepData:Adopt(nil), currencies = NS.CurrencyData:Adopt(nil),
+        statistics = NS.StatisticsData:Adopt(nil),
     }
     NS.Alerts.Reset()                       -- the first simulated model only records the caps
     NS.SessionLog:Override(s.log, time())
@@ -251,6 +350,8 @@ function H.Prepare(s, _, _, ready)
     NS.SkillData:Scan()
     NS.Bonuses.Refresh()
     NS.StatData:Request()
+    NS.RepData:Read()
+    NS.CurrencyData:Read()
     repaint()
     ready()
 end
@@ -266,8 +367,14 @@ function H.Restore(s, reason)
     NS.State.sessionGains = saved.gains
     NS.Broker.RestoreSessionState(saved.broker)
     NS.Bonuses.Invalidate()
+    NS.RepData:Adopt(saved.reps)
+    NS.CurrencyData:Adopt(saved.currencies)
+    NS.StatisticsData:Adopt(saved.statistics)
     if reason == "standDown" or NS.IsStoodDown() then return end
     NS.bus:SendMessage(NS.MSG.SKILLS_UPDATED, saved.model)
+    NS.bus:SendMessage(NS.MSG.REPS_UPDATED, saved.reps)
+    NS.bus:SendMessage(NS.MSG.CURRENCIES_UPDATED, saved.currencies)
+    NS.bus:SendMessage(NS.MSG.STATISTICS_UPDATED, saved.statistics.model)
     NS.Bonuses.Refresh()
     NS.StatData:Request()
     repaint()

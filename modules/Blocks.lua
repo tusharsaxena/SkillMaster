@@ -4,7 +4,9 @@ local addonName, NS = ...
 -- each one shows, the collapsible block header, and the one row layout pass the main window and
 -- the detached frames both draw with. Detach, Dock and a collapse send LAYOUT_CHANGED.
 --
--- NS.BLOCKS = { ids in default order }; NS.BlockDefs[id] = { id, title, short, source, filter }
+-- NS.BLOCKS = { ids in default order }; NS.BlockDefs[id] = { id, title, short, source, filter, family }
+--   (`source` names the data provider, NS.Blocks.PROVIDERS[source], modules/BlockProviders.lua; `family` the
+--   owning family's id, defaults/Families.lua, SMW-02)
 -- profile.layout.blocks[id] = { docked, order, collapsed, point, scale, locked }
 -- NS.Blocks:Detach(id) / :Dock(id) / :SetCollapsed(id, v) / :ToggleCollapsed(id) / :SetAllCollapsed(v) /
 --   :Move(from, to) / :SetOrder(id, n) / .Ordered() (every block, shown or not, in its order) /
@@ -22,17 +24,24 @@ local addonName, NS = ...
 --   "learned", "equipped" (main hand, off hand, ranged), "belowCap"; other skills "all", "learned",
 --   "belowCap"; each stat section "all", "nonZero". Picked from the header's filter mark on every
 --   surface that draws the block; B.Entries answers the rows it took out second.
--- NS.Blocks.source: nil for the live models, or fn() -> skills, stats (test mode's preview, T5.2;
---   the suites' fixtures).
+-- NS.Blocks.source: nil for the live models, or fn() -> skills, stats[, models] (test mode's preview,
+--   T5.2; the suites' fixtures); `models` is a table keyed by provider source for the other providers.
+-- NS.Blocks.Models() -> { [source] = model }; .Data() -> skills, stats, models; .EntriesFrom(id, models,
+--   isHidden): the provider dispatch (SMW-02).
 
 local L = NS.L
 
-NS.BLOCKS = { "primary", "secondary", "weapon", "other", "stats_base", "stats_spell", "stats_defense", "stats_utility" }
+NS.BLOCKS = { "primary", "secondary", "weapon", "other", "stats_base", "stats_spell", "stats_defense", "stats_utility",
+              "currencies", "reputations", "statistics" }
 
 -- `short`: the block's short name, the Journal's Alts sub-tab label and a merged window's title part
--- (round 5, R5-6: "Primary \194\183 Secondary").
-local function def(id, title, short, source, filter)
-    return { id = id, title = title, short = short, source = source, filter = filter }
+-- (round 5, R5-6: "Primary \194\183 Secondary"). `home`: its title in its own family's window and feed tooltip,
+-- where every block is of one family (the stat blocks drop "Stats \194\183", the spec's family table); nil keeps
+-- `title` there too.
+local function def(id, title, short, source, filter, home)
+    local fam = NS.FamilyOf and NS.FamilyOf(id)
+    return { id = id, title = title, short = short, source = source, filter = filter, family = fam and fam.id,
+             home = home }
 end
 
 NS.BlockDefs = {
@@ -40,14 +49,39 @@ NS.BlockDefs = {
     secondary     = def("secondary", L["Secondary Skills"], L["Secondary"], "skills", "secondary"),
     weapon        = def("weapon", L["Weapon Skills"], L["Weapons"], "skills", "weapon"),
     other         = def("other", L["Other skills"], L["Other"], "skills", "other"),
-    stats_base    = def("stats_base", L["Stats \194\183 Base & Combat"], L["Base & Combat"], "stats", "base"),
-    stats_spell   = def("stats_spell", L["Stats \194\183 Spell & Regen"], L["Spell & Regen"], "stats", "spell"),
-    stats_defense = def("stats_defense", L["Stats \194\183 Defense & Resists"], L["Defense & Resists"], "stats", "defense"),
-    stats_utility = def("stats_utility", L["Stats \194\183 Utility"], L["Utility"], "stats", "utility"),
+    stats_base    = def("stats_base", L["Stats \194\183 Base & Combat"], L["Base & Combat"], "stats", "base",
+                        L["Base & Combat"]),
+    stats_spell   = def("stats_spell", L["Stats \194\183 Spell & Regen"], L["Spell & Regen"], "stats", "spell",
+                        L["Spell & Regen"]),
+    stats_defense = def("stats_defense", L["Stats \194\183 Defense & Resists"], L["Defense & Resists"], "stats",
+                        "defense", L["Defense & Resists"]),
+    stats_utility = def("stats_utility", L["Stats \194\183 Utility"], L["Utility"], "stats", "utility", L["Utility"]),
+    -- The tree families' one block each (SMW-08..10): its rows are its family's tree (modules/Tree.lua),
+    -- folded per header rather than sorted or filtered.
+    currencies    = def("currencies", L["Currencies"], L["Currencies"], "currencies", nil),
+    reputations   = def("reputations", L["Reputations"], L["Reputations"], "reputations", nil),
+    statistics    = def("statistics", L["Statistics"], L["Statistics"], "statistics", nil),
 }
+
+--- Whether block `id` draws a tree family's rows (its family's `tree`, defaults/Families.lua): no sort, no
+--- filter, a fold per header.
+function NS.IsTreeBlock(id)
+    local d = NS.BlockDefs[id]
+    local fam = d and d.family and NS.Families[d.family]
+    return fam ~= nil and fam.tree == true
+end
 
 NS.Blocks = {}
 local B = NS.Blocks
+
+--- Block `id`'s title in its own family's window and feed tooltip: `home` (the stat blocks without "Stats \194\183"),
+--- else its title. A merged window, a detached frame and the Journal keep `title`, where families mix.
+function B.HomeTitle(id)
+    local d = NS.BlockDefs[id]
+    if not d then return id end
+    return d.home or d.title
+end
+
 B.HEADER_H = 24
 
 -- ---------------------------------------------------------------------------------------------
@@ -85,6 +119,16 @@ end
 
 --- The docked blocks, in their order.
 function B.Docked() return pick(true) end
+
+--- The docked blocks of family `fid` (defaults/Families.lua), in their order: what its window draws (SMW-04).
+function B.DockedIn(fid)
+    local out = {}
+    for _, id in ipairs(pick(true)) do
+        local d = NS.BlockDefs[id]
+        if d and d.family == fid then out[#out + 1] = id end
+    end
+    return out
+end
 --- The detached blocks.
 function B.Undocked() return pick(false) end
 
@@ -217,7 +261,8 @@ function B:SetOrder(id, n)
 end
 
 --- Collapse (true) or expand (false) every docked block, each through the seam as its chevron's
---- write is (the main window's Collapse all and Expand all, FB-16). A detached block keeps its own
+--- write is (a family window's Collapse all and Expand all, FB-16, takes its own: B:SetCollapsedFor with
+--- B.DockedIn). A detached block keeps its own
 --- state: its frame has its own chevron. One bracket, one LAYOUT_CHANGED; in combat each write
 --- waits for the end of combat, as a chevron's does. Answers how many blocks it changed.
 function B:SetAllCollapsed(collapsed)
@@ -275,13 +320,25 @@ end
 -- Data: what each block shows
 -- ---------------------------------------------------------------------------------------------
 
---- The two models the blocks draw: B.source's when set, else the live ones.
+--- Every provider's model, keyed by its source (modules/BlockProviders.lua): B.source's when set, else
+--- the live ones.
+function B.Models()
+    if B.source then
+        local skills, stats, more = B.source()
+        local out = {}
+        for k, v in pairs(more or {}) do out[k] = v end
+        out.skills, out.stats = skills, stats
+        return out
+    end
+    local out = {}
+    for src, provider in pairs(B.PROVIDERS or {}) do out[src] = provider.model() end
+    return out
+end
+
+--- The two models the skill and stat blocks draw, and every provider's (B.Models) third.
 function B.Data()
-    if B.source then return B.source() end
-    local SD, ST = NS.SkillData, NS.StatData
-    local skills = SD and type(SD.Model) == "function" and SD:Model() or nil
-    local stats = ST and type(ST.Model) == "function" and (ST:Model() or ST:Scan()) or nil
-    return skills, stats
+    local models = B.Models()
+    return models.skills, models.stats, models
 end
 
 local function hidden(kind, key)
@@ -290,45 +347,29 @@ local function hidden(kind, key)
     return list and list[key] == true
 end
 
-local function skillEntries(skills, category, isHidden)
-    local out = {}
-    local showUnlearned = not (NS.db and NS.db.profile.skills.showUnlearned == false)
-    for _, key in ipairs(skills and skills.order[category] or {}) do
-        local e = skills.byKey[key]
-        if e and not isHidden("skills", key) and (e.learned ~= false or showUnlearned) then
-            out[#out + 1] = { kind = "skill", entry = e }
-        end
-    end
-    return out
+local function providerOf(id)
+    local d = NS.BlockDefs[id]
+    return d, d and B.PROVIDERS and B.PROVIDERS[d.source]
 end
 
---- The keys hidden from block `id` (skills.hidden / stats.hidden, set true): a skill whose
---- catalog category, else model category, is the block's; a stat whose group is the block's.
---- @return table keys, string "skills"|"stats"
+--- The keys hidden from block `id` (its provider's hidden set, `<hiddenSet>.hidden`, set true) whose
+--- group, by the provider's groupOf, is the block's filter: a skill's catalog category, else its model
+--- category; a stat's group.
+--- @return table keys, string the hidden set's profile key ("skills"|"stats")
 function B.HiddenKeys(id)
-    local d = NS.BlockDefs[id]
-    if not d then return {}, "skills" end
-    local kind = d.source == "skills" and "skills" or "stats"
+    local d, provider = providerOf(id)
+    if not provider then return {}, "skills" end
+    local kind = provider.hiddenSet
     local p = NS.db and NS.db.profile
     local set = p and p[kind] and p[kind].hidden or {}
-    local groupOf = {}
-    if kind == "stats" then
-        for _, sd in ipairs(NS.STAT_DEFS or {}) do groupOf[sd.key] = sd.group end
+    local model   -- read once, and only by a provider whose groups need it (a stat's need none)
+    local function modelOf()
+        if model == nil then model = provider.model() or false end
+        return model or nil
     end
-    local model = kind == "skills" and NS.SkillData and type(NS.SkillData.Model) == "function" and NS.SkillData:Model()
     local out = {}
     for key, on in pairs(set) do
-        if on == true then
-            local group
-            if kind == "stats" then
-                group = groupOf[key]
-            else
-                local cat = NS.SkillCatalog[key]
-                local e = model and model.byKey and model.byKey[key]
-                group = (cat and cat.category) or (e and e.category)
-            end
-            if group == d.filter then out[#out + 1] = key end
-        end
+        if on == true and provider.groupOf(key, modelOf) == d.filter then out[#out + 1] = key end
     end
     table.sort(out)
     return out, kind
@@ -354,14 +395,6 @@ function B.RestoreHidden(id)
     end
     NS.Debug("Click", "restored %d hidden row(s) in %s", #keys, id)
     return #keys
-end
-
-local function statEntries(stats, group, isHidden)
-    local out = {}
-    for _, e in ipairs(stats and stats[group] or {}) do
-        if not isHidden("stats", e.key) then out[#out + 1] = { kind = "stat", entry = e } end
-    end
-    return out
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -400,6 +433,7 @@ local KEY = { value = numeric, valueAsc = numeric, progress = progress }
 --- `items` in block `id`'s order, in place: `entryOf(item)` is the item's model entry (default
 --- item.entry). A not-learned row stays below the learned ones; a tie keeps the catalog's order.
 function B.SortEntries(id, items, entryOf)
+    if NS.IsTreeBlock(id) then return items end   -- a tree keeps the client's order
     local mode = B.SortOf(id)
     local key = KEY[mode]
     if not key then return items end
@@ -578,19 +612,23 @@ function B.FilterNote(entries, removed)
 end
 
 --- The rows block `id` shows, each { kind = "skill"|"stat", entry }, in its sort order, and how many
---- its filter took out. `isHidden(kind, key)` (kind "skills" | "stats") answers which rows are left
---- out: the window's hidden sets when nil, the LDB tooltip's own for the broker (round 6, R6-10).
-function B.Entries(id, skills, stats, isHidden)
-    local d = NS.BlockDefs[id]
-    if not d then return {}, 0 end
-    if skills == nil and stats == nil then skills, stats = B.Data() end
-    isHidden = isHidden or hidden
-    if d.source == "skills" then
-        local entries, removed = applyFilter(id, skillEntries(skills, d.filter, isHidden))
-        return B.SortEntries(id, entries), removed
-    end
-    local entries, removed = applyFilter(id, statEntries(stats, d.filter, isHidden))
+--- its filter took out, from `models` (B.Models' shape). `isHidden(kind, key)` (kind "skills" | "stats")
+--- answers which rows are left out: the window's hidden sets when nil, the LDB tooltip's own for the
+--- broker (round 6, R6-10). The block's provider (B.PROVIDERS[def.source]) makes the rows. A tree block's
+--- rows are NS.Tree.Rows records under `folds` (a fold table: the LDB tooltip's own; the window's when nil).
+function B.EntriesFrom(id, models, isHidden, folds)
+    local d, provider = providerOf(id)
+    if not provider then return {}, 0 end
+    local rows = provider.entries((models or B.Models())[d.source], d.filter, isHidden or hidden, folds)
+    local entries, removed = applyFilter(id, rows)
     return B.SortEntries(id, entries), removed
+end
+
+--- B.EntriesFrom with the skill and stat models passed apart (every caller before SMW-02); both nil
+--- reads B.Models().
+function B.Entries(id, skills, stats, isHidden)
+    if skills == nil and stats == nil then return B.EntriesFrom(id, nil, isHidden) end
+    return B.EntriesFrom(id, { skills = skills, stats = stats }, isHidden)
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -609,23 +647,40 @@ end
 function Header:SetBlock(id, collapsed, docked)
     self.id, self.collapsed = id, collapsed and true or false
     paintHeaderBg(self)   -- every layout, so a skin switch reaches a pooled header
-    self.title:SetText(NS.BlockDefs[id].title)
+    self.title:SetText(B.HomeTitle(id))   -- a header of SetBlock sits in its family's window or feed tooltip
+    self.chevron:Show()   -- a label header (SetLabel) hid it; a header is a pool's own
     NS.Chrome.SetIcon(self.chevron, collapsed and "chevron-right" or "chevron-down",
         collapsed and ">" or "v")
     self.chevron.tip = collapsed and L["Expand this block"] or L["Collapse this block"]
     -- Detach is the external-link mark; dock (attach) is the same mark turned 180 degrees.
     NS.Chrome.SetIcon(self.detach, "external-link", docked and "+" or "-", not docked)
     self.detach.tip = docked and L["Detach this block into its own frame"] or L["Dock this block in the main window"]
-    B.PaintSort(self.sort, id)
-    self.sort:Show()   -- the LDB panel's headers hide it (round 8, R8-4); a header is a pool's own
     self.docked = docked
-    -- The filter mark (round 5, R5-10; every block, round 7, R7-1), left of sort; restore moves left
-    -- of whichever mark is the last one shown.
+    self:PaintMarks(id)
+    self:SetNote(nil)
+end
+
+--- The sort, filter and restore marks as block `id` has them. The LDB panel's headers hide the sort mark
+--- (round 8, R8-4) and a header is a pool's own, so each layout shows it again; a tree block has none. The
+--- filter mark (round 5, R5-10; every block, round 7, R7-1) sits left of sort; restore moves left of whichever
+--- mark is the last one shown.
+function Header:PaintMarks(id)
+    B.PaintSort(self.sort, id)
+    self.sort:SetShown(not NS.IsTreeBlock(id))
     B.PaintFilter(self.filter, id)
-    local left = self.filter:IsShown() and self.filter or self.sort
+    local left = (self.filter:IsShown() and self.filter) or (self.sort:IsShown() and self.sort) or self.detach
     self.restore:ClearAllPoints()
     self.restore:SetPoint("RIGHT", left, "LEFT", -4, 0)
     B.PaintRestore(self.restore, id)
+end
+
+--- A header that names a section of no block (the LDB tooltip's Pinned, SMW-06): its title on the
+--- header band, no chevron and no marks.
+function Header:SetLabel(text)
+    self.id, self.collapsed = nil, false
+    paintHeaderBg(self)
+    self.title:SetText(text)
+    for _, k in ipairs({ "chevron", "detach", "sort", "filter", "restore" }) do self[k]:Hide() end
     self:SetNote(nil)
 end
 
@@ -644,7 +699,12 @@ function B.PaintRestore(mark, id)
         or L["%d hidden rows. Click to show them again."]:format(n)
 end
 
-local function onHeaderClick(self) B:ToggleCollapsed(self.id) end
+-- A header's own fold (`onFold`, the LDB tooltip's: SMW-07, its section folds there alone) or the block's
+-- collapse in its window.
+local function onHeaderClick(self)
+    if self.onFold then return self.onFold(self) end
+    B:ToggleCollapsed(self.id)
+end
 
 local function onDetachClick(self)
     local h = self:GetParent()
@@ -739,15 +799,22 @@ function B.LayRows(entries, host, rowPool, y, styleKey, inset)
         row:SetPoint("TOPRIGHT", host, "TOPRIGHT", -inset, -y)
         row.layY = y
         row.marked = r.marked or nil
-        if r.kind == "skill" then row:SetSkill(r.entry) else row:SetStat(r.entry) end
+        if r.kind == "skill" then
+            row:SetSkill(r.entry)
+        elseif NS.Tree.Kind(r.kind) then
+            row:SetTree(r)
+        else
+            row:SetStat(r.entry)
+        end
         row:SetStripe(i)
         y = y + row:GetHeight()
     end
     return y
 end
 
---- The fresh entry for a row from the current models (by key), for a values-only refresh.
-function B.Lookup(skills, stats)
+--- The fresh entry for a row from the current models (by key), for a values-only refresh: `models` (B.Models'
+--- shape) answers a tree row's, by its kind's family's source.
+function B.Lookup(skills, stats, models)
     local index = {}
     for _, group in ipairs({ "base", "spell", "defense", "utility" }) do
         for _, e in ipairs(stats and stats[group] or {}) do index[e.key] = e end
@@ -755,6 +822,11 @@ function B.Lookup(skills, stats)
     return function(row)
         local e = row.entry
         if row.kind == "skill" then return skills and skills.byKey[e.key] end
+        if row.tree then
+            local fam = row.family and NS.Families[row.family]
+            local m = fam and models and models[fam.source]
+            return m and m.byKey and m.byKey[e.key] or nil
+        end
         return index[e.key]
     end
 end
@@ -765,7 +837,8 @@ function B.UpdateSpeedWatch()
     local s = B.Settings("stats_utility")
     local onScreen
     if s.docked ~= false then
-        onScreen = NS.MainWindow and NS.MainWindow.IsShown() and not s.collapsed
+        local win = NS.Windows and NS.Windows.ForBlock("stats_utility")   -- its family's window (SMW-04)
+        onScreen = win and win.IsShown() and not s.collapsed
     else
         -- Its own frame, or its merged window's (round 5).
         local gid = NS.Groups and NS.Groups.Of("stats_utility")
@@ -825,8 +898,11 @@ local function relayout()
     if NS.Detached then NS.Detached.Refresh() end
     -- The in-game check that a look write reached the bars (/sm debug): the bar height drawn now.
     if NS.State.debug then
-        NS.Debug("Set", "relayout: %d window rows restyled, bar height %s",
-            NS.MainWindow and #NS.MainWindow.Rows() or 0, tostring(NS.BarStyle.Resolve("row").height))
+        local n = 0
+        if NS.Windows then
+            for _, win in NS.Windows.Each() do n = n + #win.Rows() end
+        end
+        NS.Debug("Set", "relayout: %d window rows restyled, bar height %s", n, tostring(NS.BarStyle.Resolve("row").height))
     end
 end
 
@@ -842,6 +918,11 @@ if B.events then
     B.events:RegisterMessage(NS.MSG.STATS_UPDATED, repaint)
     B.events:RegisterMessage(NS.MSG.BONUSES_UPDATED, revalue)
     B.events:RegisterMessage(NS.MSG.LAYOUT_CHANGED, relayout)
+    -- The tree families' models (SMW-08..10): each family's own message, when its data module has landed.
+    for _, fam in pairs(NS.Families) do
+        local msg = fam.tree and rawget(NS.MSG, fam.message)   -- the catalog raises on an undeclared key
+        if msg then B.events:RegisterMessage(msg, repaint) end
+    end
     B.events:RegisterMessage(NS.MSG.SKILL_UP, function(_, _, old, new)
         NS.State.sessionGains = (NS.State.sessionGains or 0) + math.max(0, (new or 0) - (old or 0))
     end)

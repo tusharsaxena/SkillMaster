@@ -109,7 +109,7 @@ local function joined(tip)
 end
 
 
-test("broker: two data sources, \"Skill Master\" and \"Skill Master Stats\" (R6-9), separate from the launcher object", function()
+test("broker: one data source per family (SMW-05), \"Skill Master\" and \"Skill Master Stats\" kept, separate from the launcher object", function()
     reset()
     local obj = M.__ldbObjects["Skill Master"]
     assertTrue(obj ~= nil, "the feed is registered")
@@ -120,8 +120,11 @@ test("broker: two data sources, \"Skill Master\" and \"Skill Master Stats\" (R6-
     assertTrue(B.Object() == obj, "B.Object is it")
     local sources = 0
     for _, o in pairs(M.__ldbObjects) do if o.type == "data source" then sources = sources + 1 end end
-    assertEqual(sources, 2, "the skills feed and the stats feed (round 6, R6-9)")
-    assertTrue(M.__ldbObjects["Skill Master Stats"] == B.StatsObject(), "the stats feed")
+    assertEqual(sources, 6, "one feed per family (SMW-05)")
+    assertTrue(M.__ldbObjects["Skill Master Stats"] == B.StatsObject(), "the Character Stats feed keeps its name")
+    for fid, f in pairs(B.FEEDS) do
+        assertTrue(M.__ldbObjects[f.name] == B.ObjectFor(fid), fid .. "'s feed is " .. f.name)
+    end
     for _, gone in ipairs({ "SkillMaster_All", "SkillMaster_Professions", "SkillMaster_Weapons", "SkillMaster_Stats" }) do
         assertTrue(M.__ldbObjects[gone] == nil, gone .. " is gone")
     end
@@ -131,15 +134,14 @@ end)
 test("broker: the feed renders its template", function()
     reset()
     B.Refresh()
-    assertEqual(B.Text(), "Professions and Skills", "nothing pinned (the default): the feed's plain title")
-    NS.db.char.pinned = "skinning"
-    B.Refresh()
+    assertEqual(B.Text(), "Professions", "nothing pinned (the default): the feed's plain name")
+    NS.Pins.Toggle("professions", "skinning")
     assertEqual(B.Text(), "Skinning 122/150 · +0", "a pinned skill and the session's gains")
-    NS.db.char.pinned = false
+    NS.Pins.Remove("professions", "skinning")
     B.Refresh()
-    NS.SetByPath("broker.template", "{stat:crit} crit · {stat:speed}")
+    NS.SetByPath("broker.feeds.professions.template", "{stat:crit} crit · {stat:speed}")
     assertEqual(B.Text(), "9.1% crit · 100%", "a stat token on the same feed")
-    NS.SetByPath("broker.template", NS.defaults.profile.broker.template)
+    NS.SetByPath("broker.feeds.professions.template", NS.defaults.profile.broker.feeds.professions.template)
 end)
 
 test("broker: {equippedWeapon} follows the main hand's weapon class", function()
@@ -147,29 +149,30 @@ test("broker: {equippedWeapon} follows the main hand's weapon class", function()
     local saved = { M.GetInventoryItemLink, M.GetItemInfoInstant }
     M.GetInventoryItemLink = function(_, slot) if slot == 16 then return "|Hitem:2508|h[Old Blunderbuss]|h" end end
     M.GetItemInfoInstant = function() return 2508, "Weapon", "Guns", "INVTYPE_RANGEDRIGHT", 0, 2, 3 end
-    NS.SetByPath("broker.template", "{equippedWeapon}")
+    NS.SetByPath("broker.feeds.professions.template", "{equippedWeapon}")
     M.GetInventoryItemLink, M.GetItemInfoInstant = saved[1], saved[2]
     assertEqual(B.Text(), "Guns 105+5/110")
-    NS.SetByPath("broker.template", NS.defaults.profile.broker.template)
+    NS.SetByPath("broker.feeds.professions.template", NS.defaults.profile.broker.feeds.professions.template)
 end)
 
-test("test_broker_flash_reverts: any skill-up flashes the feed, then the template comes back", function()
+test("test_broker_flash_reverts: a skill-up flashes its own family's feed, then the template comes back", function()
     reset()
     B.Refresh()
     NS.bus:SendMessage(NS.MSG.SKILL_UP, "bows", 80, 81)
     publish(81)
-    assertTrue(B.Text():find("Bows 81", 1, true) ~= nil, "a weapon skill-up flashes: " .. B.Text())
+    assertTrue(B.TextFor("skills"):find("Bows 81", 1, true) ~= nil, "a weapon skill-up flashes the Skills feed: " .. B.TextFor("skills"))
+    assertEqual(B.Text(), "Professions", "and not the Professions feed (SMW-05)")
     assertEqual(B.FlashSeconds(), 5, "profile.broker.flashSeconds defaults to 5")
     M.__now = M.__now + 5
     M.__fireTimers()
-    assertEqual(B.Text(), "Professions and Skills", "reverted: nothing pinned, the plain title")
+    assertEqual(B.TextFor("skills"), "Skills", "reverted: nothing pinned, the plain name")
     NS.bus:SendMessage(NS.MSG.SKILL_UP, "cooking", 133, 134)
     assertTrue(B.Text():find("Cooking 134", 1, true) ~= nil, "and so does a profession's: " .. B.Text())
     M.__now = M.__now + 5
     M.__fireTimers()
 end)
 
-test("broker: the skills feed's tooltip has the four skill sections, on by default, and no stats", function()
+test("broker: the Professions and Skills feeds' tooltips have their own two sections each, on by default, and no stats", function()
     reset()
     for _, id in ipairs({ "primary", "secondary", "weapon", "other" }) do
         assertEqual(NS.defaults.profile.broker.tooltip.sections[id], true, id .. " on by default")
@@ -179,18 +182,25 @@ test("broker: the skills feed's tooltip has the four skill sections, on by defau
     NS.bus:SendMessage(NS.MSG.SKILL_UP, "bows", 80, 81)
     publish(81)
     local tip = recordingTip()
-    local rows = B.FillTooltip(tip)
+    local rows = B.FillTooltip(tip, "professions")
     local text = joined(tip)
-    for _, want in ipairs({ "Skill Master", "+1 this session", "Primary Professions", "Secondary Skills",
-                            "Weapon Skills", "Other skills", "Skinning", "Guns", "Defense" }) do
+    for _, want in ipairs({ "Skill Master \194\183 Professions", "+1 this session", "Primary Professions",
+                            "Secondary Skills", "Skinning" }) do
+        assertTrue(text:find(want, 1, true) ~= nil, "tooltip has " .. want .. "\n" .. text)
+    end
+    assertFalse(text:find("Weapon Skills", 1, true) ~= nil, "the weapons are the Skills feed's\n" .. text)
+    local skillsTip = recordingTip()
+    for _, r in ipairs(B.FillTooltip(skillsTip, "skills")) do rows[#rows + 1] = r end
+    text = text .. "\n" .. joined(skillsTip)
+    for _, want in ipairs({ "Skill Master \194\183 Skills", "Weapon Skills", "Other skills", "Guns", "Defense" }) do
         assertTrue(text:find(want, 1, true) ~= nil, "tooltip has " .. want .. "\n" .. text)
     end
     assertFalse(text:find("Ranged Crit", 1, true) ~= nil, "no stats by default\n" .. text)
     assertTrue(text:find("+5", 1, true) ~= nil, "Guns shows its +5 bonus")
-    assertTrue(B.BarsDrawn() >= 5, "a mini bar per learned row, drew " .. B.BarsDrawn())
+    assertTrue(B.BarsDrawn() >= 3, "a mini bar per learned row of the Skills feed, drew " .. B.BarsDrawn())
     local keys = {}
-    for _, r in ipairs(rows) do keys[r.key] = r end
-    assertTrue(keys.bows and keys.skinning and keys.swords, "clickable rows carry their keys")
+    for _, r in ipairs(rows) do if r.key then keys[r.key] = r end end
+    assertTrue(keys.bows and keys.skinning and keys.swords, "the hovered rows carry their keys")
     M.__fireTimers()
 end)
 
@@ -200,10 +210,10 @@ test("broker: each section has its own switch", function()
         NS.SetByPath("broker.tooltip.sections.weapon", false)
         NS.SetByPath("broker.tooltip.sections.stats_base", false)
         local tip = recordingTip()
-        B.FillTooltip(tip)
+        B.FillTooltip(tip, "skills")
         local text = joined(tip)
         assertFalse(text:find("Guns", 1, true) ~= nil, "Weapon off: no weapon skills\n" .. text)
-        assertTrue(text:find("Skinning", 1, true) ~= nil and text:find("Defense", 1, true) ~= nil, text)
+        assertTrue(text:find("Defense", 1, true) ~= nil, text)
         tip = recordingTip()
         local rows = B.FillTooltip(tip, "stats")
         text = joined(tip)
@@ -212,7 +222,7 @@ test("broker: each section has its own switch", function()
         local stat = false
         for _, r in ipairs(rows) do stat = stat or (r.kind == "stat" and r.key == "speed") end
         assertTrue(stat, "a stat row is clickable")
-        for _, id in ipairs(B.SECTIONS) do NS.SetByPath("broker.tooltip.sections." .. id, false) end
+        for _, id in ipairs(B.FEEDS.skills.sections) do NS.SetByPath("broker.tooltip.sections." .. id, false) end
         tip = recordingTip()
         assertEqual(#B.FillTooltip(tip, "skills"), 0, "every section off: no rows")
     end)
@@ -254,14 +264,18 @@ test("broker: a tooltip Hide row per catalog skill and per stat, on the Rows pag
     for _, def in ipairs(NS.STAT_DEFS) do
         assertTrue(onRows["broker.tooltip.hiddenStats." .. def.key] ~= nil, "a row for " .. def.key)
     end
-    for _, id in ipairs(B.SECTIONS) do
-        assertTrue(paths["broker.tooltip.sections." .. id] ~= nil, "a switch for " .. id)
+    for _, fid in ipairs({ "professions", "skills", "stats" }) do
+        for _, id in ipairs(B.FEEDS[fid].sections) do
+            assertTrue(paths["broker.tooltip.sections." .. id] ~= nil, "a switch for " .. id)
+        end
+        local t = "broker.feeds." .. fid
+        assertTrue(paths[t .. ".template"] ~= nil and paths[t .. ".preset"] ~= nil, fid .. "'s own template (SMW-05)")
     end
     local tips = {}
     for _, row in ipairs(NS.SchemaForPage("tooltips")) do tips[row.path] = row end
     assertTrue(tips["broker.tooltip.skin"] ~= nil, "the skin switch, on the Tooltips page (round 4)")
     assertTrue(paths["broker.tooltip.skin"] == nil, "and no longer on the Broker page")
-    assertTrue(paths["broker.template"] ~= nil and paths["broker.preset"] ~= nil, "the one template")
+    assertTrue(paths["broker.template"] == nil, "no one template any more")
     for path in pairs(paths) do
         assertFalse(path:find("^broker%.templates") ~= nil, "no old feed template row: " .. path)
     end
@@ -271,28 +285,21 @@ test("broker: clicks follow design §6.5 and never touch a secure frame", functi
     reset()
     local W = NS.MainWindow
     local calls = {}
-    local saved = { W.Toggle, W.ShowAndScrollTo, M.ToggleCharacter }
+    local saved = { W.Toggle, M.ToggleCharacter }
     W.Toggle = function() calls[#calls + 1] = "toggle" end
-    W.ShowAndScrollTo = function(key) calls[#calls + 1] = (type(key) == "string" and "scroll:" .. key or "BAD") end
     M.ToggleCharacter = function(tab) calls[#calls + 1] = "char:" .. tab end
     M.__ldbObjects["Skill Master"].OnClick(nil, "LeftButton")
-    B.OpenRow({ kind = "skill", key = "cooking" })
-    B.OpenRow({ kind = "skill", key = "bows" })
-    B.OpenRow({ kind = "stat", key = "speed" })
-    W.Toggle, W.ShowAndScrollTo, M.ToggleCharacter = saved[1], saved[2], saved[3]
-    assertEqual(table.concat(calls, ","), "toggle,scroll:cooking,char:SkillsFrame,char:PaperDollFrame")
-end)
-
-test("broker: a crafting row without ShowAndScrollTo still opens the main window", function()
-    reset()
-    local W = NS.MainWindow
-    local saved, shown = W.ShowAndScrollTo, 0
-    local realShow = W.Show
-    W.ShowAndScrollTo = nil
-    W.Show = function() shown = shown + 1 end
-    B.OpenRow({ kind = "skill", key = "cooking" })
-    W.Show, W.ShowAndScrollTo = realShow, saved
-    assertEqual(shown, 1)
+    W.Toggle, M.ToggleCharacter = saved[1], saved[2]
+    assertEqual(table.concat(calls, ","), "toggle", "the cell toggles its window")
+    -- SMW-07: a tooltip row opens nothing (only a section's chevron acts), so the row opener is gone.
+    assertTrue(B.OpenRow == nil and B.RowMenu == nil, "no row click path from the tooltip")
+    -- SMW-05: each other feed's cell toggles its own window.
+    NS.Windows.HideAll()
+    M.__ldbObjects["Skill Master Reputations"].OnClick(nil, "LeftButton")
+    assertTrue(NS.Windows.Get("reputations").IsShown(), "the Reputations feed opens the Reputations window")
+    assertFalse(NS.Windows.Get("professions").IsShown(), "and no other")
+    M.__ldbObjects["Skill Master Reputations"].OnClick(nil, "LeftButton")
+    assertFalse(NS.Windows.Get("reputations").IsShown(), "a second click hides it")
 end)
 
 test("broker: a hovered tooltip row wears the window's hover wash, under its text, until the pointer leaves", function()
@@ -301,7 +308,7 @@ test("broker: a hovered tooltip row wears the window's hover wash, under its tex
         local tip = dressed(B.Tip(), B.TIP_NAME)
         B.OnEnter(M.UIParent)
         local hits = B.Hits()
-        assertTrue(#hits > 0, "the rows are clickable")
+        assertTrue(#hits > 0, "the rows take the pointer for their hover")
         assertTrue(B.HoverWash(tip) == nil or not B.HoverWash(tip):IsShown(), "nothing washed before a hover")
         local hit = hits[1]
         hit:__fire("OnEnter")
@@ -333,7 +340,7 @@ test("broker: stood down, the feed reads Off and its tooltip says so; standing u
     assertEqual(off, "Off")
     assertEqual(#rows, 0, "no clickable rows while disabled")
     assertTrue(joined(tip):find("disabled", 1, true) ~= nil, joined(tip))
-    assertEqual(B.Text(), "Professions and Skills")
+    assertEqual(B.Text(), "Professions")
 end)
 
 -- ── FB-13: the tooltip's skin ────────────────────────────────────────────────────────────────
@@ -417,7 +424,7 @@ test("broker: schemaVersion 3 carries the All template and drops the other feeds
     local sv = rawget(_G, "SkillMasterDB")
     assertTrue(type(sv) == "table", "the SavedVariables table")
     sv.profiles = sv.profiles or {}
-    local D = NS.defaults.profile.broker.template
+    local D = NS.defaults.profile.broker.feeds.professions.template
     sv.profiles["OneFeed-Custom"] = { broker = { flashSeconds = 3, templates = {
         all = "{last} Lv {level}", professions = "{lowestProf}", stats = "{stat:armor}" } } }
     sv.profiles["OneFeed-Others"] = { broker = { templates = { weapons = "{equippedWeapon} !" } } }
@@ -427,19 +434,25 @@ test("broker: schemaVersion 3 carries the All template and drops the other feeds
     NS:RunMigrations()
     assertEqual(NS.db.global.schemaVersion, NS.SCHEMA_VERSION, "the runner reaches the newest step")
     local p = sv.profiles
-    assertEqual(p["OneFeed-Custom"].broker.template, "{last} Lv {level}", "the All template carries")
+    -- Step 3 carried it to broker.template; step 15 (SMW-05) on to the Professions feed's.
+    local function tpl(name)
+        local f = p[name].broker.feeds
+        return f and f.professions and f.professions.template
+    end
+    assertEqual(tpl("OneFeed-Custom"), "{last} Lv {level}", "the All template carries")
+    assertTrue(p["OneFeed-Custom"].broker.template == nil, "and lands on the Professions feed")
     assertTrue(p["OneFeed-Custom"].broker.templates == nil, "the old table goes")
     assertEqual(p["OneFeed-Custom"].broker.flashSeconds, 3, "the rest of broker is kept")
-    assertTrue(p["OneFeed-Others"].broker.template == nil, "no All template: the default stands")
+    assertTrue(tpl("OneFeed-Others") == nil, "no All template: the default stands")
     assertTrue(p["OneFeed-Others"].broker.templates == nil, "a dead feed's template goes")
-    assertEqual(p["OneFeed-Kept"].broker.template, "{pinned} kept", "a stored template wins")
+    assertEqual(tpl("OneFeed-Kept"), "{pinned} kept", "a stored template wins")
     assertTrue(p["OneFeed-Fresh"].broker == nil, "a profile with no broker passes this step (later steps may write it)")
     -- Once: the stamp is past the step.
     p["OneFeed-Others"].broker.templates = { all = "{level}" }
     NS:RunMigrations()
-    assertTrue(p["OneFeed-Others"].broker.template == nil, "the step ran once")
+    assertTrue(tpl("OneFeed-Others") == nil, "the step ran once")
     for _, k in ipairs({ "OneFeed-Custom", "OneFeed-Others", "OneFeed-Kept", "OneFeed-Fresh" }) do p[k] = nil end
-    assertEqual(D, NS.defaults.profile.broker.template)
+    assertEqual(D, NS.defaults.profile.broker.feeds.professions.template)
 end)
 
 test("broker: schemaVersion 3 moves the active profile's All template past the copied default", function()
@@ -447,7 +460,7 @@ test("broker: schemaVersion 3 moves the active profile's All template past the c
     b.templates = { all = "{level} active" }
     NS.db.global.schemaVersion = 2
     NS:RunMigrations()
-    assertEqual(b.template, "{level} active", "the active profile's choice moved")
-    assertTrue(b.templates == nil, "the old key goes")
-    NS.SetByPath("broker.template", NS.defaults.profile.broker.template)
+    assertEqual(b.feeds.professions.template, "{level} active", "the active profile's choice moved (steps 3, then 15)")
+    assertTrue(b.templates == nil and rawget(b, "template") == nil, "the old keys go")
+    NS.SetByPath("broker.feeds.professions.template", NS.defaults.profile.broker.feeds.professions.template)
 end)

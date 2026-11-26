@@ -106,11 +106,18 @@ end)
 
 -- ── the row heights reach each tooltip, and go back to auto ─────────────────────────────────
 
+-- A tooltip fill's skill and stat lines, less its section chevrons (SMW-07: a header line is no row).
+local function rowLines(all)
+    local out = {}
+    for _, row in ipairs(all) do if row.kind then out[#out + 1] = row end end
+    return out
+end
+
 test("bar sizes: LDB tooltip row height sizes every skill or stat line, and a release hands them back", function()
     withSample(function()
         set("bars.brokerRowHeight", 22)
         local tip = recordingTip()
-        local rows = NS.Broker.FillTooltip(tip)
+        local rows = rowLines(NS.Broker.FillTooltip(tip))
         assertTrue(#rows > 0, "the feed drew rows")
         for _, row in ipairs(rows) do
             local left = _G[tip:GetName() .. "TextLeft" .. row.line]
@@ -122,7 +129,7 @@ test("bar sizes: LDB tooltip row height sizes every skill or stat line, and a re
         -- Never shorter than its bar.
         set("bars.brokerRowHeight", 10)
         set("bars.miniHeight", 16)
-        rows = NS.Broker.FillTooltip(tip)
+        rows = rowLines(NS.Broker.FillTooltip(tip))
         assertEqual(_G[tip:GetName() .. "TextLeft" .. rows[1].line].h, 16, "the bar's height wins")
         NS.Broker.HideTooltip()   -- releases: every sized line back to auto
         NS.Broker.FillTooltip(recordingTip())

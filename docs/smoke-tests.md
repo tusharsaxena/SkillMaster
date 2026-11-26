@@ -12,7 +12,7 @@ the checks below that cover each item:
 
 | Design §9 item | Checks |
 |---|---|
-| The probe | SM-PROBE-1, SM-PROBE-2 |
+| The probe | SM-PROBE-1, SM-PROBE-2, SM-PROBE-3, SM-PROBE-4 |
 | Each category | SM-DISP-1, SM-TEST-1, SM-FB2-4 |
 | The lure timer | SM-DISP-2, SM-SIM-1, SM-FB2-1 |
 | Click targets in and out of combat | SM-DISP-5, SM-DISP-6, SM-DISP-8, SM-DISP-56 |
@@ -781,6 +781,17 @@ In each check, the tooltip's words are what they were before this change.
 - **SM-PROBE-2** (new, AD-79-SM) With debug logging off (`/sm debug off`) and the console closed,
   `/sm probe`: chat shows exactly one line, `probe: 2 lines written to the debug console. Use Copy to
   share it.`, and the report is in the console all the same. `/sm list` still prints in chat.
+- **SM-PROBE-3** (new, SMW-01) In the character panel, collapse one Reputation header (for example
+  Other) and one Currency header, then close the panel. `/sm probe`: the JSON holds `factions`, `currencies`
+  and `statistics`. `factions.rows` lists up to 60 factions, the collapsed header's factions among them, and
+  `factions.byIDCollapsed` names that header; `currencies.rows` lists every currency; `statistics.categories`
+  lists the categories (Character, Wealth, ...) with up to 3 rows each. Open the character panel: the headers
+  you collapsed are still collapsed. Copy the report and send it to the author; it settles
+  `docs/forever-quirks.md`'s "Reputations, currencies and Statistics" rows.
+  Result:
+- **SM-PROBE-4** (new, SMW-01) With the Reputation tab shown, `/sm probe`: no Lua error, the panel's headers do
+  not move, and `factions.skipped` reads `panel shown`.
+  Result:
 
 ## Trainer data (the offline probe, GitHub issue #3)
 
@@ -1068,4 +1079,243 @@ Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/R2_SMOKE_FEEDBACK.md`, ite
   as SM-TEST-1 and SM-TEST-12 (Samplehunter Mockstride first, then the Mage, Warrior and Paladin),
   every name starting `Sample` or `Mock`. `/sm sim start fishingTrip`: the simulated character is
   Samplehunter Mockstride too.
+  Result:
+
+## Six windows (SMW-04, 2026-11-26)
+
+`docs/superpowers/specs/2026-11-26-skillmaster-windows-design.md`. Record what you see on each Result line;
+none is passed until you say so.
+
+- **SM-WIN-1** (new, SMW-04) After the upgrade, `/sm toggle`: the window titled "Skill Master · Professions"
+  opens where your old Skill Master window stood, at its old width, columns and strata, and holds Primary
+  Professions and Secondary Skills only.
+  Result:
+- **SM-WIN-2** (new, SMW-04) `/sm skills`, `/sm stats`, `/sm currencies`, `/sm reputations`, `/sm statistics`:
+  each opens its own window ("Skill Master · Skills" with Weapon Skills and Other skills, "Skill Master ·
+  Character Stats" with the four stat blocks, the other three with "Nothing to show yet."), stacked down and
+  to the right of the Professions window the first time. A second verb hides that window alone; `/sm hide`
+  hides them all; Escape closes the one in front.
+  Result:
+- **SM-WIN-3** (new, SMW-04) Drag the Skills window somewhere, `/reload`: it comes back there, and the
+  Professions window stays where it was. General > Reset position puts every window back.
+  Result:
+- **SM-WIN-4** (new, SMW-04) Options > Keybindings > Ka0s Skill Master lists seven rows: Toggle Professions
+  window, Toggle Skills window, Toggle Character Stats window, Toggle Currencies window, Toggle Reputations
+  window, Toggle Statistics window, Toggle journal. A key you had on the old "Toggle skills window" row is now
+  on Toggle Professions window. Bind one to the Skills row: it toggles the Skills window alone.
+  Result:
+- **SM-WIN-5** (new, SMW-04) Layout > Window: one subsection per window (Professions, Skills, Character
+  Stats, Currencies, Reputations, Statistics). Change the Character Stats window's width and strata: only that
+  window changes. Each window's corner grip writes its own Window width and Window height.
+  Result:
+
+## Six brokers (SMW-05, 2026-11-26)
+
+- **SM-FEED-1** (new, SMW-05) In your broker display (Titan Panel, ChocolateBar, ...), the "Skill Master" and
+  "Skill Master Stats" cells you had are still in their places; the second is labeled "Skill Master Character
+  Stats". The display offers four new feeds: Skill Master Skills, Skill Master Currencies, Skill Master
+  Reputations and Skill Master Statistics.
+  Result:
+- **SM-FEED-2** (new, SMW-05) With nothing pinned, each feed reads its window's short name (Professions,
+  Skills, Character Stats, ...). Pin a weapon skill from a row's menu: the Skills feed shows it and the
+  Professions feed does not. Gain a weapon skill point: the Skills feed flashes, Professions does not.
+  Result:
+- **SM-FEED-3** (new, SMW-05) Hover each feed: its tooltip's title is its window's ("Skill Master ·
+  Professions" with Primary and Secondary only, "Skill Master · Skills" with Weapon and Other, "Skill Master ·
+  Character Stats" with the four stat blocks, the other three "Nothing to show yet."). Left-click each feed:
+  its own window toggles. Right-click: the Broker settings page opens.
+  Result:
+- **SM-FEED-4** (new, SMW-05) Settings > Broker > Feed: one subsection per feed, each with its own Feed text
+  presets and Custom box; your old feed text is now the Professions feed's. Tooltip: each feed's section
+  switches under its own name.
+  Result:
+
+## Pins per broker (SMW-06, GitHub issue #11, 2026-11-26)
+
+- **SM-PIN-1** (new, SMW-06) After the upgrade, a skill you had pinned is still on its feed: a profession on
+  the Skill Master (Professions) feed, a weapon skill on Skill Master Skills; a stat you had pinned on Skill
+  Master Character Stats.
+  Result:
+- **SM-PIN-2** (new, SMW-06) Right-click Cooking in the Professions window: the menu reads "Pin to the
+  Professions broker" with a tick box. Tick it, then pin Fishing the same way: the Skill Master feed shows
+  both, joined by " · ", and Cooking stays pinned. Right-click Cooking again: its tick is on; click it and only
+  Cooking goes.
+  Result:
+- **SM-PIN-3** (new, SMW-06) Pin five rows to one broker: a sixth row's "Pin to the ... broker" is grayed and
+  its tooltip says five are pinned. Another window's rows can still pin to their own broker.
+  Result:
+- **SM-PIN-4** (new, SMW-06) Hover a feed with pins, in both Tooltip styles (Tooltips > Tooltip style): a
+  "Pinned" section comes first, its rows in pin order, then the feed's own sections.
+  Result:
+- **SM-PIN-5** (new, SMW-06) Settings > Broker > Pins: each broker's pins in order, each with move up, move
+  down and unpin marks; a broker with none says "Nothing pinned.". Move one and unpin one: the feed text and
+  its tooltip follow at once. Custom feed text `{pinned2}` shows the second pin alone.
+  Result:
+- **SM-PIN-6** (new, SMW-06) `/sm test`: the Professions feed shows the sample's Fishing pin and a row's Pin is
+  grayed; end test mode: your own pins are back, unchanged.
+  Result:
+
+## The LDB tooltip: only the fold acts (SMW-07, 2026-11-26)
+
+- **SM-TIP-1** (new, SMW-07) Hover the Skill Master feed (Tooltips > Tooltip style: Main window). Click the
+  chevron on Secondary Skills: the section folds in the tooltip, which stays up where it was; click it again: it
+  opens. The Professions window's Secondary Skills block did not fold, and folding it in the window leaves the
+  tooltip's section open.
+  Result:
+- **SM-TIP-2** (new, SMW-07) Set Tooltips > Height low enough that the tooltip scrolls, scroll down a little,
+  then fold and unfold a section: the body stays where you scrolled it (no jump to the top).
+  Result:
+- **SM-TIP-3** (new, SMW-07) In the tooltip, left-click, shift-click and right-click a row, and click its go
+  icon, a crafting row's included: nothing opens, nothing is linked, no menu shows. Hovering a row still
+  highlights it and shows its row tooltip, with no click hint. Clicking the header's title does nothing; only
+  the chevron folds.
+  Result:
+- **SM-TIP-4** (new, SMW-07) Tooltips > Tooltip style: Classic. Each section header now starts with a chevron;
+  clicking it folds and unfolds that section in place. Rows still wash on hover and take no click.
+  Result:
+- **SM-TIP-5** (new, SMW-07) Tooltips > LDB tooltip has no "Open a row from" row any more; the footer reads
+  "Click label: toggle window · Right-click label: options · Click a chevron to fold". The feed's own left
+  click still toggles its window and its right click opens Broker settings. In test mode the tooltip's test
+  strip takes no click.
+  Result:
+
+## Reputations (SMW-08, GitHub issue #6, 2026-11-26)
+
+- **SM-REP-1** (new, SMW-08) `/sm probe` first; then `/sm reputations`: the Reputations window lists your
+  factions as the character panel's Reputation tab groups them (Alliance or Horde, Steamwheedle Cartel under it
+  with its own bar, Other, Inactive when you have one), each faction a bar "Honored 3,672 / 12,000" in the
+  standing's color; an Exalted faction is a full bar reading "Exalted".
+  Result:
+- **SM-REP-2** (new, SMW-08) Collapse Steamwheedle Cartel and Other in the character panel's Reputation tab,
+  close the panel, `/reload`: the window still lists their factions, and the Reputation tab is still collapsed
+  as you left it.
+  Result:
+- **SM-REP-3** (new, SMW-08) Click a header's chevron (or the header row) in the window: it folds there, and
+  the Reputation tab's own headers do not move. `/reload`: the fold is kept. Expand / Collapse all in the title
+  bar folds and opens every header, the block left open (SMW-REV).
+  Result:
+- **SM-REP-4** (new, SMW-08) Gain reputation (kill a faction's mob, or turn in a quest): the bar moves within a
+  moment, the Journal's Log shows one line for that faction with "+N", growing with each later gain this
+  session, and the row's tooltip says "This session +N". The skill-up counts do not change.
+  Result:
+- **SM-REP-5** (new, SMW-08) Right-click a faction: "Pin to the Reputations broker"; the Skill Master
+  Reputations feed then reads "Stormwind Honored 3,672 / 12,000" (your faction's). Hover the feed in both
+  tooltip styles: the Pinned section, then the tree; a header's chevron folds it in the tooltip only.
+  Result:
+- **SM-REP-6** (new, SMW-08) With the character panel's Reputation tab open, and again in combat, gain
+  reputation: nothing in the panel moves or flickers, and the window still updates.
+  Result:
+- **SM-REP-7** (new, SMW-08) The Journal's Alts tab has a Reputations sub-tab: each character's standing per
+  faction (log in on an alt first to record it).
+  Result:
+
+## Currencies (SMW-09, GitHub issue #7, 2026-11-26)
+
+- **SM-CUR-1** (new, SMW-09) `/sm currencies`: the Currencies window lists your currencies under the Currency tab's
+  own headers, each with its icon; a currency with a cap is a bar "1,200 / 75,000", one without a cap a plain
+  amount. Gold is not in the list. A character with no currencies sees "No currencies to show yet.".
+  Result:
+- **SM-CUR-2** (new, SMW-09) Collapse a header in the character panel's Currency tab, close the panel, `/reload`:
+  the window still lists that header's currencies, and the Currency tab is still collapsed as you left it.
+  Fold a header in the window: the Currency tab does not change.
+  Result:
+- **SM-CUR-3** (new, SMW-09) Hover a capped currency: its amount, its cap, "This week 800 / 10,000" where it has a
+  weekly cap, and its description.
+  Result:
+- **SM-CUR-4** (new, SMW-09) Earn a currency (or spend one): its row moves at once; the Journal's Log shows one
+  line for it with "+N" (or "-N") for this session, and the skill-up counts do not change. Do it with the
+  Currency tab open, and again in combat: nothing in the panel moves.
+  Result:
+- **SM-CUR-5** (new, SMW-09) Right-click a currency: "Pin to the Currencies broker"; the Skill Master Currencies
+  feed reads its name and amount; its tooltip (both styles) lists the Pinned section, then the tree.
+  Result:
+- **SM-CUR-6** (new, SMW-09) Settings > Alerts > Currency cap alert is off; turn it on, and bring a capped
+  currency to its cap: one toast, in the warning color, with the currency's icon. It does not toast again this
+  session.
+  Result:
+- **SM-CUR-7** (new, SMW-09) The Journal's Alts tab has a Currencies sub-tab with each character's amounts.
+  Result:
+
+## Statistics (SMW-10, 2026-11-26)
+
+- **SM-STAT-1** (new, SMW-10) `/sm statistics`: the Statistics window lists the character panel's Statistics tab's
+  categories (Character, Combat, ...), every one folded. Open Character: its rows first ("Times camped 58",
+  "Talent tree respecs --"), then its own folded sub-categories (Wealth, Consumables). Open Wealth: its rows under
+  it, one level deeper. Fold Character: Wealth goes with it; open Character again: Wealth is still open.
+  Result:
+- **SM-STAT-2** (new, SMW-10) Compare a few values with the Statistics tab itself: the same numbers, "--" where the
+  tab shows "--"; note what Total gold acquired shows (a number or money text).
+  Result:
+- **SM-STAT-3** (new, SMW-10) With the window open on an unfolded category, do something it counts (camp, post an
+  auction, kill something): the value moves within about a second. Close the window: `/sm debug` shows no
+  Statistics read while it is closed and nothing is pinned.
+  Result:
+- **SM-STAT-4** (new, SMW-10) Right-click a statistic: "Pin to the Statistics broker"; the Skill Master Statistics
+  feed reads "Times camped 58". Close the window and change that statistic: the feed text follows. `/reload`:
+  the feed shows it again at once. A category's menu has no pin.
+  Result:
+- **SM-STAT-5** (new, SMW-10) Hover the Skill Master Statistics feed (both tooltip styles): the categories, folded;
+  click a category's chevron: it opens in the tooltip only, the window's folds do not change.
+  Result:
+- **SM-STAT-6** (new, SMW-10) The Journal's Alts tab has no Statistics sub-tab. The window's title says
+  "Skill Master · Statistics", and nothing in it says "stats".
+  Result:
+
+## Test mode and the simulator: the tree families (SMW-11, 2026-11-26)
+
+- **SM-PRE-1** (new, SMW-11) `/sm test`: the Reputations window shows the sample's standings under Alliance,
+  Steamwheedle Cartel and Other (Stormwind "Honored 3,672 / 12,000"); the Currencies window Honor Points
+  "1,200 / 75,000" and Darkmoon Prize Ticket "12"; the Statistics window Character, Combat and Deaths, folded, and
+  Character opens on "Times camped 58". Folding there and turning test mode off leaves your own folds as they were.
+  Result:
+- **SM-PRE-2** (new, SMW-11) In test mode the Reputations, Currencies and Statistics feeds read the sample's pins
+  ("Stormwind Honored 3,672 / 12,000", "Honor Points 1,200 / 75,000", "Times camped 58"); your own pins come back
+  when test mode ends. The Journal's Alts tab shows the sample's standings and currencies.
+  Result:
+- **SM-PRE-3** (new, SMW-11) `/sm sim`, run the fishing trip to its end: its last two steps raise Stormwind by 250
+  and Honor Points by 150, the windows and feeds follow, and the Journal's Log gains a line for each. Stop: your
+  own reputations, currencies and Statistics are back, and the saved Log has no simulated line.
+  Result:
+
+## The six windows, end to end (SMW-12, 2026-11-26)
+
+- **SM-SMW-1** (new, SMW-12) Open all six windows (`/sm professions`, `skills`, `stats`, `currencies`,
+  `reputations`, `statistics`) and play for a while: no Lua error, and `/sm diagnostics` lists no rejected event
+  (`UPDATE_FACTION`, `CURRENCY_DISPLAY_UPDATE`, `CRITERIA_UPDATE` among the accepted).
+  Result:
+- **SM-SMW-2** (new, SMW-12) `/sm help` lists the six window verbs; the README's Usage and FAQ match what you see
+  (Character Stats are the paper doll's numbers, Statistics the Statistics tab's counters; no gold row).
+  Result:
+
+## Review fixes (SMW-REV, 2026-11-26)
+
+- **SM-REV-1** (new, SMW-REV) Collapse Other in the character panel's Reputation tab, leave the panel on that tab
+  and close it, then `/reload`: the Reputations window lists Other's factions at once, without opening the panel
+  on another tab first, and the Reputation tab is still collapsed as you left it. Do the same on the Currency tab
+  for the Currencies window.
+  Result:
+- **SM-REV-2** (new, SMW-REV) Collapse Other in the Reputation tab and close the panel. In combat, gain
+  reputation with a faction you have not met yet: the Reputations window keeps every faction under Other while
+  you fight, and the new faction joins the list as combat ends. Likewise earn a currency new to you in combat
+  with a Currency tab header collapsed: the Currencies window keeps that header's currencies.
+  Result:
+- **SM-REV-3** (new, SMW-REV) Open the Statistics window on an unfolded category, close it, do something that
+  category counts (camp, kill something), and open the window again: the new value shows at once. Hover the
+  Statistics feed with a category unfolded in its tooltip, leave, change that statistic, hover again: the tooltip
+  shows the new value.
+  Result:
+- **SM-REV-4** (new, SMW-REV) Tooltip style Classic. Hover the Skill Master Statistics feed, open Character in the
+  tooltip, then click Wealth's chevron (one level in): Wealth unfolds. On the Reputations feed, click Steamwheedle
+  Cartel's chevron (under Alliance or Horde): it folds and unfolds. A click on the chevron where it is drawn acts,
+  at every depth.
+  Result:
+- **SM-REV-5** (new, SMW-REV) In the Statistics window, with every category folded, the title bar's control reads
+  "Expand all headers": click it, and every category and sub-category opens with its values. It then reads
+  "Collapse all headers": click it, and every category folds, the categories still listed. The Reputations and
+  Currencies windows do the same with their headers; the Professions, Skills and Character Stats windows still
+  collapse and expand their blocks ("Collapse all blocks").
+  Result:
+- **SM-REV-6** (new, SMW-REV) `/sm stats`: the Skill Master · Character Stats window's four blocks read Base &
+  Combat, Spell & Regen, Defense & Resists and Utility, with no "Stats ·" in front; so do the Character Stats
+  feed's tooltip sections in both styles. Detach one: the detached frame reads "Stats · Base & Combat" as before.
   Result:

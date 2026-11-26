@@ -710,7 +710,7 @@ for i, s in ipairs(LAYERS.STRATA_CHOICES) do RANK[s] = i end
 --- (frame-layering-§1: a frame opened from another sits at least one strata above it).
 function P.Strata()
     local stored = (NS.db and NS.db.profile.layout) or NS.defaults.profile.layout
-    local top = stored.strata
+    local top = NS.Windows and NS.Windows.TopStrata() or LAYERS.STRATA.WINDOW   -- the highest family window's
     if (RANK[stored.detachedStrata] or 0) > (RANK[top] or 0) then top = stored.detachedStrata end
     local above = LAYERS.STRATA_ABOVE[top]
     if not above or (RANK[above] and RANK[above] < RANK[LAYERS.STRATA.WINDOW_READ]) then

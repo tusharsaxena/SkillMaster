@@ -12,9 +12,9 @@ local addonName, NS = ...
 --                (both through the mark's secure overlay when the micro menu is there, so the panel
 --                opens untainted); an unlearned row: the trainer popup
 --   shift-click  a profession's trade link, any other row as text, into the chat edit box
---   right-click  the row menu (LibKa0s-Widgets-1.0 ContextMenu): pin to the broker feed, hide the
+--   right-click  the row menu (LibKa0s-Widgets-1.0 ContextMenu): pin to its family's broker, hide the
 --                row, set a waypoint to the trainer, show the trainers
--- Never secure itself; the broker's rows (T4.1) reuse Target and Open, never the overlays.
+-- Never secure itself. The LDB tooltip's rows open nothing (SMW-07: only a section's fold acts there).
 --
 -- NS.Interact.OnRowClick(row, button) -> "none"|"link"|"menu"
 -- NS.Interact.OnMarkClick(row, button) -> "secure"|"tradeskill"|"skills"|"paperdoll"|"trainer"|"link"|"menu"
@@ -29,6 +29,8 @@ local L = NS.L
 --- Where a plain left click on `row` goes.
 function I.Target(row)
     local e = row.entry
+    -- A tree family's row (SMW-08..10) opens no panel: its header folds (NS.Rows), its leaf does nothing.
+    if NS.Tree.Kind(row.kind) then return "none" end
     if row.kind == "stat" then return "paperdoll" end
     if e.learned == false then return "trainer" end
     local cat = NS.SkillCatalog[e.key]
@@ -123,6 +125,7 @@ local function plainPanel(fn)
 end
 
 local OPEN = {
+    none = function() end,
     skills = plainPanel(function(row) I.OpenSkills(row.entry.key) end),
     tradeskill = function(row) I.OpenTradeSkill(row.entry.key) end,
     paperdoll = plainPanel(function() toggleCharacter(I.PAPERDOLL_TAB) end),
@@ -152,6 +155,8 @@ end
 --- The row as chat text: "[Guns 105 +5 / 110]", "[Hit 2.0%]".
 function I.LinkText(row)
     local e = row.entry
+    local tree = NS.Tree.Kind(row.kind)
+    if tree then return tree.linkText(e) end
     if row.kind == "stat" then return ("[%s %s]"):format(e.label, e.display or "") end
     if e.learned == false then return ("[%s: %s]"):format(e.name, L["Not learned"]) end
     return ("[%s %s]"):format(e.name, NS.Widgets.BarText(e.rank, tonumber(e.modifier) or 0, e.max))
@@ -188,7 +193,6 @@ end
 --- whole set's row (settings/Rows.lua), so an unknown "other:" key is still a settings write
 --- that the page's Defaults undoes.
 local function hideRow(row)
-    if row.surface == "broker" then return I.HideInTooltip(row) end
     local kind = row.kind == "stat" and "stats" or "skills"
     local key = row.entry.key
     local p = kind .. ".hidden." .. key
@@ -199,40 +203,26 @@ local function hideRow(row)
     return NS.SetByPath(kind .. ".hidden", set)
 end
 
---- Leave `row` out of the LDB tooltip (its own hidden sets, settings/Rows.lua): the tooltip's
---- row menu hides there, never in the main window.
-function I.HideInTooltip(row)
-    local setKey = row.kind == "stat" and "hiddenStats" or "hiddenSkills"
-    local p = "broker.tooltip." .. setKey .. "." .. row.entry.key
-    if NS.FindSchemaRow(p) then return NS.SetByPath(p, true) end
-    local set = {}
-    for k, v in pairs(NS.db.profile.broker.tooltip[setKey] or {}) do set[k] = v end
-    set[row.entry.key] = true
-    return NS.SetByPath("broker.tooltip." .. setKey, set)
-end
-
---- The row menu's Pin row: `field` of this character's store (char.pinned for a skill, the Skill
---- Master feed's; char.pinnedStat for a stat, the Skill Master Stats feed's, round 6, R6-9).
-local function pinRow(field, key)
+--- The row menu's Pin row (GitHub issue #11, SMW-06): a tick that pins `row` to its own family's broker
+--- (NS.Pins.FamilyOfRow: "Pin to the Professions broker"), or unpins it. Pinning never removes another
+--- pin; with NS.Pins.MAX pinned there already, an unpinned row's Pin is disabled and says why.
+local function pinRow(row)
+    local key, fid = row.entry.key, NS.Pins.FamilyOfRow(row)
+    local fam = fid and NS.Families[fid]
     -- A test-mode or simulated row is the sample character's: pinning it would write the sample's
     -- row into this character's store (preview-mode: nothing of the live state is written while
     -- either runs).
     local sample = NS.IsTestMode() or (NS.IsSimRunning ~= nil and NS.IsSimRunning())
-    -- A second click on a pinned row unpins it; nothing pinned is the default, and the feed then
-    -- reads "Professions and Skills" / "Stats" (owner feedback round 3).
-    local function pinned() return NS.db.char ~= nil and NS.db.char[field] == key end
-    return { value = "pin", label = L["Pin to the broker feed"], radio = true, disabled = sample,
-        selected = pinned,
+    local function pinned() return fid ~= nil and NS.Pins.Has(fid, key) end
+    local full = fid ~= nil and not pinned() and NS.Pins.Full(fid)
+    return { value = "pin", label = L["Pin to the %s broker"]:format(fam and fam.short or ""),
+        disabled = sample or fid == nil or full, selected = pinned,
+        tooltip = full and L["%d elements are pinned to this broker. Unpin one first."]:format(NS.Pins.MAX) or nil,
         onClick = function()
-            if sample then return end
-            local was = pinned()
-            if NS.db.char then NS.db.char[field] = not was and key or false end
-            NS.Debug("Click", "%s %s on the broker feed", was and "unpinned" or "pinned", key)
-            -- The feed's text reads the pin: redraw it now. A layout message alone never reached
-            -- the feed, which redraws on the data messages, so the pin waited for the next
-            -- skill-up to show (feedback round 2).
-            if NS.Broker and NS.Broker.Refresh then NS.Broker.Refresh() end
-            NS.Blocks.Changed()
+            if sample or not fid then return end
+            -- NS.Pins redraws the feeds' text at once: a layout message alone never reached a feed,
+            -- which redraws on the data messages (feedback round 2).
+            NS.Pins.Toggle(fid, key)
         end }
 end
 
@@ -240,16 +230,25 @@ end
 function I.MenuRows(row)
     local e = row.entry
     local rows = { { title = true, label = e.name or e.label } }
-    if row.kind == "stat" then rows[#rows + 1] = pinRow("pinnedStat", e.key) end
+    -- A tree row (SMW-08..10): pin a row with a value of its own (its kind's `pinnable`, else one with a bar);
+    -- a tree row is never hidden.
+    local tree = NS.Tree.Kind(row.kind)
+    if tree then
+        local can = tree.pinnable and tree.pinnable(e)
+        if can == nil then can = e.hasBar ~= false end
+        if can then rows[#rows + 1] = pinRow(row) end
+        return rows
+    end
+    if row.kind == "stat" then rows[#rows + 1] = pinRow(row) end
     if row.kind == "skill" then
-        rows[#rows + 1] = pinRow("pinned", e.key)
+        rows[#rows + 1] = pinRow(row)
         local trainer = trainerOf(e)
         rows[#rows + 1] = { value = "waypoint", label = L["Set a waypoint to the trainer"], disabled = trainer == nil,
             onClick = function() if trainer then NS.Waypoints:Set(trainer) end end }
         rows[#rows + 1] = { value = "trainers", label = L["Show trainers"], onClick = function() I.Trainer(row) end }
     end
-    local hideLabel = row.surface == "broker" and L["Hide in this tooltip"] or L["Hide this row"]
-    rows[#rows + 1] = { value = "hide", label = hideLabel, onClick = function() hideRow(row) end }
+    -- The LDB tooltip opens no menu (SMW-07): its rows hide from the Rows page's LDB tooltip column.
+    rows[#rows + 1] = { value = "hide", label = L["Hide this row"], onClick = function() hideRow(row) end }
     return rows
 end
 

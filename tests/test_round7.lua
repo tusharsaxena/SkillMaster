@@ -255,7 +255,7 @@ test("round7 header meta: no block header carries a line beside its title, Base 
     local h = NS.Blocks.AcquireHeader(pool, M.UIParent)
     h:SetBlock("stats_base", false, true)
     assertTrue(h.meta == nil, "no meta font string on the header")
-    assertEqual(h.title:GetText(), NS.BlockDefs.stats_base.title, "the title alone")
+    assertEqual(h.title:GetText(), NS.Blocks.HomeTitle("stats_base"), "the title alone (its own window's, SMW-REV)")
     h:SetBlock("weapon", true, false)
     assertTrue(h.collapsed and not h.docked, "SetBlock(id, collapsed, docked)")
     NS.Blocks.ReleaseHeaders(pool)
@@ -263,30 +263,31 @@ end)
 
 -- ── R7-5: the LDB tooltips' titles ───────────────────────────────────────────────────────────
 
-test("round7 titles: the two feeds' tooltips read Skill Master · Professions and Skills and Skill Master · Stats", function()
+test("round7 titles: each feed's tooltip reads its window's title (SMW-05), Skill Master · Professions ...", function()
     local Br = NS.Broker
-    local SKILLS, STATS = "Skill Master \194\183 Professions and Skills", "Skill Master \194\183 Stats"
-    assertEqual(Br.FEEDS.skills.title, SKILLS)
+    local SKILLS, STATS = "Skill Master \194\183 Professions", "Skill Master \194\183 Character Stats"
+    assertEqual(Br.FEEDS.professions.title, SKILLS)
     assertEqual(Br.FEEDS.stats.title, STATS)
+    for fid, f in pairs(Br.FEEDS) do assertEqual(f.title, NS.Families[fid].title, fid) end
     -- Both styles read B.Heading: the Main window style's panel title and the Classic tooltip's first line.
     local lines = {}
     local tip = M.CreateFrame("GameTooltip", "SkillMasterR7TitleTip", M.UIParent)
     function tip:AddLine(s) lines[#lines + 1] = s end
     function tip:AddDoubleLine(l, r) lines[#lines + 1] = l .. " " .. tostring(r) end
     function tip:NumLines() return #lines end
-    Br.FillTooltip(tip, "skills")
+    Br.FillTooltip(tip, "professions")
     assertTrue(lines[1]:find(SKILLS, 1, true) ~= nil, "Classic skills title: " .. tostring(lines[1]))
     assertEqual((Br.Heading()), SKILLS, "the panel's title")
     lines = {}
     Br.FillTooltip(tip, "stats")
     assertTrue(lines[1]:find(STATS, 1, true) ~= nil, "Classic stats title: " .. tostring(lines[1]))
     assertEqual((Br.Heading()), STATS)
-    Br.FillTooltip(tip, "skills")
-    -- The LibDataBroker names and labels a display stores by are unchanged.
+    Br.FillTooltip(tip, "professions")
+    -- The LibDataBroker names a display stores by are unchanged; the stats feed is relabeled.
     assertEqual(Br.NAME, "Skill Master")
     assertEqual(Br.STATS_NAME, "Skill Master Stats")
     assertEqual(Br.Object().label, "Skill Master")
-    assertEqual(Br.StatsObject().label, "Skill Master Stats")
+    assertEqual(Br.StatsObject().label, "Skill Master Character Stats")
 end)
 
 -- R7 review: the longer title must not draw over the gains text in the Main window style.
@@ -366,7 +367,7 @@ end)
 
 -- ── R7-1: a filter on every block ────────────────────────────────────────────────────────────
 
-local B7, W7, D7, G7 = NS.Blocks, NS.MainWindow, NS.Detached, NS.Groups
+local B7, W7, D7, G7 = NS.Blocks, T.windows, NS.Detached, NS.Groups
 
 local function sk(key, name, category, rank, max, learned)
     return { key = key, name = name, category = category, rank = rank, max = max, modifier = 0,
@@ -440,7 +441,17 @@ test("round7 filters: each block's own set, a Show rows row for every block, All
         weapon = "all,learned,equipped,belowCap", other = "all,learned,belowCap",
         stats_base = "all,nonZero", stats_spell = "all,nonZero", stats_defense = "all,nonZero", stats_utility = "all,nonZero",
     }
+    -- A tree block (SMW-08..10) keeps the client's order and folds: no filter set, no Show rows row.
+    local filtered = {}
     for _, id in ipairs(NS.BLOCKS) do
+        if NS.IsTreeBlock(id) then
+            assertEqual(table.concat(B7.FiltersOf(id), ","), "all", id .. ": no filter of its own")
+            assertTrue(NS.FindSchemaRow("layout.blocks." .. id .. ".filter") == nil, id .. ": no Show rows row")
+        else
+            filtered[#filtered + 1] = id
+        end
+    end
+    for _, id in ipairs(filtered) do
         assertEqual(table.concat(B7.FiltersOf(id), ","), want[id], id .. ": its set")
         assertEqual(NS.defaults.profile.layout.blocks[id].filter, "all", id .. ": All on a new profile")
         local row = NS.FindSchemaRow("layout.blocks." .. id .. ".filter")
@@ -515,7 +526,9 @@ test("round7 filters: every window header carries the funnel, the filled badge w
             assertTrue(h.filter:IsShown(), h.id .. ": the filter mark")
             assertEqual(h.filter.restToken, "icon.tint", h.id .. ": the marks' tint on All (smoke round 1, ruling 4)")
         end
-        assertEqual(#seen, #NS.BLOCKS, "every block drew a header")
+        local blocks = 0
+        for _, id in ipairs(NS.BLOCKS) do if not NS.IsTreeBlock(id) then blocks = blocks + 1 end end
+        assertEqual(#seen, blocks, "every skill and stat block drew a header (a tree block has no filter)")
         local opened
         NS.Widgets.ContextMenu = function(anchor, rows) opened = { anchor = anchor, rows = rows } return {} end
         local h
@@ -584,7 +597,7 @@ test("round7 filters: both LDB tooltip styles honor every block's filter", funct
             function tip:AddLine(t) lines[#lines + 1] = t end
             function tip:AddDoubleLine(l) lines[#lines + 1] = l end
             function tip:NumLines() return #lines end
-            Br.FillTooltip(tip, "skills")
+            Br.FillTooltip(tip, "professions")
             local text = table.concat(lines, "\n")
             assertTrue(text:find("Tailoring", 1, true) and not text:find("Mining", 1, true), "Classic: Primary at cap: " .. text)
             lines = {}
@@ -600,9 +613,11 @@ test("round7 filters: both LDB tooltip styles honor every block's filter", funct
     end)
 end)
 
--- ── R7-6: an LDB tooltip row opens from its go icon (the default) or the whole row ──────────
--- Engineering is the crafting row: no other suite arms it, so its overlay (made once, never
--- destroyed) is this file's alone.
+-- ── R7-6: an LDB tooltip row opened from its go icon or the whole row ─────────────────────────
+-- Re-pinned by SMW-07 (docs/superpowers/specs/2026-11-26-skillmaster-windows-design.md, the owner's ask: in
+-- the LDB tooltip only a section's fold chevron acts): a tooltip row opens, links and menus nothing, arms no
+-- secure overlay, and Tooltips > Open a row from is retired. Engineering is the crafting row: no other suite
+-- arms it, so its overlay (made once, never destroyed) is this file's alone.
 
 local Br6, BP6, SO6, I6 = NS.Broker, NS.BrokerPanel, NS.SecureOverlay, NS.Interact
 
@@ -618,24 +633,28 @@ local function r6Source()
              statIndex = {}, gains = { total = 0, byKey = {} } }
 end
 
---- The Main window style over a fixture source, `openFrom` set, out of combat, Shift up; every
---- swapped global and setting put back, the panel hidden (its OnHide fired: the fake's Hide fires
---- none) and the overlays synced.
-local function withGo(openFrom, fn)
+--- The Main window style over a fixture source, out of combat, Shift as `shift`; every swapped global
+--- and setting put back, the panel hidden (its OnHide fired: the fake's Hide fires none) and the
+--- overlays synced.
+local function withGo(fn)
     local p = NS.db.profile.tooltips.ldb
-    local saved = { source = Br6.source, style = p.style, from = p.openFrom, combat = M.InCombatLockdown,
-                    shift = M.IsShiftKeyDown, open = Br6.OpenRow }
+    local saved = { source = Br6.source, style = p.style, combat = M.InCombatLockdown, shift = M.IsShiftKeyDown,
+                    open = I6.Open, menu = I6.Menu, link = I6.Link }
     local v = r6Source()
     Br6.source = function() return v end
-    p.style, p.openFrom = "window", openFrom
+    p.style = "window"
     M.InCombatLockdown = function() return false end
     M.IsShiftKeyDown = function() return false end
-    local ok, err = pcall(fn, v)
-    Br6.OpenRow = saved.open
+    local got = {}
+    I6.Open = function(r) got[#got + 1] = "open:" .. r.entry.key end
+    I6.Menu = function(r) got[#got + 1] = "menu:" .. r.entry.key end
+    I6.Link = function(r) got[#got + 1] = "link:" .. r.entry.key end
+    local ok, err = pcall(fn, got)
+    I6.Open, I6.Menu, I6.Link = saved.open, saved.menu, saved.link
     local f = BP6.Frame()
     Br6.HideTooltip()
     f:__fire("OnHide")
-    Br6.source, p.style, p.openFrom = saved.source, saved.style, saved.from
+    Br6.source, p.style = saved.source, saved.style
     M.InCombatLockdown, M.IsShiftKeyDown = saved.combat, saved.shift
     SO6:Sync()
     if NS.Widgets.CloseMenu then NS.Widgets.CloseMenu() end
@@ -646,146 +665,74 @@ local function goRow(key)
     for _, row in ipairs(BP6.Rows()) do if row.entry and row.entry.key == key then return row end end
 end
 
-local function recordOpenRow()
-    local got = {}
-    Br6.OpenRow = function(r, button) got[#got + 1] = r.kind .. ":" .. r.key .. ":" .. tostring(button) end
-    return got
-end
-
-test("round7 go icon: Open a row from, Main window style only (Full row by default since round 8)", function()
-    assertEqual(NS.defaults.profile.tooltips.ldb.openFrom, "row", "round 8, R8-1: every profile starts on Full row")
-    local row = NS.FindSchemaRow("tooltips.ldb.openFrom")
-    assertTrue(row ~= nil, "the Tooltips > LDB tooltip row")
-    assertEqual(row.page, "tooltips")
-    assertEqual(row.default, "row")
-    local values = {}
-    for _, val in ipairs(row.values) do values[#values + 1] = val.value end
-    assertEqual(table.concat(values, ","), "row,icon")
-    local p = NS.db.profile.tooltips.ldb
-    local style, from = p.style, p.openFrom
-    p.style, p.openFrom = "classic", "icon"
-    assertTrue(row.disabledIf() == true, "dimmed in the Classic style")
-    assertEqual(Br6.OpenFrom(), "row", "Classic rows always open from the whole row")
-    p.style = "window"
-    assertFalse(row.disabledIf() == true)
-    assertEqual(Br6.OpenFrom(), "icon")
-    p.openFrom = nil
-    assertEqual(Br6.OpenFrom(), "row", "no stored choice: Full row")
-    p.style, p.openFrom = style, from
+test("round7 go icon: Open a row from is gone from the LDB tooltip; schemaVersion 16 drops a stored one", function()
+    assertTrue(NS.defaults.profile.tooltips.ldb.openFrom == nil, "no default")
+    assertTrue(NS.FindSchemaRow("tooltips.ldb.openFrom") == nil, "no Tooltips row")
+    assertTrue(Br6.OpenFrom == nil, "and no reader")
+    assertTrue(NS.FindSchemaRow("layout.openFrom") ~= nil, "the windows' own Open a row from stays")
+    local sv = rawget(_G, "SkillMasterDB")
+    sv.profiles = sv.profiles or {}
+    sv.profiles["R7-From"] = { tooltips = { ldb = { openFrom = "icon", width = 500 } } }
+    sv.profiles["R7-Fresh16"] = {}
+    NS.db.global.schemaVersion = 15
+    NS:RunMigrations()
+    assertEqual(NS.db.global.schemaVersion, NS.SCHEMA_VERSION)
+    assertTrue(sv.profiles["R7-From"].tooltips.ldb.openFrom == nil, "the stored choice goes")
+    assertEqual(sv.profiles["R7-From"].tooltips.ldb.width, 500, "the rest stays")
+    assertTrue(sv.profiles["R7-Fresh16"].tooltips == nil, "a fresh profile passes through")
+    sv.profiles["R7-From"], sv.profiles["R7-Fresh16"] = nil, nil
 end)
 
-test("round7 go icon: the row's left click opens nothing; shift-click and right-click stay on the row", function()
-    withGo("icon", function()
+test("round7 go icon: a tooltip row's left, shift and right clicks do nothing, on the row and on its go icon", function()
+    withGo(function(got)
         Br6.OnEnter(M.UIParent)
-        local got = recordOpenRow()
         local row = goRow("cooking")
         row:__fire("OnClick", "LeftButton")
-        assertEqual(#got, 0, "a plain left click on the row opens nothing")
         row:__fire("OnClick", "RightButton")
         M.IsShiftKeyDown = function() return true end
         row:__fire("OnClick", "LeftButton")
-        assertEqual(table.concat(got, ","), "skill:cooking:RightButton,skill:cooking:LeftButton", "the menu, then the link")
-        assertEqual(BP6.Frame().footer:GetText(), Br6.FooterText("icon"), "the footer says the go icon opens")
-        assertTrue(Br6.FooterText("icon"):find("go icon", 1, true) ~= nil)
-    end)
-end)
-
-test("round7 go icon: the whole row mode (round 8: Full row) arms the cast over the row, the icon live", function()
-    withGo("row", function()
-        local enabled = {}
-        Br6.OnEnter(M.UIParent)
-        local row = goRow("engineering")
-        rawset(row.act, "EnableMouse", function(_, on) enabled[#enabled + 1] = on end)
-        Br6.OnEnter(M.UIParent)
-        rawset(row.act, "EnableMouse", nil)
-        assertEqual(enabled[#enabled], true, "the icon still takes the mouse (its click is the row's)")
-        local got = recordOpenRow()
-        row = goRow("engineering")
-        assertTrue(BP6.Armed(), "the overlay scans these rows too")
-        row:__fire("OnEnter")
-        local b = SO6.Overlay("engineering")
-        assertTrue(b ~= nil and b:IsShown() and b.row == row, "a hover arms the cast")
-        assertTrue(SO6.CoverFor(row) == row, "over the whole row (round 8, R8-1)")
-        row:__fire("OnClick", "RightButton")
-        assertEqual(table.concat(got, ","), "skill:engineering:RightButton", "the right click: the row menu")
-        assertEqual(BP6.Frame().footer:GetText(), Br6.FooterText("row"))
-    end)
-end)
-
-test("round7 go icon: a hovered crafting row's icon gets the window's secure cast; the panel's hide disarms it", function()
-    withGo("icon", function()
-        local enabled = {}
-        Br6.OnEnter(M.UIParent)
-        local row = goRow("engineering")
-        rawset(row.act, "EnableMouse", function(_, on) enabled[#enabled + 1] = on end)
-        Br6.OnEnter(M.UIParent)
-        rawset(row.act, "EnableMouse", nil)
-        assertEqual(enabled[#enabled], true, "the go icon takes the mouse")
-        row = goRow("engineering")
-        assertTrue(BP6.Armed(), "the panel shows in the go icon mode")
-        row:__fire("OnEnter")
-        local b = SO6.Overlay("engineering")
-        assertTrue(b ~= nil and b:IsShown(), "armed on the hover")
-        assertTrue(b.row == row, "over the panel's row")
-        assertEqual(b.kind, "spell", "the crafting cast (type1 spell)")
-        assertEqual(b:GetFrameStrata(), "TOOLTIP", "the panel's strata, the top")
-        assertTrue(b:GetFrameLevel() > row:GetFrameLevel(), "above the row")
-        -- The overlay's right-click is the panel row's (its row menu over the tooltip).
-        local got = recordOpenRow()
-        b:GetScript("PostClick")(b, "RightButton", false)
-        assertEqual(table.concat(got, ","), "skill:engineering:RightButton", "the panel row's own menu")
-        -- A scroll re-lays it; the panel's hide takes it down.
-        local syncs, real = 0, SO6.Sync
-        SO6.Sync = function(...) syncs = syncs + 1 return real(...) end
-        BP6.SetScroll(0)
-        SO6.Sync = real
-        assertTrue(syncs > 0, "a scroll re-syncs the overlay")
-        local f = BP6.Frame()
-        f:Hide()
-        f:__fire("OnHide")
-        assertFalse(b:IsShown(), "never armed after the panel hides")
-        assertTrue(b.row == nil)
-    end)
-end)
-
-test("round7 go icon: in combat a hover arms nothing and the icon's click says why, as the window's", function()
-    withGo("icon", function()
-        Br6.OnEnter(M.UIParent)
-        M.__fireEvent("PLAYER_REGEN_DISABLED")
-        M.InCombatLockdown = function() return true end
-        local row = goRow("engineering")
-        local b = SO6.Overlay("engineering")
-        local moves = 0
-        if b then
-            for _, name in ipairs({ "SetPoint", "Show", "SetFrameLevel" }) do
-                local realFn = b[name]
-                rawset(b, name, function(...) moves = moves + 1 return realFn(...) end)
-            end
-        end
-        row:__fire("OnEnter")
-        assertEqual(moves, 0, "nothing moves or shows an overlay in combat")
-        assertTrue(b == nil or not b:IsShown(), "disarmed")
-        M.__resetPrinted()
         row.act:__fire("OnClick", "LeftButton")
-        assertEqual(#M.__printed(), 1, "one line says why it cannot open in combat")
-        if b then for _, name in ipairs({ "SetPoint", "Show", "SetFrameLevel" }) do rawset(b, name, nil) end end
-        M.InCombatLockdown = function() return false end
-        M.__fireEvent("PLAYER_REGEN_ENABLED")
-        b = SO6.Overlay("engineering")
-        assertTrue(b ~= nil and b:IsShown() and b.row == row, "armed again after combat, the row still hovered")
+        assertEqual(table.concat(got, ","), "", "no open, no menu, no link")
+        assertEqual(BP6.Frame().footer:GetText(), Br6.FooterText(), "the footer says a chevron folds")
+        assertTrue(Br6.FooterText():find("chevron", 1, true) ~= nil)
     end)
 end)
 
-test("round7 go icon: a tooltip row's shift-click links it into chat", function()
-    withGo("row", function()
+test("round7 go icon: a hovered crafting row arms no secure cast, and its go icon takes no mouse", function()
+    withGo(function()
+        local enabled = {}
         Br6.OnEnter(M.UIParent)
-        local linked, real = {}, I6.Link
-        I6.Link = function(r) linked[#linked + 1] = r.kind .. ":" .. r.entry.key end
-        M.IsShiftKeyDown = function() return true end
-        local ok, err = pcall(Br6.OpenRow, { kind = "skill", key = "swords" }, "LeftButton")
-        I6.Link = real
+        local row = goRow("engineering")
+        rawset(row.act, "EnableMouse", function(_, on) enabled[#enabled + 1] = on end)
+        Br6.OnEnter(M.UIParent)
+        rawset(row.act, "EnableMouse", nil)
+        assertEqual(enabled[#enabled], false, "the go icon takes no mouse")
+        assertTrue(BP6.Armed == nil, "the overlay never scans the tooltip's rows")
+        row = goRow("engineering")
+        row:__fire("OnEnter")
+        local b = SO6.Overlay("engineering")
+        assertTrue(b == nil or not b:IsShown() or b.row ~= row, "nothing armed over the tooltip's row")
+        assertEqual(row.openFrom, "none", "the row's tooltip gives no click hint")
+        row:__fire("OnLeave")
+    end)
+end)
+
+test("round7 go icon: a tooltip row keeps its hover: the window's wash and its row tooltip, with no click hint", function()
+    withGo(function()
+        Br6.OnEnter(M.UIParent, "skills")   -- SMW-05: the weapons are the Skills feed's
+        local row = goRow("swords")
+        local shown, real = {}, NS.RowTooltip.Show
+        NS.RowTooltip.Show = function(r) shown[#shown + 1] = r.entry.key end
+        local ok, err = pcall(function() row:__fire("OnEnter") end)
+        NS.RowTooltip.Show = real
         if not ok then error(err, 0) end
-        assertEqual(table.concat(linked, ","), "skill:swords", "linked, not opened")
+        assertEqual(table.concat(shown, ","), "swords", "the row tooltip shows on the hover")
+        local lines = NS.RowTooltip.Lines(row.entry, row.kind, NS.Rows.OpenFrom(row))
+        for _, l in ipairs(lines) do
+            local t = tostring(l.left or "")
+            assertTrue(t:find("Click:", 1, true) == nil and t:find("Right-click", 1, true) == nil, "no click hint: " .. t)
+        end
+        row:__fire("OnLeave")
     end)
 end)
 

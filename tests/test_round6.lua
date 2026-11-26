@@ -191,7 +191,7 @@ end)
 
 -- ── R6-3: every header mark one size and one vertical center ─────────────────────────────────
 
-local C, D, G, W = NS.Chrome, NS.Detached, NS.Groups, NS.MainWindow
+local C, D, G, W = NS.Chrome, NS.Detached, NS.Groups, T.windows
 
 --- The ink box of a shipped TGA (32-bit, RLE or raw, either origin): { left, top, right, bottom }
 --- in pixels over every pixel with any alpha, the way C.INK was measured.
@@ -747,14 +747,15 @@ end
 --- The feed's tooltip shown in `style` over a fixture source, then everything put back.
 local function withFeedTip(style, fn)
     local savedSource, p = Br.source, NS.db.profile
-    local savedStyle, savedHeight, savedFrom = p.tooltips.ldb.style, p.tooltips.ldb.height, p.tooltips.ldb.openFrom
+    local savedStyle, savedHeight = p.tooltips.ldb.style, p.tooltips.ldb.height
     local v = tipModels()
     Br.source = function() return v end
     p.tooltips.ldb.style = style
     local ok, err = pcall(fn, v)
     Br.HideTooltip()
     Br.source = savedSource
-    p.tooltips.ldb.style, p.tooltips.ldb.height, p.tooltips.ldb.openFrom = savedStyle, savedHeight, savedFrom
+    p.tooltips.ldb.style, p.tooltips.ldb.height = savedStyle, savedHeight
+    p.tooltips.ldb.folds = { blocks = {}, nodes = {} }
     p.layout.blocks.weapon.filter, p.layout.blocks.weapon.collapsed = "all", false
     if NS.Widgets.CloseMenu then NS.Widgets.CloseMenu() end
     if not ok then error(err, 0) end
@@ -770,8 +771,8 @@ end
 test("round6 ldb look: a new profile draws the Main window style on its own TOOLTIP frame, the window's size", function()
     local LD = NS.defaults.profile.tooltips.ldb
     assertEqual(LD.style, "window", "new profiles start on the window's look")
-    assertEqual(LD.width, NS.defaults.profile.layout.width, "the window's default width")
-    assertEqual(LD.height, NS.defaults.profile.layout.maxHeight, "the window's default height")
+    assertEqual(LD.width, NS.defaults.profile.windows.professions.width, "the window's default width")
+    assertEqual(LD.height, NS.defaults.profile.windows.professions.maxHeight, "the window's default height")
     withFeedTip("window", function()
         assertEqual(Br.Style(), "window")
         local f = Br.Tip()
@@ -781,7 +782,7 @@ test("round6 ldb look: a new profile draws the Main window style on its own TOOL
         assertEqual(BP.ContentWidth(), NS.MainWindow.ContentWidth(), "one Width draws the window's body")
         Br.OnEnter(M.UIParent)
         assertTrue(f:IsShown(), "it shows on the feed's hover")
-        assertEqual(f.title:GetText(), Br.FEEDS.skills.title, "the feed's tooltip title (R7-5)")
+        assertEqual(f.title:GetText(), Br.FEEDS.professions.title, "the feed's tooltip title (R7-5: its window's, SMW-05)")
         assertEqual(f.footer:GetText(), Br.FooterText(), "the footer hints stay")
     end)
     withFeedTip("classic", function()
@@ -795,64 +796,72 @@ test("round6 ldb look: the window's headers and rows, the bar with its text insi
         Br.OnEnter(M.UIParent)
         local ids = {}
         for _, h in ipairs(BP.Headers()) do ids[#ids + 1] = h.id end
-        assertEqual(table.concat(ids, ","), "primary,secondary,weapon,other", "the shown sections, in the window's order")
+        assertEqual(table.concat(ids, ","), "primary,secondary", "the Professions feed's sections, in the window's order")
         local row = panelRow("tailoring")
         assertTrue(row ~= nil, "a window row")
         assertTrue(row.bar:IsShown(), "the shared bar")
         assertTrue(row.act:IsShown(), "the row's mark")
         assertEqual(row.baseH, NS.db.profile.bars.rowHeight, "the window's row height")
         assertTrue(row:GetParent() == BP.Frame().content, "in the panel's scrolled body")
-        assertTrue(panelRow("rangedCrit") == nil, "no stats in the skills feed (R6-9)")
+        assertTrue(panelRow("rangedCrit") == nil, "no stats in the Professions feed (R6-9)")
+        assertTrue(panelRow("bows") == nil, "nor weapons (SMW-05)")
+        Br.OnEnter(M.UIParent, "skills")
+        ids = {}
+        for _, h in ipairs(BP.Headers()) do ids[#ids + 1] = h.id end
+        assertEqual(table.concat(ids, ","), "weapon,other", "the Skills feed's own two")
         Br.OnEnter(M.UIParent, "stats")
         assertTrue(panelRow("rangedCrit") ~= nil, "the stats feed draws the stat blocks")
         Br.OnEnter(M.UIParent)
     end)
 end)
 
-test("round6 ldb look: a block collapsed in the window is a collapsed header here, and nothing on a header acts", function()
+-- Re-pinned by SMW-07 (the owner's ruling: the tooltip keeps its own fold state): a block collapsed in the
+-- window is open here until its tooltip chevron folds it, and only that chevron takes the pointer.
+test("round6 ldb look: a block collapsed in the window stays open here; only the header's chevron takes the pointer", function()
     withFeedTip("window", function()
         NS.db.profile.layout.blocks.weapon.collapsed = true
-        Br.OnEnter(M.UIParent)
+        Br.OnEnter(M.UIParent, "skills")
         local weapon
         for _, h in ipairs(BP.Headers()) do if h.id == "weapon" then weapon = h end end
-        assertTrue(weapon ~= nil and weapon.collapsed == true, "the header says collapsed (chevron right)")
-        assertTrue(panelRow("bows") == nil, "and draws no rows")
+        assertTrue(weapon ~= nil and weapon.collapsed == false, "the tooltip's own fold: open")
+        assertTrue(panelRow("bows") ~= nil, "and draws its rows")
         assertFalse(weapon.detach:IsShown(), "no detach mark")
         assertFalse(weapon.restore:IsShown(), "no restore mark")
         -- A recorder on the pooled header's EnableMouse, then the tooltip drawn again.
-        local calls = {}
+        local calls, chev = {}, {}
         rawset(weapon, "EnableMouse", function(_, on) calls[#calls + 1] = on end)
-        Br.OnEnter(M.UIParent)
+        rawset(weapon.chevron, "EnableMouse", function(_, on) chev[#chev + 1] = on end)
+        Br.OnEnter(M.UIParent, "skills")
         rawset(weapon, "EnableMouse", nil)
-        assertEqual(calls[1], false, "the header takes no click")
+        rawset(weapon.chevron, "EnableMouse", nil)
+        assertEqual(calls[1], false, "the header's body takes no click")
+        assertEqual(chev[#chev], true, "its chevron does")
     end)
 end)
 
-test("round6 ldb look: a row's left click opens and its right click opens the row menu", function()
+-- Re-pinned by SMW-07 (the owner's ask: in the tooltip only the fold acts): a row's clicks do nothing.
+test("round6 ldb look: a row's left and right clicks open nothing", function()
     withFeedTip("window", function()
-        -- Round 8, R8-1: Full row opens as the go icon does (both modes: test_round7, test_round8).
-        NS.db.profile.tooltips.ldb.openFrom = "row"
         Br.OnEnter(M.UIParent)
-        local saved, got = Br.OpenRow, {}
-        local savedOpen, opened = NS.Interact.Open, {}
-        Br.OpenRow = function(r, button) got[#got + 1] = r.kind .. ":" .. r.key .. ":" .. tostring(button) end
-        NS.Interact.Open = function(r) opened[#opened + 1] = r.entry.key end
+        local savedOpen, savedMenu, opened = NS.Interact.Open, NS.Interact.Menu, {}
+        NS.Interact.Open = function(r) opened[#opened + 1] = "open:" .. r.entry.key end
+        NS.Interact.Menu = function(r) opened[#opened + 1] = "menu:" .. r.entry.key end
         local row = panelRow("tailoring")
         local ok, err = pcall(function()
+            assertTrue(row:GetScript("OnClick") == nil, "the row has no click handler")
             row:__fire("OnClick", "LeftButton")
             row:__fire("OnClick", "RightButton")
         end)
-        Br.OpenRow, NS.Interact.Open = saved, savedOpen
+        NS.Interact.Open, NS.Interact.Menu = savedOpen, savedMenu
         if not ok then error(err, 0) end
-        assertEqual(table.concat(opened, ","), "tailoring", "the left click opens what the go icon opens")
-        assertEqual(table.concat(got, ","), "skill:tailoring:RightButton", "the right click opens the row menu")
+        assertEqual(table.concat(opened, ","), "", "nothing opens")
     end)
 end)
 
 test("round6 ldb look: the window's weapon filter and sort reach both styles", function()
     withFeedTip("window", function()
         NS.db.profile.layout.blocks.weapon.filter = "learned"
-        Br.OnEnter(M.UIParent)
+        Br.OnEnter(M.UIParent, "skills")
         assertTrue(panelRow("bows") ~= nil and panelRow("swords") == nil, "Main window: Learned leaves Swords out")
     end)
     withFeedTip("classic", function()
@@ -862,7 +871,7 @@ test("round6 ldb look: the window's weapon filter and sort reach both styles", f
         function tip:AddLine(t) lines[#lines + 1] = t end
         function tip:AddDoubleLine(l) lines[#lines + 1] = l end
         function tip:NumLines() return #lines end
-        Br.FillTooltip(tip)
+        Br.FillTooltip(tip, "skills")
         local text = table.concat(lines, "\n")
         assertTrue(text:find("Bows", 1, true) ~= nil and text:find("Swords", 1, true) == nil, "Classic too: " .. text)
     end)
@@ -874,8 +883,8 @@ test("round6 ldb look: past its Height the body scrolls, by the wheel and by the
         local f = BP.Frame()
         assertEqual(select(2, BP.Scroll()), 0, "the default Height fits the fixture")
         assertFalse(f.scrollBar:IsEnabled(), "while it fits the bar is drawn disabled (round 7, R7-4)")
-        NS.db.profile.tooltips.ldb.height = 120
-        Br.OnEnter(M.UIParent)
+        NS.db.profile.tooltips.ldb.height = 80   -- SMW-05: under the Skills feed's three rows
+        Br.OnEnter(M.UIParent, "skills")   -- SMW-05: the fixture's longest feed (three rows)
         local _, most = BP.Scroll()
         assertTrue(most > 0, "the body overflows")
         assertTrue(f.scrollBar:IsShown(), "the scroll bar shows")
@@ -884,24 +893,6 @@ test("round6 ldb look: past its Height the body scrolls, by the wheel and by the
         f.scrollBar:GetScript("OnValueChanged")(f.scrollBar, 1)
         assertEqual((BP.Scroll()), 1, "the bar drives the offset")
     end)
-end)
-
-test("round6 ldb look: the row menu draws above the tooltip in both styles, and goes back as it hides", function()
-    for _, style in ipairs({ "window", "classic" }) do
-        withFeedTip(style, function()
-            Br.OnEnter(M.UIParent)
-            local tip = Br.Tip()
-            local m = Br.RowMenu({ kind = "skill", key = "tailoring" }, tip)
-            assertTrue(m ~= nil, style .. ": the menu opens")
-            assertEqual(m:GetFrameStrata(), "TOOLTIP", style .. ": in the tooltip's strata")
-            assertTrue(m:GetFrameLevel() > tip:GetFrameLevel(), style .. ": above the tooltip")
-            assertTrue(Br.MenuOpen(), style .. ": the tooltip stays up while the menu is open")
-            m:Hide()
-            m:__fire("OnHide")
-            assertEqual(m:GetFrameStrata(), "FULLSCREEN_DIALOG", style .. ": the library's strata again")
-            assertFalse(Br.MenuOpen())
-        end)
-    end
 end)
 
 test("round6 ldb look: the classic-only rows are dimmed in the Main window style, width and height in Classic", function()
@@ -950,63 +941,63 @@ local function statsTip()
     return tip, lines
 end
 
-test("round6 stats feed: a second data source, its tooltip the four stat blocks, its clicks the skills feed's", function()
+test("round6 stats feed: its own data source, its tooltip the four stat blocks, its clicks its window's", function()
     local obj = M.__ldbObjects[Br.STATS_NAME]
     assertTrue(obj ~= nil and obj == Br.StatsObject(), "Skill Master Stats is registered")
     assertEqual(obj.type, "data source")
-    assertEqual(obj.label, "Skill Master Stats")
-    assertTrue(obj.OnClick == Br.OnClick, "the same label clicks")
-    assertEqual(table.concat(Br.STAT_SECTIONS, ","), "stats_base,stats_spell,stats_defense,stats_utility")
-    for _, id in ipairs(Br.STAT_SECTIONS) do
+    assertEqual(obj.label, "Skill Master Character Stats", "relabeled; its name stays (SMW-05)")
+    assertTrue(type(obj.OnClick) == "function", "its label clicks")
+    assertEqual(table.concat(Br.FEEDS.stats.sections, ","), "stats_base,stats_spell,stats_defense,stats_utility")
+    for _, id in ipairs(Br.FEEDS.stats.sections) do
         assertEqual(NS.defaults.profile.broker.tooltip.sections[id], true, id .. " on by default")
     end
     withFeedTip("window", function()
         obj.OnEnter(M.UIParent)
         assertEqual(Br.Feed(), "stats")
-        assertEqual(BP.Frame().title:GetText(), "Skill Master \194\183 Stats")
+        assertEqual(BP.Frame().title:GetText(), "Skill Master \194\183 Character Stats")
         local ids = {}
         for _, h in ipairs(BP.Headers()) do ids[#ids + 1] = h.id end
         assertEqual(table.concat(ids, ","), "stats_base", "the stat blocks with rows, no skill block")
         assertTrue(panelRow("tailoring") == nil, "no skills in the stats feed")
         M.__ldbObjects[Br.NAME].OnEnter(M.UIParent)
-        assertEqual(Br.Feed(), "skills", "the skills feed's hover takes it back")
+        assertEqual(Br.Feed(), "professions", "the Professions feed's hover takes it back")
     end)
     withFeedTip("classic", function()
         local tip, lines = statsTip()
         Br.FillTooltip(tip, "stats")
         local text = table.concat(lines, "\n")
-        assertTrue(text:find("Skill Master \194\183 Stats", 1, true) ~= nil and text:find("Ranged Crit", 1, true) ~= nil, text)
+        assertTrue(text:find("Skill Master \194\183 Character Stats", 1, true) ~= nil and text:find("Ranged Crit", 1, true) ~= nil, text)
         assertTrue(text:find("Tailoring", 1, true) == nil, "Classic: no skills either")
         NS.db.profile.broker.tooltip.hiddenStats = { rangedCrit = true }   -- the Rows page's LDB tooltip eye
         tip, lines = statsTip()
         Br.FillTooltip(tip, "stats")
         NS.db.profile.broker.tooltip.hiddenStats = {}
         assertTrue(table.concat(lines, "\n"):find("Ranged Crit", 1, true) == nil, "a stat's tooltip Hide reaches the stats feed")
-        Br.FillTooltip(statsTip(), "skills")
+        Br.FillTooltip(statsTip(), "professions")
     end)
 end)
 
-test("round6 stats feed: a stat row's menu pins its stat to the feed per character; with none it reads Stats", function()
+test("round6 stats feed: a stat row's menu pins its stat to the feed per character; with none it reads Character Stats", function()
     local crit = tipModels().statIndex.rangedCrit
     NS.bus:SendMessage(NS.MSG.STATS_UPDATED, { base = { crit }, spell = {}, defense = {}, utility = {} })
-    local saved = NS.db.char.pinnedStat
-    NS.db.char.pinnedStat = false
+    local saved = NS.db.char.pins
+    NS.db.char.pins = {}
     Br.Refresh()
-    assertEqual(Br.StatsText(), "Stats", "nothing pinned")
+    assertEqual(Br.StatsText(), "Character Stats", "nothing pinned")
     local pin
     for _, r in ipairs(NS.Interact.MenuRows({ kind = "stat", entry = crit })) do
         if r.value == "pin" then pin = r end
     end
-    assertTrue(pin ~= nil and pin.label == "Pin to the broker feed", "the stat row menu offers the pin")
+    assertTrue(pin ~= nil and pin.label == "Pin to the Character Stats broker", "the stat row menu offers the pin")
     assertFalse(pin.selected(), "not pinned yet")
     pin.onClick()
-    assertEqual(NS.db.char.pinnedStat, "rangedCrit", "stored per character")
+    assertEqual(NS.Pins.Stored("stats")[1], "rangedCrit", "stored per character")
     assertEqual(Br.StatsText(), "Ranged Crit 9.1%", "the feed shows the pinned stat at once")
     assertTrue(pin.selected(), "ticked")
-    assertTrue(NS.db.char.pinned ~= "rangedCrit", "the skills feed's pin is apart")
+    assertEqual(#NS.Pins.Stored("professions"), 0, "the skills feeds' pins are apart")
     pin.onClick()
-    assertEqual(Br.StatsText(), "Stats", "a second click unpins")
-    NS.db.char.pinnedStat = saved
+    assertEqual(Br.StatsText(), "Character Stats", "a second click unpins")
+    NS.db.char.pins = saved
     Br.Refresh()
 end)
 
@@ -1028,27 +1019,16 @@ end)
 
 -- ── R6 review: the fixes from the round's review ─────────────────────────────────────────────
 
-test("round6 review: the Main window style's test strip opens its menu above the tooltip, and it ends test mode", function()
+-- Re-pinned by SMW-07 (only a section's fold chevron acts in the tooltip): the strip takes no click.
+test("round6 review: the Main window style's test strip shows in test mode and takes no click", function()
     withFeedTip("window", function()
         withTestMode(function()
             Br.OnEnter(M.UIParent)
             local panel = BP.Frame()
             local strip = panel.strip
             assertTrue(strip ~= nil and strip:IsShown(), "the strip shows in test mode")
-            strip:__fire("OnMouseUp", "RightButton")
-            local m = BP.StripMenu()
-            assertTrue(m ~= nil and m:IsShown(), "a right-click opens the strip's menu")
-            assertEqual(m:GetFrameStrata(), "TOOLTIP", "in the tooltip's strata")
-            assertTrue(m:GetFrameLevel() > panel:GetFrameLevel(), "above the tooltip")
-            assertTrue(Br.MenuOpen(), "the tooltip stays up while it is open")
-            local rows = BP.StripMenuRows()
-            assertEqual(#rows, 1)
-            assertEqual(rows[1].value, "END_TEST")
-            rows[1].onClick(rows[1].value, rows[1])
-            assertFalse(NS.IsTestMode(), "End test ends test mode")
-            m:Hide()
-            m:__fire("OnHide")
-            assertFalse(Br.MenuOpen())
+            assertTrue(strip:GetScript("OnMouseUp") == nil, "and has no click")
+            assertTrue(BP.StripMenu == nil, "no strip menu from the tooltip")
             -- The kit's Hide fires no OnHide: release the test-mode rows (their bar timers) as the client does.
             Br.HideTooltip()
             panel:__fire("OnHide")

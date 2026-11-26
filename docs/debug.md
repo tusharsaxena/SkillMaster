@@ -8,7 +8,7 @@ LibKa0s-DebugLog-1.0's console (`core/DebugLogSetup.lua`). `/sm debug` toggles t
 bug can be reproduced with the console closed and read afterwards. Lines are tag-first:
 `[Set]` (the write seam), `[Test]` (test mode and its sample data), `[Sim]` (the simulator and its
 seam), `[Migrate]`, `[Bus]`, `[Click]` (a crafting overlay's cast, a click that found no armed
-overlay, a pin to the broker feed), `[Skills]` (a scan's line and row counts), `[Bonus]`,
+overlay, a pin to the broker feed), `[Skills]` (a scan's line and row counts), `[Reps]` (a full reputation read: its rows, and why one was partial), `[Currencies]` (the same for the currency list), `[Statistics]` (the category tree's first build), `[Bonus]`,
 `[Alerts]`, `[Broker]`, `[Probe]`, `[Layout]` (a merge, split or snap drop), `[Combat]` (an action
 queued until combat ends) and `[Arrow]` (the waypoint arrow's library lines), plus the library's own
 `[Cmd]`, `[Cfg]`, `[Launcher]` and `[Lifecycle]` lines.

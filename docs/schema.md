@@ -12,27 +12,52 @@ Exactly two (savedvariables-§4, toc-file-§2):
 ```
 SkillMasterDB
   global
-    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (13)
+    schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (16)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
     characters = {}              -- the alt snapshots (modules/Alts.lua), keyed "<realm>-<name>" from
                                  -- AceDB 40's db.keys: "<ruleset>-<First Surname>" (forever-quirks-§4);
                                  -- each { name, class, className, race, faction, level, updated,
                                  -- skills = { [key] = { name, category, rank, max } },
-                                 -- stats = { [key] = { group, value, display, pct } } } (FB-33;
-                                 -- absent in an older snapshot: the Journal draws a dash)
+                                 -- stats = { [key] = { group, value, display, pct } } (FB-33;
+                                 -- absent in an older snapshot: the Journal draws a dash),
+                                 -- reps = { [factionID] = { name, reaction, standing, value, max,
+                                 -- exalted } } (SMW-08: the Alts tab's Reputations sub-tab),
+                                 -- currencies = { [currencyID] = { name, quantity, maxQuantity,
+                                 -- icon } } (SMW-09: its Currencies sub-tab; never gold) }
   char.<db.keys.char>
-    pinned = false               -- the skill key the broker's {pinned} shows (the row menu's Pin)
-    pinnedStat = false           -- the stat key the Skill Master Stats feed shows (a stat row's Pin;
-                                 -- round 6, R6-9); none: the feed reads "Stats"
+    pins = {}                    -- the pins per broker (modules/Pins.lua, SMW-06, GitHub issue #11): {
+                                 -- [family] = { key, ... } }, in order, up to 5 per feed; a skill's key,
+                                 -- a stat's, a factionID, a currencyID, a statistic's
+                                 -- "<categoryID>:<statID>". The old one-pin fields `pinned` (a skill)
+                                 -- and `pinnedStat` (a stat) are folded in when read (Pins.Normalize:
+                                 -- a one-item list in the skill's family, or in stats) and go; the
+                                 -- runner has no per-character step
     log = {}                     -- the log's ring (modules/SessionLog.lua): the newest journal.keep
                                  -- (500; 50 .. 2000) { t, key, old, new, zone }, oldest first; the
-                                 -- Journal's ranges reach no further back than it holds
+                                 -- Journal's ranges reach no further back than it holds. A
+                                 -- reputation's change (SMW-08) is { t, kind = "reputation", key (its
+                                 -- factionID), name, old, new, zone }, one per faction per session,
+                                 -- its new standing moved on by each later change; it counts no
+                                 -- skill point. A currency's (SMW-09) is the same with kind =
+                                 -- "currency", key its currencyID, old and new its amounts
+    fold = {}                    -- the tree windows' folds (modules/Tree.lua, SMW-03): { [family] = {
+                                 -- [nodeKey] = true folded | false open } }; an absent node takes its
+                                 -- family's default (Statistics folded, the others open). Keys are
+                                 -- strings: a faction header's factionID, a currency header's
+                                 -- "<name>#<depth>", a Statistics categoryID. Never the client's own
+                                 -- Expand/Collapse state
   profiles.<name>
     enabled = true               -- Enable Ka0s Skill Master; /sm enable, /sm disable
     scale   = 1                  -- Master scale (0.5 .. 2)
     alpha   = 1                  -- Master opacity (0 .. 1)
     locked  = false              -- Lock frame (and hide the main window's resize grip); /sm lock, /sm unlock, the window's and the Journal's lock marks
-    window  = { point = false }  -- drop point, written only by modules/MainWindow.lua
+    windows = {                  -- the six family windows (SMW-04, modules/Window.lua; Layout > Window)
+      professions = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1,
+                      summary = true, strata = "MEDIUM" },   -- point: drop point, written only by modules/Window.lua
+      skills = { ... summary = true }, stats, currencies, reputations, statistics = { ... summary = false },
+    }                            -- schemaVersion 14 moved window.point and layout.width/maxHeight/fitHeight/
+                                 -- columns/summary/strata to windows.professions; a window never dragged
+                                 -- opens next to the Professions window, stacked down and right
     skin = {
       source = "ka0s", skin = <library default: WoW Forever>,
       ignorePanel = true, ignoreFonts = false,
@@ -40,13 +65,12 @@ SkillMasterDB
       pickerSeen = false,
     }
     layout = {                   -- the Layout page (T5.1)
-      width = 420, maxHeight = 560, blockGap = 0, summary = true,   -- width, maxHeight: also the resize grip's (AF-SM-RESIZE)
-      fitHeight = false,         -- off: the window stays maxHeight tall (owner feedback round 3)
-      columns = 1,               -- 1 | 2 columns of docked blocks, each `width` wide
+      blockGap = 0,              -- px between two docked blocks, every family window (the size, columns,
+                                 -- summary and strata are windows.<family>'s since SMW-04)
       openFrom = "row",          -- Open a row from (round 8, R8-1): "row" (Full row: a left click
                                  -- anywhere on a window, detached or merged row does what its go
                                  -- icon does) | "icon" (Go icon only); a new key, no migration
-      strata = "MEDIUM", detachedStrata = "MEDIUM",   -- BACKGROUND | LOW | MEDIUM | HIGH
+      detachedStrata = "MEDIUM", -- BACKGROUND | LOW | MEDIUM | HIGH
       detached = {               -- Layout > Detached windows (round 5, R5-7): every detached window
         scale = 1, alpha = 1,    -- scale multiplies blocks.<id>.scale
         bgColor, useClassColorBg = false, bgFromSkin = true,
@@ -121,14 +145,20 @@ SkillMasterDB
                helperTooltip = true,   -- the gathering and fishing lines in a row's tooltip
                helperHint = false }    -- the one-line hint under the row (design §12 item 4)
     stats  = { hidden = { [key] = true } }   -- how a row draws is bars.rowDisplay (schemaVersion 2)
-    broker = {                   -- the one "Skill Master" feed (modules/Broker.lua; FB-12, schemaVersion 3)
-      flashSeconds = 5,
-      template = "{pinned} · +{gains}",   -- the feed's text (presets + Custom)
+    broker = {                   -- one feed per family (modules/Broker.lua; FB-12, schemaVersion 3; SMW-05)
+      flashSeconds = 5,          -- a skill-up flashes its own family's feed
+      feeds = {                  -- each feed's text (presets + Custom); schemaVersion 15 moved the one
+                                 -- broker.template here, to the Professions feed's
+        professions = { template = "{pinned} · +{gains}" },
+        skills, stats, currencies, reputations, statistics = { template = "{pinned}" },
+      },                         -- a {pinned} feed with nothing pinned reads its family's short name
       tooltip = {
         skin = true,             -- Apply skin to the tooltip (FB-13): the feed's own skinned frame
-        sections = { primary = true, secondary = true, weapon = true, other = true,   -- Skill Master
-                     stats_base = true, stats_spell = true, stats_defense = true,      -- Skill Master
-                     stats_utility = true },   -- Stats (round 6, R6-9; schemaVersion 9 dropped `stats`)
+        sections = { primary = true, secondary = true,   -- the Professions feed's
+                     weapon = true, other = true,         -- the Skills feed's
+                     stats_base = true, stats_spell = true, stats_defense = true,   -- Character Stats'
+                     stats_utility = true,   -- (round 6, R6-9; schemaVersion 9 dropped `stats`)
+                     currencies = true, reputations = true, statistics = true },   -- the tree feeds' one each
         hiddenSkills = { [key] = true },   -- left out of the tooltip only, apart from skills.hidden
                                            -- (all four hidden sets: the Rows page, round 5, R5-13)
         hiddenStats  = { [key] = true },   -- left out of the tooltip only, apart from stats.hidden
@@ -140,10 +170,10 @@ SkillMasterDB
                                  -- schemaVersion 8 kept earlier profiles on "classic")
               width = 420, height = 560,   -- the Main window style's size (the window's defaults)
               barWidth = 128, fontSize = 12,   -- the Classic style's
-              openFrom = "row" },    -- Main window style: a row opens from anywhere on it ("row", Full
-                                     -- row) or its go icon alone ("icon", Go icon only); round 7,
-                                     -- R7-6; "row" by default since round 8, R8-1 (unreleased: no
-                                     -- migration)
+              folds = { blocks = {}, nodes = {} } },   -- the tooltip's own folds (SMW-07,
+                                     -- modules/BrokerFolds.lua): blocks[id] a section folded,
+                                     -- nodes[family][nodeKey] a tree header's; never the window's.
+                                     -- `openFrom` (round 7) is retired: schemaVersion 16
     }
     journal = { point = false, size = false, keep = 500, range = "all", filter = "primary" }
                                  -- range: session | 1d | 3d | 7d | 30d | all (the Log tab, FB-32;
@@ -190,6 +220,7 @@ SkillMasterDB
       skillUp = true,            -- the skill-up toast (owner feedback round 4)
       skillUpScope = "all",      -- "all" | "professions" (primary and secondary) | "combat" (weapon and Other)
       skillUpSound = false,      -- the skill-up toast's own sound
+      currencyCap = false,       -- a currency reaching its cap toasts, once per currency per session (SMW-09)
       point = false,             -- toast drop point, written only by modules/Alerts.lua
     }
 ```
@@ -205,15 +236,15 @@ The Minimap button row's path is `global.minimap.shown`; its get/set invert onto
 ## Writers
 
 Every row goes through `NS.SetByPath` (`settings/Schema.lua`). The named non-setting state and its
-writers: `profile.window.point`, owned by `modules/MainWindow.lua` (`savePoint` on drag stop,
-`W.ResetPosition`); `profile.journal.point` and `profile.journal.size`, owned by
+writers: `profile.windows.<family>.point`, owned by `modules/Window.lua` (each window's `savePoint` on drag
+stop, `W.ResetPosition`); `profile.journal.point` and `profile.journal.size`, owned by
 `modules/Journal.lua` (`savePoint` on drag stop and `J.ResetPosition`; `saveSize` on the resize
 grip's release); `global.characters`, owned by `modules/Alts.lua` (`Snapshot`, `Forget`);
 `char.log`, owned by `modules/SessionLog.lua` (`Add`, `Clear`); `profile.alerts.point`, owned by
 `modules/Alerts.lua` (the toast's `setPosition`); `profile.layout.blocks.<id>.point`, owned by
 `modules/Detached.lua` (`savePoint` on drag stop, `StorePoint` for a section split or unmerged from a
 merged window); `profile.layout.groups`, owned by `modules/Groups.lua` (`Merge`, `Split`, `Unmerge`,
-`Leave`, the band drag's `savePoint`, the normalization on read); `char.pinned` and `char.pinnedStat`, owned by `modules/Interact.lua`
+`Leave`, the band drag's `savePoint`, the normalization on read); `char.fold`, owned by `modules/Tree.lua` (`SetFolded`, `Toggle`, `SetAll`; a session store instead while test mode or a simulation runs); `char.pinned` and `char.pinnedStat`, owned by `modules/Interact.lua`
 (the row menu's Pin on a skill and on a stat row, refused while test mode or a simulation runs); `global.minimap.minimapPos`,
 LibDBIcon's own.
 
@@ -234,6 +265,9 @@ LibDBIcon's own.
 | 10 → 11 | `waypointMethodFolded`, per profile | no TomTom (round 7, R7-7): `waypoints.method` keeps `"auto"` (the map pin, else chat) and `"chat"`; a stored `"tomtom"` or `"native"` meant the map pin once TomTom is gone, so it goes and the default `"auto"` answers; `"chat"` stays |
 | 11 → 12 | `iconRowColorKept`, per profile | Bars > Icons' Use the row's color (`icons.borderColorFromRow`) defaults off on a new profile (round 7, R7-2): every profile an earlier install stored gets the old `true`, which AceDB stripped, where none is stored, an empty stored profile included (as step 8); a stored value stays; only a fresh install (stamp 0) passes through |
 | 12 → 13 | `foreverDBRetired`, per profile | Skill Master stops reading ForeverDB (ISF-SM-01; only Drop Watcher reads it): a stored `trainers.foreverDB`, SF-SM-02's Use ForeverDB switch, goes whatever it holds; nothing carries over |
+| 13 → 14 | `windowsSplit`, per profile | six family windows (SMW-04): a stored `window.point` and `layout.width`, `maxHeight`, `fitHeight`, `columns`, `summary` and `strata` (rawget: stored choices only) move to `windows.professions` (one already stored there wins), and the old keys go; the other windows start from their defaults, placed next to the Professions window the first time |
+| 14 → 15 | `feedTemplatesSplit`, per profile | one broker feed per family (SMW-05): a stored `broker.template` was the Skill Master feed's, the Professions feed's now, so it moves to `broker.feeds.professions.template` (one stored there other than the default wins) and the old key goes |
+| 15 → 16 | `tipOpenFromRetired`, per profile | in the LDB tooltip only a section's fold chevron acts (SMW-07): a stored `tooltips.ldb.openFrom` names nothing and goes, whatever it holds |
 
 No step for the waypoint arrow's keys (round 6, R6-11): `waypoints.arrow`, `waypoints.arrowScale` and
 `waypoints.arrowFrame` are new keys and nothing stored reshapes, so the defaults answer on every

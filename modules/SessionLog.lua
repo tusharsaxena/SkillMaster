@@ -20,7 +20,11 @@ local function cap()
 end
 local WINDOW = 3600    -- seconds: Rate's default sliding window
 
-local function points(e) return math.max((e.new or 0) - (e.old or 0), 0) end
+-- A skill-up's points; a reputation or currency gain (an entry with a `kind`, SMW-08) is no skill point.
+local function points(e)
+    if e.kind then return 0 end
+    return math.max((e.new or 0) - (e.old or 0), 0)
+end
 
 local function liveEntry(key) return NS.SkillData and NS.SkillData:Get(key) end
 
@@ -41,6 +45,35 @@ local function newLog(store, start, entryOf)
         local log = store()
         if not log then return nil end
         local e = { t = tonumber(t) or time(), key = key, old = tonumber(old) or (new - 1), new = new, zone = zone }
+        floor = floor or #log
+        log[#log + 1] = e
+        local keep = math.max(cap(), floor)
+        while #log > keep do table.remove(log, 1) end
+        return e
+    end
+
+    --- Record a reputation's or currency's change (SMW-08, SMW-09): `kind` its row kind, `key` its id, `name`
+    --- what the Log shows. One entry per kind and key per session, its `new` (and time) moved on by each later
+    --- change and the entry moved to the end, so a session of kills is one line, not one per kill, and the log
+    --- stays in time order (the Journal draws it, and the trim drops from it, by position). Answers the entry.
+    function SL:AddChange(kind, key, name, old, new, t, zone)
+        if type(kind) ~= "string" or type(key) ~= "string" or type(new) ~= "number" then return nil end
+        local log = store()
+        if not log then return nil end
+        t = tonumber(t) or time()
+        for i = #log, 1, -1 do
+            local e = log[i]
+            if e.t < sessionStart then break end
+            if e.kind == kind and e.key == key then
+                e.new, e.t, e.zone = new, t, zone or e.zone
+                if i < #log then
+                    table.remove(log, i)
+                    log[#log + 1] = e
+                end
+                return e
+            end
+        end
+        local e = { t = t, kind = kind, key = key, name = name, old = tonumber(old) or new, new = new, zone = zone }
         floor = floor or #log
         log[#log + 1] = e
         local keep = math.max(cap(), floor)
@@ -88,14 +121,25 @@ local function newLog(store, start, entryOf)
     --- Every entry since `from` (nil: this session's start), oldest first, optionally for one key.
     function SL:Since(from, key) return entriesSince(from, key) end
 
+    --- The change of `kind`'s `key` this session (new minus old of its one entry), 0 with none.
+    function SL:KindGainsFor(kind, key)
+        local sum = 0
+        for _, e in ipairs(entriesSince(nil, key)) do
+            if e.kind == kind then sum = sum + ((e.new or 0) - (e.old or 0)) end
+        end
+        return sum
+    end
+
     --- @param from number|nil epoch seconds the count starts at; nil is this session's start
     --- @return number the points gained this session (or since `from`), table points per key
     function SL:Gains(from)
         local total, byKey = 0, {}
         for _, e in ipairs(entriesSince(from)) do
-            local p = points(e)
-            total = total + p
-            byKey[e.key] = (byKey[e.key] or 0) + p
+            if not e.kind then
+                local p = points(e)
+                total = total + p
+                byKey[e.key] = (byKey[e.key] or 0) + p
+            end
         end
         return total, byKey
     end
@@ -186,5 +230,19 @@ local function onSkillUp(_, key, old, new)
     SL:Add(key, old, new, time(), GetZoneText and GetZoneText() or nil)
 end
 
+-- A faction's standing moved (SMW-08): REP_CHANGED(key, old, new, name).
+local function onRepChanged(_, key, old, new, name)
+    SL:AddChange("reputation", key, name, old, new, time(), GetZoneText and GetZoneText() or nil)
+end
+
+-- A currency's amount moved (SMW-09): CURRENCY_CHANGED(key, old, new, name).
+local function onCurrencyChanged(_, key, old, new, name)
+    SL:AddChange("currency", key, name, old, new, time(), GetZoneText and GetZoneText() or nil)
+end
+
 SL.events = NS.NewBusTarget()
-if SL.events then SL.events:RegisterMessage(NS.MSG.SKILL_UP, onSkillUp) end
+if SL.events then
+    SL.events:RegisterMessage(NS.MSG.SKILL_UP, onSkillUp)
+    SL.events:RegisterMessage(NS.MSG.REP_CHANGED, onRepChanged)
+    SL.events:RegisterMessage(NS.MSG.CURRENCY_CHANGED, onCurrencyChanged)
+end

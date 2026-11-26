@@ -6,7 +6,7 @@ local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
 
-local W, Blocks, I, A, B = NS.MainWindow, NS.Blocks, NS.Interact, NS.Alerts, NS.Broker
+local W, Blocks, I, A, B = T.windows, NS.Blocks, NS.Interact, NS.Alerts, NS.Broker
 
 local function set(path, value)
     local ok, err = NS.SetByPath(path, value)
@@ -100,7 +100,8 @@ end)
 test("round3 sort: the LDB tooltip lists a section in its block's order", function()
     withWorld(function()
         set("layout.blocks.weapon.sort", "valueAsc")
-        local rows = B.FillTooltip(M.CreateFrame("GameTooltip", "SkillMasterRound3Tip", M.UIParent, "GameTooltipTemplate"))
+        local rows = B.FillTooltip(M.CreateFrame("GameTooltip", "SkillMasterRound3Tip", M.UIParent, "GameTooltipTemplate"),
+            "skills")   -- SMW-05: the weapons are the Skills feed's
         local got = {}
         for _, r in ipairs(rows) do
             local c = r.kind == "skill" and NS.SkillCatalog[r.key]
@@ -149,17 +150,17 @@ test("round3 window: collapsing every block keeps the window's height; Shrink to
         local ok, err = pcall(function()
             W.Refresh(true)
             local tall = h
-            assertEqual(tall, NS.db.profile.layout.maxHeight, "Window height")
+            assertEqual(tall, NS.db.profile.windows.professions.maxHeight, "Window height")
             Blocks:SetAllCollapsed(true)
             M.__fireTimers()
             W.Refresh(true)
             assertEqual(h, tall, "collapsed: the same height")
-            set("layout.fitHeight", true)
+            set("windows.professions.fitHeight", true)
             W.Refresh(true)
             assertTrue(h < tall, "Shrink to fit: the window shrinks to its headers")
         end)
         rawset(f, "SetHeight", nil)
-        set("layout.fitHeight", false)
+        set("windows.professions.fitHeight", false)
         Blocks:SetAllCollapsed(false)
         M.__fireTimers()
         if not ok then error(err, 0) end
@@ -168,9 +169,9 @@ end)
 
 -- ── the broker ──────────────────────────────────────────────────────────────────────────────
 
-test("round3 broker: a second Pin on the pinned skill unpins it, and the feed reads Professions and Skills", function()
-    local before = NS.db.char.pinned
-    NS.db.char.pinned = false
+test("round3 broker: a second Pin on the pinned skill unpins it, and the feed reads Professions", function()
+    local before = NS.db.char.pins
+    NS.db.char.pins = {}
     -- End any earlier suite's skill-up flash: a fresh flash, then its timer runs out.
     B.Flash("cooking", 1)
     M.__now = M.__now + B.FlashSeconds() + 1
@@ -179,29 +180,28 @@ test("round3 broker: a second Pin on the pinned skill unpins it, and the feed re
     local pin
     for _, r in ipairs(I.MenuRows(row)) do if r.value == "pin" then pin = r end end
     pin.onClick()
-    assertEqual(NS.db.char.pinned, "cooking", "pinned")
+    assertEqual(NS.Pins.Stored("professions")[1], "cooking", "pinned")
     pin.onClick()
-    assertEqual(NS.db.char.pinned, false, "unpinned")
+    assertEqual(#NS.Pins.Stored("professions"), 0, "unpinned")
     B.Refresh()
-    assertEqual(B.Text(), "Professions and Skills")
-    NS.db.char.pinned = before
+    assertEqual(B.Text(), "Professions", "its family's feed, nothing pinned (SMW-05)")
+    NS.db.char.pins = before
     B.Refresh()
 end)
 
-test("round3 broker: a right-click on a tooltip row opens the row menu, whose Hide leaves it out of the tooltip only", function()
+-- Re-pinned by SMW-07 (the owner's ask: in the LDB tooltip only a section's fold chevron acts): a tooltip row
+-- opens no menu, so the menu's tooltip-only Hide went; the Rows page's LDB tooltip column still hides there.
+test("round3 broker: a tooltip row opens no menu; the tooltip's own Hide set still leaves it out of the tooltip only", function()
     withWorld(function()
         local savedMenu, opened = I.Menu, nil
         I.Menu = function(row) opened = row return row end
         local ok, err = pcall(function()
-            B.OpenRow({ kind = "skill", key = "cooking" }, "RightButton", M.UIParent)
-            assertTrue(opened ~= nil and opened.entry.key == "cooking", "the menu for the row's entry")
-            assertEqual(opened.surface, "broker")
-            local hide
-            for _, r in ipairs(I.MenuRows(opened)) do if r.value == "hide" then hide = r end end
-            assertEqual(hide.label, "Hide in this tooltip")
-            hide.onClick()
+            assertTrue(B.OpenRow == nil and B.RowMenu == nil, "no row menu from the tooltip")
+            assertTrue(I.HideInTooltip == nil, "the menu's tooltip-only Hide went with it")
+            assertTrue(NS.SetByPath("broker.tooltip.hiddenSkills.cooking", true), "the Rows page's LDB eye")
             assertTrue(B.HiddenInTooltip("skill", "cooking"), "left out of the tooltip")
             assertFalse(NS.db.profile.skills.hidden.cooking == true, "still in the window")
+            assertTrue(opened == nil, "no menu opened")
         end)
         I.Menu = savedMenu
         NS.db.profile.broker.tooltip.hiddenSkills.cooking = nil

@@ -20,7 +20,6 @@ L["Test mode: the skills shown are sample data."] = true
 L["Test mode"] = true
 L["Sample character"] = true   -- test mode's nameless stand-in when LibKa0s-Sim-1.0 is absent
 L["Test mode cannot start in combat."] = true
-L["Shows or hides the Skill Master window."] = true
 
 -- The Journal window (modules/Journal.lua).
 L["Skill Master \194\183 Journal"] = true
@@ -81,9 +80,6 @@ L["The block the Alts tab shows when the Journal opens."] = true
 L["List available commands"] = true
 L["Open the settings panel"] = true
 L["Choose a skin: open the skin picker"] = true
-L["Show the Skill Master window"] = true
-L["Hide the Skill Master window"] = true
-L["Show or hide the Skill Master window"] = true
 L["Show or hide the Journal: the skill-up log and your alts"] = true
 L["Lock the window in place"] = true
 L["Unlock the window so it can be dragged"] = true
@@ -340,7 +336,6 @@ L["Collapse this block"] = true
 -- The interactions: the click map, the row menu, the row tooltip, the trainer popup, the waypoints (T3.3).
 L["Profession windows open from Skill Master out of combat."] = true
 L["The character panel opens from Skill Master out of combat."] = true
-L["Pin to the broker feed"] = true
 L["Set a waypoint to the trainer"] = true
 L["Show trainers"] = true
 L["Hide this row"] = true
@@ -395,7 +390,6 @@ L["Your next rank"] = true
 L["Your next rank: %s (%d)"] = true
 L["Set waypoint"] = true
 L["Print to chat"] = true
-L["End test"] = true
 L["No map coordinates for this trainer yet; Print to chat gives directions."] = true
 L["Waypoint method is Chat only (Trainers and Waypoints page); Print to chat gives directions."] = true
 L["No TomTom and no map pin on this client; Print to chat gives directions."] = true
@@ -419,7 +413,6 @@ L["Utility"] = true
 
 -- ---- BEGIN M5 polish (the M3/M4 review leftovers) ----
 -- The broker tooltip's footer (modules/Broker.lua), as the mockup writes it.
-L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click to open, shift-click to link, right-click for the menu"] = true
 -- The one-line gathering hint under a row (modules/Rows.lua, profile.skills.helperHint).
 L["Gathers %s \194\183 next: %s at %d"] = true
 L["Gathers %s"] = true
@@ -445,7 +438,6 @@ L["HUD text only"] = true
 L["Ka0s Default"] = true
 L["Reload your interface (/reload) to finish changing the skin."] = true
 -- The key bindings (modules/MainWindow.lua, launcher-§6).
-L["Toggle skills window"] = true
 L["Toggle journal"] = true
 L["Shows or hides the Journal: the skill-up log and your alts."] = true
 -- ==== END T5.3 ====
@@ -545,7 +537,6 @@ L["Window"] = true
 L["Blocks"] = true
 L["Block order"] = true
 L["Window width (px)"] = true
-L["Width of the Skill Master window. Multiplied by Master scale on General > Master controls."] = true
 L["Block spacing (px)"] = true
 L["Space between two docked blocks."] = true
 L["Show summary strip"] = true
@@ -557,7 +548,6 @@ L["Low"] = true
 L["Medium"] = true
 L["High"] = true
 L["Window strata"] = true
-L["The Skill Master window's layer."] = true
 L["Detached block strata"] = true
 L["The layer every detached block's frame draws in."] = true
 L["Fill direction"] = true
@@ -618,7 +608,6 @@ L["How long the feed shows the skill that just went up (^ Bows 81) in place of i
 L["Tooltip"] = true
 L["Apply skin to the tooltip"] = true
 L["Draw the feed's tooltip in the skin's backdrop, border and fonts. Off, it is the game's plain tooltip. Classic style only: the Main window style always wears the skin."] = true
-L["Sections"] = true
 L["Draw this section in the feed's tooltip."] = true
 L["Broker"] = true
 L["Alerts"] = true
@@ -715,8 +704,6 @@ L["The simulator needs LibKa0s-Sim-1.0."] = true
 -- ---- END M5 integration ----
 
 -- Owner feedback round 3 (main thread): the broker title with nothing pinned
-L["Professions and Skills"] = true
-L["Hide in this tooltip"] = true
 L["Default order"] = true
 L["Value, highest first"] = true
 L["Value, lowest first"] = true
@@ -734,7 +721,6 @@ L["The weapons the weapon skill alert never reads, as a set of keys."] = true
 L["Mute %s"] = true
 L["Never alert for this weapon, whatever its gap."] = true
 L["Window height (px)"] = true
-L["Height of the Skill Master window; the rows scroll inside it."] = true
 L["Shrink to fit the rows"] = true
 L["Shrink the window when its rows take less than Window height, so it grows and shrinks as blocks expand and collapse."] = true
 
@@ -833,7 +819,6 @@ L["Restore every Broker setting on this profile to its default. Hidden tooltip r
 -- ---- Round 6, R6-10: the LDB tooltip in the main window's style (settings/Tooltips.lua,
 -- modules/BrokerPanel.lua) ----
 L["Tooltip style"] = true
-L["Main window draws the LDB tooltip as the main window: its block headers, rows, bars and fonts, the window's collapse, sort and filter, at the Width and Height below. Classic is the tooltip lines with mini bars."] = true
 L["Main window"] = true
 L["Classic"] = true
 L["Width (px)"] = true
@@ -843,12 +828,7 @@ L["The tallest the LDB tooltip grows in the Main window style; past it, it scrol
 L["Nothing to show in this tooltip."] = true
 
 -- ---- Round 6, R6-9: the Skill Master Stats feed (modules/Broker.lua, settings/Broker.lua) ----
-L["Skill Master Stats"] = true
-L["Stats feed sections"] = true
 -- Round 7, R7-5: the LDB tooltips' titles (modules/Broker.lua B.FEEDS)
-L["Skill Master \194\183 Professions and Skills"] = true
-L["Skill Master \194\183 Stats"] = true
-L["Draw this stat block in the Skill Master Stats feed's tooltip."] = true
 
 -- ---- Round 6, R6-11: Skill Master's waypoint arrow (modules/WaypointArrow.lua, settings/Trainers.lua) ----
 L["Show Skill Master's arrow"] = true
@@ -939,13 +919,11 @@ L["Which of the block's rows show, here, in its detached frame, in a merged wind
 L["Open a row from"] = true
 L["Full row"] = true
 L["Go icon only"] = true
-L["Main window style: what a left click on an LDB tooltip row opens from. Full row: anywhere on the row does what its go icon does, as the main window's (a profession window, the character panel, the trainers). Go icon only: the go icon alone opens it, and the rest of the row only links (shift-click) and opens the row menu (right-click). Classic style rows always open from the whole row."] = true
 L["What a left click on a row of the main window, a detached window or a merged window opens from. Full row: anywhere on the row does what its go icon does (a profession window, the character panel, the trainers). Go icon only: the go icon alone opens it, and the rest of the row only links (shift-click) and opens the row menu (right-click)."] = true
 L["Click: open the profession \194\183 Shift-click: link \194\183 Right-click: menu"] = true
 L["Click: Skills tab \194\183 Shift-click: link \194\183 Right-click: menu"] = true
 L["Click: trainers and waypoint \194\183 Right-click: menu"] = true
 L["Click: character panel \194\183 Shift-click: link \194\183 Right-click: menu"] = true
-L["Click label: toggle window \194\183 Right-click label: options \194\183 Rows: click the go icon to open, shift-click to link, right-click for the menu"] = true
 
 -- The metatable answers the key itself; `true` above only documents the key. Replace each `true`
 -- with the key so a lookup never answers a boolean.

@@ -6,8 +6,12 @@ Documentation map lists; this file keeps a summary and one link per topic.
 ## Overview
 
 Ka0s Skill Master shows a vanilla-era character's weapon skills, professions, Defense, Lockpicking,
-Riding and character stats as skinnable data bars, with bonuses, trainer directions, a broker feed,
-alerts, a session log, an alt overview and gathering helpers. The design is
+Riding and character stats as skinnable data bars, with bonuses, trainer directions, broker feeds,
+alerts, a session log, an alt overview and gathering helpers. Since the six-windows run
+(`docs/superpowers/specs/2026-11-26-skillmaster-windows-design.md`) it also shows the character panel's other
+tabs: reputations (GitHub issue #6), currencies (#7) and the Statistics tab, in six windows, one per family
+(`defaults/Families.lua`): Professions, Skills, Character Stats, Currencies, Reputations and Statistics, each with
+its own broker feed and up to five pins per feed (#11). The design is
 `docs/superpowers/specs/2026-11-10-skill-master-design.md`; the build plan and its status ledger are
 under `docs/superpowers/plans/`.
 
@@ -26,11 +30,11 @@ the alt overview and the Journal; the settings pages for every display setting; 
 character and its alts (`modules/Preview.lua` over `defaults/Preview_Forever.lua`, named from
 LibKa0s-Sim-1.0's shared `Sim.Sample("forever")` people, the one source of sample names
 (LibKa0s#104); a library-absent load draws a nameless sample and no alts) and the simulator
-(`modules/Simulator.lua` on LibKa0s-Sim-1.0, every start of which opens the step panel); skins; the launcher, two key bindings and the
-diagnostics dump.
+(`modules/Simulator.lua` on LibKa0s-Sim-1.0, every start of which opens the step panel); skins; the launcher, a key
+binding per family window and one for the Journal, and the diagnostics dump.
 
-Pure data modules (`SkillData`, `Bonuses`, `StatData`, `Trainers`, `Helpers`, `SessionLog`, `Alts`)
-read the client API through `NS.Compat` and publish bus messages; display modules consume only
+Pure data modules (`SkillData`, `Bonuses`, `StatData`, `RepData`, `CurrencyData`, `StatisticsData`, `Trainers`,
+`Helpers`, `SessionLog`, `Alts`) read the client API through `NS.Compat` and publish bus messages; display modules consume only
 messages and models, so test mode, the simulator and the headless harness drive them the same way
 ([data-flow.md](data-flow.md)). Strata and levels come from one table, `NS.Constants.LAYERS`
 (`core/Constants.lua`, frame-layering-§5).
@@ -54,8 +58,13 @@ Skill Master's own waypoint arrow `NS.WaypointArrow`, an adapter on `LibKa0s-Way
 model (`StatData`), the trainer lookups (`Trainers`), the skill helpers (`NS.SkillHelpers`,
 `modules/Helpers.lua`), the session log (`NS.SessionLog`), the alt snapshots (`NS.Alts`), the
 Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), the broker feed
-(`NS.Template`, `NS.Broker`: the Skill Master and Skill Master Stats feeds; `NS.BrokerPanel`, their tooltip in the main window's style), test mode's data swap (`NS.Preview`), the simulator (`NS.Sim`,
-`NS.SimHost`) and the diagnostics sections;
+(`NS.Template`, `NS.Broker`: six feeds, one per family, with `modules/BrokerTooltip.lua`'s Classic lines and `modules/BrokerFolds.lua`'s tooltip-only folds;
+`NS.BrokerPanel`, their tooltip in the main window's style; `NS.Pins`, the pins per feed), test mode's data swap
+(`NS.Preview`), the simulator (`NS.Sim`, `NS.SimHost`) and the diagnostics sections. The six-windows run added the
+family registry (`NS.Families`, `defaults/Families.lua`), the window factory (`modules/Window.lua`, one instance
+per family; `NS.MainWindow` is the Professions window's shim), the block providers (`modules/BlockProviders.lua`),
+the tree row model and its addon-side folds (`NS.Tree`, `char.fold`), the shared-collapse reader
+(`NS.SharedList`) and the three tree models (`RepData`, `CurrencyData`, `StatisticsData`);
 `settings/` holds the schema,
 the slash table and the settings pages.
 
@@ -116,7 +125,8 @@ the default skin, is the library's (skinning-§2).
 |---|---|---|
 | Skill and stat bars, blocks, detached frames, columns | not listed | yes |
 | Bonuses, trainers, waypoints, gathering and fishing helpers | not listed | yes |
-| Broker feed, alerts, session log, alts, Journal | not listed | yes |
+| Broker feeds and pins, alerts, session log, alts, Journal | not listed | yes |
+| Reputations, Currencies and Statistics windows | not listed | yes |
 | Settings pages, skins, test mode, simulator, launcher, key bindings, diagnostics | not listed | yes |
 
 "Not listed": the TOC's load-gating pair keeps the addon out of Retail's AddOns list.
@@ -167,7 +177,9 @@ settings like any other, with schema rows on the Layout page (T5.1), and every a
 through `NS.SetByPath` (architecture-§5): the block header and the detached frame's buttons
 (`NS.Blocks:Detach` / `:Dock` / `:SetCollapsed`), the Block order drag list (`:Move`, every changed
 `order` inside one bulk bracket, one `LAYOUT_CHANGED`), the window's one Expand / Collapse all control
-(`:SetAllCollapsed`, every docked block's `collapsed` inside one bulk bracket, one `LAYOUT_CHANGED`)
+(`:SetAllCollapsed`, every docked block's `collapsed` inside one bulk bracket, one `LAYOUT_CHANGED`; in a tree
+window, Reputations, Currencies and Statistics, it folds and opens the tree's headers instead, `NS.Tree.SetAll`, the
+block left open, SMW-REV)
 and `/sm set`. The `docked` and `collapsed`
 rows' `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`) stores the value and waits out combat;
 `order` stores plainly, its `onChange` `NS.Blocks.OrderChanged`. The seam logs each write
@@ -266,11 +278,12 @@ No structural registry exists.
 
 ## Message Bus
 
-Six messages, each declared once in `core/Bus.lua` as `NS.MSG.<KEY>` through LibKa0s-Bus-1.0's
+Thirteen messages, each declared once in `core/Bus.lua` as `NS.MSG.<KEY>` through LibKa0s-Bus-1.0's
 strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDATED` and `SKILL_UP`
 (the simulator's restoring stop re-sends `SKILLS_UPDATED` with the live model),
 `Bonuses` sends `BONUSES_UPDATED`, `StatData` sends `STATS_UPDATED` and `Blocks` sends
-`LAYOUT_CHANGED`; the simulator (`modules/Simulator.lua`) sends `SIM_TICK` after each step.
+`LAYOUT_CHANGED`; the three tree models send their own (SMW-08..10); the family windows and the feeds' tooltip say
+when they show (SMW-10); the simulator (`modules/Simulator.lua`) sends `SIM_TICK` after each step.
 
 | Constant | Wire name | Sender | Payload | Consumers |
 |---|---|---|---|---|
@@ -278,13 +291,21 @@ strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDAT
 | `SKILL_UP` | `Ka0s_SkillMaster_SkillUp` | `modules/SkillData.lua` (T2.1) | key, old, new | blocks (session gains), broker flash, alerts, session log |
 | `STATS_UPDATED` | `Ka0s_SkillMaster_StatsUpdated` | `modules/StatData.lua` (T2.3) | the stats model | stat blocks, broker |
 | `BONUSES_UPDATED` | `Ka0s_SkillMaster_BonusesUpdated` | `modules/Bonuses.lua` (T2.2) | none | bars, tooltips, broker |
-| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse, collapse all, move); the skin owner's look-change hook; `NS.ApplyLook` (every display row's write, `settings/OptionsSetup.lua`) | none | `modules/Blocks.lua`, which repaints the window and the detached frames; the Journal; the trainer popup (`modules/TrainerPopup.lua`, its trainer names' color while it is shown) |
+| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse, collapse all, move; a tree fold, `NS.Tree`; a pin, `NS.Pins`); the skin owner's look-change hook; `NS.ApplyLook` (every display row's write, `settings/OptionsSetup.lua`) | none | `modules/Blocks.lua`, which repaints the windows and the detached frames; the Journal; the trainer popup (`modules/TrainerPopup.lua`, its trainer names' color while it is shown); `modules/StatisticsData.lua` (whether to watch `CRITERIA_UPDATE`) |
+| `REPS_UPDATED` | `Ka0s_SkillMaster_RepsUpdated` | `modules/RepData.lua` (SMW-08); the simulator's stop | the reputations model | blocks, broker, alts |
+| `REP_CHANGED` | `Ka0s_SkillMaster_RepChanged` | `modules/RepData.lua`, a standing that moved between two reads | key, old, new, name | session log (the Journal's Log) |
+| `CURRENCIES_UPDATED` | `Ka0s_SkillMaster_CurrenciesUpdated` | `modules/CurrencyData.lua` (SMW-09); the simulator's stop | the currencies model | blocks, broker, alts |
+| `CURRENCY_CHANGED` | `Ka0s_SkillMaster_CurrencyChanged` | `modules/CurrencyData.lua`, an amount that moved | key, old, new, name | session log, alerts (the cap alert) |
+| `STATISTICS_UPDATED` | `Ka0s_SkillMaster_StatisticsUpdated` | `modules/StatisticsData.lua` (SMW-10), the first use (unless a block's own pass asked) and each debounced re-read; the simulator's stop | the Statistics model | blocks, broker |
+| `WINDOW_TOGGLED` | `Ka0s_SkillMaster_WindowToggled` | `modules/Window.lua` (SMW-10), a family window's show, hide and `OnHide` | family id, shown | `modules/StatisticsData.lua` |
+| `FEED_TOOLTIP_TOGGLED` | `Ka0s_SkillMaster_FeedTooltipToggled` | `modules/Broker.lua` (SMW-10, `B.TooltipToggled`), a feed's tooltip up (before it fills) or down | family id, shown | `modules/StatisticsData.lua` (its first use, and whether to watch) |
 | `SIM_TICK` | `Ka0s_SkillMaster_SimTicked` | `modules/Simulator.lua` (T5.2), after each step | the step's kind | none yet (published for displays under simulation) |
 
 ## Slash Commands
 
 `/sm` and `/skillmaster`, one LibKa0s-Slash-1.0 dispatcher over `NS.COMMANDS` (`settings/Slash.lua`):
-`help`, `config`, `skin`, `show`, `hide`, `toggle`, `journal`, `lock`, `unlock`, `test`, `sim`, `probe`, `enable`, `disable`,
+`help`, `config`, `skin`, `show`, `hide`, `toggle`, one verb per family window (`professions`, `skills`, `stats`,
+`currencies`, `reputations`, `statistics`), `journal`, `lock`, `unlock`, `test`, `sim`, `probe`, `enable`, `disable`,
 `list`, `get`, `set`, `reset`, `resetall`, `debug`, `diagnostics`, `perf`, `version`. The bare
 command opens the settings panel. While disabled, every verb but the library's live set refuses on
 one line. A report verb (`probe`, `diagnostics`) writes to the debug console, ungated, and prints
@@ -308,6 +329,10 @@ one chat pointer; acknowledgments, refusals, `help` and `list` stay in chat
 | `PLAYER_EQUIPMENT_CHANGED` | `modules/Detached.lua` at load, on its own bus target | `onEquipmentChanged`: re-render the detached weapon block (or the merged window it is a section of) and re-sync the overlays while it is shown; with the header's Equipped filter on a docked weapon block, refresh the main window at once (round 5, R5-10) | a weapon swap changes the weapon block's equipped-only list |
 | (timer) | `NS.TrainerPopup.Show` | `P.RefreshDistances` every 1 s (AceTimer, `P.TICK`) while the trainer popup is shown; `P.Hide` and the frame's `OnHide` cancel it, the frame's `OnShow` restarts it (a UIParent hide and show, Alt+Z or a cinematic, runs both; the R5-followups review) (round 5, R5-15) | the player moves: the distances and the nearest-first order follow |
 | `PLAYER_LOGOUT` | `modules/Alts.lua` at load, on its own bus target | `Alts:Snapshot` | the last snapshot of the session |
+| `UPDATE_FACTION`, `PLAYER_ENTERING_WORLD`, `PLAYER_REGEN_ENABLED` | `modules/RepData.lua` at load, on its own bus target (SMW-08) | `RD:Request`: one read 0.2 s after a burst; the first in full through `NS.SharedList` (expand, read, restore; never in combat or while the Reputation tab shows; its own echo latched), every later one by id; combat's end retries a partial read | a standing moved; the panel's collapse is the client's, never this addon's |
+| `CURRENCY_DISPLAY_UPDATE`, `PLAYER_ENTERING_WORLD`, `ACCOUNT_CHARACTER_CURRENCY_DATA_RECEIVED`, `PLAYER_REGEN_ENABLED` | `modules/CurrencyData.lua` at load, on its own bus target (SMW-09) | `CD:Request`: as RepData's; the event's currency id narrows the read to it, a nil id reads every known one | an amount moved |
+| `PLAYER_ENTERING_WORLD` | `modules/StatisticsData.lua` at load, on its own bus target (SMW-10) | with a statistic pinned, the first use (the category tree and the pinned rows' categories) for the feed's text; `SD:Watch` | the Statistics are otherwise read only on first use |
+| `CRITERIA_UPDATE` | `modules/StatisticsData.lua`'s `SD:Watch`, on a second bus target, registered ONLY while the Statistics show (its window, a detached or merged Statistics block, its feed's tooltip) or a statistic is pinned, unregistered as soon as none is | one-shot 1 s timer the event starts (a debounce, never a poll), then `SD:Refresh`: the unfolded categories again and each pinned row by its index | the event is noisy and carries no payload |
 | `USER_WAYPOINT_UPDATED` | `modules/WaypointArrow.lua` at load, on its own bus target | `WaypointArrow.OnWaypointUpdated`: with an arrow up, `C_Map.HasUserWaypoint` false, or a pin whose world place lies more than 2 yd from the trainer's, hides it; a pin the client cannot place keeps it (round 6, R6-11) | the native pin was cleared or replaced elsewhere (the world map's own pin) |
 | (`OnUpdate`) | `LibKa0s-WaypointArrow-1.0` on show (round 8, R8-5: the adapter's `Show` and `ShowTest`) | one measure every `WA.THROTTLE` (0.03 s, the library's): the player's world place and facing against the trainer's, the art's rotation (a sheet frame for On the ground), color and the yards; armed on show, set to nil on every hide path (the library's `takeDown`); no `OnHide` disarms it, since a UIParent hide and show (Alt+Z, a cinematic) fires `OnHide` and the arrow would come back frozen (round 6, R6-11; the R6-11 review) | the arrow follows the player |
 
@@ -319,7 +344,12 @@ with the zone); `modules/Alts.lua` hears `SKILLS_UPDATED` (one snapshot 2 s afte
 `modules/Journal.lua` hears `SKILLS_UPDATED` and `LAYOUT_CHANGED` (a repaint while shown);
 `modules/Alerts.lua` hears `SKILL_UP` and `SKILLS_UPDATED` (the cap and weapon-gap checks);
 `modules/Broker.lua` hears `SKILLS_UPDATED`, `SKILL_UP`, `STATS_UPDATED` and `BONUSES_UPDATED`
-(the feed texts and the flash).
+(the feed texts and the flash), and each tree family's model message (its feed's pins);
+`modules/Blocks.lua` hears each tree family's model message too (repaint); `modules/SessionLog.lua` hears
+`REP_CHANGED` and `CURRENCY_CHANGED` (one Log line per faction or currency per session); `modules/Alts.lua` hears
+`REPS_UPDATED` and `CURRENCIES_UPDATED` (the snapshot's standings and amounts); `modules/Alerts.lua` hears
+`CURRENCY_CHANGED` (the optional cap alert); `modules/StatisticsData.lua` hears `WINDOW_TOGGLED`,
+`FEED_TOOLTIP_TOGGLED` and `LAYOUT_CHANGED` (when to watch `CRITERIA_UPDATE`).
 
 Every registration goes through `NS.SafeRegisterEvent` (events-frames-taint-§1); a refused name
 lands in `NS.rejectedEvents`, which the `[Init]` summary and the diagnostics report print. The stand-
@@ -462,7 +492,8 @@ keeps.
 What the addon does not do yet, and what is still unverified in game: [known-limitations.md](known-limitations.md).
 The main themes are the character panel opened from the Classic-style broker tooltip (a tainted `OnShow`),
 the secure overlays' placement and the Skills tab's tainted switch, the trainer popup's and the waypoint
-arrow's measurements, test mode and the simulator's reach, and the client APIs assumed until `/sm probe`.
+arrow's measurements, test mode and the simulator's reach, and the client APIs assumed until `/sm probe` (among them
+the reputation, currency and Statistics shapes the six-windows run built on Blizzard's Forever source).
 
 ## Documentation map
 

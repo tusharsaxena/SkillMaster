@@ -25,7 +25,7 @@ end
 
 local function state(out)
     if NS.IsStoodDown() then out:add(TAG, "stood down: runtime state released") return end
-    out:add(TAG, "window shown=%s testMode=%s simMode=%s", NS.MainWindow.IsShown(), NS.IsTestMode(),
+    out:add(TAG, "window shown=%s testMode=%s simMode=%s", NS.Windows.AnyShown(), NS.IsTestMode(),
         NS.IsSimMode and NS.IsSimMode() or false)
 end
 
@@ -136,9 +136,14 @@ end
 
 local function layout(out)
     local p = NS.db.profile
-    out:add(TAG, "layout window scale=%s alpha=%s locked=%s point=%s maxHeight=%s summary=%s columns=%s strata=%s",
-        p.scale, p.alpha, p.locked, p.window.point and "set" or "default", p.layout.maxHeight, p.layout.summary,
-        p.layout.columns, p.layout.strata)
+    out:add(TAG, "layout scale=%s alpha=%s locked=%s", p.scale, p.alpha, p.locked)
+    for _, fid in ipairs(NS.FAMILY_ORDER) do
+        local w = NS.Windows.Settings(fid)
+        local win = NS.Windows.Get(fid)
+        out:add(TAG, "layout window %s point=%s width=%s maxHeight=%s summary=%s columns=%s strata=%s shown=%s", fid,
+            type(w.point) == "table" and "set" or "default", w.width, w.maxHeight, w.summary, w.columns, w.strata,
+            win and win.IsShown() or false)
+    end
     out:add(TAG, "layout detached strata=%s", p.layout.detachedStrata)
     for _, id in ipairs(NS.BLOCKS) do
         local b = NS.Blocks.Settings(id)

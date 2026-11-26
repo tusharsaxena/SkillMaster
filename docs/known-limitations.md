@@ -2,11 +2,10 @@
 
 Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2: Known Limitations over 60 lines).
 
-- The broker tooltip's Classic style opens the character panel for a stat or Skills-tab row with a
-  plain `ToggleCharacter` call, which on WoW Forever taints `CharacterFrame:OnShow` (the PlayerFrame
-  status-bar secret compare, docs/forever-quirks.md, "The character panel and secret geometry"). The main window's rows go through the
-  micro button instead, and so do the Main window style's rows in either *Open a row from* (round 7,
-  R7-6; round 8, R8-1); the Classic style's rows have no secure overlay.
+- The broker tooltip's rows open nothing since SMW-07 (only a section's fold chevron acts, the owner's ruling), so
+  the Classic style's old plain `ToggleCharacter` path, which tainted `CharacterFrame:OnShow` on WoW Forever
+  (docs/forever-quirks.md, "The character panel and secret geometry"), is no longer reached from a tooltip. The
+  windows' rows open the character panel through the micro button.
 - The Main window style (round 7, R7-6) shows the window's row tooltip on the shared
   GameTooltip, placed beside the panel (AD-92-SM: `NS.Chrome.PlaceBeside` against the panel, the
   row's group; SM-TIP-6), so it no longer overlaps the panel. Both sit at TOOLTIP; if neither side
@@ -38,8 +37,8 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
 - The simulator plays one scenario (a fishing trip: six skill-ups, a lure on and off, a mount up
   and down) on test mode's sample character. Only the reads the simulated character needs go
   through the seam: the skill list, the player's level, class and race, the weapon enchant, the
-  main hand's tooltip and the speed. The other stats, the buffs and the zone stay live during a
-  session.
+  main hand's tooltip and the speed, and (SMW-11) the faction, currency and Statistics lists. The other stats,
+  the buffs and the zone stay live during a session.
 - Turning test mode on (round 5) shows the main window, the Journal and three sticky toasts from the
   sample character (a rank cap, a weapon gap, a skill up; `NS.Alerts.ShowTestToasts`, keys
   `test:cap`, `test:weapon`, `test:skillup`); turning it off takes the toasts down and hides each
@@ -154,3 +153,20 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   has her teach Alchemy to 75, her title says Expert), Sayoc's Staves (absent from the 1.12 dump) and
   Annora. The owner's ruling on the two disagreements (2026-11-24, "trust the dump"): Bena Winterhoof
   keeps the dump's Apprentice and Sayoc teaches no Staves. Costs and level gates are not checked offline.
+- The Reputations, Currencies and Statistics windows are built on the shapes Blizzard's Forever UI source uses,
+  not on a measurement (docs/forever-quirks.md, "Reputations, currencies and Statistics"): which currencies Forever
+  lists, whether friendship or major-faction bars occur, whether `GetFactionDataByID` answers under a collapsed
+  header and what a Wealth statistic answers (copper or text) wait on the owner's `/sm probe`. Friendship and
+  major-faction bars are drawn as standard standings until then.
+- A first reputation or currency read refused by combat or an open Reputation or Currency tab is partial; it is
+  read again when combat ends or the tab closes. A faction or currency first met while the read is refused joins
+  the window then too; the ones already listed stay meanwhile (SMW-REV).
+- The minimap and broker launcher menu reaches two of the six windows: Show window opens Professions, and the
+  Journal has its own row. The spec ("A window factory") gives every family a launcher menu entry, but LibKa0s's
+  Launcher takes at most two host rows (`MAX_EXTRAS`, `libs/LibKa0s/Launcher.lua:179`, minor 11), and Show
+  window and the Journal hold them. The Skills, Character Stats, Currencies, Reputations and Statistics windows
+  open from their slash verbs (`/sm skills`, `stats`, `currencies`, `reputations`, `statistics`) and their key
+  bindings until LibKa0s raises the limit or lets a row open a submenu (not yet filed; the run's lead files it).
+- A Statistics value folded away, or on a surface that was not showing, when `CRITERIA_UPDATE` fired is stale
+  until its category opens again on a shown surface, when it is read afresh (a closed window or a tooltip shown
+  again reads its unfolded categories anew); a pinned statistic is read on every debounced pass.

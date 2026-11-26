@@ -12,6 +12,10 @@ local Sim = LibStub and LibStub("LibKa0s-Sim-1.0", true)
 -- header changes the player's Skills tab, and a simulated list has nothing to toggle.
 local GUARDED = {
     SetSkillHeaderExpanded = function() return false end,
+    -- The faction list's headers are the character panel's Reputation tab's (SMW-08).
+    SetFactionHeaderExpanded = function() return false end,
+    -- And the currency list's, the Currency tab's (SMW-09).
+    SetCurrencyHeaderExpanded = function() return false end,
 }
 
 --- The reference seam stub (LibKa0s-Sim-1.0's "Adopting it", step 2), member by member.

@@ -11,26 +11,15 @@ local addonName, NS = ...
 -- the tooltip's own Width and Height (tooltips.ldb.width / .height, the window's default size to
 -- start). The footer keeps the feed's click hints.
 --
--- Nothing on a header takes the pointer (owner decision: no collapse, sort, filter, detach or
--- restore from here: they come from the window's blocks). A row's shift-click links it and its
--- right click opens the row menu (NS.Broker.OpenRow) wherever it lands. Its left click follows
--- Tooltips > Open a row from (round 7, R7-6; NS.Broker.OpenFrom), the main window's two choices
--- (round 8, R8-1; each row's `openFrom`, read by NS.Rows.OpenFrom):
---   * "row" (Full row, the default): anywhere on the row does what its go icon does, as a main window
---     row in Full row: the hovered row's secure overlay (modules/SecureOverlay.lua scans these rows
---     while P.Armed(): a profession window by its cast, the character panel by the micro button)
---     covers the whole row; a click the overlay did not take reaches the row, NS.Interact.Open (in
---     combat it says why it cannot open, as the window's mark does).
---   * "icon" (Go icon only): the go icon opens it, its overlay over the icon alone, and the row's own
---     left click opens nothing.
--- Either way the row takes the window's hover: the wash, the row tooltip, the icon lit under the
--- pointer.
--- The overlay follows the rows: a scroll and the panel's hide re-sync it (out of combat; in combat
--- Sync waits, every overlay disarmed at combat start), and a released row is forgotten (NS.Rows).
+-- ONLY THE FOLD TAKES A CLICK (the owner's ask, SMW-07). A block header's chevron folds or unfolds that
+-- section in the tooltip alone (NS.Broker.ToggleTipFold, tooltips.ldb.folds; the window's collapse is
+-- untouched), and the body is drawn again in place at its scroll offset; the rest of the header takes no
+-- pointer. A row opens, links and menus nothing here and arms no secure overlay; it keeps the window's
+-- hover, the wash and the row tooltip (with no click hint). Test mode's strip takes no click either.
 --
 -- Shown, hidden and kept up by NS.Broker's showing machinery (OnEnter / OnLeave / HideTooltip):
--- NS.Broker.Tip() answers this frame in this style. P.Frame() / P.Fill() / P.Scroll() / P.SetScroll(n)
--- / P.Rows() / P.Headers() / P.Width() / P.ContentWidth() / P.MaxHeight() / P.Armed().
+-- NS.Broker.Tip() answers this frame in this style. P.Frame() / P.Fill([keepScroll]) / P.Scroll() /
+-- P.SetScroll(n) / P.Rows() / P.Headers() / P.Width() / P.ContentWidth() / P.MaxHeight().
 
 NS.BrokerPanel = {}
 local P = NS.BrokerPanel
@@ -102,69 +91,44 @@ end
 -- The rows and headers: the window's own, made still
 -- ---------------------------------------------------------------------------------------------
 
-local function iconMode() return NS.Broker.OpenFrom() == "icon" end
-
---- Whether the hovered row is armed with the secure overlay (over its go icon or the whole row, as
---- Open a row from says): the panel shows (modules/SecureOverlay.lua scans P.Rows() while it
---- answers true).
-function P.Armed()
-    return frame ~= nil and frame:IsShown() == true and NS.Broker.Style() == "window" and not NS.IsStoodDown()
+-- A row's hover here: the window's wash and its row tooltip, nothing armed (no overlay, no lit mark).
+local function rowEnter(self)
+    NS.Skin.ListRow(self, "hover")
+    if NS.RowTooltip and self.entry then NS.RowTooltip.Show(self) end
 end
 
-local function isShift() return type(IsShiftKeyDown) == "function" and IsShiftKeyDown() end
-
-local rowClick
-
---- The go icon's own click (the overlay did not take it: in combat, a kind it has none for, or not
---- yet synced): the window's mark action (NS.Interact.Open); the right button and shift as the row.
-local function actClick(row, button)
-    if not row.entry then return end
-    if button == "RightButton" or isShift() then return rowClick(row, button) end
-    if NS.RowTooltip then NS.RowTooltip.Hide(row) end
-    return NS.Interact.Open(row)
+local function rowLeave(self)
+    if self:IsMouseOver() == true then return end
+    NS.Skin.ListRow(self, self.stripe and "stripe" or "normal")
+    if NS.RowTooltip then NS.RowTooltip.Hide(self) end
 end
 
---- A row's click: the right button and a shift-click always (the row menu, the link); the plain left
---- click in Full row what the go icon does (actClick), in Go icon only nothing.
-rowClick = function(self, button)
-    local e = self.entry
-    if not (e and NS.Broker) then return end
-    if button == "RightButton" or isShift() then
-        return NS.Broker.OpenRow({ kind = self.kind, key = e.key }, button, self)
-    end
-    if iconMode() then return end
-    return actClick(self, button)
-end
-
---- A pooled window row dressed for the panel on each fill: the window's hover (NS.Rows.RowEnter /
---- RowLeave: the overlay, the row tooltip, the icon's hot watch), a live icon, and the tooltip's
---- Open a row from as the row's own (`openFrom`, which NS.Rows.OpenFrom and the overlay read).
+--- A pooled window row dressed for the panel on each fill: no click of any button on the row or its
+--- go icon, the panel's own hover, and `openFrom` "none" (the row tooltip then gives no click hint).
 local function dressRow(row)
-    if not row.skmPanel then
-        row.skmPanel = true
-        row:SetScript("OnClick", rowClick)
-        row.overlayClick = rowClick   -- the overlay's right and shift clicks (SecureOverlay PostClick)
-        if row.act then row.act:SetScript("OnClick", function(_, button) actClick(row, button) end) end
-        row:SetScript("OnEnter", NS.Rows.RowEnter)
-        row:SetScript("OnLeave", NS.Rows.RowLeave)
+    row:SetScript("OnClick", nil)
+    row:SetScript("OnMouseDown", nil)
+    row:SetScript("OnEnter", rowEnter)
+    row:SetScript("OnLeave", rowLeave)
+    row.overlayClick = nil
+    row.openFrom = "none"
+    -- A tree header's chevron (SMW-08..10) folds it in the tooltip's own folds, never the window's.
+    row.onFold = row.tree and function(r) return NS.Broker.ToggleTipNode(r.family, r.entry.nodeKey) end or nil
+    if row.act then
+        row.act:SetScript("OnClick", nil)
+        row.act:EnableMouse(false)
     end
-    row.openFrom = NS.Broker.OpenFrom()
-    if row.act then row.act:EnableMouse(true) end
 end
 
---- Re-lay the overlay over the hovered row after the rows moved (a scroll) or went (a hide).
-local function syncOverlay()
-    local SO = NS.SecureOverlay
-    if SO and SO.Sync then SO:Sync() end
-end
+-- A header's marks that act in the window; here only the chevron takes the pointer.
+local MARKS = { "sort", "filter", "detach", "restore" }
 
--- A header's marks that act in the window; here nothing on a header takes the pointer.
-local MARKS = { "chevron", "sort", "filter", "detach", "restore" }
+local function foldClick(h) NS.Broker.ToggleTipFold(h.id) end
 
---- A header as a state line: the chevron says the window's collapse. No other mark is drawn: detach
---- and restore are actions only, and the sort and filter marks went in round 8 (R8-4; the owner's
---- call), the rows following the window's order and filter all the same (NS.Broker.TooltipEntries).
-local function stillHeader(h)
+--- A header as the tooltip's: the chevron says and flips the tooltip's own fold; the header's body and
+--- every other mark take no pointer, and are not drawn (detach and restore are window actions, and the
+--- sort and filter marks went in round 8, R8-4, the rows following the window's order and filter).
+local function stillHeader(h, folded)
     h:EnableMouse(false)
     for _, k in ipairs(MARKS) do
         if h[k] then h[k]:EnableMouse(false) end
@@ -173,6 +137,9 @@ local function stillHeader(h)
     h.restore:Hide()
     h.sort:Hide()
     h.filter:Hide()
+    h.onFold = foldClick
+    h.chevron:EnableMouse(true)
+    h.chevron.tip = folded and L["Unfold this section in the tooltip"] or L["Fold this section in the tooltip"]
 end
 
 -- ---------------------------------------------------------------------------------------------
@@ -187,7 +154,6 @@ function P.SetScroll(offset)
     if frame then
         frame.list:SetVerticalScroll(offset)
         if frame.scrollBar then frame.scrollBar:Sync(most, offset) end
-        if P.Armed() then syncOverlay() end   -- the armed icon moved with its row
     end
 end
 
@@ -204,12 +170,8 @@ local function release()
     end
 end
 
---- The panel hid: its rows go, and so does any overlay armed over one (out of combat; in combat
---- every overlay was disarmed at its start and Sync waits).
-local function onHide()
-    release()
-    syncOverlay()
-end
+--- The panel hid: its rows go.
+local function onHide() release() end
 
 local function buildBody()
     frame.list = CreateFrame("ScrollFrame", nil, frame)
@@ -234,21 +196,6 @@ local function buildBody()
     headerPool, rowPool = NS.Blocks.NewHeaderPool(), NS.Rows.NewPool()
 end
 
---- The strip menu's rows: End test, as the window's strip has (the library's label).
-function P.StripMenuRows()
-    return { { label = L["End test"], value = "END_TEST", onClick = function() NS.ToggleTestMode() end } }
-end
-
-local stripMenu
---- The strip's menu while it was last opened (the suites read it).
-function P.StripMenu() return stripMenu end
-
-local function stripClick(self, button)
-    if button ~= "RightButton" then return end
-    stripMenu = NS.Widgets.ContextMenu(self, P.StripMenuRows(), { owner = addonName, cursor = true })
-    if stripMenu then NS.Broker.RaiseMenu(stripMenu, frame) end
-end
-
 local function build()
     if frame then return frame end
     frame = CreateFrame("Frame", P.FRAME_NAME, UIParent, "BackdropTemplate")
@@ -260,10 +207,9 @@ local function build()
     frame.title:SetWordWrap(false)   -- one line; P.Fill bounds it clear of the gains text
     frame.gains = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.gains:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -9)
-    -- No onEnd: the library's strip menu opens at its own FULLSCREEN_DIALOG strata, under this
-    -- TOOLTIP frame. The strip's right-click opens the same End test row here, lifted above the
-    -- tooltip as the row menu is (NS.Broker.RaiseMenu), so the tooltip stays up while it is open.
-    -- Docked under the title band by the library, full width (AD-88-SM, LibKa0s#88).
+    -- No onEnd and no click (SMW-07: only a fold chevron acts in the tooltip; test mode ends from the
+    -- window's own strip or /sm test). Docked under the title band by the library, full width (AD-88-SM,
+    -- LibKa0s#88).
     frame.titleBar = NS.Chrome.TitleBar(frame)
     frame.strip = NS.Widgets.TestStrip(frame, {
         text  = L["Test mode: the skills shown are sample data."],
@@ -271,8 +217,7 @@ local function build()
         dock = "title", titleBar = frame.titleBar, window = frame,
     })
     if frame.strip then
-        frame.strip:EnableMouse(true)
-        frame.strip:SetScript("OnMouseUp", stripClick)
+        frame.strip:EnableMouse(false)
         frame.strip:SetFrameLevel(frame:GetFrameLevel() + LAYERS.LEVEL.OVERLAY)
     end
     buildBody()
@@ -303,10 +248,15 @@ local function layoutGap()
     return tonumber(l.blockGap) or 0
 end
 
---- Block `id` from `y` down in the body: its header (the window's collapse), then, expanded, its
+--- Block `id` from `y` down in the body: its header (the tooltip's own fold, SMW-07), then, open, its
 --- rows and an emptied filter's muted line. Answers the y under it, or `y` for a block with nothing.
-local function layBlock(id, skills, stats, y)
-    local entries, removed = NS.Broker.TooltipEntries(id, skills, stats)
+local function blockEntries(id, skills, stats, models)
+    if NS.IsTreeBlock(id) then return NS.Broker.TreeEntries(id, models), 0 end
+    return NS.Broker.TooltipEntries(id, skills, stats)
+end
+
+local function layBlock(id, skills, stats, y, models)
+    local entries, removed = blockEntries(id, skills, stats, models)
     local note = NS.Blocks.FilterNote(entries, removed)
     if #entries == 0 and not note then return y end
     local host = frame.content
@@ -314,9 +264,9 @@ local function layBlock(id, skills, stats, y)
     h:ClearAllPoints()
     h:SetPoint("TOPLEFT", host, "TOPLEFT", 0, -y)
     h:SetPoint("TOPRIGHT", host, "TOPRIGHT", 0, -y)
-    local collapsed = NS.Blocks.Settings(id).collapsed and true or false
+    local collapsed = NS.Broker.TipFolded(id)
     h:SetBlock(id, collapsed, true)
-    stillHeader(h)
+    stillHeader(h, collapsed)
     y = y + NS.Blocks.HEADER_H
     if not collapsed then
         y = NS.Blocks.LayRows(entries, host, rowPool, y, "row", 0)
@@ -328,7 +278,33 @@ local function layBlock(id, skills, stats, y)
     return y + layoutGap()
 end
 
---- The body's content: the shown blocks, or the one muted line that says why there are none.
+--- The feed's pins first (GitHub issue #11, SMW-06): a Pinned header, then each pin as its block's row.
+--- Answers the y under them, or `y` when the feed has none.
+local PIN_KINDS = { skill = true, stat = true }
+local function layPins(y)
+    local pins = {}
+    for _, r in ipairs(NS.Broker.PinnedEntries(NS.Broker.Feed())) do
+        -- A tree pin (SMW-08..10) as a leaf at the section's edge.
+        if NS.Tree.Kind(r.kind) then
+            pins[#pins + 1] = { kind = r.kind, entry = r.entry, depth = 0, indent = 0 }
+        elseif PIN_KINDS[r.kind] then
+            pins[#pins + 1] = r
+        end
+    end
+    if #pins == 0 then return y end
+    local host = frame.content
+    local h = NS.Blocks.AcquireHeader(headerPool, host)
+    h:ClearAllPoints()
+    h:SetPoint("TOPLEFT", host, "TOPLEFT", 0, -y)
+    h:SetPoint("TOPRIGHT", host, "TOPRIGHT", 0, -y)
+    h:SetLabel(L["Pinned"])
+    h:EnableMouse(false)
+    y = NS.Blocks.LayRows(pins, host, rowPool, y + NS.Blocks.HEADER_H, "row", 0)
+    return y + layoutGap()
+end
+
+--- The body's content: the feed's pins and its shown blocks, or the one muted line that says why there
+--- are none.
 local function layBody()
     local B = NS.Broker
     frame.empty:SetText("")
@@ -336,22 +312,24 @@ local function layBody()
         frame.empty:SetText(L["Ka0s Skill Master is disabled."])
         return LINE_H + 12
     end
-    local skills, stats = B.Models()
-    local y = 0
+    local skills, stats, more = B.Models()
+    local models = { skills = skills, stats = stats }   -- by provider source (modules/BlockProviders.lua)
+    for k, m in pairs(more or {}) do models[k] = m end
+    local y = layPins(0)
     for _, id in ipairs(B.ShownBlocks()) do
-        local stat = NS.BlockDefs[id].source == "stats"
-        if (stat and stats) or (not stat and skills) then y = layBlock(id, skills, stats, y) end
+        if models[NS.BlockDefs[id].source] then y = layBlock(id, skills, stats, y, models) end
     end
     for _, row in ipairs(rowPool.active) do dressRow(row) end
     if y > 0 then return y end
-    local have = NS.Broker.Feed() == "stats" and stats or (NS.Broker.Feed() ~= "stats" and skills)
-    local none = NS.Broker.Feed() == "stats" and L["No stats to show yet."] or L["No skills to show yet."]
-    frame.empty:SetText(have and L["Nothing to show in this tooltip."] or none)
+    -- The feed's family has a model and nothing showed, or has none yet (SMW-05: each feed's own line).
+    local fid = B.Feed()
+    local f = B.FEEDS[fid]
+    frame.empty:SetText(models[f and f.source] and L["Nothing to show in this tooltip."] or NS.Windows.EmptyText(fid))
     return LINE_H + 12
 end
 
 --- Size the frame to its body, up to Height; past it, the body scrolls.
-local function fit(y)
+local function fit(y, keepScroll)
     local top = NS.Chrome.TitleBottom(frame) + NS.Chrome.StripOffset(frame.strip)
     local w = P.Width()
     frame:SetWidth(w)
@@ -372,12 +350,13 @@ local function fit(y)
     frame.footer:ClearAllPoints()
     frame.footer:SetPoint("TOPLEFT", frame, "TOPLEFT", PAD, -(top + 1 + viewH + 4))
     frame:SetHeight(top + 1 + viewH + footerH + 4)
-    P.SetScroll(0)
+    P.SetScroll(keepScroll and state.offset or 0)   -- clamped to the new overflow
 end
 
 --- Draw the tooltip anew: the skin's shell and fonts, the title and gains, test mode's strip, the
---- shown blocks, the footer. NS.Broker.OnEnter shows it after.
-function P.Fill()
+--- shown blocks, the footer. NS.Broker.OnEnter shows it after; a fold's redraw (`keepScroll`,
+--- NS.Broker.RedrawTooltip) keeps the body where it was scrolled.
+function P.Fill(keepScroll)
     build()
     release()
     local S = NS.Skin
@@ -392,5 +371,5 @@ function P.Fill()
     if frame.strip then frame.strip:SetShown(NS.IsTestMode()) end
     frame.footer:SetText(NS.Broker.FooterText())
     S.Text(frame.footer, "muted")
-    fit(layBody())
+    fit(layBody(), keepScroll)
 end

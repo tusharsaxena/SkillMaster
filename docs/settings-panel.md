@@ -6,15 +6,15 @@ login; each page body builds on its first show.
 | Page | Tabs | Covers |
 |---|---|---|
 | Ka0s Skill Master (landing) | none | The logo, the tagline and the slash command list |
-| General | Master controls, Skin, Keybindings | Master controls, the skin, the key binding |
-| Layout | Window, Blocks, Detached windows, Block order | The window's width, maximum height, block spacing, summary strip, column count (one or two), where a row opens from (Full row or Go icon only, round 8) and frame strata; per block show, dock, collapse, lock, sort (Sort rows by), scale, width (Block width, 200 to 600, which the detached window's corner grip writes; a merged window's columns take the widest member's, FB-SM-04) and Show rows (its header's filter, round 7); the weapon block's compact filter (equipped and below cap only); every detached window's scale, opacity, title band, strata, background and border; the block order, dragged |
+| General | Master controls, Skin, Keybindings | Master controls, the skin, the key bindings (one per family window and the Journal) |
+| Layout | Window, Blocks, Detached windows, Block order | Block spacing and where a row opens from (Full row or Go icon only, round 8), for every window; then one subsection per family window (SMW-04: Professions, Skills, Character Stats, Currencies, Reputations, Statistics) with its width, maximum height, shrink to fit, summary strip, column count (one or two) and strata (`windows.<family>.*`); per block show, dock, collapse, lock, sort (Sort rows by), scale, width (Block width, 200 to 600, which the detached window's corner grip writes; a merged window's columns take the widest member's, FB-SM-04) and Show rows (its header's filter, round 7); the weapon block's compact filter (equipped and below cap only); every detached window's scale, opacity, title band, strata, background and border; the block order, dragged |
 | Bars | Bar, Colors, Text, Marks, Icons | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom) and position; Rank tier colors (each tier a darker shade of the category color, By category only), thresholds in the window (off by default) and in the row tooltip (on; round 6, R6-4), timer and spark (off by default); the rows' icons (show, size, zoom, and the composed border on the icon family with Use the row's color). No preview bar: the open window restyles live (owner feedback round 4) |
 | Skills | General | Unlearned rows, the gathering and fishing tooltip lines (`skills.helperTooltip`), the hint under the row (`skills.helperHint`, off by default) |
 | Rows | Primary, Secondary, Weapons, Other, Base & Combat, Spell & Regen, Defense & Resists, Utility (one tab per block with rows, round 9) | Every catalog skill and stat once, each on its block's tab under the block's heading: a boxed row (icon, name) with two eyes, the main window's Hide (`skills.hidden.<key>`, `stats.hidden.<key>`) and the LDB tooltip's (`broker.tooltip.hiddenSkills.<key>`, `hiddenStats.<key>`); a Window / LDB tooltip caption line on top; each heading's two eyes show that group's hidden rows again (round 5, R5-11..R5-13) |
-| Broker | Feed, Tooltip | The feed's text template (a presets dropdown plus Custom) and the skill-up flash; the Skill Master feed's four section switches and the Skill Master Stats feed's four (round 6, R6-9) |
-| Tooltips | Main window tooltip, LDB tooltip | Each tooltip's bar width, bar height, row height and font size; Apply skin to the tooltip (the LDB tooltip). The heights keep their `bars.*` paths and the skin row `broker.tooltip.skin`; the widths and font sizes are `tooltips.row.*` / `tooltips.ldb.*` (owner feedback round 4). The LDB tooltip's *Tooltip style* (`tooltips.ldb.style`: *Main window*, a new profile's default, or *Classic*, round 6, R6-10) with its *Width (px)* (`tooltips.ldb.width`, 420, counted as Layout > Window width; at the narrow end the title moves left of the gains text and truncates rather than draw over it) and *Height (px)* (`tooltips.ldb.height`, 560, the tallest it grows before it scrolls), both dimmed in Classic; *Open a row from* (`tooltips.ldb.openFrom`: *Full row*, the default since round 8, R8-1, or *Go icon only*; round 7, R7-6; the main window's two choices, the same overlay rules), right under Tooltip style and dimmed in Classic, whose rows always open from the whole row; *Apply skin to the tooltip*, the LDB *Bar width*, *Row height* and *Font size* are Classic's and dimmed in Main window (*Bar height* stays live: the Journal's Alts bars read it too) |
-| Alerts | Alerts, Muted weapons | The rank-cap and weapon-gap alerts, the gap, the sound; the skill-up alert, which skills it reads and its own sound (round 4) |
-| Journal | Journal | Skill-ups kept per character, the Log tab's range (the window's own picker writes the same row), the Alts sub-tab on open |
+| Broker | Feed, Tooltip, Pins | Each of the six feeds' text template (a presets dropdown plus Custom; SMW-05) and the skill-up flash; each feed's section switches, one per block of its family (the tree feeds one each); each feed's pins, up to five, reordered and unpinned (SMW-06, per character) |
+| Tooltips | Main window tooltip, LDB tooltip | Each tooltip's bar width, bar height, row height and font size; Apply skin to the tooltip (the LDB tooltip). The heights keep their `bars.*` paths and the skin row `broker.tooltip.skin`; the widths and font sizes are `tooltips.row.*` / `tooltips.ldb.*` (owner feedback round 4). The LDB tooltip's *Tooltip style* (`tooltips.ldb.style`: *Main window*, a new profile's default, or *Classic*, round 6, R6-10) with its *Width (px)* (`tooltips.ldb.width`, 420, counted as Layout > Window width; at the narrow end the title moves left of the gains text and truncates rather than draw over it) and *Height (px)* (`tooltips.ldb.height`, 560, the tallest it grows before it scrolls), both dimmed in Classic; no *Open a row from* (SMW-07 retired `tooltips.ldb.openFrom`: a tooltip's rows take no click, only a section's fold chevron acts); *Apply skin to the tooltip*, the LDB *Bar width*, *Row height* and *Font size* are Classic's and dimmed in Main window (*Bar height* stays live: the Journal's Alts bars read it too) |
+| Alerts | Alerts, Muted weapons | The rank-cap and weapon-gap alerts, the gap, the sound; the currency cap alert (`alerts.currencyCap`, off by default, SMW-09); the skill-up alert, which skills it reads and its own sound (round 4) |
+| Journal | Journal | Skill-ups kept per character (reputation and currency changes share the ring, SMW-08/09), the Log tab's range (the window's own picker writes the same row), the Alts sub-tab on open (Statistics has none) |
 | Trainers and Waypoints | Trainers, Waypoints (two tabs, FB-SM-06) | Trainers: Show all trainers and the trainer popup's Trainer name color. Waypoints: the rest. The waypoint method (Map pin or Chat only; no TomTom choice, round 7, R7-7, but Map pin places a TomTom waypoint when the real TomTom is loaded, AF-SM-TOMTOM), the chat line, Show all trainers (round 2 of GitHub issue #3: the trainer popup lists every rank's trainers, Artisan first, and marks the next rank's; the popup's own check box writes the same row); the Waypoint arrow subgroup: Show Skill Master's arrow (on by default: a map pin comes with Skill Master's own arrow and the game's arrow stays off; round 6, R6-11), then `LibKa0s-WaypointArrow-1.0`'s settings block (round 8, R8-5): Arrow style (Flat, Ridge, Raised, Faceted, On the ground; Raised by default), Use the skin's colors (on: the skin's accent far away, its good color near), Far color and Near color (grayed while the skin's colors are on; the distance fade kept) and Arrow scale (0.5 to 2); round 9 (R9-1): the library's Text block under Arrow text (Font, Font size, Font color, Use class color, Font flags, Font shadow, Use the skin's font, and from LibKa0s v1.108.0 Use the skin's color and Use the skin's shadow, both on by default, then Text position: Below, Above, Left, Right or Hidden; Show the trainer's name; Distance units: Yards or Compact) and its Position block under Arrow position (X offset and Y offset from the screen's center, Lock the arrow, and a Reset position button, the block's `afterSubgroup` hook); dragging the arrow moves the two sliders; the trainer popup's Trainer name color with Use class color and Use the skin's color (on by default: the skin's accent) |
 | Profiles | none | AceDB profiles: switch, copy, reset, delete |
 
@@ -80,28 +80,31 @@ The library's Appearance tab over `skin.source`, `skin.skin`, `skin.ignorePanel`
 
 ### Keybindings
 
-The library's Keybindings tab over `NS.BINDINGS`: Toggle skills window and Toggle journal. Keys stay the
-client's and are never stored in a profile (options-ui-§20).
+The library's Keybindings tab over `NS.BINDINGS`: Toggle Professions window, Toggle Skills window, Toggle
+Character Stats window, Toggle Currencies window, Toggle Reputations window, Toggle Statistics window (SMW-04) and
+Toggle journal. Keys stay the client's and are never stored in a profile (options-ui-§20).
 
-The launcher's right-click menu lists Enabled, Locked, Test mode, Sim mode and Show window; Show window
-shares its handler with `/sm toggle` and the key binding, and Sim mode its handler (`NS.ToggleSim`)
+The launcher's right-click menu lists Enabled, Locked, Test mode, Sim mode, Show window and Journal; Show window
+is the Professions window (SMW-04; the other five have no row while the library takes two extras at most) and
+shares its handler with `/sm toggle` and its key binding, and Sim mode its handler (`NS.ToggleSim`)
 with the Master-controls Sim mode box and the bare `/sm sim`.
 
 ## Layout
 
-*Window width* and *Window height* (`layout.width`, `layout.maxHeight`) are also what the main
+Each family window's *Window width* and *Window height* (`windows.<family>.width`, `.maxHeight`; schemaVersion 14
+moved the one window's `layout.width` and `layout.maxHeight` to the Professions window's) are also what that
 window's resize grip writes on its release (AF-SM-RESIZE), so the two sliders follow a drag; the
 grip's bounds are their ranges. With *Shrink to fit the rows* on, the dragged height is the most the
 window grows to, as Window height is.
 
-The Window tab's last rows: *Columns* (`layout.columns`, One column / Two columns: the docked blocks
-fill two columns, each Window width wide, the shorter column first), *Open a row from*
+Each window's subsection also has *Columns* (`windows.<family>.columns`, One column / Two columns: the docked blocks
+fill two columns, each Window width wide, the shorter column first) and *Window strata*
+(`windows.<family>.strata`); the tab's first rows, every window's, are *Block spacing* and *Open a row from*
 (`layout.openFrom`, round 8, R8-1: *Full row*, the default, a left click anywhere on a main window,
 detached or merged window row does what its go icon does, the crafting and character-panel rows'
 secure overlay laid over the whole hovered row; *Go icon only*, the go icon alone, the rest of the
 row linking on a shift-click and opening the row menu on a right-click; the row tooltip's click
-hint says which) and *Window strata*
-(`layout.strata`); *Detached block strata* (`layout.detachedStrata`) is on the Detached windows tab
+hint says which); *Detached block strata* (`layout.detachedStrata`) is on the Detached windows tab
 (round 5, same path, nothing migrated). The two strata rows offer
 Background, Low, Medium and High (`NS.Constants.LAYERS.STRATA_CHOICES`, frame-layering-§1) and
 their tooltip is the library's `O.StrataTooltip`; the window's row applies through
@@ -154,18 +157,21 @@ detached frame, a merged section and both LDB tooltip styles alike. The Journal'
 The feed's right-click opens this page by its key (`NS.Broker.SETTINGS_PAGE = "broker"`, through
 `NS.Helpers.OpenOptionsPanel`); with the library absent it opens the main settings panel.
 
-- **Feed**: *Text*, the one template (`broker.template`; the presets cover skills and stats alike:
-  pinned skill and gains (with nothing pinned, the feed reads Professions and Skills), pinned skill, lowest profession and gains, last skill-up and gains,
-  equipped weapon and Defense, pinned skill and crit, crit and speed), and *Skill-up flash*
-  (`broker.flashSeconds`).
-- **Tooltip**: *Sections*: one switch per skill section of the Skill Master feed
-  (`broker.tooltip.sections.<primary|secondary|weapon|other>`);
-  *Stats feed sections*: one per stat block of the Skill Master Stats feed
-  (`broker.tooltip.sections.<stats_base|stats_spell|stats_defense|stats_utility>`), all on by default
-  (round 6, R6-9: the old Stats switch went with schemaVersion 9). The stats feed has no template:
-  its text is the stat pinned from a stat row's menu (*Pin to the broker feed*), its label and value,
-  or "Stats" with none. *Apply skin to the tooltip* (`broker.tooltip.skin`) is not here: it moved
-  to the Tooltips page's LDB tooltip tab (round 4).
+- **Feed**: one subsection per feed (SMW-05), each its *Feed text* (`broker.feeds.<family>.template`, a presets
+  dropdown plus Custom; schemaVersion 15 moved the one `broker.template` to the Professions feed's). Professions
+  offers pinned skill and gains (its default), pinned skill, lowest profession and gains, last skill-up and gains,
+  equipped weapon and Defense, pinned skill and crit, crit and speed; Skills pinned skill, equipped weapon and
+  Defense, last skill-up and gains; Character Stats pinned stat, crit and speed; Currencies, Reputations and
+  Statistics the pinned element. With nothing pinned a `{pinned}` feed reads its family's short name. Then
+  *Skill-up flash* (`broker.flashSeconds`).
+- **Tooltip**: one subsection per feed, a switch per section, its family's blocks
+  (`broker.tooltip.sections.<id>`: the skill blocks, the four stat blocks, and the tree feeds' `currencies`,
+  `reputations` and `statistics`), all on by default. *Apply skin to the tooltip* (`broker.tooltip.skin`) is not
+  here: it moved to the Tooltips page's LDB tooltip tab (round 4).
+- **Pins** (SMW-06, `settings/BrokerPins.lua`): each feed's pins (`char.pins.<family>`, per character, up to
+  five) in their order, each with Move up, Move down and Unpin. A row is pinned from its menu in its window
+  (*Pin to the <window> broker*, a toggle that never removes another pin); `{pinned}` joins a feed's pins with
+  " · ", `{pinned1}` to `{pinned5}` show one each, and the tooltip lists them first.
 
 The tooltip's Hide rows moved to the [Rows](#rows) page (round 5, R5-13), same paths.
 

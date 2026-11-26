@@ -58,6 +58,13 @@ read_globals = {
   -- FB-14 / FB-17: a profession's spell icon, the player's name and the class icon's two sources
   -- (core/Compat.lua SpellTexture, PlayerName, ClassIcon); the name's class color (MainWindow)
   "GetSpellTexture", "UnitName", "C_Texture", "CLASS_ICON_TCOORDS", "RAID_CLASS_COLORS",
+  -- SMW-01: the probe's factions, currencies and statistics sections (modules/ProbeSections.lua), the
+  -- two character-panel frames it never opens a header under, and the 1.12 names it reports as absent
+  "C_Reputation", "C_GossipInfo", "C_CurrencyInfo", "ReputationFrame", "TokenFrame",
+  "GetStatisticsCategoryList", "GetCategoryInfo", "GetCategoryNumAchievements", "GetAchievementInfo",
+  "GetStatistic", "GetNumFactions", "GetFactionInfo", "GetCurrencyListSize", "GetCurrencyListInfo",
+  -- SMW-08: a faction's standing name and bar color (core/Compat.lua FactionStandingLabel, FactionBarColor)
+  "GetText", "UnitSex", "FACTION_BAR_COLORS",
 }
 
 -- T4.3: the session log's clock and zone, the alt snapshot's identity reads, the Journal's popup,
