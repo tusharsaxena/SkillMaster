@@ -24,7 +24,7 @@ marked as such rather than listed as a requirement.
 | Tool | Version | Needed for | Evidence |
 |---|---|---|---|
 | `lua5.1` (+ `luac`) | **5.1 exactly** | the headless suite, `KA0S_KIT_CLIENT=forever lua tests/run.lua` | `tests/_kit/loader.lua` uses `setfenv` |
-| `luacheck` | any recent | `luacheck .`, the other half of the green gate | `.luacheckrc` at the repo root |
+| `luacheck` | any recent | `~/.claude/dev-copilot/bin/ka0s-bounded luacheck .`, part of the green gate | `.luacheckrc` at the repo root |
 | `lizard` | any recent | the `complexity` suite of `tests/_kit/run-automated-tests.sh`, which runs it over a sanitized shadow (automated-tests-§3) | `lizard --version` |
 | `git` | any recent | vendoring; the kit's eol, prose, skin-values and client-globals suites read `git ls-files` | `tests/_kit/test_eol.lua` |
 | `ka0s-bounded` (dev-copilot plugin, `~/.claude/dev-copilot/bin/`) | the plugin's | runs `luacheck .` and `tests/_kit/run-automated-tests.sh` with bounds, as the green gate requires (testing-§15) | the CLAUDE.md gate line; `docs/testing.md` |
@@ -73,6 +73,8 @@ python3 -c "import PIL; print(PIL.__version__)"
 ```sh
 KA0S_KIT_CLIENT=forever lua tests/run.lua             # the suite — must be green (Forever profile only)
 ~/.claude/dev-copilot/bin/ka0s-bounded luacheck .     # must be 0 warnings / 0 errors
+python3 -m pytest -q -p no:cacheprovider tools/seeds  # the seed tool's tests — must pass
+                                                      # (or: python3 -m unittest discover -s tools/seeds)
 ~/.claude/dev-copilot/bin/ka0s-bounded bash tests/_kit/run-automated-tests.sh --suite complexity --no-bundle
                                                       # the sighted complexity report (release-time)
 ```
