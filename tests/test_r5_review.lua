@@ -69,7 +69,7 @@ test("r5 review: the open Journal's Log shows a reputation or currency change as
             local function names()
                 local out = {}
                 for _, row in ipairs(J.Frame().logPanel.pool.active) do
-                    if row:IsShown() then out[#out + 1] = row.cols[3]:GetText() end
+                    if row:IsShown() then out[#out + 1] = row.cols[4]:GetText() end
                 end
                 return table.concat(out, ",")
             end

@@ -1422,3 +1422,17 @@ none is passed until you say so.
   category still lists the game's own "Secondary Skills" statistics. Every saved layout (detached, merged, folded,
   sorted, filtered) of the group is as it was before the update.
   Result:
+- **SM-R6-2** (new, R6-SM-02) `/sm journal`, Log tab: the headers read DATE, TIME, TYPE, NAME, CHANGE, ZONE. Each row's
+  TYPE reads Skill-up, Reputation or Currency; a row that moved a standing ("+250, Honored") reads Reputation. Drag the
+  resize grip as narrow as it goes: the window stops at its new minimum (wider than before), and at it no column cuts
+  its text: a long faction ("Wintersaber Trainers", "Hydraxian Waterlords") in NAME, "+250, Honored" in CHANGE, a
+  long zone ("Hillsbrad Foothills") in ZONE, and the side column's cards (range, summary, ETA to cap, New session)
+  stand clear of the table. A Journal you had sized wider than that minimum before the update comes back at its
+  size; one you had left at the old 720 opens at the new minimum. Click TYPE: Any type, Skill-up, Reputation,
+  Currency; pick Reputation: only faction rows, the TYPE header in the accent with its funnel, the summary card
+  "Reputation · All time · filtered". Click NAME: Any name and that type's names, flat; pick one: the TYPE filter
+  stays. Pick TYPE Skill-up: the faction name filter drops. TYPE Any type, then NAME: a submenu per type present
+  ("One of the Skill-ups" and the like); pick a currency: only its rows, TYPE unfiltered, the summary counting the
+  currency. Clear filters drops both. `/sm test`: the sample Log's rows each show their type. Alts tab: the
+  character columns keep their width, one more character showing at the minimum width.
+  Result:

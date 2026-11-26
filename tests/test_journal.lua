@@ -61,8 +61,8 @@ test("journal: the log lists skill-ups newest first, with the session's gains, a
     local rows = activeRows(p)
     assertEqual(#rows, 2)
     assertEqual(rows[1].entry.key, "fishing", "newest first")
-    assertEqual(rows[1].cols[4]:GetText(), "106 -> 107")
-    assertEqual(rows[1].cols[5]:GetText(), "Loch Modan")
+    assertEqual(rows[1].cols[5]:GetText(), "106 -> 107")   -- Type is the third column since R6-SM-02
+    assertEqual(rows[1].cols[6]:GetText(), "Loch Modan")
     assertEqual(p.session.value:GetText(), "+2")
     assertFalse(p.empty:IsShown(), "no empty state with entries")
     p.clear:GetScript("OnClick")(p.clear)
@@ -307,18 +307,17 @@ test("journal: the Log has a Date column beside the time, and every column keeps
     local p = J.Frame().logPanel
     local heads = {}
     for i, fs in ipairs(p.headers) do heads[i] = fs:GetText() end
-    assertEqual(table.concat(heads, ","), "DATE,TIME,NAME,CHANGE,ZONE")   -- uppercase on the band (round 5)
+    assertEqual(table.concat(heads, ","), "DATE,TIME,TYPE,NAME,CHANGE,ZONE")   -- uppercase (round 5), Type (R6-SM-02)
     local rows = activeRows(p)
     local oldest = rows[#rows]
     assertEqual(oldest.cols[1]:GetText(), os.date("%m/%d/%y", oldest.entry.t), "the date")
     assertEqual(oldest.cols[2]:GetText(), os.date("%H:%M", oldest.entry.t), "and the time apart")
     for i, fs in ipairs(oldest.cols) do
         assertFalse(fs:CanWordWrap(), "column " .. i .. " truncates rather than wraps")
-        if i ~= 3 then assertTrue(fs:GetWidth() > 0, "column " .. i .. " has a fixed width") end
+        if i ~= 4 then assertTrue(fs:GetWidth() > 0, "column " .. i .. " has a fixed width") end
     end
-    -- At the default width the fixed columns leave the Skill column room (the list is 414 wide).
-    local list = J.MIN_W - 24 - 190 - 12
-    assertTrue(98 + (70 + 100 + 14) < list - 80, "the Skill column keeps 80 px or more")
+    -- At the minimum width the fixed columns leave the Name column room (R6-SM-02: 150 px or more).
+    assertTrue(J.LogColumnWidths(J.MIN_W)[4] >= 150, "the Name column keeps 150 px or more")
     NS.SetByPath("journal.range", "session")
     SL:Clear()
     J.Hide()
@@ -435,7 +434,7 @@ test("journal: a saved size beyond the screen comes back on it; a wider window s
     assertEqual(sizes[1], "1600x900", "clamped to the screen")
     assertEqual(J.VisibleAltCols(), J.MAX_COLS, "as many characters as fit, up to the built columns")
     J.Relayout(J.MIN_W, J.MIN_H)
-    assertEqual(J.VisibleAltCols(), 5, "five at the default width")
+    assertEqual(J.VisibleAltCols(), 6, "six at the minimum width (840 since R6-SM-02; five fit the old 720)")
     NS.db.profile.journal.size = false
     J.Hide()
 end)
@@ -459,7 +458,7 @@ test("journal: the Log table scrolls by a bar that shows only while it overflows
     p.scroll:GetScript("OnValueChanged")(p.scroll, 4)
     assertEqual(p.scroll.offset, 4, "a drag scrolls the table")
     assertEqual(activeRows(p)[1].entry.new, J.VisibleLogRows() + 10 - 4 + 1, "four rows down from the newest")
-    assertEqual(p.headers[5]:GetWidth(), 150, "the Zone column is 150 px wide")
+    assertEqual(p.headers[6]:GetWidth(), 150, "the Zone column is 150 px wide")
     SL:Clear()
     J.Hide()
 end)

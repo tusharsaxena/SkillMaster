@@ -979,13 +979,13 @@ Total.
 - r5 sm-10: the Log draws a reputation row's name and its signed change with the standing
 - r5 sm-10: a reputation grind never pushes a skill-up out: the ring keeps journal.keep of each sort
 - r5 sm-10: schemaVersion 19 keeps every stored Log row and fills a change row's missing name
-- r5 sm-11: the five headers each open a filter menu; the third is Name
-- r5 sm-11: the Name filter narrows to a kind, or one name, and the summary counts that kind
+- r5 sm-11: every header opens a filter menu; Name is the fourth, after Type (R6-SM-02)
+- r5 sm-11: the Type filter (R6-SM-02) narrows to a kind, Name to one name, and the summary counts that kind
 - r5 sm-11: Date, Time, Change and Zone filters, combined
 - r5 sm-11: an active header shows it, and Clear filters clears every one in one click
-- r5 sm-11: the ETA card follows the Name filter
+- r5 sm-11: the ETA card follows the Type filter
 - r5 sm-12: the Log's empty lines and the Clear log question speak of every row, not skill-ups alone
-- r5 sm-12: with the Name filter on reputations, the ETA card says the filter leaves no skill-ups
+- r5 sm-12: with the Type filter on reputations, the ETA card says the filter leaves no skill-ups
 - r5 sm-12: the Alts tab's empty line and footer name reputations and currencies too
 - r5 sm-12: test mode's sample Log shows reputation and currency rows beside the skill-ups
 - r5 sm-12: the diagnostics count the Log's rows by sort
@@ -998,12 +998,15 @@ Total.
 - r5 review: the Yesterday filter is the calendar's day before, across a daylight-saving change
 - r5 review: a detached sub-category this character's tree lacks shows no window, and keeps its row
 
-### test_r6_owner.lua (4)
+### test_r6_owner.lua (7)
 
 - r6 sm-01: the group's title reads Secondary Professions; its id and short label stay
 - r6 sm-01: a detached Secondary window is titled Secondary Professions
 - r6 sm-01: the settings labels and the Professions window's binding tip say secondary professions
 - r6 sm-01: the client's own header, Secondary Skills, still files its lines in the Secondary group
+- r6 sm-02: the Log has a Type column after Time: Skill-up, Reputation (a standing change too), Currency
+- r6 sm-02: the Type header filters by kind; Name keeps the names, of the picked type only
+- r6 sm-02: the Journal is wide enough at its minimum for every column and the side cards
 
 ### test_preview_trees.lua (6)
 
@@ -1434,7 +1437,7 @@ Total.
 | test_r5_subdetach.lua | 9 |
 | test_r5_journal.lua | 17 |
 | test_r5_review.lua | 5 |
-| test_r6_owner.lua | 4 |
+| test_r6_owner.lua | 7 |
 | test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
@@ -1466,4 +1469,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **1068** |
+| **Total** | **1071** |
