@@ -289,3 +289,101 @@ test("r5 sm-11: the ETA card follows the Name filter", function()
         assertEqual(#J.EtaRows(0, J.Frame().logPanel.filtered), 0, "no skill among the rows, no ETA")
     end)
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- R5-SM-12: the rest of the Journal, fitted to its new contents
+-- ---------------------------------------------------------------------------------------------
+
+test("r5 sm-12: the Log's empty lines and the Clear log question speak of every row, not skill-ups alone", function()
+    withLog(M.time() - 60, function()
+        J.Show()
+        J.SelectTab("log")
+        local p = J.Frame().logPanel
+        assertEqual(p.empty:GetText(), "Nothing logged yet.", "an empty Log")
+        SL:AddChange("currency", "1901", "Honor Points", 1, 2, M.time() - 600000)
+        J.SelectRange("session")
+        assertEqual(p.empty:GetText(), "Nothing logged in this range.", "a range with no row")
+        local q = M.StaticPopupDialogs.SKILLMASTER_CLEAR_LOG.text
+        assertTrue(q:find("reputation", 1, true) ~= nil and q:find("currency", 1, true) ~= nil,
+            "the question names what Clear log removes")
+        local row = NS.FindSchemaRow("journal.range")
+        assertTrue(row.desc:find("skill-ups, reputation and currency", 1, true) ~= nil, "Log shows says what it lists")
+        J.SelectRange("all")
+    end)
+end)
+
+test("r5 sm-12: with the Name filter on reputations, the ETA card says the filter leaves no skill-ups", function()
+    withLog(M.time() - 600, function()
+        SL:Add("fishing", 50, 51, M.time() - 500)
+        SL:AddChange("reputation", "72", "Stormwind", 1, 6, M.time() - 400)
+        J.Show()
+        J.SelectTab("log")
+        local eta = J.Frame().logPanel.eta
+        assertEqual(eta.none:GetText(), "Two skill-ups of a skill give it an ETA.", "unfiltered: the old hint")
+        JF.Set("kind", "reputation")
+        J.Render()
+        assertTrue(eta.none:IsShown(), "no ETA line")
+        assertEqual(eta.none:GetText(), "The filter leaves no skill-ups to time.", "the reason is the filter")
+        JF.Clear()
+        J.Render()
+    end)
+end)
+
+test("r5 sm-12: the Alts tab's empty line and footer name reputations and currencies too", function()
+    local chars = NS.db.global.characters
+    local saved = {}
+    for k, v in pairs(chars) do saved[k], chars[k] = v, nil end
+    local ok, err = pcall(function()
+        chars["Realm-Solo"] = { name = "Solo", class = "HUNTER", level = 10, skills = {}, reps = {}, currencies = {} }
+        J.Show()
+        J.SelectTab("alts")
+        J.SelectFilter("reputations")
+        local p = J.Frame().altsPanel
+        assertEqual(p.empty:GetText(), "No character has a reputation recorded yet.", "a reputation sub-tab's own words")
+        J.SelectFilter("currencies")
+        assertEqual(p.empty:GetText(), "No character has a currency recorded yet.", "a currency sub-tab's own words")
+        J.SelectFilter("primary")
+        local foot = J.Frame().altsFooter.left:GetText()
+        assertTrue(foot:find("reputation or currency change", 1, true) ~= nil, "the footer names every snapshot trigger")
+    end)
+    J.SelectTab("log")
+    J.Hide()
+    for k in pairs(chars) do chars[k] = nil end
+    for k, v in pairs(saved) do chars[k] = v end
+    if not ok then error(err, 0) end
+end)
+
+test("r5 sm-12: test mode's sample Log shows reputation and currency rows beside the skill-ups", function()
+    local wasOn = NS.IsTestMode()
+    if not wasOn then NS.ToggleTestMode() end
+    local ok, err = pcall(function()
+        local kinds = {}
+        for _, e in ipairs(NS.Preview.Log():Entries()) do kinds[e.kind or "skill"] = (kinds[e.kind or "skill"] or 0) + 1 end
+        assertTrue((kinds.skill or 0) > 0, "skill-ups")
+        assertTrue((kinds.reputation or 0) > 0, "a reputation change")
+        assertTrue((kinds.currency or 0) > 0, "a currency change")
+        local reached = false
+        for _, e in ipairs(NS.Preview.Log():Entries()) do if e.newReaction then reached = true end end
+        assertTrue(reached, "one that reached a standing")
+        local prev = 0
+        for _, e in ipairs(NS.Preview.Log():Entries()) do
+            assertTrue(e.t >= prev, "oldest first")
+            prev = e.t
+        end
+    end)
+    if not wasOn then NS.ToggleTestMode() end
+    if not ok then error(err, 0) end
+end)
+
+test("r5 sm-12: the diagnostics count the Log's rows by sort", function()
+    local saved = NS.db.char.log
+    NS.db.char.log = { { t = 1, key = "fishing", old = 1, new = 2 }, { t = 2, kind = "reputation", key = "72", old = 1, new = 2 } }
+    local ok, err = pcall(function()
+        local text = NS.Diagnostics and NS.Diagnostics.SessionLogLine and NS.Diagnostics.SessionLogLine() or ""
+        assertTrue(text:find("skill-ups=1", 1, true) ~= nil, "the skill-ups")
+        assertTrue(text:find("reputation=1", 1, true) ~= nil, "the reputation rows")
+        assertTrue(text:find("currency=0", 1, true) ~= nil, "the currency rows")
+    end)
+    NS.db.char.log = saved
+    if not ok then error(err, 0) end
+end)

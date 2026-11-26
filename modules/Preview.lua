@@ -169,7 +169,13 @@ local function buildLog(skills, now)
     local fx, entries = fixture(), {}
     for i = #fx.log, 1, -1 do
         local e = fx.log[i]
-        entries[#entries + 1] = { t = now - e.ago, key = keyOf(e.skill), old = e.old, new = e.new, zone = L[e.zone] }
+        local row = { t = now - e.ago, key = keyOf(e.skill), old = e.old, new = e.new, zone = L[e.zone] }
+        -- A reputation's or currency's change (R5-SM-12): its kind, id and name, the standings a move crossed.
+        if e.rep or e.currency then
+            row.kind, row.key, row.name = e.rep and "reputation" or "currency", tostring(e.id), e.rep or e.currency
+            row.oldReaction, row.newReaction = e.from, e.to
+        end
+        entries[#entries + 1] = row
     end
     return NS.SessionLog.View(entries, now - (fx.sessionAgo or 0), function(key) return skills.byKey[key] end)
 end

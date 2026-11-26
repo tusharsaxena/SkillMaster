@@ -390,8 +390,9 @@ local function renderLogRows(p, log, from)
         bindLogRow(p, Pool.Acquire(p.pool, function() return newLogRow(p) end), list[i], shown)
     end
     p.empty:SetShown(n == 0)
-    local why = L["No skill-ups in this range."]
-    if #log:Entries() == 0 then why = L["No skill-ups logged yet."] elseif JF.Active() then why = L["No rows match the filters."] end
+    -- The Log holds reputations and currencies too (R5-SM-10), so its empty lines speak of every row (R5-SM-12).
+    local why = L["Nothing logged in this range."]
+    if #log:Entries() == 0 then why = L["Nothing logged yet."] elseif JF.Active() then why = L["No rows match the filters."] end
     p.empty:SetText(why)
     p.shown = shown
     p.scroll:Sync(max(n - state.logRows, 0), state.logOffset)
@@ -466,6 +467,9 @@ local function renderSide(p, SL, range, from, now)
         line.value:SetText(r and J.FormatETA(r.sec) or "")
     end
     p.eta.none:SetShown(#rows == 0)
+    -- With the Name filter on reputations or currencies the reason is the filter, not too few skill-ups (R5-SM-12).
+    p.eta.none:SetText(kind == "skill" and L["Two skill-ups of a skill give it an ETA."]
+        or L["The filter leaves no skill-ups to time."])
 end
 
 local function buildCard(p, h, anchor, y)
@@ -639,7 +643,7 @@ local function buildLog()
     p.scroll:SetPoint("BOTTOMLEFT", p, "BOTTOMRIGHT", -(SIDE_W + PAD + SCROLL_W), 0)
     p.empty = text(p, "muted")
     p.empty:SetPoint("TOPLEFT", p.header, "BOTTOMLEFT", 6, -8)
-    p.empty:SetText(L["No skill-ups logged yet."])
+    p.empty:SetText(L["Nothing logged yet."])
     buildSessionCard(p)
     buildEtaCard(p)
     buildLogButtons(p)
@@ -916,6 +920,13 @@ local function bindAltRow(p, row, key, name, kind, list, i)
     row:Show()
 end
 
+-- An Alts sub-tab with no row, in its kind's words (R5-SM-12: the reputation and currency sub-tabs said "skill").
+local ALT_EMPTY = {
+    skill = L["No character has a skill in this block yet."],
+    reputation = L["No character has a reputation recorded yet."],
+    currency = L["No character has a currency recorded yet."],
+}
+
 local function renderAlts(p)
     local list = NS.Preview.Alts():List()
     local keys, names, kind = J.AltRows(list, state.filter)
@@ -936,7 +947,7 @@ local function renderAlts(p)
         end
     end
     p.empty:SetShown(#list == 0 or #keys == 0)
-    p.empty:SetText(#list == 0 and L["No characters recorded yet."] or L["No character has a skill in this block yet."])
+    p.empty:SetText(#list == 0 and L["No characters recorded yet."] or ALT_EMPTY[kind] or ALT_EMPTY.skill)
     p.shown, p.rows, p.list = shown, keys, list
     p.scroll:Sync(#list > 0 and max(#keys - state.altRows, 0) or 0, state.altOffset)
 end
@@ -1206,7 +1217,7 @@ local function build()
     frame.logPanel = buildLog()
     frame.altsPanel = buildAlts()
     frame.altsFooter = NS.Chrome.Footer(frame, {
-        left = L["Snapshots update on login, logout and every skill change. Right-click a character to forget it."],
+        left = L["Snapshots update on login, logout and every skill, reputation or currency change. Right-click a character to forget it."],
         grip = true,   -- its right side clears the resize grip's corner
     })
     frame.altsFooter:Hide()
@@ -1280,7 +1291,7 @@ function J.ClearLog()
 end
 
 StaticPopupDialogs.SKILLMASTER_CLEAR_LOG = {
-    text         = L["Clear this character's skill-up log? Every entry is removed."],
+    text         = L["Clear this character's Journal log? Every skill-up, reputation and currency row is removed."],
     button1      = YES,
     button2      = NO,
     timeout      = 0,

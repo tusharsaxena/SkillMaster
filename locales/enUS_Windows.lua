@@ -132,6 +132,12 @@ L["No rows match the filters."] = true
 L["%s \194\183 filtered"] = true
 L["Reputation \194\183 %s"] = true
 L["Currencies \194\183 %s"] = true
+-- The rest of the Journal, fitted to its new rows (modules/Journal.lua, R5-SM-12).
+L["Nothing logged yet."] = true
+L["Nothing logged in this range."] = true
+L["The filter leaves no skill-ups to time."] = true
+L["No character has a reputation recorded yet."] = true
+L["No character has a currency recorded yet."] = true
 
 -- `true` only documents the key: replace each with the key so a lookup never answers a boolean.
 for k, v in pairs(L) do if v == true then rawset(L, k, k) end end

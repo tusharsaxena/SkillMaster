@@ -15,8 +15,10 @@ local _, NS = ...
 --   temp       the temporary bonuses, each { skill, amount, label, seconds, source }: `seconds` is
 --              the time left when test mode turns on.
 --   stats      value per NS.STAT_DEFS key (a number, or { value, raw }), at the character's level.
---   log        the session's skill-ups, newest first, each { ago = seconds before now, skill, old,
---              new, zone }; `sessionAgo` is when the session began.
+--   log        the session's Log rows, newest first: a skill-up { ago = seconds before now, skill, old,
+--              new, zone }, or a reputation's or currency's change { ago, rep | currency (its name), id,
+--              old, new, zone[, from, to] (the standings a move crossed) } (R5-SM-12); `sessionAgo`
+--              is when the session began.
 --   alts       the other characters' snapshots, each skill { rank, max }; `sample` is each one's
 --              shared row, as for the character.
 --   pinned, mainHand  catalog English names: the broker's {pinned} and {equippedWeapon} skills.
@@ -91,13 +93,19 @@ NS.Preview_Forever = {
     pinned   = "Fishing",
     mainHand = "Guns",
     log = {
+        -- The Journal's reputation and currency rows (R5-SM-10, R5-SM-12): a gain that reached Revered, a gain, a
+        -- spend. `rep` / `currency` name the row, `id` its key, `from` / `to` the standings a move crossed.
         { ago = 60,   skill = "Bows",            old = 80,  new = 81,  zone = "Loch Modan" },
+        { ago = 180,  currency = "Honor Points", id = 1901, old = 1166, new = 1200, zone = "Loch Modan" },
         { ago = 240,  skill = "Fishing",         old = 106, new = 107, zone = "Loch Modan" },
+        { ago = 600,  rep = "Ironforge", id = 47, old = 20985, new = 21010, from = 6, to = 7, zone = "Loch Modan" },
         { ago = 720,  skill = "Skinning",        old = 121, new = 122, zone = "Loch Modan" },
         { ago = 780,  skill = "Two-Handed Axes", old = 106, new = 107, zone = "Loch Modan" },
+        { ago = 1200, currency = "Darkmoon Prize Ticket", id = 515, old = 20, new = 12, zone = "Ironforge" },
         { ago = 1500, skill = "Leatherworking",  old = 145, new = 146, zone = "Ironforge" },
         { ago = 1620, skill = "Leatherworking",  old = 144, new = 145, zone = "Ironforge" },
         { ago = 1860, skill = "Fishing",         old = 105, new = 106, zone = "Ironforge" },
+        { ago = 2400, rep = "Stormwind", id = 72, old = 12647, new = 12672, zone = "Wetlands" },
         { ago = 2700, skill = "Defense",         old = 99,  new = 100, zone = "Wetlands" },
         { ago = 3720, skill = "Cooking",         old = 132, new = 133, zone = "Wetlands" },
         { ago = 4860, skill = "Skinning",        old = 120, new = 121, zone = "Wetlands" },

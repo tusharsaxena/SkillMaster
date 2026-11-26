@@ -1398,3 +1398,14 @@ none is passed until you say so.
   (Morning and the like) and CHANGE (Gains, Losses, Standing changes). Click Clear filters: every row is back, the
   headers return to their color and the button goes. `/reload`: the Log opens unfiltered.
   Result:
+- **SM-R5-12** (new, R5-SM-12) The rest of the Journal: with nothing logged (Clear log, then accept), the Log reads
+  "Nothing logged yet."; pick Current session after an older row exists: "Nothing logged in this range." Clear log
+  asks "Clear this character's Journal log? Every skill-up, reputation and currency row is removed." Filter NAME to
+  Reputations: the ETA to cap card reads "The filter leaves no skill-ups to time." Alts tab, Reputations and
+  Currencies sub-tabs on a character with none recorded: "No character has a reputation (currency) recorded yet."; the
+  footer reads "Snapshots update on login, logout and every skill, reputation or currency change." Settings →
+  Journal: *Skill-ups to keep* says the Log keeps as many reputation and currency changes besides, and *Log shows*
+  names skill-ups, reputation and currency changes. `/sm test` (test mode): the Log shows Honor Points +34, an
+  Ironforge row "+25, Revered", a Darkmoon Prize Ticket spend "-8" and a Stormwind gain among the sample skill-ups.
+  `/sm diagnostics`: the model line counts skill-ups, reputation and currency rows apart.
+  Result:

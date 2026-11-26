@@ -253,7 +253,7 @@ end)
 
 -- ── review fixes: the Journal's Alts hint line is a window footer ────────────────────────────
 
-local ALTS_HINT = NS.L["Snapshots update on login, logout and every skill change. Right-click a character to forget it."]
+local ALTS_HINT = NS.L["Snapshots update on login, logout and every skill, reputation or currency change. Right-click a character to forget it."]
 
 test("chrome review: the Journal's Alts hint is the library's Footer, shown with the Alts tab only", function()
     J.Show()

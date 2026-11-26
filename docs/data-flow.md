@@ -42,7 +42,10 @@ other timer.
 
 `SKILL_UP(key, old, new)` adds one `{ t, key, old, new, zone }` to `db.char.log`, a ring of the
 newest `journal.keep` (500 by default; the Journal page, T5.1), or, while a simulation runs, to a
-session-only list (`SessionLog:Override`, T5.2) that the same cap trims. A profile switch to a lower cap never trims what the log held when the session first wrote to it; lowering *Skill-ups to keep* itself trims at once. *Clear log* asks first, as *Forget* does. A session starts at login and again on the Journal's New session; `Gains` sums this
+session-only list (`SessionLog:Override`, T5.2) that the same cap trims. `REP_CHANGED` and `CURRENCY_CHANGED` add a
+row per change beside them (R5-SM-10), and the cap counts each sort apart: `journal.keep` skill-ups and as many
+changes, so a reputation grind never trims a skill-up. The Log's column filters (`NS.JournalFilters`, R5-SM-11)
+narrow what the Log draws and the summary and ETA cards count; they are session-only and never written. A profile switch to a lower cap never trims what the log held when the session first wrote to it; lowering *Skill-ups to keep* itself trims at once. *Clear log* asks first, as *Forget* does. A session starts at login and again on the Journal's New session; `Gains` sums this
 session's points (`GainsFor(key)` one skill's), `Rate(window, now, key)` is points an hour over the
 last `window` seconds of it (one skill's with `key`: the row tooltip's "This session" line), and
 `ETA(key)` is `(max - rank)` over the rate that skill's own gains this session set (nil under two

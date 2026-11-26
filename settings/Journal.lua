@@ -30,7 +30,7 @@ NS.RegisterSchemaRows(NS.Live({
           NS.ApplyLook()
       end },
     { path = "journal.range", page = PAGE, group = JOURNAL, type = "string", default = P.range,
-      label = L["Log shows"], desc = L["The skill-ups the Log tab lists and sums: this session, the last few days or all of them."],
+      label = L["Log shows"], desc = L["The skill-ups, reputation and currency changes the Log tab lists and sums: this session, the last few days or all of them."],
       values = rangeValues(),
       -- The Journal alone reads it: a repaint of the open window, not a full look change.
       onChange = function() if NS.Journal then NS.Journal.Refresh() end end },
