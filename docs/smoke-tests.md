@@ -1436,3 +1436,10 @@ none is passed until you say so.
   currency. Clear filters drops both. `/sm test`: the sample Log's rows each show their type. Alts tab: the
   character columns keep their width, one more character showing at the minimum width.
   Result:
+- **SM-R6-3** (new, R6-SM-03) `/sm journal`, Log tab (`/sm test` gives a mix): each TYPE reads in its own color,
+  Skill-up a sky blue, Reputation an orchid (violet), Currency a teal; all three easy to read on the dark window and
+  easy to tell apart, none of them the red, orange, yellow or green of a reputation standing. DATE, TIME and ZONE stay
+  in the muted gray. Click TYPE: Skill-up, Reputation and Currency each in its column's color, Any type in the menu's
+  plain text; the picked one turns the menu's gold while ticked. Switch the skin (Settings → General → Skin): the
+  three colors stay the same and stay apart.
+  Result:

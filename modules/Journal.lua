@@ -378,7 +378,6 @@ local function newLogRow(p)
     row.cols = placeColumns(row, nil, "body")
     NS.Skin.Text(row.cols[1], "muted")
     NS.Skin.Text(row.cols[2], "muted")
-    NS.Skin.Text(row.cols[3], "muted")
     NS.Skin.Text(row.cols[6], "muted")
     return row
 end
@@ -390,6 +389,7 @@ local function bindLogRow(p, row, e, i)
     row.cols[1]:SetText(date(L["%m/%d/%y"], e.t))
     row.cols[2]:SetText(date("%H:%M", e.t))
     row.cols[3]:SetText(J.TypeText(e))   -- R6-SM-02
+    NS.Skin.Text(row.cols[3], JF.KindToken(JF.KindOf(e)))   -- its kind's own color, replayed on a skin switch (R6-SM-03)
     -- A reputation's or currency's change (SMW-08, SMW-09; SessionLog:AddChange): its name, and the change.
     row.cols[4]:SetText(J.RowName(e))
     row.cols[5]:SetText(e.kind and J.ChangeText(e) or (tostring(e.old) .. ARROW .. tostring(e.new)))

@@ -80,6 +80,15 @@ function JF.KindOf(e) return e.kind or "skill" end
 --- A kind's label, as the Type column shows it: "Skill-up", "Reputation", "Currency" (R6-SM-02).
 function JF.KindLabel(kind) return KIND_LABEL[kind or "skill"] or tostring(kind) end
 
+-- Each kind's own color (R6-SM-03): an owner token (core/SkinSetup.lua), the Type cells' and the Type menu's.
+local KIND_TOKEN = { skill = "sm.type.skill", reputation = "sm.type.reputation", currency = "sm.type.currency" }
+
+--- A kind's color token, as the Type column paints it (NS.Skin.Text takes the name): "sm.type.skill", ...
+function JF.KindToken(kind) return KIND_TOKEN[kind or "skill"] or KIND_TOKEN.skill end
+
+--- A kind's color now, { r, g, b, a }: the token through the skin, else its own default.
+function JF.KindColor(kind) return NS.SkinColor(JF.KindToken(kind)) end
+
 local function day(t) return date("%Y-%m-%d", t) end
 
 --- The local calendar's day before `t`'s, as day() names it: noon of `t`'s day less a day, so a 23- or 25-hour day
@@ -201,6 +210,7 @@ function MENUS.type(_, ctx)
     local rows = { { title = true, label = L["Type"] }, radio(L["Any type"], "kind", nil, ctx) }
     for _, k in ipairs(JF.KINDS) do
         local row = radio(KIND_LABEL[k], "kind", k, ctx)
+        row.color = JF.KindColor(k)   -- as its cells (R6-SM-03); the library golds it while selected
         local onClick = row.onClick
         row.onClick = function()
             if filters.name ~= nil and nameKind ~= k then filters.name, nameKind = nil, nil end

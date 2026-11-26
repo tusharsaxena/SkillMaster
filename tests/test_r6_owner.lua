@@ -212,3 +212,61 @@ test("r6 sm-02: the Journal is wide enough at its minimum for every column and t
     assertEqual(table.concat(sizes, ","), J.MIN_W .. "x500," .. (J.MIN_W + 100) .. "x500",
         "an old 720 size comes back at the new minimum; a larger one is kept")
 end)
+
+-- ---------------------------------------------------------------------------------------------
+-- R6-SM-03: every type its own color ("Give every type a unique color")
+-- ---------------------------------------------------------------------------------------------
+
+local function rgb(r, g, b) return ("%.3f,%.3f,%.3f"):format(r, g, b) end
+
+test("r6 sm-03: each Type cell is drawn in its kind's own color, three distinct, none the muted style", function()
+    withDay(function()
+        local want = {}
+        for _, k in ipairs(JF.KINDS) do
+            local c = JF.KindColor(k)
+            assertTrue(type(c) == "table", "a color for " .. k)
+            want[JF.KindLabel(k)] = rgb(c[1], c[2], c[3])
+        end
+        local muted = NS.SkinColor("text.muted") or NS.SkinColor("sm.muted")
+        local seen = {}
+        for _, row in ipairs(logRows()) do
+            local fs = row.cols[3]
+            local got = rgb(fs:GetTextColor())
+            assertEqual(got, want[fs:GetText()], "the " .. fs:GetText() .. " cell's color")
+            assertTrue(got ~= rgb(muted[1], muted[2], muted[3]), "no longer the muted style")
+            seen[fs:GetText()] = got
+        end
+        assertTrue(seen["Skill-up"] ~= seen["Reputation"] and seen["Skill-up"] ~= seen["Currency"]
+            and seen["Reputation"] ~= seen["Currency"], "three distinct colors")
+        assertEqual(rgb(logRows()[1].cols[1]:GetTextColor()), rgb(muted[1], muted[2], muted[3]), "DATE stays muted")
+    end)
+end)
+
+test("r6 sm-03: the type colors are readable on the dark Journal and far apart from each other", function()
+    local cs = {}
+    for _, k in ipairs(JF.KINDS) do
+        local c = JF.KindColor(k)
+        -- Relative luminance well above the window's near-black backing.
+        assertTrue(0.2126 * c[1] + 0.7152 * c[2] + 0.0722 * c[3] > 0.35, k .. " is bright enough")
+        cs[#cs + 1] = c
+    end
+    for i = 1, #cs do
+        for j = i + 1, #cs do
+            local d = math.abs(cs[i][1] - cs[j][1]) + math.abs(cs[i][2] - cs[j][2]) + math.abs(cs[i][3] - cs[j][3])
+            assertTrue(d > 0.4, ("kinds %d and %d stand apart (%.2f)"):format(i, j, d))
+        end
+    end
+end)
+
+test("r6 sm-03: the Type filter menu lists each type in its own color; Any type stays plain", function()
+    withDay(function()
+        local byLabel = {}
+        for _, r in ipairs(J.FilterMenuRowsForTest("type")) do if r.label then byLabel[r.label] = r end end
+        assertEqual(byLabel["Any type"].color, nil, "Any type in the menu's own text color")
+        for _, k in ipairs(JF.KINDS) do
+            local row, c = byLabel[JF.KindLabel(k)], JF.KindColor(k)
+            assertTrue(row ~= nil and row.color ~= nil, "a color on " .. k)
+            assertEqual(rgb(row.color[1], row.color[2], row.color[3]), rgb(c[1], c[2], c[3]), k .. " as its cells")
+        end
+    end)
+end)
