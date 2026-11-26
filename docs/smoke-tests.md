@@ -1327,3 +1327,10 @@ none is passed until you say so.
   tooltip appears ("Fold this section in the tooltip", "Unfold", "Collapse this block" are gone). The other header
   marks (detach, sort, filter) still show theirs.
   Result:
+- **SM-R5-2** (new, R5-SM-02) In the Professions window, click a block header's title or the empty band right of
+  it: the block collapses, and a second click opens it. In the Statistics window, click a category's name (not
+  its chevron): it unfolds; click a sub-category's name one level in: it unfolds too. Do the same in the LDB
+  tooltip, Tooltip style Main window (a section header's band, a Statistics category's row) and Classic (anywhere
+  on a header line, a nested one included): each folds and unfolds in the tooltip alone, the window untouched.
+  The footer reads "Click a header to fold".
+  Result:

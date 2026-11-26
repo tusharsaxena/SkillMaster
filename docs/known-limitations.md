@@ -2,7 +2,7 @@
 
 Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2: Known Limitations over 60 lines).
 
-- The broker tooltip's rows open nothing since SMW-07 (only a section's fold chevron acts, the owner's ruling), so
+- The broker tooltip's rows open nothing since SMW-07 (only a section's header acts, folding it, the owner's ruling), so
   the Classic style's old plain `ToggleCharacter` path, which tainted `CharacterFrame:OnShow` on WoW Forever
   (docs/forever-quirks.md, "The character panel and secret geometry"), is no longer reached from a tooltip. The
   windows' rows open the character panel through the micro button.

@@ -556,7 +556,7 @@ Total.
 - round6 trainer ranks: past the max height the cards scroll under a skin scroll bar, the wheel and the bar drive it
 - round6 ldb look: a new profile draws the Main window style on its own TOOLTIP frame, the window's size
 - round6 ldb look: the window's headers and rows, the bar with its text inside and the mark at its right
-- round6 ldb look: a block collapsed in the window stays open here; only the header's chevron takes the pointer
+- round6 ldb look: a block collapsed in the window stays open here; the header and its chevron take the pointer
 - round6 ldb look: a row's left and right clicks open nothing
 - round6 ldb look: the window's weapon filter and sort reach both styles
 - round6 ldb look: past its Height the body scrolls, by the wheel and by the skin's scroll bar
@@ -925,15 +925,18 @@ Total.
 - smw-rev: with the window hidden and one statistic pinned, CRITERIA_UPDATE reads the pinned row alone
 - smw-rev: a reputation's later change moves its one Log line to the end, so the Log stays in time order
 - smw-rev: the feeds read the main hand and the level only for a template that shows them
-- smw-rev: a nested header's chevron in the Classic tooltip sits over its chevron, past the indent
+- smw-rev: a nested header's chevron in the Classic tooltip is inside its hit, which spans the line
 - smw-rev: in the Statistics window, Expand all opens every category and Collapse all folds them, the block open
 - smw-rev: in the Reputations window, Collapse all folds the headers; a collapsed block opens on Expand all
 - smw-rev: the skill windows' Expand / Collapse all still collapses and expands their blocks
 - smw-rev: the Character Stats window and feed title the stat blocks without the "Stats ·" prefix
 
-### test_r5_feedback.lua (1)
+### test_r5_feedback.lua (4)
 
 - r5 sm-01: no fold chevron carries a hint tooltip, in any window or in the LDB tooltip
+- r5 sm-02: in a window, a click on a block header's body and on a tree header's row folds it, at every depth
+- r5 sm-02: in the Main window style LDB tooltip, a click on a section header's body or a tree header's row folds it
+- r5 sm-02: in the Classic LDB tooltip, a header line's hit spans the whole line, at every depth
 
 ### test_preview_trees.lua (6)
 
@@ -1359,7 +1362,7 @@ Total.
 | test_currencies.lua | 9 |
 | test_statistics.lua | 15 |
 | test_smw_review.lua | 15 |
-| test_r5_feedback.lua | 1 |
+| test_r5_feedback.lua | 4 |
 | test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
@@ -1391,4 +1394,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **1013** |
+| **Total** | **1016** |

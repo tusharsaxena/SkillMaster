@@ -442,7 +442,9 @@ end)
 -- The Classic tooltip's tree chevrons
 -- ---------------------------------------------------------------------------------------------
 
-test("smw-rev: a nested header's chevron in the Classic tooltip sits over its chevron, past the indent", function()
+-- Re-pinned by R5-SM-02 (the owner's round 5: a click anywhere on a header folds it): the hit lies over the
+-- header's whole line at every depth, so a nested header's chevron past its indent is inside it.
+test("smw-rev: a nested header's chevron in the Classic tooltip is inside its hit, which spans the line", function()
     local tree = {
         { id = 130, name = "Character", parent = -1, rows = { { statID = 9001, name = "Times camped", quantity = 58 } } },
         { id = 140, name = "Wealth", parent = 130, rows = { { statID = 9101, name = "Auctions posted", quantity = 33 } } },
@@ -463,16 +465,15 @@ test("smw-rev: a nested header's chevron in the Classic tooltip sits over its ch
             local at, buttons = {}, {}
             for _, c in ipairs(B.Chevrons()) do
                 buttons[#buttons + 1] = c
-                rawset(c, "SetPoint", function(self, _, _, _, x)
-                    if self.row.node ~= nil then at[self.row.depth] = x end
+                rawset(c, "SetPoint", function(self, point, _, _, x)
+                    if self.row.node ~= nil and point == "LEFT" then at[self.row.depth] = x end
                 end)
             end
             B.OnEnter(M.UIParent, "statistics")
             for _, c in ipairs(buttons) do rawset(c, "SetPoint", nil) end
-            assertEqual(at[0], -2, "a top category's chevron at the line's left")
-            assertEqual(at[1], -2 + B.INDENT_PX, "Wealth's, one indent in")
-            assertEqual(at[2], -2 + 2 * B.INDENT_PX, "Auctions', two indents in")
-            assertEqual(B.IndentWidth(nil, 0), 0, "no indent at the top")
+            assertEqual(at[0], -2, "a top category's hit from the line's left")
+            assertEqual(at[1], -2, "Wealth's too, its indented chevron inside it")
+            assertEqual(at[2], -2, "Auctions' too, two indents in")
         end)
         NS.Broker.HideTooltip()
         ldb.style, ldb.folds = saved.style, saved.folds

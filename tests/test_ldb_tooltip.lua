@@ -134,7 +134,7 @@ test("ldb tooltip: the Classic header line shows the chevron's state", function(
         assertTrue(text:find(down, 1, true) ~= nil, "an open one's points down")
         assertTrue(text:find("Tailoring", 1, true) == nil, "a folded section draws no rows")
         assertTrue(text:find("Cooking", 1, true) ~= nil)
-        assertTrue(text:find("Click a chevron to fold", 1, true) ~= nil, "the footer says so")
+        assertTrue(text:find("Click a header to fold", 1, true) ~= nil, "the footer says so")
     end)
 end)
 

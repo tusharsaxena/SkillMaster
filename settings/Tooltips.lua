@@ -56,7 +56,7 @@ end
 local ldbRows = NS.Live({
     { path = "tooltips.ldb.style", page = PAGE, group = LDB, type = "string", default = PT.ldb.style,
       label = L["Tooltip style"],
-      desc = L["Main window draws the LDB tooltip as the main window: its block headers, rows, bars and fonts, the window's sort and filter, at the Width and Height below. Classic is the tooltip lines with mini bars. In both, a section's chevron folds it in the tooltip alone."],
+      desc = L["Main window draws the LDB tooltip as the main window: its block headers, rows, bars and fonts, the window's sort and filter, at the Width and Height below. Classic is the tooltip lines with mini bars. In both, a click on a section's header folds it in the tooltip alone."],
       values = { { value = "window", text = L["Main window"] }, { value = "classic", text = L["Classic"] } } },
     -- Round 7's Open a row from (tooltips.ldb.openFrom) went with SMW-07: a tooltip row opens nothing,
     -- only a section's fold chevron acts (schemaVersion 16 drops a stored value).
