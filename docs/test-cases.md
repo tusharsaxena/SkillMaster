@@ -990,10 +990,11 @@ Total.
 - r5 sm-12: test mode's sample Log shows reputation and currency rows beside the skill-ups
 - r5 sm-12: the diagnostics count the Log's rows by sort
 
-### test_r5_review.lua (2)
+### test_r5_review.lua (3)
 
 - r5 review: the Log keeps journal.keep of each sort across sessions; a login never lets one sort grow
 - r5 review: a lower keep from a profile switch still never trims a sort below what it held
+- r5 review: the open Journal's Log shows a reputation or currency change as it lands
 
 ### test_preview_trees.lua (6)
 
@@ -1423,7 +1424,7 @@ Total.
 | test_r5_join_resize.lua | 5 |
 | test_r5_subdetach.lua | 9 |
 | test_r5_journal.lua | 17 |
-| test_r5_review.lua | 2 |
+| test_r5_review.lua | 3 |
 | test_preview_trees.lua | 6 |
 | test_polish.lua | 12 |
 | test_preview.lua | 9 |
@@ -1455,4 +1456,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **1061** |
+| **Total** | **1062** |

@@ -1376,9 +1376,13 @@ function J.ApplyGeometry()
     J.Relayout(WIDTH, HEIGHT)
 end
 
--- A skill pass (after its SKILL_UPs, so the log is current) and a look change repaint it.
+-- A skill pass (after its SKILL_UPs, so the log is current) and a look change repaint it; so do a reputation and a
+-- currency pass (after their REP_CHANGED and CURRENCY_CHANGED: the Log's rows and the Alts tab, R5-REV). Each
+-- repaints only while the Journal shows.
 J.events = NS.NewBusTarget()
 if J.events then
     J.events:RegisterMessage(NS.MSG.SKILLS_UPDATED, function() J.Refresh() end)
+    J.events:RegisterMessage(NS.MSG.REPS_UPDATED, function() J.Refresh() end)
+    J.events:RegisterMessage(NS.MSG.CURRENCIES_UPDATED, function() J.Refresh() end)
     J.events:RegisterMessage(NS.MSG.LAYOUT_CHANGED, function() J.Refresh() end)
 end

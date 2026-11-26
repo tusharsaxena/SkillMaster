@@ -1,8 +1,8 @@
 -- tests/test_r5_review.lua — the independent review of the round 5 addendum A1 branch (R5-SM-08..12; Ka0sAddonsCommonTasks
 -- docs/2026-11-26-OWNER_FEEDBACK_ROUND5/A1_SKILLMASTER_MORE.md). Each case pins one confirmed finding (R5-REV).
 local T = _G.SKM_TEST
-local NS = T.NS
-local test, assertEqual = T.test, T.assertEqual
+local NS, M = T.NS, T.mocks
+local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
 local SL = NS.SessionLog
 
 --- `fn` on an empty log, journal.keep at `keep`; the log, the keep and the floor put back after.
@@ -53,5 +53,38 @@ test("r5 review: a lower keep from a profile switch still never trims a sort bel
         local skills, changes = counts()
         assertEqual(skills, 40, "the skill-ups held at the session's first write")
         assertEqual(changes, 30, "the changes held, each sort its own floor")
+    end)
+end)
+
+-- R5-REV: the open Journal repainted on a skill pass and a layout change only, so a reputation or currency row
+-- logged while it showed stayed off the Log (and the Alts tab stale) until something else redrew it.
+test("r5 review: the open Journal's Log shows a reputation or currency change as it lands", function()
+    withKeep(500, function()
+        local J = NS.Journal
+        local savedRange = NS.db.profile.journal.range
+        NS.db.profile.journal.range = "all"
+        local ok, err = pcall(function()
+            J.Show()
+            J.SelectTab("log")
+            local function names()
+                local out = {}
+                for _, row in ipairs(J.Frame().logPanel.pool.active) do
+                    if row:IsShown() then out[#out + 1] = row.cols[3]:GetText() end
+                end
+                return table.concat(out, ",")
+            end
+            assertEqual(names(), "", "an empty Log")
+            -- RepData's publish: REP_CHANGED (the log's row), then REPS_UPDATED.
+            NS.bus:SendMessage(NS.MSG.REP_CHANGED, "72", 8900, 9100, "Stormwind", 5, 6)
+            NS.bus:SendMessage(NS.MSG.REPS_UPDATED, nil)
+            assertEqual(names(), "Stormwind", "the faction's row drawn at once")
+            NS.bus:SendMessage(NS.MSG.CURRENCY_CHANGED, "1901", 100, 113, "Honor Points")
+            NS.bus:SendMessage(NS.MSG.CURRENCIES_UPDATED, nil)
+            assertTrue(names():find("Honor Points", 1, true) ~= nil, "and the currency's")
+        end)
+        J.Hide()
+        NS.db.profile.journal.range = savedRange
+        M.__fireTimers()
+        if not ok then error(err, 0) end
     end)
 end)

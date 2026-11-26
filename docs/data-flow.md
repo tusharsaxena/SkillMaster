@@ -60,7 +60,8 @@ keeps the last snapshot's, and a snapshot from before FB-33 has none, a dash in 
 Journal's Alts tab is a matrix, characters across and the rows of one main-window block down (a
 sub-tab per `NS.BLOCKS` id: a skill block's every skill some character has, a stat block's every
 `NS.STAT_DEFS` row). The Journal reads both at render time and repaints on `SKILLS_UPDATED`, which
-follows a pass's `SKILL_UP`s.
+follows a pass's `SKILL_UP`s, and on `REPS_UPDATED` and `CURRENCIES_UPDATED`, which follow their
+`REP_CHANGED` and `CURRENCY_CHANGED` rows.
 
 ## Alerts (T4.2)
 
