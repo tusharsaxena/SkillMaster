@@ -60,8 +60,8 @@ local RANGE_LABEL = {
 function J.RangeLabel(range) return RANGE_LABEL[range] or range end
 
 -- 720 wide (owner feedback round 4): the Zone column took 150 px and the Skill column kept room. 840 since the
--- Type column (R6-SM-02, owner feedback round 6: "Increase min width of the window to accommodate"): its 70 px
--- and a Name column of 150 px or more, room for a 20-letter faction, at the minimum (J.LogColumnWidths).
+-- Type column (R6-SM-02, owner feedback round 6: "Increase min width of the window to accommodate"): its 76 px
+-- and a Name column of 150 px, room for a 20-letter faction, at the minimum (J.LogColumnWidths).
 -- TITLE_H is the title band's bottom edge with no band measured (NS.Chrome.TITLE_BOTTOM): the tabs
 -- are laid under it, and shift() moves them by how far the band's own bottom (NS.Chrome.TitleBottom,
 -- read from the band the skin lays) differs from it. The strip docks between the bar and the tabs
@@ -144,6 +144,7 @@ local JF = NS.JournalFilters
 
 --- The type a Log row shows (R6-SM-02): "Skill-up", "Reputation" (a standing change too), "Currency".
 function J.TypeText(e) return JF.KindLabel(JF.KindOf(e)) end
+
 -- The column filters' context (R5-SM-11): how a row is named, the clock, and the repaint a pick asks for.
 local function filterCtx()
     return { nameOf = J.RowName, now = time(), onChange = function()
@@ -320,8 +321,8 @@ end
 local LOG_COLS = {
     { x = 6, w = 50, j = "LEFT" },                    -- Date
     { x = 58, w = 36, j = "LEFT" },                   -- Time
-    { x = 98, w = 70, j = "LEFT" },                   -- Type: 70 for "Reputation" (R6-SM-02)
-    { x = 172, r = -(110 + 150 + 14), j = "LEFT" },   -- Name (a skill, a faction or a currency)
+    { x = 98, w = 76, j = "LEFT" },                   -- Type: 76 for "Reputation" in a 12 px body face (R6-SM-02)
+    { x = 178, r = -(110 + 150 + 14), j = "LEFT" },   -- Name (a skill, a faction or a currency)
     { r = -(150 + 10), w = 110, j = "RIGHT" },        -- Change: 110 for "+250, Honored" (R5-SM-10)
     { r = -6, w = 150, j = "RIGHT" },                 -- Zone: 150 (owner feedback round 4)
 }

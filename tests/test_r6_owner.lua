@@ -190,7 +190,7 @@ test("r6 sm-02: the Journal is wide enough at its minimum for every column and t
     assertEqual(#widths, 6, "six columns")
     -- What each column's longest cell needs in the body font: "12/31/26", "23:59", "Reputation", a 20-letter
     -- faction ("Hydraxian Waterlords"), "+2,500, Revered", a long zone ("Hillsbrad Foothills").
-    local need = { 46, 30, 64, 140, 100, 140 }
+    local need = { 46, 30, 74, 140, 100, 140 }
     for i, w in ipairs(widths) do
         assertTrue(w >= need[i], ("column %d is %d px at the minimum, needs %d"):format(i, w, need[i]))
     end
