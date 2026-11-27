@@ -48,13 +48,13 @@ end
 
 --- A recording stand-in for GameTooltip: its lines, and a TextLeftN region per line.
 local function recordingTip()
-    local tip = M.CreateFrame("GameTooltip", "SkillMasterTestTip", M.UIParent)
+    local tip = M.CreateFrame("GameTooltip", "CharacterLedgerTestTip", M.UIParent)
     tip.lines = {}
-    function tip:GetName() return "SkillMasterTestTip" end
+    function tip:GetName() return "CharacterLedgerTestTip" end
     function tip:NumLines() return #self.lines end
     function tip:ClearLines() self.lines = {} end
     local function region(n)
-        local name = "SkillMasterTestTipTextLeft" .. n
+        local name = "CharacterLedgerTestTipTextLeft" .. n
         _G[name] = _G[name] or M.CreateFrame("Frame", name, tip)   -- the addon reads the real _G, as in the client
     end
     function tip:AddLine(text) self.lines[#self.lines + 1] = { text } region(#self.lines) end
@@ -109,23 +109,23 @@ local function joined(tip)
 end
 
 
-test("broker: one data source per family (SMW-05), \"Skill Master\" and \"Skill Master Stats\" kept, separate from the launcher object", function()
+test("broker: one data source per family (SMW-05), \"Character Ledger\" and \"Character Ledger Stats\" kept, separate from the launcher object", function()
     reset()
-    local obj = M.__ldbObjects["Skill Master Professions"]
+    local obj = M.__ldbObjects["Character Ledger Professions"]
     assertTrue(obj ~= nil, "the feed is registered")
     assertEqual(obj.type, "data source")
-    assertEqual(obj.label, "Skill Master Professions")
+    assertEqual(obj.label, "Character Ledger Professions")
     assertTrue(type(obj.OnClick) == "function" and type(obj.OnEnter) == "function"
         and type(obj.OnLeave) == "function", "its handlers")
     assertTrue(B.Object() == obj, "B.Object is it")
     local sources = 0
     for _, o in pairs(M.__ldbObjects) do if o.type == "data source" then sources = sources + 1 end end
     assertEqual(sources, 6, "one feed per family (SMW-05)")
-    assertTrue(M.__ldbObjects["Skill Master Stats"] == B.StatsObject(), "the Character Stats feed keeps its name")
+    assertTrue(M.__ldbObjects["Character Ledger Stats"] == B.StatsObject(), "the Character Stats feed keeps its name")
     for fid, f in pairs(B.FEEDS) do
         assertTrue(M.__ldbObjects[f.name] == B.ObjectFor(fid), fid .. "'s feed is " .. f.name)
     end
-    for _, gone in ipairs({ "SkillMaster_All", "SkillMaster_Professions", "SkillMaster_Weapons", "SkillMaster_Stats" }) do
+    for _, gone in ipairs({ "CharacterLedger_All", "CharacterLedger_Professions", "CharacterLedger_Weapons", "CharacterLedger_Stats" }) do
         assertTrue(M.__ldbObjects[gone] == nil, gone .. " is gone")
     end
     assertEqual(NS.Launcher:Object().type, "launcher", "the launcher stays the one launcher object")
@@ -184,7 +184,7 @@ test("broker: the Professions and Skills feeds' tooltips have their own two sect
     local tip = recordingTip()
     local rows = B.FillTooltip(tip, "professions")
     local text = joined(tip)
-    for _, want in ipairs({ "Skill Master \194\183 Professions", "+1 this session", "Primary Professions",
+    for _, want in ipairs({ "Character Ledger \194\183 Professions", "+1 this session", "Primary Professions",
                             "Secondary Professions", "Skinning" }) do
         assertTrue(text:find(want, 1, true) ~= nil, "tooltip has " .. want .. "\n" .. text)
     end
@@ -192,7 +192,7 @@ test("broker: the Professions and Skills feeds' tooltips have their own two sect
     local skillsTip = recordingTip()
     for _, r in ipairs(B.FillTooltip(skillsTip, "skills")) do rows[#rows + 1] = r end
     text = text .. "\n" .. joined(skillsTip)
-    for _, want in ipairs({ "Skill Master \194\183 Skills", "Weapon Skills", "Other skills", "Guns", "Defense" }) do
+    for _, want in ipairs({ "Character Ledger \194\183 Skills", "Weapon Skills", "Other skills", "Guns", "Defense" }) do
         assertTrue(text:find(want, 1, true) ~= nil, "tooltip has " .. want .. "\n" .. text)
     end
     assertFalse(text:find("Ranged Crit", 1, true) ~= nil, "no stats by default\n" .. text)
@@ -288,17 +288,17 @@ test("broker: clicks follow design §6.5 and never touch a secure frame", functi
     local saved = { W.Toggle, M.ToggleCharacter }
     W.Toggle = function() calls[#calls + 1] = "toggle" end
     M.ToggleCharacter = function(tab) calls[#calls + 1] = "char:" .. tab end
-    M.__ldbObjects["Skill Master Professions"].OnClick(nil, "LeftButton")
+    M.__ldbObjects["Character Ledger Professions"].OnClick(nil, "LeftButton")
     W.Toggle, M.ToggleCharacter = saved[1], saved[2]
     assertEqual(table.concat(calls, ","), "toggle", "the cell toggles its window")
     -- SMW-07: a tooltip row opens nothing (only a section's chevron acts), so the row opener is gone.
     assertTrue(B.OpenRow == nil and B.RowMenu == nil, "no row click path from the tooltip")
     -- SMW-05: each other feed's cell toggles its own window.
     NS.Windows.HideAll()
-    M.__ldbObjects["Skill Master Reputations"].OnClick(nil, "LeftButton")
+    M.__ldbObjects["Character Ledger Reputations"].OnClick(nil, "LeftButton")
     assertTrue(NS.Windows.Get("reputations").IsShown(), "the Reputations feed opens the Reputations window")
     assertFalse(NS.Windows.Get("professions").IsShown(), "and no other")
-    M.__ldbObjects["Skill Master Reputations"].OnClick(nil, "LeftButton")
+    M.__ldbObjects["Character Ledger Reputations"].OnClick(nil, "LeftButton")
     assertFalse(NS.Windows.Get("reputations").IsShown(), "a second click hides it")
 end)
 
@@ -421,7 +421,7 @@ end)
 -- ── schemaVersion 3: one feed ────────────────────────────────────────────────────────────────
 
 test("broker: schemaVersion 3 carries the All template and drops the other feeds' keys", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     assertTrue(type(sv) == "table", "the SavedVariables table")
     sv.profiles = sv.profiles or {}
     local D = NS.defaults.profile.broker.feeds.professions.template

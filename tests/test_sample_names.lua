@@ -2,7 +2,7 @@
 -- docs/2026-11-24-FEEDBACK_BATCH, decision D1, LibKa0s#104).
 --
 -- The owner, 2026-11-24: "adopt the predefined test mode names consistently across all addon's
--- test/sim modes". Every named sample person Skill Master draws (test mode's character and alts, the
+-- test/sim modes". Every named sample person Character Ledger draws (test mode's character and alts, the
 -- simulator's character) comes from LibKa0s-Sim-1.0's Sim.Sample("forever"), so no `Sample*` or
 -- `Mock*` name may be written anywhere in the addon's own files. The walk covers every tracked file
 -- but tests/ (the suites check the library's names), libs/ (the library owns them), the frozen

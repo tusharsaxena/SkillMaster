@@ -1,6 +1,6 @@
 local _, NS = ...
 -- modules/BrokerFolds.lua — the LDB tooltip's own folds (item SMW-07 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md; the spec's "The LDB tooltip: only the fold
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md; the spec's "The LDB tooltip: only the fold
 -- works"). The owner's ask: in the tooltip, a category's expand/collapse chevron is the one interaction, and
 -- its fold is the tooltip's alone (the owner's ruling): folding a section there never collapses its block in
 -- the window, nor a window's collapse the tooltip's section.

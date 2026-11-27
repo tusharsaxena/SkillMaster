@@ -1,6 +1,6 @@
 local _, NS = ...
 -- modules/RepData.lua — the reputations model (GitHub issue #6; item SMW-08 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md, the spec's "Reputations (#6)"), a sibling of
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md, the spec's "Reputations (#6)"), a sibling of
 -- modules/SkillData.lua and modules/StatData.lua. It reads the client's faction list (NS.Compat, C_Reputation on
 -- WoW Forever) into the character panel's own grouping and announces REPS_UPDATED; a standing that moved
 -- between two reads is REP_CHANGED (the Journal's session gains).
@@ -287,7 +287,7 @@ function RD.ValueText(e)
 end
 
 local function color(e)
-    return NS.Compat.FactionBarColor(e.reaction) or NS.SkinColor("sm.barFill")
+    return NS.Compat.FactionBarColor(e.reaction) or NS.SkinColor("cl.barFill")
 end
 
 --- The bar's values (the shared bar widget's shape), or nil for a header with no bar of its own.

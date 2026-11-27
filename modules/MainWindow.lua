@@ -1,9 +1,9 @@
 local _, NS = ...
 -- modules/MainWindow.lua — NS.MainWindow, the thin shim over the Professions window (item SMW-04 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md), and the key bindings. The window itself is
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md), and the key bindings. The window itself is
 -- modules/Window.lua's factory, one instance per family; the Professions one keeps the old window's
--- frame name, its `/sm show` verb, the launcher's Show window entry and the SkillMasterToggleWindow binding
--- (`/sm professions` runs the same toggle; `/sm toggle` is every window's since R5-SM-05). A call that concerned the old one window as a whole (a refresh, the
+-- frame name, its `/cl show` verb, the launcher's Show window entry and the CharacterLedgerToggleWindow binding
+-- (`/cl professions` runs the same toggle; `/cl toggle` is every window's since R5-SM-05). A call that concerned the old one window as a whole (a refresh, the
 -- applied settings, a stand-down, Reset position, scroll to a skill) now reaches every family window.
 
 local L = NS.L
@@ -28,13 +28,13 @@ W.ShowAndScrollTo = Windows.ShowAndScrollTo
 -- permanent: the client stores the player's key against them, so a rename unbinds every player's key.
 -- Each is plain (no secure template), hidden, one toggle per press, and its click runs that window's one
 -- toggle handler, which refuses while stood down exactly as its verb does.
-W.TOGGLE_BUTTON = "SkillMasterToggleWindow"
-W.JOURNAL_BUTTON = "SkillMasterToggleJournal"
+W.TOGGLE_BUTTON = "CharacterLedgerToggleWindow"
+W.JOURNAL_BUTTON = "CharacterLedgerToggleJournal"
 -- The other families' buttons (SMW-04), [fid] = name: permanent once shipped.
 W.FAMILY_BUTTONS = {
-    skills = "SkillMasterToggleSkills", stats = "SkillMasterToggleStats",
-    currencies = "SkillMasterToggleCurrencies", reputations = "SkillMasterToggleReputations",
-    statistics = "SkillMasterToggleStatistics",
+    skills = "CharacterLedgerToggleSkills", stats = "CharacterLedgerToggleStats",
+    currencies = "CharacterLedgerToggleCurrencies", reputations = "CharacterLedgerToggleReputations",
+    statistics = "CharacterLedgerToggleStatistics",
 }
 
 -- Each window's binding label, in the family order.
@@ -70,7 +70,7 @@ do
         W.__familyButtons[fid] = bindingButton(name, function() Windows.Toggle(fid) end)
     end
     W.__journalButton = bindingButton(W.JOURNAL_BUTTON, function() NS.Journal.Toggle() end)
-    BINDING_HEADER_SKILLMASTER = NS.Constants.BRAND
+    BINDING_HEADER_CHARACTERLEDGER = NS.Constants.BRAND
     NS.BINDINGS = {}
     for _, fid in ipairs(NS.FAMILY_ORDER) do
         local cmd = command(fid == "professions" and W.TOGGLE_BUTTON or W.FAMILY_BUTTONS[fid])

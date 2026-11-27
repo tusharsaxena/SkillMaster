@@ -1,6 +1,6 @@
 local _, NS = ...
 -- settings/BrokerPins.lua — the Broker page's Pins tab (GitHub issue #11; item SMW-06 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md): each broker's pins, in the family order, as
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md): each broker's pins, in the family order, as
 -- one boxed list (settings/BoxList.lua). A feed's heading, then its pins in their order, each with a move
 -- up, a move down and an unpin mark; a feed with none says so. A row's menu in its window pins an element
 -- (modules/Interact.lua); this tab only orders and removes.

@@ -6,7 +6,7 @@ local addonName, NS = ...
 -- the toast's sound. A left-click on a cap toast sets a waypoint to the trainer (NS.Waypoints, T3.3)
 -- or, without it, prints the directions.
 --
--- Owner feedback round 4 (the mockup "Skill Master alert toasts"): a skill-up toast on every point
+-- Owner feedback round 4 (the mockup "Character Ledger alert toasts"): a skill-up toast on every point
 -- (alerts.skillUp, alerts.skillUpScope), green, short-lived (A.SKILLUP_SECONDS), its own sound
 -- switch; skill-ups within A.FOLD_SECONDS of the last share one toast.
 --
@@ -458,7 +458,7 @@ local function alertsTable() return NS.db and NS.db.profile.alerts end
 function A.NewToast()
     if not Toast then return A.ToastStub end
     return Toast:New({
-        owner = addonName, name = "SkillMasterAlertToast", build = A.Build,
+        owner = addonName, name = "CharacterLedgerAlertToast", build = A.Build,
         width = A.WIDTH, stack = A.STACK,
         -- Read right after each build (Toast's present): the kind just built picks its own sound
         -- switch and its life (a skill-up toast is short).

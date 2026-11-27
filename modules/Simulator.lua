@@ -14,7 +14,7 @@ local addonName, NS = ...
 -- (NS.SessionLog:Override), alt snapshots stand aside while a session runs, and the stop puts the
 -- skills model, the alerts' and the broker's session state back as they were.
 --
--- Three surfaces, one handler (preview-mode, options-ui-§15, launcher-§2): `/sm sim …`, the
+-- Three surfaces, one handler (preview-mode, options-ui-§15, launcher-§2): `/cl sim …`, the
 -- launcher's Sim mode entry and the Master-controls Sim mode checkbox, the last two through
 -- NS.IsSimMode / NS.ToggleSim. NS.Sim is the library instance (or the reference stub); this file's
 -- own fields are on NS.SimHost (C.4).
@@ -418,7 +418,7 @@ end
 --- The descriptor (LibKa0s-Sim-1.0, `Sim:New(d)`).
 function H.Descriptor()
     return {
-        name = addonName, seam = NS.SimSeam, slash = "/sm sim",
+        name = addonName, seam = NS.SimSeam, slash = "/cl sim",
         deliver = H.Deliver,
         isStoodDown = function() return NS.IsStoodDown() end,
         scenarios = { names = { H.SCENARIO }, defs = { [H.SCENARIO] = {
@@ -430,7 +430,7 @@ function H.Descriptor()
         refusal = H.Refusal,
         stepDelay = H.STEP_DELAY,
         stopText = {
-            standDown = L["Simulation stopped: Skill Master was disabled."],
+            standDown = L["Simulation stopped: Character Ledger was disabled."],
             combat    = L["Simulation stopped: combat started."],
             profile   = L["Simulation stopped: the profile changed."],
         },
@@ -438,7 +438,7 @@ function H.Descriptor()
         print = function(line) NS.Print(line) end,
         debug = function(_, fmt, ...) NS.Debug("Sim", fmt, ...) end,
         panel = {
-            title = L["Skill Master - Simulation"],
+            title = L["Character Ledger - Simulation"],
             stepLabel = function(step) return H.StepLabel(step) end,
             anchorTo = mainFrame,
             check = NS.Icon("confirm"),
@@ -482,7 +482,7 @@ function NS.IsSimMode() return NS.Sim:IsPanelShown() or NS.Sim:IsActive() end
 --- Whether a session is running (the window's simulation strip reads this).
 function NS.IsSimRunning() return NS.Sim:IsActive() end
 
---- The one toggle: on, what the bare `/sm sim` does (the status, the usage and the step panel);
+--- The one toggle: on, what the bare `/cl sim` does (the status, the usage and the step panel);
 --- off, stop a running session and hide the panel.
 function NS.ToggleSim()
     if NS.IsSimMode() then

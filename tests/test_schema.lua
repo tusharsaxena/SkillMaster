@@ -18,7 +18,7 @@ end)
 test("schema: the Master controls come first, General visibility omitted, Test mode present", function()
     local paths = {}
     for i, row in ipairs(NS.Schema) do paths[row.path] = i end
-    assertEqual(paths.enabled, 1, "Enable Skill Master opens the General page")
+    assertEqual(paths.enabled, 1, "Enable Character Ledger opens the General page")
     assertTrue(paths.visibility == nil, "no General visibility row: the window is opened by the player")
     assertTrue(paths["state.testMode"] ~= nil, "Test mode row")
     assertTrue(paths[NS.Constants.MINIMAP_PATH] ~= nil, "Minimap button row")

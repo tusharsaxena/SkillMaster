@@ -27,7 +27,7 @@ local P = NS.BrokerPanel
 local L = NS.L
 local LAYERS = NS.Constants.LAYERS
 
-P.FRAME_NAME = "SkillMasterBrokerPanel"
+P.FRAME_NAME = "CharacterLedgerBrokerPanel"
 
 -- The main window's own measures (modules/MainWindow.lua), so one Width draws one body: the title
 -- band's bottom (NS.Chrome.TitleBottom, read from the band at each fill; TITLE_H, its no-band figure,
@@ -218,7 +218,7 @@ local function build()
     frame.gains = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     frame.gains:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -PAD, -9)
     -- No onEnd and no click (SMW-07: only a fold chevron acts in the tooltip; test mode ends from the
-    -- window's own strip or /sm test). Docked under the title band by the library, full width (AD-88-SM,
+    -- window's own strip or /cl test). Docked under the title band by the library, full width (AD-88-SM,
     -- LibKa0s#88).
     frame.titleBar = NS.Chrome.TitleBar(frame)
     frame.strip = NS.Widgets.TestStrip(frame, {
@@ -319,7 +319,7 @@ local function layBody()
     local B = NS.Broker
     frame.empty:SetText("")
     if NS.IsStoodDown() then
-        frame.empty:SetText(L["Ka0s Skill Master is disabled."])
+        frame.empty:SetText(L["Ka0s Character Ledger is disabled."])
         return LINE_H + 12
     end
     local skills, stats, more = B.Models()

@@ -5,7 +5,7 @@ local C = NS.Constants
 
 -- The brand in plain text (launcher-§1): the LDB label, the disabled line's subject, the Options
 -- parent title and the diagnostics markers. Never the TOC ## Title, never the folder name.
-C.BRAND = "Ka0s Skill Master"
+C.BRAND = "Ka0s Character Ledger"
 
 -- A real client font as the last rung, never nil (debug-logging-§2).
 C.FALLBACK_FONT = "Fonts\\FRIZQT__.TTF"

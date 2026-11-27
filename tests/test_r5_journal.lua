@@ -1,5 +1,5 @@
 -- tests/test_r5_journal.lua — the Journal rework of owner feedback round 5, addendum A1 (Ka0sAddonsCommonTasks
--- docs/2026-11-26-OWNER_FEEDBACK_ROUND5/A1_SKILLMASTER_MORE.md): "Rework the journal: Track reputations, and
+-- docs/2026-11-26-OWNER_FEEDBACK_ROUND5/A1_CHARACTERLEDGER_MORE.md): "Rework the journal: Track reputations, and
 -- currencies gain/loss here as well; add filters for all column headers; Check if any other rework for journal
 -- is required." R5-SM-10: every reputation or currency change is its own Log row, signed, with the standing it
 -- reached when the standing moved; no row for the login baseline. R5-SM-11 and R5-SM-12 follow below.
@@ -138,7 +138,7 @@ test("r5 sm-10: a reputation grind never pushes a skill-up out: the ring keeps j
 end)
 
 test("r5 sm-10: schemaVersion 19 keeps every stored Log row and fills a change row's missing name", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.char = sv.char or {}
     sv.char["R5-Log"] = { log = {
         { t = 100, key = "fishing", old = 50, new = 51, zone = "Elwynn Forest" },
@@ -307,7 +307,7 @@ test("r5 sm-12: the Log's empty lines and the Clear log question speak of every 
         SL:AddChange("currency", "1901", "Honor Points", 1, 2, M.time() - 600000)
         J.SelectRange("session")
         assertEqual(p.empty:GetText(), "Nothing logged in this range.", "a range with no row")
-        local q = M.StaticPopupDialogs.SKILLMASTER_CLEAR_LOG.text
+        local q = M.StaticPopupDialogs.CHARACTERLEDGER_CLEAR_LOG.text
         assertTrue(q:find("reputation", 1, true) ~= nil and q:find("currency", 1, true) ~= nil,
             "the question names what Clear log removes")
         local row = NS.FindSchemaRow("journal.range")

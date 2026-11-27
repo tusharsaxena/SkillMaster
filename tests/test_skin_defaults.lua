@@ -2,7 +2,7 @@
 -- docs/2026-11-20-SKIN_DEFAULTS_AUDIT, item SD-SK-SM): the waypoint arrow's text color and shadow
 -- follow the skin (SD-SK-SM.2, SM.3), the settings list's eye marks take the skin's icon tint
 -- (SD-SK-SM.1), lines written onto the stock GameTooltip read the gtip family (the owner's U-7), and
--- a trainer card takes the skin's hover wash (the owner's U-31, SkillMaster#9).
+-- a trainer card takes the skin's hover wash (the owner's U-31, CharacterLedger#9).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
@@ -21,17 +21,17 @@ end
 --- answers true, then put the stored choice back. Raises when no skin differs.
 local function underSkinWhere(differs, fn)
     local lib = skinLib()
-    local source, current = lib:GetChoice("SkillMaster")
+    local source, current = lib:GetChoice("CharacterLedger")
     local picked
     for _, opt in ipairs(NS.SKIN_OPTIONS) do
         if opt.value ~= current then
-            lib:SetChoice("SkillMaster", source, opt.value)
+            lib:SetChoice("CharacterLedger", source, opt.value)
             if differs() then picked = opt.value break end
         end
     end
     local ok, err = true, nil
     if picked then ok, err = pcall(fn, picked) end
-    lib:SetChoice("SkillMaster", source, current)
+    lib:SetChoice("CharacterLedger", source, current)
     assertTrue(picked ~= nil, "a shipped skin draws it differently")
     if not ok then error(err, 0) end
 end
@@ -105,9 +105,9 @@ end
 test("skin defaults: a list row's eye takes the skin's icon tint with the Scope cleared, the dim as alpha only (SD-SK-SM.1)", function()
     -- red under: settings/BoxList.lua's SetVertexColor(1, 1, 1, a.dimmed and 0.35 or 1)
     local lib = skinLib()
-    local panel, fonts = lib:GetIgnore("SkillMaster")
+    local panel, fonts = lib:GetIgnore("CharacterLedger")
     withTextureIcons(function(AceGUI)
-        lib:SetIgnore("SkillMaster", false, fonts)
+        lib:SetIgnore("CharacterLedger", false, fonts)
         local ok, err = pcall(function()
             local eye = eyeRow(AceGUI, true)
             assertEqual(rgb(eye.image:GetVertexColor()), tok("icon.tint"), "the skin's icon.tint")
@@ -122,22 +122,22 @@ test("skin defaults: a list row's eye takes the skin's icon tint with the Scope 
             assertEqual(rgb(eye.image:GetVertexColor()), rgb(1, 1, 1), "release gives the pooled image its white back")
             assertEqual(eye.image:GetAlpha(), 1, "and its full alpha")
         end)
-        lib:SetIgnore("SkillMaster", panel, fonts)
+        lib:SetIgnore("CharacterLedger", panel, fonts)
         if not ok then error(err, 0) end
     end)
 end)
 
 test("skin defaults: with Ignore settings panel on, the eye keeps the client's white (SD-SK-SM.1)", function()
     local lib = skinLib()
-    local panel, fonts = lib:GetIgnore("SkillMaster")
+    local panel, fonts = lib:GetIgnore("CharacterLedger")
     withTextureIcons(function(AceGUI)
-        lib:SetIgnore("SkillMaster", true, fonts)
+        lib:SetIgnore("CharacterLedger", true, fonts)
         local ok, err = pcall(function()
             local eye = eyeRow(AceGUI, true)
             assertEqual(rgb(eye.image:GetVertexColor()), rgb(1, 1, 1), "the stock white")
             assertTrue(math.abs(eye.image:GetAlpha() - 0.35) < 1e-6, "still dimmed")
         end)
-        lib:SetIgnore("SkillMaster", panel, fonts)
+        lib:SetIgnore("CharacterLedger", panel, fonts)
         if not ok then error(err, 0) end
     end)
 end)
@@ -235,7 +235,7 @@ local function washOf(card)
     return call and call[1]
 end
 
-test("skin defaults: a trainer card takes the skin's list.hover wash on hover, back on leave (U-31, SkillMaster#9)", function()
+test("skin defaults: a trainer card takes the skin's list.hover wash on hover, back on leave (U-31, CharacterLedger#9)", function()
     -- red under: onCardEnter / onCardLeave painting nothing but the GameTooltip
     withPopup(function()
         local cards = TP.Cards()

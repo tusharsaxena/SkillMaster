@@ -574,20 +574,20 @@ test("round5 rows: a tab draws a column header, its block's heading and two eyes
     local panel, from = showRowsPage()
     local ok, err = pcall(function()
     local captions = {}
-    for _, c in ipairs(createdOf(from, "SkillMasterListCaption")) do
+    for _, c in ipairs(createdOf(from, "CharacterLedgerListCaption")) do
         if c.text ~= "" then captions[#captions + 1] = c end
     end
     assertEqual(#captions, 2, "two column captions")
     assertEqual(captions[1].text, NS.L["Window"])
     assertEqual(captions[2].text, NS.L["LDB tooltip"])
-    local headings = createdOf(from, "SkillMasterListHeading")
+    local headings = createdOf(from, "CharacterLedgerListHeading")
     assertEqual(#headings, 1, "the first tab draws its one block")
     assertEqual(headings[1].text, NS.BlockDefs.primary.title)
     -- Per row: its label, then its window eye, then its tooltip eye.
-    local seq = drawn(from, { SkillMasterListLabel = true, Icon = true })
+    local seq = drawn(from, { CharacterLedgerListLabel = true, Icon = true })
     local lwAt
     for i, w in ipairs(seq) do
-        if w.type == "SkillMasterListLabel" and w.text == NS.L["Leatherworking"] then lwAt = i end
+        if w.type == "CharacterLedgerListLabel" and w.text == NS.L["Leatherworking"] then lwAt = i end
     end
     assertTrue(lwAt ~= nil, "Leatherworking has a row")
     local winEye, tipEye = seq[lwAt + 1], seq[lwAt + 2]
@@ -616,9 +616,9 @@ test("round5 rows: a group heading's eyes show that group's hidden rows again, o
     NS.SetByPath("skills.hidden.fishing", true)   -- another group's
     local panel, from = showRowsPage("weapon")
     local function weaponMarks(since)
-        local seq = drawn(since, { SkillMasterListHeading = true, Icon = true })
+        local seq = drawn(since, { CharacterLedgerListHeading = true, Icon = true })
         for i, w in ipairs(seq) do
-            if w.type == "SkillMasterListHeading" and w.text == NS.BlockDefs.weapon.title then
+            if w.type == "CharacterLedgerListHeading" and w.text == NS.BlockDefs.weapon.title then
                 return seq[i + 1], seq[i + 2]
             end
         end
@@ -651,7 +651,7 @@ test("round5 rows: a hide written while the page is hidden (the row menu) redraw
     NS.SetByPath("broker.tooltip.hiddenStats.speed", true)
     local from
     panel, from = showRowsPage()
-    local labels = createdOf(from, "SkillMasterListLabel")
+    local labels = createdOf(from, "CharacterLedgerListLabel")
     hidePanel(panel)
     clearHidden()
     assertTrue(#labels > 0, "the page drew again")
@@ -710,7 +710,7 @@ end)
 
 local function headingsSince(from)
     local out = {}
-    for _, h in ipairs(createdOf(from, "SkillMasterListHeading")) do out[#out + 1] = h.text end
+    for _, h in ipairs(createdOf(from, "CharacterLedgerListHeading")) do out[#out + 1] = h.text end
     return out
 end
 
@@ -720,16 +720,16 @@ test("round5 review: a hide written elsewhere while the Rows page is on screen r
     local panel = showRowsPage("weapon")
     local ok, err = pcall(function()
         local from = #aceGUI().__created
-        NS.SetByPath("skills.hidden.axes", true)   -- the row menu's Hide, `/sm set`
+        NS.SetByPath("skills.hidden.axes", true)   -- the row menu's Hide, `/cl set`
         M.__fireTimers()
         assertTrue(#headingsSince(from) > 0, "the shown page drew again")
         from = #aceGUI().__created
         NS.SetByPath("skills.hidden.bows", true)
         M.__fireTimers()
-        local seq = drawn(from, { SkillMasterListHeading = true, Icon = true })
+        local seq = drawn(from, { CharacterLedgerListHeading = true, Icon = true })
         local showWin
         for i, w in ipairs(seq) do
-            if w.type == "SkillMasterListHeading" and w.text == NS.BlockDefs.weapon.title then showWin = seq[i + 1] end
+            if w.type == "CharacterLedgerListHeading" and w.text == NS.BlockDefs.weapon.title then showWin = seq[i + 1] end
         end
         assertTrue(showWin ~= nil, "the Weapon Skills heading's window eye")
         from = #aceGUI().__created
@@ -768,7 +768,7 @@ test("round9 rows: one tab per block in the default block order, each drawing on
         local headings = headingsSince(from)
         assertEqual(#headings, 1)
         assertEqual(headings[1], NS.BlockDefs.stats_defense.title)
-        local labels = createdOf(from, "SkillMasterListLabel")
+        local labels = createdOf(from, "CharacterLedgerListLabel")
         assertEqual(#labels, #NS.OptionsRows.Group("stats_defense").rows, "only its block's rows")
     end)
     hidePanel(panel)

@@ -1,6 +1,6 @@
 -- tests/test_m5_leftovers.lua — the M5 leftovers, each red before its fix:
 --   * every HUD color companion defaults on (skinning-§6), and the category and bonus colors keep
---     apart while they follow the skin: owner tokens sm.cat.* / sm.bonus* carry the mockup's colors;
+--     apart while they follow the skin: owner tokens cl.cat.* / cl.bonus* carry the mockup's colors;
 --   * the settings rows the player expects: fill direction, the main window's and the detached
 --     blocks' frame strata (the crafting overlays follow), and one or two columns of blocks;
 --   * a running simulation pins nothing into the character's store;
@@ -46,10 +46,10 @@ test("skin colors: every HUD color companion defaults on, in the defaults and on
 end)
 
 test("skin colors: the category and bonus owner tokens carry the mockup's colors", function()
-    -- red under: no sm.cat.* tokens, and bonus tokens following sem.warn / sem.good.
+    -- red under: no cl.cat.* tokens, and bonus tokens following sem.warn / sem.good.
     local want = {
-        ["sm.cat.primary"] = "5b9be0", ["sm.cat.secondary"] = "5fb36d", ["sm.cat.weapon"] = "d9913f",
-        ["sm.cat.other"] = "a08ce0", ["sm.bonusTemp"] = "7fd8c4", ["sm.bonusPerm"] = "8db8ff",
+        ["cl.cat.primary"] = "5b9be0", ["cl.cat.secondary"] = "5fb36d", ["cl.cat.weapon"] = "d9913f",
+        ["cl.cat.other"] = "a08ce0", ["cl.bonusTemp"] = "7fd8c4", ["cl.bonusPerm"] = "8db8ff",
     }
     for token, h in pairs(want) do
         local def = NS.SKIN_OWNER_TOKENS[token]
@@ -60,19 +60,19 @@ test("skin colors: the category and bonus owner tokens carry the mockup's colors
 end)
 
 test("skin colors: following the skin, each category fills in its own token, not one shared fill", function()
-    -- red under: FillColor answering sm.barFill for every category while colors.fromSkin is on.
+    -- red under: FillColor answering cl.barFill for every category while colors.fromSkin is on.
     local bars = NS.db.profile.bars
     local mode, follow = bars.colorMode, bars.colors.fromSkin
     bars.colorMode, bars.colors.fromSkin = "category", true
     local seen = {}
     for _, cat in ipairs({ "primary", "secondary", "weapon", "other" }) do
         local c = NS.Rows.FillColor({ key = "x", rank = 1, max = 10, category = cat })
-        assertTrue(near(c, NS.SkinColor("sm.cat." .. cat)), cat .. " fills in sm.cat." .. cat)
+        assertTrue(near(c, NS.SkinColor("cl.cat." .. cat)), cat .. " fills in cl.cat." .. cat)
         local sig = ("%.3f %.3f %.3f"):format(c[1], c[2], c[3])
         assertTrue(not seen[sig], cat .. " is told apart from the others")
         seen[sig] = true
     end
-    assertTrue(near(NS.Rows.FillColor({ key = "crit", pct = 10 }, true), NS.SkinColor("sm.cat.stats")), "stats")
+    assertTrue(near(NS.Rows.FillColor({ key = "crit", pct = 10 }, true), NS.SkinColor("cl.cat.stats")), "stats")
     bars.colors.fromSkin = false
     bars.colors.weapon = { 1, 0, 0, 1 }
     assertTrue(near(NS.Rows.FillColor({ key = "x", rank = 1, max = 10, category = "weapon" }), { 1, 0, 0 }),
@@ -275,7 +275,7 @@ test("glyphs: no display string carries a character a shipped skin face cannot d
     -- arrow and the equipped weapon's triangle marker (U+2502, U+258F, U+25B8, U+25BE, U+2197,
     -- U+2212, U+2192). The scan reads every string literal of modules/, settings/ and locales/
     -- (and core/, defaults/), escapes decoded, outside comments and debug-log calls.
-    T.assertDisplayGlyphs{ label = "SkillMaster", include = { "modules/", "settings/", "locales/", "core/", "defaults/" } }
+    T.assertDisplayGlyphs{ label = "CharacterLedger", include = { "modules/", "settings/", "locales/", "core/", "defaults/" } }
 end)
 
 test("glyphs: the guard is falsifiable, a planted arrow is caught", function()

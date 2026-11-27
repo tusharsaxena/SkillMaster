@@ -4,7 +4,7 @@ local _, NS = ...
 
 NS.defaults = {
     profile = {
-        enabled = true,     -- the Enable Ka0s Skill Master row (slash `enable` / `disable`)
+        enabled = true,     -- the Enable Ka0s Character Ledger row (slash `enable` / `disable`)
         scale   = 1,        -- the main window's scale (0.5 .. 2)
         alpha   = 1,        -- the main window's opacity (0 .. 1)
         locked  = false,    -- the main window cannot be dragged while true
@@ -94,7 +94,7 @@ NS.defaults = {
         stats  = { hidden = {} },
         -- T3.1 the bar widget's look (LibKa0s-Widgets-1.0's Bar, through NS.BarStyle). The colors are the player's picks; while
         -- `colors.fromSkin` is on (the default, skinning-§6) the skin's owner tokens draw instead
-        -- (core/SkinSetup.lua, sm.cat.* and sm.bonus*). Both carry the approved mockup's colors
+        -- (core/SkinSetup.lua, cl.cat.* and cl.bonus*). Both carry the approved mockup's colors
         -- (docs/superpowers/specs/2026-11-10-skill-master-mockups).
         -- The rows' in-game icons (Bars > Icons, feedback round 2): shown, their size, how far the
         -- art is cropped each side (the 1.x art's baked-in border; 7 is the old fixed crop), and the
@@ -221,7 +221,7 @@ NS.defaults = {
             -- stored "tomtom" or "native" into "auto".
             method   = "auto",
             announce = true,     -- say in chat where a waypoint was set
-            -- Round 6, R6-11: the native pin comes with Skill Master's own arrow
+            -- Round 6, R6-11: the native pin comes with Character Ledger's own arrow
             -- (modules/WaypointArrow.lua) and is not super-tracked; off, the client's arrow again.
             arrow      = true,
             arrowScale = 1,      -- the arrow frame's scale (0.5 .. 2)
@@ -300,7 +300,7 @@ NS.defaults = {
             currencyCap = false,
             point     = false,  -- the toast stack's drop point, in UIParent's units
         },
-        -- The one broker data feed, "Skill Master" (modules/Broker.lua, design §6.7; feedback round
+        -- The one broker data feed, "Character Ledger" (modules/Broker.lua, design §6.7; feedback round
         -- 2, FB-12). Tokens: modules/Template.lua. schemaVersion 3 carried a stored
         -- `broker.templates.all` here and dropped the other three feeds' templates (core/Database.lua).
         broker = {
@@ -336,8 +336,8 @@ NS.defaults = {
     global = { schemaVersion = 0, minimap = { hide = false }, characters = {} },
     -- Per character: the pins per broker (GitHub issue #11, SMW-06; modules/Pins.lua, its one writer),
     -- { [family] = { key, ... } } in order, up to five each, set from a row's menu and the Broker page's
-    -- Pins tab: each feed's {pinned}. The one-pin fields of before (pinned, the Skill Master feed's skill;
-    -- pinnedStat, round 6's Skill Master Stats stat) are folded into it when read. And the session log's
+    -- Pins tab: each feed's {pinned}. The one-pin fields of before (pinned, the Character Ledger feed's skill;
+    -- pinnedStat, round 6's Character Ledger Stats stat) are folded into it when read. And the session log's
     -- ring (modules/SessionLog.lua).
     -- fold: the tree windows' folds, { [family] = { [nodeKey] = true folded | false open } } (modules/Tree.lua,
     -- its one writer; SMW-03); an absent node takes its family's default.

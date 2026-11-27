@@ -1,16 +1,16 @@
-# Schema — Ka0s Skill Master
+# Schema — Ka0s Character Ledger
 
 ## SavedVariables
 
 Exactly two (savedvariables-§4, toc-file-§2):
 
-- `SkillMasterDB` — AceDB-3.0, defaults from `defaults/Profile.lua`.
-- `SkillMasterPerfDB` — LibKa0s-Perf-1.0's capture ring, outside the profile tree (performance-§5).
+- `CharacterLedgerDB` — AceDB-3.0, defaults from `defaults/Profile.lua`.
+- `CharacterLedgerPerfDB` — LibKa0s-Perf-1.0's capture ring, outside the profile tree (performance-§5).
 
 ## Shape and defaults
 
 ```
-SkillMasterDB
+CharacterLedgerDB
   global
     schemaVersion = 0            -- default 0; the runner raises it to NS.SCHEMA_VERSION (19)
     minimap = { hide = false }   -- LibDBIcon's own table (launcher-§3); LibDBIcon adds minimapPos
@@ -51,10 +51,10 @@ SkillMasterDB
                                  -- "<name>#<depth>", a Statistics categoryID. Never the client's own
                                  -- Expand/Collapse state
   profiles.<name>
-    enabled = true               -- Enable Ka0s Skill Master; /sm enable, /sm disable
+    enabled = true               -- Enable Ka0s Character Ledger; /cl enable, /cl disable
     scale   = 1                  -- Master scale (0.5 .. 2)
     alpha   = 1                  -- Master opacity (0 .. 1)
-    locked  = false              -- Lock frame (and hide the main window's resize grip); /sm lock, /sm unlock, the window's and the Journal's lock marks
+    locked  = false              -- Lock frame (and hide the main window's resize grip); /cl lock, /cl unlock, the window's and the Journal's lock marks
     windows = {                  -- the six family windows (SMW-04, modules/Window.lua; Layout > Window)
       professions = { point = false, width = 420, maxHeight = 560, fitHeight = false, columns = 1,
                       summary = true, strata = "MEDIUM" },   -- point: drop point, written only by modules/Window.lua
@@ -150,7 +150,7 @@ SkillMasterDB
       font, fontColor, useClassColorFont, fontFlags = "@skin", fontShadow, fontFromSkin,
       fontColorFromSkin, fontShadowFromSkin,   -- every other *FromSkin defaults true
       colors = { fromSkin = true, primary, secondary, weapon, other, stats, bonusTemp, bonusPerm },
-                                 -- fromSkin on: the skin's sm.cat.* / sm.bonus* owner tokens draw
+                                 -- fromSkin on: the skin's cl.cat.* / cl.bonus* owner tokens draw
     }                            -- colors are positional { r, g, b, a }
     skills = { showUnlearned = true, hidden = { [key] = true },
                helperTooltip = true,   -- the gathering and fishing lines in a row's tooltip
@@ -196,7 +196,7 @@ SkillMasterDB
     waypoints = { method = "auto", announce = true,    -- method: "auto" (the map pin, else chat) | "chat";
                                                        -- schemaVersion 11 folded a stored "tomtom"
                                                        -- or "native" into "auto" (R7-7, no TomTom)
-                  arrow = true, arrowScale = 1,        -- Skill Master's own arrow (R6-11);
+                  arrow = true, arrowScale = 1,        -- Character Ledger's own arrow (R6-11);
                                                        -- scale 0.5 .. 2
                   arrowStyle = "raised",               -- R8-5, LibKa0s-WaypointArrow-1.0's block:
                                                        -- flat | ridge | raised | faceted | ground
@@ -217,7 +217,7 @@ SkillMasterDB
                   arrowX = 0, arrowY = 200,            -- R9-1, the Position block: offsets from the
                                                        -- screen's center in UIParent's units,
                                                        -- -2000 .. 2000; a drag writes them
-                  arrowLock = false }                  -- the arrow's own lock (not /sm lock)
+                  arrowLock = false }                  -- the arrow's own lock (not /cl lock)
     trainers = { showAll = false,     -- the trainer popup lists every rank (GitHub issue #3, round 2)
                  nameColor = { r, g, b, a }, useClassColorName = false,   -- the trainer popup's
                  nameColorFromSkin = true }   -- trainer name: the skin's accent while on (FB-11)
@@ -273,13 +273,13 @@ LibDBIcon's own.
 | 5 → 6 | `groupsNormalized`, per profile | merged detached windows (round 5, R5-6), `layout.groups`, a new key defaulting to `{}`: nothing carries over; a stored `layout.groups` that is not a table goes, a stored one is normalized against the profile's own blocks (a member that is not a detached block there, a repeat, an empty column and a group of fewer than two go); a profile with none passes through |
 | 6 → 7 | `markersSplit`, per profile | thresholds split per surface (round 6, R6-4): a stored `bars.markers = false` carries to both `bars.markersWindow` and `bars.markersTooltip`; any stored `bars.markers` goes, and otherwise the new defaults answer (window off, row tooltip on) |
 | 7 → 8 | `classicTooltipKept`, per profile | the LDB tooltip's style (round 6, R6-10), `tooltips.ldb.style`, a new key whose default `"window"` is for new profiles only: every profile an earlier install stored gets `"classic"`, today's look, unless it already holds a style, an empty stored profile included (AceDB keeps a never-customized profile as `{}`, and the step runs at OnInitialize, before any new profile exists; the round's review); only a fresh install (the run starts at stamp 0) passes through. The runner hands each step `(sv, profile, from)` for this |
-| 8 → 9 | `statsSectionRetired`, per profile | the stat blocks moved to their own feed, Skill Master Stats (round 6, R6-9), with a switch per stat block (`broker.tooltip.sections.stats_*`, new keys defaulting on): a stored `broker.tooltip.sections.stats` goes; nothing carries over |
+| 8 → 9 | `statsSectionRetired`, per profile | the stat blocks moved to their own feed, Character Ledger Stats (round 6, R6-9), with a switch per stat block (`broker.tooltip.sections.stats_*`, new keys defaulting on): a stored `broker.tooltip.sections.stats` goes; nothing carries over |
 | 9 → 10 | `statsCollapseKept`, per profile | Spell and Defense default to expanded on a new profile (round 6, R6-8; added by the round's review): a profile stored before R6-8 (the run starts at stamp 1 to 6) gets `layout.blocks.stats_spell.collapsed` and `stats_defense.collapsed = true`, the old default AceDB stripped, where none is stored; a stored value stays; a fresh install and a build already on the new default (stamp 7 or later) pass through |
 | 10 → 11 | `waypointMethodFolded`, per profile | no TomTom (round 7, R7-7): `waypoints.method` keeps `"auto"` (the map pin, else chat) and `"chat"`; a stored `"tomtom"` or `"native"` meant the map pin once TomTom is gone, so it goes and the default `"auto"` answers; `"chat"` stays |
 | 11 → 12 | `iconRowColorKept`, per profile | Bars > Icons' Use the row's color (`icons.borderColorFromRow`) defaults off on a new profile (round 7, R7-2): every profile an earlier install stored gets the old `true`, which AceDB stripped, where none is stored, an empty stored profile included (as step 8); a stored value stays; only a fresh install (stamp 0) passes through |
-| 12 → 13 | `foreverDBRetired`, per profile | Skill Master stops reading ForeverDB (ISF-SM-01; only Drop Watcher reads it): a stored `trainers.foreverDB`, SF-SM-02's Use ForeverDB switch, goes whatever it holds; nothing carries over |
+| 12 → 13 | `foreverDBRetired`, per profile | Character Ledger stops reading ForeverDB (ISF-SM-01; only Drop Watcher reads it): a stored `trainers.foreverDB`, SF-SM-02's Use ForeverDB switch, goes whatever it holds; nothing carries over |
 | 13 → 14 | `windowsSplit`, per profile | six family windows (SMW-04): a stored `window.point` and `layout.width`, `maxHeight`, `fitHeight`, `columns`, `summary` and `strata` (rawget: stored choices only) move to `windows.professions` (one already stored there wins), and the old keys go; the other windows start from their defaults, placed next to the Professions window the first time |
-| 14 → 15 | `feedTemplatesSplit`, per profile | one broker feed per family (SMW-05): a stored `broker.template` was the Skill Master feed's, the Professions feed's now, so it moves to `broker.feeds.professions.template` (one stored there other than the default wins) and the old key goes |
+| 14 → 15 | `feedTemplatesSplit`, per profile | one broker feed per family (SMW-05): a stored `broker.template` was the Character Ledger feed's, the Professions feed's now, so it moves to `broker.feeds.professions.template` (one stored there other than the default wins) and the old key goes |
 | 15 → 16 | `tipOpenFromRetired`, per profile | in the LDB tooltip only a section's fold chevron acts (SMW-07): a stored `tooltips.ldb.openFrom` names nothing and goes, whatever it holds |
 | 16 → 17 | `groupWidthCleaned`, per profile | a merged window resizes (R5-SM-08): its column width is stored on its group, `layout.groups[gid].width` (optional; none is its widest member's width); a stored one out of a block's 200..600 is clamped and a non-number goes |
 | 17 → 18 | `subsNormalized`, per profile | detached sub-categories (R5-SM-09), `layout.subs`, a new key defaulting to `{}`: nothing carries over; a stored `layout.subs` that is not a table goes, a stored one is normalized (an id that is no tree header's and a row that is no table go; a kept row is detached, its point a table or false, its width clamped) |

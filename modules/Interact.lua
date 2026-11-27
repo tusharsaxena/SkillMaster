@@ -117,7 +117,7 @@ end
 local function plainPanel(fn)
     return function(row)
         if InCombatLockdown() then
-            NS.Print(L["The character panel opens from Skill Master out of combat."])
+            NS.Print(L["The character panel opens from Character Ledger out of combat."])
             return
         end
         fn(row)
@@ -133,7 +133,7 @@ local OPEN = {
     secure = function(row)
         -- The overlay takes this click when it is armed; reaching here means it is not.
         if InCombatLockdown() then
-            NS.Print(L["Profession windows open from Skill Master out of combat."])
+            NS.Print(L["Profession windows open from Character Ledger out of combat."])
         elseif NS.SecureOverlay then
             local SO, key = NS.SecureOverlay, row.entry.key
             NS.Debug("Click", "no armed crafting overlay under the click: re-synced")

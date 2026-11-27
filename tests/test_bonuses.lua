@@ -348,7 +348,7 @@ test("bonuses: a temp '+N' line that names no skill starts no ticker", function(
 end)
 
 -- WoW Forever 1.60.1, measured in game 2026-11-10: GetBuffDataByIndex raised "Auras cannot be accessed
--- when secret while tainted by 'SkillMaster'" from the ticker.
+-- when secret while tainted by 'CharacterLedger'" from the ticker.
 test("bonuses: a blocked aura read never raises and keeps the last buffs read in full", function()
     local w = {
         race = { "Gnome", "Gnome" }, now = 50,
@@ -359,7 +359,7 @@ test("bonuses: a blocked aura read never raises and keeps the last buffs read in
     withWorld(w, function()
         assertEqual(#NS.Bonuses:Breakdown("fishing").sources, 1, "plain read first")
         M.C_UnitAuras = { GetBuffDataByIndex = function()
-            error("GetBuffDataByIndex(): Auras cannot be accessed when secret while tainted by 'SkillMaster'")
+            error("GetBuffDataByIndex(): Auras cannot be accessed when secret while tainted by 'CharacterLedger'")
         end }
         NS.Bonuses.Invalidate("buffs")
         local ok, b = pcall(NS.Bonuses.Breakdown, NS.Bonuses, "fishing")

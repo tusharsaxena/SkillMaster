@@ -181,7 +181,7 @@ test("options: the flat color mode draws the Bar color, or the skin's while its 
     assertNear(c[1], 0.1, 1e-9, "the player's flat color")
     NS.SetByPath("bars.barColorFromSkin", true)
     c = NS.Rows.FillColor({ key = "bows", rank = 10, max = 100, category = "weapon" })
-    assertEqual(c, NS.SkinColor("sm.barFill"), "the skin's fill")
+    assertEqual(c, NS.SkinColor("cl.barFill"), "the skin's fill")
     NS.Helpers.RestoreDefaults("bars")
     M.__fireTimers()
 end)
@@ -238,7 +238,7 @@ test("options: the library-absent load keeps every hand-written row; the compose
     -- both counts, the delta unmoved.
     -- Round 6 (R6-9): the Broker page's Stats section switch gave way to the stats feed's four stat
     -- block switches, hand-written: -1 +4 = +3 in both counts, the delta unmoved.
-    -- Round 6 (R6-11): Trainers and Waypoints' Show Skill Master's arrow and Arrow scale,
+    -- Round 6 (R6-11): Trainers and Waypoints' Show Character Ledger's arrow and Arrow scale,
     -- hand-written: +2 in both counts, the delta unmoved.
     -- Round 7 (R7-1): Layout > Blocks' Show rows filter on the seven other blocks, hand-written: +7
     -- in both counts, the delta unmoved.

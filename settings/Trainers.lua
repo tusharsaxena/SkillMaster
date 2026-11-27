@@ -1,6 +1,6 @@
 local _, NS = ...
 -- settings/Trainers.lua — the Trainers and Waypoints page (modules/Waypoints.lua): which waypoint a
--- trainer's Go button sets, whether chat says so, the unverified-data mark, Skill Master's own arrow
+-- trainer's Go button sets, whether chat says so, the unverified-data mark, Character Ledger's own arrow
 -- (round 6, R6-11) and its look, colors and scale (round 8, R8-5: LibKa0s-WaypointArrow-1.0's
 -- settings block), its text and position (round 9, R9-1), and the trainer popup's name color (a swatch on the skin's accent by default,
 -- with its class-color companion). FB-SM-06 (the owner, 2026-11-24: "Split Trainers and Waypoint
@@ -50,7 +50,7 @@ NS.RegisterSchemaRows(NS.Live({
       label = L["Say where in chat"], desc = L["Print a chat line naming the trainer when a waypoint is set."] },
 }))
 
--- The Waypoint arrow subgroup. Round 6, R6-11: Skill Master's own arrow (modules/WaypointArrow.lua),
+-- The Waypoint arrow subgroup. Round 6, R6-11: Character Ledger's own arrow (modules/WaypointArrow.lua),
 -- hand-written. Round 8, R8-5: then the library's settings block at NS.WaypointArrow.PATHS, in its
 -- order: Arrow style (Raised by default), Use the skin's colors (on), Far color and Near color
 -- (grayed while the skin's are drawn) and Arrow scale. Round 9, R9-1: then the library's Text block
@@ -62,8 +62,8 @@ NS.RegisterSchemaRows(NS.Live({
 local ARROW = L["Waypoint arrow"]
 NS.RegisterSchemaRows(NS.Live({
     { path = "waypoints.arrow", page = PAGE, group = WAYPOINTS, subgroup = ARROW, type = "bool", default = PW.arrow,
-      label = L["Show Skill Master's arrow"],
-      desc = L["A map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin. With TomTom loaded, TomTom's arrow points instead."],
+      label = L["Show Character Ledger's arrow"],
+      desc = L["A map pin comes with Character Ledger's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin. With TomTom loaded, TomTom's arrow points instead."],
       onChange = function() if NS.WaypointArrow then NS.WaypointArrow.ApplySettings() end end },
 }))
 -- The library's words, keyed as its SETTINGS_STRINGS, through NS.L.
@@ -85,7 +85,7 @@ local ARROW_WORDS = {
     CLASS_COLOR_TIP = L["Draw the arrow's distance in your class color instead of the swatch beside it."],
     CLASS_COLOR_NOTE = L["Not read while Use class color is on, except for its opacity, which always applies."],
     FONT_FLAGS = L["Font flags"],
-    FONT_FLAGS_TIP = L["Outline and monochrome rendering. From skin follows the Font outline setting on Skill Master's Skin tab; any other choice is drawn as picked."],
+    FONT_FLAGS_TIP = L["Outline and monochrome rendering. From skin follows the Font outline setting on Character Ledger's Skin tab; any other choice is drawn as picked."],
     FLAGS_SKIN = L["From skin"], FLAGS_NONE = L["None"], FLAGS_OUTLINE = L["Outline"],
     FLAGS_THICK = L["Thick outline"], FLAGS_MONO = L["Monochrome"], FLAGS_MONO_OUTLINE = L["Monochrome outline"],
     FONT_SHADOW = L["Font shadow"],
@@ -108,7 +108,7 @@ local ARROW_WORDS = {
     Y_OFFSET = L["Y offset"],
     Y_TIP = L["How far above the screen's center the arrow sits; the Arrow scale does not move it. Dragging the arrow sets it."],
     LOCK = L["Lock the arrow"],
-    LOCK_TIP = L["While on, the arrow cannot be dragged. Its right-click menu still opens. /sm lock does not hold the arrow."],
+    LOCK_TIP = L["While on, the arrow cannot be dragged. Its right-click menu still opens. /cl lock does not hold the arrow."],
     RESET_POSITION = L["Reset position"], RESET_POSITION_TIP = L["Put the arrow back at its default position."],
 }
 -- The Position block's Reset position button, keyed by its subgroup, for the page's render.

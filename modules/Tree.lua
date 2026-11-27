@@ -1,6 +1,6 @@
 local _, NS = ...
 -- modules/Tree.lua — the tree row model and its folds (item SMW-03 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md; the spec's "Tree blocks and folding"). One model
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md; the spec's "Tree blocks and folding"). One model
 -- serves the Reputations, Currencies and Statistics windows and their LDB tooltips.
 --
 -- An entry is { depth, header, nodeKey, ... } in display order: a header row (a chevron and its title,

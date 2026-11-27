@@ -656,7 +656,7 @@ end
 local Header = {}
 
 local function paintHeaderBg(h)
-    local c = NS.SkinColor("sm.headerBg")
+    local c = NS.SkinColor("cl.headerBg")
     if c then h.bg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
 end
 
@@ -912,7 +912,7 @@ local function relayout()
     if NS.IsStoodDown and NS.IsStoodDown() then return end
     if NS.MainWindow then NS.MainWindow.Refresh(true) end
     if NS.Detached then NS.Detached.Refresh() end
-    -- The in-game check that a look write reached the bars (/sm debug): the bar height drawn now.
+    -- The in-game check that a look write reached the bars (/cl debug): the bar height drawn now.
     if NS.State.debug then
         local n = 0
         if NS.Windows then

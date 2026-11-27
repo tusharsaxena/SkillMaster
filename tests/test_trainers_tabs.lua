@@ -2,7 +2,7 @@
 -- Trainers and Waypoint into 2 separate tabs"). The Trainers and Waypoints page keeps its key
 -- ("trainers") and its title, and its rows fall into two groups, so RenderTabbedSchema draws two
 -- tabs: Trainers (the trainer data and the trainer popup) first, then Waypoints (the method, the
--- chat line, and Skill Master's arrow with its text and position).
+-- chat line, and Character Ledger's arrow with its text and position).
 local T = _G.SKM_TEST
 local NS = T.NS
 local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue

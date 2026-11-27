@@ -1,4 +1,4 @@
--- tests/test_tooltips.lua — where Skill Master's own tooltips open (LibKa0s#92, AD-92-SM of
+-- tests/test_tooltips.lua — where Character Ledger's own tooltips open (LibKa0s#92, AD-92-SM of
 -- Ka0sAddonsCommonTasks docs/2026-11-17-LIBKA0S_V1_105_ADOPTION/; WowAddonStandards
 -- standalone-windows, *Tooltip placement*, and launcher-§7).
 --

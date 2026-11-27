@@ -108,14 +108,14 @@ end)
 
 test("test_seam_mini_bars_are_the_bar_widget: the broker tooltip draws the Widgets Bar's mini style (the Journal's: test_journal)", function()
     withWorld(function()
-        local tip = M.CreateFrame("GameTooltip", "SkillMasterSeamTip", M.UIParent)
+        local tip = M.CreateFrame("GameTooltip", "CharacterLedgerSeamTip", M.UIParent)
         tip.lines = {}
-        function tip:GetName() return "SkillMasterSeamTip" end
+        function tip:GetName() return "CharacterLedgerSeamTip" end
         function tip:NumLines() return #self.lines end
         function tip:ClearLines() self.lines = {} end
         local function add(...)
             tip.lines[#tip.lines + 1] = { ... }
-            local name = "SkillMasterSeamTipTextLeft" .. #tip.lines
+            local name = "CharacterLedgerSeamTipTextLeft" .. #tip.lines
             _G[name] = _G[name] or M.CreateFrame("Frame", name, tip)
         end
         tip.AddLine, tip.AddDoubleLine = function(_, ...) add(...) end, function(_, ...) add(...) end

@@ -19,8 +19,8 @@ local function runPerf(rest)
 end
 
 local function runResetAll()
-    if StaticPopup_Show and StaticPopupDialogs.SKILLMASTER_RESET_ALL then
-        StaticPopup_Show("SKILLMASTER_RESET_ALL")
+    if StaticPopup_Show and StaticPopupDialogs.CHARACTERLEDGER_RESET_ALL then
+        StaticPopup_Show("CHARACTERLEDGER_RESET_ALL")
     else
         NS.Helpers.RestoreAllDefaults()
         NS.Print(L["All settings reset to defaults."])
@@ -33,10 +33,10 @@ NS.COMMANDS = {
     {"config",      L["Open the settings panel"],                 function() NS.OpenOptionsPanel() end},
     {"skin",        L["Choose a skin: open the skin picker"],     function() NS.RunSkinVerb() end},
     {"show",        L["Show the Professions window"],             function() NS.MainWindow.Show() end},
-    {"hide",        L["Hide every Skill Master window"],          function() NS.Windows.HideAll() end},
-    -- Every window at once (R5-SM-05, the owner's round 5): `/sm professions` is the Professions window's verb,
+    {"hide",        L["Hide every Character Ledger window"],          function() NS.Windows.HideAll() end},
+    -- Every window at once (R5-SM-05, the owner's round 5): `/cl professions` is the Professions window's verb,
     -- the one the launcher's Show window entry and its key binding share (Documented deviations, launcher-§6).
-    {"toggle",      L["Show or hide every Skill Master window"],  function() NS.Windows.ToggleAll() end},
+    {"toggle",      L["Show or hide every Character Ledger window"],  function() NS.Windows.ToggleAll() end},
     -- One verb per family window (SMW-04), in the family order: each its window's one toggle handler.
     {"professions", L["Show or hide the Professions window"],     function() NS.Windows.Toggle("professions") end},
     {"skills",      L["Show or hide the Skills window: weapon skills and other skills"],
@@ -51,19 +51,19 @@ NS.COMMANDS = {
     {"lock",        L["Lock the window in place"],                function() setAndEcho("locked", true) end},
     {"unlock",      L["Unlock the window so it can be dragged"],  function() setAndEcho("locked", false) end},
     {"test",        L["Turn test mode on or off"],                function() NS.ToggleTestMode() end},
-    {"sim",         L["Run the simulator: scripted skill-ups, a lure and a speed change \226\128\148 `/sm sim` shows the steps"],
+    {"sim",         L["Run the simulator: scripted skill-ups, a lure and a speed change \226\128\148 `/cl sim` shows the steps"],
                                                                   function(rest) NS.Sim:RunVerb(rest or "") end},
     {"probe",       L["Report the client's skill and stat API as JSON, to send to the author"],
                                                                   function() NS.Probe.Verb() end},
     {"enable",      L["Turn the addon on"],                       function() setAndEcho("enabled", true) end},
-    {"disable",     L["Turn the addon off \226\128\148 `/sm enable` turns it back on"],
+    {"disable",     L["Turn the addon off \226\128\148 `/cl enable` turns it back on"],
                                                                   function() setAndEcho("enabled", false) end},
     {"list",        L["List every setting and its current value"], function() cli:CliList() end},
-    {"get",         L["Print a setting's current value \226\128\148 `/sm get <path>`"],
+    {"get",         L["Print a setting's current value \226\128\148 `/cl get <path>`"],
                                                                   function(rest) cli:CliGet(rest) end},
-    {"set",         L["Set a setting \226\128\148 `/sm set <path> <value>` (try /sm list)"],
+    {"set",         L["Set a setting \226\128\148 `/cl set <path> <value>` (try /cl list)"],
                                                                   function(rest) cli:CliSet(rest) end},
-    {"reset",       L["Reset one setting to its default \226\128\148 `/sm reset <path>`"],
+    {"reset",       L["Reset one setting to its default \226\128\148 `/cl reset <path>`"],
                                                                   function(rest) cli:CliReset(rest) end},
     {"resetall",    L["Reset this profile to defaults"],          function() runResetAll() end},
     {"debug",       L["Toggle the debug console \226\128\148 `on`/`off` enable/disable logging"],
@@ -73,7 +73,7 @@ NS.COMMANDS = {
         end},
     {"diagnostics", L["Write the diagnostics report to the debug console"],
                                                                   function() NS.DebugLog:RunDiagnostics() end},
-    {"perf",        L["Measure performance \226\128\148 try `/sm perf` for the workflow"],
+    {"perf",        L["Measure performance \226\128\148 try `/cl perf` for the workflow"],
                                                                   function(rest) runPerf(rest) end},
     {"version",     L["Print the addon version"],                 function() cli:CliVersion() end},
 }
@@ -85,12 +85,12 @@ if not SlashLib then
     local DISABLED_LINE_FORMAT = "%s is disabled \226\128\148 enable it with |cFFFFFF00%s|r"
     local function absent(verb)
         return function()
-            NS.Print(L["%s is unavailable: the LibKa0s library did not load."]:format("/sm " .. verb))
+            NS.Print(L["%s is unavailable: the LibKa0s library did not load."]:format("/cl " .. verb))
         end
     end
     local function rows(indent)
         local out = {}
-        for i, e in ipairs(NS.COMMANDS) do out[i] = indent .. "/sm " .. e[1] .. "  " .. e[2] end
+        for i, e in ipairs(NS.COMMANDS) do out[i] = indent .. "/cl " .. e[1] .. "  " .. e[2] end
         return out
     end
     cli = {
@@ -112,7 +112,7 @@ if not SlashLib then
         HelpHeader      = function() return L["v%s slash commands"]:format(NS.Version()) end,
         HelpRows        = function() return rows("  ") end,
         LandingRows     = function() return rows("") end,
-        DisabledLine    = function() return DISABLED_LINE_FORMAT:format(NS.Constants.BRAND, "/sm enable") end,
+        DisabledLine    = function() return DISABLED_LINE_FORMAT:format(NS.Constants.BRAND, "/cl enable") end,
         CliList         = absent("list"),
         CliGet          = absent("get"),
         CliSet          = absent("set"),
@@ -127,8 +127,8 @@ if not SlashLib then
     }
 else
     cli = SlashLib:New({
-        slash        = "/sm",
-        slashAliases = { "/skillmaster" },
+        slash        = "/cl",
+        slashAliases = { "/characterledger" },
         commands     = NS.COMMANDS,                       -- passed IN, never owned by the library
         aliases      = { options = "config" },
         -- The disabled gate (slash-commands-§7): every verb but the live ones refuses on one line.
@@ -154,6 +154,6 @@ NS.Slash = cli
 --- The two chat commands, both onto one dispatcher. Called from OnInitialize.
 function NS.RegisterSlash()
     local function dispatch(msg) cli:OnSlash(msg) end
-    NS.addon:RegisterChatCommand("sm", dispatch)
-    NS.addon:RegisterChatCommand("skillmaster", dispatch)
+    NS.addon:RegisterChatCommand("cl", dispatch)
+    NS.addon:RegisterChatCommand("characterledger", dispatch)
 end

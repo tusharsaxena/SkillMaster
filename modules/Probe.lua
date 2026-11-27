@@ -1,5 +1,5 @@
 local _, NS = ...
--- modules/Probe.lua — `/sm probe`: a one-shot report of the WoW Forever API shapes the data
+-- modules/Probe.lua — `/cl probe`: a one-shot report of the WoW Forever API shapes the data
 -- modules depend on (design §5.4). The owner runs it once in game and sends the JSON back; it
 -- corrects the "assumed (1.12)" rows in docs/forever-quirks.md.
 --
@@ -221,13 +221,13 @@ function P.Summary()
 end
 
 --- The `probe` verb: run the report and write it to the debug console as JSON (LibKa0s#79, the
---- owner's report-routing ruling of 2026-11-08). D:Report writes it ungated under a `/sm probe`
+--- owner's report-routing ruling of 2026-11-08). D:Report writes it ungated under a `/cl probe`
 --- header, reveals a hidden console and prints one chat pointer; the console's Copy carries it out.
 --- Without the library there is no encoder, so the verb refuses in chat and writes nothing.
 function P.Verb()
     local encode = NS.PerfEncodeJSON   -- through core/PerfSetup.lua (library-stack-§7)
     if not encode then
-        NS.Print(L["%s is unavailable: the LibKa0s library did not load."]:format("/sm probe"))
+        NS.Print(L["%s is unavailable: the LibKa0s library did not load."]:format("/cl probe"))
         return nil
     end
     local json = encode(P.Run())

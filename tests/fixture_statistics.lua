@@ -1,5 +1,5 @@
 -- tests/fixture_statistics.lua — the character panel's Statistics tab as the mocks answer it (SMW-10 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md), in Forever's shapes: GetStatisticsCategoryList (a
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md), in Forever's shapes: GetStatisticsCategoryList (a
 -- table ordered by numeric key), GetCategoryInfo (name, parent; -1 a root), GetCategoryNumAchievements,
 -- GetStatistic(categoryID, index) -> quantity, skip, statID (Retail's one-argument form raises) and
 -- GetAchievementInfo(statID) (the name second). Shared by tests/test_statistics.lua and tests/perf.lua.

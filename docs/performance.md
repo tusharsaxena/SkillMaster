@@ -1,6 +1,6 @@
-# Performance — Ka0s Skill Master
+# Performance — Ka0s Character Ledger
 
-The harness is LibKa0s-Perf-1.0 (`core/PerfSetup.lua`), with captures in `SkillMasterPerfDB`.
+The harness is LibKa0s-Perf-1.0 (`core/PerfSetup.lua`), with captures in `CharacterLedgerPerfDB`.
 
 ## Buckets
 
@@ -33,7 +33,7 @@ per iteration, frame methods excluded.
 
 ## Capture
 
-`/sm perf` prints the workflow. A capture holds the latch's `perf` hold: the addon stands down
+`/cl perf` prints the workflow. A capture holds the latch's `perf` hold: the addon stands down
 through the same teardown as `disabled`, with no `/reload`, and feature verbs answer "Not available
 during a performance capture." until it ends.
 

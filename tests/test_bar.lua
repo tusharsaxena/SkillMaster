@@ -163,33 +163,33 @@ end)
 
 -- AD-80-SM: the swap keeps every bar's look. The widget draws this addon's owner tokens, so the
 -- colors a bar paints are the ones modules/Bar.lua painted, and the bonus slots are remapped from
--- the widget's defaults (sem.info / sem.good) onto sm.bonusTemp / sm.bonusPerm.
+-- the widget's defaults (sem.info / sem.good) onto cl.bonusTemp / cl.bonusPerm.
 test("bar: the bars are LibKa0s-Widgets-1.0's Bar, owned by this addon's skin", function()
     local bar = fresh()
     assertTrue(bar.Repaint == M.LibStub("LibKa0s-Widgets-1.0").__barMethods.Repaint, "the library's widget")
-    assertEqual(bar.owner, "SkillMaster", "this addon's skin owner")
+    assertEqual(bar.owner, "CharacterLedger", "this addon's skin owner")
     assertTrue(NS.Bar == nil, "modules/Bar.lua is gone")
 end)
 
-test("bar: the bonus slots are remapped onto sm.bonusTemp and sm.bonusPerm", function()
+test("bar: the bonus slots are remapped onto cl.bonusTemp and cl.bonusPerm", function()
     local style = BS.Resolve("row")
-    assertEqual(style.bonusTemp, "sm.bonusTemp", "the temp slot names the owner token")
-    assertEqual(style.bonusPerm, "sm.bonusPerm", "the permanent slot names the owner token")
+    assertEqual(style.bonusTemp, "cl.bonusTemp", "the temp slot names the owner token")
+    assertEqual(style.bonusPerm, "cl.bonusPerm", "the permanent slot names the owner token")
     local bar = fresh()
     bar:SetValues{ value = 10, max = 100, bonus = 5, bonusKind = "temp" }
-    local want = NS.SkinColor("sm.bonusTemp")
+    local want = NS.SkinColor("cl.bonusTemp")
     for i = 1, 4 do assertNear(bar.bonusColor[i], want[i] or 1, 1e-9, "temp channel " .. i) end
     bar:SetValues{ value = 10, max = 100, bonus = 5, bonusKind = "perm" }
-    want = NS.SkinColor("sm.bonusPerm")
+    want = NS.SkinColor("cl.bonusPerm")
     for i = 1, 4 do assertNear(bar.bonusColor[i], want[i] or 1, 1e-9, "perm channel " .. i) end
 end)
 
 test("bar: a bar paints the owner tokens it painted before the swap", function()
     local bar = fresh()
     bar:SetValues{ value = 50, max = 100 }
-    local fill = NS.SkinColor("sm.barFill")
+    local fill = NS.SkinColor("cl.barFill")
     for i = 1, 4 do assertNear(bar.fillColor[i], fill[i] or 1, 1e-9, "the fill, channel " .. i) end
-    local bg, want = M.__paint(bar.bg).color, NS.SkinColor("sm.barBg")
+    local bg, want = M.__paint(bar.bg).color, NS.SkinColor("cl.barBg")
     for i = 1, 3 do assertNear(bg[i], want[i], 1e-6, "the background, channel " .. i) end
     -- a player's own pick (the colors not following the skin) is handed over as the color itself
     local colors = NS.db.profile.bars.colors

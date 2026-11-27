@@ -41,7 +41,7 @@ local P = NS.TrainerPopup
 local L = NS.L
 local LAYERS = NS.Constants.LAYERS
 
-P.FRAME_NAME = "SkillMasterTrainerPopup"
+P.FRAME_NAME = "CharacterLedgerTrainerPopup"
 local WIDTH, TITLE_H, PAD, CARD_H, BUTTON_H = 380, 26, 10, 54, 26
 -- The small font's line height (the fallback when the client measures nothing), the lines a card's
 -- "Also teaches" line may wrap to (inside the card's 8-unit insets), a rank heading's line, the
@@ -151,7 +151,7 @@ local function restWash(c)
 end
 
 -- A card is clicked, so it takes the skin's list.hover wash while the pointer is on it (the owner's
--- U-31, SkillMaster#9); ListRow is recorded, so a skin switch repaints it. The journal's rows are
+-- U-31, CharacterLedger#9); ListRow is recorded, so a skin switch repaints it. The journal's rows are
 -- not clicked and take none.
 -- Its tooltip: the whole card, the "Also teaches" list unclipped. A card is a BODY element
 -- (LibKa0s#92, AD-92-SM): beside the popup, its window group, level with the card

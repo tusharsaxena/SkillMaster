@@ -67,7 +67,7 @@ test("FB-SM-02 bars: the flat fill, background, border and text draw the class c
         ["bars.fontColor"] = SWATCH, ["bars.fontColorFromSkin"] = true, ["bars.useClassColorFont"] = true,
         ["bars.border"] = true,
     }, function()
-        assertClass(NS.BarStyle.Swatch("barColor", "sm.barFill", "useClassColorBar"), "the flat fill", 0.5)
+        assertClass(NS.BarStyle.Swatch("barColor", "cl.barFill", "useClassColorBar"), "the flat fill", 0.5)
         local st = NS.BarStyle.Resolve("row")
         assertClass(st.bg, "the background", 0.5)
         assertClass(st.text, "the text", 0.5)
@@ -78,7 +78,7 @@ end))
 test("FB-SM-02 bars: with the class off the skin's color still wins over the swatch", function()
     with({ ["bars.bgColor"] = SWATCH, ["bars.bgColorFromSkin"] = true, ["bars.useClassColorBg"] = false },
         function()
-            assertTrue(NS.BarStyle.Resolve("row").bg == "sm.barBg" or type(NS.BarStyle.Resolve("row").bg) == "table"
+            assertTrue(NS.BarStyle.Resolve("row").bg == "cl.barBg" or type(NS.BarStyle.Resolve("row").bg) == "table"
                 and NS.BarStyle.Resolve("row").bg[1] ~= 0.1, "the skin's background, not the swatch")
         end)
 end)

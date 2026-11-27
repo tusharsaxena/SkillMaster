@@ -1,5 +1,5 @@
 -- tests/test_pins.lua — the pins per broker (GitHub issue #11; item SMW-06 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md): char.pins[family], up to five per broker; a
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md): char.pins[family], up to five per broker; a
 -- row's menu toggles its own pin and never removes another; {pinned} joins them and {pinned1}..{pinned5}
 -- render one each; the tooltip lists them first; the Broker page's Pins tab orders and removes; the old
 -- one-pin fields are folded in when read.
@@ -64,7 +64,7 @@ local function skillRow(key) return { kind = "skill", entry = SKILLS[key] } end
 
 local function recordingTip()
     local lines = {}
-    local tip = M.CreateFrame("GameTooltip", "SkillMasterPinsTip", M.UIParent)
+    local tip = M.CreateFrame("GameTooltip", "CharacterLedgerPinsTip", M.UIParent)
     function tip:AddLine(t) lines[#lines + 1] = t end
     function tip:AddDoubleLine(l, r) lines[#lines + 1] = l .. " " .. tostring(r) end
     function tip:NumLines() return #lines end
@@ -203,7 +203,7 @@ test("pins: the Broker page's Pins tab lists each broker's pins, moves and unpin
         local model = NS.OptionsBrokerPins.Model()
         assertEqual(#model, #NS.FAMILY_ORDER, "one list per broker")
         assertEqual(model[1].family, "professions")
-        assertEqual(model[1].title, "Skill Master Professions", "named as the display names the feed")
+        assertEqual(model[1].title, "Character Ledger Professions", "named as the display names the feed")
         local p = model[1].pins
         assertEqual(p[1].label, "Mining")
         assertTrue(p[1].first and not p[1].last and p[2].last, "the ends cannot move past themselves")

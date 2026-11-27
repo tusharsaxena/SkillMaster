@@ -1,4 +1,4 @@
--- tests/run.lua — Ka0s Skill Master's headless runner: the load list, the lifecycle kick and the
+-- tests/run.lua — Ka0s Character Ledger's headless runner: the load list, the lifecycle kick and the
 -- suite list, on the vendored kit (tests/_kit/). Run from the repo root, under the Forever profile
 -- only (clients-§6): KA0S_KIT_CLIENT=forever lua tests/run.lua
 
@@ -9,13 +9,13 @@ local buildMocks = dofile("tests/wow_mock.lua")
 
 local mocks = buildMocks()
 local NS = {}
-Loader.addonName = "SkillMaster"
+Loader.addonName = "CharacterLedger"
 
 -- The vendored library, read out of LibKa0s.xml in XML order (the TOC reaches it through that one
 -- .xml, which tocFiles cannot see); a short hand list would test stubs and stay green.
 local LIB_FILES = Loader.xmlFiles("libs/LibKa0s/LibKa0s.xml")
 -- The addon's own files come from the TOC, so the runner cannot drift from what the client loads.
-local ADDON_FILES = Loader.tocFiles("SkillMaster.toc")
+local ADDON_FILES = Loader.tocFiles("CharacterLedger.toc")
 
 Loader.loadAll(LIB_FILES, NS, mocks)
 Loader.loadAll(ADDON_FILES, NS, mocks)
@@ -92,7 +92,7 @@ Kit.skinValues = { rows = {
 local installIcon = dofile("tests/fixture_icon_widget.lua")
 local boxList = {}
 Kit.skinSwitch = {
-    owner = "SkillMaster",
+    owner = "CharacterLedger",
     skin  = function() return mocks.LibStub("LibKa0s-Skin-1.0") end,
     surfaces = {
         -- On the sample character, so its rows' bars draw fills (Bars of data, expect "texture").

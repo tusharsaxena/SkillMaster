@@ -240,9 +240,9 @@ test("F-005: Clear log asks first, and only an accept clears the stored history"
     M.__popups = {}
     local clear = J.Frame().logPanel.clear
     clear:GetScript("OnClick")(clear, "LeftButton")
-    assertEqual(M.__popups[1], "SKILLMASTER_CLEAR_LOG", "a confirmation")
+    assertEqual(M.__popups[1], "CHARACTERLEDGER_CLEAR_LOG", "a confirmation")
     assertEqual(#NS.db.char.log, 1, "nothing cleared before the accept")
-    M.StaticPopupDialogs.SKILLMASTER_CLEAR_LOG.OnAccept()
+    M.StaticPopupDialogs.CHARACTERLEDGER_CLEAR_LOG.OnAccept()
     assertEqual(#NS.db.char.log, 0, "cleared on accept")
     J.Hide()
 end)
@@ -305,7 +305,7 @@ test("F-010: on a library-absent load the stand-down still takes every bus targe
 end)
 
 test("F-016: the Master controls' Enable row names the brand", function()
-    -- red under: settings/General.lua passing the literal "Skill Master" as addonName
+    -- red under: settings/General.lua passing the literal "Character Ledger" as addonName
     local found
     for _, row in ipairs(NS.Schema) do if row.path == "enabled" then found = row end end
     assertTrue(found ~= nil, "the Enable row")

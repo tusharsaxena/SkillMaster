@@ -1,4 +1,4 @@
--- tests/test_probe.lua — `/sm probe`: the Forever API report the owner runs once in game
+-- tests/test_probe.lua — `/cl probe`: the Forever API report the owner runs once in game
 -- (design §5.4, plan Task 1.2).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
@@ -85,7 +85,7 @@ end)
 -- #79 (AD-79-SM), the owner's report-routing ruling of 2026-11-08: a report is written to the debug
 -- console through D:Report, ungated, revealing a hidden console, with exactly one chat pointer.
 -- Re-pinned from "shows the report as JSON in the copy window", which the console's Copy replaces.
-test("probe: /sm probe writes the JSON report to the debug console with one chat pointer", function()
+test("probe: /cl probe writes the JSON report to the debug console with one chat pointer", function()
     installSkills()
     local D = NS.DebugLog
     local wasOn = NS.State.debug
@@ -102,12 +102,12 @@ test("probe: /sm probe writes the JSON report to the debug console with one chat
     assertEqual(#printed - before, 1, "exactly one chat line: " .. table.concat(printed, " | ", before + 1))
     assertTrue(printed[#printed]:find("lines written to the debug console", 1, true) ~= nil, printed[#printed])
     assertTrue(shown, "the hidden console is revealed")
-    assertTrue(text:find("/sm probe", 1, true) ~= nil, "the report's header names the verb:\n" .. text)
+    assertTrue(text:find("/cl probe", 1, true) ~= nil, "the report's header names the verb:\n" .. text)
     assertTrue(text:find('"skillLines"', 1, true) ~= nil, "the JSON is in the console:\n" .. text)
     assertTrue(NS.Probe.__copy == nil, "the probe's own copy window is gone")
 end)
 
-test("probe: library-absent, /sm probe refuses in chat on one line", function()
+test("probe: library-absent, /cl probe refuses in chat on one line", function()
     local loadDegraded = dofile("tests/degraded_env.lua")
     local NS2 = loadDegraded()
     NS2.addon:OnInitialize()

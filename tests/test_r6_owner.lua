@@ -1,5 +1,5 @@
 -- tests/test_r6_owner.lua — owner feedback round 6 (Ka0sAddonsCommonTasks docs/2026-11-27-OWNER_FEEDBACK_ROUND6/).
--- R6-SM-01: "Rename secondary skills to secondary professions": every label Skill Master gives that group reads
+-- R6-SM-01: "Rename secondary skills to secondary professions": every label Character Ledger gives that group reads
 -- Secondary Professions; the client's own Skills-tab header ("Secondary Skills") is game data and still files
 -- Cooking, First Aid and Fishing there, and the block's id, its saved settings and its short label stay.
 -- R6-SM-02: the Journal Log's Type column (below).
@@ -227,7 +227,7 @@ test("r6 sm-03: each Type cell is drawn in its kind's own color, three distinct,
             assertTrue(type(c) == "table", "a color for " .. k)
             want[JF.KindLabel(k)] = rgb(c[1], c[2], c[3])
         end
-        local muted = NS.SkinColor("text.muted") or NS.SkinColor("sm.muted")
+        local muted = NS.SkinColor("text.muted") or NS.SkinColor("cl.muted")
         local seen = {}
         for _, row in ipairs(logRows()) do
             local fs = row.cols[3]
@@ -343,7 +343,7 @@ test("r6 sm-04: an unlearned Alts cell reads '-' in the muted style, and has no 
         local cell = altCell("primary", "mining")
         assertTrue(cell.unlearned:IsShown(), "the hunter can learn Mining and has not")
         assertEqual(cell.unlearned:GetText(), "-", "renamed from Unlearned")
-        local muted = NS.SkinColor("text.muted") or NS.SkinColor("sm.muted")
+        local muted = NS.SkinColor("text.muted") or NS.SkinColor("cl.muted")
         assertEqual(rgb(cell.unlearned:GetTextColor()), rgb(muted[1], muted[2], muted[3]), "muted")
         local s, shown = hover(rec, cell)
         assertFalse(shown, "no tooltip on an unlearned cell")

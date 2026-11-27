@@ -81,9 +81,9 @@ function JF.KindOf(e) return e.kind or "skill" end
 function JF.KindLabel(kind) return KIND_LABEL[kind or "skill"] or tostring(kind) end
 
 -- Each kind's own color (R6-SM-03): an owner token (core/SkinSetup.lua), the Type cells' and the Type menu's.
-local KIND_TOKEN = { skill = "sm.type.skill", reputation = "sm.type.reputation", currency = "sm.type.currency" }
+local KIND_TOKEN = { skill = "cl.type.skill", reputation = "cl.type.reputation", currency = "cl.type.currency" }
 
---- A kind's color token, as the Type column paints it (NS.Skin.Text takes the name): "sm.type.skill", ...
+--- A kind's color token, as the Type column paints it (NS.Skin.Text takes the name): "cl.type.skill", ...
 function JF.KindToken(kind) return KIND_TOKEN[kind or "skill"] or KIND_TOKEN.skill end
 
 --- A kind's color now, { r, g, b, a }: the token through the skin, else its own default.

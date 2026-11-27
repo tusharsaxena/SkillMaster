@@ -1,4 +1,4 @@
-# Common tasks — Ka0s Skill Master
+# Common tasks — Ka0s Character Ledger
 
 ## Add a setting
 

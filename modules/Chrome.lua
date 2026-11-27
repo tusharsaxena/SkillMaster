@@ -1,5 +1,5 @@
 local addonName, NS = ...
--- modules/Chrome.lua — the small chrome every Skill Master surface shares: the title-bar and header
+-- modules/Chrome.lua — the small chrome every Character Ledger surface shares: the title-bar and header
 -- icon controls (standalone-windows: catalog marks at one size and one pitch, a plain glyph as the
 -- fallback rung) and the hover tooltip line they carry.
 --

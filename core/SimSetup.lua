@@ -31,7 +31,7 @@ NS.NewSimSeamStub = newSeamStub   -- the surface-parity case builds one to compa
 
 if Sim then
     NS.SimSeam = Sim:NewSeam(NS.Compat, {
-        name    = "SkillMaster",
+        name    = "CharacterLedger",
         guarded = GUARDED,
         -- NS.Debug loads later (core/DebugLogSetup.lua); the seam reaches it at call time.
         debug   = function(tag, fmt, ...) if NS.Debug then NS.Debug(tag, fmt, ...) end end,

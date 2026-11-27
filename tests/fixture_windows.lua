@@ -1,5 +1,5 @@
 -- tests/fixture_windows.lua — the suites' view of the three skill and stat windows as one (SMW-04 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md). Before the split, one window drew the eight
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md). Before the split, one window drew the eight
 -- skill and stat blocks; the cases written against it read its rows, its headers and its frame. This
 -- view shows the Professions, Skills and Character Stats windows together and answers their rows and
 -- headers as one list, so those cases keep asserting what each block draws; a member it does not

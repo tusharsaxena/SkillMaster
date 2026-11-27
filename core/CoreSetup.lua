@@ -94,6 +94,6 @@ NS.MakeResizable = lib.MakeResizable
 local printer = lib:New({ prefix = function() return NS.PREFIX end })
 
 -- NS.Print and NS.Util.print are ONE function object: AceAddon's AceConsole embed stamps its own
--- :Print over NS.Print, and core/SkillMaster.lua reclaims it from NS.Util.print (architecture-§2).
+-- :Print over NS.Print, and core/CharacterLedger.lua reclaims it from NS.Util.print (architecture-§2).
 NS.Print = printer.Print
 NS.Util.print = NS.Print

@@ -1,6 +1,6 @@
 local addonName, NS = ...
 -- core/PerfSetup.lua — NS.Perf from LibKa0s-Perf-1.0 (performance): the declared buckets, the
--- capture ring SkillMasterPerfDB, and the `perf` verb's act. No `decorate` hook: the library draws
+-- capture ring CharacterLedgerPerfDB, and the `perf` verb's act. No `decorate` hook: the library draws
 -- the panel's close control from addonName.
 --
 -- LOAD-BEARING: before any module that takes `local Perf = NS.Perf` as a load-time upvalue.
@@ -24,7 +24,7 @@ NS.Perf = lib:New({
     name      = addonName,
     addonName = addonName,
     title     = NS.Constants.BRAND,
-    slash     = "/sm",
+    slash     = "/cl",
     version   = NS.version,
     sv        = addonName .. "PerfDB",
     -- Declared in report order. Each is reached by a real bracket (tests/test_perf.lua):

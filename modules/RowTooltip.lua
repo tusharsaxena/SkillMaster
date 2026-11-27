@@ -232,9 +232,9 @@ local TONES = {
 RT.TONES = TONES
 
 local function toneColor(tone)
-    if tone == "temp" then return Bar.PlayerColor("bonusTemp", "sm.bonusTemp") end
-    if tone == "perm" then return Bar.PlayerColor("bonusPerm", "sm.bonusPerm") end
-    return NS.SkinColor(TONES[tone] or "gtip.body") or NS.SkinColor("sm.barText")
+    if tone == "temp" then return Bar.PlayerColor("bonusTemp", "cl.bonusTemp") end
+    if tone == "perm" then return Bar.PlayerColor("bonusPerm", "cl.bonusPerm") end
+    return NS.SkinColor(TONES[tone] or "gtip.body") or NS.SkinColor("cl.barText")
 end
 
 local tipBar

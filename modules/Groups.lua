@@ -563,7 +563,7 @@ local function applyPoint(f, g)
 end
 
 local function paintSubBg(sh)
-    local c = NS.SkinColor("sm.headerBg")
+    local c = NS.SkinColor("cl.headerBg")
     if c then sh.bg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
 end
 

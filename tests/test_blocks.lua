@@ -164,7 +164,7 @@ test("rows: the color modes", function()
     bars.colors.fromSkin = false
     assertEqual(R.FillColor(e), bars.colors.primary)
     bars.colors.fromSkin = true
-    assertEqual(R.FillColor(e), NS.SkinColor("sm.cat.primary"), "a category color that follows the skin")
+    assertEqual(R.FillColor(e), NS.SkinColor("cl.cat.primary"), "a category color that follows the skin")
     bars.colorMode = "progress"
     assertTrue(type(R.FillColor(e)) == "table")
     bars.colorMode = "likelihood"
@@ -226,7 +226,7 @@ test("mainwindow: a skin switch restyles every bar, header and icon well, not on
     withWorld(function()
         W.Show()
         local Skin = M.LibStub("LibKa0s-Skin-1.0")
-        local source, current = Skin:GetChoice("SkillMaster")
+        local source, current = Skin:GetChoice("CharacterLedger")
         local other
         for _, def in ipairs(Skin:Skins()) do if def.key ~= current then other = def.key break end end
         assertTrue(other ~= nil, "a second skin to switch to")
@@ -244,8 +244,8 @@ test("mainwindow: a skin switch restyles every bar, header and icon well, not on
         local header = W.HeaderFor("weapon")
         local hr = header.bg.SetColorTexture
         header.bg.SetColorTexture = function(t, ...) headerPaints = headerPaints + 1 return hr(t, ...) end
-        local ok, err = pcall(function() Skin:SetChoice("SkillMaster", source, other) end)
-        Skin:SetChoice("SkillMaster", source, current)
+        local ok, err = pcall(function() Skin:SetChoice("CharacterLedger", source, other) end)
+        Skin:SetChoice("CharacterLedger", source, current)
         for _, row in ipairs(rows) do row.bar.ApplyStyle, row.iconBg.SetColorTexture = realStyle[row], nil end
         header.bg.SetColorTexture = nil
         if not ok then error(err, 0) end

@@ -1,9 +1,9 @@
-# Debug — Ka0s Skill Master
+# Debug — Ka0s Character Ledger
 
 ## The console
 
-LibKa0s-DebugLog-1.0's console (`core/DebugLogSetup.lua`). `/sm debug` toggles the window;
-`/sm debug on` and `/sm debug off` turn logging on and off. The flag is session-only
+LibKa0s-DebugLog-1.0's console (`core/DebugLogSetup.lua`). `/cl debug` toggles the window;
+`/cl debug on` and `/cl debug off` turn logging on and off. The flag is session-only
 (`NS.State.debug`, off at every login and `/reload`, never saved) and independent of the window, so a
 bug can be reproduced with the console closed and read afterwards. Lines are tag-first:
 `[Set]` (the write seam), `[Test]` (test mode and its sample data), `[Sim]` (the simulator and its
@@ -16,17 +16,17 @@ queued until combat ends) and `[Arrow]` (the waypoint arrow's library lines), pl
 ## Reports
 
 A report is a multi-line read-out the player asks for by name (the owner's report-routing ruling of
-2026-11-08, debug-logging). `/sm probe` is this addon's one report verb besides diagnostics: it writes
+2026-11-08, debug-logging). `/cl probe` is this addon's one report verb besides diagnostics: it writes
 the probe's JSON through `NS.DebugLog:Report("Probe", "probe", fn)`, ungated (it lands with logging
-off), under a `/sm probe` header line. A hidden console opens, and chat gets exactly one pointer line,
+off), under a `/cl probe` header line. A hidden console opens, and chat gets exactly one pointer line,
 `probe: N lines written to the debug console. Use Copy to share it.` (`REPORT_WRITTEN`, localized
 through the descriptor's `L`). Without the library the probe has no JSON encoder, so it refuses in
 chat on one line and writes nothing. Acknowledgments, refusals, usage, `help` and the reserved
-`/sm list` stay in chat; the Journal shows its log in its own window and has no chat read-out.
+`/cl list` stay in chat; the Journal shows its log in its own window and has no chat read-out.
 
 ## The diagnostics report
 
-Two forms and no third: `/sm diagnostics` and `/sm debug diagnostics`, plus the console title bar's
+Two forms and no third: `/cl diagnostics` and `/cl debug diagnostics`, plus the console title bar's
 Diagnostics link. All three run `NS.DebugLog:RunDiagnostics()`.
 
 - It runs while the addon is disabled.
@@ -36,7 +36,7 @@ Diagnostics link. All three run `NS.DebugLog:RunDiagnostics()`.
   Copy carries the trace and the report.
 - It stays under the library's line cap and per-list caps; a capped report ends with a `truncated` line.
 
-The library writes both markers (with the brand `Ka0s Skill Master`), the identity header (client
+The library writes both markers (with the brand `Ka0s Character Ledger`), the identity header (client
 build, locale, debug flag, combat reads, the LibKa0s minors, the `[Init]` summary) and a guard per
 section. This addon writes the sections, in `modules/Diagnostics.lua`:
 

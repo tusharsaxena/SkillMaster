@@ -7,10 +7,10 @@ exclude_files = { "libs/", "docs/audits/", "docs/reviews/", "docs/revendor/", "_
 ignore = { "212/self", "212/event" }
 
 globals = {
-  "SkillMasterDB",               -- the SavedVariables write target
-  "SkillMasterPerfDB",           -- the perf capture ring (core/PerfSetup.lua, performance-§5)
+  "CharacterLedgerDB",               -- the SavedVariables write target
+  "CharacterLedgerPerfDB",           -- the perf capture ring (core/PerfSetup.lua, performance-§5)
   "StaticPopupDialogs",          -- the reset confirmation (settings/General.lua)
-  "BINDING_HEADER_SKILLMASTER",  -- the key binding's category title (modules/MainWindow.lua)
+  "BINDING_HEADER_CHARACTERLEDGER",  -- the key binding's category title (modules/MainWindow.lua)
   "UISpecialFrames",             -- Escape closes the main window (modules/MainWindow.lua)
 }
 

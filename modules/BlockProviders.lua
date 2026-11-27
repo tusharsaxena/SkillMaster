@@ -1,6 +1,6 @@
 local _, NS = ...
 -- modules/BlockProviders.lua — the data providers the block engine dispatches on (item SMW-02 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md). A block's def names its provider by `source`
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md). A block's def names its provider by `source`
 -- (NS.BlockDefs[id].source, the family's `source` in defaults/Families.lua), and modules/Blocks.lua reads
 -- NS.Blocks.PROVIDERS[source] at CALL time instead of branching on skills or stats, so a new family adds a
 -- provider here and no branch there. Each provider is:

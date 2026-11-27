@@ -1,12 +1,12 @@
 ## Interface: 16001
 ## AllowLoadGameType: camelot
 ## ExcludeLoadGameType: standard
-## Title: Ka0s Skill Master
-## Notes: Weapon skills, professions and character stats as customizable bars, for WoW Forever.
+## Title: Ka0s Character Ledger
+## Notes: Skills, professions, stats, reputations and currencies as customizable bars, for WoW Forever.
 ## Author: add1kted2ka0s
 ## Version: 0.1.0
-## IconTexture: Interface\AddOns\SkillMaster\media\logos\skillmaster.logo.128.tga
-## SavedVariables: SkillMasterDB, SkillMasterPerfDB
+## IconTexture: Interface\AddOns\CharacterLedger\media\logos\characterledger.logo.128.tga
+## SavedVariables: CharacterLedgerDB, CharacterLedgerPerfDB
 ## OptionalDeps: Ace3, LibStub, CallbackHandler-1.0, LibSharedMedia-3.0, LibDataBroker-1.1, LibDBIcon-1.0, EllesmereUI
 ## DefaultState: enabled
 ## Category-enUS: UI
@@ -86,7 +86,7 @@ core\PerfSetup.lua
 # LOAD-BEARING: after Constants (FONT_MONO), State (the flag) and CoreSetup (the printer); before any NS.Debug call.
 core\DebugLogSetup.lua
 # LOAD-BEARING: NewAddon(NS, ...) and the NS.Print reclaim at FILE SCOPE, so it follows core\CoreSetup.lua.
-core\SkillMaster.lua
+core\CharacterLedger.lua
 core\Database.lua
 # Conventional: builds the launcher object at load; Register() runs from OnEnable.
 core\LauncherSetup.lua
@@ -153,7 +153,7 @@ modules\Interact.lua
 modules\RowTooltip.lua
 modules\TrainerPopup.lua
 modules\Waypoints.lua
-# R6-11, R8-5: Skill Master's waypoint arrow, an adapter on LibKa0s-WaypointArrow-1.0 (resolved at
+# R6-11, R8-5: Character Ledger's waypoint arrow, an adapter on LibKa0s-WaypointArrow-1.0 (resolved at
 # FILE SCOPE, after libs\LibKa0s\LibKa0s.xml); registers USER_WAYPOINT_UPDATED on its own bus target at
 # FILE SCOPE (after core\Bus.lua); publishes NS.WaypointArrow.SettingsRows, read by settings\Trainers.lua
 # at FILE SCOPE (the # Modules -> # Settings order guarantees it); reads NS.Compat, NS.Trainers and
@@ -166,7 +166,7 @@ modules\Window.lua
 # SCOPE). Publishes NS.BINDINGS, read by settings\General.lua at FILE SCOPE; the # Modules -> # Settings
 # order guarantees it.
 modules\MainWindow.lua
-# Conventional: `/sm probe`; reads core\ members only at FILE SCOPE (NS.Widgets, NS.Constants).
+# Conventional: `/cl probe`; reads core\ members only at FILE SCOPE (NS.Widgets, NS.Constants).
 modules\Probe.lua
 # Conventional: the probe's factions, currencies and statistics sections; reads NS.Probe at FILE SCOPE.
 modules\ProbeSections.lua
@@ -176,7 +176,7 @@ modules\SkillData.lua
 modules\Trainers.lua
 # Conventional: publishes NS.SkillHelpers (NS.Helpers is the options library, settings\OptionsSetup.lua).
 modules\Helpers.lua
-# T2.2: defines NS.addon:OnBonusesUnitChanged at FILE SCOPE, so it follows core\SkillMaster.lua; reads NS.SkillData at call time.
+# T2.2: defines NS.addon:OnBonusesUnitChanged at FILE SCOPE, so it follows core\CharacterLedger.lua; reads NS.SkillData at call time.
 modules\Bonuses.lua
 # Conventional: the DebugLog descriptor asks for its sections at RUN time.
 modules\Diagnostics.lua

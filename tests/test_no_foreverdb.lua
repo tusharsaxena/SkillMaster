@@ -1,7 +1,7 @@
--- tests/test_no_foreverdb.lua — Skill Master reads no ForeverDB (item ISF-SM-01 of Ka0sAddonsCommonTasks
+-- tests/test_no_foreverdb.lua — Character Ledger reads no ForeverDB (item ISF-SM-01 of Ka0sAddonsCommonTasks
 -- docs/2026-11-25-ITEM_SEARCH_FEEDBACK/, spec §8: only Drop Watcher reads ForeverDB). SF-SM-02 had
 -- added an optional ForeverDB reader (modules/ForeverDBSources.lua, Trainers > Use ForeverDB); it is
--- gone, so a book rank's sources and a trainer's position come from Skill Master's own data alone.
+-- gone, so a book rank's sources and a trainer's position come from Character Ledger's own data alone.
 --
 -- The characterization cases SF-SM-02 wrote before its feature pin exactly that display, and they
 -- stay: a book rank's row tooltip says who sells the book and nothing more, and a trainer record with
@@ -66,7 +66,7 @@ local function coordless(extra)
 end
 
 -- ---------------------------------------------------------------------------------------------
--- Characterization: the display from Skill Master's own data (pinned by SF-SM-02, kept)
+-- Characterization: the display from Character Ledger's own data (pinned by SF-SM-02, kept)
 -- ---------------------------------------------------------------------------------------------
 
 test("characterization: Fishing 150/150's row tooltip names the next rank and its book seller, then the hint", function()
@@ -132,7 +132,7 @@ local function ownLuaFiles()
         seen[rel] = true
         out[#out + 1] = rel
     end
-    for _, rel in ipairs(T.Loader.tocFiles("SkillMaster.toc")) do add(rel) end
+    for _, rel in ipairs(T.Loader.tocFiles("CharacterLedger.toc")) do add(rel) end
     local ok, p = pcall(io.popen, "find . -name '*.lua' -not -path './libs/*' -not -path './tests/_kit/*' -not -path './.git/*' 2>/dev/null")
     if ok and p then
         for line in p:lines() do add(line) end
@@ -157,7 +157,7 @@ test("no ForeverDB: no addon Lua file outside libs/ and tests/_kit/ reads Foreve
 end)
 
 test("no ForeverDB: the TOC and .pkgmeta name no ForeverDB dependency, and the module is gone", function()
-    local toc = readFile("SkillMaster.toc")
+    local toc = readFile("CharacterLedger.toc")
     for line in (toc .. "\n"):gmatch("([^\n]*)\n") do
         if line:match("^##") then assertTrue(line:find("ForeverDB") == nil, "TOC: " .. line) end
         assertTrue(line:find("ForeverDBSources") == nil, "TOC lists the module: " .. line)
@@ -176,7 +176,7 @@ test("no ForeverDB: no Use ForeverDB setting, default or string", function()
 end)
 
 test("no ForeverDB: schemaVersion 13 drops a stored trainers.foreverDB from every profile", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["ISF-Off"] = { trainers = { foreverDB = false, showAll = true } }
     sv.profiles["ISF-On"] = { trainers = { foreverDB = true } }

@@ -127,7 +127,7 @@ function NS.RegisterSchemaPage(key, title, spec)
     spec = spec or {}
     NS.RegisterOptionsPage(key, title, function(mainCategory)
         local H = NS.Helpers
-        local ctx = H.CreatePanel("SkillMaster" .. key:gsub("^%l", string.upper) .. "Panel", title, {
+        local ctx = H.CreatePanel("CharacterLedger" .. key:gsub("^%l", string.upper) .. "Panel", title, {
             pageKey         = key,
             defaultsButton  = true,
             defaultsTooltip = spec.defaultsTooltip
@@ -146,7 +146,7 @@ end
 
 local descriptor = {
     parentTitle   = NS.Constants.BRAND,
-    mainPanelName = "SkillMasterMainPanel",
+    mainPanelName = "CharacterLedgerMainPanel",
     addonName     = addonName,   -- the FOLDER (library-stack-§8), never a display label
 
     get          = function(path) return NS.GetSetting(path) end,

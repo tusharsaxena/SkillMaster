@@ -1,6 +1,6 @@
 local _, NS = ...
 -- modules/CurrencyData.lua — the currencies model (GitHub issue #7; item SMW-09 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md, the spec's "Currencies (#7)"), a sibling of
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md, the spec's "Currencies (#7)"), a sibling of
 -- modules/RepData.lua. It reads the client's currency list (NS.Compat, C_CurrencyInfo on WoW Forever) into the
 -- Currency tab's own headers (by currencyListDepth) and announces CURRENCIES_UPDATED; an amount that moved is
 -- CURRENCY_CHANGED (the Journal's session gains, the optional cap alert).
@@ -297,7 +297,7 @@ end
 function CD.BarValues(e)
     if not e.hasBar then return nil end
     return { value = math.min(e.quantity or 0, e.maxQuantity), max = e.maxQuantity, text = CD.ValueText(e),
-             color = NS.BarStyle.Swatch("barColor", "sm.barFill", "useClassColorBar") }
+             color = NS.BarStyle.Swatch("barColor", "cl.barFill", "useClassColorBar") }
 end
 
 -- The amount, and a capped currency's cap (in the warning tone at the cap) with its bar.

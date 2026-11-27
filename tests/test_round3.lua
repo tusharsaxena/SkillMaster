@@ -100,7 +100,7 @@ end)
 test("round3 sort: the LDB tooltip lists a section in its block's order", function()
     withWorld(function()
         set("layout.blocks.weapon.sort", "valueAsc")
-        local rows = B.FillTooltip(M.CreateFrame("GameTooltip", "SkillMasterRound3Tip", M.UIParent, "GameTooltipTemplate"),
+        local rows = B.FillTooltip(M.CreateFrame("GameTooltip", "CharacterLedgerRound3Tip", M.UIParent, "GameTooltipTemplate"),
             "skills")   -- SMW-05: the weapons are the Skills feed's
         local got = {}
         for _, r in ipairs(rows) do
@@ -210,7 +210,7 @@ test("round3 broker: a tooltip row opens no menu; the tooltip's own Hide set sti
 end)
 
 test("round3 broker: the bars stop at the widest value, never past the old fixed column", function()
-    local tip = M.CreateFrame("GameTooltip", "SkillMasterRound3Inset", M.UIParent, "GameTooltipTemplate")
+    local tip = M.CreateFrame("GameTooltip", "CharacterLedgerRound3Inset", M.UIParent, "GameTooltipTemplate")
     local inset = B.ValueInset(tip)
     assertTrue(inset > 0 and inset <= 124, "within the old 124 px column: " .. tostring(inset))
 end)

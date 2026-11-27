@@ -3,12 +3,12 @@ local _, NS = ...
 -- when the real TomTom is loaded, else the client's native user waypoint (C_Map.SetUserWaypoint,
 -- feature-detected), else the directions in chat. A trainer without coordinates (most profession
 -- trainers: the data never guesses a pin, defaults/Trainers_Forever.lua) always goes to chat. The
--- native pin comes with Skill Master's own arrow (modules/WaypointArrow.lua, round 6, R6-11) and is
--- not super-tracked, unless Show Skill Master's arrow is off: then the pin is super-tracked and the
+-- native pin comes with Character Ledger's own arrow (modules/WaypointArrow.lua, round 6, R6-11) and is
+-- not super-tracked, unless Show Character Ledger's arrow is off: then the pin is super-tracked and the
 -- client's arrow points.
 --
 -- TomTom (AF-SM-TOMTOM, owner img-19, 2026-11-19): with TomTom loaded, the native pin left nothing,
--- because TomTom takes the client's user waypoint over and clears it, and Skill Master's arrow
+-- because TomTom takes the client's user waypoint over and clears it, and Character Ledger's arrow
 -- follows the pin away. So the real TomTom, told by its folder name (NS.Compat.TomTom; round 7's
 -- R7-7 dropped TomTom over another addon answering TomTom's API, which this still ignores), gets the
 -- waypoint and its arrow points; ours stays hidden. A TomTom that raises falls back to the pin.
@@ -86,11 +86,11 @@ local function viaTomTom(t)
     local tt = NS.Compat.TomTom()
     if not tt then return false end
     return (pcall(tt.AddWaypoint, tt, t.mapID, t.x / 100, t.y / 100, {
-        title = t.name, from = L["Skill Master"], persistent = false, minimap = true, world = true,
+        title = t.name, from = L["Character Ledger"], persistent = false, minimap = true, world = true,
     }))
 end
 
--- The native pin, super-tracked (the client's own arrow) unless Skill Master's arrow points the way
+-- The native pin, super-tracked (the client's own arrow) unless Character Ledger's arrow points the way
 -- (round 6, R6-11: NS.WaypointArrow.Wanted); then the pin is set and explicitly not
 -- super-tracked, so an earlier pin's client arrow goes away too.
 local function viaNative(t, ownArrow)

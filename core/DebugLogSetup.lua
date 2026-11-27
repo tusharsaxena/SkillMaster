@@ -19,7 +19,7 @@ if not lib then
     end
     local noop = function() end
     local function diagnosticsAbsent()
-        NS.Print(NS.L["%s is unavailable: the LibKa0s library did not load."]:format("/sm diagnostics"))
+        NS.Print(NS.L["%s is unavailable: the LibKa0s library did not load."]:format("/cl diagnostics"))
         return 0
     end
     NS.DebugLog = {
@@ -54,7 +54,7 @@ if not lib then
         BuildDiagnostics = function() return { lines = {}, dropped = 0, capped = false, capsHit = false } end,
         -- Report and Serialize, new at LibKa0s v1.105.0 (DebugLog minor 23), the library's
         -- suggested stub: with no console the report streams to chat with no pointer, and a
-        -- serialize answers one line. `/sm probe` reaches neither here: with no library it has no
+        -- serialize answers one line. `/cl probe` reaches neither here: with no library it has no
         -- JSON encoder and refuses in chat before reporting (modules/Probe.lua).
         Report          = function(_, _, _, fn)
             local n = 0
@@ -96,7 +96,7 @@ NS.DebugLog = lib:New({
     addonName = addonName,   -- the FOLDER the console's close / copy / clear marks are drawn from
     title     = NS.Constants.BRAND,
     font      = NS.Constants.FONT_MONO,
-    slash     = "/sm",
+    slash     = "/cl",
 
     -- The flag stays the addon's, session-only (debug-logging-§5).
     isEnabled  = function() return NS.State.debug == true end,
@@ -127,7 +127,7 @@ NS.DebugLog = lib:New({
     diagnostics = function() return NS.Diagnostics and NS.Diagnostics.Sections() or {} end,
     L = {
         DIAG_WRITTEN = NS.L["Diagnostic report written to the debug console: %d lines. Use Copy to share it."],
-        -- D:Report's one chat pointer (DebugLog minor 23): `/sm probe` is the report verb today.
+        -- D:Report's one chat pointer (DebugLog minor 23): `/cl probe` is the report verb today.
         REPORT_WRITTEN = NS.L["%s: %d lines written to the debug console. Use Copy to share it."],
     },
 })
