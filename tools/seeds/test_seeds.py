@@ -462,5 +462,40 @@ class Apply(Fixture):
                          '        { L["A"], 1, -70 }, { L["B"], 2, -70 },\n')
 
 
+
+class TrainerEvidenceTest(unittest.TestCase):
+    """GitHub issue #10: the trainers the bundle's ForeverDB verdicts confirm, a disagreement counting
+    only when no `keep` ruling holds its flag."""
+
+    DOC = {
+        "build": "1.60.1.1", "foreverdb": {"tag": "v1", "verdicts": {"trainers": {
+            "ok": {"npc": "found", "side": "ok", "spot": "ok", "role": "ok"},
+            "absent_role": {"npc": "found", "side": "ok", "spot": "ok", "role": "absent"},
+            "ruled_side": {"npc": "found", "side": "mismatch", "spot": "ok", "role": "ok"},
+            "open_side": {"npc": "found", "side": "mismatch", "spot": "ok", "role": "ok"},
+            "removed_spot": {"npc": "found", "side": "ok", "spot": "position-off", "role": "ok"},
+            "missing": {"npc": "missing"},
+            "renamed": {"npc": "name-mismatch", "side": "ok", "spot": "ok", "role": "ok"},
+        }}},
+        "flags": [
+            {"kind": "fdb-side", "list": "trainers", "id": "ruled_side"},
+            {"kind": "fdb-side", "list": "trainers", "id": "open_side"},
+            {"kind": "fdb-spot", "list": "trainers", "id": "removed_spot"},
+        ],
+    }
+    RULINGS = {
+        "shipped:fdb-side:trainers:ruled_side": {"ruling": "keep", "reason": "owner ruling"},
+        "shipped:fdb-spot:trainers:removed_spot": {"ruling": "remove", "reason": "gone"},
+    }
+
+    def test_confirmed_set(self):
+        self.assertEqual(seeds.trainer_evidence(self.DOC, self.RULINGS), ["absent_role", "ok", "ruled_side"])
+
+    def test_the_file_names_its_tag_and_copies_no_row(self):
+        text = seeds.format_evidence_lua(self.DOC, ["ok"], "2026-01-01-forever")
+        self.assertIn('tag = "foreverdb@v1", build = "1.60.1.1"', text)
+        self.assertIn('["ok"] = true,', text)
+        self.assertTrue(text.endswith("\r\n") and "\n" not in text.replace("\r\n", ""))
+
 if __name__ == "__main__":
     unittest.main()

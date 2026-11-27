@@ -66,12 +66,20 @@ end
 -- tests/test_trainers.lua refuses.
 local PROV = NS.TrainerProvenance_Forever or { confirmed = {}, unverified = {} }
 local META = NS.DataMeta and NS.DataMeta.Trainers_Forever
+-- The seeds run's ForeverDB evidence (defaults/TrainerEvidence_Forever.lua, GitHub issue #10): the
+-- owner's ruling of 2026-11-27 validates the trainers from the sources, not in game, so a record the
+-- probe could not confirm (round 2's Forever-only hold, the Neutral sides, Annora's instance point) is
+-- verified when ForeverDB confirms its NPC, name, spot and side, or a `keep` ruling settles the one
+-- field it disagrees on. Its probe reason stays readable as `probe`.
+local EVIDENCE = NS.TrainerEvidence_Forever or { confirmed = {} }
 
 local function add(rec)
     rec.id = rec.id or slug(rec.name)
     rec.source = rec.source .. SRC_PROBE
     if PROV.confirmed[rec.id] and META and META.verified then
         rec.verified = META.verified
+    elseif EVIDENCE.confirmed[rec.id] and EVIDENCE.tag then
+        rec.verified, rec.probe = EVIDENCE.tag, PROV.unverified[rec.id]
     else
         rec.verified, rec.unverified = false, PROV.unverified[rec.id]
     end
