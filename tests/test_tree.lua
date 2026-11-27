@@ -1,5 +1,5 @@
 -- tests/test_tree.lua — the tree row model and the addon-side folds (item SMW-03 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md; the spec's "Tree blocks and folding"). One
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md; the spec's "Tree blocks and folding"). One
 -- model serves Reputations, Currencies and Statistics: entries carry { depth, header, nodeKey }, and the
 -- children of a folded node are skipped. A fold is this addon's own state, char.fold[family][nodeKey],
 -- and never the client's Expand or Collapse.

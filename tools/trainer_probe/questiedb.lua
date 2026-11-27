@@ -6,7 +6,7 @@
 -- NPC table (src/corrections/Forever/{legacy,generated,traces}/ and foreverNPCFixes.lua).
 --
 -- QuestieDB is GPLv3 for contributions (its LICENSE.md). Nothing read here is written into the
--- addon: the probe compares, and ships only Skill Master's own corrected numbers plus the commit.
+-- addon: the probe compares, and ships only Character Ledger's own corrected numbers plus the commit.
 
 local IO = dofile((...) .. "/io.lua")
 

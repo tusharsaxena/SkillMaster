@@ -13,7 +13,7 @@ L["Diagnostic report written to the debug console: %d lines. Use Copy to share i
 L["Slash Commands"] = true
 
 -- The main window.
-L["Skill Master"] = true
+L["Character Ledger"] = true
 L["%s - %s"] = true
 L["No skills to show yet."] = true
 L["Test mode: the skills shown are sample data."] = true
@@ -22,7 +22,7 @@ L["Sample character"] = true   -- test mode's nameless stand-in when LibKa0s-Sim
 L["Test mode cannot start in combat."] = true
 
 -- The Journal window (modules/Journal.lua).
-L["Skill Master \194\183 Journal"] = true
+L["Character Ledger \194\183 Journal"] = true
 L["Alts"] = true
 L["Time"] = true
 L["Change"] = true
@@ -81,24 +81,24 @@ L["Lock the window in place"] = true
 L["Unlock the window so it can be dragged"] = true
 L["Turn test mode on or off"] = true
 L["Turn the addon on"] = true
-L["Turn the addon off \226\128\148 `/sm enable` turns it back on"] = true
+L["Turn the addon off \226\128\148 `/cl enable` turns it back on"] = true
 L["List every setting and its current value"] = true
-L["Print a setting's current value \226\128\148 `/sm get <path>`"] = true
-L["Set a setting \226\128\148 `/sm set <path> <value>` (try /sm list)"] = true
-L["Reset one setting to its default \226\128\148 `/sm reset <path>`"] = true
+L["Print a setting's current value \226\128\148 `/cl get <path>`"] = true
+L["Set a setting \226\128\148 `/cl set <path> <value>` (try /cl list)"] = true
+L["Reset one setting to its default \226\128\148 `/cl reset <path>`"] = true
 L["Reset this profile to defaults"] = true
 L["Toggle the debug console \226\128\148 `on`/`off` enable/disable logging"] = true
 L["Write the diagnostics report to the debug console"] = true
-L["Measure performance \226\128\148 try `/sm perf` for the workflow"] = true
+L["Measure performance \226\128\148 try `/cl perf` for the workflow"] = true
 L["Print the addon version"] = true
 L["Report the client's skill and stat API as JSON, to send to the author"] = true
 L["%s: %d lines written to the debug console. Use Copy to share it."] = true
 
 -- Settings.
 L["Profiles"] = true
-L["Scales the Skill Master window."] = true
-L["Opacity of the Skill Master window."] = true
-L["Locks the Skill Master window in place."] = true
+L["Scales the Character Ledger window."] = true
+L["Opacity of the Character Ledger window."] = true
+L["Locks the Character Ledger window in place."] = true
 L["Reset this profile to the addon's defaults? Everything you have configured in it is discarded \226\128\148 your other profiles are not affected."] = true
 L["All settings reset to defaults."] = true
 
@@ -328,8 +328,8 @@ L["Expand all blocks"] = true
 L["Collapse all blocks"] = true
 
 -- The interactions: the click map, the row menu, the row tooltip, the trainer popup, the waypoints (T3.3).
-L["Profession windows open from Skill Master out of combat."] = true
-L["The character panel opens from Skill Master out of combat."] = true
+L["Profession windows open from Character Ledger out of combat."] = true
+L["The character panel opens from Character Ledger out of combat."] = true
 L["Set a waypoint to the trainer"] = true
 L["Show trainers"] = true
 L["Hide this row"] = true
@@ -402,7 +402,7 @@ L["Map pin set: %s"] = true
 L["+%d this session"] = true
 L["Off"] = true
 L["No stats to show yet."] = true
-L["Ka0s Skill Master is disabled."] = true
+L["Ka0s Character Ledger is disabled."] = true
 L["Utility"] = true
 -- ---- END T4.1 ----
 
@@ -417,7 +417,7 @@ L["No fishing data for this zone"] = true
 
 -- ==== BEGIN T5.3 (locales, bindings, diagnostics) -- merged by the integrator. ====
 -- The library-absent sentences (core/Namespace.lua and the setup files' degradation stubs).
-L["The LibKa0s library is missing from this installation of Ka0s Skill Master (expected in libs/LibKa0s)"] = true
+L["The LibKa0s library is missing from this installation of Ka0s Character Ledger (expected in libs/LibKa0s)"] = true
 L["%s; running on reduced built-in fallbacks."] = true
 L["%s, so the debug console window is unavailable."] = true
 L["%s, so there is no minimap button and no broker plugin."] = true
@@ -622,7 +622,7 @@ L["Trainers"] = true
 L["Waypoints"] = true
 L["Block width"] = true
 L["Width of the block's own frame while it is detached. Dragging the frame's corner grip sets it. In a merged window every column takes its widest block's width."] = true
-L["Sample: Skill Master's arrow is off"] = true
+L["Sample: Character Ledger's arrow is off"] = true
 L["Sample: TomTom's arrow points to real waypoints"] = true
 L["Waypoint method"] = true
 L["Where a trainer's waypoint goes: Map pin places one on the map (a TomTom waypoint, with TomTom's arrow, when TomTom is loaded), Chat only writes the directions. A trainer with no coordinates, or a client with neither TomTom nor a map pin, is always written to chat."] = true
@@ -644,17 +644,17 @@ L["Restore every setting on this page to its default, on this profile."] = true
 L["Test mode cannot start while a simulation runs."] = true
 L["Simulation"] = true
 L["Simulation: a sample character plays scripted events."] = true
-L["Run the simulator: scripted skill-ups, a lure and a speed change \226\128\148 `/sm sim` shows the steps"] = true
+L["Run the simulator: scripted skill-ups, a lure and a speed change \226\128\148 `/cl sim` shows the steps"] = true
 L["A simulation cannot start while test mode is on."] = true
 L["A simulation cannot start in combat."] = true
 L["A simulation cannot start in an instance."] = true
 L["A simulation cannot start in a group."] = true
 L["A fishing trip: skill-ups, a lure and a mount"] = true
-L["Simulation stopped: Skill Master was disabled."] = true
+L["Simulation stopped: Character Ledger was disabled."] = true
 L["Simulation stopped: combat started."] = true
 L["Simulation stopped: the profile changed."] = true
 L["Simulation started (%s): a sample character plays scripted events. Nothing is saved."] = true
-L["Skill Master - Simulation"] = true
+L["Character Ledger - Simulation"] = true
 L["Skill-up: %s"] = true
 L["Fishing lure on"] = true
 L["Fishing lure off"] = true
@@ -726,7 +726,7 @@ L["Bar width (px)"] = true
 L["Font size"] = true
 L["Tooltips"] = true
 L["Width of the bar in the tooltip of a main window or detached row."] = true
-L["Size of Skill Master's lines in the tooltip of a main window or detached row. The game's other tooltips keep theirs."] = true
+L["Size of Character Ledger's lines in the tooltip of a main window or detached row. The game's other tooltips keep theirs."] = true
 L["Width of the bars in the LDB (broker) tooltip, Classic style. The tooltip widens to fit them; a wide value column can stretch them further."] = true
 L["Size of the text in the LDB (broker) tooltip, Classic style. The Main window style takes the window's fonts."] = true
 L["Restore every Tooltips setting on this profile to its default."] = true
@@ -797,7 +797,7 @@ L["Show rows"] = true
 L["Rows"] = true
 L["Hide %s in the LDB tooltip"] = true
 L["Leave this row out of the window and the detached blocks. The row menu's Hide sets it too."] = true
-L["Leave this row out of the LDB tooltip: a skill out of the Skill Master feed's, a stat out of the Skill Master Stats feed's. The tooltip's row menu's Hide sets it too."] = true
+L["Leave this row out of the LDB tooltip: a skill out of the Character Ledger feed's, a stat out of the Character Ledger Stats feed's. The tooltip's row menu's Hide sets it too."] = true
 L["Every skill hidden from the window, as a set of keys."] = true
 L["Every stat hidden from the window, as a set of keys."] = true
 L["Every skill the LDB tooltip leaves out, as a set of keys."] = true
@@ -822,12 +822,12 @@ L["Height (px)"] = true
 L["The tallest the LDB tooltip grows in the Main window style; past it, it scrolls (the mouse wheel or its scroll bar)."] = true
 L["Nothing to show in this tooltip."] = true
 
--- ---- Round 6, R6-9: the Skill Master Stats feed (modules/Broker.lua, settings/Broker.lua) ----
+-- ---- Round 6, R6-9: the Character Ledger Stats feed (modules/Broker.lua, settings/Broker.lua) ----
 -- Round 7, R7-5: the LDB tooltips' titles (modules/Broker.lua B.FEEDS)
 
--- ---- Round 6, R6-11: Skill Master's waypoint arrow (modules/WaypointArrow.lua, settings/Trainers.lua) ----
-L["Show Skill Master's arrow"] = true
-L["A map pin comes with Skill Master's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin. With TomTom loaded, TomTom's arrow points instead."] = true
+-- ---- Round 6, R6-11: Character Ledger's waypoint arrow (modules/WaypointArrow.lua, settings/Trainers.lua) ----
+L["Show Character Ledger's arrow"] = true
+L["A map pin comes with Character Ledger's own arrow, pointing the way with the distance under it, and the game's own arrow stays off. Off: the game's arrow points to the map pin. With TomTom loaded, TomTom's arrow points instead."] = true
 L["Arrow scale"] = true
 -- Round 8, R8-5: the arrow's settings block, LibKa0s-WaypointArrow-1.0's SettingsRows (its
 -- SETTINGS_STRINGS, handed back through settings/Trainers.lua so a translation reaches them).
@@ -847,7 +847,7 @@ L["The size of the arrow and its distance, 0.5 to 2."] = true
 L["You have arrived: %s"] = true
 -- Round 9, R9-1..R9-3: the arrow's Text and Position blocks (LibKa0s-WaypointArrow-1.0's
 -- SETTINGS_STRINGS through settings/Trainers.lua), its STRINGS (the distance in both units, the
--- right-click menu) and Skill Master's menu items and tooltip (modules/WaypointArrow.lua).
+-- right-click menu) and Character Ledger's menu items and tooltip (modules/WaypointArrow.lua).
 L["%.1fk yd"] = true
 L["Waypoint"] = true
 L["Right-click for options."] = true
@@ -861,11 +861,11 @@ L["Reset position"] = true
 L["Opens the chat box with a /way line for this waypoint. Press Enter to send it to the channel the box is set to, or edit it first. Nothing is sent until you do."] = true
 L["This waypoint has no map point to share or show."] = true
 L["Not available in combat."] = true
-L["Open Skill Master's trainer popup for this trainer's skill."] = true
+L["Open Character Ledger's trainer popup for this trainer's skill."] = true
 L["Arrow settings..."] = true
 L["Open Trainers and Waypoints, where the arrow's look, text and position are set."] = true
 L["Hide arrow"] = true
-L["Turn off Show Skill Master's arrow: the game's own arrow points to the map pin. Trainers and Waypoints turns it back on."] = true
+L["Turn off Show Character Ledger's arrow: the game's own arrow points to the map pin. Trainers and Waypoints turns it back on."] = true
 L["Arrow text"] = true
 L["The face the arrow's distance is drawn in."] = true
 L["Height of the arrow's distance, in points."] = true
@@ -874,7 +874,7 @@ L["Use class color"] = true
 L["Draw the arrow's distance in your class color instead of the swatch beside it."] = true
 L["Not read while Use class color is on, except for its opacity, which always applies."] = true
 L["Font flags"] = true
-L["Outline and monochrome rendering. From skin follows the Font outline setting on Skill Master's Skin tab; any other choice is drawn as picked."] = true
+L["Outline and monochrome rendering. From skin follows the Font outline setting on Character Ledger's Skin tab; any other choice is drawn as picked."] = true
 L["From skin"] = true
 L["None"] = true
 L["Outline"] = true
@@ -899,7 +899,7 @@ L["X offset"] = true
 L["How far right of the screen's center the arrow sits; the Arrow scale does not move it. Dragging the arrow sets it."] = true
 L["Y offset"] = true
 L["How far above the screen's center the arrow sits; the Arrow scale does not move it. Dragging the arrow sets it."] = true
-L["While on, the arrow cannot be dragged. Its right-click menu still opens. /sm lock does not hold the arrow."] = true
+L["While on, the arrow cannot be dragged. Its right-click menu still opens. /cl lock does not hold the arrow."] = true
 L["Put the arrow back at its default position."] = true
 
 -- ---- Round 7, R7-1: a filter on every block (modules/Blocks.lua B.FILTER_SETS, settings/Layout.lua) ----

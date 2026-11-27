@@ -142,7 +142,7 @@ function R.IconStyle(rowColor, rowH)
     local style = S.Resolve("icon.borderStyle", p.borderStyle or "Solid", follow) or p.borderStyle or "Solid"
     local edge = tonumber(S.Resolve("icon.borderSize", tonumber(p.borderSize) or 1, follow)) or 1
     local show = p.border ~= false and style ~= "None" and edge > 0
-    local color = show and (iconBorderColor(p, rowColor) or NS.SkinColor("sm.barFill")) or nil
+    local color = show and (iconBorderColor(p, rowColor) or NS.SkinColor("cl.barFill")) or nil
     return { show = p.show ~= false, size = size, crop = crop, border = color, borderStyle = style, borderSize = edge }
 end
 
@@ -188,22 +188,22 @@ local LIKELIHOOD = { { 0.95, "sem.neutral" }, { 0.8, "sem.good" }, { 0.5, "sem.s
 
 local function ladder(steps, p)
     for _, step in ipairs(steps) do
-        if p >= step[1] then return NS.SkinColor(step[2]) or NS.SkinColor("sm.barFill") end
+        if p >= step[1] then return NS.SkinColor(step[2]) or NS.SkinColor("cl.barFill") end
     end
-    return NS.SkinColor("sm.barFill")
+    return NS.SkinColor("cl.barFill")
 end
 
---- The fill color for a row in the profile's color mode: by category (the skin's sm.cat.<category>
+--- The fill color for a row in the profile's color mode: by category (the skin's cl.cat.<category>
 --- token while `colors.fromSkin` is on, else the player's color), by progress, by skill-up likelihood (gray / green / yellow /
 --- orange against the cap) or flat (the Bar color, through its skin and class-color companions).
 function R.FillColor(e, isStat)
     local mode = bars().colorMode
-    if mode == "flat" then return NS.BarStyle.Swatch("barColor", "sm.barFill", "useClassColorBar") end
+    if mode == "flat" then return NS.BarStyle.Swatch("barColor", "cl.barFill", "useClassColorBar") end
     local p = isStat and (tonumber(e.pct) or 0) / 100 or ((e.max or 0) > 0 and e.rank / e.max or 0)
     if mode == "progress" then return ladder(PROGRESS, p) end
     if mode == "likelihood" and not isStat then return ladder(LIKELIHOOD, p) end
     local cat = isStat and "stats" or (e.category or "other")
-    return NS.BarStyle.PlayerColor(cat, "sm.cat." .. cat)
+    return NS.BarStyle.PlayerColor(cat, "cl.cat." .. cat)
 end
 
 --- The bar's values for a skill entry, and the earliest temp expiry (or nil). The bonus is the
@@ -247,7 +247,7 @@ end
 --- says (by default 16 px, the 0.07 crop and a 1 px border in the row's color, FB-14).
 local function paintIcon(row, color, kind, key, learned, tex)
     local h = row.baseH or bars().rowHeight or 20
-    local st = R.IconStyle(color or NS.SkinColor("sm.barFill"), h)
+    local st = R.IconStyle(color or NS.SkinColor("cl.barFill"), h)
     local f = row.iconFrame
     f:SetShown(st.show)
     placeName(row, st.show)
@@ -646,7 +646,7 @@ function R.Acquire(pool, parent, styleKey)
     local row = NS.Pool.Acquire(pool, function() return build(parent, styleKey) end)
     row:SetParent(parent)
     row.bar:ApplyStyle(NS.BarStyle.Resolve(styleKey))
-    local c = NS.SkinColor("sm.iconBg")   -- every acquire, so a skin switch reaches a pooled row
+    local c = NS.SkinColor("cl.iconBg")   -- every acquire, so a skin switch reaches a pooled row
     if c then row.iconBg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
     local h = bars().rowHeight or 20
     -- The icon and the action mark sit in the row's first line, so a hint line can grow it below.

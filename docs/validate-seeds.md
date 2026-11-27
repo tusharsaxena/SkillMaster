@@ -1,8 +1,8 @@
-# Seed validation — Skill Master
+# Seed validation — Character Ledger
 
-The seed-validation contract `/dev-copilot:validate-seeds SkillMaster forever` runs. The command
+The seed-validation contract `/dev-copilot:validate-seeds CharacterLedger forever` runs. The command
 supplies the loop (clean tree, one date, status, derive, rule, apply, gate, hand-back) and its
-standing rules. This file supplies Skill Master's procedure: the tool, the files it writes, the
+standing rules. This file supplies Character Ledger's procedure: the tool, the files it writes, the
 precedent a ruling follows and what the client's data can and cannot check. The headings below are
 the interface the command reads, so keep their names.
 
@@ -18,7 +18,7 @@ Each run ends in a frozen bundle under `docs/seed-research/<date>-forever/` (raw
 | --- | --- | --- | --- |
 | `forever` | wago.tools product `wowf` (WoW Forever). **Evidence: ForeverDB** (the trainers and gathering nodes) | `defaults/Trainers_Forever.lua`, `defaults/Fishing_Forever.lua`, `defaults/SkillCatalog_Forever.lua`, `defaults/Gathering_Forever.lua` (all hand-made, tool-checked) | `tools/seeds/seeds.py`; dev-copilot's `scripts/foreverdb.py` |
 
-Skill Master is Forever-only (roster Clients `Forever`, clients-§9), so there is no `retail` flavor.
+Character Ledger is Forever-only (roster Clients `Forever`, clients-§9), so there is no `retail` flavor.
 `defaults/Preview_Forever.lua` is not a seed: it is test mode's fictional sample character from the
 design mockups, and nothing in it mirrors a DB2 row.
 
@@ -89,7 +89,7 @@ design mockups, and nothing in it mirrors a DB2 row.
   2. the seed files' own headers (`Fishing_Forever.lua`: levels recalled from 1.12, unverified;
      `Trainers_Forever.lua`: coordinates only where a source printed them (since issue #3, QuestieDB's
      single standing point, through the trainer probe), never a guessed pin;
-     `SkillCatalog_Forever.lua`: the skill-line ids a `/sm probe` confirmed on build 70862);
+     `SkillCatalog_Forever.lua`: the skill-line ids a `/cl probe` confirmed on build 70862);
   3. the design spec, `docs/superpowers/specs/2026-11-10-skill-master-design.md` (goal 1: the four
      categories and the lines in each);
   4. the owner's feedback rounds recorded in the plan ledger under `docs/superpowers/plans/`,

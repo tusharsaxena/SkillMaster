@@ -4,7 +4,7 @@ local _, NS = ...
 --
 -- LOAD-BEARING: registers LAST, so Profiles is the last subcategory (options-ui-§3).
 local L = NS.L
-local APPNAME = "SkillMaster-Profiles"
+local APPNAME = "CharacterLedger-Profiles"
 
 local function build(parentCategory)
     local AceDBOptions    = LibStub("AceDBOptions-3.0", true)
@@ -14,7 +14,7 @@ local function build(parentCategory)
     if not (AceDBOptions and AceConfig and AceConfigDialog and AceGUI and NS.db) then return nil end
     local H = NS.Helpers
     AceConfig:RegisterOptionsTable(APPNAME, AceDBOptions:GetOptionsTable(NS.db))
-    local ctx = H.CreatePanel("SkillMasterProfilesPanel", L["Profiles"], {
+    local ctx = H.CreatePanel("CharacterLedgerProfilesPanel", L["Profiles"], {
         pageKey = "profiles", defaultsButton = false,
     })
     local container

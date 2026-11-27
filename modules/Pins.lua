@@ -1,13 +1,13 @@
 local _, NS = ...
 -- modules/Pins.lua — the pins per broker (GitHub issue #11; item SMW-06 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md, the spec's "Brokers and pins"). Each family's
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md, the spec's "Brokers and pins"). Each family's
 -- broker feed shows its own pins: an ordered list of up to Pins.MAX keys, per character, in
 -- char.pins[family] (named non-setting state; this file is its one writer). A row's menu toggles its own
 -- pin (modules/Interact.lua), and pinning never removes another pin; the Broker settings page's Pins tab
 -- (settings/BrokerPins.lua) reorders and removes them.
 --
 -- THE OLD ONE-PIN FIELDS. Before this item a character stored one pinned skill (char.pinned, the Skill
--- Master feed's) and one pinned stat (char.pinnedStat, the Skill Master Stats feed's). The schemaVersion
+-- Master feed's) and one pinned stat (char.pinnedStat, the Character Ledger Stats feed's). The schemaVersion
 -- runner has no per-character steps (core/Database.lua), so they are normalized when read: a stored skill
 -- key becomes a one-item list in its own family (its block's: Professions or Skills), a stored stat key one
 -- in Character Stats, and both old fields go.

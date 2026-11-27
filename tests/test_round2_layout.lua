@@ -149,7 +149,7 @@ end
 
 test("round2 layout: Layout > Block order draws one boxed row per block in order, its eye showing or hiding it", function()
     local panel, from = showTab("layout", "Layout", NS.L["Block order"])
-    local labels = created(from, "SkillMasterListLabel")
+    local labels = created(from, "CharacterLedgerListLabel")
     local ordered = B.Ordered()
     assertEqual(#labels, #ordered, "one row per block")
     for i, id in ipairs(ordered) do assertEqual(labels[i].text, NS.BlockDefs[id].title, "row " .. i) end

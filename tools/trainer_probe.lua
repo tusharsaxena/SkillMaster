@@ -60,7 +60,7 @@ end
 function Probe.Records(repo)
     local NS = { L = setmetatable({}, { __index = function(_, k) return k end }), DataMeta = {} }
     local fn = assert(loadfile((repo or ".") .. "/defaults/Trainers_Forever.lua"))
-    fn("SkillMaster", NS)
+    fn("CharacterLedger", NS)
     return NS.Trainers_Forever
 end
 

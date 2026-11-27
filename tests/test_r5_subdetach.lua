@@ -1,5 +1,5 @@
 -- tests/test_r5_subdetach.lua — R5-SM-09 (owner feedback round 5, addendum A1, Ka0sAddonsCommonTasks
--- docs/2026-11-26-OWNER_FEEDBACK_ROUND5/A1_SKILLMASTER_MORE.md): "Allow detaching sub categories (e.g. Alliance,
+-- docs/2026-11-26-OWNER_FEEDBACK_ROUND5/A1_CHARACTERLEDGER_MORE.md): "Allow detaching sub categories (e.g. Alliance,
 -- Other here). Or any of the nested sub categories here [Statistics]. or sub categories here [Currencies]." Every
 -- tree header carries the block header's detach mark; a detached sub-category is its own window drawn as a
 -- detached block (moves, joins, resizes, remembers its place and collapse, survives /reload), its rows the
@@ -227,7 +227,7 @@ test("r5 sm-09: the model normalizes a stored row and refuses what is no tree he
 end)
 
 test("r5 sm-09: schemaVersion 18 normalizes a stored layout.subs and drops one that is no table", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["R5-Subs"] = { layout = { subs = { ["sub:reputations:469"] = { point = 3 }, junk = 1 } } }
     sv.profiles["R5-SubsBad"] = { layout = { subs = "nope" } }

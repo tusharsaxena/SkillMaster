@@ -102,7 +102,7 @@ local function classicTooltipKept(_, profile, from)
     if rawget(t.ldb, "style") == nil then t.ldb.style = "classic" end
 end
 
---- 8 -> 9 (owner feedback round 6, R6-9): the stat blocks moved to their own feed, Skill Master Stats,
+--- 8 -> 9 (owner feedback round 6, R6-9): the stat blocks moved to their own feed, Character Ledger Stats,
 --- with a switch per stat block (`broker.tooltip.sections.stats_*`, new keys defaulting on). The old
 --- Stats switch, `broker.tooltip.sections.stats`, names no section any more: a stored one goes.
 local function statsSectionRetired(_, profile)
@@ -162,7 +162,7 @@ local function foreverDBRetired(_, profile)
     if type(t) == "table" then t.foreverDB = nil end
 end
 
---- 13 -> 14 (SMW-04, docs/superpowers/specs/2026-11-26-skillmaster-windows-design.md, "Migration, schema
+--- 13 -> 14 (SMW-04, docs/superpowers/specs/2026-11-26-characterledger-windows-design.md, "Migration, schema
 --- 14"): one window per family. The old one window became the Professions window, so its stored drop point
 --- (`window.point`, a table only: false was the default) and its stored `layout.width`, `maxHeight`,
 --- `fitHeight`, `columns`, `summary` and `strata` move to `windows.professions`; the old keys go. Only a
@@ -195,7 +195,7 @@ local function windowsSplit(_, profile)
 end
 
 --- 14 -> 15 (SMW-05): one broker feed per family, each with its own template. The one feed's stored
---- `broker.template` was the "Skill Master" feed's, which is the Professions feed now, so it moves to
+--- `broker.template` was the "Character Ledger" feed's, which is the Professions feed now, so it moves to
 --- `broker.feeds.professions.template` (rawget: only a stored choice moves; one already stored there,
 --- other than the default, wins); the old key goes. `broker.preset` was session-only and never stored.
 local function feedTemplatesSplit(_, profile)

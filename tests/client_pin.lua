@@ -16,7 +16,7 @@ return function(Loader, getenv)
     getenv = getenv or os.getenv
     local asked = getenv("KA0S_KIT_CLIENT")
     if asked ~= nil and asked ~= "" and asked ~= PIN then
-        error(('client_pin: KA0S_KIT_CLIENT="%s", but Ka0s Skill Master is Forever-only (clients-§9); '
+        error(('client_pin: KA0S_KIT_CLIENT="%s", but Ka0s Character Ledger is Forever-only (clients-§9); '
             .. 'unset it or set it to "forever"'):format(asked), 2)
     end
     local MC = Loader.MockClient

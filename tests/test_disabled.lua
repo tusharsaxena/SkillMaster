@@ -85,7 +85,7 @@ end)
 
 test("disabled 2-3: writing `enabled` through the seam leaves NOTHING registered", function()
     -- red under: drop addon:UnregisterAllEvents() (or NS.BusStandDown()) from NS.StandDown
-    -- (core/SkillMaster.lua): the addon's or a data module's events survive the disable.
+    -- (core/CharacterLedger.lua): the addon's or a data module's events survive the disable.
     bringUp()
     disable()
     assertEqual(#regSet(), 0, "survivors:\n  " .. joined(regSet()))
@@ -131,7 +131,7 @@ test("disabled 6: firing every baseline event writes nothing, says nothing, show
         end
     end
     assertTrue(events.PLAYER_REGEN_DISABLED, "the combat-entry event is in the baseline by name")
-    -- red under: drop addon:UnregisterAllEvents() from NS.StandDown (core/SkillMaster.lua):
+    -- red under: drop addon:UnregisterAllEvents() from NS.StandDown (core/CharacterLedger.lua):
     -- OnEnterCombat runs on PLAYER_REGEN_DISABLED, ends test mode and prints.
     disable()
     M.__resetSvWrites()
@@ -170,14 +170,14 @@ test("disabled 7: every live verb answers, and each feature verb refuses on one 
         local out = M.__printed()
         if verb == "help" then
             -- help prints the whole index while disabled (the library heads it with the notice).
-            assertTrue(#out > 2, "/sm help prints the index while disabled: " .. joined(out))
+            assertTrue(#out > 2, "/cl help prints the index while disabled: " .. joined(out))
         elseif LIVE[verb] then
             for _, line in ipairs(out) do
-                assertFalse(line:find(refusal, 1, true) ~= nil, "/sm " .. verb .. " refused: " .. line)
+                assertFalse(line:find(refusal, 1, true) ~= nil, "/cl " .. verb .. " refused: " .. line)
             end
         else
-            assertEqual(#out, 1, "/sm " .. verb .. " refuses on ONE line: " .. joined(out))
-            assertTrue(out[1]:find(refusal, 1, true) ~= nil, "/sm " .. verb .. ": " .. tostring(out[1]))
+            assertEqual(#out, 1, "/cl " .. verb .. " refuses on ONE line: " .. joined(out))
+            assertTrue(out[1]:find(refusal, 1, true) ~= nil, "/cl " .. verb .. ": " .. tostring(out[1]))
         end
     end
     -- The reserved verbs' other forms: `debug diagnostics` answers as `diagnostics` does.
@@ -186,16 +186,16 @@ test("disabled 7: every live verb answers, and each feature verb refuses on one 
         M.__resetPrinted()
         NS.Slash:OnSlash(line)
         local out = M.__printed()
-        assertTrue(#out >= 1, "/sm " .. line .. " printed nothing while disabled")
+        assertTrue(#out >= 1, "/cl " .. line .. " printed nothing while disabled")
         for _, l in ipairs(out) do
-            assertFalse(l:find(refusal, 1, true) ~= nil, "/sm " .. line .. " refused: " .. l)
+            assertFalse(l:find(refusal, 1, true) ~= nil, "/cl " .. line .. " refused: " .. l)
         end
     end
     NS.DebugLog:Hide()
     disable()
     opened = 0
     NS.Slash:OnSlash("")
-    assertEqual(opened, 1, "a bare /sm opens the settings panel while disabled")
+    assertEqual(opened, 1, "a bare /cl opens the settings panel while disabled")
     NS.OpenOptionsPanel = realOpen
     enable()
     -- Under the perf hold alone, a feature verb answers the capture line, never the disabled one.
@@ -311,6 +311,6 @@ test("disabled 10: releasing ONE hold does not resurrect an addon the other hold
     T.assertLatchHoldOrder{
         lifecycle = NS.Lifecycle, perfHold = NS.HOLD_PERF,
         setEnabled = function(on) NS.SetByPath("enabled", on) end,
-        regSet = regSet, label = "SkillMaster",
+        regSet = regSet, label = "CharacterLedger",
     }
 end)

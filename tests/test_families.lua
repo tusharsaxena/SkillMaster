@@ -1,5 +1,5 @@
 -- tests/test_families.lua — the family registry and the block engine's provider dispatch (item SMW-02 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md). No visible change: the eight blocks keep their
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md). No visible change: the eight blocks keep their
 -- rows, their titles and their order.
 local T = _G.SKM_TEST
 local NS = T.NS
@@ -26,10 +26,10 @@ test("families: the split and the kept broker names (the spec's calls)", functio
     assertEqual(table.concat(F.professions.blocks, ","), "primary,secondary")
     assertEqual(table.concat(F.skills.blocks, ","), "weapon,other")
     assertEqual(table.concat(F.stats.blocks, ","), "stats_base,stats_spell,stats_defense,stats_utility")
-    assertEqual(F.professions.feed.name, "Skill Master Professions", "a display stores the Professions feed by this name")
-    assertEqual(F.stats.feed.name, "Skill Master Stats", "and Character Stats by this one")
-    assertEqual(F.stats.title, "Skill Master \194\183 Character Stats")
-    assertEqual(F.statistics.title, "Skill Master \194\183 Statistics", "Statistics is never called stats")
+    assertEqual(F.professions.feed.name, "Character Ledger Professions", "a display stores the Professions feed by this name")
+    assertEqual(F.stats.feed.name, "Character Ledger Stats", "and Character Stats by this one")
+    assertEqual(F.stats.title, "Character Ledger \194\183 Character Stats")
+    assertEqual(F.statistics.title, "Character Ledger \194\183 Statistics", "Statistics is never called stats")
     for _, fid in ipairs({ "currencies", "reputations", "statistics" }) do
         assertTrue(F[fid].tree, fid .. " is drawn by the tree model")
     end

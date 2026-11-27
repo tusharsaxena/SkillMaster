@@ -137,7 +137,7 @@ end)
 -- ── the LDB tooltip ─────────────────────────────────────────────────────────────────────────
 
 local function recordingTip()
-    local name = "SkillMasterIconsTip"
+    local name = "CharacterLedgerIconsTip"
     local tip = M.CreateFrame("GameTooltip", name, M.UIParent)
     tip.lines = {}
     function tip:GetName() return name end
@@ -167,7 +167,7 @@ test("round2 icons: the LDB tooltip draws the window's block titles on header ba
         local bands = NS.Broker.Bands(tip)
         -- One band per header, one per even row of each section.
         assertTrue(#bands > 0 and #bands < #rows + #titles, "headers and every other row, not every row")
-        local header = NS.SkinColor("sm.headerBg")
+        local header = NS.SkinColor("cl.headerBg")
         assertNear(paint(bands[1])[1], header[1], 1e-6, "the first band is a header's, in the block header's color")
         NS.Broker.HideTooltip()
         assertEqual(#NS.Broker.Bands(tip), 0, "every band goes with the tooltip")

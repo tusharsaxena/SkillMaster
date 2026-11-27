@@ -1,11 +1,11 @@
-# Settings panel — Ka0s Skill Master
+# Settings panel — Ka0s Character Ledger
 
 The panel is LibKa0s-Options-1.0's, built from the schema (options-ui). Its category registers at
 login; each page body builds on its first show.
 
 | Page | Tabs | Covers |
 |---|---|---|
-| Ka0s Skill Master (landing) | none | The logo, the tagline and the slash command list |
+| Ka0s Character Ledger (landing) | none | The logo, the tagline and the slash command list |
 | General | Master controls, Skin, Keybindings | Master controls, the skin, the key bindings (one per family window and the Journal) |
 | Layout | Window, Blocks, Detached windows, Block order | Block spacing and where a row opens from (Full row or Go icon only, round 8), for every window; then one subsection per family window (SMW-04: Professions, Skills, Character Stats, Currencies, Reputations, Statistics) with its width, maximum height, shrink to fit, summary strip, column count (one or two) and strata (`windows.<family>.*`); per block show, dock, collapse, lock, sort (Sort rows by), scale, width (Block width, 200 to 600, which the detached window's corner grip writes; a merged window's columns take the widest member's, FB-SM-04) and Show rows (its header's filter, round 7); the weapon block's compact filter (equipped and below cap only); every detached window's scale, opacity, title band, strata, background and border; the block order, dragged |
 | Bars | Bar, Colors, Text, Marks, Icons | The bar heights and fill direction; the composed fill, background, border and font blocks; the color mode and palette; what rows show, the bar text (a presets dropdown plus Custom) and position; Rank tier colors (each tier a darker shade of the category color, By category only), thresholds in the window (off by default) and in the row tooltip (on; round 6, R6-4), timer and spark (off by default); the rows' icons (show, size, zoom, and the composed border on the icon family with Use the row's color). No preview bar: the open window restyles live (owner feedback round 4) |
@@ -15,7 +15,7 @@ login; each page body builds on its first show.
 | Tooltips | Main window tooltip, LDB tooltip | Each tooltip's bar width, bar height, row height and font size; Apply skin to the tooltip (the LDB tooltip). The heights keep their `bars.*` paths and the skin row `broker.tooltip.skin`; the widths and font sizes are `tooltips.row.*` / `tooltips.ldb.*` (owner feedback round 4). The LDB tooltip's *Tooltip style* (`tooltips.ldb.style`: *Main window*, a new profile's default, or *Classic*, round 6, R6-10) with its *Width (px)* (`tooltips.ldb.width`, 420, counted as Layout > Window width; at the narrow end the title moves left of the gains text and truncates rather than draw over it) and *Height (px)* (`tooltips.ldb.height`, 560, the tallest it grows before it scrolls), both dimmed in Classic; no *Open a row from* (SMW-07 retired `tooltips.ldb.openFrom`: a tooltip's rows take no click, only a section's header acts: a click anywhere on it folds, R5-SM-02); *Apply skin to the tooltip*, the LDB *Bar width*, *Row height* and *Font size* are Classic's and dimmed in Main window (*Bar height* stays live: the Journal's Alts bars read it too) |
 | Alerts | Alerts, Muted weapons | The rank-cap and weapon-gap alerts, the gap, the sound; the currency cap alert (`alerts.currencyCap`, off by default, SMW-09); the skill-up alert, which skills it reads and its own sound (round 4) |
 | Journal | Journal | Skill-ups kept per character (reputation and currency changes share the ring, SMW-08/09), the Log tab's range (the window's own picker writes the same row), the Alts sub-tab on open (Statistics has none) |
-| Trainers and Waypoints | Trainers, Waypoints (two tabs, FB-SM-06) | Trainers: Show all trainers and the trainer popup's Trainer name color. Waypoints: the rest. The waypoint method (Map pin or Chat only; no TomTom choice, round 7, R7-7, but Map pin places a TomTom waypoint when the real TomTom is loaded, AF-SM-TOMTOM), the chat line, Show all trainers (round 2 of GitHub issue #3: the trainer popup lists every rank's trainers, Artisan first, and marks the next rank's; the popup's own check box writes the same row); the Waypoint arrow subgroup: Show Skill Master's arrow (on by default: a map pin comes with Skill Master's own arrow and the game's arrow stays off; round 6, R6-11), then `LibKa0s-WaypointArrow-1.0`'s settings block (round 8, R8-5): Arrow style (Flat, Ridge, Raised, Faceted, On the ground; Raised by default), Use the skin's colors (on: the skin's accent far away, its good color near), Far color and Near color (grayed while the skin's colors are on; the distance fade kept) and Arrow scale (0.5 to 2); round 9 (R9-1): the library's Text block under Arrow text (Font, Font size, Font color, Use class color, Font flags, Font shadow, Use the skin's font, and from LibKa0s v1.108.0 Use the skin's color and Use the skin's shadow, both on by default, then Text position: Below, Above, Left, Right or Hidden; Show the trainer's name; Distance units: Yards or Compact) and its Position block under Arrow position (X offset and Y offset from the screen's center, Lock the arrow, and a Reset position button, the block's `afterSubgroup` hook); dragging the arrow moves the two sliders; the trainer popup's Trainer name color with Use class color and Use the skin's color (on by default: the skin's accent) |
+| Trainers and Waypoints | Trainers, Waypoints (two tabs, FB-SM-06) | Trainers: Show all trainers and the trainer popup's Trainer name color. Waypoints: the rest. The waypoint method (Map pin or Chat only; no TomTom choice, round 7, R7-7, but Map pin places a TomTom waypoint when the real TomTom is loaded, AF-SM-TOMTOM), the chat line, Show all trainers (round 2 of GitHub issue #3: the trainer popup lists every rank's trainers, Artisan first, and marks the next rank's; the popup's own check box writes the same row); the Waypoint arrow subgroup: Show Character Ledger's arrow (on by default: a map pin comes with Character Ledger's own arrow and the game's arrow stays off; round 6, R6-11), then `LibKa0s-WaypointArrow-1.0`'s settings block (round 8, R8-5): Arrow style (Flat, Ridge, Raised, Faceted, On the ground; Raised by default), Use the skin's colors (on: the skin's accent far away, its good color near), Far color and Near color (grayed while the skin's colors are on; the distance fade kept) and Arrow scale (0.5 to 2); round 9 (R9-1): the library's Text block under Arrow text (Font, Font size, Font color, Use class color, Font flags, Font shadow, Use the skin's font, and from LibKa0s v1.108.0 Use the skin's color and Use the skin's shadow, both on by default, then Text position: Below, Above, Left, Right or Hidden; Show the trainer's name; Distance units: Yards or Compact) and its Position block under Arrow position (X offset and Y offset from the screen's center, Lock the arrow, and a Reset position button, the block's `afterSubgroup` hook); dragging the arrow moves the two sliders; the trainer popup's Trainer name color with Use class color and Use the skin's color (on by default: the skin's accent) |
 | Profiles | none | AceDB profiles: switch, copy, reset, delete |
 
 Every page but General and Profiles is declared through `NS.RegisterSchemaPage(key, title, spec)`
@@ -44,14 +44,14 @@ Custom with its text in the box. No string row may be drawn without `values` or 
 
 What follows the skin: every composed block on the Bars page carries its `*FromSkin` companion,
 default on (skinning-§6), and so does the palette (`bars.colors.fromSkin`, *Use the skin's colors*):
-while it is on the category and bonus colors are the skin's owner tokens `sm.cat.*` and
-`sm.bonus*`, which keep the mockup's colors apart under every skin. The window, block headers, tooltips, toasts, the Journal and the trainer
+while it is on the category and bonus colors are the skin's owner tokens `cl.cat.*` and
+`cl.bonus*`, which keep the mockup's colors apart under every skin. The window, block headers, tooltips, toasts, the Journal and the trainer
 popup take their fonts, colors, textures and borders from the skin and the Skin tab's font,
 texture and outline overrides; they have no per-element rows.
 
 ## Landing
 
-Drawn by the library from `NS.LANDING` (`settings/General.lua`): logo `media/logos/skillmaster.logo.tga`,
+Drawn by the library from `NS.LANDING` (`settings/General.lua`): logo `media/logos/characterledger.logo.tga`,
 the TOC's `## Notes`, and one row per `NS.COMMANDS` entry. No tab strip (options-ui-§13).
 
 ## General
@@ -62,7 +62,7 @@ Composed by `H.MasterControls` with General visibility omitted (the window is op
 
 | Row | Schema path |
 |---|---|
-| Enable Skill Master | `enabled` |
+| Enable Character Ledger | `enabled` |
 | Master scale | `scale` |
 | Master opacity | `alpha` |
 | Lock frame | `locked` |
@@ -86,8 +86,8 @@ Toggle journal. Keys stay the client's and are never stored in a profile (option
 
 The launcher's right-click menu lists Enabled, Locked, Test mode, Sim mode, Show window and Journal; Show window
 is the Professions window (SMW-04; the other five have no row while the library takes two extras at most) and
-shares its handler with `/sm professions` and its key binding (`/sm toggle` shows or hides every window, R5-SM-05), and Sim mode its handler (`NS.ToggleSim`)
-with the Master-controls Sim mode box and the bare `/sm sim`.
+shares its handler with `/cl professions` and its key binding (`/cl toggle` shows or hides every window, R5-SM-05), and Sim mode its handler (`NS.ToggleSim`)
+with the Master-controls Sim mode box and the bare `/cl sim`.
 
 ## Layout
 

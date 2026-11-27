@@ -1,5 +1,5 @@
 -- tests/test_windows.lua — the six family windows (item SMW-04 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md): one window per family, each with its own
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md): one window per family, each with its own
 -- frame, blocks, settings and place; the schemaVersion 14 split of the old one window's settings; the
 -- slash verbs, the key bindings and the "Character Stats" labels.
 local T = _G.SKM_TEST
@@ -22,7 +22,7 @@ test("windows: one window per family, in the family order, each its own frame an
         frames[W.Frame()] = true
     end
     assertEqual(n, 6)
-    assertEqual(Windows.Get("professions").FRAME_NAME, "SkillMasterMainWindow", "Professions keeps the old window's name")
+    assertEqual(Windows.Get("professions").FRAME_NAME, "CharacterLedgerMainWindow", "Professions keeps the old window's name")
     assertEqual(NS.MainWindow.Frame(), Windows.Get("professions").Frame(), "NS.MainWindow is the Professions window")
     local escape = {}
     for _, name in ipairs(M.UISpecialFrames) do escape[name] = true end
@@ -59,7 +59,7 @@ test("windows: each window draws its own family's docked blocks, and only those"
 end)
 
 test("windows: the Character Stats window drops the Stats prefix nowhere it matters; tree windows show their empty line", function()
-    assertEqual(NS.Families.stats.title, "Skill Master \194\183 Character Stats")
+    assertEqual(NS.Families.stats.title, "Character Ledger \194\183 Character Stats")
     assertEqual(NS.Families.stats.short, "Character Stats")
     local empty = { currencies = "No currencies to show yet.", reputations = "No reputations to show yet.",
                     statistics = "No statistics to show yet." }
@@ -124,7 +124,7 @@ test("windows: a drag saves that window's drop point alone; Reset position forge
 end)
 
 test("windows: schemaVersion 14 moves the old window's stored settings to the Professions window", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     local p = sv.profiles
     p["Win-Old"] = { window = { point = { point = "TOP", relPoint = "TOP", x = 1, y = -2 } },
@@ -156,20 +156,20 @@ test("windows: schemaVersion 14 moves the old window's stored settings to the Pr
     for _, k in ipairs({ "Win-Old", "Win-Kept", "Win-Default", "Win-Fresh" }) do p[k] = nil end
 end)
 
-test("windows: one slash verb per window toggles it; /sm hide hides them all", function()
+test("windows: one slash verb per window toggles it; /cl hide hides them all", function()
     hideAll()
     for _, fid in ipairs(NS.FAMILY_ORDER) do
         NS.Slash:OnSlash(fid)
-        assertTrue(Windows.Get(fid).IsShown(), "/sm " .. fid .. " shows its window")
+        assertTrue(Windows.Get(fid).IsShown(), "/cl " .. fid .. " shows its window")
     end
     NS.Slash:OnSlash("statistics")
-    assertFalse(Windows.Get("statistics").IsShown(), "a second /sm statistics hides it")
+    assertFalse(Windows.Get("statistics").IsShown(), "a second /cl statistics hides it")
     NS.Slash:OnSlash("hide")
-    assertFalse(Windows.AnyShown(), "/sm hide hides every window")
-    -- Re-pinned by R5-SM-05 (the owner's round 5): /sm toggle is every window, /sm professions the Professions one.
+    assertFalse(Windows.AnyShown(), "/cl hide hides every window")
+    -- Re-pinned by R5-SM-05 (the owner's round 5): /cl toggle is every window, /cl professions the Professions one.
     NS.Slash:OnSlash("toggle")
     assertTrue(Windows.Get("professions").IsShown() and Windows.Get("skills").IsShown(),
-        "/sm toggle shows every window")
+        "/cl toggle shows every window")
     hideAll()
 end)
 

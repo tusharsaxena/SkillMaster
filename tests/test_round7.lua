@@ -1,5 +1,5 @@
 -- tests/test_round7.lua — the owner's round-7 feedback (2026-11-13): TomTom support removed, the
--- native pin and Skill Master's own arrow always (R7-7); the icon border's row color off on a new
+-- native pin and Character Ledger's own arrow always (R7-7); the icon border's row color off on a new
 -- profile (R7-2); no header meta text (R7-3); the LDB tooltips' titles (R7-5); the LDB
 -- panel's scroll bar always drawn (R7-4); a filter on every block (R7-1); an LDB tooltip row opening
 -- from its go icon, the default, or the whole row (R7-6).
@@ -38,7 +38,7 @@ local function withTomTomShaped(fn)
     if not ok then error(err, 0) end
 end
 
-test("round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Skill Master's arrow always", function()
+test("round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Character Ledger's arrow always", function()
     withTomTomShaped(function(t, rec)
         assertEqual(Wp:Method(t), "native", "the map pin, never TomTom")
         assertEqual(Wp:Set(t), "native")
@@ -46,7 +46,7 @@ test("round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Sk
         assertEqual(rec.set, 1, "the native pin is set")
         assertEqual(rec.superTrack[#rec.superTrack], false, "not super-tracked while our arrow points")
         assertTrue(WA.Wanted(), "the arrow is wanted whatever TomTom-shaped global exists")
-        assertTrue(WA.IsShown(), "Skill Master's arrow shows")
+        assertTrue(WA.IsShown(), "Character Ledger's arrow shows")
     end)
 end)
 
@@ -59,7 +59,7 @@ test("round7 no TomTom: the arrow off super-tracks the pin (the client's arrow)"
     end)
 end)
 
-test("round7 no TomTom: /sm test shows the sample arrow while the arrow setting is on", function()
+test("round7 no TomTom: /cl test shows the sample arrow while the arrow setting is on", function()
     withTomTomShaped(function()
         WA.ShowTest()
         assertTrue(WA.IsShown(), "test mode's sample arrow shows")
@@ -88,7 +88,7 @@ test("round7 no TomTom: Waypoint method offers the map pin and chat only, no Tom
 end)
 
 test("round7 no TomTom: schemaVersion 11 folds a stored tomtom or native method into auto", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["R7-TomTom"] = { waypoints = { method = "tomtom", announce = false } }
     sv.profiles["R7-Native"] = { waypoints = { method = "native" } }
@@ -108,7 +108,7 @@ end)
 
 -- ── AF-SM-TOMTOM: the real TomTom, detected by name (owner img-19, 2026-11-19) ─────────────
 -- R7-7 dropped TomTom because another addon answered TomTom's API. With the real TomTom loaded,
--- though, it takes over the native user waypoint and clears it, which took Skill Master's arrow
+-- though, it takes over the native user waypoint and clears it, which took Character Ledger's arrow
 -- with it, so Set waypoint left nothing. The real addon, by name, now places a TomTom waypoint.
 
 --- Inside withTomTomShaped: TomTom loaded by name (C_AddOns.IsAddOnLoaded), its AddWaypoint
@@ -143,7 +143,7 @@ test("af tomtom: the real TomTom loaded places a TomTom waypoint and no arrow of
         assertEqual(c[2], 0.5, "x as a 0..1 fraction")
         assertEqual(c[3], 0.5, "y as a 0..1 fraction")
         local o = c[4]
-        assertTrue(type(o) == "table" and o.title == "Woo Ping" and o.from == "Skill Master"
+        assertTrue(type(o) == "table" and o.title == "Woo Ping" and o.from == "Character Ledger"
             and o.persistent == false and o.minimap == true and o.world == true, "the waypoint's options")
         assertEqual(rec.set, 0, "no native pin")
         assertFalse(WA.IsShown(), "TomTom's arrow points, not ours")
@@ -166,7 +166,7 @@ test("af tomtom: TomTom's AddWaypoint raising falls back to the native pin and o
         assertEqual(Wp:Set(t), "native", "the map pin when TomTom fails")
         assertEqual(rec.tomtom, 1, "TomTom was tried first")
         assertEqual(rec.set, 1, "the native pin is set")
-        assertTrue(WA.IsShown(), "with Skill Master's arrow")
+        assertTrue(WA.IsShown(), "with Character Ledger's arrow")
     end, true)
 end)
 
@@ -176,7 +176,7 @@ test("af tomtom: TomTom absent keeps the native pin and our arrow; Chat only sti
         assertEqual(Wp:Method(t), "native")
         assertEqual(Wp:Set(t), "native")
         assertEqual(rec.set, 1)
-        assertTrue(WA.IsShown(), "Skill Master's arrow")
+        assertTrue(WA.IsShown(), "Character Ledger's arrow")
     end)
     withRealTomTom(function(t, rec)
         NS.db.profile.waypoints.method = "chat"
@@ -226,7 +226,7 @@ test("round7 icon border: Use the row's color is off on a new profile, so the sk
 end)
 
 test("round7 icon border: schemaVersion 12 keeps the row's color on every profile stored before", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["R7-Old"] = { bars = { height = 15 } }
     sv.profiles["R7-Off"] = { icons = { borderColorFromRow = false } }
@@ -263,15 +263,15 @@ end)
 
 -- ── R7-5: the LDB tooltips' titles ───────────────────────────────────────────────────────────
 
-test("round7 titles: each feed's tooltip reads its window's title (SMW-05), Skill Master · Professions ...", function()
+test("round7 titles: each feed's tooltip reads its window's title (SMW-05), Character Ledger · Professions ...", function()
     local Br = NS.Broker
-    local SKILLS, STATS = "Skill Master \194\183 Professions", "Skill Master \194\183 Character Stats"
+    local SKILLS, STATS = "Character Ledger \194\183 Professions", "Character Ledger \194\183 Character Stats"
     assertEqual(Br.FEEDS.professions.title, SKILLS)
     assertEqual(Br.FEEDS.stats.title, STATS)
     for fid, f in pairs(Br.FEEDS) do assertEqual(f.title, NS.Families[fid].title, fid) end
     -- Both styles read B.Heading: the Main window style's panel title and the Classic tooltip's first line.
     local lines = {}
-    local tip = M.CreateFrame("GameTooltip", "SkillMasterR7TitleTip", M.UIParent)
+    local tip = M.CreateFrame("GameTooltip", "CharacterLedgerR7TitleTip", M.UIParent)
     function tip:AddLine(s) lines[#lines + 1] = s end
     function tip:AddDoubleLine(l, r) lines[#lines + 1] = l .. " " .. tostring(r) end
     function tip:NumLines() return #lines end
@@ -284,11 +284,11 @@ test("round7 titles: each feed's tooltip reads its window's title (SMW-05), Skil
     assertEqual((Br.Heading()), STATS)
     Br.FillTooltip(tip, "professions")
     -- The stats feed keeps its LibDataBroker name, relabeled; the Professions feed is named for its family
-    -- (R7-SM-02, the owner's rename of "Skill Master").
-    assertEqual(Br.NAME, "Skill Master Professions")
-    assertEqual(Br.STATS_NAME, "Skill Master Stats")
-    assertEqual(Br.Object().label, "Skill Master Professions")
-    assertEqual(Br.StatsObject().label, "Skill Master Character Stats")
+    -- (R7-SM-02, the owner's rename of "Character Ledger").
+    assertEqual(Br.NAME, "Character Ledger Professions")
+    assertEqual(Br.STATS_NAME, "Character Ledger Stats")
+    assertEqual(Br.Object().label, "Character Ledger Professions")
+    assertEqual(Br.StatsObject().label, "Character Ledger Stats")
 end)
 
 -- R7 review: the longer title must not draw over the gains text in the Main window style.
@@ -594,7 +594,7 @@ test("round7 filters: both LDB tooltip styles honor every block's filter", funct
             assertTrue(util ~= nil and util.note:IsShown(), "an emptied stat section keeps its header and muted line")
             p.style = "classic"
             local lines = {}
-            local tip = M.CreateFrame("GameTooltip", "SkillMasterR7FilterTip", M.UIParent)
+            local tip = M.CreateFrame("GameTooltip", "CharacterLedgerR7FilterTip", M.UIParent)
             function tip:AddLine(t) lines[#lines + 1] = t end
             function tip:AddDoubleLine(l) lines[#lines + 1] = l end
             function tip:NumLines() return #lines end
@@ -609,13 +609,13 @@ test("round7 filters: both LDB tooltip styles honor every block's filter", funct
         end)
         Br.HideTooltip()
         Br.source, p.style = savedSource, savedStyle
-        Br.FillTooltip(M.CreateFrame("GameTooltip", "SkillMasterR7FeedReset", M.UIParent), "skills")   -- the skills feed again
+        Br.FillTooltip(M.CreateFrame("GameTooltip", "CharacterLedgerR7FeedReset", M.UIParent), "skills")   -- the skills feed again
         if not ok then error(err, 0) end
     end)
 end)
 
 -- ── R7-6: an LDB tooltip row opened from its go icon or the whole row ─────────────────────────
--- Re-pinned by SMW-07 (docs/superpowers/specs/2026-11-26-skillmaster-windows-design.md, the owner's ask: in
+-- Re-pinned by SMW-07 (docs/superpowers/specs/2026-11-26-characterledger-windows-design.md, the owner's ask: in
 -- the LDB tooltip only a section's fold chevron acts): a tooltip row opens, links and menus nothing, arms no
 -- secure overlay, and Tooltips > Open a row from is retired. Engineering is the crafting row: no other suite
 -- arms it, so its overlay (made once, never destroyed) is this file's alone.
@@ -671,7 +671,7 @@ test("round7 go icon: Open a row from is gone from the LDB tooltip; schemaVersio
     assertTrue(NS.FindSchemaRow("tooltips.ldb.openFrom") == nil, "no Tooltips row")
     assertTrue(Br6.OpenFrom == nil, "and no reader")
     assertTrue(NS.FindSchemaRow("layout.openFrom") ~= nil, "the windows' own Open a row from stays")
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["R7-From"] = { tooltips = { ldb = { openFrom = "icon", width = 500 } } }
     sv.profiles["R7-Fresh16"] = {}
@@ -740,7 +740,7 @@ end)
 -- ── FB-SM-05: test mode always shows an arrow (the owner, 2026-11-24, S2: "some arrow should show
 -- in test mode (either this addons arrow, or tomtom's arrow)") ───────────────────────────────────
 -- Test mode writes nothing, and a TomTom waypoint is TomTom's saved state, so the preview is always
--- Skill Master's own sample arrow, labeled when it is not the arrow a real waypoint would show.
+-- Character Ledger's own sample arrow, labeled when it is not the arrow a real waypoint would show.
 
 --- Run `fn(labels)` with the arrow's ShowSample recorded: every label it was handed, in order (the
 --- instance carries its methods as plain fields, so the real one is put back).
@@ -760,14 +760,14 @@ test("FB-SM-05 test mode: the arrow off still shows a labeled sample", function(
         withLabels(function(labels)
             WA.ShowTest()
             assertTrue(WA.IsShown(), "a sample arrow shows")
-            assertEqual(labels[#labels], NS.L["Sample: Skill Master's arrow is off"], "labeled as such")
+            assertEqual(labels[#labels], NS.L["Sample: Character Ledger's arrow is off"], "labeled as such")
         end)
         WA.HideTest()
         assertFalse(WA.IsShown(), "and it goes when test mode ends")
     end)
 end)
 
-test("FB-SM-05 test mode: with TomTom loaded the sample is Skill Master's, labeled, and TomTom is never written", function()
+test("FB-SM-05 test mode: with TomTom loaded the sample is Character Ledger's, labeled, and TomTom is never written", function()
     withRealTomTom(function(_, rec)
         withLabels(function(labels)
             WA.ShowTest()

@@ -1,5 +1,5 @@
 -- tests/test_ldb_tooltip.lua — the LDB tooltip's one interaction (item SMW-07 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md; the owner: "In the LDB tooltip, clicking on a
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md; the owner: "In the LDB tooltip, clicking on a
 -- category's expand/collapse button does nothing - allow only this interaction"). A section's chevron folds it
 -- in the tooltip alone (tooltips.ldb.folds), the tooltip redraws in place keeping its scroll, both styles carry
 -- the chevrons, rows take no click and keep their hover. (The rows' inertness, the overlay and Open a row
@@ -122,7 +122,7 @@ end)
 test("ldb tooltip: the Classic header line shows the chevron's state", function()
     withTip("classic", function()
         local lines = {}
-        local tip = M.CreateFrame("GameTooltip", "SkillMasterLdbFoldTip", M.UIParent)
+        local tip = M.CreateFrame("GameTooltip", "CharacterLedgerLdbFoldTip", M.UIParent)
         function tip:AddLine(t) lines[#lines + 1] = t end
         function tip:AddDoubleLine(l, r) lines[#lines + 1] = l .. " " .. tostring(r) end
         function tip:NumLines() return #lines end

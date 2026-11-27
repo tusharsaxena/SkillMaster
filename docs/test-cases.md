@@ -84,10 +84,10 @@ Total.
 
 - slash: every entry is a positional triple
 - slash: the reserved verbs are all present, `skin` directly after `config`
-- slash: /sm lock and /sm unlock write `locked` through the seam and echo it
-- slash: /sm test flips test mode, and again turns it off
+- slash: /cl lock and /cl unlock write `locked` through the seam and echo it
+- slash: /cl test flips test mode, and again turns it off
 - slash: the stub's one library string is pinned to the live major
-- slash: on a library-absent load, /sm enable still lands through writeThrough
+- slash: on a library-absent load, /cl enable still lands through writeThrough
 
 ### test_mainwindow.lua (9)
 
@@ -98,13 +98,13 @@ Total.
 - window: locked refuses the drag; unlocked drags and saves the drop point
 - window: a grip drag reflows the columns at most once per frame and redraws once, after the release
 - window: the grip's bounds are Window width's and Window height's range, per column count
-- window: Locked hides the grip and refuses a grab; /sm unlock and the lock mark bring it back
+- window: Locked hides the grip and refuses a grab; /cl unlock and the lock mark bring it back
 - broker: the LDB tooltip has no resize grip
 
 ### test_launcher.lua (4)
 
 - launcher: the object is the brand, the 128 px logo, registered once OnEnable runs
-- launcher: left-click opens the settings panel through the same opener as /sm config
+- launcher: left-click opens the settings panel through the same opener as /cl config
 - launcher: the menu carries a Journal checkbox after Show window and before Open settings
 - launcher: the Journal entry's tick is the Journal's state and its click the journal verb's
 
@@ -131,7 +131,7 @@ Total.
 - skin: this addon is a registered owner wearing its stored choice
 - skin: writing the skin row applies it through the owner
 - skin: the picker's preview is the test mode (skinning-§10)
-- skin: /sm skin opens the library's picker
+- skin: /cl skin opens the library's picker
 - skin: Ignore settings panel defaults to on, Ignore fonts to off (skinning-§3)
 
 ### test_perf.lua (2)
@@ -146,8 +146,8 @@ Total.
 - probe: headers lists the localized header names
 - probe: apis maps every probed name to a boolean
 - probe: enchant carries the weapon enchant returns (a lure's time left)
-- probe: /sm probe writes the JSON report to the debug console with one chat pointer
-- probe: library-absent, /sm probe refuses in chat on one line
+- probe: /cl probe writes the JSON report to the debug console with one chat pointer
+- probe: library-absent, /cl probe refuses in chat on one line
 - probe: C_SkillInfo and C_Item are read first, a table-shaped line kept whole
 - probe: a slot-taking C_Item.GetWeaponEnchantInfo does not error, and each try is recorded
 - compat: WeaponEnchantInfo passes a slot and normalizes Forever's table to the 1.12 shape
@@ -166,12 +166,13 @@ Total.
 - probe sections: statistics is the category tree with up to 3 raw rows each
 - probe sections: statistics records whether the Retail form GetStatistic(statID) answers, under pcall
 
-### test_skilldata.lua (26)
+### test_skilldata.lua (27)
 
 - skillcatalog: every vanilla profession, the 16 weapon lines, Defense, Lockpicking and Riding
 - skillcatalog: kinds, tiers and the window each row opens
 - skillcatalog: the localized-name map answers each enUS name and the racial riding names
-- skillcatalog: both data tables record a source and stay unverified until the smoke pass
+- skillcatalog: both data tables record a source and are verified against Forever's DB2 (GitHub issue #10)
+- classweapons: Forever's own additions over 1.12, Rogue Axes and Druid Polearms (#10, DB2)
 - classweapons: every class lists only catalog keys
 - compat: SkillLineInfo normalizes the table shape
 - compat: SkillLineInfo normalizes the multi shape
@@ -195,7 +196,7 @@ Total.
 - skills: WoW Forever's struct reads its real ranks, and a profession's child line is one row
 - skills: a child line with an unknown name still maps through its parent skill-line ID
 
-### test_trainers.lua (35)
+### test_trainers.lua (36)
 
 - test_trainers_fist_alliance: Alliance fist weapons are taught in Ironforge and Darnassus
 - test_trainers_fist_alliance: the home city of the player's race sorts first
@@ -217,6 +218,7 @@ Total.
 - trainer probe: a rank learned from a book or a quest names it (the owner's books comment on #3)
 - trainer provenance: every record carries the probe's confirmation or an explicit unverified reason
 - trainer provenance: a confirmed record still holds the values the probe confirmed
+- trainer provenance: every trainer is verified, by the probe or by the seeds evidence (GitHub issue #10)
 - trainer provenance: no trainer is shown as unverified (the owner, 2026-11-25)
 - trainer probe books: a card for a book vendor or a rank quest's giver says how the rank is learned (#3)
 - round2 artisan: Alliance Artisan Leatherworking is Drakk Stonehand in the Hinterlands, not Telonis
@@ -227,7 +229,7 @@ Total.
 - round2 show all: AllRanks lists every rank, Artisan first, each trainer once under its highest
 - round2 show all: the popup's check box lists every rank and marks the next rank's trainers
 - round2 show all: quest givers sit in their rank's group, an unlearned skill marks Apprentice
-- round2 forever-only: the 55 ship, each unverified with its reason, an npcID and a point
+- round2 forever-only: the 55 ship, each verified by the seeds evidence, with the probe's hold, an npcID and a point
 - round2 forever-only: Zephras Isle and Riverglades trainers serve both factions (the owner's ruling)
 - round2 forever-only: a Junior trainer trains Apprentice only; riding's Forever instructors join
 - source ranks: a capital's titled craft trainer trains one rank below its title (Wowhead: Fimble Finespindle)
@@ -268,7 +270,7 @@ Total.
 ### test_bonuses.lua (16)
 
 - bonuses: lure on the pole is one temp enchant source with its expiry
-- bonuses: a Dwarf's Guns +5 is one permanent racial source
+- bonuses: a Dwarf's Guns +5 is one permanent racial source (the mechanism; Forever ships none)
 - bonuses: modifier 12 with 7 attributed leaves one Other 5
 - bonuses: no modifier, no sources
 - bonuses: an unknown or unlearned skill answers an empty breakdown
@@ -277,18 +279,19 @@ Total.
 - bonuses: more attributed than the modifier shows a negative Other, never a silent mismatch
 - bonuses: the 1.12 globals and a scanning tooltip are the fallback readers
 - bonuses: inventory change publishes BONUSES_UPDATED; the 1 s ticker runs only while a temp bonus lives
-- racials: the table is Forever data, unverified, with a source, +5 per racial skill
+- racials: WoW Forever has none, verified against its DB2 (GitHub issue #10)
 - racials: every racial skill key is a catalog key
 - bonuses: UNIT_AURA re-reads the buffs only, never the equipped tooltips
 - bonuses: a temp '+N' line that names no skill starts no ticker
 - bonuses: a blocked aura read never raises and keeps the last buffs read in full
 - bonuses: an aura with a secret field is treated as a blocked read
 
-### test_statdata.lua (16)
+### test_statdata.lua (17)
 
 - statdata (primary_vs_highest): the primaries scale against the highest, Agi 112 -> 100%, Str 48 -> 42.9%
 - statdata: attack power is base plus buffs against 400, crit against 30%
-- statdata (hit_markers): hit scales to 9% with markers at 5% and 9%, spell hit to 16%
+- statdata: a hit chance adds the combat rating bonus, as Forever's paper doll does (#10)
+- statdata (hit_markers): hit scales to 9% with markers at 5% and 9%, spell hit to 17% (Forever's table, #10)
 - statdata (armor_mitigation): 1104 armor at level 22 -> 1104/(1104+400+1870) = 32.7%, against 75%
 - statdata (missing_api_omitted): a stat the client cannot give is left out, never faked
 - statdata (resist_ref_at_60): resists scale to 5 x (level + 3) = 315 at 60, with the cap marker
@@ -317,7 +320,7 @@ Total.
 - bar: the pool hands bars back in order and clears their timers on release
 - bar: a secret width (a tooltip-anchored bar, tainted) lays out on the last plain width
 - bar: the bars are LibKa0s-Widgets-1.0's Bar, owned by this addon's skin
-- bar: the bonus slots are remapped onto sm.bonusTemp and sm.bonusPerm
+- bar: the bonus slots are remapped onto cl.bonusTemp and cl.bonusPerm
 - bar: a bar paints the owner tokens it painted before the swap
 
 ### test_bars_live.lua (18)
@@ -430,8 +433,8 @@ Total.
 - round5 table headers: a look change repaints both bands (the Journal re-renders on LAYOUT_CHANGED)
 - round5 journal lock: the title bar's lock mark beside the close control toggles the one locked setting
 - round5 journal lock: a profile switch repaints the Journal's mark from the new profile
-- round5 journal lock: /sm lock and /sm unlock repaint the Journal's mark
-- round5 test mode: /sm test shows the main window, the Journal and one sticky toast of each kind
+- round5 journal lock: /cl lock and /cl unlock repaint the Journal's mark
+- round5 test mode: /cl test shows the main window, the Journal and one sticky toast of each kind
 - round5 test mode: ending it takes the toasts down and puts the windows back as they were
 - round5 test mode: combat ends it and its toasts with it; nothing live is written
 
@@ -572,14 +575,14 @@ Total.
 - round6 arrow: the rotation is bearing minus facing, counter-clockwise from north (x north, y west)
 - round6 arrow: the fill blends from the skin's accent at 300 yd to its sem.good at 30 yd
 - round6 arrow: a waypoint sets the native pin unsuper-tracked and shows the arrow on it
-- round6 arrow: Show Skill Master's arrow off keeps the old behavior
+- round6 arrow: Show Character Ledger's arrow off keeps the old behavior
 - round6 arrow: the arrow follows the player's facing and place, throttled, and turns color by distance
 - round6 arrow: no facing hides the art and keeps the distance; no distance shows the name alone, dim
 - round6 arrow: within 5 yd the arrow hides, the pin clears and chat says you have arrived
 - round6 arrow: the menu's Clear waypoint clears the waypoint; a cleared or replaced native pin hides the arrow
 - round6 arrow: a drag saves the offsets on the profile; the arrow's own lock refuses it
 - round6 arrow: test mode shows it on a sample trainer at a sample distance, writes nothing, and takes it down
-- round6 arrow: /sm test raises and lowers the arrow with test mode's other surfaces
+- round6 arrow: /cl test raises and lowers the arrow with test mode's other surfaces
 - round6 arrow: turning the arrow off hands the pin back to the game's arrow; the scale applies at once
 - round6 arrow review: a hide and show of its parent (Alt-Z, a cinematic) leaves the arrow ticking
 - round6 arrow review: a profile switch to one with the arrow off hands the pin back to the game's arrow
@@ -588,9 +591,9 @@ Total.
 
 ### test_round7.lua (32)
 
-- round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Skill Master's arrow always
+- round7 no TomTom: a TomTom-shaped global is ignored; the native pin and Character Ledger's arrow always
 - round7 no TomTom: the arrow off super-tracks the pin (the client's arrow)
-- round7 no TomTom: /sm test shows the sample arrow while the arrow setting is on
+- round7 no TomTom: /cl test shows the sample arrow while the arrow setting is on
 - round7 no TomTom: Waypoint method offers the map pin and chat only, no TomTom label
 - round7 no TomTom: schemaVersion 11 folds a stored tomtom or native method into auto
 - af tomtom: the real TomTom loaded places a TomTom waypoint and no arrow of ours
@@ -602,7 +605,7 @@ Total.
 - round7 icon border: Use the row's color is off on a new profile, so the skin's icon border draws
 - round7 icon border: schemaVersion 12 keeps the row's color on every profile stored before
 - round7 header meta: no block header carries a line beside its title, Base & Combat included
-- round7 titles: each feed's tooltip reads its window's title (SMW-05), Skill Master · Professions ...
+- round7 titles: each feed's tooltip reads its window's title (SMW-05), Character Ledger · Professions ...
 - round7 titles: the panel's title never overlaps its gains text, centered while it fits
 - round7 scroll bar: an always-shown bar is drawn disabled while nothing scrolls, enabled once it does
 - round7 scroll bar: the LDB panel builds its bar always shown
@@ -618,7 +621,7 @@ Total.
 - round7 go icon: a hovered crafting row arms no secure cast, and its go icon takes no mouse
 - round7 go icon: a tooltip row keeps its hover: the window's wash and its row tooltip, with no click hint
 - FB-SM-05 test mode: the arrow off still shows a labeled sample
-- FB-SM-05 test mode: with TomTom loaded the sample is Skill Master's, labeled, and TomTom is never written
+- FB-SM-05 test mode: with TomTom loaded the sample is Character Ledger's, labeled, and TomTom is never written
 - FB-SM-05 test mode: turning the arrow off while it runs keeps the sample
 
 ### test_round8.lua (22)
@@ -639,29 +642,29 @@ Total.
 - round8 open a row from: the row tooltip's click hint says the mode
 - round8 open a row from: a tooltip row opens nothing and arms no cast, in either window mode
 - round8 arrow: the profile's arrow defaults are the library's, Raised and the skin's colors
-- round8 arrow: the Waypoint arrow subgroup is the library's settings block at Skill Master's paths
+- round8 arrow: the Waypoint arrow subgroup is the library's settings block at Character Ledger's paths
 - round8 arrow: each of the five looks reaches the shown arrow through its setting
 - round8 arrow: the skin's colors off draws the far and near swatches, faded by distance
 - round8 arrow: a profile switch re-applies the arrow's look
-- round8 arrow: the library carries every look's art; Skill Master's own copy is gone
+- round8 arrow: the library carries every look's art; Character Ledger's own copy is gone
 - round8 arrow: a library-absent load has no arrow, so a map pin keeps the game's own
 
 ### test_round9.lua (14)
 
-- round9 arrow: the Text and Position blocks sit under the look, at Skill Master's paths, on the library's defaults
+- round9 arrow: the Text and Position blocks sit under the look, at Character Ledger's paths, on the library's defaults
 - round9 arrow: the Position block's Reset position is a hook on its subgroup, handed to the page
 - round9 arrow: a drag writes the X and Y offsets through the settings seam
-- round9 arrow: the arrow's own Lock holds the drag; /sm lock no longer does
-- round9 arrow: the menu is Clear first, the library's items, then Skill Master's, in the owner's order
+- round9 arrow: the arrow's own Lock holds the drag; /cl lock no longer does
+- round9 arrow: the menu is Clear first, the library's items, then Character Ledger's, in the owner's order
 - round9 arrow: Clear waypoint clears the native pin, as the old right-click did
 - round9 arrow: Show trainers opens the trainer popup on the skill its waypoint came from
-- round9 arrow: Arrow settings opens Trainers and Waypoints; Hide arrow turns Skill Master's arrow off
+- round9 arrow: Arrow settings opens Trainers and Waypoints; Hide arrow turns Character Ledger's arrow off
 - round9 arrow review: under test mode's sample Show trainers is off, as the library's Show on map is
 - round9 arrow review: Arrow settings is off in combat, with the combat tooltip
 - round9 arrow review: a drag, the menu's Lock and Reset position refresh the open settings panel
 - round9 arrow: the tooltip says right-click opens the menu, and drops the drag hint while locked
 - round9 arrow: Show the trainer's name adds the trainer as the second line
-- round9 arrow: compact units read thousands of yards in Skill Master's words
+- round9 arrow: compact units read thousands of yards in Character Ledger's words
 
 ### test_sr1.lua (10)
 
@@ -674,7 +677,7 @@ Total.
 - sr1 title-bar tips: every control of a merged section's sub-header shows its tooltip above it, in gtip.title
 - sr1 title-bar colors: every mark icon.tint at rest and text.link hot, the close close.rest and close.hot, in Ka0s Default and every other skin
 - sr1 title-bar colors: a narrowing filter keeps its filled badge (a state color) at rest
-- sr1 header bands: sm.headerBg resolves to list.header.bg in every skin
+- sr1 header bands: cl.headerBg resolves to list.header.bg in every skin
 
 ### test_blocks.lua (10)
 
@@ -722,7 +725,7 @@ Total.
 - windows: a window never dragged opens next to the Professions window, stacked down and right
 - windows: a drag saves that window's drop point alone; Reset position forgets every one
 - windows: schemaVersion 14 moves the old window's stored settings to the Professions window
-- windows: one slash verb per window toggles it; /sm hide hides them all
+- windows: one slash verb per window toggles it; /cl hide hides them all
 - windows: each family's key binding button toggles its window
 - windows: a broker crafting row routes to the window that docks it
 - windows: a stood-down addon refuses every window
@@ -767,7 +770,7 @@ Total.
 
 ### test_journal.lua (22)
 
-- journal: /sm journal toggles it, through the one toggle handler
+- journal: /cl journal toggles it, through the one toggle handler
 - journal: the chrome is the shared one: the title, the wrapped close control, the window tier
 - journal: the tabs switch panels: Log first, then Alts
 - journal: the log lists skill-ups newest first, with the session's gains, and Clear empties it
@@ -815,7 +818,7 @@ Total.
 
 ### test_broker.lua (16)
 
-- broker: one data source per family (SMW-05), "Skill Master" and "Skill Master Stats" kept, separate from the launcher object
+- broker: one data source per family (SMW-05), "Character Ledger" and "Character Ledger Stats" kept, separate from the launcher object
 - broker: the feed renders its template
 - broker: {equippedWeapon} follows the main hand's weapon class
 - test_broker_flash_reverts: a skill-up flashes its own family's feed, then the template comes back
@@ -943,12 +946,12 @@ Total.
 - r5 sm-03: the Classic LDB tooltip draws the pin mark on its pinned lines, and only those
 - r5 sm-03: pinning and unpinning a row shows and hides its mark at once
 - r5 sm-04: the six display brokers each draw their own in-game icon; the addon's control broker keeps the logo
-- r5 sm-05: /sm toggle shows all six windows when none shows, and hides them all when any shows
-- r5 sm-05: /sm professions, the Show window entry and its key binding toggle the Professions window alone
-- r5 sm-05: the help says /sm toggle is every window and /sm professions the Professions window
-- r5 sm-05: /sm toggle under the perf hold opens nothing and says the capture line once
+- r5 sm-05: /cl toggle shows all six windows when none shows, and hides them all when any shows
+- r5 sm-05: /cl professions, the Show window entry and its key binding toggle the Professions window alone
+- r5 sm-05: the help says /cl toggle is every window and /cl professions the Professions window
+- r5 sm-05: /cl toggle under the perf hold opens nothing and says the capture line once
 - r5 sm-06: the probe's doubled profession lines draw each profession once, in the windows and the tooltip
-- r5 sm-07: all six windows open while playing raise no Lua error, and /sm toggle closes them all
+- r5 sm-07: all six windows open while playing raise no Lua error, and /cl toggle closes them all
 
 ### test_r5_join_resize.lua (5)
 
@@ -1046,7 +1049,7 @@ Total.
 ### test_preview.lua (9)
 
 - preview: test mode draws the sample Dwarf Hunter in every block
-- preview: the bonuses are the sample's: the Dwarf racial on Guns, the lure's timer on Fishing
+- preview: the bonuses are the sample's: none on Guns (no Forever racial), the lure's timer on Fishing
 - preview: the broker, the summary line and the row tooltip read the sample
 - preview: the Journal's session log and alts are the sample's
 - preview: test mode off restores the live data in every source
@@ -1078,7 +1081,7 @@ Total.
 ### test_sim_start_panel.lua (5)
 
 - sim start panel: the panel's Start row is the typed start, and it shows the panel
-- sim start panel: the bare /sm sim shows the panel
+- sim start panel: the bare /cl sim shows the panel
 - sim start panel: a Restart with the panel closed shows it again
 - sim start panel: the Master controls Sim box shows the panel
 - sim start panel: the launcher menu's Sim mode entry shows the panel
@@ -1153,7 +1156,7 @@ Total.
 - skin defaults: a trainer card's tooltip lines read gtip.title and gtip.body (U-7)
 - skin defaults: the waypoint arrow's tooltip lines read the gtip family (U-7)
 - skin defaults: the row tooltip's tones read the gtip family, meaning colors kept (U-7)
-- skin defaults: a trainer card takes the skin's list.hover wash on hover, back on leave (U-31, SkillMaster#9)
+- skin defaults: a trainer card takes the skin's list.hover wash on hover, back on leave (U-31, CharacterLedger#9)
 
 ### test_seams.lua (5)
 
@@ -1399,12 +1402,12 @@ Total.
 | test_perf.lua | 2 |
 | test_probe.lua | 10 |
 | test_probe_sections.lua | 11 |
-| test_skilldata.lua | 26 |
-| test_trainers.lua | 35 |
+| test_skilldata.lua | 27 |
+| test_trainers.lua | 36 |
 | test_trainer_probe.lua | 18 |
 | test_helpers.lua | 8 |
 | test_bonuses.lua | 16 |
-| test_statdata.lua | 16 |
+| test_statdata.lua | 17 |
 | test_bar.lua | 14 |
 | test_bars_live.lua | 18 |
 | test_bars_round2.lua | 8 |
@@ -1480,4 +1483,4 @@ Total.
 | test_skin_switch.lua | 25 |
 | test_client_globals.lua | 3 |
 | Skipped | 1 |
-| **Total** | **1082** |
+| **Total** | **1085** |

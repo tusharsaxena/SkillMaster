@@ -1,11 +1,11 @@
 # Forever quirks
 
-WoW Forever client behavior this addon works around (documentation-§3, Tier 2). Skill Master ships on
+WoW Forever client behavior this addon works around (documentation-§3, Tier 2). Character Ledger ships on
 WoW Forever only (clients-§9), so it carries this file and no `docs/midnight-quirks.md`.
 
 The first part below is the collection's Forever quirks catalog (`forever-quirks`), vendored whole
 from the standard and replaced wholesale on every revendor (never edit inside its markers); the
-second, `## SkillMaster-specific quirks`, is this addon's own.
+second, `## CharacterLedger-specific quirks`, is this addon's own.
 
 <!-- BEGIN VENDORED: forever quirks catalog v2.117.0 (source: WowAddonStandards) -->
 > Part of the **[Ka0s WoW Addon Standard](https://github.com/tusharsaxena/WowAddonStandards/blob/master/standards/STANDARDS.md)** — the split standard. This section is vendored whole into the `docs/forever-quirks.md` of every addon that ships on WoW Forever (§1), so its links are absolute. Cross-references use the `filename-§N` form (see the index's section map).
@@ -19,12 +19,12 @@ client needs only that client's catalog, and because a behavior measured on one 
 hold on the other.
 
 *Why this section exists.* Through v2.116.0 the collection had one catalog, client-quirks, written on
-Retail, and one Forever entry inside it (the two-word names, now §4). Ka0s Skill Master, Forever-only
+Retail, and one Forever entry inside it (the two-word names, now §4). Ka0s Character Ledger, Forever-only
 since v2.105.0 (clients-§9), carried that Retail catalog whole in its `docs/midnight-quirks.md` and had
 nowhere upstream to put what it measured on Forever: on 2026-11-10 (build 70862) the client answered a
 secret number and refused an aura read, the Retail secret-value rules measured again on the other client.
 The owner's ruling of 2026-11-10 split the catalog per client, one file per client an addon ships on
-(SkillMaster `docs/superpowers/plans/2026-11-10-feedback-1.md`, *Owner decisions*).
+(CharacterLedger `docs/superpowers/plans/2026-11-10-feedback-1.md`, *Owner decisions*).
 
 ### 1. How an entry is written, promoted and vendored (MUST)
 
@@ -107,23 +107,23 @@ one-repo bar.
 
 **`UnitStat` can answer a secret number.** *Client:* Forever (1.60.1, build 70862). *Measured:* the owner's
 in-game error, 2026-11-10: inside an AceTimer callback, a comparison on the value `UnitStat("player", i)`
-answered raised "attempt to compare field 'value' (a secret number value)" (the error as SkillMaster's
+answered raised "attempt to compare field 'value' (a secret number value)" (the error as CharacterLedger's
 `tests/test_statdata.lua` records it). Whether the player was in combat is not recorded. *Cost:* a raise on every rescan of the
 path that compares the stat; the stat line stops updating. *Do:* client-quirks-§2's rule: test
 `issecretvalue` before any comparison or arithmetic on a stat reader's return, keep the last plain value
 (marked stale) rather than the secret, and rescan on `PLAYER_REGEN_ENABLED`. The combat edge is assumed:
 if the secret persists out of combat, the stale value stands until a later scan reads it plain. *Retail entry:*
-client-quirks-§2, the secret-value family. *Source:* SkillMaster `docs/forever-quirks.md`, its own
+client-quirks-§2, the secret-value family. *Source:* CharacterLedger `docs/forever-quirks.md`, its own
 section's measured findings; promoted under §1's one-repo bar for an engine behavior.
 
 **`C_UnitAuras.GetBuffDataByIndex` can raise instead of answering a secret.** *Client:* Forever (1.60.1,
 build 70862). *Measured:* the owner's in-game error, 2026-11-10: the read raised "Auras cannot be accessed
-when secret while tainted by 'SkillMaster'". The call fails outright; it does not hand back a secret table
+when secret while tainted by 'CharacterLedger'". The call fails outright; it does not hand back a secret table
 to test. *Cost:* a raise that takes down the whole scan, not one missing value, so an `issecretvalue` guard
 on the return never runs. *Do:* call the aura reader through `pcall` and treat a failure as "auras are
 secret now": keep the last plain list and read again after combat (the combat edge is assumed; if the
 raise persists out of combat, the last list stands until a later read succeeds). *Retail entry:* client-quirks-§2, the
-secret-value family. *Source:* SkillMaster `docs/forever-quirks.md`, its own section's measured findings;
+secret-value family. *Source:* CharacterLedger `docs/forever-quirks.md`, its own section's measured findings;
 promoted under §1's one-repo bar for an engine behavior.
 
 ### 4. Names and realms
@@ -176,13 +176,13 @@ Each needs an in-game probe, recorded with the build, or a second repo, before i
   promotes under §1 when a second repo meets it:
   - `C_SkillInfo.GetSkillLineInfo(i)` answers one table with `isCollapsed`, `rank`, `maxRank`, `modifier`,
     `skillID` and `parentSkillLineID`, not the Retail-style `skillRank` / `skillMaxRank`; none of the 1.12
-    skill globals exist. *Measured:* build 70862. *Source:* SkillMaster.
+    skill globals exist. *Measured:* build 70862. *Source:* CharacterLedger.
   - `C_Item.GetWeaponEnchantInfo(weaponSlot)` takes an `Enum.WeaponSlot` (`MainHand` 0, `OffHand` 1,
     `Ranged` 2), raises on 16 and without one, and answers an array of records. *Measured:* build 70862.
-    *Source:* SkillMaster.
+    *Source:* CharacterLedger.
   - Each profession and secondary skill is listed twice in the skill list, the vanilla line and a child line
     whose `parentSkillLineID` is the vanilla one, in either order. *Measured:* build 70862. *Source:*
-    SkillMaster.
+    CharacterLedger.
   - Registering `COMBAT_LOG_EVENT_UNFILTERED` raises `ADDON_ACTION_FORBIDDEN`, which `pcall` does not
     catch. *Measured:* build 70862. *Source:* CombatTrail.
   - `C_DamageMeter` ships whole, its two enums match Retail, and the player source's `amountPerSecond` is
@@ -193,13 +193,13 @@ Each needs an in-game probe, recorded with the build, or a second repo, before i
     subclass 8 is from the owner's item dump on build 70862. *Source:* ConsumableMaster.
 <!-- END VENDORED -->
 
-## SkillMaster-specific quirks
+## CharacterLedger-specific quirks
 
 ### The Forever API surface is assumed, not measured (open probe)
 
 WoW Forever's API is only partly known (LibKa0s#44). The data modules are built against the vanilla
 1.12 return shapes behind feature detection (design §12, item 1), and every shape they rely on is
-listed below as **assumed (1.12)** until the owner runs `/sm probe` in game and sends the JSON back.
+listed below as **assumed (1.12)** until the owner runs `/cl probe` in game and sends the JSON back.
 The probe (`modules/Probe.lua`) reports each row's presence under `apis`, the raw returns of every
 skill line under `skillLines` (and under `skillSource` which API it read them from), the localized
 header names under `headers` and the weapon-enchant returns under `enchant`. From SMW-01 it also writes the
@@ -219,7 +219,7 @@ unknown until the probe runs. The same sets list `UnitResistance` on Forever and
 below on both clients.
 
 - **Client:** Forever 1.60.1 (build 70790, interface 16001), *not measured* for any row below, except
-  the rows marked **measured**: the owner's `/sm probe` on build 70862 (2026-11-10, enUS, a Night Elf
+  the rows marked **measured**: the owner's `/cl probe` on build 70862 (2026-11-10, enUS, a Night Elf
   Hunter), and two in-game errors the same day.
 - **Measured findings (build 70862).**
   - The skill list is `C_SkillInfo` only. None of the 1.12 globals exist.
@@ -267,8 +267,8 @@ below on both clients.
 | `C_Texture.GetAtlasInfo("classicon-<class>")`, `CLASS_ICON_TCOORDS` | the atlas answers a table where the client has it; else the class sheet's `{ l, r, t, b }` per class file | assumed; which source Forever carries is not measured (SM-DISP-13) | MainWindow summary line (FB-17) |
 | `UnitName("player")` | the player's name | assumed | MainWindow summary line (FB-17) |
 | `C_Spell.GetSpellName(spellID)` (fallback: `GetSpellInfo(spellID)`) | the spell's localized name | listed (inherited from live); the catalog's `openSpellID`s (vanilla Apprentice ranks) unverified | SecureOverlay (the crafting cast) |
-| `C_TradeSkillUI.OpenTradeSkill(skillLineID)` | opens a profession's window by its line; not protected on Retail | assumed; Skinning (393) and Fishing (356) have their own window on Forever (seen in game, 2026-11-11), the call unverified (`/sm probe` lists it) | Interact (Skinning, Fishing: owner feedback round 3) |
-| `C_SkillInfo.SetSelectedSkill(i)` / `SetSelectedSkill(i)`, `SkillFrame_SetSelection(i)` | select line i in Character > Skills | assumed; which one Forever's Skills tab answers is unverified (`/sm probe` lists them) | Interact (a weapon or Other row's click, round 3) |
+| `C_TradeSkillUI.OpenTradeSkill(skillLineID)` | opens a profession's window by its line; not protected on Retail | assumed; Skinning (393) and Fishing (356) have their own window on Forever (seen in game, 2026-11-11), the call unverified (`/cl probe` lists it) | Interact (Skinning, Fishing: owner feedback round 3) |
+| `C_SkillInfo.SetSelectedSkill(i)` / `SetSelectedSkill(i)`, `SkillFrame_SetSelection(i)` | select line i in Character > Skills | assumed; which one Forever's Skills tab answers is unverified (`/cl probe` lists them) | Interact (a weapon or Other row's click, round 3) |
 | `UnitStat(unit, i)`, `UnitAttackPower(unit)`, `UnitRangedAttackPower(unit)` | `base, effective, pos, neg`; `base, pos, neg` | assumed (1.12); `UnitStat` **measured** to answer secret numbers in an AceTimer callback | StatData (T2.3) |
 | `UnitArmor(unit)` | `base, effective, armor, pos, neg`; mitigation derived from the effective armor and the level, capped at 75% | assumed (1.12) | StatData (T2.3) |
 | `UnitDefenseSkill(unit)` | `base, modifier` (the kit's Forever set lists it; neither set lists `UnitDefense`) | listed by the kit's Forever set; shape assumed | StatData (T2.3) |
@@ -292,10 +292,10 @@ draft for calling the bare `GetSkillLineInfo` (2026-11-10).
 
 ### Reputations, currencies and Statistics: the Blizzard-source shapes (open probe)
 
-The Reputations, Currencies and Statistics windows (SMW, `docs/superpowers/specs/2026-11-26-skillmaster-windows-design.md`)
+The Reputations, Currencies and Statistics windows (SMW, `docs/superpowers/specs/2026-11-26-characterledger-windows-design.md`)
 are built on the shapes Blizzard's own Forever UI source uses (Gethe/wow-ui-source branch `forever`, the Camelot
 `ReputationFrame`, `TokenFrame` and `Blizzard_Statistics`), behind presence tests. Nothing here is measured in game
-yet: `/sm probe`'s three sections (SMW-01) settle each row, and the owner's run promotes it.
+yet: `/cl probe`'s three sections (SMW-01) settle each row, and the owner's run promotes it.
 
 - **Client:** Forever 1.60.1, *not measured*. The kit's Forever set lists every name below; the bare 1.12
   `GetNumFactions`, `GetFactionInfo`, `ExpandFactionHeader`, `GetCurrencyListSize` and `GetCurrencyListInfo` are in
@@ -321,7 +321,7 @@ yet: `/sm probe`'s three sections (SMW-01) settle each row, and the owner's run 
 | `UPDATE_FACTION`, `CURRENCY_DISPLAY_UPDATE` (`currencyType`, nil for a bulk refresh), `CRITERIA_UPDATE` (no payload, noisy) | the refresh events Blizzard's panels use | source, not probed | none (an event is not a one-shot read) |
 
 *Source:* the recon `wf_29cd618e-8fa` of 2026-11-26, recorded in
-`docs/superpowers/specs/2026-11-26-skillmaster-windows-recon.md` (its *api* findings).
+`docs/superpowers/specs/2026-11-26-characterledger-windows-recon.md` (its *api* findings).
 
 What the build does with them (SMW-08..10), so a probe result that differs says what to change:
 
@@ -356,7 +356,7 @@ holds, and the Forever guides. Where Forever departs from 1.12:
 - **The client holds no rank costs** (no SkillTiers on 71139): `Ranks_Forever` keeps 1.12's fees as
   `unsourced`.
 
-*Do:* re-run the checks (`/dev-copilot:validate-seeds SkillMaster forever`, then
+*Do:* re-run the checks (`/dev-copilot:validate-seeds CharacterLedger forever`, then
 `tools/seeds/seeds.py evidence`) on a new build. *Source:* the SM10 commits and
 `docs/seed-research/2026-11-27-forever/`.
 
@@ -380,7 +380,7 @@ read from Gethe/wow-ui-source branch `forever` (`Blizzard_UIPanels_Game/Camelot/
 - **A frame anchored to `GameTooltip` can answer a secret width.** The row tooltip's bar, anchored to a
   `GameTooltipTextLeftN` line with `SetWidth(200)`, answered `GetWidth()` as a secret number, and
   `Bar:Layout` raised "attempt to perform arithmetic on a secret number value (execution tainted by
-  'SkillMaster')" on every hover (21x). *Do:* test `issecretvalue` on a geometry read before arithmetic;
+  'CharacterLedger')" on every hover (21x). *Do:* test `issecretvalue` on a geometry read before arithmetic;
   the bar falls back to the last plain width, seeded by the caller that set it (`bar.knownWidth`).
 - **The Skills tab is `SkillsFrame`.** Forever's character panel is the Camelot `CharacterFrame`; its
   sub-frames are `PaperDollFrame`, `ReputationFrame`, `SkillsFrame`, `PVPRankFrame`, `TokenFrame` and
@@ -390,7 +390,7 @@ read from Gethe/wow-ui-source branch `forever` (`Blizzard_UIPanels_Game/Camelot/
   The tab keeps a non-header selection it finds on show (`SelectFirstSkillIfNoneSelected`), so selecting
   first and opening after lands on the line.
 - **An addon that shows `CharacterFrame` taints its `OnShow`.** `ToggleCharacter("PaperDollFrame")` from
-  the addon raised "attempt to compare a secret number value (execution tainted by 'SkillMaster')" in
+  the addon raised "attempt to compare a secret number value (execution tainted by 'CharacterLedger')" in
   `TextStatusBar.lua` `UpdateTextStringWithValues`, reached from `CharacterFrame:OnShow`'s
   `playerFrameHealthBar:ShowStatusBarText()` (2x), out of combat. *Do:* open the panel through a secure
   click on `CharacterMicroButton` (a `SecureActionButtonTemplate` running the macro

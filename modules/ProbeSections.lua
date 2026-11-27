@@ -1,6 +1,6 @@
 local _, NS = ...
--- modules/ProbeSections.lua — `/sm probe`'s factions, currencies and statistics sections (item SMW-01 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md). Each dumps the client's raw answers so the owner's
+-- modules/ProbeSections.lua — `/cl probe`'s factions, currencies and statistics sections (item SMW-01 of
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md). Each dumps the client's raw answers so the owner's
 -- run settles the shapes the Reputations, Currencies and Statistics windows are built on (the spec's "The probe
 -- and the client notes"); docs/forever-quirks.md carries what Blizzard's Forever source already says.
 --

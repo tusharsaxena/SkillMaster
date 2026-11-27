@@ -2,7 +2,7 @@
 -- report.json, suggested-patch.tsv and the shipped provenance file
 -- (defaults/TrainerProvenance_Forever.lua).
 --
--- Licensing (issue #3): what is written holds Skill Master's own records, the checks' verdicts and
+-- Licensing (issue #3): what is written holds Character Ledger's own records, the checks' verdicts and
 -- the sources' commits. A source's value appears only where a check quotes it against one record
 -- (a name, a title, a spawn point) or a patch proposes it as that record's corrected number; no
 -- source table is copied.
@@ -155,7 +155,7 @@ local function spotSection(out, run)
             #run.foreverQuests, table.concat(run.foreverQuests, ", "))
         out[#out + 1] = ""
     end
-    out[#out + 1] = ("### Forever-only trainers Skill Master does not ship (%d)"):format(#run.foreverOnly)
+    out[#out + 1] = ("### Forever-only trainers Character Ledger does not ship (%d)"):format(#run.foreverOnly)
     out[#out + 1] = ""
     out[#out + 1] = "Trainer NPCs in QuestieDB's Forever table with a profession, riding or weapon title and no row in the 1.12 dump: new on Forever, so neither Era source knows them."
     out[#out + 1] = ""
@@ -181,7 +181,7 @@ function R.Markdown(run)
     recordsSection(out, run)
     out[#out + 1] = "## Licensing"
     out[#out + 1] = ""
-    out[#out + 1] = "QuestieDB (GPLv3 for contributions), the CMaNGOS dump (GPL-3.0), pfQuest (MIT), ItemTree (All Rights Reserved) and Method.gg are cited, not copied: this report quotes a source only against one of Skill Master's records, and the addon ships only its own corrected numbers and the commits above (`NS.DataMeta.Trainers_Forever`)."
+    out[#out + 1] = "QuestieDB (GPLv3 for contributions), the CMaNGOS dump (GPL-3.0), pfQuest (MIT), ItemTree (All Rights Reserved) and Method.gg are cited, not copied: this report quotes a source only against one of Character Ledger's records, and the addon ships only its own corrected numbers and the commits above (`NS.DataMeta.Trainers_Forever`)."
     out[#out + 1] = ""
     return table.concat(out, "\n")
 end

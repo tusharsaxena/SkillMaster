@@ -60,7 +60,7 @@ end
 --- The hidden scanning tooltip (the fallback when C_TooltipInfo is absent), made on first use.
 local function scanTip()
     if B.__scanTip == nil then
-        local ok, tip = pcall(CreateFrame, "GameTooltip", "SkillMasterScanTip", nil, "GameTooltipTemplate")
+        local ok, tip = pcall(CreateFrame, "GameTooltip", "CharacterLedgerScanTip", nil, "GameTooltipTemplate")
         B.__scanTip = ok and tip or false
     end
     return B.__scanTip or nil

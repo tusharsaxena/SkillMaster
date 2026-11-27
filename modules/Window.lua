@@ -1,7 +1,7 @@
 local addonName, NS = ...
 -- modules/Window.lua — the family window factory (item SMW-04 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md; the spec's "Families and windows"). One
--- window per family of defaults/Families.lua, each its own instance of what was the one Skill Master
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md; the spec's "Families and windows"). One
+-- window per family of defaults/Families.lua, each its own instance of what was the one Character Ledger
 -- window: its chrome (title band with lock, journal, settings, one Expand / Collapse all and close), the
 -- optional summary strip (the character's class icon and name, then its level line), its family's
 -- docked blocks in a scrolled body (NS.Blocks headers and NS.Rows rows), the bonus legend on the
@@ -17,7 +17,7 @@ local addonName, NS = ...
 --
 -- NS.Windows.New(fid) -> W (once per family, at load) / .Get(fid) / .Each() / .Settings(fid) / .Point(fid)
 --   / .EmptyText(fid) / .HasLegend(fid) / .ForBlock(id) (the window a docked block draws in) / .Toggle(fid)
---   / .ToggleAll() (`/sm toggle`: every window)
+--   / .ToggleAll() (`/cl toggle`: every window)
 --   / .RefreshAll(relayout) / .RefreshValuesAll() / .ApplyAll() / .HideAll() / .StandDownAll()
 --   / .ResetPositions() / .AnyShown() / .AllRows() (every shown window's rows, the overlay sync's)
 --   / .ShowAndScrollTo(key) / .TopStrata() (the highest window strata, the trainer popup's)
@@ -100,9 +100,9 @@ function Windows.New(fid)
     local W = { family = fid, CLASS_ICON = 14 }   -- the summary line's class icon, px
     byFamily[fid] = W
     -- The Professions window keeps the old window's names (a skin or a player's macro may know them).
-    local frameName = fid == "professions" and "SkillMasterMainWindow" or ("SkillMaster" .. cap(fid) .. "Window")
+    local frameName = fid == "professions" and "CharacterLedgerMainWindow" or ("CharacterLedger" .. cap(fid) .. "Window")
     W.FRAME_NAME = frameName
-    W.SCROLL_NAME = fid == "professions" and "SkillMasterMainScroll" or ("SkillMaster" .. cap(fid) .. "Scroll")
+    W.SCROLL_NAME = fid == "professions" and "CharacterLedgerMainScroll" or ("CharacterLedger" .. cap(fid) .. "Scroll")
     local PATH = "windows." .. fid .. "."   -- its Layout > Window rows
 
     local frame          -- built on first show
@@ -925,7 +925,7 @@ function Windows.Toggle(fid)
     return W and W.Toggle() or false
 end
 
---- `/sm toggle` (R5-SM-05, the owner's round 5): hide every family window while any shows, else show all six.
+--- `/cl toggle` (R5-SM-05, the owner's round 5): hide every family window while any shows, else show all six.
 --- While stood down it opens nothing and answers the one refusal line once, as each window's toggle would.
 --- Answers whether the windows are shown after.
 function Windows.ToggleAll()

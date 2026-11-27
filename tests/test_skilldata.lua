@@ -41,7 +41,7 @@ local function struct(v)
              numTempPoints = l[3] or 0, skillModifier = l[4] or 0, skillMaxRank = l[5] }
 end
 
--- WoW Forever 1.60.1's struct, field for field as `/sm probe` showed it (build 70862, 2026-11-10).
+-- WoW Forever 1.60.1's struct, field for field as `/cl probe` showed it (build 70862, 2026-11-10).
 -- A line may carry { ..., [6] = skillID, [7] = parentSkillLineID }.
 local function foreverStruct(v)
     if v.header then

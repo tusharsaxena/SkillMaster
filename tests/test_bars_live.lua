@@ -29,13 +29,13 @@ end
 
 --- A tooltip whose lines have the named regions the broker anchors its mini bars to.
 local function recordingTip()
-    local tip = M.CreateFrame("GameTooltip", "SkillMasterBarsLiveTip", M.UIParent)
+    local tip = M.CreateFrame("GameTooltip", "CharacterLedgerBarsLiveTip", M.UIParent)
     tip.lines = {}
-    function tip:GetName() return "SkillMasterBarsLiveTip" end
+    function tip:GetName() return "CharacterLedgerBarsLiveTip" end
     function tip:NumLines() return #self.lines end
     function tip:ClearLines() self.lines = {} end
     local function region(n)
-        local name = "SkillMasterBarsLiveTipTextLeft" .. n
+        local name = "CharacterLedgerBarsLiveTipTextLeft" .. n
         _G[name] = _G[name] or M.CreateFrame("Frame", name, tip)
     end
     function tip:AddLine(text) self.lines[#self.lines + 1] = { text } region(#self.lines) end

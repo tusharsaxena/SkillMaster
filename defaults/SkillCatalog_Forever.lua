@@ -1,5 +1,5 @@
 local _, NS = ...
--- defaults/SkillCatalog_Forever.lua — every skill line Skill Master shows (design §2, goal 1): the
+-- defaults/SkillCatalog_Forever.lua — every skill line Character Ledger shows (design §2, goal 1): the
 -- vanilla professions, the 16 weapon skill lines, Defense, Lockpicking and Riding.
 --
 -- NS.SkillCatalog[key] = { category, kind, tiers, openSpell, opensSkillsTab, name, aliases, order }
@@ -26,7 +26,7 @@ local _, NS = ...
 -- Source: the vanilla 1.12 skill list, checked against WoW Forever's own DB2 for GitHub issue #10 by
 -- the seeds run (docs/seed-research/2026-11-27-forever: every skillLineID and riding aliasID against
 -- SkillLine, every open and icon spell ID against SpellName, no flag) and the rank caps against the
--- rank spells (defaults/Ranks_Forever.lua). A `/sm probe` confirmed the skill-line IDs on build 70862.
+-- rank spells (defaults/Ranks_Forever.lua). A `/cl probe` confirmed the skill-line IDs on build 70862.
 
 NS.DataMeta = NS.DataMeta or {}
 NS.DataMeta.SkillCatalog_Forever = { source = "WoW Forever DB2 SkillLine + SpellName (wowf 1.60.1.71139; "
@@ -90,7 +90,7 @@ NS.SkillCatalog = {
 
 -- The skill-line IDs (SkillLine.dbc, vanilla) and the open spells' IDs (the Apprentice rank: any
 -- rank's ID answers the rank-free localized name, which casts the highest rank known). The skill-line
--- IDs a `/sm probe` showed (build 70862, 2026-11-10) all match: every profession, secondary and weapon line,
+-- IDs a `/cl probe` showed (build 70862, 2026-11-10) all match: every profession, secondary and weapon line,
 -- Defense 95. The rest, and the open spells, are still unverified on WoW Forever.
 local SKILL_LINE_IDS = {
     alchemy = 171, blacksmithing = 164, enchanting = 333, engineering = 202, herbalism = 182,

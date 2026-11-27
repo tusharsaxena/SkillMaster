@@ -1,4 +1,4 @@
-# Smoke tests — Ka0s Skill Master
+# Smoke tests — Ka0s Character Ledger
 
 In-game checks on **WoW Forever** (client 1.60.1). The owner runs them; an agent never marks one
 passed (clients-§6, testing). Each check names what to do and what you should see. Every check
@@ -26,8 +26,8 @@ the checks below that cover each item:
 
 ## Load
 
-- **SM-LOAD-1** Log in on Forever. The AddOns list shows Ka0s Skill Master with its logo; no Lua error.
-- **SM-LOAD-2** On a **Retail** client, open the AddOns list. Ka0s Skill Master is **not listed**
+- **SM-LOAD-1** Log in on Forever. The AddOns list shows Ka0s Character Ledger with its logo; no Lua error.
+- **SM-LOAD-2** On a **Retail** client, open the AddOns list. Ka0s Character Ledger is **not listed**
   (the `ExcludeLoadGameType: standard` gate, clients-§9). This also settles the open evolution the
   standard recorded for the Forever load gate.
 - **SM-LOAD-3** On a fresh profile the skin picker opens once, previewing in test mode; it defaults to
@@ -35,12 +35,12 @@ the checks below that cover each item:
 
 ## Window
 
-- **SM-WIN-1** `/sm toggle` opens the window titled Skill Master; Escape and the close button hide it.
-- **SM-WIN-2** Drag it, `/reload`: it reopens where it was dropped. `/sm lock`: it no longer drags.
-- **SM-WIN-3** `/sm test`: an amber band says the skills shown are sample data. Enter combat: the
+- **SM-WIN-1** `/cl toggle` opens the window titled Character Ledger; Escape and the close button hide it.
+- **SM-WIN-2** Drag it, `/reload`: it reopens where it was dropped. `/cl lock`: it no longer drags.
+- **SM-WIN-3** `/cl test`: an amber band says the skills shown are sample data. Enter combat: the
   band disappears and test mode is off.
-- **SM-WIN-4** Bind keys under Options → Keybindings → Ka0s Skill Master: *Toggle skills window* toggles
-  the window and *Toggle journal* toggles the Journal. `/sm disable`: each press refuses on one line.
+- **SM-WIN-4** Bind keys under Options → Keybindings → Ka0s Character Ledger: *Toggle skills window* toggles
+  the window and *Toggle journal* toggles the Journal. `/cl disable`: each press refuses on one line.
 - **SM-WIN-5** (round 6, R6-3) Hide one weapon row so the Weapon Skills header shows every mark
   (eye, filter funnel, sort, pop-out): all four read the same size and sit on one line, none higher,
   lower or smaller than the others. Pop the block out and merge it with another detached block: the
@@ -54,8 +54,8 @@ the checks below that cover each item:
   share the new width.
 - **SM-WIN-7** (new, AF-SM-RESIZE) Drag the grip as small and as large as it goes: it stops at Window
   width's and Window height's limits (never off the screen), and the window still draws cleanly at both.
-- **SM-WIN-8** (new, AF-SM-RESIZE) `/sm lock`: the grip disappears and the window neither drags nor
-  resizes. `/sm unlock`: the grip is back. The title bar's lock mark and the launcher's Locked entry do
+- **SM-WIN-8** (new, AF-SM-RESIZE) `/cl lock`: the grip disappears and the window neither drags nor
+  resizes. `/cl unlock`: the grip is back. The title bar's lock mark and the launcher's Locked entry do
   the same. Hover the minimap or broker button for the LDB tooltip: it has no grip and keeps its size.
 - **SM-WIN-9** (new, AF-SM-RESIZE review fix) Drag the grip to an odd size and release, then open
   Layout › Window: Window width and Window height read whole tens (the sliders' step). Nudge either
@@ -81,7 +81,7 @@ the checks below that cover each item:
   Where it opens is SM-TIP-1 (AD-92-SM: beside the window, no longer off the row's top-right corner).
 - **SM-DISP-5** Click Leatherworking (or any craft, Cooking, First Aid, Mining's Smelting): its
   window opens. Click Skinning or Fishing: its own window (Camping) opens. Click a weapon, Defense or
-  Riding: Character → Skills, with that skill selected (`/sm debug` logs `[Click] Skills tab for <key>:
+  Riding: Character → Skills, with that skill selected (`/cl debug` logs `[Click] Skills tab for <key>:
   line <n>, selected by <call>`). Click a stat:
   the paper doll. Shift-click a row with the chat box open: `[Guns 105 +5 / 110]` is inserted.
   Right-click: the row menu (pin, waypoint, trainers, hide).
@@ -91,7 +91,7 @@ the checks below that cover each item:
 - **SM-DISP-7** An unlearned weapon row reads `Not learned · <trainer>, <city> · 10s`. A click on
   the row (its action mark included) opens the trainer popup: the faction's weapon masters, with no
   unverified warning since the trainer probe confirmed them (amended, GitHub issue #3). Set
-  waypoint (a map pin and Skill Master's arrow), and Print to chat.
+  waypoint (a map pin and Character Ledger's arrow), and Print to chat.
 - **SM-DISP-8** Open the window and the Journal over it, then click the window: it comes to the
   front and a crafting row still opens its profession (the overlay was re-leveled above the rows).
   Drag the window by its title: no invisible button is left at the old place, and at the drop
@@ -103,7 +103,7 @@ the checks below that cover each item:
 - **SM-DISP-10** (FB-14) Every row draws an in-game icon in a thin border of its color, never two
   letters: each profession its own spell icon, each weapon line, Defense, Lockpicking, Riding and
   each stat a fitting classic icon; an unlearned row's icon is gray; an alert toast draws the same
-  icon. A line Skill Master does not know shows the question mark. Note any icon that draws blank
+  icon. A line Character Ledger does not know shows the question mark. Note any icon that draws blank
   or green: its catalog name is unverified (`defaults/SkillCatalog_Forever.lua`, `defaults/Stats_Forever.lua`).
 - **SM-DISP-11** (FB-15) A docked block's header shows the detach mark (a box, its arrow out of the
   top right); a detached frame's dock control is the same mark turned round (the arrow into the
@@ -117,7 +117,7 @@ the checks below that cover each item:
   the same action mark (an arrow into a box) at the right end, in one column with the block headers'
   detach marks, the bar ending the same few pixels before it; stat rows carry none. Clicking a
   crafting row's mark (or anywhere on the row) opens the
-  profession out of combat (`/sm debug` logs `[Click] crafting overlay ... cast ...`), and in combat
+  profession out of combat (`/cl debug` logs `[Click] crafting overlay ... cast ...`), and in combat
   says why it cannot. Fishing's lure timer sits inside its bar's right end. Detach a block: its title sits
   in the middle of the band, and the first and last rows have a little room above and below.
 - **SM-DISP-15** (round 2) Bars > Marks: tick Rank tier colors. Every profession bar draws to 300
@@ -179,7 +179,7 @@ the checks below that cover each item:
   edge. Title band On hover: the band, title and marks vanish, the rows stay where they were; point at
   a window: its band returns and the window drags by it; point away: gone. Never: no band, the rows
   move up, a thin strip at the top still drags the window. Detached block strata sits on this tab.
-  `/sm skin` to another skin: every pick above survives the repaint.
+  `/cl skin` to another skin: every pick above survives the repaint.
 - **SM-DISP-26** (round 5, R5-6: the merged window) Detach
   Primary Professions and Secondary Professions and drag Secondary onto Primary's bottom edge: one window
   titled `Primary · Secondary`, each section under its own sub-header (chevron, title, sort mark, split mark); the band's two marks collapse / expand both
@@ -228,11 +228,11 @@ the checks below that cover each item:
   unlearned weapon: each weapon master in a city on your continent shows `N yd` under its cost, the
   nearest first; one on the other continent, or without coordinates, shows none and comes last.
   Walk towards another trainer with the popup open: within about a second the yards change and the
-  cards reorder; the trainer you selected stays selected. Compare one card's yards with Skill Master's
+  cards reorder; the trainer you selected stays selected. Compare one card's yards with Character Ledger's
   arrow (roughly equal: a straight line). Enter an instance (or a battleground) with the popup open: no
   distances, no error.
 - **SM-DISP-39** (round 6, R6-10) On a new profile, hover the broker feed: the tooltip looks like the
-  main window, as wide as it, in the skin's shell with the title band (Skill Master · Professions and Skills since round 7, the session's
+  main window, as wide as it, in the skin's shell with the title band (Character Ledger · Professions and Skills since round 7, the session's
   gains at the right): the window's block headers (chevron and title; no sort or filter mark since
   round 8, SM-DISP-54), its rows (icon, name, the bar with its text inside it, the action mark at the
   right end), at the window's row height and fonts, the footer hints under them. Collapse Weapon
@@ -243,15 +243,15 @@ the checks below that cover each item:
   > LDB tooltip: Height 200, hover: the body scrolls with the wheel and its scroll bar. Tooltip
   style Classic: today's lines and mini bars, and the row menu over them is whole too. An existing
   profile from before this build opens on Classic.
-- **SM-DISP-40** (round 6, R6-9) In a broker display add the second feed, Skill Master Stats: it reads
+- **SM-DISP-40** (round 6, R6-9) In a broker display add the second feed, Character Ledger Stats: it reads
   `Stats`. Hover it: its tooltip lists the stat blocks (Base & Combat, Spell & Regen, Defense &
-  Resists, Utility) in the chosen Tooltip style, and the Skill Master feed's tooltip lists skills
+  Resists, Utility) in the chosen Tooltip style, and the Character Ledger feed's tooltip lists skills
   only. Right-click Ranged Crit (in the window or the stats tooltip) > Pin to the broker feed: the
   feed reads `Ranged Crit 9.1%` (your value) at once; log on an alt: its feed reads `Stats`; pin again
   to unpin. Left-click the stats feed: the window toggles; right-click: the Broker page. Broker >
   Tooltip > Stats feed sections: turn Utility off: the stats tooltip leaves it out. Rows: a stat's
   LDB tooltip eye leaves it out of the stats feed's tooltip.
-- **SM-DISP-41** (round 6, review) On a new profile run `/sm test`, hover the Skill Master feed and
+- **SM-DISP-41** (round 6, review) On a new profile run `/cl test`, hover the Character Ledger feed and
   right-click the amber strip at the top of its tooltip: the End test menu draws whole, over the
   tooltip, and the tooltip stays while it is open; click End test: test mode ends. A profile from
   before this build that never changed a setting opens the feed tooltip on Classic.
@@ -259,7 +259,7 @@ the checks below that cover each item:
   available: hover Set waypoint: its label takes the skin's hover color, as Print to chat's does.
 - **SM-DISP-43** (round 6, R6-11) Open the trainer popup on an unlearned weapon,
   pick a weapon master in your city and click Set waypoint: the map pin is set, the game's own arrow
-  does not show, and Skill Master's arrow (Raised by default, round 8) shows above the screen's center with the yards
+  does not show, and Character Ledger's arrow (Raised by default, round 8) shows above the screen's center with the yards
   under it in the skin's body font. Turn on the spot: the arrow turns to keep pointing at the
   trainer (turn left and it turns right). Face the trainer: it points straight up. Far away (300 yd
   or more) it is the skin's accent; walk in: it shades into the skin's green by 30 yd. Within about
@@ -272,26 +272,26 @@ the checks below that cover each item:
   new one. Enter an instance (or ride to another continent): the art goes and the trainer's name
   shows alone, dimmed. Enter combat: it stays.
 - **SM-DISP-45** (round 6, R6-11) Trainers and Waypoints > Waypoint arrow: Arrow scale 1.5: the arrow grows at once.
-  Untick Show Skill Master's arrow with it up: it goes and the game's own arrow points at the pin;
-  set a waypoint again: the game's arrow, no Skill Master arrow. Tick it again.
-- **SM-DISP-46** (the R6-11 review) A waypoint set and Skill Master's arrow up. Press
+  Untick Show Character Ledger's arrow with it up: it goes and the game's own arrow points at the pin;
+  set a waypoint again: the game's arrow, no Character Ledger arrow. Tick it again.
+- **SM-DISP-46** (the R6-11 review) A waypoint set and Character Ledger's arrow up. Press
   Alt+Z twice: the arrow comes back and still turns as you turn and counts the yards down (walk in:
-  `You have arrived` still prints). Make a second profile with Show Skill Master's arrow off and
+  `You have arrived` still prints). Make a second profile with Show Character Ledger's arrow off and
   switch to it with the arrow up: it goes and the game's own arrow points at the pin. Switch back,
   set the waypoint, then switch to a profile whose arrow is at scale 2 and dragged elsewhere: the
   arrow takes that scale and place at once.
 - **SM-DISP-47** (round 7, R7-7; amended, AF-SM-TOMTOM: the real TomTom is SM-DISP-64) With an
   addon that answers TomTom's API but is not TomTom itself (the owner's round-7 case) loaded: Set
-  waypoint on a weapon master gives the map pin and Skill Master's arrow, never TomTom's; `/sm test` shows the sample arrow too. Untick Show Skill Master's
+  waypoint on a weapon master gives the map pin and Character Ledger's arrow, never TomTom's; `/cl test` shows the sample arrow too. Untick Show Character Ledger's
   arrow and set it again: the map pin with the game's own arrow. Trainers and Waypoints > Waypoint
   method offers Map pin and Chat only, no TomTom entry. A profile that had TomTom first or Map pin
   stored reads Map pin after the upgrade.
 - **SM-DISP-48** (round 7, R7-3) Expand Stats · Base & Combat in the main window, a detached frame, a
-  merged window and the Skill Master Stats feed's tooltip (both styles): no `vs highest primary` (or
+  merged window and the Character Ledger Stats feed's tooltip (both styles): no `vs highest primary` (or
   any other muted text) beside any block title; the header holds the chevron, the title and its marks
   only. Hover a stat row: its tooltip still has the `Scale: vs ...` line.
-- **SM-DISP-49** (round 7, R7-5) Hover the Skill Master feed, then the Skill Master Stats feed, in each
-  Tooltip style: the titles read `Skill Master · Professions and Skills` and `Skill Master · Stats`
+- **SM-DISP-49** (round 7, R7-5) Hover the Character Ledger feed, then the Character Ledger Stats feed, in each
+  Tooltip style: the titles read `Character Ledger · Professions and Skills` and `Character Ledger · Stats`
   (a middle dot). The broker display still shows both feeds where you had placed them (their names
   are unchanged) and their texts as before. In the Main window style, set Tooltips > LDB tooltip >
   Width (px) to 300 and hover each feed: the title never draws over the `+N this session` text at the
@@ -322,7 +322,7 @@ the checks below that cover each item:
   the menu`. Click a row's name or bar: nothing opens. Hover a crafting row (Tailoring): the row
   washes, its row tooltip shows beside it and the go icon lights under the pointer; click the go
   icon: the profession window opens (the cast, as the main window's). A weapon row's go icon opens
-  Character > Skills on its line, a stat row's (Skill Master Stats) the paper doll, with no Lua error.
+  Character > Skills on its line, a stat row's (Character Ledger Stats) the paper doll, with no Lua error.
   Shift-click a row: its link goes into chat; right-click a row and its go icon: the row menu, above
   the tooltip. Scroll a long tooltip (Height 200) and click a go icon: the row under the pointer
   opens. Move off the tooltip so it hides, then click where a go icon was: nothing happens. In
@@ -356,7 +356,7 @@ the checks below that cover each item:
 - **SM-DISP-56** (round 8, R8-1: open a row from) A fresh profile: Layout > Window > Open a row from
   reads Full row, and so does Tooltips > LDB tooltip > Open a row from. In the main window click a
   crafting row's name, its icon and its bar (Tailoring, Cooking): the profession window opens each
-  time, out of combat, with no "action blocked" or Lua error (`/sm debug` logs the overlay's
+  time, out of combat, with no "action blocked" or Lua error (`/cl debug` logs the overlay's
   `PostClick` with no "no armed crafting overlay" line). Click a weapon row's name: Character > Skills
   opens on its line; a stat row's: the paper doll, with no PlayerFrame secret-compare error. Hover a
   row: its tooltip's last line starts `Click:` (`Arrow:` in Go icon only). Shift-click a crafting row
@@ -366,11 +366,11 @@ the checks below that cover each item:
   again. Detach Weapon Skills and merge two detached blocks: their rows open from anywhere on them
   too. Set Open a row from to Go icon only: a click on a row's name or bar opens nothing, its go icon
   opens it, shift-click and right-click still work on the whole row; the detached and merged rows
-  follow. Hover the Skill Master feed (Main window style): a click anywhere on a row opens what its
+  follow. Hover the Character Ledger feed (Main window style): a click anywhere on a row opens what its
   go icon opens (a crafting row its window, not the main window), and the footer names the
   shift-click link; set its Open a row from to Go icon only and SM-DISP-52 holds.
 - **SM-DISP-57** (round 8, R8-5: the arrow's five looks) A fresh profile: Trainers and Waypoints >
-  Waypoint arrow reads Show Skill Master's arrow, Arrow style Raised, Use the skin's colors ticked
+  Waypoint arrow reads Show Character Ledger's arrow, Arrow style Raised, Use the skin's colors ticked
   (Far color and Near color grayed), Arrow scale 1. Set a weapon master's waypoint and pick each
   Arrow style in turn, the arrow up: Flat (one even color, a dark edge), Ridge (a lit spine down the
   middle), Raised (lit from the top left, a soft shadow down and to the right that stays there as you
@@ -385,7 +385,7 @@ the checks below that cover each item:
   Untick Use the skin's colors: Far color and Near color light up; set Far to red and Near to blue:
   far away it is red, it shades through purple as you walk in, blue by 30 yd. Tick it again: the
   skin's colors are back. Make a second profile with On the ground and switch to it, the arrow up:
-  it lies on the ground at once; switch back: Raised. `/sm test`: the sample arrow draws in the chosen
+  it lies on the ground at once; switch back: Raised. `/cl test`: the sample arrow draws in the chosen
   look.
 - **SM-DISP-59** (round 9: the Rows page's tabs) Open Settings > Rows: a tab strip reads Primary,
   Secondary, Weapons, (Other, when a catalog skill is uncategorized,) Base & Combat, Spell & Regen,
@@ -405,23 +405,23 @@ the checks below that cover each item:
   X offset 300: the arrow moves right at once; Y offset 0: it sits at the screen's center. Drag the
   arrow: both sliders follow when you drop it. Arrow scale 2: it grows where it is. Click Reset
   position: it goes back above the center and the sliders read 0 and 200. Tick Lock the arrow: it no
-  longer drags, and its tooltip drops the drag hint; `/sm lock` and `/sm unlock` do not change
+  longer drags, and its tooltip drops the drag hint; `/cl lock` and `/cl unlock` do not change
   whether it drags. Untick it.
 - **SM-DISP-62** (round 9, R9-2: the arrow's menu) Right-click the arrow: a menu at the pointer, in
   the skin, reads Clear waypoint, Share in chat, Show on map, Show trainers, Lock the arrow, Reset
   position, Arrow settings..., Hide arrow. Share in chat: the chat box opens with a ` /way <zone>
   xx.x, yy.y <trainer>` line and sends nothing until you press Enter. Show on map: the world map
   opens on the trainer's zone (in combat the item is grayed, its tooltip saying why). Show trainers:
-  Skill Master's trainer popup opens on the skill whose Set waypoint you clicked. Lock the arrow:
+  Character Ledger's trainer popup opens on the skill whose Set waypoint you clicked. Lock the arrow:
   it stops dragging and the next right-click reads Unlock the arrow. Reset position: back above the
   center. Arrow settings...: the settings panel opens on Trainers and Waypoints (in combat the item is
   grayed, its tooltip saying why). Hide arrow: the arrow
-  goes and the game's own arrow points to the pin; Show Skill Master's arrow is unticked there.
+  goes and the game's own arrow points to the pin; Show Character Ledger's arrow is unticked there.
   Tick it again. Click elsewhere: an open menu closes; walk into the trainer with it open: it closes.
-- **SM-DISP-63** (round 9, R9-2: the sample's menu) A waypoint set, then `/sm test`: the sample
+- **SM-DISP-63** (round 9, R9-2: the sample's menu) A waypoint set, then `/cl test`: the sample
   arrow shows over it. Right-click it: Share in chat, Show on map and Show trainers are grayed.
   Clear waypoint: the sample goes, the real arrow is back and
-  the map pin stays. `/sm test` again to end test mode: the real arrow stays.
+  the map pin stays. `/cl test` again to end test mode: the real arrow stays.
 - **SM-DISP-64** (new, AF-SM-TOMTOM, owner img-19) With **TomTom** installed and enabled, open the
   trainer popup on an unlearned weapon (Bows) and press Set waypoint: TomTom's waypoint appears (on
   the world map, the minimap and with TomTom's own arrow), titled with the trainer's name; Skill
@@ -429,7 +429,7 @@ the checks below that cover each item:
   the TomTom waypoint: it names the trainer. A cap toast's click does the same. (A map pin left by
   a Set made before TomTom was enabled is not cleared; known-limitations.md.)
 - **SM-DISP-65** (new, AF-SM-TOMTOM) Disable TomTom and `/reload`: Set waypoint is the map pin with
-  Skill Master's arrow again, and chat says `Map pin set: ...`. With TomTom enabled, Waypoint method
+  Character Ledger's arrow again, and chat says `Map pin set: ...`. With TomTom enabled, Waypoint method
   Chat only: Set waypoint is grayed and Print to chat prints the directions.
 - **SM-DISP-37** (round 6, R6-6) Open the trainer popup on an unlearned weapon: the primary button
   reads `Set waypoint` (no `(map pin)` or `(chat)`), no `Waypoint order:` line sits under the buttons and the window ends a pad below them.
@@ -485,13 +485,13 @@ Every data bar is LibKa0s-Widgets-1.0's `Bar` now, styled from the Bars page by 
 - **SM-BAR-2** (new, the one visible change) Bars > Show border on, thickness 1: each bar's edge is
   one physical pixel, crisp at any UI scale (it was one UI unit, which a fractional scale blurred
   or doubled); thickness 3 draws three pixels.
-- **SM-BAR-3** (new) With the window open, switch the skin (`/sm skin`, Apply): every bar repaints
+- **SM-BAR-3** (new) With the window open, switch the skin (`/cl skin`, Apply): every bar repaints
   in the new skin at once, no `/reload`. Bars > Rank tier colors on (Color mode By category): a
   profession bar splits into a shade per rank tier entered, on a scale to 300.
 
 ## Tooltip placement (AD-92-SM, LibKa0s#92)
 
-Every tooltip Skill Master places itself opens where its element sits, never at the pointer and never
+Every tooltip Character Ledger places itself opens where its element sits, never at the pointer and never
 off a corner of the control (standalone-windows, *Tooltip placement*; launcher-§7). The gap is 2 px.
 In each check, the tooltip's words are what they were before this change.
 
@@ -516,7 +516,7 @@ In each check, the tooltip's words are what they were before this change.
   (right of it, or left of it when the arrow is near the screen's right edge), its top level with the
   arrow's, never at the pointer. Drag the arrow elsewhere and hover again: it follows the arrow.
 - **SM-TIP-6** (the broker feed, launcher-§7) On a broker display (Titan Panel or the like) at the top of
-  the screen, hover the Skill Master feed in each Tooltip style (Main window, Classic): the tooltip
+  the screen, hover the Character Ledger feed in each Tooltip style (Main window, Classic): the tooltip
   hangs 2 px under the feed's cell; with the cell in the screen's right third its right edge lines up
   with the cell's right edge (it extends left), in the left third its left edge with the cell's, in the
   middle third it is centered. A display at the bottom of the screen opens it 2 px above the cell. The
@@ -526,14 +526,14 @@ In each check, the tooltip's words are what they were before this change.
 
 ## Journal
 
-- **SM-JRN-1** `/sm journal` opens "Skill Master · Journal" with Log and Alts tabs; Escape and
+- **SM-JRN-1** `/cl journal` opens "Character Ledger · Journal" with Log and Alts tabs; Escape and
   the close mark close it (and any open range menu with it); drag it, `/reload`, and it opens where
   it was dropped.
 - **SM-JRN-4** (FB-33) With the Journal where it first opens (centered), grab the bottom-right grip
   and drag slowly: the grip's corner stays under the pointer, the top-left corner stays put, and the
   window never leaps or grows faster than the pointer moves; it never gets smaller than it opened.
   Release: more log rows show, and on Alts more characters across once it is wide enough. `/reload`:
-  it opens at the dragged size and place. Lock the window (`/sm lock`): the grip does nothing.
+  it opens at the dragged size and place. Lock the window (`/cl lock`): the grip does nothing.
 - **SM-JRN-2** (FB-32) Gain a skill point: a row appears at the top of Log with the date, the time,
   the skill, `old -> new` and the zone, every column inside its own width (a long skill or zone name
   ends in an ellipsis, nothing overlaps), and the summary card counts it. A second gain of the same
@@ -560,19 +560,19 @@ In each check, the tooltip's words are what they were before this change.
 - **SM-JRN-7** (round 5, R5-4) The Log table's header (DATE, TIME, SKILL, CHANGE, ZONE, uppercase)
   and the Alts table's header (the block's title and the character names) each stand on a band in
   the block headers' color with a thin rule under it, plainly not a row; the rows keep their stripes.
-  `/sm skin` to another skin: both bands follow it.
+  `/cl skin` to another skin: both bands follow it.
 - **SM-JRN-8** (round 5, R5-2) The Journal's title bar carries a padlock left of its close mark, its
   tooltip "Lock or unlock the window". Click it: it closes, the main window's padlock closes too, and
-  neither the Journal nor the main window drags or resizes. `/sm unlock`: both padlocks open. With
+  neither the Journal nor the main window drags or resizes. `/cl unlock`: both padlocks open. With
   the Journal open, switch to a profile whose window is unlocked: the Journal's padlock opens.
 
 ## Integration (M3 + M4)
 
-- **SM-SEAM-1** Collapse the Primary block and scroll the window to the top. Hover the Skill Master feed and
+- **SM-SEAM-1** Collapse the Primary block and scroll the window to the top. Hover the Character Ledger feed and
   click Leatherworking in its tooltip: the window opens, Primary expands and the body scrolls to
   the row. Click an unlearned weapon in the feed tooltip's Weapon section: the trainer popup opens on that skill.
 - **SM-SEAM-2** The broker tooltip's and the Journal's mini bars match the window's bar colors;
-  switch skins and reopen both: they follow. Click the cap toast: a map pin and Skill Master's arrow.
+  switch skins and reopen both: they follow. Click the cap toast: a map pin and Character Ledger's arrow.
 - **SM-SEAM-3** Click the main window's journal mark: the Journal opens; again: it closes.
 - **SM-SEAM-4** Hover a feed, then move straight onto another addon's tooltip owner (a bag item):
   the other tooltip stays up (the feed's leave check hides only its own). The feed tooltip's footer
@@ -586,10 +586,10 @@ In each check, the tooltip's words are what they were before this change.
   and Open skin selector. Hovering shows the status tooltip.
 - **SM-LDB-3** (new, AD-81-SM) Right-click the minimap button with the Journal closed: *Journal* is
   unticked; click it: the Journal opens and the menu closes. Right-click again: *Journal* is ticked;
-  click it: the Journal closes. The same from a broker display's Skill Master feed. `/sm disable`,
+  click it: the Journal closes. The same from a broker display's Character Ledger feed. `/cl disable`,
   then right-click: *Journal (enable the addon first)* is grayed and does nothing.
-- **SM-LDB-2** In a broker display (Titan Panel, ChocolateBar or Bazooka), add the one Skill Master
-  feed ("Skill Master"; no All, Professions or Weapons feed is offered; the stats have their own
+- **SM-LDB-2** In a broker display (Titan Panel, ChocolateBar or Bazooka), add the one Character Ledger
+  feed ("Character Ledger"; no All, Professions or Weapons feed is offered; the stats have their own
   feed, SM-DISP-40): it shows its
   template's text. Gain a skill point: the feed reads `^ <skill> <new>` for five seconds, with the
   up chevron. Hover it (Tooltips > Tooltip style Classic): the tooltip lists Primary, Secondary, Weapon and Other with mini bars, no
@@ -597,7 +597,7 @@ In each check, the tooltip's words are what they were before this change.
   off, hover again: weapons do not show. Rows: Cooking's LDB tooltip eye; the tooltip leaves it
   out and the main window still shows it. Turn *Apply skin to the tooltip* off: the plain tooltip;
   hover a unit or item afterwards, its GameTooltip is the game's own look.
-- **SM-CFG-1** Settings → AddOns → Ka0s Skill Master: the landing page lists the slash commands; General
+- **SM-CFG-1** Settings → AddOns → Ka0s Character Ledger: the landing page lists the slash commands; General
   has Master controls, Skin and Keybindings tabs; Profiles works.
 - **SM-CFG-2** Uncheck Minimap button: the button hides, and Reset all settings does not bring it back.
 
@@ -619,7 +619,7 @@ In each check, the tooltip's words are what they were before this change.
   from its row menu and reopen Rows: Fishing's Window eye reads dimmed.
 - **SM-OPT-21** (R5-followups review) With Rows open and the main window visible, right-click Axes
   in the window > Hide this row: Axes's Window eye dims at once and the Weapon Skills heading's
-  Window eye lights; click it: Axes comes back. `/sm set skills.hidden.bows true` with the page open:
+  Window eye lights; click it: Axes comes back. `/cl set skills.hidden.bows true` with the page open:
   the same. Drag Weapon Skills to the top on Layout > Block order, go back to Rows: Weapon Skills
   is the first heading.
 - **SM-OPT-20** (round 5, R5-13) Hide a skill and a stat in both columns, then Skills > Defaults and
@@ -633,7 +633,7 @@ In each check, the tooltip's words are what they were before this change.
   points on different skills within 5 s share one toast ("Skill up · 2 skills"). A weapon 25 or more
   behind toasts red "WEAPON SKILL GAP" with "(-N)". Alerts > Skill-up alerts for: Professions only
   stops the weapon skill-ups; Play a sound on skill up plays the sound on skill-ups alone.
-- **SM-ALR-3** (round 6, R6-1) `/sm test`: the weapon-gap and skill-up toasts wear the cap toast's
+- **SM-ALR-3** (round 6, R6-1) `/cl test`: the weapon-gap and skill-up toasts wear the cap toast's
   look (the skin's background, border and text, the same icon size, no red or green wash or edge).
   Only the small label ("WEAPON SKILL GAP", "SKILL UP") and the numbers keep red and green, the
   delta in brackets: "Daggers 74 / 110 (-36)", "Bows 81 / 110 (+1)". Switch skins: all three follow.
@@ -678,7 +678,7 @@ In each check, the tooltip's words are what they were before this change.
   strata does the same for a detached block.
 - **SM-OPT-11** Bars > Colors: with Use the skin's colors on (the default) the bars show the
   mockup's category colors; turn it off and change the Weapon skills swatch: the weapon bars take it.
-- **SM-OPT-12** During a simulation (`/sm sim`, start the trip), right-click a row: Pin to the
+- **SM-OPT-12** During a simulation (`/cl sim`, start the trip), right-click a row: Pin to the
   broker feed is grayed out and does nothing. With test mode on, the feed starts `Fishing 107+25/150`
   and a `{equippedWeapon}` template reads `Guns 105+5/110`, whatever your own pin and weapon.
 - **SM-OPT-13** Bars > Size: set LDB tooltip bar height to 12 and LDB tooltip row height to 24, then
@@ -690,35 +690,35 @@ In each check, the tooltip's words are what they were before this change.
 
 ## Disabled
 
-- **SM-OFF-1** `/sm disable`: the window hides, `/sm toggle` answers one disabled line, the key
-  binding does nothing, the right-click menu grays all but Enabled. `/sm enable` restores it.
+- **SM-OFF-1** `/cl disable`: the window hides, `/cl toggle` answers one disabled line, the key
+  binding does nothing, the right-click menu grays all but Enabled. `/cl enable` restores it.
 
 ## Test mode and the simulator
 
-- **SM-TEST-1** (amended, AD-87-SM) `/sm test`: the window, a detached block, the broker feed and the
+- **SM-TEST-1** (amended, AD-87-SM) `/cl test`: the window, a detached block, the broker feed and the
   Journal all show Samplehunter Mockstride, the level-22 Dwarf Hunter (Leatherworking 146/150, Fishing
   107 +25 with a lure timer near 4:12, Guns 105 +5, Fist Weapons, Polearms, Thrown and Riding
   unlearned), the summary reads "Samplehunter Mockstride · Lv 22 · Dwarf Hunter" behind the Hunter
-  icon and the strip says the data is sample data. `/sm test` again: your own character everywhere.
-- **SM-TEST-12** (new, AD-87-SM) `/sm test`, then the Journal's Alts tab: the columns are Samplehunter
+  icon and the strip says the data is sample data. `/cl test` again: your own character everywhere.
+- **SM-TEST-12** (new, AD-87-SM) `/cl test`, then the Journal's Alts tab: the columns are Samplehunter
   Mockstride (this character, first), then Mockflame Samplewick (Mage), Mockshield Sampleforge
   (Warrior) and Sampleblade Mockvale (Paladin). Every name starts `Sample` or `Mock`; hovering a
   name's header shows `Realm: Samplerealm` or `Realm: Mockrealm`, never a real realm.
-- **SM-TEST-2** (round 5, R5-1) With the main window and the Journal closed, `/sm test`: both open,
+- **SM-TEST-2** (round 5, R5-1) With the main window and the Journal closed, `/cl test`: both open,
   and three toasts stack: the Leatherworking 150 / 150 cap toast (its next rank and trainer), a weapon-gap
   toast for Daggers (red numbers) and a skill-up toast for Bows (green numbers). They stay up (no countdown) and drag as one
-  stack. `/sm test` again: the toasts go and both windows close. Open the Journal first, then
-  `/sm test` twice: the Journal stays open. Enter combat in test mode: the toasts go with it.
-- **SM-TEST-3** (round 6, R6-2) Open the Journal, then `/sm test`: the amber strip "Test mode: the
+  stack. `/cl test` again: the toasts go and both windows close. Open the Journal first, then
+  `/cl test` twice: the Journal stays open. Enter combat in test mode: the toasts go with it.
+- **SM-TEST-3** (round 6, R6-2) Open the Journal, then `/cl test`: the amber strip "Test mode: the
   skills shown are sample data." shows under the Journal's title, the tabs and the log below it, and
-  nothing overlaps. Hover the LDB feed: the same line sits under the tooltip's title. `/sm test`
+  nothing overlaps. Hover the LDB feed: the same line sits under the tooltip's title. `/cl test`
   again: the strip and the line go and the Journal's tabs move back up. Right-click the Journal's
   strip: End test ends test mode.
-- **SM-TEST-6** (AD-88-SM, the docked strip) `/sm test` with the main window and the Journal open, and
+- **SM-TEST-6** (AD-88-SM, the docked strip) `/cl test` with the main window and the Journal open, and
   hover the LDB feed (Tooltips > Tooltip style: Main window). In each of the three, the amber strip
   spans the full width directly under the title bar. It touches the bar's bottom edge with no gap,
   and the bar's title and marks stay visible. The summary line, the Journal's tabs and the tooltip's
-  first block header sit just under the strip and none of them is covered. `/sm test` again: the
+  first block header sit just under the strip and none of them is covered. `/cl test` again: the
   strip goes and everything moves back up under the title bar. Repeat once under a second skin (for
   example WoW Midnight): the strip still sits under the bar.
 - **SM-TEST-7** (AD-89-SM, the footer) Open the main window: the bonus legend (temp bonus,
@@ -735,7 +735,7 @@ In each check, the tooltip's words are what they were before this change.
   X in the corner, evenly spaced (6 px apart, the X 6 px from the edge), all the same size and gray at
   rest. Hover each: its tooltip opens above it ("Lock or unlock the window", "Open the journal",
   "Collapse all blocks", "Open the settings panel", "Close") and the mark lights in the skin's link
-  color, the X in red. Click the gear: the Skill Master settings open. The lock, the journal mark and
+  color, the X in red. Click the gear: the Character Ledger settings open. The lock, the journal mark and
   Expand / Collapse all still do what they did. Repeat under a second skin (for example WoW Midnight).
 - **SM-TEST-9** (AD-86-SM, the Journal's title marks) Open the Journal: at the top right, the lock,
   the settings gear, then the close X in the corner, at the same spacing as the main window's. Hover
@@ -743,7 +743,7 @@ In each check, the tooltip's words are what they were before this change.
   open. The lock still locks and unlocks both windows, and the X closes the Journal.
 - **SM-TEST-10** (AD-86-SM, the trainer popup's title marks) Open the trainer popup (click an
   unlearned weapon row): its title bar carries the settings gear left of the close X. Click the gear:
-  the popup closes and the Skill Master settings open on top, not under it. The X still closes it.
+  the popup closes and the Character Ledger settings open on top, not under it. The X still closes it.
 - **SM-TEST-11** (AD-86-SM, the detached and merged bands) Detach a block: its band carries a settings
   gear in the top right corner, the dock, collapse, sort and filter marks to its left as before (the
   eye left of them when rows are hidden), evenly spaced at the main window's pitch (6 px between
@@ -752,44 +752,44 @@ In each check, the tooltip's words are what they were before this change.
   detached blocks: the merged window's band shows the gear in the corner, then dock all and collapse
   all. With Layout > Detached windows > Title band "On hover", the gear hides and shows with the rest
   of the band; with "Never", it is gone with the band.
-- **SM-TEST-4** (round 6, R6-11) `/sm test`: Skill Master's waypoint arrow shows,
+- **SM-TEST-4** (round 6, R6-11) `/cl test`: Character Ledger's waypoint arrow shows,
   pointing up and to the left at a sample weapon master with `240 yd` under it; no map pin is set.
-  Drag it where you want it. `/sm test` again: it goes (a waypoint you had set before test mode comes
+  Drag it where you want it. `/cl test` again: it goes (a waypoint you had set before test mode comes
   back). Enter combat in test mode: it goes with the rest.
 - **SM-TEST-5** (the R6-11 review) Set a trainer waypoint (the arrow points at it),
-  then `/sm test`, right-click the sample arrow and pick Clear waypoint: the sample goes and the arrow points at the real
-  trainer again, the map pin kept. `/sm test` again: the real arrow stays.
+  then `/cl test`, right-click the sample arrow and pick Clear waypoint: the sample goes and the arrow points at the real
+  trainer again, the map pin kept. `/cl test` again: the real arrow stays.
 - **SM-SIM-1** Tick General → Master controls → Sim mode: the step panel opens beside the window and
   the box stays ticked. Start the fishing trip: every 3 s a step plays; a skill-up flashes the broker
   and adds a Journal line, the lure puts a teal segment on Fishing, the mount moves Run Speed to
   160%. The window shows the cyan simulation strip.
-- **SM-SIM-2** Untick Sim mode (or the launcher's Sim mode entry, or `/sm sim stop`): the session
+- **SM-SIM-2** Untick Sim mode (or the launcher's Sim mode entry, or `/cl sim stop`): the session
   ends, your own skills, Journal log and broker gains are back, and `/reload` shows nothing of the
-  session was saved. Entering combat or `/sm disable` ends a session too; test mode refuses while one
+  session was saved. Entering combat or `/cl disable` ends a session too; test mode refuses while one
   runs and the simulator refuses in test mode, combat, an instance or a group.
-- **SM-SIM-3** With test mode on, `/sm diagnostics`: the state line reads `testMode=true`, the model
+- **SM-SIM-3** With test mode on, `/cl diagnostics`: the state line reads `testMode=true`, the model
   section `preview source=on` and the sim section `preview data=true`; during a simulation the state
   line reads `simMode=true` and the sim section names the scenario and its step.
 
 
 ## Probe
 
-- **SM-PROBE-1** (amended, AD-79-SM) `/sm probe`: the debug console opens, if it was hidden, with a
-  `/sm probe` header line and the JSON report under it, `skillLines` holding every skill (a collapsed
+- **SM-PROBE-1** (amended, AD-79-SM) `/cl probe`: the debug console opens, if it was hidden, with a
+  `/cl probe` header line and the JSON report under it, `skillLines` holding every skill (a collapsed
   header in the Skills tab is collapsed again afterwards). No copy window opens. Press the console's
   Copy and send the text to the author; it settles the assumed rows in `docs/forever-quirks.md`.
-- **SM-PROBE-2** (new, AD-79-SM) With debug logging off (`/sm debug off`) and the console closed,
-  `/sm probe`: chat shows exactly one line, `probe: 2 lines written to the debug console. Use Copy to
-  share it.`, and the report is in the console all the same. `/sm list` still prints in chat.
+- **SM-PROBE-2** (new, AD-79-SM) With debug logging off (`/cl debug off`) and the console closed,
+  `/cl probe`: chat shows exactly one line, `probe: 2 lines written to the debug console. Use Copy to
+  share it.`, and the report is in the console all the same. `/cl list` still prints in chat.
 - **SM-PROBE-3** (new, SMW-01) In the character panel, collapse one Reputation header (for example
-  Other) and one Currency header, then close the panel. `/sm probe`: the JSON holds `factions`, `currencies`
+  Other) and one Currency header, then close the panel. `/cl probe`: the JSON holds `factions`, `currencies`
   and `statistics`. `factions.rows` lists up to 60 factions, the collapsed header's factions among them, and
   `factions.byIDCollapsed` names that header; `currencies.rows` lists every currency; `statistics.categories`
   lists the categories (Character, Wealth, ...) with up to 3 rows each. Open the character panel: the headers
   you collapsed are still collapsed. Copy the report and send it to the author; it settles
   `docs/forever-quirks.md`'s "Reputations, currencies and Statistics" rows.
   Result:
-- **SM-PROBE-4** (new, SMW-01) With the Reputation tab shown, `/sm probe`: no Lua error, the panel's headers do
+- **SM-PROBE-4** (new, SMW-01) With the Reputation tab shown, `/cl probe`: no Lua error, the panel's headers do
   not move, and `factions.skipped` reads `panel shown`.
   Result:
 
@@ -813,7 +813,7 @@ you see on each Result line; none is passed until you say so.
 - **SM-TPROBE-3** (either faction) At one Journeyman trainer (for example Tel'Athir, Alchemy) and one
   Artisan trainer (for example Georgio Bolero, Tailoring), open the trainer window with the skill at
   the rank's gate: the Journeyman trainer offers Journeyman (150) and the Artisan trainer Artisan
-  (300). The CMaNGOS 1.12 dump has each one rank lower; Skill Master keeps the titles.
+  (300). The CMaNGOS 1.12 dump has each one rank lower; Character Ledger keeps the titles.
   Result: PASSED (owner, 2026-11-23).
   Superseded (owner's ruling, 2026-11-23: "trust the source not my smoke test"; the owner checked
   Wowhead for Fimble Finespindle and Drakk Stonehand): a Journeyman-titled trainer trains Apprentice,
@@ -927,7 +927,7 @@ only Drop Watcher reads ForeverDB now, so SM-FDB-1..5 no longer describe the add
 
 - **SM-FDB-1** (with ForeverDB) On Forever with ForeverDB installed and enabled, log in and run
   `/dump C_AddOns.IsAddOnLoaded("ForeverDB")`: `false`, unless another addon you run loads it. Then
-  `/sm diagnostics`: the report's identity section has a `ForeverDB: present=yes loaded=no`
+  `/cl diagnostics`: the report's identity section has a `ForeverDB: present=yes loaded=no`
   line with ForeverDB's version. No Lua error.
   Result: PASSED (owner, 2026-11-25).
 - **SM-FDB-2** (with ForeverDB) A character whose Fishing, Cooking or First Aid is at 150/150 (the next
@@ -943,45 +943,45 @@ only Drop Watcher reads ForeverDB now, so SM-FDB-1..5 no longer describe the add
   other card is unchanged, and no card's tooltip says "Map position from ForeverDB": every shipped
   trainer has its own position, which ForeverDB never overrides.
   Result: PASSED (owner, 2026-11-25).
-- **SM-FDB-4** (with ForeverDB) Settings > Skill Master > Trainers and Waypoints > Trainers: hover Use
+- **SM-FDB-4** (with ForeverDB) Settings > Character Ledger > Trainers and Waypoints > Trainers: hover Use
   ForeverDB, on by default: its tooltip starts "Needs the ForeverDB addon". Untick it and hover the
   SM-FDB-2 row again: no source lines. Tick it again: they are back.
   Result: PASSED (owner, 2026-11-25).
 - **SM-FDB-5** (without ForeverDB) Disable ForeverDB in the AddOns list and `/reload`. Hover the
   SM-FDB-2 row: the tooltip is as it was before this change (the Trainer line, then the helper and the
   click hint), with no Lua error. The trainer popup and its cards are unchanged. The Use ForeverDB row
-  is still on the Trainers tab, and `/sm diagnostics` reports `ForeverDB: present=yes loaded=no`.
+  is still on the Trainers tab, and `/cl diagnostics` reports `ForeverDB: present=yes loaded=no`.
   Result: PASSED (owner, 2026-11-25).
-- **SM-FDB-6** (Retail) Skill Master is Forever-only: on Retail it is not in the AddOns list (the TOC's
+- **SM-FDB-6** (Retail) Character Ledger is Forever-only: on Retail it is not in the AddOns list (the TOC's
   load-gating pair), so there is nothing of it to load or check. Confirm it is absent from Retail's list
   with ForeverDB's presence making no difference.
   Result: PASSED (owner, 2026-11-25).
 
-### Skill Master stops reading ForeverDB (ISF-SM-01, 2026-11-25)
+### Character Ledger stops reading ForeverDB (ISF-SM-01, 2026-11-25)
 
 Ka0sAddonsCommonTasks `docs/2026-11-25-ITEM_SEARCH_FEEDBACK/`, item ISF-SM-01 (spec §8): only Drop
 Watcher reads ForeverDB. `modules/ForeverDBSources.lua`, the Use ForeverDB row and `## OptionalDeps:
-ForeverDB` are gone; a book rank's sources and a trainer's position come from Skill Master's own data.
+ForeverDB` are gone; a book rank's sources and a trainer's position come from Character Ledger's own data.
 
 - **ISF-SM-01-1** On Forever with ForeverDB installed and enabled (and Drop Watcher disabled, so
   nothing else asks for it), log in and `/reload`. `/dump C_AddOns.IsAddOnLoaded("ForeverDB")`:
   `false`, and stays `false` after the steps below. Hover the row of a skill at 150/150 whose next rank
   comes from a book (Fishing, Cooking or First Aid): the Trainer line names the book's seller, then the
   helper and the click hint, with no "Sold by", "Drops from" or "World drop" lines. Open that skill's
-  trainer popup and hover the seller's card: no ForeverDB lines. Settings > Skill Master > Trainers and
+  trainer popup and hover the seller's card: no ForeverDB lines. Settings > Character Ledger > Trainers and
   Waypoints > Trainers has no Use ForeverDB row. No Lua error.
   Result: not run.
 
 ## Skins and diagnostics
 
-- **SM-SKIN-1** `/sm skin`: pick Ka0s Default, Apply. The window and the debug console change look.
-- **SM-SKIN-2** `/sm skin` once per shipped skin (every entry of the picker, WoW Forever included),
+- **SM-SKIN-1** `/cl skin`: pick Ka0s Default, Apply. The window and the debug console change look.
+- **SM-SKIN-2** `/cl skin` once per shipped skin (every entry of the picker, WoW Forever included),
   Apply each: the window, a detached block, the Journal, the trainer popup, an alert toast and the
   broker tooltip all restyle, and every character on them draws (no empty boxes in the legend, the
   block headers' fallback marks, the Journal's `old -> new` or the stat tooltip's marker lines). The
   category colors stay told apart (Primary blue, Secondary green, Weapon orange, Other violet) and
   the lure's teal and the racial's blue bonus segments keep their own colors.
-- **SM-SKIN-3** (LibKa0s v1.108.0, SD-RV-SM) `/sm skin`: Apply a skin with a glossy bar look (Glass).
+- **SM-SKIN-3** (LibKa0s v1.108.0, SD-RV-SM) `/cl skin`: Apply a skin with a glossy bar look (Glass).
   Every data bar (the window's rows, a detached block, the row tooltip's bar, the broker tooltip's
   mini bars, the Journal's mini bars) shows the skin's gloss over its fill; back on Ka0s Default the
   gloss goes. Show border off on the Bars page still draws no bar border under every skin.
@@ -991,7 +991,7 @@ ForeverDB` are gone; a book rank's sources and a trainer's position come from Sk
   color rows, and each still switches the detached windows between the skin's look and the swatches.
   Result: PASSED (owner, 2026-11-24).
 - **SM-SKIN-5** (SD-SK-SM.2, SM.3) Turn test mode on (the arrow shows on its sample trainer), then
-  `/sm skin` and Apply another skin: the arrow's distance text takes the new skin's HUD text color
+  `/cl skin` and Apply another skin: the arrow's distance text takes the new skin's HUD text color
   and shadow at once, with no reload or reopen. Trainers and Waypoints > Arrow text shows Use the
   skin's color and Use the skin's shadow, both ticked; untick Use the skin's color and the text
   takes the Font color swatch.
@@ -1002,7 +1002,7 @@ ForeverDB` are gone; a book rank's sources and a trainer's position come from Sk
   all legible on the dark game tooltip; a row tooltip's good, warning and bonus colors keep their
   meaning hues.
   Result: PASSED (owner, 2026-11-24).
-- **SM-SKIN-7** (U-31, SkillMaster#9) Open the trainer popup and move the pointer over each card: the
+- **SM-SKIN-7** (U-31, CharacterLedger#9) Open the trainer popup and move the pointer over each card: the
   card under the pointer takes the skin's hover wash and loses it when the pointer leaves; the
   selected card shows the hover while under the pointer and is selected again after. Switch skins
   with the popup open and hover again: the wash is the new skin's. The Journal's rows take no hover.
@@ -1012,7 +1012,7 @@ ForeverDB` are gone; a book rank's sources and a trainer's position come from Sk
   again: the eyes are the client's white, a dimmed one still dimmed. Open another settings page that
   uses icons: none of them is left tinted or dimmed.
   Result: PASSED (owner, 2026-11-24).
-- **SM-DIAG-1** `/sm diagnostics`: the report appears in the debug console with the ten sections
+- **SM-DIAG-1** `/cl diagnostics`: the report appears in the debug console with the ten sections
   (identity, settings, state, skin, model, probe, bonuses, layout, sim, rejected).
 
 ## Feedback batch (2026-11-24)
@@ -1035,22 +1035,22 @@ Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/`, items FB-SM-01 to FB-SM
   (Background, Border), Bars > Icons (Border color, with Use the row's color off) and Trainers and
   Waypoints > Trainers > Trainer name color: each draws the class color while the skin's is ticked.
   Result:
-- **SM-FB-4** (FB-SM-06, S3) Open Settings > Skill Master > Trainers and Waypoints: two tabs,
+- **SM-FB-4** (FB-SM-06, S3) Open Settings > Character Ledger > Trainers and Waypoints: two tabs,
   Trainers (Show all trainers, Trainer popup's Trainer name color) and
   Waypoints (Waypoint method, Say where in chat, the Waypoint arrow, Arrow text and Arrow position
   subgroups with Reset position). Defaults resets the rows on both tabs. The arrow's right-click
   Arrow settings... still opens this page.
   Result:
-- **SM-FB-5** (FB-SM-05, S2) With TomTom installed and Show Skill Master's arrow off, `/sm test`:
-  Skill Master's sample arrow shows, labeled "Sample: Skill Master's arrow is off" (with the arrow on
+- **SM-FB-5** (FB-SM-05, S2) With TomTom installed and Show Character Ledger's arrow off, `/cl test`:
+  Character Ledger's sample arrow shows, labeled "Sample: Character Ledger's arrow is off" (with the arrow on
   and TomTom loaded: "Sample: TomTom's arrow points to real waypoints"). No TomTom waypoint appears.
-  Untick or tick Show Skill Master's arrow during test mode: the sample stays. `/sm test` again: it
+  Untick or tick Show Character Ledger's arrow during test mode: the sample stays. `/cl test` again: it
   goes.
   Result:
 - **SM-FB-6** (FB-SM-04, S1) Detach a block. Its window shows a corner resize grip: drag it wider
   and narrower. The rows follow the width, the height stays the rows' height, and the window does
   not jump. Layout > Blocks > the block's Block width slider shows the new width (a multiple of 10).
-  `/reload`: the width and the place are kept. Tick Lock this block, or `/sm lock`: the grip hides
+  `/reload`: the width and the place are kept. Tick Lock this block, or `/cl lock`: the grip hides
   and a drag on the corner does nothing; unlock: it is back. Merge two detached blocks of different
   widths: the merged window's columns are the wider one's width.
   Result:
@@ -1060,46 +1060,46 @@ Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/`, items FB-SM-01 to FB-SM
 Ka0sAddonsCommonTasks `docs/2026-11-24-FEEDBACK_BATCH/R2_SMOKE_FEEDBACK.md`, item FB2-SM-01.
 
 - **SM-FB2-1** (FB2-SM-01, D2) Log in on Forever after the LibKa0s v1.113.0 re-vendor: no Lua error.
-  With the step panel closed, `/sm sim start fishingTrip`: the session runs and the step panel opens.
-  `/sm sim stop`, close the panel, then `/sm sim`: the panel opens and nothing
+  With the step panel closed, `/cl sim start fishingTrip`: the session runs and the step panel opens.
+  `/cl sim stop`, close the panel, then `/cl sim`: the panel opens and nothing
   starts. Click the panel's Start row: the session runs with the panel still shown. Close the panel
-  while the session runs, then `/sm sim restart`: a fresh session runs and the panel opens again.
+  while the session runs, then `/cl sim restart`: a fresh session runs and the panel opens again.
   Result:
 - **SM-FB2-2** (FB2-SM-01, D2) With the step panel closed, tick General > Master controls > Sim mode,
   and separately pick the launcher menu's Sim mode entry: each opens the step panel.
   Result:
-- **SM-FB2-3** (FB2-SM-01, D3) Settings > Skill Master > General > Skin: Azeroth. Open the Journal's
+- **SM-FB2-3** (FB2-SM-01, D3) Settings > Character Ledger > General > Skin: Azeroth. Open the Journal's
   Log tab and its range picker: the selected range reads gold, the other ranges parchment text.
   Click a block header's sort mark: the current order's row reads gold beside its tick. Back to Ka0s
   Default and Obsidian: the selected rows read gold too, not Obsidian's blue accent. On Forever,
   under the default WoW Forever skin, repeat both menus: the selected rows read gold, not its tan
   accent. In every skin the selected row reads gold and its text differs from the others.
   Result:
-- **SM-FB2-4** (FB2-SM-01, D1) `/sm test`: the window and the Journal's Alts tab show the same names
+- **SM-FB2-4** (FB2-SM-01, D1) `/cl test`: the window and the Journal's Alts tab show the same names
   as SM-TEST-1 and SM-TEST-12 (Samplehunter Mockstride first, then the Mage, Warrior and Paladin),
-  every name starting `Sample` or `Mock`. `/sm sim start fishingTrip`: the simulated character is
+  every name starting `Sample` or `Mock`. `/cl sim start fishingTrip`: the simulated character is
   Samplehunter Mockstride too.
   Result:
 
 ## Six windows (SMW-04, 2026-11-26)
 
-`docs/superpowers/specs/2026-11-26-skillmaster-windows-design.md`. Record what you see on each Result line;
+`docs/superpowers/specs/2026-11-26-characterledger-windows-design.md`. Record what you see on each Result line;
 none is passed until you say so.
 
-- **SM-WIN-1** (new, SMW-04) After the upgrade, `/sm toggle`: the window titled "Skill Master · Professions"
-  opens where your old Skill Master window stood, at its old width, columns and strata, and holds Primary
+- **SM-WIN-1** (new, SMW-04) After the upgrade, `/cl toggle`: the window titled "Character Ledger · Professions"
+  opens where your old Character Ledger window stood, at its old width, columns and strata, and holds Primary
   Professions and Secondary Professions only.
   Result:
-- **SM-WIN-2** (new, SMW-04) `/sm skills`, `/sm stats`, `/sm currencies`, `/sm reputations`, `/sm statistics`:
-  each opens its own window ("Skill Master · Skills" with Weapon Skills and Other skills, "Skill Master ·
+- **SM-WIN-2** (new, SMW-04) `/cl skills`, `/cl stats`, `/cl currencies`, `/cl reputations`, `/cl statistics`:
+  each opens its own window ("Character Ledger · Skills" with Weapon Skills and Other skills, "Character Ledger ·
   Character Stats" with the four stat blocks, the other three with "Nothing to show yet."), stacked down and
-  to the right of the Professions window the first time. A second verb hides that window alone; `/sm hide`
+  to the right of the Professions window the first time. A second verb hides that window alone; `/cl hide`
   hides them all; Escape closes the one in front.
   Result:
 - **SM-WIN-3** (new, SMW-04) Drag the Skills window somewhere, `/reload`: it comes back there, and the
   Professions window stays where it was. General > Reset position puts every window back.
   Result:
-- **SM-WIN-4** (new, SMW-04) Options > Keybindings > Ka0s Skill Master lists seven rows: Toggle Professions
+- **SM-WIN-4** (new, SMW-04) Options > Keybindings > Ka0s Character Ledger lists seven rows: Toggle Professions
   window, Toggle Skills window, Toggle Character Stats window, Toggle Currencies window, Toggle Reputations
   window, Toggle Statistics window, Toggle journal. A key you had on the old "Toggle skills window" row is now
   on Toggle Professions window. Bind one to the Skills row: it toggles the Skills window alone.
@@ -1111,17 +1111,17 @@ none is passed until you say so.
 
 ## Six brokers (SMW-05, 2026-11-26)
 
-- **SM-FEED-1** (new, SMW-05) In your broker display (Titan Panel, ChocolateBar, ...), the "Skill Master" and
-  "Skill Master Stats" cells you had are still in their places; the second is labeled "Skill Master Character
-  Stats". The display offers four new feeds: Skill Master Skills, Skill Master Currencies, Skill Master
-  Reputations and Skill Master Statistics.
+- **SM-FEED-1** (new, SMW-05) In your broker display (Titan Panel, ChocolateBar, ...), the "Character Ledger" and
+  "Character Ledger Stats" cells you had are still in their places; the second is labeled "Character Ledger Character
+  Stats". The display offers four new feeds: Character Ledger Skills, Character Ledger Currencies, Character Ledger
+  Reputations and Character Ledger Statistics.
   Result:
 - **SM-FEED-2** (new, SMW-05) With nothing pinned, each feed reads its window's short name (Professions,
   Skills, Character Stats, ...). Pin a weapon skill from a row's menu: the Skills feed shows it and the
   Professions feed does not. Gain a weapon skill point: the Skills feed flashes, Professions does not.
   Result:
-- **SM-FEED-3** (new, SMW-05) Hover each feed: its tooltip's title is its window's ("Skill Master ·
-  Professions" with Primary and Secondary only, "Skill Master · Skills" with Weapon and Other, "Skill Master ·
+- **SM-FEED-3** (new, SMW-05) Hover each feed: its tooltip's title is its window's ("Character Ledger ·
+  Professions" with Primary and Secondary only, "Character Ledger · Skills" with Weapon and Other, "Character Ledger ·
   Character Stats" with the four stat blocks, the other three "Nothing to show yet."). Left-click each feed:
   its own window toggles. Right-click: the Broker settings page opens.
   Result:
@@ -1133,11 +1133,11 @@ none is passed until you say so.
 ## Pins per broker (SMW-06, GitHub issue #11, 2026-11-26)
 
 - **SM-PIN-1** (new, SMW-06) After the upgrade, a skill you had pinned is still on its feed: a profession on
-  the Skill Master (Professions) feed, a weapon skill on Skill Master Skills; a stat you had pinned on Skill
+  the Character Ledger (Professions) feed, a weapon skill on Character Ledger Skills; a stat you had pinned on Skill
   Master Character Stats.
   Result:
 - **SM-PIN-2** (new, SMW-06) Right-click Cooking in the Professions window: the menu reads "Pin to the
-  Professions broker" with a tick box. Tick it, then pin Fishing the same way: the Skill Master feed shows
+  Professions broker" with a tick box. Tick it, then pin Fishing the same way: the Character Ledger feed shows
   both, joined by " · ", and Cooking stays pinned. Right-click Cooking again: its tick is on; click it and only
   Cooking goes.
   Result:
@@ -1151,13 +1151,13 @@ none is passed until you say so.
   down and unpin marks; a broker with none says "Nothing pinned.". Move one and unpin one: the feed text and
   its tooltip follow at once. Custom feed text `{pinned2}` shows the second pin alone.
   Result:
-- **SM-PIN-6** (new, SMW-06) `/sm test`: the Professions feed shows the sample's Fishing pin and a row's Pin is
+- **SM-PIN-6** (new, SMW-06) `/cl test`: the Professions feed shows the sample's Fishing pin and a row's Pin is
   grayed; end test mode: your own pins are back, unchanged.
   Result:
 
 ## The LDB tooltip: only the fold acts (SMW-07, 2026-11-26)
 
-- **SM-TIP-1** (new, SMW-07) Hover the Skill Master feed (Tooltips > Tooltip style: Main window). Click the
+- **SM-TIP-1** (new, SMW-07) Hover the Character Ledger feed (Tooltips > Tooltip style: Main window). Click the
   chevron on Secondary Professions: the section folds in the tooltip, which stays up where it was; click it again: it
   opens. The Professions window's Secondary Professions block did not fold, and folding it in the window leaves the
   tooltip's section open.
@@ -1181,7 +1181,7 @@ none is passed until you say so.
 
 ## Reputations (SMW-08, GitHub issue #6, 2026-11-26)
 
-- **SM-REP-1** (new, SMW-08) `/sm probe` first; then `/sm reputations`: the Reputations window lists your
+- **SM-REP-1** (new, SMW-08) `/cl probe` first; then `/cl reputations`: the Reputations window lists your
   factions as the character panel's Reputation tab groups them (Alliance or Horde, Steamwheedle Cartel under it
   with its own bar, Other, Inactive when you have one), each faction a bar "Honored 3,672 / 12,000" in the
   standing's color; an Exalted faction is a full bar reading "Exalted".
@@ -1198,7 +1198,7 @@ none is passed until you say so.
   moment, the Journal's Log shows one line for that faction with "+N", growing with each later gain this
   session, and the row's tooltip says "This session +N". The skill-up counts do not change.
   Result:
-- **SM-REP-5** (new, SMW-08) Right-click a faction: "Pin to the Reputations broker"; the Skill Master
+- **SM-REP-5** (new, SMW-08) Right-click a faction: "Pin to the Reputations broker"; the Character Ledger
   Reputations feed then reads "Stormwind Honored 3,672 / 12,000" (your faction's). Hover the feed in both
   tooltip styles: the Pinned section, then the tree; a header's chevron folds it in the tooltip only.
   Result:
@@ -1211,7 +1211,7 @@ none is passed until you say so.
 
 ## Currencies (SMW-09, GitHub issue #7, 2026-11-26)
 
-- **SM-CUR-1** (new, SMW-09) `/sm currencies`: the Currencies window lists your currencies under the Currency tab's
+- **SM-CUR-1** (new, SMW-09) `/cl currencies`: the Currencies window lists your currencies under the Currency tab's
   own headers, each with its icon; a currency with a cap is a bar "1,200 / 75,000", one without a cap a plain
   amount. Gold is not in the list. A character with no currencies sees "No currencies to show yet.".
   Result:
@@ -1226,7 +1226,7 @@ none is passed until you say so.
   line for it with "+N" (or "-N") for this session, and the skill-up counts do not change. Do it with the
   Currency tab open, and again in combat: nothing in the panel moves.
   Result:
-- **SM-CUR-5** (new, SMW-09) Right-click a currency: "Pin to the Currencies broker"; the Skill Master Currencies
+- **SM-CUR-5** (new, SMW-09) Right-click a currency: "Pin to the Currencies broker"; the Character Ledger Currencies
   feed reads its name and amount; its tooltip (both styles) lists the Pinned section, then the tree.
   Result:
 - **SM-CUR-6** (new, SMW-09) Settings > Alerts > Currency cap alert is off; turn it on, and bring a capped
@@ -1238,7 +1238,7 @@ none is passed until you say so.
 
 ## Statistics (SMW-10, 2026-11-26)
 
-- **SM-STAT-1** (new, SMW-10) `/sm statistics`: the Statistics window lists the character panel's Statistics tab's
+- **SM-STAT-1** (new, SMW-10) `/cl statistics`: the Statistics window lists the character panel's Statistics tab's
   categories (Character, Combat, ...), every one folded. Open Character: its rows first ("Times camped 58",
   "Talent tree respecs --"), then its own folded sub-categories (Wealth, Consumables). Open Wealth: its rows under
   it, one level deeper. Fold Character: Wealth goes with it; open Character again: Wealth is still open.
@@ -1247,23 +1247,23 @@ none is passed until you say so.
   tab shows "--"; note what Total gold acquired shows (a number or money text).
   Result:
 - **SM-STAT-3** (new, SMW-10) With the window open on an unfolded category, do something it counts (camp, post an
-  auction, kill something): the value moves within about a second. Close the window: `/sm debug` shows no
+  auction, kill something): the value moves within about a second. Close the window: `/cl debug` shows no
   Statistics read while it is closed and nothing is pinned.
   Result:
-- **SM-STAT-4** (new, SMW-10) Right-click a statistic: "Pin to the Statistics broker"; the Skill Master Statistics
+- **SM-STAT-4** (new, SMW-10) Right-click a statistic: "Pin to the Statistics broker"; the Character Ledger Statistics
   feed reads "Times camped 58". Close the window and change that statistic: the feed text follows. `/reload`:
   the feed shows it again at once. A category's menu has no pin.
   Result:
-- **SM-STAT-5** (new, SMW-10) Hover the Skill Master Statistics feed (both tooltip styles): the categories, folded;
+- **SM-STAT-5** (new, SMW-10) Hover the Character Ledger Statistics feed (both tooltip styles): the categories, folded;
   click a category's chevron: it opens in the tooltip only, the window's folds do not change.
   Result:
 - **SM-STAT-6** (new, SMW-10) The Journal's Alts tab has no Statistics sub-tab. The window's title says
-  "Skill Master · Statistics", and nothing in it says "stats".
+  "Character Ledger · Statistics", and nothing in it says "stats".
   Result:
 
 ## Test mode and the simulator: the tree families (SMW-11, 2026-11-26)
 
-- **SM-PRE-1** (new, SMW-11) `/sm test`: the Reputations window shows the sample's standings under Alliance,
+- **SM-PRE-1** (new, SMW-11) `/cl test`: the Reputations window shows the sample's standings under Alliance,
   Steamwheedle Cartel and Other (Stormwind "Honored 3,672 / 12,000"); the Currencies window Honor Points
   "1,200 / 75,000" and Darkmoon Prize Ticket "12"; the Statistics window Character, Combat and Deaths, folded, and
   Character opens on "Times camped 58". Folding there and turning test mode off leaves your own folds as they were.
@@ -1272,18 +1272,18 @@ none is passed until you say so.
   ("Stormwind Honored 3,672 / 12,000", "Honor Points 1,200 / 75,000", "Times camped 58"); your own pins come back
   when test mode ends. The Journal's Alts tab shows the sample's standings and currencies.
   Result:
-- **SM-PRE-3** (new, SMW-11) `/sm sim`, run the fishing trip to its end: its last two steps raise Stormwind by 250
+- **SM-PRE-3** (new, SMW-11) `/cl sim`, run the fishing trip to its end: its last two steps raise Stormwind by 250
   and Honor Points by 150, the windows and feeds follow, and the Journal's Log gains a line for each. Stop: your
   own reputations, currencies and Statistics are back, and the saved Log has no simulated line.
   Result:
 
 ## The six windows, end to end (SMW-12, 2026-11-26)
 
-- **SM-SMW-1** (new, SMW-12) Open all six windows (`/sm professions`, `skills`, `stats`, `currencies`,
-  `reputations`, `statistics`) and play for a while: no Lua error, and `/sm diagnostics` lists no rejected event
+- **SM-SMW-1** (new, SMW-12) Open all six windows (`/cl professions`, `skills`, `stats`, `currencies`,
+  `reputations`, `statistics`) and play for a while: no Lua error, and `/cl diagnostics` lists no rejected event
   (`UPDATE_FACTION`, `CURRENCY_DISPLAY_UPDATE`, `CRITERIA_UPDATE` among the accepted).
   Result:
-- **SM-SMW-2** (new, SMW-12) `/sm help` lists the six window verbs; the README's Usage and FAQ match what you see
+- **SM-SMW-2** (new, SMW-12) `/cl help` lists the six window verbs; the README's Usage and FAQ match what you see
   (Character Stats are the paper doll's numbers, Statistics the Statistics tab's counters; no gold row).
   Result:
 
@@ -1304,7 +1304,7 @@ none is passed until you say so.
   Statistics feed with a category unfolded in its tooltip, leave, change that statistic, hover again: the tooltip
   shows the new value.
   Result:
-- **SM-REV-4** (new, SMW-REV) Tooltip style Classic. Hover the Skill Master Statistics feed, open Character in the
+- **SM-REV-4** (new, SMW-REV) Tooltip style Classic. Hover the Character Ledger Statistics feed, open Character in the
   tooltip, then click Wealth's chevron (one level in): Wealth unfolds. On the Reputations feed, click Steamwheedle
   Cartel's chevron (under Alliance or Horde): it folds and unfolds. A click on the chevron where it is drawn acts,
   at every depth.
@@ -1315,7 +1315,7 @@ none is passed until you say so.
   Currencies windows do the same with their headers; the Professions, Skills and Character Stats windows still
   collapse and expand their blocks ("Collapse all blocks").
   Result:
-- **SM-REV-6** (new, SMW-REV) `/sm stats`: the Skill Master · Character Stats window's four blocks read Base &
+- **SM-REV-6** (new, SMW-REV) `/cl stats`: the Character Ledger · Character Stats window's four blocks read Base &
   Combat, Spell & Regen, Defense & Resists and Utility, with no "Stats ·" in front; so do the Character Stats
   feed's tooltip sections in both styles. Detach one: the detached frame reads "Stats · Base & Combat" as before.
   Result:
@@ -1341,25 +1341,25 @@ none is passed until you say so.
   Classic and hover the feed again: each pinned line shows the mark just left of its mini bar (R5-REV). Unpin
   one: its mark goes at once.
   Result:
-- **SM-R5-4** (new, R5-SM-04) Put the six Skill Master feeds on your display bar (Titan Panel or the like): each
+- **SM-R5-4** (new, R5-SM-04) Put the six Character Ledger feeds on your display bar (Titan Panel or the like): each
   draws its own icon (Professions an anvil and hammer, Skills a sword, Character Stats the Strength icon,
   Currencies a pile of coins, Reputations a guild tabard, Statistics a note), none a green or blank square and
-  none the Ka0s logo. The addon's own control broker (Ka0s Skill Master) and the minimap button keep the logo.
+  none the Ka0s logo. The addon's own control broker (Ka0s Character Ledger) and the minimap button keep the logo.
   Result:
-- **SM-R5-5** (new, R5-SM-05) With every window closed, `/sm toggle`: all six windows open (Professions where the
-  old window stood, each other where you last dropped it). `/sm toggle` again: all six close. Open one window
-  (`/sm statistics`) and `/sm toggle`: it closes and nothing else opens. `/sm professions` opens and closes the
+- **SM-R5-5** (new, R5-SM-05) With every window closed, `/cl toggle`: all six windows open (Professions where the
+  old window stood, each other where you last dropped it). `/cl toggle` again: all six close. Open one window
+  (`/cl statistics`) and `/cl toggle`: it closes and nothing else opens. `/cl professions` opens and closes the
   Professions window alone; so do the minimap button's Show window and its key binding (Options → Keybindings →
-  Ka0s Skill Master → Toggle Professions window). `/sm help` lists `toggle` as "Show or hide every Skill Master
+  Ka0s Character Ledger → Toggle Professions window). `/cl help` lists `toggle` as "Show or hide every Character Ledger
   window".
   Result:
 - **SM-R5-6** (new, R5-SM-06) With Leatherworking, Skinning, Cooking, First Aid and Fishing learned, open the
-  Professions and Skills windows and hover the Skill Master feed in both tooltip styles: each profession is listed
+  Professions and Skills windows and hover the Character Ledger feed in both tooltip styles: each profession is listed
   once (the client lists each twice, a parent and a child line), and none shows up again under Other.
   Result:
-- **SM-R5-7** (new, R5-SM-07) `/sm toggle` to open all six windows, then play for a while: gain reputation and a
+- **SM-R5-7** (new, R5-SM-07) `/cl toggle` to open all six windows, then play for a while: gain reputation and a
   currency, skill up, fight, level if you can, unfold categories in the Statistics and Reputations windows, and
-  hover every feed in both tooltip styles. No Lua error, and `/sm diagnostics` lists no rejected event. `/sm toggle`
+  hover every feed in both tooltip styles. No Lua error, and `/cl diagnostics` lists no rejected event. `/cl toggle`
   closes all six.
   Result:
 
@@ -1369,31 +1369,31 @@ none is passed until you say so.
   Reputations onto the bottom edge of Primary until they join into one "Primary · Reputations" window. A resize
   grip shows in its bottom-right corner: drag it wider and narrower; the window follows, the height stays the
   rows', and on release it keeps the new width (`/reload`: still that width). Drag Reputations onto Primary's right
-  edge instead (two columns): the grip widens both columns together. `/sm lock`: the grip hides; `/sm unlock`: it
+  edge instead (two columns): the grip widens both columns together. `/cl lock`: the grip hides; `/cl unlock`: it
   is back. Right-click the band, Unmerge all: each window has its own grip again at its own old width.
   Result:
-- **SM-R5-9** (new, R5-SM-09) `/sm reputations`: each header (Alliance, Steamwheedle Cartel, Other) shows the detach
+- **SM-R5-9** (new, R5-SM-09) `/cl reputations`: each header (Alliance, Steamwheedle Cartel, Other) shows the detach
   mark at its right end. Click Alliance's: a window titled "Alliance" opens with Darnassus, Gnomeregan Exiles,
   Ironforge and Stormwind, and the Reputations window no longer lists Alliance or those four. Drag it somewhere,
   collapse it with its chevron, resize it with its grip, then `/reload`: it comes back where you left it, collapsed
   and at that width. Drag it onto a detached Primary Professions window's edge: they join ("Primary · Alliance").
   Click its dock mark (or the joined window's Dock all): Alliance is back in the Reputations window in its place.
-  `/sm statistics`: open Character and detach Wealth (a nested category): a "Wealth" window shows its statistics
+  `/cl statistics`: open Character and detach Wealth (a nested category): a "Wealth" window shows its statistics
   even with Character folded again in the Statistics window; detach Character too and its window lists its own
-  rows, Consumables, Reputation and Gear but not Wealth. `/sm currencies`: detach Player vs. Player: Honor Points
+  rows, Consumables, Reputation and Gear but not Wealth. `/cl currencies`: detach Player vs. Player: Honor Points
   moves to its own window. Hover each feed: its tooltip still shows the whole tree and no detach mark. With
   Alliance and Player vs. Player still detached, log in an alt on the same profile that lacks one (a Horde
   character, or one with no Honor Points): no empty "Alliance" or "Player vs. Player" window shows; back on the
   first character, both windows are where you left them.
   Result:
-- **SM-R5-10** (new, R5-SM-10) `/reload`, then `/sm journal`, Log tab: no reputation or currency row appears for the
+- **SM-R5-10** (new, R5-SM-10) `/reload`, then `/cl journal`, Log tab: no reputation or currency row appears for the
   login itself. Kill a few mobs that give reputation, and earn or spend a currency (Honor Points, a Merchant's
   Favor): each kill's reputation is its own row (the faction's name in the Name column, "+5" or the like in
   Change), each currency change its own row, a spend reading negative ("-20"). When a standing changes (say
   Friendly to Honored), that row reads "+25, Honored". Skill-ups still log beside them, newest first. Keep the
   Journal open while you kill: each row appears as it happens, without closing and reopening the Journal.
   Result:
-- **SM-R5-11** (new, R5-SM-11) `/sm journal`, Log tab: the headers read DATE, TIME, NAME, CHANGE, ZONE. Hover one: a
+- **SM-R5-11** (new, R5-SM-11) `/cl journal`, Log tab: the headers read DATE, TIME, NAME, CHANGE, ZONE. Hover one: a
   tooltip says "No filter" and "Click to filter this column." Click NAME: a menu offers Everything, Skill-ups,
   Reputations, Currencies and a submenu per kind of the names in the range; pick Reputations: only faction rows
   remain, the NAME header turns the accent color with a small funnel beside it, the summary card reads
@@ -1409,12 +1409,12 @@ none is passed until you say so.
   Currencies sub-tabs on a character with none recorded: "No character has a reputation (currency) recorded yet."; the
   footer reads "Snapshots update on login, logout and every skill, reputation or currency change." Settings →
   Journal: *Skill-ups to keep* says the Log keeps as many reputation and currency changes besides, and *Log shows*
-  names skill-ups, reputation and currency changes. `/sm test` (test mode): the Log shows Honor Points +34, an
+  names skill-ups, reputation and currency changes. `/cl test` (test mode): the Log shows Honor Points +34, an
   Ironforge row "+25, Revered", a Darkmoon Prize Ticket spend "-8" and a Stormwind gain among the sample skill-ups.
-  `/sm diagnostics`: the model line counts skill-ups, reputation and currency rows apart.
+  `/cl diagnostics`: the model line counts skill-ups, reputation and currency rows apart.
   Result:
-- **SM-R6-1** (new, R6-SM-01) `/sm show`: the Professions window's second group header reads "Secondary
-  Professions" over Cooking, First Aid and Fishing (no "Secondary Skills" anywhere Skill Master draws its own label).
+- **SM-R6-1** (new, R6-SM-01) `/cl show`: the Professions window's second group header reads "Secondary
+  Professions" over Cooking, First Aid and Fishing (no "Secondary Skills" anywhere Character Ledger draws its own label).
   Detach it: the window is titled "Secondary Professions". Hover the Professions LDB feed: its second section reads
   "Secondary Professions". Settings, Broker, Tooltip: the switch reads "Secondary professions"; Bars, Colors: the swatch
   reads "Secondary professions". Settings, General, Keybindings: hover Toggle Professions window: "primary and
@@ -1422,7 +1422,7 @@ none is passed until you say so.
   category still lists the game's own "Secondary Skills" statistics. Every saved layout (detached, merged, folded,
   sorted, filtered) of the group is as it was before the update.
   Result:
-- **SM-R6-2** (new, R6-SM-02) `/sm journal`, Log tab: the headers read DATE, TIME, TYPE, NAME, CHANGE, ZONE. Each row's
+- **SM-R6-2** (new, R6-SM-02) `/cl journal`, Log tab: the headers read DATE, TIME, TYPE, NAME, CHANGE, ZONE. Each row's
   TYPE reads Skill-up, Reputation or Currency; a row that moved a standing ("+250, Honored") reads Reputation. Drag the
   resize grip as narrow as it goes: the window stops at its new minimum (wider than before), and at it no column cuts
   its text: a long faction ("Wintersaber Trainers", "Hydraxian Waterlords") in NAME, "+250, Honored" in CHANGE, a
@@ -1433,17 +1433,17 @@ none is passed until you say so.
   "Reputation · All time · filtered". Click NAME: Any name and that type's names, flat; pick one: the TYPE filter
   stays. Pick TYPE Skill-up: the faction name filter drops. TYPE Any type, then NAME: a submenu per type present
   ("One of the Skill-ups" and the like); pick a currency: only its rows, TYPE unfiltered, the summary counting the
-  currency. Clear filters drops both. `/sm test`: the sample Log's rows each show their type. Alts tab: the
+  currency. Clear filters drops both. `/cl test`: the sample Log's rows each show their type. Alts tab: the
   character columns keep their width, one more character showing at the minimum width.
   Result:
-- **SM-R6-3** (new, R6-SM-03) `/sm journal`, Log tab (`/sm test` gives a mix): each TYPE reads in its own color,
+- **SM-R6-3** (new, R6-SM-03) `/cl journal`, Log tab (`/cl test` gives a mix): each TYPE reads in its own color,
   Skill-up a sky blue, Reputation an orchid (violet), Currency a teal; all three easy to read on the dark window and
   easy to tell apart, none of them the red, orange, yellow or green of a reputation standing. DATE, TIME and ZONE stay
   in the muted gray. Click TYPE: Skill-up, Reputation and Currency each in its column's color, Any type in the menu's
   plain text; the picked one turns the menu's gold while ticked. Switch the skin (Settings → General → Skin): the
   three colors stay the same and stay apart.
   Result:
-- **SM-R6-4** (new, R6-SM-04) Log in an alt or two first, then `/sm journal`, Alts tab. Primary: hover another
+- **SM-R6-4** (new, R6-SM-04) Log in an alt or two first, then `/cl journal`, Alts tab. Primary: hover another
   character's learned profession (Leatherworking 155/225): the tooltip is the Professions window's for that row, its
   name and Primary, the rank and max, the bar, the next rank ("Artisan at 225 · Lv 35" or similar) and that
   character's trainer (their faction's), with no Bonuses section, no This session or ETA lines and no
@@ -1456,16 +1456,16 @@ none is passed until you say so.
   Result:
 
 - **SM-R7-1** (new, R7-SM-02) After `/reload`, open your broker display's list of feeds (Titan Panel's or
-  ChocolateBar's menu): the Professions feed reads **Skill Master Professions**, with the blacksmithing icon, beside
-  Skill Master Skills, Stats, Currencies, Reputations and Statistics; no plain "Skill Master" feed is left. A cell you
-  had placed for the old "Skill Master" feed is gone: add Skill Master Professions where you want it, and its text,
+  ChocolateBar's menu): the Professions feed reads **Character Ledger Professions**, with the blacksmithing icon, beside
+  Character Ledger Skills, Stats, Currencies, Reputations and Statistics; no plain "Character Ledger" feed is left. A cell you
+  had placed for the old "Character Ledger" feed is gone: add Character Ledger Professions where you want it, and its text,
   tooltip and pins are the same as before. Result:
 
 ## The data tables, validated from the sources (GitHub issue #10, 2026-11-27)
 
 - **SM-10-1** (new) On a **Human, Dwarf, Orc or Troll**, hover a weapon skill vanilla gave a racial +5 (a Human's Swords, a
   Dwarf's Guns): the tooltip's Bonuses show no "Racial" line; if the skill shows a modifier at all, it comes from gear or
-  an "Other" line. `/sm test` (the sample Dwarf Hunter): Guns shows 105/110 with no bonus segment. Result: PASS (owner-waived 2026-11-27: "i dont have a way to smoke test, so just assume it passes")
+  an "Other" line. `/cl test` (the sample Dwarf Hunter): Guns shows 105/110 with no bonus segment. Result: PASS (owner-waived 2026-11-27: "i dont have a way to smoke test, so just assume it passes")
 - **SM-10-2** (new) On a **Rogue**, the Skills window's Weapon block lists **Axes** (unlearned until trained); on a
   **Druid** level 20 or more, **Polearms**. Result: PASS (owner-waived 2026-11-27: "i dont have a way to smoke test, so just assume it passes")
 - **SM-10-3** (new) Below level 40 with no Riding, hover the Riding row: the trainer line ends **100g** (was 90g); the

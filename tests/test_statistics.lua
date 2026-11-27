@@ -1,5 +1,5 @@
 -- tests/test_statistics.lua — the Statistics window (item SMW-10 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md, the spec's "Statistics (new)"): StatisticsData's
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md, the spec's "Statistics (new)"): StatisticsData's
 -- category tree in Forever's form GetStatistic(categoryID, index), the lazy fold-driven reads (a category's
 -- rows only once it unfolds), CRITERIA_UPDATE registered only while the Statistics show or one is pinned and
 -- debounced to one re-read, pins, the tooltip's own folds, no Alts sub-tab, and the perf bucket.

@@ -1,4 +1,4 @@
--- tests/wow_mock.lua — Ka0s Skill Master's WoW-API mock: the kit's shared base
+-- tests/wow_mock.lua — Ka0s Character Ledger's WoW-API mock: the kit's shared base
 -- (tests/_kit/mock_base.lua) plus the handful of APIs that are this addon's own.
 --
 -- Returns a builder, so each run gets a fresh, isolated environment.

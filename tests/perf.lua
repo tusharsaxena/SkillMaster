@@ -5,7 +5,7 @@
 local Loader     = dofile("tests/_kit/loader.lua")
 dofile("tests/client_pin.lua")(Loader)   -- Forever-only: every run is the Forever profile (clients-§9)
 local buildMocks = dofile("tests/wow_mock.lua")
-Loader.addonName = "SkillMaster"
+Loader.addonName = "CharacterLedger"
 
 local opts = { out = nil, label = "offline" }
 do
@@ -22,7 +22,7 @@ end
 
 local mocks, NS = buildMocks(), {}
 Loader.loadAll(Loader.xmlFiles("libs/LibKa0s/LibKa0s.xml"), NS, mocks)
-Loader.loadAll(Loader.tocFiles("SkillMaster.toc"), NS, mocks)
+Loader.loadAll(Loader.tocFiles("CharacterLedger.toc"), NS, mocks)
 NS.addon:OnInitialize()
 NS.db.profile.skin.pickerSeen = true
 NS.addon:OnEnable()
@@ -93,7 +93,7 @@ do
 end
 NS.Perf.on = false
 
-print(("Ka0s Skill Master — offline perf  (v%s, label '%s')"):format(NS.Version(), opts.label))
+print(("Ka0s Character Ledger — offline perf  (v%s, label '%s')"):format(NS.Version(), opts.label))
 print("")
 print(("%-22s %8s %12s %12s %12s"):format("scenario", "iters", "ms/iter", "api/iter", "bytes/iter"))
 for _, r in ipairs(rows) do

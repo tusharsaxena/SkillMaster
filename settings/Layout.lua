@@ -5,7 +5,7 @@ local _, NS = ...
 -- (round 5) and the block order, dragged through LibKa0s-Widgets-1.0's ReorderList (options-ui-§18).
 --
 -- `layout.blocks.<id>.docked`, `.collapsed` and `.order` are written only through NS.SetByPath
--- (architecture-§5): the block header, the detached frame's buttons, the drag list and `/sm set`
+-- (architecture-§5): the block header, the detached frame's buttons, the drag list and `/cl set`
 -- all call the seam, and the rows' `set` (NS.Blocks.StoreDocked / StoreCollapsed, which wait out
 -- combat) or plain store (order, its onChange NS.Blocks.OrderChanged) does the rest. `.point`
 -- stays drag-only geometry and has no row.

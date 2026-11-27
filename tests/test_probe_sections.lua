@@ -1,5 +1,5 @@
--- tests/test_probe_sections.lua — `/sm probe`'s factions, currencies and statistics sections (item SMW-01 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md; the spec's "The probe and the client notes"). The
+-- tests/test_probe_sections.lua — `/cl probe`'s factions, currencies and statistics sections (item SMW-01 of
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md; the spec's "The probe and the client notes"). The
 -- fakes follow Blizzard's Forever UI source (the recon's API findings): one FactionData or CurrencyInfo table
 -- per row, an index range that lists only expanded rows, and GetStatistic(categoryID, index).
 local T = _G.SKM_TEST

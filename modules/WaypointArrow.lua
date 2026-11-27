@@ -1,12 +1,12 @@
 local _, NS = ...
--- modules/WaypointArrow.lua — Skill Master's waypoint arrow, on LibKa0s-WaypointArrow-1.0 (owner
+-- modules/WaypointArrow.lua — Character Ledger's waypoint arrow, on LibKa0s-WaypointArrow-1.0 (owner
 -- feedback round 8, R8-5; the arrow itself was round 6's R6-11). A trainer's native map pin
 -- (NS.Waypoints) is not super-tracked, so the client's own arrow stays away, and the library's
 -- small movable frame points the way instead, with the distance under it. With the real TomTom
 -- loaded, NS.Waypoints places TomTom's waypoint and hides this arrow (AF-SM-TOMTOM). This file is the thin
 -- adapter: the trainer it points at, the settings paths it is configured from, test mode's sample,
 -- the profile reload, the native pin it clears and watches, the tooltip and the right-click menu's
--- Skill Master items.
+-- Character Ledger items.
 --
 -- NS.WaypointArrow.Show(trainer) / .Hide() / .Clear() / .IsShown() / .Frame() / .Target() /
 -- .Wanted() / .Update() / .ShowTest() / .HideTest() / .ApplySettings() / .OnWaypointUpdated() /
@@ -17,12 +17,12 @@ local _, NS = ...
 -- (Flat, Ridge, Raised, Faceted, On the ground), the rotation and its secret-value guards, the
 -- distance fade between the far and near colors (the skin's accent and sem.good while "Use the
 -- skin's colors" is on), the distance text in the player's font on any side (round 9, R9-1/R9-3:
--- the trainer's name as its optional second line, yards or compact units in Skill Master's words),
+-- the trainer's name as its optional second line, yards or compact units in Character Ledger's words),
 -- the scale, the drag (which writes waypoints.arrowX / arrowY through NS.SetByPath, architecture-§5)
 -- and the arrow's own lock, and the right-click menu (round 9, R9-2: the library's Clear waypoint,
--- Share in chat, Show on map, Lock / Unlock and Reset position, with Skill Master's Show trainers,
+-- Share in chat, Show on map, Lock / Unlock and Reset position, with Character Ledger's Show trainers,
 -- Arrow settings... and Hide arrow added here). Within 5 yards it calls onArrive: the native pin is
--- cleared and chat says so. /sm lock no longer holds the arrow: its own Lock does (round 9).
+-- cleared and chat says so. /cl lock no longer holds the arrow: its own Lock does (round 9).
 --
 -- Without the library major (LibKa0s absent or older than the arrow) Wanted() answers false, so a
 -- map pin is super-tracked and the client's own arrow points: the behavior before R6-11.
@@ -35,7 +35,7 @@ local LAYERS = NS.Constants.LAYERS
 local Arrow = LibStub and LibStub("LibKa0s-WaypointArrow-1.0", true)
 WA.lib = Arrow
 
-WA.FRAME_NAME = "SkillMasterWaypointArrow"
+WA.FRAME_NAME = "CharacterLedgerWaypointArrow"
 --- Seconds between two measures while the arrow is shown (the library's throttle).
 WA.THROTTLE = Arrow and Arrow.THROTTLE or 0.03
 
@@ -87,7 +87,7 @@ local function get(path)
     return node
 end
 
---- Whether a native pin comes with this arrow: Show Skill Master's arrow on, and the library there.
+--- Whether a native pin comes with this arrow: Show Character Ledger's arrow on, and the library there.
 function WA.Wanted()
     return Arrow ~= nil and profile().arrow ~= false
 end
@@ -190,7 +190,7 @@ local function menuItems(items, target)
     local key = target ~= nil and WA.TrainerKey() or nil
     table.insert(items, (indexOf(items, "map") or #items) + 1, {
         id = "trainers", label = L["Show trainers"], disabled = key == nil,
-        tooltip = L["Open Skill Master's trainer popup for this trainer's skill."],
+        tooltip = L["Open Character Ledger's trainer popup for this trainer's skill."],
         onClick = function() WA.ShowTrainers() end })
     local combat = InCombatLockdown and InCombatLockdown() or false
     items[#items + 1] = { id = "settings", label = L["Arrow settings..."], disabled = combat,
@@ -198,7 +198,7 @@ local function menuItems(items, target)
             or L["Open Trainers and Waypoints, where the arrow's look, text and position are set."],
         onClick = function() WA.OpenSettings() end }
     items[#items + 1] = { id = "hide", label = L["Hide arrow"],
-        tooltip = L["Turn off Show Skill Master's arrow: the game's own arrow points to the map pin. Trainers and Waypoints turns it back on."],
+        tooltip = L["Turn off Show Character Ledger's arrow: the game's own arrow points to the map pin. Trainers and Waypoints turns it back on."],
         onClick = function() WA.HideArrow() end }
     return items
 end
@@ -209,7 +209,7 @@ function WA.Instance()
     inst = Arrow:New({
         addon = NS.name, name = WA.FRAME_NAME, strata = LAYERS.STRATA.HUD, skin = NS.name,
         -- Round 9, R9-1: the drag, the lock and Reset position write the settings paths; the
-        -- arrow's own Lock is its one drag gate (no canDrag: /sm lock is the windows').
+        -- arrow's own Lock is its one drag gate (no canDrag: /cl lock is the windows').
         paths = WA.PATHS, set = setSetting,
         onClick = onClick, onEnter = onEnter, onLeave = onLeave, onArrive = onArrive,
         onClear = function() WA.Clear() end, onSampleClear = function() WA.Clear() end,
@@ -304,7 +304,7 @@ end
 -- The words under the sample: the trainer's name where a real pin would show this arrow, else what
 -- the preview stands in for, so it never claims to be the arrow a real waypoint shows.
 local function sampleLabel(t)
-    if profile().arrow == false then return L["Sample: Skill Master's arrow is off"] end
+    if profile().arrow == false then return L["Sample: Character Ledger's arrow is off"] end
     local C = NS.Compat
     if C and C.TomTom and C.TomTom() then return L["Sample: TomTom's arrow points to real waypoints"] end
     return t.name
@@ -312,7 +312,7 @@ end
 
 --- Test mode (preview-mode): the arrow on a sample trainer, at the library's sample distance and
 --- angle. Nothing is written. FB-SM-05 (the owner, 2026-11-24: "some arrow should show in test
---- mode"): always Skill Master's own sample, whatever Show Skill Master's arrow says and whether
+--- mode"): always Character Ledger's own sample, whatever Show Character Ledger's arrow says and whether
 --- TomTom is loaded, labeled when it is not the arrow a real waypoint would show. TomTom is never
 --- driven here: its waypoint would be TomTom's saved state, and test mode writes nothing.
 function WA.ShowTest()
@@ -382,20 +382,20 @@ function WA.OpenSettings()
     return nil
 end
 
---- The menu's Show trainers: Skill Master's trainer popup on the target trainer's skill.
+--- The menu's Show trainers: Character Ledger's trainer popup on the target trainer's skill.
 function WA.ShowTrainers()
     local key = WA.TrainerKey()
     if key and NS.TrainerPopup then NS.TrainerPopup.Show(key) end
 end
 
---- The menu's Hide arrow: Show Skill Master's arrow off, through its setting, whose change hides
+--- The menu's Hide arrow: Show Character Ledger's arrow off, through its setting, whose change hides
 --- the arrow and hands the map pin to the game's own arrow.
 function WA.HideArrow()
     setSetting("waypoints.arrow", false)
 end
 
 --- The library's settings blocks (the look; round 9, the Text and Position blocks) at WA.PATHS,
---- each row's change re-applying the settings, composed by Skill Master's options instance
+--- each row's change re-applying the settings, composed by Character Ledger's options instance
 --- (`opts.options`, NS.Helpers by default). Answers the rows and the afterSubgroup hooks (the
 --- Position block's Reset position button); `{}, {}` without the library. `opts` carries page,
 --- group, subgroup, textSubgroup, positionSubgroup and L as the library takes them.

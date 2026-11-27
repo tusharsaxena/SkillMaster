@@ -1,5 +1,5 @@
 local addonName, NS = ...
--- core/SkillMaster.lua — AceAddon registration (NS promoted to the addon object), the lifecycle
+-- core/CharacterLedger.lua — AceAddon registration (NS promoted to the addon object), the lifecycle
 -- callbacks, the stand-down / stand-up pair and test mode.
 --
 -- LOAD-BEARING: NewAddon(NS, ...) stamps AceConsole's :Print over NS.Print at FILE SCOPE, so this

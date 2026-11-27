@@ -1,6 +1,6 @@
 local _, NS = ...
 -- modules/SharedList.lua — reading a client list whose header collapse is shared with the character panel
--- (items SMW-08 and SMW-09 of docs/superpowers/plans/2026-11-26-skillmaster-windows.md; the spec's "The collapse
+-- (items SMW-08 and SMW-09 of docs/superpowers/plans/2026-11-26-characterledger-windows.md; the spec's "The collapse
 -- trap"). The reputation and currency lists answer only the rows under OPEN headers, and their headers are the
 -- character panel's own (the Reputation and Currency tabs). So a full read opens every collapsed header, reads,
 -- and closes them again bottom up, the way modules/SkillData.lua reads the skill list. It never does so:

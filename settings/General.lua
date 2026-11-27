@@ -19,7 +19,7 @@ NS.LANDING = {
 }
 
 -- The global reset's confirmation (options-ui-§12).
-StaticPopupDialogs.SKILLMASTER_RESET_ALL = {
+StaticPopupDialogs.CHARACTERLEDGER_RESET_ALL = {
     text         = L["Reset this profile to the addon's defaults? Everything you have configured in it is discarded \226\128\148 your other profiles are not affected."],
     button1      = YES,
     button2      = NO,
@@ -31,7 +31,7 @@ StaticPopupDialogs.SKILLMASTER_RESET_ALL = {
         NS.Print(L["All settings reset to defaults."])
     end,
 }
-local function confirmResetAll() StaticPopup_Show("SKILLMASTER_RESET_ALL") end
+local function confirmResetAll() StaticPopup_Show("CHARACTERLEDGER_RESET_ALL") end
 
 -- ---------------------------------------------------------------------------------------------
 -- Master controls: one declaration, composed by the library (options-ui-§15). No General
@@ -54,9 +54,9 @@ local masterRows, masterTail = H.MasterControls({
     omit             = { visibility = true },
     defaults         = { enabled = P.enabled, scale = P.scale, alpha = P.alpha, locked = P.locked },
     notes            = {
-        scale  = L["Scales the Skill Master window."],
-        alpha  = L["Opacity of the Skill Master window."],
-        locked = L["Locks the Skill Master window in place."],
+        scale  = L["Scales the Character Ledger window."],
+        alpha  = L["Opacity of the Character Ledger window."],
+        locked = L["Locks the Character Ledger window in place."],
     },
     onResetPosition  = function() NS.MainWindow.ResetPosition() end,
     onResetAll       = confirmResetAll,
@@ -153,7 +153,7 @@ local TABS = { tabs = {
 } }
 
 local function build(mainCategory)
-    local ctx = H.CreatePanel("SkillMasterGeneralPanel", "General", {
+    local ctx = H.CreatePanel("CharacterLedgerGeneralPanel", "General", {
         pageKey         = "general",
         defaultsButton  = true,
         defaultsTooltip = H.ResetAllTooltip(H.KEYBINDS_UNCHANGED),

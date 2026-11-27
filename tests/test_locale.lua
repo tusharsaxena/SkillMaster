@@ -20,7 +20,7 @@ local _ = ...
 local T = _G.SKM_TEST
 local test, assertTrue, assertEqual = T.test, T.assertTrue, T.assertEqual
 
-local TOC = "SkillMaster.toc"
+local TOC = "CharacterLedger.toc"
 
 local function readFile(rel)
     local f = assert(io.open(rel, "rb"))
@@ -152,7 +152,7 @@ end
 -- The enUS table: the files in TOC order into one fresh namespace, read raw.
 local function enUS()
     local NS = {}
-    for _, path in ipairs(ENUS_FILES) do assert(loadfile(path))("SkillMaster", NS) end
+    for _, path in ipairs(ENUS_FILES) do assert(loadfile(path))("CharacterLedger", NS) end
     assertTrue(type(NS.L) == "table", "locales/enUS.lua publishes NS.L")
     local raw = {}
     for k, v in pairs(NS.L) do raw[k] = v end
@@ -175,7 +175,7 @@ local function stubWrites(path, clientLocale)
     end })
     local chunk = assert(loadfile(path))
     setfenv(chunk, setmetatable({ GetLocale = function() return clientLocale end }, { __index = _G }))
-    chunk("SkillMaster", { L = L })
+    chunk("CharacterLedger", { L = L })
     return written
 end
 

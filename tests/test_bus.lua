@@ -4,12 +4,12 @@ local NS = T.NS
 local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
 
 local EXPECTED = {
-    SKILLS_UPDATED = "Ka0s_SkillMaster_SkillsUpdated",
-    SKILL_UP = "Ka0s_SkillMaster_SkillUp",
-    STATS_UPDATED = "Ka0s_SkillMaster_StatsUpdated",
-    BONUSES_UPDATED = "Ka0s_SkillMaster_BonusesUpdated",
-    LAYOUT_CHANGED = "Ka0s_SkillMaster_LayoutChanged",
-    SIM_TICK = "Ka0s_SkillMaster_SimTicked",
+    SKILLS_UPDATED = "Ka0s_CharacterLedger_SkillsUpdated",
+    SKILL_UP = "Ka0s_CharacterLedger_SkillUp",
+    STATS_UPDATED = "Ka0s_CharacterLedger_StatsUpdated",
+    BONUSES_UPDATED = "Ka0s_CharacterLedger_BonusesUpdated",
+    LAYOUT_CHANGED = "Ka0s_CharacterLedger_LayoutChanged",
+    SIM_TICK = "Ka0s_CharacterLedger_SimTicked",
 }
 
 test("bus: the six messages are declared once, PascalCase on the wire", function()

@@ -1,6 +1,6 @@
 -- tests/test_journal.lua — the Journal window (design §6.4): its standalone-window chrome, the two
 -- tabs, the Log list with its range picker and side cards (FB-32), the alts matrix with its mini
--- bars, characters across and a sub-tab per main-window block (FB-33), and `/sm journal`.
+-- bars, characters across and a sub-tab per main-window block (FB-33), and `/cl journal`.
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -16,7 +16,7 @@ local function activeRows(p)
     return out
 end
 
-test("journal: /sm journal toggles it, through the one toggle handler", function()
+test("journal: /cl journal toggles it, through the one toggle handler", function()
     J.Hide()
     NS.Slash:OnSlash("journal")
     assertTrue(J.IsShown(), "shown")
@@ -27,7 +27,7 @@ end)
 test("journal: the chrome is the shared one: the title, the wrapped close control, the window tier", function()
     J.Show()
     local f = J.Frame()
-    assertEqual(f.title:GetText(), "Skill Master \194\183 Journal")
+    assertEqual(f.title:GetText(), "Character Ledger \194\183 Journal")
     assertTrue(f.close ~= nil, "the close control was built through NS.MakeCloseButton")
     assertEqual(f:GetFrameStrata(), NS.Constants.LAYERS.STRATA.WINDOW)
     local found = false
@@ -66,7 +66,7 @@ test("journal: the log lists skill-ups newest first, with the session's gains, a
     assertEqual(p.session.value:GetText(), "+2")
     assertFalse(p.empty:IsShown(), "no empty state with entries")
     p.clear:GetScript("OnClick")(p.clear)
-    M.StaticPopupDialogs.SKILLMASTER_CLEAR_LOG.OnAccept()   -- the confirmation (review F-005)
+    M.StaticPopupDialogs.CHARACTERLEDGER_CLEAR_LOG.OnAccept()   -- the confirmation (review F-005)
     assertEqual(#SL:Entries(), 0, "Clear log cleared the store")
     assertEqual(#activeRows(p), 0, "and the list")
     assertTrue(p.empty:IsShown(), "the empty state shows")
@@ -243,8 +243,8 @@ test("journal: right-click on a character's name asks before forgetting it", fun
     local head = J.Frame().altsPanel.heads[1]
     M.__popups = {}
     head:GetScript("OnMouseUp")(head, "RightButton")
-    assertEqual(M.__popups[1], "SKILLMASTER_FORGET_ALT")
-    M.StaticPopupDialogs.SKILLMASTER_FORGET_ALT.OnAccept(nil, "Samplerealm-Mockflame Samplewick")
+    assertEqual(M.__popups[1], "CHARACTERLEDGER_FORGET_ALT")
+    M.StaticPopupDialogs.CHARACTERLEDGER_FORGET_ALT.OnAccept(nil, "Samplerealm-Mockflame Samplewick")
     assertTrue(NS.db.global.characters["Samplerealm-Mockflame Samplewick"] == nil, "forgotten on accept")
     J.SelectTab("log")
     J.Hide()
@@ -378,7 +378,7 @@ end)
 -- ── FB-33: the Alts tab's leftovers and the resize grip ──────────────────────────────────────
 
 test("journal: schemaVersion 5 turns a stored pre-FB-33 filter into its block", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["Round3-Old"] = { journal = { filter = "weapons" } }
     sv.profiles["Round3-Pro"] = { journal = { filter = "professions" } }

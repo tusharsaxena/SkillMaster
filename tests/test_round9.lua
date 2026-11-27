@@ -1,7 +1,7 @@
 -- tests/test_round9.lua — the owner's round-9 feedback (2026-11-14) on the waypoint arrow, on
 -- LibKa0s-WaypointArrow-1.0 version 2.2: the Text and Position blocks on the Waypoint arrow page
--- (R9-1), the right-click menu with Skill Master's own items (R9-2), the trainer's name as the label
--- line and the distance in Skill Master's words in both units (R9-3).
+-- (R9-1), the right-click menu with Character Ledger's own items (R9-2), the trainer's name as the label
+-- line and the distance in Character Ledger's words in both units (R9-3).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -60,7 +60,7 @@ end
 
 -- ── R9-1: the Text and Position blocks ───────────────────────────────────────────────────────
 
-test("round9 arrow: the Text and Position blocks sit under the look, at Skill Master's paths, on the library's defaults", function()
+test("round9 arrow: the Text and Position blocks sit under the look, at Character Ledger's paths, on the library's defaults", function()
     local want = {
         { "waypoints.arrowFont", "font", L["Arrow text"] },
         { "waypoints.arrowFontSize", "fontSize", L["Arrow text"] },
@@ -99,7 +99,7 @@ test("round9 arrow: the Text and Position blocks sit under the look, at Skill Ma
     end
     assertEqual(NS.defaults.profile.waypoints.arrowFrame, nil, "the round-6 drag point is gone")
     local pos = at["waypoints.arrowTextPosition"].row
-    assertEqual(pos.values[1].text, L["Below"], "the choices in Skill Master's words")
+    assertEqual(pos.values[1].text, L["Below"], "the choices in Character Ledger's words")
     assertEqual(at["waypoints.arrowLock"].row.label, L["Lock the arrow"])
 end)
 
@@ -116,7 +116,7 @@ test("round9 arrow: the Position block's Reset position is a hook on its subgrou
         local ok, err = pcall(hook, {}, "G")
         H.InlineButtonPair = realPair
         if not ok then error(err, 0) end
-        assertEqual(button and button.text, L["Reset position"], "the button, in Skill Master's words")
+        assertEqual(button and button.text, L["Reset position"], "the button, in Character Ledger's words")
         button.onClick()
         assertEqual(NS.db.profile.waypoints.arrowX, 0, "X back to the default")
         assertEqual(NS.db.profile.waypoints.arrowY, 200, "Y back to the default")
@@ -145,7 +145,7 @@ test("round9 arrow: a drag writes the X and Y offsets through the settings seam"
     end)
 end)
 
-test("round9 arrow: the arrow's own Lock holds the drag; /sm lock no longer does", function()
+test("round9 arrow: the arrow's own Lock holds the drag; /cl lock no longer does", function()
     withArrow9({ mapID = 1453, x = 0.4, y = 0.5 }, nil, function(t)
         Wp:Set(t)
         local f = WA.Frame()
@@ -154,7 +154,7 @@ test("round9 arrow: the arrow's own Lock holds the drag; /sm lock no longer does
         f.__userPlaced = nil
         f:__fire("OnDragStart")
         NS.db.profile.locked = savedLock
-        assertTrue(f.__userPlaced == true, "/sm lock: the arrow still drags")
+        assertTrue(f.__userPlaced == true, "/cl lock: the arrow still drags")
         f:__fire("OnDragStop")
         item("lock").onClick()
         assertEqual(NS.db.profile.waypoints.arrowLock, true, "the menu's Lock the arrow writes the setting")
@@ -169,7 +169,7 @@ end)
 
 -- ── R9-2: the right-click menu ───────────────────────────────────────────────────────────────
 
-test("round9 arrow: the menu is Clear first, the library's items, then Skill Master's, in the owner's order", function()
+test("round9 arrow: the menu is Clear first, the library's items, then Character Ledger's, in the owner's order", function()
     withArrow9({ mapID = 1453, x = 0.4, y = 0.5 }, nil, function(t)
         Wp:Set(t)
         local ids, labels = {}, {}
@@ -180,7 +180,7 @@ test("round9 arrow: the menu is Clear first, the library's items, then Skill Mas
         assertEqual(table.concat(ids, ","), "clear,share,map,trainers,lock,reset,settings,hide")
         assertEqual(table.concat(labels, "|"), table.concat({ L["Clear waypoint"], L["Share in chat"],
             L["Show on map"], L["Show trainers"], L["Lock the arrow"], L["Reset position"],
-            L["Arrow settings..."], L["Hide arrow"] }, "|"), "every word through Skill Master's locale")
+            L["Arrow settings..."], L["Hide arrow"] }, "|"), "every word through Character Ledger's locale")
         local opened = 0
         local W = NS.Widgets
         local realW = W.ContextMenu
@@ -221,7 +221,7 @@ test("round9 arrow: Show trainers opens the trainer popup on the skill its waypo
     end)
 end)
 
-test("round9 arrow: Arrow settings opens Trainers and Waypoints; Hide arrow turns Skill Master's arrow off", function()
+test("round9 arrow: Arrow settings opens Trainers and Waypoints; Hide arrow turns Character Ledger's arrow off", function()
     withArrow9({ mapID = 1453, x = 0.4, y = 0.5 }, nil, function(t, rec)
         Wp:Set(t)
         local H, page = NS.Helpers, nil
@@ -232,7 +232,7 @@ test("round9 arrow: Arrow settings opens Trainers and Waypoints; Hide arrow turn
         if not ok then error(err, 0) end
         assertEqual(page, "trainers", "the Trainers and Waypoints page")
         item("hide").onClick()
-        assertEqual(NS.db.profile.waypoints.arrow, false, "Show Skill Master's arrow is off")
+        assertEqual(NS.db.profile.waypoints.arrow, false, "Show Character Ledger's arrow is off")
         assertFalse(WA.IsShown(), "the arrow goes")
         assertEqual(rec.superTrack[#rec.superTrack], true, "and the game's own arrow takes the pin")
     end)
@@ -324,7 +324,7 @@ test("round9 arrow: Show the trainer's name adds the trainer as the second line"
     end)
 end)
 
-test("round9 arrow: compact units read thousands of yards in Skill Master's words", function()
+test("round9 arrow: compact units read thousands of yards in Character Ledger's words", function()
     withArrow9({ mapID = 1453, x = 0.08, y = 0.5 }, { arrowUnits = "compact" }, function(t)
         Wp:Set(t)
         tick()

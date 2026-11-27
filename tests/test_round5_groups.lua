@@ -259,7 +259,7 @@ test("round5 groups: a block docked by any path leaves its group", function()
         assertTrue(B:Dock("weapon"), "the seam's dock")
         assertTrue(G.Of("weapon") == nil, "left the group")
         assertEqual(cols(layout.groups[gid]), "primary,secondary")
-        NS.SetByPath("layout.blocks.secondary.docked", true)   -- /sm set
+        NS.SetByPath("layout.blocks.secondary.docked", true)   -- /cl set
         assertTrue(layout.groups[gid] == nil, "a group of one dissolved")
         assertTrue(D.Frame("primary"):IsShown(), "the last block its own window again")
     end)
@@ -537,7 +537,7 @@ end)
 -- ── the store: schemaVersion 6 and the diagnostics ─────────────────────────────────────────
 
 test("round5 groups: schemaVersion 6 normalizes a stored layout.groups and drops a malformed one", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["Round5-Groups"] = { layout = {
         blocks = { primary = { docked = false }, secondary = { docked = false }, weapon = { docked = true } },

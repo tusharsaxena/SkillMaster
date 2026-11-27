@@ -31,7 +31,7 @@ local _, NS = ...
 -- every client read a simulated character needs (preview-mode, H1): a module reads them as
 -- `NS.Compat.Member(...)` at call time and never captures one in a local.
 -- The skill list (T2.1): the kit's Forever API set lists it as C_SkillInfo.* and not as the 1.12
--- globals, so C_SkillInfo is read first and the 1.12 globals second, until `/sm probe` settles
+-- globals, so C_SkillInfo is read first and the 1.12 globals second, until `/cl probe` settles
 -- which the client carries (docs/forever-quirks.md, the assumed-API table). The bare
 -- GetSkillLineInfo rung stays because the Forever set is best-effort, not measured.
 --
@@ -64,7 +64,7 @@ local function expandedOf(t)
 end
 
 --- The C_SkillInfo struct as the one record shape. Measured on WoW Forever 1.60.1 (build 70862,
---- `/sm probe` 2026-11-10): name, isHeader, isCollapsed, rank, maxRank, modifier, tempPoints,
+--- `/cl probe` 2026-11-10): name, isHeader, isCollapsed, rank, maxRank, modifier, tempPoints,
 --- skillID, parentSkillLineID. The retail-style names (skillName, skillRank, ...) stay as fallbacks.
 local function fromStruct(t)
     return {
@@ -141,7 +141,7 @@ end
 
 -- The calls that select a line in Character -> Skills, first that exists wins. The 1.12 global and
 -- its C_SkillInfo twin take the line's index; the stock frame's own helper redraws the detail pane.
--- Which of them WoW Forever's Skills tab answers is UNVERIFIED (`/sm probe` lists them).
+-- Which of them WoW Forever's Skills tab answers is UNVERIFIED (`/cl probe` lists them).
 local SELECTORS = {
     { "C_SkillInfo.SetSelectedSkill", function() return C_SkillInfo and C_SkillInfo.SetSelectedSkill end },
     { "SetSelectedSkill", function() return SetSelectedSkill end },
@@ -211,7 +211,7 @@ end
 -- The weapon temp enchant. Measured in game on WoW Forever 1.60.1 (2026-11-10): the call is
 -- `local enchants = C_Item.GetWeaponEnchantInfo(weaponSlot)`. It takes a slot and errors without
 -- one, and it answers one value, not 1.12's positional list. Neither the slot's encoding nor the
--- record's fields are measured yet (`/sm probe` records both), so the shim tries the plausible slot
+-- record's fields are measured yet (`/cl probe` records both), so the shim tries the plausible slot
 -- arguments under pcall, remembers the first that does not error, and reads the record by any
 -- plausible field name. The 1.12 global keeps its own positional shape.
 

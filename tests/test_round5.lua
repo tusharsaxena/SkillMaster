@@ -92,7 +92,7 @@ local function colorOf(tex) return rawget(tex, "__color") end
 
 local function assertBand(header, what)
     assertTrue(header.bg ~= nil, what .. ": a background band")
-    sameColor(colorOf(header.bg), NS.SkinColor("sm.headerBg"), what .. ": the block header's color")
+    sameColor(colorOf(header.bg), NS.SkinColor("cl.headerBg"), what .. ": the block header's color")
     assertTrue(header.rule ~= nil, what .. ": a rule under it")
     assertEqual(header.rule:GetHeight(), 1, what .. ": the rule is 1 px")
     assertTrue(colorOf(header.rule) ~= nil, what .. ": the rule painted (the skin's divider)")
@@ -120,8 +120,8 @@ test("round5 table headers: a look change repaints both bands (the Journal re-re
     f.altsPanel.header.bg:SetColorTexture(0, 0, 0, 0)
     NS.bus:SendMessage(NS.MSG.LAYOUT_CHANGED)
     M.__fireTimers()
-    sameColor(colorOf(f.logPanel.header.bg), NS.SkinColor("sm.headerBg"), "the Log band repainted")
-    sameColor(colorOf(f.altsPanel.header.bg), NS.SkinColor("sm.headerBg"), "the Alts band repainted")
+    sameColor(colorOf(f.logPanel.header.bg), NS.SkinColor("cl.headerBg"), "the Log band repainted")
+    sameColor(colorOf(f.altsPanel.header.bg), NS.SkinColor("cl.headerBg"), "the Alts band repainted")
     J.Hide()
 end)
 
@@ -174,15 +174,15 @@ test("round5 journal lock: a profile switch repaints the Journal's mark from the
     if not ok then error(err, 0) end
 end)
 
-test("round5 journal lock: /sm lock and /sm unlock repaint the Journal's mark", function()
+test("round5 journal lock: /cl lock and /cl unlock repaint the Journal's mark", function()
     local was = NS.GetSetting("locked")
     NS.SetByPath("locked", false)
     J.Show()
     local f = J.Frame()
     NS.Slash:OnSlash("lock")
-    assertEqual(lockIcon(f.lockButton), NS.Icon("lock"), "/sm lock: the closed padlock")
+    assertEqual(lockIcon(f.lockButton), NS.Icon("lock"), "/cl lock: the closed padlock")
     NS.Slash:OnSlash("unlock")
-    assertEqual(lockIcon(f.lockButton), NS.Icon("unlock"), "/sm unlock: the open one")
+    assertEqual(lockIcon(f.lockButton), NS.Icon("unlock"), "/cl unlock: the open one")
     J.Hide()
     NS.SetByPath("locked", true)
     J.Show()
@@ -203,7 +203,7 @@ end
 
 local function testOff() if NS.IsTestMode() then NS.ToggleTestMode() end M.__fireTimers() end
 
-test("round5 test mode: /sm test shows the main window, the Journal and one sticky toast of each kind", function()
+test("round5 test mode: /cl test shows the main window, the Journal and one sticky toast of each kind", function()
     testOff()
     W.Hide()
     J.Hide()

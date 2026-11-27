@@ -8,12 +8,12 @@ test("launcher: the object is the brand, the 128 px logo, registered once OnEnab
     NS.addon:OnEnable()
     assertTrue(NS.Launcher:IsRegistered(), "registered")
     local obj = NS.Launcher:Object()
-    assertEqual(obj.label, "Ka0s Skill Master")
+    assertEqual(obj.label, "Ka0s Character Ledger")
     assertEqual(obj.icon, NS.Constants.LOGO_ICON_PATH)
     assertEqual(obj.type, "launcher")
 end)
 
-test("launcher: left-click opens the settings panel through the same opener as /sm config", function()
+test("launcher: left-click opens the settings panel through the same opener as /cl config", function()
     local real, opened = NS.OpenOptionsPanel, 0
     NS.OpenOptionsPanel = function() opened = opened + 1 end
     NS.Launcher:Object().OnClick(nil, "LeftButton")

@@ -1,5 +1,5 @@
 -- tests/test_reputations.lua — the Reputations window (GitHub issue #6; item SMW-08 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md): RepData's panel grouping and standing bars, the
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md): RepData's panel grouping and standing bars, the
 -- expand-read-restore first read (never in combat, never while the panel shows, a re-entry latch), the refresh
 -- by id, the tree rows and their addon-side folds, the tooltip's own folds, the pins, the Journal's session
 -- changes and the Alts sub-tab.

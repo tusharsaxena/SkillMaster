@@ -13,7 +13,7 @@ local _, NS = ...
 -- stored value needed a migration. The widths and font sizes are new (tooltips.row.*, tooltips.ldb.*).
 -- The fill, background, border and colors still follow the Bars page.
 --
--- The main window tooltip is the game's shared GameTooltip: its font size reaches Skill Master's own
+-- The main window tooltip is the game's shared GameTooltip: its font size reaches Character Ledger's own
 -- lines only, and each goes back to its own size when the tooltip clears (NS.Chrome.TooltipFontSize).
 local L = NS.L
 local PB, PT, PBR = NS.defaults.profile.bars, NS.defaults.profile.tooltips, NS.defaults.profile.broker
@@ -38,7 +38,7 @@ NS.RegisterSchemaRows(NS.Live({
         L["Height of the bar's line in the tooltip of a main window or detached row. Never shorter than its bar."],
         PB.tooltipRowHeight, 10, 40),
     px("tooltips.row.fontSize", ROW, L["Font size"],
-        L["Size of Skill Master's lines in the tooltip of a main window or detached row. The game's other tooltips keep theirs."],
+        L["Size of Character Ledger's lines in the tooltip of a main window or detached row. The game's other tooltips keep theirs."],
         PT.row.fontSize, 8, 20),
 }))
 

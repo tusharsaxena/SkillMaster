@@ -5,7 +5,7 @@
 --     owner's `gtip.title`;
 --   ruling 4, at rest every mark paints `icon.tint` and under the pointer `text.link`; the close X
 --     rests in `close.rest` (which follows `icon.tint`) and lights `close.hot`; pinned per skin;
---   ruling 5, the block header band (`sm.headerBg`) resolves to `list.header.bg` in every skin.
+--   ruling 5, the block header band (`cl.headerBg`) resolves to `list.header.bg` in every skin.
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
@@ -188,15 +188,15 @@ test("sr1 title-bar colors: a narrowing filter keeps its filled badge (a state c
     end)
 end)
 
-test("sr1 header bands: sm.headerBg resolves to list.header.bg in every skin", function()
+test("sr1 header bands: cl.headerBg resolves to list.header.bg in every skin", function()
     local keys = skinKeys()
     assertTrue(#keys >= 9, "the nine shipped skins: " .. #keys)
     for _, key in ipairs(keys) do
         inSkin(key, function()
-            local _, applied = Skin:GetChoice(NS.ADDON_NAME or "SkillMaster")
+            local _, applied = Skin:GetChoice(NS.ADDON_NAME or "CharacterLedger")
             assertEqual(applied, key, "the skin applied")
             local want = { NS.Skin.Color("list.header.bg") }
-            local got = { NS.Skin.Color("sm.headerBg") }
+            local got = { NS.Skin.Color("cl.headerBg") }
             assertTrue(want[1] ~= nil, key .. ": list.header.bg resolves")
             for i = 1, 4 do
                 assertTrue(math.abs((got[i] or -1) - want[i]) < 1e-6, key .. ": component " .. i .. " is list.header.bg's")

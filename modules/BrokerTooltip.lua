@@ -1,6 +1,6 @@
 local _, NS = ...
 -- modules/BrokerTooltip.lua — the broker feeds' tooltip content (split out of modules/Broker.lua, item
--- SMW-05 of docs/superpowers/plans/2026-11-26-skillmaster-windows.md, which keeps the feeds, their text,
+-- SMW-05 of docs/superpowers/plans/2026-11-26-characterledger-windows.md, which keeps the feeds, their text,
 -- their clicks and the showing machinery): the Classic style's lines (tooltips.ldb.style = "classic") with
 -- Widgets Bar mini bars, the rows' heights, the header bands and stripes, the rows' hover areas, the chevrons
 -- and hover wash, and the content both styles share: each feed's sections (its family's blocks, read
@@ -110,7 +110,7 @@ function B.Bars() return barPool.active or {} end
 
 -- ---------------------------------------------------------------------------------------------
 -- Bands: the window's look on the tooltip (feedback round 2): a section's header band
--- (`sm.headerBg`, the block header's) and the alternate rows' stripe (`list.stripe`, the window
+-- (`cl.headerBg`, the block header's) and the alternate rows' stripe (`list.stripe`, the window
 -- rows'). Textures on the tooltip itself, in its BORDER layer, above its backdrop and below its
 -- text; a child frame would draw over the text. Each tooltip keeps its own pool, every texture
 -- hidden again with the bars, so the shared GameTooltip shows nothing of the feed's for its next owner.
@@ -338,7 +338,7 @@ end
 local function skillBar(e)
     local values = NS.Rows.SkillValues(e)
     values.color = NS.Rows.FillColor(e)
-    return values, values.bonusKind == "temp" and "sm.bonusTemp" or "sm.bonusPerm"
+    return values, values.bonusKind == "temp" and "cl.bonusTemp" or "cl.bonusPerm"
 end
 
 local function skillValue(e, bonus)
@@ -391,7 +391,7 @@ local function addTitle(tip, title, foldId)
     local n = tip:NumLines()
     local h = NS.BarStyle.TooltipRowHeight("mini") + B.HEADER_PAD
     sizeRow(tip, n, h)
-    local c = NS.SkinColor("sm.headerBg")
+    local c = NS.SkinColor("cl.headerBg")
     if c then band(tip, n, h, c[1], c[2], c[3], c[4]) end
     return foldId and { line = n, fold = foldId } or nil
 end
@@ -593,7 +593,7 @@ function B.FillTooltip(tip, which)
     tip:AddDoubleLine(B.Colored("gtip.title", title), B.Colored("gtip.muted", gained))
     B.AddTestModeLine(tip)
     if NS.IsStoodDown() then
-        tip:AddLine(B.Colored("gtip.muted", L["Ka0s Skill Master is disabled."]))
+        tip:AddLine(B.Colored("gtip.muted", L["Ka0s Character Ledger is disabled."]))
         return rows
     end
     fillSections(tip, rows)

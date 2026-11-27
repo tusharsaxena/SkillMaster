@@ -27,7 +27,7 @@ local LAYERS = NS.Constants.LAYERS
 local Pool = NS.Pool
 local floor, min, max = math.floor, math.min, math.max
 
-J.FRAME_NAME = "SkillMasterJournal"
+J.FRAME_NAME = "CharacterLedgerJournal"
 
 -- ── the Alts sub-tabs: one per main-window block, in the main window's default order ──────────
 
@@ -353,11 +353,11 @@ local function placeColumns(parent, cols, role)
 end
 
 -- A table's header band (owner feedback round 5, R5-4): the headers read like one more row, so each
--- stands on a band of its own, the block headers' fill (sm.headerBg, modules/Blocks.lua) with the
+-- stands on a band of its own, the block headers' fill (cl.headerBg, modules/Blocks.lua) with the
 -- skin's 1 px divider under it. The fill is repainted on every render (J.Render, which a look change
 -- reaches through LAYOUT_CHANGED); the divider is the skin's recorded paint.
 local function paintBand(header)
-    local c = NS.SkinColor("sm.headerBg")
+    local c = NS.SkinColor("cl.headerBg")
     if c then header.bg:SetColorTexture(c[1], c[2], c[3], c[4] or 1) end
 end
 
@@ -1109,14 +1109,14 @@ end
 local function buildChrome()
     frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     frame.title:SetPoint("TOP", frame, "TOP", 0, -7)
-    frame.title:SetText(L["Skill Master \194\183 Journal"])
+    frame.title:SetText(L["Character Ledger \194\183 Journal"])
     NS.Skin.Shell(frame)
     NS.Skin.Text(frame.title, "title")
     frame.titleBar = NS.Chrome.TitleBar(frame)
     buildStrip()
     -- The title-bar marks on LibKa0s Widgets' HeaderButtons (AD-86-SM, LibKa0s#86): the lock mark
-    -- (owner feedback round 5, R5-2: the main window's own, toggling the one `locked` setting, /sm
-    -- lock, /sm unlock; J.ApplyLock repaints it), then settings, then the close in the corner.
+    -- (owner feedback round 5, R5-2: the main window's own, toggling the one `locked` setting, /cl
+    -- lock, /cl unlock; J.ApplyLock repaints it), then settings, then the close in the corner.
     local hb = NS.Chrome.TitleMarks(frame, {
         close = function() J.Hide() end,
         settingsTip = L["Open the settings panel"],
@@ -1293,7 +1293,7 @@ end
 local function syncStrip()
     local on = NS.IsTestMode()
     if not frame.strip then
-        local title = L["Skill Master \194\183 Journal"]
+        local title = L["Character Ledger \194\183 Journal"]
         frame.title:SetText(on and L["%s - %s"]:format(title, L["Test mode"]) or title)
     elseif frame.strip:IsShown() ~= on then
         frame.strip:SetShown(on)
@@ -1347,7 +1347,7 @@ function J.ClearLog()
     J.Render()
 end
 
-StaticPopupDialogs.SKILLMASTER_CLEAR_LOG = {
+StaticPopupDialogs.CHARACTERLEDGER_CLEAR_LOG = {
     text         = L["Clear this character's Journal log? Every skill-up, reputation and currency row is removed."],
     button1      = YES,
     button2      = NO,
@@ -1361,10 +1361,10 @@ StaticPopupDialogs.SKILLMASTER_CLEAR_LOG = {
 --- mode's log is session-only sample data, so it clears at once.
 function J.ConfirmClear()
     if NS.Sim:IsActive() or NS.Preview.IsOn() then return J.ClearLog() end
-    StaticPopup_Show("SKILLMASTER_CLEAR_LOG")
+    StaticPopup_Show("CHARACTERLEDGER_CLEAR_LOG")
 end
 
-StaticPopupDialogs.SKILLMASTER_FORGET_ALT = {
+StaticPopupDialogs.CHARACTERLEDGER_FORGET_ALT = {
     text         = L["Forget %s? Their snapshot is removed until they log in again."],
     button1      = YES,
     button2      = NO,
@@ -1384,7 +1384,7 @@ function J.ConfirmForget(key, name)
         NS.Print(L["Forgetting a character waits until the simulation stops."])
         return
     end
-    StaticPopup_Show("SKILLMASTER_FORGET_ALT", name or key, nil, key)
+    StaticPopup_Show("CHARACTERLEDGER_FORGET_ALT", name or key, nil, key)
 end
 
 function J.Frame() return frame end
@@ -1408,7 +1408,7 @@ end
 
 function J.Hide() if frame then frame:Hide() end end
 
---- The one toggle handler: `/sm journal` (and, at integration, the title-bar and launcher entries).
+--- The one toggle handler: `/cl journal` (and, at integration, the title-bar and launcher entries).
 function J.Toggle()
     if J.IsShown() then J.Hide() return false end
     return J.Show()

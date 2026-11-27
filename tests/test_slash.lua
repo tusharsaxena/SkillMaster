@@ -30,7 +30,7 @@ test("slash: the reserved verbs are all present, `skin` directly after `config`"
     assertTrue(indexOf("diag") == nil and indexOf("dump") == nil, "no diagnostics alias (debug-logging-§14)")
 end)
 
-test("slash: /sm lock and /sm unlock write `locked` through the seam and echo it", function()
+test("slash: /cl lock and /cl unlock write `locked` through the seam and echo it", function()
     M.__resetPrinted()
     NS.Slash:OnSlash("lock")
     assertTrue(NS.GetSetting("locked") == true, "lock")
@@ -40,7 +40,7 @@ test("slash: /sm lock and /sm unlock write `locked` through the seam and echo it
     assertTrue(NS.GetSetting("locked") == false, "unlock")
 end)
 
-test("slash: /sm test flips test mode, and again turns it off", function()
+test("slash: /cl test flips test mode, and again turns it off", function()
     NS.Slash:OnSlash("test")
     assertTrue(NS.IsTestMode(), "on")
     NS.Slash:OnSlash("test")
@@ -52,7 +52,7 @@ test("slash: the stub's one library string is pinned to the live major", functio
     T.assertLibraryConstant(NS2.Slash.__disabledLineFormat, "LibKa0s-Slash-1.0", "DISABLED_LINE_FORMAT")
 end)
 
-test("slash: on a library-absent load, /sm enable still lands through writeThrough", function()
+test("slash: on a library-absent load, /cl enable still lands through writeThrough", function()
     local NS2 = loadDegraded()
     NS2.addon:OnInitialize()
     NS2.Slash:OnSlash("disable")

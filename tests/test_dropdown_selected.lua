@@ -1,4 +1,4 @@
--- tests/test_dropdown_selected.lua — every menu in Skill Master that marks a selected entry paints
+-- tests/test_dropdown_selected.lua — every menu in Character Ledger that marks a selected entry paints
 -- that entry apart (FB2-SM-01 of Ka0sAddonsCommonTasks docs/2026-11-24-FEEDBACK_BATCH, decision D3).
 --
 -- The owner, 2026-11-24: "make the current selected always be a different color than the other
@@ -16,7 +16,7 @@ local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue
 
-local OWNER = "SkillMaster"
+local OWNER = "CharacterLedger"
 local SKINS = { "ka0s", "obsidian", "azeroth", "forever" }
 local GOLD = { 1, 0.82, 0 }   -- Ka0s Default's selected gold, every skin's selection
 

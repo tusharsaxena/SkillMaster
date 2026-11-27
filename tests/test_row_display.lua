@@ -96,13 +96,13 @@ end)
 -- ── the broker tooltip's lines ───────────────────────────────────────────────────────────────
 
 local function recordingTip()
-    local tip = M.CreateFrame("GameTooltip", "SkillMasterRowsShowTip", M.UIParent)
+    local tip = M.CreateFrame("GameTooltip", "CharacterLedgerRowsShowTip", M.UIParent)
     tip.lines = {}
-    function tip:GetName() return "SkillMasterRowsShowTip" end
+    function tip:GetName() return "CharacterLedgerRowsShowTip" end
     function tip:NumLines() return #self.lines end
     function tip:ClearLines() self.lines = {} end
     local function region(n)
-        local name = "SkillMasterRowsShowTipTextLeft" .. n
+        local name = "CharacterLedgerRowsShowTipTextLeft" .. n
         _G[name] = _G[name] or M.CreateFrame("Frame", name, tip)
     end
     function tip:AddLine(text) self.lines[#self.lines + 1] = { text } region(#self.lines) end
@@ -159,7 +159,7 @@ end)
 -- ── the schemaVersion 2 step ─────────────────────────────────────────────────────────────────
 
 test("rows show: schemaVersion 2 moves a stored stats.display once, in every stored profile", function()
-    local sv = rawget(_G, "SkillMasterDB")   -- the raw SavedVariables the runner walks
+    local sv = rawget(_G, "CharacterLedgerDB")   -- the raw SavedVariables the runner walks
     assertTrue(type(sv) == "table", "the SavedVariables table")
     sv.profiles = sv.profiles or {}
     sv.profiles["RowsShow-Text"] = { stats = { display = "text", hidden = {} } }

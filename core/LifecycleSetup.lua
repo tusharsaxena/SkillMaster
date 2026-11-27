@@ -25,7 +25,7 @@ function NS.SyncEnabledHold()
     NS.Lifecycle:Set(NS.HOLD_DISABLED, NS.GetSetting("enabled") == false)
 end
 
--- The teardown and rebuild. NS.StandDown / NS.StandUp are defined in core/SkillMaster.lua and
+-- The teardown and rebuild. NS.StandDown / NS.StandUp are defined in core/CharacterLedger.lua and
 -- reached at call time.
 if not lib then
     local held, down = {}, false

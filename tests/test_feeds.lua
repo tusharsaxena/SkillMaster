@@ -1,5 +1,5 @@
 -- tests/test_feeds.lua — the six broker feeds (item SMW-05 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md): one LibDataBroker data source per family,
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md): one LibDataBroker data source per family,
 -- built from the registry, each with its own template, sections, pin, flash and clicks; the
 -- schemaVersion 15 step; the split of modules/Broker.lua.
 local T = _G.SKM_TEST
@@ -45,7 +45,7 @@ end
 --- A recording tooltip: its lines as text.
 local function recordingTip()
     local lines = {}
-    local tip = M.CreateFrame("GameTooltip", "SkillMasterFeedsTip", M.UIParent)
+    local tip = M.CreateFrame("GameTooltip", "CharacterLedgerFeedsTip", M.UIParent)
     function tip:AddLine(t) lines[#lines + 1] = t end
     function tip:AddDoubleLine(l, r) lines[#lines + 1] = l .. " " .. tostring(r) end
     function tip:NumLines() return #lines end
@@ -54,12 +54,12 @@ end
 
 test("feeds: one data source per family, in the family order, the two shipped names kept", function()
     local want = {
-        professions = { "Skill Master Professions", "Skill Master Professions" },
-        skills = { "Skill Master Skills", "Skill Master Skills" },
-        stats = { "Skill Master Stats", "Skill Master Character Stats" },
-        currencies = { "Skill Master Currencies", "Skill Master Currencies" },
-        reputations = { "Skill Master Reputations", "Skill Master Reputations" },
-        statistics = { "Skill Master Statistics", "Skill Master Statistics" },
+        professions = { "Character Ledger Professions", "Character Ledger Professions" },
+        skills = { "Character Ledger Skills", "Character Ledger Skills" },
+        stats = { "Character Ledger Stats", "Character Ledger Stats" },
+        currencies = { "Character Ledger Currencies", "Character Ledger Currencies" },
+        reputations = { "Character Ledger Reputations", "Character Ledger Reputations" },
+        statistics = { "Character Ledger Statistics", "Character Ledger Statistics" },
     }
     for fid, w in pairs(want) do
         local f = B.FEEDS[fid]
@@ -79,7 +79,7 @@ test("feeds: with nothing pinned, a {pinned} feed reads its family's short name"
             assertEqual(B.TextFor(fid), NS.Families[fid].short, fid)
         end
         NS.SetByPath("broker.feeds.currencies.template", " - ")
-        assertEqual(B.TextFor("currencies"), "Skill Master Currencies", "a blank render falls back to the label")
+        assertEqual(B.TextFor("currencies"), "Character Ledger Currencies", "a blank render falls back to the label")
     end)
 end)
 
@@ -135,7 +135,7 @@ test("feeds: a tree family's tooltip says it has nothing yet, in both styles", f
         local rows = B.FillTooltip(tip, "reputations")
         local text = table.concat(lines, "\n")
         assertEqual(#rows, 0, "no rows")
-        assertTrue(text:find("Skill Master \194\183 Reputations", 1, true) ~= nil, text)
+        assertTrue(text:find("Character Ledger \194\183 Reputations", 1, true) ~= nil, text)
         assertTrue(text:find(NS.Windows.EmptyText("reputations"), 1, true) ~= nil, text)
         assertEqual(select(2, B.Heading()), "", "no session gains line on a feed that gains no skill")
         local ldb = NS.db.profile.tooltips.ldb
@@ -194,7 +194,7 @@ test("feeds: the Broker page has a template pair and the section switches per fe
 end)
 
 test("feeds: schemaVersion 15 moves the one template to the Professions feed's", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     local p = sv.profiles
     local D = NS.defaults.profile.broker.feeds.professions.template

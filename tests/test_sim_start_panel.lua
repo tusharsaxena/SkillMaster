@@ -1,4 +1,4 @@
--- tests/test_sim_start_panel.lua — every start path of Skill Master's simulator shows the step
+-- tests/test_sim_start_panel.lua — every start path of Character Ledger's simulator shows the step
 -- panel (FB2-SM-01 of Ka0sAddonsCommonTasks docs/2026-11-24-FEEDBACK_BATCH, decision D2).
 --
 -- The owner's words, 2026-11-24: "sim mode whether started from a command like /xx sim start
@@ -29,7 +29,7 @@ test("sim start panel: the panel's Start row is the typed start, and it shows th
     local row = NS.Sim:PanelRows()[1]
     assertTrue(row ~= nil and row.key == "start", "the first row is Start")
     assertTrue(row.actionable, "Start is clickable before a session")
-    local line = tostring(row.command):match("^/sm (.+)$")
+    local line = tostring(row.command):match("^/cl (.+)$")
     assertTrue(line ~= nil and line:find("sim start " .. H.SCENARIO, 1, true) == 1, tostring(row.command))
     NS.Sim:HidePanel()
     NS.Slash:OnSlash(line)
@@ -38,7 +38,7 @@ test("sim start panel: the panel's Start row is the typed start, and it shows th
     reset()
 end)
 
-test("sim start panel: the bare /sm sim shows the panel", function()
+test("sim start panel: the bare /cl sim shows the panel", function()
     reset()
     NS.Slash:OnSlash("sim")
     assertFalse(NS.Sim:IsActive(), "the bare verb starts no session")

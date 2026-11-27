@@ -1,4 +1,4 @@
-# Profiles — Ka0s Skill Master
+# Profiles — Ka0s Character Ledger
 
 AceDB-3.0 profiles are user-visible: the Profiles page (`settings/Profiles.lua`) draws AceDBOptions.
 

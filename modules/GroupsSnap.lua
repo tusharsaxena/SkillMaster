@@ -315,7 +315,7 @@ function S.BeginSection(sh, gid, id)
     g:SetFrameStrata(above())
     g:SetWidth(w)
     g:SetHeight(h)
-    paint(g.bg, "sm.headerBg")
+    paint(g.bg, "cl.headerBg")
     g.title:SetText(NS.BlockDefs[id] and NS.BlockDefs[id].title or id)
     g.token = nil
     drag = { kind = "section", frame = sh.owner, header = sh, gid = gid, id = id,

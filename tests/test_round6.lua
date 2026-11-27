@@ -2,7 +2,7 @@
 -- look, test mode's cues on the Journal and the LDB tooltip, the header marks at one size and one
 -- vertical center, the sort mark's menu, every block expanded on a new profile, the thresholds'
 -- two switches, the trainer popup's Set waypoint button and its next-rank-and-above trainers, and
--- Skill Master's own waypoint arrow (R6-11).
+-- Character Ledger's own waypoint arrow (R6-11).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue, assertFalse = T.test, T.assertEqual, T.assertTrue, T.assertFalse
@@ -150,13 +150,13 @@ end)
 
 --- A tooltip that records its lines (tests/test_broker.lua's shape): tip.lines[n] = { left, right }.
 local function recordingTip()
-    local tip = M.CreateFrame("GameTooltip", "SkillMasterRound6Tip", M.UIParent)
+    local tip = M.CreateFrame("GameTooltip", "CharacterLedgerRound6Tip", M.UIParent)
     tip.lines = {}
-    function tip:GetName() return "SkillMasterRound6Tip" end
+    function tip:GetName() return "CharacterLedgerRound6Tip" end
     function tip:NumLines() return #self.lines end
     function tip:ClearLines() self.lines = {} end
     local function region(n)
-        local name = "SkillMasterRound6TipTextLeft" .. n
+        local name = "CharacterLedgerRound6TipTextLeft" .. n
         _G[name] = _G[name] or M.CreateFrame("Frame", name, tip)
     end
     function tip:AddLine(text) self.lines[#self.lines + 1] = { text } region(#self.lines) end
@@ -471,7 +471,7 @@ test("round6 thresholds: the window legend's threshold entry shows only with the
 end)
 
 test("round6 thresholds: schemaVersion 7 carries a stored false to both switches and drops the old key", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["R6-Off"] = { bars = { markers = false, height = 21 } }
     sv.profiles["R6-On"] = { bars = { markers = true } }
@@ -868,7 +868,7 @@ test("round6 ldb look: the window's weapon filter and sort reach both styles", f
     withFeedTip("classic", function()
         NS.db.profile.layout.blocks.weapon.filter = "learned"
         local lines = {}
-        local tip = M.CreateFrame("GameTooltip", "SkillMasterR6Tip", M.UIParent)
+        local tip = M.CreateFrame("GameTooltip", "CharacterLedgerR6Tip", M.UIParent)
         function tip:AddLine(t) lines[#lines + 1] = t end
         function tip:AddDoubleLine(l) lines[#lines + 1] = l end
         function tip:NumLines() return #lines end
@@ -911,7 +911,7 @@ test("round6 ldb look: the classic-only rows are dimmed in the Main window style
 end)
 
 test("round6 ldb look: schemaVersion 8 keeps every stored profile on Classic; a fresh install starts on it new", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["R6-Old"] = { bars = { height = 15 } }
     sv.profiles["R6-Chose"] = { tooltips = { ldb = { style = "window" } } }
@@ -931,11 +931,11 @@ test("round6 ldb look: schemaVersion 8 keeps every stored profile on Classic; a 
     for _, k in ipairs({ "R6-Old", "R6-Chose", "R6-Empty", "R6-New" }) do sv.profiles[k] = nil end
 end)
 
--- ── R6-9: the Skill Master Stats feed ────────────────────────────────────────────────────────
+-- ── R6-9: the Character Ledger Stats feed ────────────────────────────────────────────────────────
 
 local function statsTip()
     local lines = {}
-    local tip = M.CreateFrame("GameTooltip", "SkillMasterR6StatsTip", M.UIParent)
+    local tip = M.CreateFrame("GameTooltip", "CharacterLedgerR6StatsTip", M.UIParent)
     function tip:AddLine(t) lines[#lines + 1] = t end
     function tip:AddDoubleLine(l, r) lines[#lines + 1] = l .. " " .. tostring(r) end
     function tip:NumLines() return #lines end
@@ -944,9 +944,9 @@ end
 
 test("round6 stats feed: its own data source, its tooltip the four stat blocks, its clicks its window's", function()
     local obj = M.__ldbObjects[Br.STATS_NAME]
-    assertTrue(obj ~= nil and obj == Br.StatsObject(), "Skill Master Stats is registered")
+    assertTrue(obj ~= nil and obj == Br.StatsObject(), "Character Ledger Stats is registered")
     assertEqual(obj.type, "data source")
-    assertEqual(obj.label, "Skill Master Character Stats", "relabeled; its name stays (SMW-05)")
+    assertEqual(obj.label, "Character Ledger Stats", "relabeled; its name stays (SMW-05)")
     assertTrue(type(obj.OnClick) == "function", "its label clicks")
     assertEqual(table.concat(Br.FEEDS.stats.sections, ","), "stats_base,stats_spell,stats_defense,stats_utility")
     for _, id in ipairs(Br.FEEDS.stats.sections) do
@@ -955,7 +955,7 @@ test("round6 stats feed: its own data source, its tooltip the four stat blocks, 
     withFeedTip("window", function()
         obj.OnEnter(M.UIParent)
         assertEqual(Br.Feed(), "stats")
-        assertEqual(BP.Frame().title:GetText(), "Skill Master \194\183 Character Stats")
+        assertEqual(BP.Frame().title:GetText(), "Character Ledger \194\183 Character Stats")
         local ids = {}
         for _, h in ipairs(BP.Headers()) do ids[#ids + 1] = h.id end
         assertEqual(table.concat(ids, ","), "stats_base", "the stat blocks with rows, no skill block")
@@ -967,7 +967,7 @@ test("round6 stats feed: its own data source, its tooltip the four stat blocks, 
         local tip, lines = statsTip()
         Br.FillTooltip(tip, "stats")
         local text = table.concat(lines, "\n")
-        assertTrue(text:find("Skill Master \194\183 Character Stats", 1, true) ~= nil and text:find("Ranged Crit", 1, true) ~= nil, text)
+        assertTrue(text:find("Character Ledger \194\183 Character Stats", 1, true) ~= nil and text:find("Ranged Crit", 1, true) ~= nil, text)
         assertTrue(text:find("Tailoring", 1, true) == nil, "Classic: no skills either")
         NS.db.profile.broker.tooltip.hiddenStats = { rangedCrit = true }   -- the Rows page's LDB tooltip eye
         tip, lines = statsTip()
@@ -1003,7 +1003,7 @@ test("round6 stats feed: a stat row's menu pins its stat to the feed per charact
 end)
 
 test("round6 stats feed: schemaVersion 9 drops a stored Stats section switch, the stat blocks' switches answer", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["R6-Stats"] = { broker = { tooltip = { sections = { stats = true, weapon = false } } } }
     sv.profiles["R6-Fresh9"] = {}
@@ -1066,7 +1066,7 @@ test("round6 review: the Set waypoint button keeps the skin's hover look beside 
 end)
 
 test("round6 review: schemaVersion 8 keeps an empty stored profile on Classic too; only a fresh install starts new", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["R6-Untouched"] = {}
     NS.db.global.schemaVersion = 7
@@ -1081,7 +1081,7 @@ test("round6 review: schemaVersion 8 keeps an empty stored profile on Classic to
 end)
 
 test("round6 review: schemaVersion 10 keeps Spell and Defense collapsed on a profile from before R6-8", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["R6-Old10"] = { bars = { height = 15 } }
     sv.profiles["R6-Open10"] = { layout = { blocks = { stats_spell = { collapsed = false, order = 3 } } } }
@@ -1108,7 +1108,7 @@ test("round6 review: schemaVersion 10 keeps Spell and Defense collapsed on a pro
     for _, k in ipairs({ "R6-Old10", "R6-Open10", "R6-Empty10", "R6-Later10" }) do sv.profiles[k] = nil end
 end)
 
--- ── R6-11: Skill Master's own waypoint arrow ─────────────────────────────────────────────────
+-- ── R6-11: Character Ledger's own waypoint arrow ─────────────────────────────────────────────────
 
 local WA, Wp = NS.WaypointArrow, NS.Waypoints
 
@@ -1193,7 +1193,7 @@ test("round6 arrow: a waypoint sets the native pin unsuper-tracked and shows the
         assertEqual(Wp:Set(t), "native")
         assertEqual(rec.set, 1, "the native pin is still set")
         assertEqual(rec.superTrack[#rec.superTrack], false, "and not super-tracked: the game's arrow goes away")
-        assertTrue(WA.IsShown(), "Skill Master's arrow shows")
+        assertTrue(WA.IsShown(), "Character Ledger's arrow shows")
         assertEqual(WA.Target(), t)
         local p = parts()
         local f = p.frame
@@ -1203,14 +1203,14 @@ test("round6 arrow: a waypoint sets the native pin unsuper-tracked and shows the
         assertEqual(p.text:GetText(), NS.L["%d yd"]:format(100), "the yards under the art")
         assertTrue(p.body:IsShown() and near(p.body:GetRotation(), 0), "target due north, facing north: up")
         -- Round 8, R8-5: the library's Raised look by default, its art under libs\LibKa0s.
-        local media = "Interface\\AddOns\\SkillMaster\\libs\\LibKa0s\\media\\waypoint\\"
+        local media = "Interface\\AddOns\\CharacterLedger\\libs\\LibKa0s\\media\\waypoint\\"
         assertEqual(p.body:GetTexture(), media .. "arrow-fill", "the tinted body")
         assertEqual(p.overlay:GetTexture(), media .. "raised-overlay", "Raised's overlay")
         assertTrue(p.shadow:IsShown(), "and its shadow")
     end)
 end)
 
-test("round6 arrow: Show Skill Master's arrow off keeps the old behavior", function()
+test("round6 arrow: Show Character Ledger's arrow off keeps the old behavior", function()
     withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t, rec)
         NS.db.profile.waypoints.arrow = false
         assertEqual(Wp:Set(t), "native")
@@ -1314,7 +1314,7 @@ end)
 
 test("round6 arrow: a drag saves the offsets on the profile; the arrow's own lock refuses it", function()
     -- Round 9 (R9-1): the drag writes the X and Y offsets from the screen's center, and the arrow's
-    -- own Lock (waypoints.arrowLock), not /sm lock, refuses it.
+    -- own Lock (waypoints.arrowLock), not /cl lock, refuses it.
     withArrow({ mapID = 1453, x = 0.4, y = 0.5 }, function(t)
         Wp:Set(t)
         local f = WA.Frame()
@@ -1361,7 +1361,7 @@ test("round6 arrow: test mode shows it on a sample trainer at a sample distance,
     end)
 end)
 
-test("round6 arrow: /sm test raises and lowers the arrow with test mode's other surfaces", function()
+test("round6 arrow: /cl test raises and lowers the arrow with test mode's other surfaces", function()
     withArrow(nil, function()
         NS.ToggleTestMode()
         local on = WA.IsShown()

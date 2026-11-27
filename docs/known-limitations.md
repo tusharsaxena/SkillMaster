@@ -95,8 +95,8 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   the trainer (every profession trainer today), Waypoint method is Chat only, or the native pin API is
   not there. Its tooltip says which; Print to chat always works. A disabled button's
   tooltip needs `SetMotionScriptsWhileDisabled`, called when the client has it. Unverified in game.
-- Skill Master's waypoint arrow (round 6, R6-11) shows only with a native pin set
-  (`C_Map.SetUserWaypoint` on a map that takes one) and Show Skill Master's arrow on; off, the pin is
+- Character Ledger's waypoint arrow (round 6, R6-11) shows only with a native pin set
+  (`C_Map.SetUserWaypoint` on a map that takes one) and Show Character Ledger's arrow on; off, the pin is
   super-tracked and the game's arrow points. With the real TomTom loaded (AF-SM-TOMTOM, owner img-19,
   2026-11-19), Set waypoint places a TomTom waypoint instead and TomTom's arrow points, never this
   one: TomTom takes the client's user waypoint over and clears it, which hid this arrow with the pin,
@@ -106,8 +106,8 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   gets the native pin. A TomTom whose `AddWaypoint` raises falls back to the native pin and this
   arrow. When TomTom wins, a native pin an earlier Set placed (before TomTom was enabled) is not
   cleared and may stay on the map beside TomTom's waypoint: the client's user waypoint may be one the
-  player placed, and nothing tells Skill Master's from theirs, so the TomTom path leaves it alone
-  (clear it from the world map). Test mode's sample arrow is always Skill Master's own, whatever Show Skill Master's arrow says, and with TomTom loaded it is labeled "Sample: TomTom's arrow points to real waypoints": test mode never places a TomTom waypoint, which would be TomTom's saved state (FB-SM-05). Its pin is set with
+  player placed, and nothing tells Character Ledger's from theirs, so the TomTom path leaves it alone
+  (clear it from the world map). Test mode's sample arrow is always Character Ledger's own, whatever Show Character Ledger's arrow says, and with TomTom loaded it is labeled "Sample: TomTom's arrow points to real waypoints": test mode never places a TomTom waypoint, which would be TomTom's saved state (FB-SM-05). Its pin is set with
   `C_SuperTrack.SetSuperTrackedUserWaypoint(false)`, not just without the `true` call, so a pin the
   game was super-tracking loses its arrow too. The bearing assumes `GetWorldPosFromMapPos` answers x
   north and y west and `GetPlayerFacing` radians counter-clockwise from north (the retail
@@ -131,7 +131,7 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   Journal's slider bar has no arrows, so the full-length dim thumb says the same). A skin switch while
   the tooltip is up repaints the thumb in `scroll.thumb` until the next hover redraws it. Unverified
   in game.
-- Every client API the data modules use is assumed until `/sm probe` confirms it
+- Every client API the data modules use is assumed until `/cl probe` confirms it
   ([forever-quirks.md](forever-quirks.md), the addon's own section). The kit's Forever API set
   already lists the skill list as `C_SkillInfo.*` rather than the 1.12 globals.
 - **Trainer data (GitHub issue #3).** Since round 3: 145 of the 201 records are confirmed
@@ -156,7 +156,7 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
 - The Reputations, Currencies and Statistics windows are built on the shapes Blizzard's Forever UI source uses,
   not on a measurement (docs/forever-quirks.md, "Reputations, currencies and Statistics"): which currencies Forever
   lists, whether friendship or major-faction bars occur, whether `GetFactionDataByID` answers under a collapsed
-  header and what a Wealth statistic answers (copper or text) wait on the owner's `/sm probe`. Friendship and
+  header and what a Wealth statistic answers (copper or text) wait on the owner's `/cl probe`. Friendship and
   major-faction bars are drawn as standard standings until then.
 - A first reputation or currency read refused by combat or an open Reputation or Currency tab is partial; it is
   read again when combat ends or the tab closes. A faction or currency first met while the read is refused joins
@@ -165,7 +165,7 @@ Split out of [ARCHITECTURE.md](ARCHITECTURE.md) under documentation-§3 (Tier 2:
   Journal has its own row. The spec ("A window factory") gives every family a launcher menu entry, but LibKa0s's
   Launcher takes at most two host rows (`MAX_EXTRAS`, `libs/LibKa0s/Launcher.lua:179`, minor 11), and Show
   window and the Journal hold them. The Skills, Character Stats, Currencies, Reputations and Statistics windows
-  open from their slash verbs (`/sm skills`, `stats`, `currencies`, `reputations`, `statistics`) and their key
+  open from their slash verbs (`/cl skills`, `stats`, `currencies`, `reputations`, `statistics`) and their key
   bindings until LibKa0s raises the limit or lets a row open a submenu (not yet filed; the run's lead files it).
 - A Statistics value folded away, or on a surface that was not showing, when `CRITERIA_UPDATE` fired is stale
   until its category opens again on a shown surface, when it is read afresh (a closed window or a tooltip shown

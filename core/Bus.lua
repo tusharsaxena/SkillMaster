@@ -55,31 +55,31 @@ end
 -- <Event> is PascalCase and names what happened (naming-cheatsheet). Senders and payloads:
 NS.MSG = Bus.Catalog(addonName, {
     -- modules/SkillData.lua (T2.1). Payload: the skills model.
-    SKILLS_UPDATED  = "Ka0s_SkillMaster_SkillsUpdated",
+    SKILLS_UPDATED  = "Ka0s_CharacterLedger_SkillsUpdated",
     -- modules/SkillData.lua (T2.1). Payload: key, old rank, new rank.
-    SKILL_UP        = "Ka0s_SkillMaster_SkillUp",
+    SKILL_UP        = "Ka0s_CharacterLedger_SkillUp",
     -- modules/StatData.lua (T2.3). Payload: the stats model.
-    STATS_UPDATED   = "Ka0s_SkillMaster_StatsUpdated",
+    STATS_UPDATED   = "Ka0s_CharacterLedger_StatsUpdated",
     -- modules/Bonuses.lua (T2.2). No payload; readers ask NS.Bonuses:Breakdown(key).
-    BONUSES_UPDATED = "Ka0s_SkillMaster_BonusesUpdated",
+    BONUSES_UPDATED = "Ka0s_CharacterLedger_BonusesUpdated",
     -- modules/Blocks.lua (T3.2), after a dock, detach, reorder or a layout setting. No payload.
-    LAYOUT_CHANGED  = "Ka0s_SkillMaster_LayoutChanged",
+    LAYOUT_CHANGED  = "Ka0s_CharacterLedger_LayoutChanged",
     -- modules/RepData.lua (SMW-08). Payload: the reputations model.
-    REPS_UPDATED    = "Ka0s_SkillMaster_RepsUpdated",
+    REPS_UPDATED    = "Ka0s_CharacterLedger_RepsUpdated",
     -- modules/RepData.lua (SMW-08), a faction's standing moved between two reads. Payload: key, old
     -- standing, new standing, the faction's name.
-    REP_CHANGED     = "Ka0s_SkillMaster_RepChanged",
+    REP_CHANGED     = "Ka0s_CharacterLedger_RepChanged",
     -- modules/CurrencyData.lua (SMW-09). Payload: the currencies model.
-    CURRENCIES_UPDATED = "Ka0s_SkillMaster_CurrenciesUpdated",
+    CURRENCIES_UPDATED = "Ka0s_CharacterLedger_CurrenciesUpdated",
     -- modules/CurrencyData.lua (SMW-09), a currency's amount moved. Payload: key, old amount, new amount, name.
-    CURRENCY_CHANGED   = "Ka0s_SkillMaster_CurrencyChanged",
+    CURRENCY_CHANGED   = "Ka0s_CharacterLedger_CurrencyChanged",
     -- modules/StatisticsData.lua (SMW-10), after a debounced re-read. Payload: the Statistics model.
-    STATISTICS_UPDATED = "Ka0s_SkillMaster_StatisticsUpdated",
+    STATISTICS_UPDATED = "Ka0s_CharacterLedger_StatisticsUpdated",
     -- modules/Window.lua (SMW-10), a family window shown or hidden. Payload: the family id, shown (boolean).
-    WINDOW_TOGGLED     = "Ka0s_SkillMaster_WindowToggled",
+    WINDOW_TOGGLED     = "Ka0s_CharacterLedger_WindowToggled",
     -- modules/Broker.lua (SMW-10), a feed's tooltip shown (before it fills) or hidden. Payload: the family id,
     -- shown (boolean).
-    FEED_TOOLTIP_TOGGLED = "Ka0s_SkillMaster_FeedTooltipToggled",
+    FEED_TOOLTIP_TOGGLED = "Ka0s_CharacterLedger_FeedTooltipToggled",
     -- the simulator (T5.2). Payload: the step's name.
-    SIM_TICK        = "Ka0s_SkillMaster_SimTicked",
+    SIM_TICK        = "Ka0s_CharacterLedger_SimTicked",
 })

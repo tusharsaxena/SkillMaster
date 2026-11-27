@@ -1,4 +1,4 @@
-# Data flow — Ka0s Skill Master
+# Data flow — Ka0s Character Ledger
 
 The pipeline the addon is built around (design §5.3), and how much of it exists today.
 
@@ -179,6 +179,6 @@ The README's `## How the bars work` is the player-facing version of this page.
   `NS.Rows.SkillValues` / `StatValues` with `NS.Rows.FillColor`, the Journal from the snapshot's rank,
   cap and category. Both follow `profile.bars` (the colors, `miniHeight`, the broker tooltip's `brokerRowHeight`, the fill direction) as the
   window's rows do. While `bars.colors.fromSkin` is on (the default) a category fills in the skin's
-  `sm.cat.<category>` owner token and a bonus in `sm.bonusTemp` / `sm.bonusPerm`, each the mockup's
+  `cl.cat.<category>` owner token and a bonus in `cl.bonusTemp` / `cl.bonusPerm`, each the mockup's
   color under every skin unless the skin states its own (`core/SkinSetup.lua`).
 - The main window's journal mark calls `NS.Journal.Toggle`.

@@ -1,5 +1,5 @@
 local addonName, NS = ...
--- modules/BarStyle.lua — Skill Master's settings for its data bars, resolved into a style for
+-- modules/BarStyle.lua — Character Ledger's settings for its data bars, resolved into a style for
 -- LibKa0s-Widgets-1.0's Bar (LibKa0s#80, AD-80-SM). The bar itself is the library's: the skill and
 -- stat rows, the detached blocks, the row tooltip, the Journal and the broker tooltip draw
 -- `NS.Widgets.Bar(parent, NS.BarStyle.Opts(styleKey))` (or `AcquireBar` / `ReleaseBars` from a pool).
@@ -14,11 +14,11 @@ local addonName, NS = ...
 --   NS.BarStyle.PlayerColor(key, token) / .Swatch(key, token, classKey) -> color
 --   NS.BarStyle.ShowMarkers(styleKey) / .TooltipRowHeight(styleKey)
 --
--- The colors that follow the skin are handed over as token NAMES (`sm.barFill`, `sm.bonusTemp`, ...),
+-- The colors that follow the skin are handed over as token NAMES (`cl.barFill`, `cl.bonusTemp`, ...),
 -- so the widget resolves them against this addon's skin owner at paint time and a skin switch
 -- repaints every bar with no call from here. The player's own picks (a swatch off its skin
 -- companion, a class color) are handed over as colors. The bonus slots are remapped onto this
--- addon's owner tokens: `bonusTemp = "sm.bonusTemp"`, `bonusPerm = "sm.bonusPerm"`.
+-- addon's owner tokens: `bonusTemp = "cl.bonusTemp"`, `bonusPerm = "cl.bonusPerm"`.
 
 NS.BarStyle = {}
 local BS = NS.BarStyle
@@ -82,7 +82,7 @@ local function border(p)
     end
     if style == "None" or (tonumber(size) or 0) <= 0 then show = false end
     return { show = show and true or false, style = style, size = tonumber(size) or 1,
-             color = swatchSlot("borderColor", "sm.barBorder", "useClassColorBorder") }
+             color = swatchSlot("borderColor", "cl.barBorder", "useClassColorBorder") }
 end
 
 local function font(p)
@@ -125,17 +125,17 @@ function BS.Resolve(styleKey)
     local edge = border(p)
     return NS.Widgets.BarStyle(styleKey, {
         height = p[HEIGHT_KEY[styleKey]] or p.height,
-        fill = "sm.barFill",
-        bg = swatchSlot("bgColor", "sm.barBg", "useClassColorBg"),
+        fill = "cl.barFill",
+        bg = swatchSlot("bgColor", "cl.barBg", "useClassColorBg"),
         border = edge.show and edge.color or false, borderShow = edge.show,
         borderStyle = edge.style, borderSize = edge.size, borderFromSkin = false,
-        marker = "sm.marker", spark = p.spark and "sm.spark" or false,
+        marker = "cl.marker", spark = p.spark and "cl.spark" or false,
         -- Rank tier colors works under Color mode By category alone (feedback round 2): the
         -- widget's segments, one shade per rank tier (W.BAR.SHADE).
         segmented = p.tierColors == true and (p.colorMode or "category") == "category",
-        text = swatchSlot("fontColor", "sm.barText", "useClassColorFont"), timer = "sm.timer",
-        bonusTemp = playerSlot("bonusTemp", "sm.bonusTemp"),
-        bonusPerm = playerSlot("bonusPerm", "sm.bonusPerm"),
+        text = swatchSlot("fontColor", "cl.barText", "useClassColorFont"), timer = "cl.timer",
+        bonusTemp = playerSlot("bonusTemp", "cl.bonusTemp"),
+        bonusPerm = playerSlot("bonusPerm", "cl.bonusPerm"),
         -- The LibSharedMedia key: the widget fetches it, and an unknown one draws the skin's texture.
         texture = p.barTextureFromSkin == false and p.barTexture or nil,
         alpha = tonumber(p.barAlpha) or 1,

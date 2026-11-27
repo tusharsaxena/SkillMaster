@@ -468,7 +468,7 @@ end
 local function build(id)
     -- A detached sub-category's frame has no global name: its id carries a node key (R5-SM-09).
     local sub = NS.SubBlocks and NS.SubBlocks.IsSub(id)
-    local f = CreateFrame("Frame", (not sub) and ("SkillMasterBlock_" .. id) or nil, UIParent, "BackdropTemplate")
+    local f = CreateFrame("Frame", (not sub) and ("CharacterLedgerBlock_" .. id) or nil, UIParent, "BackdropTemplate")
     f:SetFrameStrata(LAYERS.STRATA.HUD)
     f.id = id
     f:SetWidth(D.Width(id))

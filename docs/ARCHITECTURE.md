@@ -1,14 +1,14 @@
-# Architecture — Ka0s Skill Master
+# Architecture — Ka0s Character Ledger
 
 The engineer brief and the hub of the doc set (documentation-§3). Topic detail lives in the pages the
 Documentation map lists; this file keeps a summary and one link per topic.
 
 ## Overview
 
-Ka0s Skill Master shows a vanilla-era character's weapon skills, professions, Defense, Lockpicking,
+Ka0s Character Ledger shows a vanilla-era character's weapon skills, professions, Defense, Lockpicking,
 Riding and character stats as skinnable data bars, with bonuses, trainer directions, broker feeds,
 alerts, a session log, an alt overview and gathering helpers. Since the six-windows run
-(`docs/superpowers/specs/2026-11-26-skillmaster-windows-design.md`) it also shows the character panel's other
+(`docs/superpowers/specs/2026-11-26-characterledger-windows-design.md`) it also shows the character panel's other
 tabs: reputations (GitHub issue #6), currencies (#7) and the Statistics tab, in six windows, one per family
 (`defaults/Families.lua`): Professions, Skills, Character Stats, Currencies, Reputations and Statistics, each with
 its own broker feed and up to five pins per feed (#11). The design is
@@ -44,7 +44,7 @@ messages and models, so test mode, the simulator and the headless harness drive 
 Every file, its responsibility and why the TOC orders it as it does: [module-map.md](module-map.md).
 In short: `core/` holds the identity, the constants, the one setup file per LibKa0s major (Media,
 Env, Core, Skin, Bus, Pool, Widgets, Lifecycle, Perf, DebugLog, Launcher), the AceAddon entry
-(`core/SkillMaster.lua`) and the store (`core/Database.lua`); `core/Compat.lua` is the compat family (the skill-list shims and the reads the simulator answers),
+(`core/CharacterLedger.lua`) and the store (`core/Database.lua`); `core/Compat.lua` is the compat family (the skill-list shims and the reads the simulator answers),
 wrapped at load by the simulator's seam (`core/SimSetup.lua`);
 `defaults/Profile.lua` is the defaults tree and `defaults/*_Forever.lua` the data tables (the skill
 catalog, the class weapon lists, trainers, ranks, gathering, fishing, racials, stat definitions);
@@ -53,8 +53,8 @@ Bar, which draws every data bar; the title-bar controls `NS.Chrome`, the
 blocks `NS.Blocks`, the rows `NS.Rows`, the detached frames, the merged windows `NS.Groups` and their drags `NS.GroupsSnap`, the
 main window, the secure crafting
 overlays, the click map `NS.Interact`, the row tooltip, the trainer popup, `NS.Waypoints` and
-Skill Master's own waypoint arrow `NS.WaypointArrow`, an adapter on `LibKa0s-WaypointArrow-1.0`), the
-`/sm probe` report, the skills model (`SkillData`), the bonus breakdown (`Bonuses`), the stats
+Character Ledger's own waypoint arrow `NS.WaypointArrow`, an adapter on `LibKa0s-WaypointArrow-1.0`), the
+`/cl probe` report, the skills model (`SkillData`), the bonus breakdown (`Bonuses`), the stats
 model (`StatData`), the trainer lookups (`Trainers`), the skill helpers (`NS.SkillHelpers`,
 `modules/Helpers.lua`), the session log (`NS.SessionLog`), the alt snapshots (`NS.Alts`), the
 Journal window, the alerts (`NS.Alerts`, the rank-cap and weapon-gap toasts), the broker feed
@@ -136,8 +136,8 @@ the default skin, is the library's (skinning-§2).
 ## Settings Schema
 
 One schema (`settings/Schema.lua`, on LibKa0s-Schema-1.0) drives the panel, the CLI and resets; the
-single write seam is `NS.SetByPath`. Profile rows live under `SkillMasterDB.profiles.<name>`, the
-installation's rows under `SkillMasterDB.global`. Every row, default and migration:
+single write seam is `NS.SetByPath`. Profile rows live under `CharacterLedgerDB.profiles.<name>`, the
+installation's rows under `CharacterLedgerDB.global`. Every row, default and migration:
 [schema.md](schema.md).
 
 Named non-setting state (architecture-§5): `profile.window.point`, the main window's drop point, is
@@ -164,13 +164,13 @@ ranges at the current column count, capped at the screen in the frame's own unit
 divided by Master scale, re-applied by `W.ApplySettings`), so a scale above 1 never lets the window
 grow past the screen. A grab pins the window by its top-left
 (`NS.Chrome.PinTopLeft`), and the release saves that point with `savePoint`. `locked` hides the grip
-and its `canResize` refuses a grab, so `/sm lock`, `/sm unlock`, the header's lock mark and the
+and its `canResize` refuses a grab, so `/cl lock`, `/cl unlock`, the header's lock mark and the
 launcher's Locked all gate it with the drag. The LDB tooltip (`modules/BrokerPanel.lua`) has no grip.
 The waypoint arrow keeps no named non-setting state since round 9 (R9-1): its drop point
 (`profile.waypoints.arrowFrame.point`, round 6) is gone, and a drag, the arrow's Lock and Reset
 position write the `waypoints.arrowX`, `arrowY` and `arrowLock` settings through `NS.SetByPath`
 (the library's `d.set`), so the Position block's sliders follow the drag. The arrow's own Lock is
-its only drag gate; `/sm lock` holds the windows and no longer the arrow (Documented deviations, slash-commands-§8).
+its only drag gate; `/cl lock` holds the windows and no longer the arrow (Documented deviations, slash-commands-§8).
 
 `profile.layout.blocks[id].point` (T3.2) is named non-setting state, owned by `modules/Detached.lua`:
 its writers are `savePoint` (a detached frame's `OnDragStop`) and `D.StorePoint` (where a section
@@ -182,7 +182,7 @@ through `NS.SetByPath` (architecture-§5): the block header and the detached fra
 (`:SetAllCollapsed`, every docked block's `collapsed` inside one bulk bracket, one `LAYOUT_CHANGED`; in a tree
 window, Reputations, Currencies and Statistics, it folds and opens the tree's headers instead, `NS.Tree.SetAll`, the
 block left open, SMW-REV)
-and `/sm set`. The `docked` and `collapsed`
+and `/cl set`. The `docked` and `collapsed`
 rows' `set` (`NS.Blocks.StoreDocked` / `StoreCollapsed`) stores the value and waits out combat;
 `order` stores plainly, its `onChange` `NS.Blocks.OrderChanged`. The seam logs each write
 (debug-logging-§10). `shown`, `scale` and `locked` are plain rows. `sort` (round 3) and each
@@ -203,7 +203,7 @@ each tab drawing only its own group), one eye per set (Window, LDB tooltip) on `
 heading (`SetMany`, one act). It replaced the Skills page's Professions and Weapons tabs, the Stats
 page (gone: its General tab held only the undrawn set row) and the Broker page's Tooltip skills and
 Tooltip stats tabs. The paths did not move, so nothing migrated. Every hide write, from any actor
-(the page's eyes, the row menu, a header's restore eye, `/sm set`), goes through `H.RefreshPanel`:
+(the page's eyes, the row menu, a header's restore eye, `/cl set`), goes through `H.RefreshPanel`:
 a page on screen renders at once, a hidden one is owed a render; writes inside a bracket (a
 heading's show-all, the page's Defaults) coalesce into one render on the next frame. A block
 reorder changes the window, not the page's tab strip (round 9).
@@ -278,7 +278,7 @@ test mode or a simulation runs so a sample row never lands in them.
 
 HUD colors follow the skin (skinning-§6): every `*FromSkin` companion, the palette's
 `bars.colors.fromSkin` included, defaults true; while the palette follows, the categories and
-bonuses draw the owner tokens `sm.cat.*` and `sm.bonus*` (`core/SkinSetup.lua`). No
+bonuses draw the owner tokens `cl.cat.*` and `cl.bonus*` (`core/SkinSetup.lua`). No
 `Skin.FollowOnce` step: the addon was born on LibKa0s v1.94.0 with the companions on, so no stored
 profile predates them ([schema.md](schema.md)). From LibKa0s v1.108.0 the waypoint arrow's text
 color and shadow carry companions too (`waypoints.arrowFontColorFromSkin`,
@@ -289,9 +289,9 @@ texture, a font or a color starts on the skin (skinning-§9); the one opt-out is
 
 Lines written onto the stock `GameTooltip` (the row tooltip, a trainer card's, the Journal's column
 header, the arrow's) read the `gtip.*` family (`gtip.title`, `gtip.body`, `gtip.muted`), drawn for
-that frame's dark backing, and keep `sem.*` and `sm.bonus*` where the color is the meaning (the
+that frame's dark backing, and keep `sem.*` and `cl.bonus*` where the color is the meaning (the
 owner's U-7, 2026-11-20). A trainer popup card wears the skin's `list.hover` wash while the pointer
-is on it (the owner's U-31, SkillMaster#9); the Journal's rows are not clicked and take none. The
+is on it (the owner's U-31, CharacterLedger#9); the Journal's rows are not clicked and take none. The
 settings list's action marks (the Rows page's eyes) take the skin's `icon.tint` through `S.Mark`
 on the panel (`panel = true`), dimmed by alpha, so they keep the client's white while *Ignore
 settings panel* is on.
@@ -309,7 +309,7 @@ the simulator sends `SIM_TICK`. The register, with every sender, payload and con
 
 ## Slash Commands
 
-`/sm` and `/skillmaster`, one LibKa0s-Slash-1.0 dispatcher over `NS.COMMANDS` (`settings/Slash.lua`):
+`/cl` and `/characterledger`, one LibKa0s-Slash-1.0 dispatcher over `NS.COMMANDS` (`settings/Slash.lua`):
 `help`, `config`, `skin`, `show`, `hide`, `toggle`, one verb per family window (`professions`, `skills`, `stats`,
 `currencies`, `reputations`, `statistics`), `journal`, `lock`, `unlock`, `test`, `sim`, `probe`, `enable`, `disable`,
 `list`, `get`, `set`, `reset`, `resetall`, `debug`, `diagnostics`, `perf`, `version`. The bare
@@ -323,7 +323,7 @@ one chat pointer; acknowledgments, refusals, `help` and `list` stay in chat
 
 | Event | Registered by | Handler | Why |
 |---|---|---|---|
-| `PLAYER_REGEN_DISABLED` | `NS.RegisterRuntime` (`core/SkillMaster.lua`) | `addon:OnEnterCombat` | combat ends test mode (its three toasts and the windows it opened come down) and a running simulation (preview-mode) |
+| `PLAYER_REGEN_DISABLED` | `NS.RegisterRuntime` (`core/CharacterLedger.lua`) | `addon:OnEnterCombat` | combat ends test mode (its three toasts and the windows it opened come down) and a running simulation (preview-mode) |
 | `PLAYER_REGEN_DISABLED`, `PLAYER_REGEN_ENABLED` | `modules/SecureOverlay.lua` at load, on its own bus target | disarm every crafting overlay at the combat-start edge; after combat run the queued layout work, then re-sync the overlays | Taint Notes below |
 | `SKILL_LINES_CHANGED` | `NS.SkillData:Enable` (from `NS.RegisterRuntime`) | debounced `SkillData:Scan` (0.1 s) | the skill list changed; the echo of the scan's own header toggles is ignored for 0.2 s |
 | `CHAT_MSG_SKILL` | `NS.SkillData:Enable` | debounced `SkillData:Scan` | a skill-up line |
@@ -420,7 +420,7 @@ modes and both styles.
 
 ## Tooltip placement
 
-Every tooltip Skill Master places itself opens where its element sits in its window, never at the
+Every tooltip Character Ledger places itself opens where its element sits in its window, never at the
 pointer and never off a corner of the control (WowAddonStandards standalone-windows, *Tooltip
 placement*; launcher-§7; LibKa0s#92, adopted as AD-92-SM). Each is owned at `ANCHOR_NONE`, filled,
 shown, and then placed by one of `NS.Chrome`'s three placers (`modules/Chrome.lua`), which read
@@ -453,7 +453,7 @@ placer's horizontal side by screen third and its gap as well.
   Widgets' `HeaderButtons`, `NS.MakeCloseButton`). The block headers' marks are treated as
   header-strip controls, as smoke round 1's ruling 3 does for every header-strip mark
   (`tests/test_sr1.lua`).
-- **The bonus scanner** (`modules/Bonuses.lua`, `SkillMasterScanTip`). A hidden tooltip owned by
+- **The bonus scanner** (`modules/Bonuses.lua`, `CharacterLedgerScanTip`). A hidden tooltip owned by
   UIParent at `ANCHOR_NONE` to read item lines. It is never shown, so it has no placement.
 - **The minimap button's status tooltip.** `LibKa0s-Launcher-1.0` draws it and re-places it through
   `PlaceLauncher` (Launcher minor 11). No host code anchors it (launcher-§7).
@@ -461,7 +461,7 @@ placer's horizontal side by screen third and its gap as well.
   entries' tooltips (*What it does not bind*). Its rows are the library's (Enabled, Locked, Test
   mode, Sim mode, Show window, Open settings, Open skin selector) plus this addon's one host row,
   *Journal*, after Show window (`extraEntries`, Launcher minor 11, LibKa0s#81, AD-81-SM): a checkbox
-  ticked while the Journal is open, whose click is `/sm journal`'s own handler (launcher-§2), grayed
+  ticked while the Journal is open, whose click is `/cl journal`'s own handler (launcher-§2), grayed
   while the addon is disabled.
 - **Library windows and widgets**: the row menu (Widgets' `ContextMenu`), the docked test and sim
   strips, the debug console, the sim and perf panels, the skin picker and the icon browser. Each is
@@ -469,7 +469,7 @@ placer's horizontal side by screen third and its gap as well.
 - **The settings pages** in Blizzard's Settings canvas, the library's Options widgets among them.
   options-ui governs them, and the tooltip-placement rule does not bind them.
 - **A broker display's own placement.** The feeds supply `OnEnter`, so the display does not place
-  their tooltip. Skill Master places it, as the row above describes. A display that ignores
+  their tooltip. Character Ledger places it, as the row above describes. A display that ignores
   `OnEnter` and calls `OnTooltipShow` would get no tooltip, because the feeds define no
   `OnTooltipShow`.
 
@@ -487,7 +487,7 @@ round 2 the 55 Forever-only trainers, placed by QuestieDB alone) is never confir
 checks say, until it is seen in game.
 
 **Licensing decision (2026-11-23, issue #3).** QuestieDB is GPLv3 for contributions, the CMaNGOS dump
-GPL-3.0, pfQuest MIT, ItemTree All Rights Reserved. Skill Master (MIT) ships none of their tables, no
+GPL-3.0, pfQuest MIT, ItemTree All Rights Reserved. Character Ledger (MIT) ships none of their tables, no
 fixture and no copy: only its own corrected records (names, `npcID`s, item and quest ids, coordinates
 rounded to 0.1 map-%) and the sources' commits in `NS.DataMeta.Trainers_Forever`. The probe reads the
 sources from checkouts outside the repo, and its reports quote a source only against one record. This
@@ -499,7 +499,7 @@ keeps.
 What the addon does not do yet, and what is still unverified in game: [known-limitations.md](known-limitations.md).
 The main themes are the character panel opened from the Classic-style broker tooltip (a tainted `OnShow`),
 the secure overlays' placement and the Skills tab's tainted switch, the trainer popup's and the waypoint
-arrow's measurements, test mode and the simulator's reach, and the client APIs assumed until `/sm probe` (among them
+arrow's measurements, test mode and the simulator's reach, and the client APIs assumed until `/cl probe` (among them
 the reputation, currency and Statistics shapes the six-windows run built on Blizzard's Forever source).
 
 ## Documentation map
@@ -509,7 +509,7 @@ the reputation, currency and Statistics shapes the six-windows run built on Bliz
 | Doc | Covers |
 |---|---|
 | `ARCHITECTURE.md` | This file — the hub: overview, module map summary, schema, bus, slash, events, taint, limitations, this map, deviations |
-| `scope.md` | What Skill Master shows, and what it deliberately leaves to the game and to other addons |
+| `scope.md` | What Character Ledger shows, and what it deliberately leaves to the game and to other addons |
 | `module-map.md` | Every non-vendored file, its responsibility and the TOC's load order |
 | `schema.md` | The SavedVariables shape, every default and the migration path |
 | `settings-panel.md` | The `Page \| Covers` table and the page → tab → row tree |
@@ -546,7 +546,7 @@ the reputation, currency and Statistics shapes the six-windows run built on Bliz
 
 | Doc | Covers |
 |---|---|
-| `validate-seeds.md` | The seed-validation contract `/dev-copilot:validate-seeds SkillMaster forever` runs: `tools/seeds/seeds.py` re-checks the trainer, fishing-zone and skill-catalog seeds against WoW Forever's own DB2 (wago.tools `wowf`), and the trainers and gathering nodes against ForeverDB as secondary evidence (verdicts only, GPL data never copied), with its rulings, precedent and gate |
+| `validate-seeds.md` | The seed-validation contract `/dev-copilot:validate-seeds CharacterLedger forever` runs: `tools/seeds/seeds.py` re-checks the trainer, fishing-zone and skill-catalog seeds against WoW Forever's own DB2 (wago.tools `wowf`), and the trainers and gathering nodes against ForeverDB as secondary evidence (verdicts only, GPL data never copied), with its rulings, precedent and gate |
 
 Frozen and generated material is out of the map and named once per directory (documentation-§3):
 `docs/audits/`, `docs/reviews/`, `docs/automated-tests/<run>/`, `docs/perf-analysis/<run>/`,
@@ -561,9 +561,9 @@ sources, the plan and its status ledger) and `docs/investigations/`. Of these, `
 
 | Rule | What differs | Why | Decided | Re-check trigger |
 |---|---|---|---|---|
-| localization-§4 | Three things still match on a localized name, through the locale keys (`NS.L`): a skill line whose record carries no skill-line ID (the 1.12 positional list), the three excluded Skills-tab headers (Class Skills, Armor Proficiencies, Languages) and the crafting spell when `NS.Compat.SpellName` answers nothing for its ID. Every record that carries an ID is matched on it first (`NS.SkillLineIDToKey`), and the crafting cast uses the name its spell ID resolves to. | The client hands no ID for a 1.12-shaped line or for a header, so the locale key is the only route; enUS ships the strings, the other locale files are stubs, so a non-enUS client on the positional shape sorts its lines into Other until they are translated ([known-limitations.md](known-limitations.md)). | 2026-11-10, M6 review F-001 | `/sm probe` shows whether Forever's struct carries a skill-line ID (then only the headers remain), or the locale files gain the skill-line and header strings |
+| localization-§4 | Three things still match on a localized name, through the locale keys (`NS.L`): a skill line whose record carries no skill-line ID (the 1.12 positional list), the three excluded Skills-tab headers (Class Skills, Armor Proficiencies, Languages) and the crafting spell when `NS.Compat.SpellName` answers nothing for its ID. Every record that carries an ID is matched on it first (`NS.SkillLineIDToKey`), and the crafting cast uses the name its spell ID resolves to. | The client hands no ID for a 1.12-shaped line or for a header, so the locale key is the only route; enUS ships the strings, the other locale files are stubs, so a non-enUS client on the positional shape sorts its lines into Other until they are translated ([known-limitations.md](known-limitations.md)). | 2026-11-10, M6 review F-001 | `/cl probe` shows whether Forever's struct carries a skill-line ID (then only the headers remain), or the locale files gain the skill-line and header strings |
 
-| skinning (LibKa0s `S.Tooltip`) | The skinned broker tooltip (FB-13) is an addon-owned `GameTooltip` frame (`SkillMasterBrokerTooltip`) painted with `NS.Skin.Shell` and `NS.Skin.Text`, not the library's `S.Tooltip`. | `S.Tooltip` only recolors a backdrop the frame already has, and a modern `GameTooltipTemplate` frame draws its art through NineSlice, so there was nothing for it to recolor; the shared `GameTooltip` is never restyled. | 2026-11-10, feedback round 2 | LibKa0s ships a tooltip skin that paints an owned or template tooltip frame |
+| skinning (LibKa0s `S.Tooltip`) | The skinned broker tooltip (FB-13) is an addon-owned `GameTooltip` frame (`CharacterLedgerBrokerTooltip`) painted with `NS.Skin.Shell` and `NS.Skin.Text`, not the library's `S.Tooltip`. | `S.Tooltip` only recolors a backdrop the frame already has, and a modern `GameTooltipTemplate` frame draws its art through NineSlice, so there was nothing for it to recolor; the shared `GameTooltip` is never restyled. | 2026-11-10, feedback round 2 | LibKa0s ships a tooltip skin that paints an owned or template tooltip frame |
 | options-ui-§16 | `bars.borderStyleFromSkin` (*Use the skin's border*, the bar border's style companion) defaults `false`, in `defaults/Profile.lua` and on its composed row; every other `*FromSkin` companion defaults `true`. | The owner wants no bar border by default under every skin. Azeroth, High Contrast and WoW Midnight state a real bar border style, which wins over *Show border* off while the companion is on (skinning-§6), so the companion on drew an edge the player had switched off. With it off, *Show border* decides; ticking it opts into the skin's border. No migration: AceDB stripped every stored `true` (the old default). | 2026-11-10, feedback round 2 follow-up | The standard lets a bar border companion default off, or makes a host's *Show border* off win over a skin's real style |
 | frame-layering-§1 | The crafting rows' secure overlays (`modules/SecureOverlay.lua`) sit one strata above their host window or detached block (`LAYERS.STRATA_ABOVE`), not in the host's strata at a level over it, and only the hovered crafting row's overlay is armed. | The hosts are toplevel (frame-layering-§4), and the client orders a raised toplevel window with everything in it as one group: an overlay in the host's strata lost the hit test to the row under it at any frame level, so no crafting click ever opened a profession (`GetMouseFoci` named the row alone, the overlay shown, placed and three levels higher). Arming only the hovered row keeps an invisible mouse-live frame a strata up from covering another window: a window over the row takes the pointer first, so the row is never hovered. | 2026-11-11, feedback round 2 | The standard gains a rule for secure click overlays over toplevel windows, or the client hit-tests a separate frame over a toplevel window's children by level |
 | frame-layering-§6 | The row menu (LibKa0s-Widgets-1.0 `ContextMenu`, a library-owned popup at FULLSCREEN_DIALOG) is lifted by the host to TOOLTIP strata, at the open LDB tooltip's level + `LAYERS.LEVEL.POPUP`, while it is open from that tooltip (`NS.Broker.RaiseMenu`: the row menu, and the Main window style's test-strip menu, round 6 review), and put back to FULLSCREEN_DIALOG (`LAYERS.STRATA.MENU`) as it hides. The standard names the library's tier as one this addon relies on, not one it moves; flagged in round 6 and accepted by the owner in round 7. | Both LDB tooltip styles sit at TOOLTIP, the strata every tooltip takes, so the menu opened from a row at FULLSCREEN_DIALOG drew under it and was half hidden (owner feedback round 6, R6-10, screenshot 59). The library offers no strata option for `ContextMenu`. | 2026-11-13, owner feedback round 6; owner-accepted 2026-11-13 (round 7, R7-8) | LibKa0s's `ContextMenu` takes a strata (or an opener frame whose strata it sits above) |
@@ -571,9 +571,9 @@ sources, the plan and its status ledger) and `docs/investigations/`. Of these, `
 | standalone-windows (*Title-bar controls*) | A detached block's band and a merged window's band build only their settings mark with `W.HeaderButtons` (`close = false`); their block-header marks (dock, collapse, sort, filter, restore; dock all, collapse all) stay `NS.Chrome.HeaderMark`s, placed inward of the settings mark at the strip's pitch (`HEADER.PAD`, `HEADER.GAP`) by the skin's `S.Header`, not built as the strip's extras. | Those marks carry state the library's `HeaderButton` does not: art cropped to its ink box (round 6, R6-3), the filter's filled badge in its own colors (round 8, R8-2) and the restore mark's own showing; an extra built by the library repaints itself at `icon.tint` on a skin switch, which would undo the badge. Their colors already follow the rule (`icon.tint` at rest, `text.link` hot). | 2026-11-17, AD-86-SM (LibKa0s v1.105.0 adoption, wave B) | `W.HeaderButtons` adopts host-built extras (as it adopts `closeButton`), or carries a badge state. Not yet filed as a LibKa0s issue (review of AD-86-SM, 2026-11-17): the run's lead files it, and this row then cites it |
 | standalone-windows (*Which marks a window owes*, v2.115.0) | A detached block window, a secondary window, carries no close mark in its header: `NS.Detached.BandMarks` builds its band with `close = false` (`modules/Detached.lua:162-163`, called at `modules/Detached.lua:218`), so its marks are the settings mark and the block's own (dock, collapse, sort, filter, restore). | The dock mark is the designed way back: docking returns the block to the main window, which carries the close. A close would hide a block the player never docked back, leaving it out of both windows. | Owner waiver of 2026-11-19 (Ka0sAddonsCommonTasks `docs/2026-11-19-ADOPTION_FEEDBACK/`, its owner rulings; item AF-WVR-SM), named in the bullet's waiver list | A detached window gains state a dock cannot restore, or the standard drops the waiver |
 | standalone-windows (*Which marks a window owes*, v2.115.0) | A merged (group) window, a secondary window, carries no close mark in its header: its band is built through the same `NS.Detached.BandMarks` (`modules/Groups.lua:645`), `close = false`, so its marks are the settings mark, Dock all and Collapse all. | Dock all is the designed way back, as for a detached block: it returns every merged block to the main window, which carries the close. | Owner waiver of 2026-11-19 (Ka0sAddonsCommonTasks `docs/2026-11-19-ADOPTION_FEEDBACK/`, its owner rulings; item AF-WVR-SM), named in the bullet's waiver list | A merged window gains state Dock all cannot restore, or the standard drops the waiver |
-| launcher-§6 | The `toggle` verb shows or hides every family window (`NS.Windows.ToggleAll`: all six hidden while any shows, else all six shown). The launcher's *Show window* entry and the Show window key binding toggle the Professions window, through the handler `/sm professions` runs, so the menu entry, a verb and the key still share one handler; a press while stood down answers the line `toggle` answers. | Owner's round 5 ("Rename /sm toggle to /sm professions. /sm toggle should open all windows."); the key binding stays on Professions (the lead's call), and the launcher menu has room for one Show window row. | 2026-11-26 (owner, round 5, R5-SM-05) | The standard rules on an addon with several primary windows, or the owner asks for the Show window entry or its binding to open every window. |
+| launcher-§6 | The `toggle` verb shows or hides every family window (`NS.Windows.ToggleAll`: all six hidden while any shows, else all six shown). The launcher's *Show window* entry and the Show window key binding toggle the Professions window, through the handler `/cl professions` runs, so the menu entry, a verb and the key still share one handler; a press while stood down answers the line `toggle` answers. | Owner's round 5 ("Rename /cl toggle to /cl professions. /cl toggle should open all windows."); the key binding stays on Professions (the lead's call), and the launcher menu has room for one Show window row. | 2026-11-26 (owner, round 5, R5-SM-05) | The standard rules on an addon with several primary windows, or the owner asks for the Show window entry or its binding to open every window. |
 
-| slash-commands-§8 | `/sm lock` and `/sm unlock` lock the windows only; the waypoint arrow has its own Lock (`waypoints.arrowLock`, on Trainers and Waypoints › Arrow position and in the arrow's right-click menu), which `/sm lock` does not reach. | Owner decision (round 9): the arrow is moved and locked on its own, apart from the windows, and the library widget owns that lock for every consumer. | 2026-11-14 (owner, round 9) | The standard rules on per-widget locks, or the owner asks for `/sm lock` to hold the arrow too. |
+| slash-commands-§8 | `/cl lock` and `/cl unlock` lock the windows only; the waypoint arrow has its own Lock (`waypoints.arrowLock`, on Trainers and Waypoints › Arrow position and in the arrow's right-click menu), which `/cl lock` does not reach. | Owner decision (round 9): the arrow is moved and locked on its own, apart from the windows, and the library widget owns that lock for every consumer. | 2026-11-14 (owner, round 9) | The standard rules on per-widget locks, or the owner asks for `/cl lock` to hold the arrow too. |
 
 ### Files over the 1500-line cap
 

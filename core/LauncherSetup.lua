@@ -63,7 +63,7 @@ NS.Launcher = lib:New({
     toggleWindow   = function() NS.MainWindow.Toggle() end,
 
     -- The host's own row (Launcher minor 11, LibKa0s#81; AD-81-SM): the Journal, after Show window
-    -- and before Open settings, a checkbox ticked while it is open. Its click is `/sm journal`'s own
+    -- and before Open settings, a checkbox ticked while it is open. Its click is `/cl journal`'s own
     -- handler (launcher-§2); gated by default, so it grays while the addon is disabled.
     -- Show window is the Professions window (SMW-04). The other five family windows have no row yet: the
     -- library takes at most two (Launcher minor 11, MAX_EXTRAS), so they wait on a LibKa0s change; their

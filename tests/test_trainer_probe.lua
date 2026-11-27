@@ -164,7 +164,7 @@ test("trainer probe: the provenance file loads and holds each record's confirmat
         { id = "b", name = "Annora", confirmed = false, reason = "place: inside an instance" },
     } }
     local NS = {}
-    local ok, err = IO.sandbox(R.Provenance(run), "prov", {}, "SkillMaster", NS)
+    local ok, err = IO.sandbox(R.Provenance(run), "prov", {}, "CharacterLedger", NS)
     assertTrue(ok, tostring(err))
     assertEqual(NS.DataMeta.Trainers_Forever.verified, "questiedb@0123456789ab")
     assertEqual(NS.TrainerProvenance_Forever.confirmed.a.name, "Tel'Athir")

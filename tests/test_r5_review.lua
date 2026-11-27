@@ -1,5 +1,5 @@
 -- tests/test_r5_review.lua — the independent review of the round 5 addendum A1 branch (R5-SM-08..12; Ka0sAddonsCommonTasks
--- docs/2026-11-26-OWNER_FEEDBACK_ROUND5/A1_SKILLMASTER_MORE.md). Each case pins one confirmed finding (R5-REV).
+-- docs/2026-11-26-OWNER_FEEDBACK_ROUND5/A1_CHARACTERLEDGER_MORE.md). Each case pins one confirmed finding (R5-REV).
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks
 local test, assertEqual, assertTrue = T.test, T.assertEqual, T.assertTrue

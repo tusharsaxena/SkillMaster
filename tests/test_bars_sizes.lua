@@ -41,7 +41,7 @@ end
 
 --- A tooltip whose lines are recording font strings, both sides.
 local function recordingTip()
-    local name = "SkillMasterSizesTip"
+    local name = "CharacterLedgerSizesTip"
     local tip = M.CreateFrame("GameTooltip", name, M.UIParent)
     tip.lines = {}
     function tip:GetName() return name end
@@ -164,7 +164,7 @@ end)
 -- ── schemaVersion 4: the stored detached height goes ────────────────────────────────────────
 
 test("bar sizes: schemaVersion 4 drops a stored bars.compactHeight and keeps the rest", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["Sizes-Custom"] = { bars = { compactHeight = 17, height = 21 } }
     sv.profiles["Sizes-Fresh"] = {}
@@ -206,7 +206,7 @@ end)
 
 test("tooltips: a font size reaches a tooltip's lines and goes back to each line's own font", function()
     -- red under: a size written onto GameTooltip's shared font strings and never put back
-    local name = "SkillMasterFontTip"
+    local name = "CharacterLedgerFontTip"
     local tip = M.CreateFrame("GameTooltip", name, M.UIParent)
     function tip:GetName() return name end
     function tip:NumLines() return 2 end

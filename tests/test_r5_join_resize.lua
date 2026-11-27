@@ -1,5 +1,5 @@
 -- tests/test_r5_join_resize.lua — R5-SM-08 (owner feedback round 5, addendum A1, Ka0sAddonsCommonTasks
--- docs/2026-11-26-OWNER_FEEDBACK_ROUND5/A1_SKILLMASTER_MORE.md): "Detached windows, when joined, are no longer
+-- docs/2026-11-26-OWNER_FEEDBACK_ROUND5/A1_CHARACTERLEDGER_MORE.md): "Detached windows, when joined, are no longer
 -- resizable." A merged window carries the same corner grip as a detached one: it sets the window's column
 -- width (layout.groups[gid].width, inside a block's 200..600 on the same step), the drop point kept, hidden
 -- while locked. Unmerged, each block keeps its own width.
@@ -119,7 +119,7 @@ test("r5 sm-08: a stored column width out of range is clamped, a malformed one d
 end)
 
 test("r5 sm-08: migration 17 cleans a stored group's column width", function()
-    local sv = rawget(_G, "SkillMasterDB")
+    local sv = rawget(_G, "CharacterLedgerDB")
     sv.profiles = sv.profiles or {}
     sv.profiles["R5-Join"] = { layout = {
         blocks = { primary = { docked = false }, other = { docked = false } },

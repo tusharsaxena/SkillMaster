@@ -1,5 +1,5 @@
 -- tests/test_smw_review.lua — the fix pass on the six-windows run's independent review (SMW-REV, item list in
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md): each case pins one finding the review raised and
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md): each case pins one finding the review raised and
 -- the run fixed. Its own small client fixtures, so it leans on no other suite's locals.
 local T = _G.SKM_TEST
 local NS, M = T.NS, T.mocks

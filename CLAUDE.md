@@ -1,4 +1,4 @@
-# CLAUDE.md — Ka0s Skill Master
+# CLAUDE.md — Ka0s Character Ledger
 
 **Ka0s WoW addon.** Adheres to the **Ka0s WoW Addon Standard** —
 https://github.com/tusharsaxena/WowAddonStandards

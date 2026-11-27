@@ -1,5 +1,5 @@
 -- tests/test_currencies.lua — the Currencies window (GitHub issue #7; item SMW-09 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md): CurrencyData's panel headers, capped bars and plain
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md): CurrencyData's panel headers, capped bars and plain
 -- value rows, no gold (the owner's ruling), the expand-read-restore first read, the by-id refresh
 -- CURRENCY_DISPLAY_UPDATE drives, the Journal's session gains, the Alts sub-tab and the optional cap alert.
 local T = _G.SKM_TEST

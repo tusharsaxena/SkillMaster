@@ -29,7 +29,7 @@ NS.OptionsRows = Rows
 -- The two columns' widths: wide enough for their captions over a 16 px eye.
 Rows.COLUMN_W, Rows.LABEL_W = 84, 0.62
 
--- Every hide write, from any actor (the page's eyes, the row menu's Hide, `/sm set`, a header's
+-- Every hide write, from any actor (the page's eyes, the row menu's Hide, `/cl set`, a header's
 -- restore eye), redraws the page: the library renders a page on screen now and marks a hidden one
 -- owed a render for its next show (review, R5-followups: a write from elsewhere left a shown page's
 -- eyes stale). Inside a bracket (a heading's show-all, the page's Defaults) the writes coalesce
@@ -97,7 +97,7 @@ local function setRow(path, desc, onChange)
 end
 
 local WINDOW_DESC = L["Leave this row out of the window and the detached blocks. The row menu's Hide sets it too."]
-local TIP_DESC = L["Leave this row out of the LDB tooltip: a skill out of the Skill Master feed's, a stat out of the Skill Master Stats feed's. The tooltip's row menu's Hide sets it too."]
+local TIP_DESC = L["Leave this row out of the LDB tooltip: a skill out of the Character Ledger feed's, a stat out of the Character Ledger Stats feed's. The tooltip's row menu's Hide sets it too."]
 
 local function pair(rows, group, kind, key, name)
     local winKind, tipKey = kind == "stat" and "stats" or "skills", kind == "stat" and "hiddenStats" or "hiddenSkills"

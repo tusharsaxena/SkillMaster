@@ -1,6 +1,6 @@
 -- tests/test_r5_feedback.lua — the owner's round 5 feedback on the six windows and brokers (items R5-SM-01..07
 -- of Ka0sAddonsCommonTasks docs/2026-11-26-OWNER_FEEDBACK_ROUND5/00_PLAN.md): no hint tooltip on a fold chevron,
--- the whole header row folds, a pin mark on each pinned row, an icon per display broker, `/sm toggle` showing
+-- the whole header row folds, a pin mark on each pinned row, an icon per display broker, `/cl toggle` showing
 -- or hiding every window, no profession listed twice, and a session with every window open raising nothing.
 -- Test mode's sample fills every window and feed, so each case reads no live client state.
 local T = _G.SKM_TEST
@@ -431,7 +431,7 @@ test("r5 sm-04: the six display brokers each draw their own in-game icon; the ad
 end)
 
 -- ---------------------------------------------------------------------------------------------
--- R5-SM-05: `/sm toggle` shows or hides every window; `/sm professions` is the Professions window's
+-- R5-SM-05: `/cl toggle` shows or hides every window; `/cl professions` is the Professions window's
 -- ---------------------------------------------------------------------------------------------
 
 local function shownSet()
@@ -444,7 +444,7 @@ end
 
 local ALL = table.concat(NS.FAMILY_ORDER, ",")
 
-test("r5 sm-05: /sm toggle shows all six windows when none shows, and hides them all when any shows", function()
+test("r5 sm-05: /cl toggle shows all six windows when none shows, and hides them all when any shows", function()
     NS.Windows.HideAll()
     local ok, err = pcall(function()
         NS.Slash:OnSlash("toggle")
@@ -460,11 +460,11 @@ test("r5 sm-05: /sm toggle shows all six windows when none shows, and hides them
     if not ok then error(err, 0) end
 end)
 
-test("r5 sm-05: /sm professions, the Show window entry and its key binding toggle the Professions window alone", function()
+test("r5 sm-05: /cl professions, the Show window entry and its key binding toggle the Professions window alone", function()
     NS.Windows.HideAll()
     local ok, err = pcall(function()
         NS.Slash:OnSlash("professions")
-        assertEqual(shownSet(), "professions", "/sm professions opens Professions alone")
+        assertEqual(shownSet(), "professions", "/cl professions opens Professions alone")
         NS.Slash:OnSlash("professions")
         assertEqual(shownSet(), "", "and closes it")
         local button = NS.MainWindow.__toggleButton
@@ -478,14 +478,14 @@ test("r5 sm-05: /sm professions, the Show window entry and its key binding toggl
     if not ok then error(err, 0) end
 end)
 
-test("r5 sm-05: the help says /sm toggle is every window and /sm professions the Professions window", function()
+test("r5 sm-05: the help says /cl toggle is every window and /cl professions the Professions window", function()
     local desc = {}
     for _, row in ipairs(NS.COMMANDS) do desc[row[1]] = row[2] end
-    assertEqual(desc.toggle, "Show or hide every Skill Master window")
+    assertEqual(desc.toggle, "Show or hide every Character Ledger window")
     assertEqual(desc.professions, "Show or hide the Professions window")
 end)
 
-test("r5 sm-05: /sm toggle under the perf hold opens nothing and says the capture line once", function()
+test("r5 sm-05: /cl toggle under the perf hold opens nothing and says the capture line once", function()
     NS.Windows.HideAll()
     local saved, printed = NS.Print, {}
     local savedRefusal = NS.StoodDownRefusal
@@ -507,7 +507,7 @@ end)
 -- classify / addLearned, tests/test_skilldata.lua); this case pins it end to end on the probe's own list.
 -- ---------------------------------------------------------------------------------------------
 
--- `/sm probe` on WoW Forever, 2026-11-26 (Ka0sAddonsCommonTasks docs/2026-11-26-OWNER_FEEDBACK_ROUND5/inputs/
+-- `/cl probe` on WoW Forever, 2026-11-26 (Ka0sAddonsCommonTasks docs/2026-11-26-OWNER_FEEDBACK_ROUND5/inputs/
 -- SM_PROBE_2026-11-26.md): a Night Elf Hunter's Skills tab in order, each profession as the classic line
 -- (parentSkillLineID 0) and a child line with the parent's ID and the same rank and max; Cooking's child first.
 local PROBE = {
@@ -584,7 +584,7 @@ test("r5 sm-06: the probe's doubled profession lines draw each profession once, 
         end)
         withStyle("classic", function()
             local lines = {}
-            local tip = M.CreateFrame("GameTooltip", "SkillMasterR5ProbeTip", M.UIParent)
+            local tip = M.CreateFrame("GameTooltip", "CharacterLedgerR5ProbeTip", M.UIParent)
             function tip:AddLine(t) lines[#lines + 1] = t end
             function tip:AddDoubleLine(l) lines[#lines + 1] = l end
             function tip:NumLines() return #lines end
@@ -608,8 +608,8 @@ end)
 
 -- ---------------------------------------------------------------------------------------------
 -- R5-SM-07: every window open while playing raises no Lua error. A headless session on the probe's own shapes:
--- `/sm toggle` opens all six, the game's events fire as play sends them, every fold is clicked, every feed
--- hovered in both styles, then `/sm toggle` closes them all. Each step must run without an error.
+-- `/cl toggle` opens all six, the game's events fire as play sends them, every fold is clicked, every feed
+-- hovered in both styles, then `/cl toggle` closes them all. Each step must run without an error.
 -- ---------------------------------------------------------------------------------------------
 
 local statsFx = dofile("tests/fixture_statistics.lua")
@@ -687,7 +687,7 @@ local function installProbeClient()
     }
 end
 
-test("r5 sm-07: all six windows open while playing raise no Lua error, and /sm toggle closes them all", function()
+test("r5 sm-07: all six windows open while playing raise no Lua error, and /cl toggle closes them all", function()
     local saved = { M.GetText, M.UnitSex }
     M.GetText = function(key) return LABELS[tonumber(tostring(key):match("(%d+)$"))] end
     M.UnitSex = function() return 2 end
@@ -726,7 +726,7 @@ test("r5 sm-07: all six windows open while playing raise no Lua error, and /sm t
         end
     end
     local ok, err = pcall(function()
-        run("/sm toggle (open)", NS.Slash.OnSlash, NS.Slash, "toggle")
+        run("/cl toggle (open)", NS.Slash.OnSlash, NS.Slash, "toggle")
         assertEqual(shownSet(), ALL, "every window open")
         fire("PLAYER_ENTERING_WORLD", false, true)
         fire("SKILL_LINES_CHANGED")
@@ -770,7 +770,7 @@ test("r5 sm-07: all six windows open while playing raise no Lua error, and /sm t
         end
         fire("CRITERIA_UPDATE")
         fire("PLAYER_LOGOUT")
-        run("/sm toggle (close)", NS.Slash.OnSlash, NS.Slash, "toggle")
+        run("/cl toggle (close)", NS.Slash.OnSlash, NS.Slash, "toggle")
         assertEqual(shownSet(), "", "every window closed")
     end)
     NS.Windows.HideAll()

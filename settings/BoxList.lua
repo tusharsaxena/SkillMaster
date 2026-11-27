@@ -15,10 +15,10 @@ local addonName, NS = ...
 --   the text as a section heading, else the line is the column captions' own.
 -- NS.OptionsList.Cancel(ctx)                        before anything is drawn (the page's beforeRender)
 --
--- The row's name and icon are one AceGUI widget of this addon's own ("SkillMasterListLabel": a fixed
+-- The row's name and icon are one AceGUI widget of this addon's own ("CharacterLedgerListLabel": a fixed
 -- row-high frame, the icon and the text centered on it), because AceGUI's Label hangs its text from
 -- the top of a row and Flow gives a row no vertical alignment. A header's text is one of two more
--- ("SkillMasterListHeading", a section heading; "SkillMasterListCaption", a column's caption,
+-- ("CharacterLedgerListHeading", a section heading; "CharacterLedgerListCaption", a column's caption,
 -- centered over it). Nothing is drawn on AceGUI's pooled frames: the box and the handle are the
 -- library's, given back by Cancel.
 
@@ -32,8 +32,8 @@ List.STRIDE = List.ROW_H + List.ROW_GAP
 List.ACTION_W, List.LEAD_W, List.HANDLE_W_FALLBACK = 32, 8, 30
 List.ICON = 18
 
-local WIDGET, WIDGET_VERSION = "SkillMasterListLabel", 1
-local HEADING, CAPTION, TEXT_VERSION = "SkillMasterListHeading", "SkillMasterListCaption", 1
+local WIDGET, WIDGET_VERSION = "CharacterLedgerListLabel", 1
+local HEADING, CAPTION, TEXT_VERSION = "CharacterLedgerListHeading", "CharacterLedgerListCaption", 1
 
 local function aceGUI() return NS.AceGUI or (LibStub and LibStub("AceGUI-3.0", true)) end
 
@@ -225,7 +225,7 @@ function List.Row(scroll, list, spec)
     local label = AceGUI:Create(WIDGET)
     label:SetText(spec.text)
     label:SetImage(spec.icon)
-    local muted = spec.dimmed and NS.SkinColor("sm.muted")
+    local muted = spec.dimmed and NS.SkinColor("cl.muted")
     if muted then label:SetColor(muted[1], muted[2], muted[3]) end
     local actions = spec.actions or {}
     label:SetRelativeWidth(List.LabelWidth(list, #actions))

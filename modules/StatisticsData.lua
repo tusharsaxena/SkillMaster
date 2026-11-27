@@ -1,6 +1,6 @@
 local _, NS = ...
 -- modules/StatisticsData.lua — the Statistics model (item SMW-10 of
--- docs/superpowers/plans/2026-11-26-skillmaster-windows.md, the spec's "Statistics (new)"): the character
+-- docs/superpowers/plans/2026-11-26-characterledger-windows.md, the spec's "Statistics (new)"): the character
 -- panel's Statistics tab (counters such as Times camped, nested as Character > Wealth), never "stats" (those
 -- are Character Stats, modules/StatData.lua). It reads the client through NS.Compat (Forever's
 -- GetStatistic(categoryID, index) -> quantity, skip, statID) and announces STATISTICS_UPDATED.

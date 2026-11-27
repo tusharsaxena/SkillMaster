@@ -206,7 +206,7 @@ end
 
 --- Make the overlay for `key` of kind `want.kind` (out of combat only: the caller checked).
 local function make(key, want)
-    local name = (want.kind == "char" and "SkillMasterPanel_" or "SkillMasterCraft_") .. tostring(key):gsub("%W", "_")
+    local name = (want.kind == "char" and "CharacterLedgerPanel_" or "CharacterLedgerCraft_") .. tostring(key):gsub("%W", "_")
     local b = CreateFrame("Button", name, UIParent, "SecureActionButtonTemplate")
     b:SetFrameStrata(LAYERS.STRATA.WINDOW)
     b:RegisterForClicks("AnyUp", "AnyDown")
@@ -335,7 +335,7 @@ local function rect(f)
     return ("%.0f,%.0f %.0fx%.0f"):format(l, t, w, h)
 end
 
---- One line on `key`'s overlay against `row` (the click debug, /sm debug): whether it exists, is
+--- One line on `key`'s overlay against `row` (the click debug, /cl debug): whether it exists, is
 --- shown, sits over the row and above it. A click that reaches the plain row logs this.
 function SO.Describe(key, row)
     local b = overlays[key]

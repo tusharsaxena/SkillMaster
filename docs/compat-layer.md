@@ -1,4 +1,4 @@
-# Compat layer — Ka0s Skill Master
+# Compat layer — Ka0s Character Ledger
 
 `core/Compat.lua` is the compat family's root and only file (compat). It owns every
 version-variant client call the addon makes, normalizes the return shape, and decides nothing
@@ -28,7 +28,7 @@ unnormalized return shape the owner sends back, so it is the one reader outside 
 | `Compat.TomTom()` | `C_AddOns.IsAddOnLoaded("TomTom")`, then the `TomTom` global and its `AddWaypoint` | the real TomTom addon's table, told by its folder name so another addon answering TomTom's API is ignored (round 7, R7-7), or nil; the bare `IsAddOnLoaded` is never called (AF-SM-TOMTOM) |
 | `Compat.ClassIcon(classFile)` | `C_Texture.GetAtlasInfo("classicon-<class>")`, then `CLASS_ICON_TCOORDS` on `Interface\GLUES\CHARACTERCREATE\UI-CHARACTERCREATE-CLASSES` | `{ atlas }` where the client carries the atlas, else `{ file, coords }`, else `nil` (the summary line hides the icon). Pure: it reads no character, so the simulator passes it through |
 | `Compat.OpenTradeSkill(skillLineID)` | `C_TradeSkillUI.OpenTradeSkill` under pcall | Opens a profession's window by its skill line; `true` when the client took the call and did not answer `false`, `false` without the API. Unverified on WoW Forever |
-| `Compat.SelectSkillLine(i)` | `Compat.SKILL_SELECTORS` (`C_SkillInfo.SetSelectedSkill`, then `SetSelectedSkill`), first that exists, then `SkillFrame_SetSelection` / `SkillFrame_UpdateSkills` | Selects line `i` in Character -> Skills and lets the frame redraw; answers the name of the call that ran, or `nil`. Which selector Forever answers is unverified (`/sm probe` lists them) |
+| `Compat.SelectSkillLine(i)` | `Compat.SKILL_SELECTORS` (`C_SkillInfo.SetSelectedSkill`, then `SetSelectedSkill`), first that exists, then `SkillFrame_SetSelection` / `SkillFrame_UpdateSkills` | Selects line `i` in Character -> Skills and lets the frame redraw; answers the name of the call that ran, or `nil`. Which selector Forever answers is unverified (`/cl probe` lists them) |
 | `Compat.RefreshSkillsTab()` | Forever's `SkillsFrame`, `CharacterFrame`'s right pane and `EventRegistry` | Opens the collapsed detail pane, fires `SkillsFrame.NewSkillLineSelected` and refreshes each entry's highlight after a selection made outside the tab; `false` on a client without `SkillsFrame` |
 | `Compat.TradeSkillLink(names)` | `C_SpellBook.GetSpellBookItemTradeSkillLink` by slot, with `GetNumSpellBookSkillLines` / `GetSpellBookSkillLineInfo` / `GetSpellBookItemName` | The trade link of the first spellbook spell named one of `names`, scanning past the skill lines' end until `Compat.PAST_LINES` (8) empty slots in a row, stopping at `Compat.MAX_BOOK_SLOT` (1000); `nil` when none is found or without the API |
 
@@ -46,7 +46,7 @@ never through a captured local, and `tests/test_sim.lua` asserts `seam:Unwrapped
 
 The kit's Forever API set (`tests/_kit/client_globals_forever.lua`) lists the skill list as
 `C_SkillInfo.*` and none of the 1.12 globals. That set is best-effort, not a measurement, so the
-1.12 rung is not dead code under compat's dead-fallback-rung rule until `/sm probe` answers
+1.12 rung is not dead code under compat's dead-fallback-rung rule until `/cl probe` answers
 (`docs/forever-quirks.md`, the addon's assumed-API table). When the probe confirms which API the
 client carries, delete the rung it rules out.
 

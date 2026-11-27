@@ -1,11 +1,11 @@
 local addonName, NS = ...
 -- modules/Broker.lua — the broker data feeds (design §6.7, plan Task 4.1; feedback round 2, FB-12; owner
--- feedback round 6, R6-9; item SMW-05 of docs/superpowers/plans/2026-11-26-skillmaster-windows.md): one
+-- feedback round 6, R6-9; item SMW-05 of docs/superpowers/plans/2026-11-26-characterledger-windows.md): one
 -- LibDataBroker-1.1 "data source" per family of defaults/Families.lua, built from the registry. "Skill
 -- Master Stats" (Character Stats, relabeled) keeps its name, so a display's placement stays; the
--- Professions feed, "Skill Master" until owner feedback round 7 (R7-SM-02), is "Skill Master Professions",
--- named for its family as the rest are; "Skill Master Skills", "Skill Master Currencies", "Skill Master Reputations"
--- and "Skill Master Statistics" are new. Each feed's text is its own template (broker.feeds.<family>.template,
+-- Professions feed, "Character Ledger" until owner feedback round 7 (R7-SM-02), is "Character Ledger Professions",
+-- named for its family as the rest are; "Character Ledger Skills", "Character Ledger Currencies", "Character Ledger Reputations"
+-- and "Character Ledger Statistics" are new. Each feed's text is its own template (broker.feeds.<family>.template,
 -- modules/Template.lua), a skill feed's flashed on a skill-up of its family; its tooltip's sections are its
 -- family's blocks, each with its own switch (broker.tooltip.sections.<block id>), and each skill and stat
 -- its own tooltip Hide (profile.broker.tooltip), apart from the windows' skills.hidden / stats.hidden.
@@ -67,7 +67,7 @@ local HIDE_POLL = 0.1          -- seconds between the tooltip's leave checks
 -- ---------------------------------------------------------------------------------------------
 -- The feeds, one per family (SMW-05). `name` is the LibDataBroker name (a key display addons store
 -- placements under, so never localized and never changed once shipped; the launcher object is the
--- addon's folder name, "SkillMaster"), `label` what a display draws, `title` the tooltip's (its window's
+-- addon's folder name, "CharacterLedger"), `label` what a display draws, `title` the tooltip's (its window's
 -- title, both styles; R7-5), `sections` its family's blocks, `short` the text an unpinned feed shows.
 -- ---------------------------------------------------------------------------------------------
 
@@ -93,7 +93,7 @@ function B.SetFeed(which)
 end
 
 -- The owned tooltip frame's global name (its TextLeftN lines are found by it, as GameTooltip's are).
-B.TIP_NAME = "SkillMasterBrokerTooltip"
+B.TIP_NAME = "CharacterLedgerBrokerTooltip"
 
 -- The settings page the feed's right-click opens (the Broker page's registration key). The library
 -- opens the main panel when no page of that key is built.

@@ -39,38 +39,38 @@ if #NS.SKIN_OPTIONS == 0 then NS.SKIN_OPTIONS[1] = { value = DEFAULT, text = NS.
 -- This addon's own tokens. The skill bars (T3.1) read them; each follows a library token so every
 -- skin dresses them without knowing this addon.
 NS.SKIN_OWNER_TOKENS = {
-    ["sm.barFill"]   = { default = { 0.27, 0.59, 0.90, 1 }, follow = "bar.fill" },
-    ["sm.barBg"]     = { default = { 0.19, 0.20, 0.25, 0.9 }, follow = "bar.bg" },
+    ["cl.barFill"]   = { default = { 0.27, 0.59, 0.90, 1 }, follow = "bar.fill" },
+    ["cl.barBg"]     = { default = { 0.19, 0.20, 0.25, 0.9 }, follow = "bar.bg" },
     -- The category and bonus colors while Bars > Colors follows the skin (bars.colors.fromSkin,
     -- on by default, skinning-§6). Each is the approved mockup's color and follows no library
     -- token, so the categories stay apart under every skin; a skin may still state its own through
     -- the token's `skins`. The player's picks (defaults/Profile.lua, bars.colors) draw while the
     -- companion is off.
-    ["sm.cat.primary"]   = { default = { 0.357, 0.608, 0.878, 1 } },   -- #5b9be0
-    ["sm.cat.secondary"] = { default = { 0.373, 0.702, 0.427, 1 } },   -- #5fb36d
-    ["sm.cat.weapon"]    = { default = { 0.851, 0.569, 0.247, 1 } },   -- #d9913f
-    ["sm.cat.other"]     = { default = { 0.627, 0.549, 0.878, 1 } },   -- #a08ce0
-    ["sm.cat.stats"]     = { default = { 0.788, 0.627, 0.478, 1 } },   -- #c9a07a
-    ["sm.bonusTemp"]     = { default = { 0.498, 0.847, 0.769, 1 } },   -- #7fd8c4
-    ["sm.bonusPerm"]     = { default = { 0.553, 0.722, 1, 1 } },       -- #8db8ff
+    ["cl.cat.primary"]   = { default = { 0.357, 0.608, 0.878, 1 } },   -- #5b9be0
+    ["cl.cat.secondary"] = { default = { 0.373, 0.702, 0.427, 1 } },   -- #5fb36d
+    ["cl.cat.weapon"]    = { default = { 0.851, 0.569, 0.247, 1 } },   -- #d9913f
+    ["cl.cat.other"]     = { default = { 0.627, 0.549, 0.878, 1 } },   -- #a08ce0
+    ["cl.cat.stats"]     = { default = { 0.788, 0.627, 0.478, 1 } },   -- #c9a07a
+    ["cl.bonusTemp"]     = { default = { 0.498, 0.847, 0.769, 1 } },   -- #7fd8c4
+    ["cl.bonusPerm"]     = { default = { 0.553, 0.722, 1, 1 } },       -- #8db8ff
     -- The Journal Log's Type column and its filter menu (R6-SM-03, owner feedback round 6: "Give every type a
     -- unique color"). Like the categories they follow no library token, so the three stay apart under every
     -- skin. Picked clear of the reputation standing ramp (red, orange, yellow, green: Compat.FactionBarColor)
     -- and of the green and red a gain or loss reads as, and of the menu's gold selection: a sky blue for a
     -- skill-up, an orchid for a reputation, a teal for a currency. Each is bright on the dark window.
-    ["sm.type.skill"]      = { default = { 0.435, 0.659, 0.941, 1 } },   -- #6fa8f0
-    ["sm.type.reputation"] = { default = { 0.753, 0.549, 0.910, 1 } },   -- #c08ce8
-    ["sm.type.currency"]   = { default = { 0.361, 0.839, 0.753, 1 } },   -- #5cd6c0
+    ["cl.type.skill"]      = { default = { 0.435, 0.659, 0.941, 1 } },   -- #6fa8f0
+    ["cl.type.reputation"] = { default = { 0.753, 0.549, 0.910, 1 } },   -- #c08ce8
+    ["cl.type.currency"]   = { default = { 0.361, 0.839, 0.753, 1 } },   -- #5cd6c0
     -- T3.1 the bar's edges, threshold markers, spark and text; the row's timer, icon
     -- well and the unlearned row's muted line: what every skin draws.
-    ["sm.barBorder"] = { default = { 0.24, 0.22, 0.20, 1 }, follow = "bar.border" },
-    ["sm.marker"]    = { default = { 0.95, 0.70, 0.24, 1 }, follow = "hud.label" },
-    ["sm.spark"]     = { default = { 1, 1, 1, 0.6 }, follow = "hud.text" },
-    ["sm.barText"]   = { default = { 1, 1, 1, 1 }, follow = "hud.text" },
-    ["sm.timer"]     = { default = { 0.50, 0.85, 0.77, 1 }, follow = "sem.info" },
-    ["sm.iconBg"]    = { default = { 0.04, 0.035, 0.03, 1 }, follow = "card.bg" },
-    ["sm.muted"]     = { default = { 0.64, 0.62, 0.59, 1 }, follow = "text.muted" },
-    ["sm.headerBg"]  = { default = { 0, 0, 0, 0.35 }, follow = "list.header.bg" },
+    ["cl.barBorder"] = { default = { 0.24, 0.22, 0.20, 1 }, follow = "bar.border" },
+    ["cl.marker"]    = { default = { 0.95, 0.70, 0.24, 1 }, follow = "hud.label" },
+    ["cl.spark"]     = { default = { 1, 1, 1, 0.6 }, follow = "hud.text" },
+    ["cl.barText"]   = { default = { 1, 1, 1, 1 }, follow = "hud.text" },
+    ["cl.timer"]     = { default = { 0.50, 0.85, 0.77, 1 }, follow = "sem.info" },
+    ["cl.iconBg"]    = { default = { 0.04, 0.035, 0.03, 1 }, follow = "card.bg" },
+    ["cl.muted"]     = { default = { 0.64, 0.62, 0.59, 1 }, follow = "text.muted" },
+    ["cl.headerBg"]  = { default = { 0, 0, 0, 0.35 }, follow = "list.header.bg" },
 }
 
 --- A token's color as { r, g, b, a }: the skin's, else the owner token's own default, so a
@@ -198,7 +198,7 @@ function NS.RunSkinVerb()
         why = "absent"
     end
     if win == nil and why == "absent" then
-        NS.Print(NS.L["%s is unavailable: the LibKa0s library did not load."]:format("/sm skin"))
+        NS.Print(NS.L["%s is unavailable: the LibKa0s library did not load."]:format("/cl skin"))
     end
     return win, why
 end

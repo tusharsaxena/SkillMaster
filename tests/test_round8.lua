@@ -578,7 +578,7 @@ end)
 -- ── R8-5: the waypoint arrow on LibKa0s-WaypointArrow-1.0 ────────────────────────────────────
 
 local WA8, Wp8 = NS.WaypointArrow, NS.Waypoints
-local ARROW_MEDIA = "Interface\\AddOns\\SkillMaster\\libs\\LibKa0s\\media\\waypoint\\"
+local ARROW_MEDIA = "Interface\\AddOns\\CharacterLedger\\libs\\LibKa0s\\media\\waypoint\\"
 
 local function close(a, b) return type(a) == "number" and type(b) == "number" and math.abs(a - b) < 1e-3 end
 
@@ -644,7 +644,7 @@ test("round8 arrow: the profile's arrow defaults are the library's, Raised and t
     end
 end)
 
-test("round8 arrow: the Waypoint arrow subgroup is the library's settings block at Skill Master's paths", function()
+test("round8 arrow: the Waypoint arrow subgroup is the library's settings block at Character Ledger's paths", function()
     local want = {
         { "waypoints.arrowStyle", "string" }, { "waypoints.arrowSkinColors", "bool" },
         { "waypoints.arrowFar", "color" }, { "waypoints.arrowNear", "color" }, { "waypoints.arrowScale", "number" },
@@ -652,7 +652,7 @@ test("round8 arrow: the Waypoint arrow subgroup is the library's settings block 
     local at = {}
     for i, row in ipairs(NS.Schema) do at[row.path] = { row = row, i = i } end
     local show = at["waypoints.arrow"]
-    assertTrue(show ~= nil and show.row.subgroup == NS.L["Waypoint arrow"], "Show Skill Master's arrow heads the subgroup")
+    assertTrue(show ~= nil and show.row.subgroup == NS.L["Waypoint arrow"], "Show Character Ledger's arrow heads the subgroup")
     for n, w in ipairs(want) do
         local hit = at[w[1]]
         assertTrue(hit ~= nil, w[1] .. " is a schema row")
@@ -666,7 +666,7 @@ test("round8 arrow: the Waypoint arrow subgroup is the library's settings block 
     local values = {}
     for _, v in ipairs(style.values) do values[#values + 1] = v.value end
     assertEqual(table.concat(values, ","), "flat,ridge,raised,faceted,ground", "the five looks")
-    assertEqual(style.values[5].text, NS.L["On the ground"], "named through Skill Master's locale")
+    assertEqual(style.values[5].text, NS.L["On the ground"], "named through Character Ledger's locale")
     assertEqual(at["waypoints.arrowFar"].row.disabledIf, "waypoints.arrowSkinColors", "grayed while the skin's are drawn")
     assertEqual(at["waypoints.arrowNear"].row.disabledIf, "waypoints.arrowSkinColors")
     local scale = at["waypoints.arrowScale"].row
@@ -736,7 +736,7 @@ test("round8 arrow: a profile switch re-applies the arrow's look", function()
     end)
 end)
 
-test("round8 arrow: the library carries every look's art; Skill Master's own copy is gone", function()
+test("round8 arrow: the library carries every look's art; Character Ledger's own copy is gone", function()
     for _, name in ipairs({ "arrow-fill", "flat-overlay", "ridge-overlay", "raised-overlay", "raised-shadow",
                             "faceted-overlay", "ground-body", "ground-overlay" }) do
         local fh = io.open("libs/LibKa0s/media/waypoint/" .. name .. ".tga", "rb")
