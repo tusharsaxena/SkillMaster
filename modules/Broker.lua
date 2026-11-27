@@ -2,8 +2,9 @@ local addonName, NS = ...
 -- modules/Broker.lua — the broker data feeds (design §6.7, plan Task 4.1; feedback round 2, FB-12; owner
 -- feedback round 6, R6-9; item SMW-05 of docs/superpowers/plans/2026-11-26-skillmaster-windows.md): one
 -- LibDataBroker-1.1 "data source" per family of defaults/Families.lua, built from the registry. "Skill
--- Master" (Professions) and "Skill Master Stats" (Character Stats, relabeled) keep their names, so a
--- display's placements stay; "Skill Master Skills", "Skill Master Currencies", "Skill Master Reputations"
+-- Master Stats" (Character Stats, relabeled) keeps its name, so a display's placement stays; the
+-- Professions feed, "Skill Master" until owner feedback round 7 (R7-SM-02), is "Skill Master Professions",
+-- named for its family as the rest are; "Skill Master Skills", "Skill Master Currencies", "Skill Master Reputations"
 -- and "Skill Master Statistics" are new. Each feed's text is its own template (broker.feeds.<family>.template,
 -- modules/Template.lua), a skill feed's flashed on a skill-up of its family; its tooltip's sections are its
 -- family's blocks, each with its own switch (broker.tooltip.sections.<block id>), and each skill and stat

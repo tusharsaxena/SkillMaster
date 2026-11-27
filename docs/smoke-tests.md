@@ -1454,3 +1454,9 @@ none is passed until you say so.
   its bar. Reputations: Standing, Progress and the bar in the standing's color, no This session line. Your current
   character's column shows the same kind of tooltip from its snapshot. Each tooltip stands beside the Journal.
   Result:
+
+- **SM-R7-1** (new, R7-SM-02) After `/reload`, open your broker display's list of feeds (Titan Panel's or
+  ChocolateBar's menu): the Professions feed reads **Skill Master Professions**, with the blacksmithing icon, beside
+  Skill Master Skills, Stats, Currencies, Reputations and Statistics; no plain "Skill Master" feed is left. A cell you
+  had placed for the old "Skill Master" feed is gone: add Skill Master Professions where you want it, and its text,
+  tooltip and pins are the same as before. Result:

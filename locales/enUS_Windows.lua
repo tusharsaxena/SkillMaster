@@ -13,6 +13,7 @@ L["Skill Master \194\183 Reputations"] = true
 L["Skill Master \194\183 Statistics"] = true
 L["Skill Master Skills"] = true
 L["Skill Master Character Stats"] = true
+L["Skill Master Professions"] = true
 L["Skill Master Currencies"] = true
 L["Skill Master Reputations"] = true
 L["Skill Master Statistics"] = true

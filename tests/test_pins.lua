@@ -203,7 +203,7 @@ test("pins: the Broker page's Pins tab lists each broker's pins, moves and unpin
         local model = NS.OptionsBrokerPins.Model()
         assertEqual(#model, #NS.FAMILY_ORDER, "one list per broker")
         assertEqual(model[1].family, "professions")
-        assertEqual(model[1].title, "Skill Master", "named as the display names the feed")
+        assertEqual(model[1].title, "Skill Master Professions", "named as the display names the feed")
         local p = model[1].pins
         assertEqual(p[1].label, "Mining")
         assertTrue(p[1].first and not p[1].last and p[2].last, "the ends cannot move past themselves")

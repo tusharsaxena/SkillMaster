@@ -136,15 +136,15 @@ test("broker: the footer reads as the mockup; a right-click opens the Broker set
     local savedOpen, savedNS = H.OpenOptionsPanel, NS.OpenOptionsPanel
     rawset(H, "OpenOptionsPanel", function(page) opened[#opened + 1] = tostring(page) return true end)
     NS.OpenOptionsPanel = function() opened[#opened + 1] = "main" end
-    M.__ldbObjects["Skill Master"].OnClick(nil, "RightButton")
+    M.__ldbObjects["Skill Master Professions"].OnClick(nil, "RightButton")
     assertEqual(table.concat(opened, ","), "broker", "the Broker page, by its page key")
 
     -- No page opener (the library absent): the main panel; no opener at all: nothing, no error.
     rawset(H, "OpenOptionsPanel", nil)
-    M.__ldbObjects["Skill Master"].OnClick(nil, "RightButton")
+    M.__ldbObjects["Skill Master Professions"].OnClick(nil, "RightButton")
     assertEqual(table.concat(opened, ","), "broker,main")
     NS.OpenOptionsPanel = nil
-    M.__ldbObjects["Skill Master"].OnClick(nil, "RightButton")
+    M.__ldbObjects["Skill Master Professions"].OnClick(nil, "RightButton")
     rawset(H, "OpenOptionsPanel", savedOpen)
     NS.OpenOptionsPanel = savedNS
     assertEqual(B.SETTINGS_PAGE, "broker")

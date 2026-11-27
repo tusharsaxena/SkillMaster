@@ -26,7 +26,7 @@ test("families: the split and the kept broker names (the spec's calls)", functio
     assertEqual(table.concat(F.professions.blocks, ","), "primary,secondary")
     assertEqual(table.concat(F.skills.blocks, ","), "weapon,other")
     assertEqual(table.concat(F.stats.blocks, ","), "stats_base,stats_spell,stats_defense,stats_utility")
-    assertEqual(F.professions.feed.name, "Skill Master", "a display stores the Professions feed by this name")
+    assertEqual(F.professions.feed.name, "Skill Master Professions", "a display stores the Professions feed by this name")
     assertEqual(F.stats.feed.name, "Skill Master Stats", "and Character Stats by this one")
     assertEqual(F.stats.title, "Skill Master \194\183 Character Stats")
     assertEqual(F.statistics.title, "Skill Master \194\183 Statistics", "Statistics is never called stats")
