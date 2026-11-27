@@ -66,12 +66,20 @@ end
 -- tests/test_trainers.lua refuses.
 local PROV = NS.TrainerProvenance_Forever or { confirmed = {}, unverified = {} }
 local META = NS.DataMeta and NS.DataMeta.Trainers_Forever
+-- The seeds run's ForeverDB evidence (defaults/TrainerEvidence_Forever.lua, GitHub issue #10): the
+-- owner's ruling of 2026-11-27 validates the trainers from the sources, not in game, so a record the
+-- probe could not confirm (round 2's Forever-only hold, the Neutral sides, Annora's instance point) is
+-- verified when ForeverDB confirms its NPC, name, spot and side, or a `keep` ruling settles the one
+-- field it disagrees on. Its probe reason stays readable as `probe`.
+local EVIDENCE = NS.TrainerEvidence_Forever or { confirmed = {} }
 
 local function add(rec)
     rec.id = rec.id or slug(rec.name)
     rec.source = rec.source .. SRC_PROBE
     if PROV.confirmed[rec.id] and META and META.verified then
         rec.verified = META.verified
+    elseif EVIDENCE.confirmed[rec.id] and EVIDENCE.tag then
+        rec.verified, rec.probe = EVIDENCE.tag, PROV.unverified[rec.id]
     else
         rec.verified, rec.unverified = false, PROV.unverified[rec.id]
     end
@@ -300,7 +308,7 @@ for _, r in ipairs({
     { "Velma Warnam", "Horde", "Scourge", "Brill", "Tirisfal Glades", 1420, 4773, 60.1, 52.6 },
 }) do
     add{ name = r[1], faction = r[2], race = r[3], city = r[4], mapName = r[5], mapID = r[6],
-         npcID = r[7], x = r[8], y = r[9], cost = 900000, teaches = { "riding" }, ranks = { 75, 150 }, source = SRC_RECALL }
+         npcID = r[7], x = r[8], y = r[9], cost = 1000000, teaches = { "riding" }, ranks = { 75, 150 }, source = SRC_RECALL }
 end
 
 -- The Forever-only trainers (round 2; the owner, 2026-11-23: "Go ahead and ship these 55 forever only
@@ -382,8 +390,8 @@ end
 -- Velma Warnam's spot) and Genn Fairweather (Stablemaster and Riding Trainer, Zephras Isle, both sides,
 -- Apprentice riding per Method.gg's Forever guide; no race: QuestieDB names none).
 add{ name = "Shari Stilwell", faction = "Horde", race = "Scourge", city = "Tirisfal Glades", mapName = "Tirisfal Glades",
-     mapID = 1420, npcID = 246152, x = 60.2, y = 52.7, cost = 900000, teaches = { "riding" }, ranks = { 75, 150 },
+     mapID = 1420, npcID = 246152, x = 60.2, y = 52.7, cost = 1000000, teaches = { "riding" }, ranks = { 75, 150 },
      hold = FOREVER_ONLY, source = SRC_FOREVER }
 add{ name = "Genn Fairweather", faction = "Neutral", city = "Zephras Isle", mapName = "Zephras Isle", mapID = 2521,
-     npcID = 265756, x = 53.8, y = 81.3, cost = 900000, teaches = { "riding" }, ranks = { 75 },
+     npcID = 265756, x = 53.8, y = 81.3, cost = 1000000, teaches = { "riding" }, ranks = { 75 },
      hold = FOREVER_ONLY, source = SRC_FOREVER }

@@ -254,10 +254,10 @@ below on both clients.
 | `C_TooltipInfo.GetInventoryItem("player", slot)` (fallback: a hidden `GameTooltip` and `SetInventoryItem`) | `{ lines = { { leftText }, ... } }` | listed (inherited from live); shape assumed | Bonuses (item and enchant scan, T2.2) |
 | Item and lure tooltip text | `Equip: Increased <Skill> +N.`, `+N <Skill>`, and a lure as `<Name> (+N <Skill> Skill) (M min)` on the main hand (enUS) | assumed (1.12); the lure line's wording is a guess until the probe | Bonuses' locale patterns |
 | `C_UnitAuras.GetBuffDataByIndex` + `C_TooltipInfo.GetUnitBuffByAuraInstanceID` | aura data with `name`, `auraInstanceID`, `expirationTime` (GetTime seconds, 0 = none); tooltip lines as above | shape assumed; the read **measured** to raise when auras are secret (build 70862) | Bonuses (skill buffs) |
-| Racial weapon bonuses in `modifier` | the +5 racials are part of the skill line's modifier | assumed (1.12) | Bonuses (a racial the modifier lacks shows as a negative Other) |
-| `UnitResistance(unit, school)` | `base, total, bonus, minus` | listed by the kit's Forever set; shape assumed (1.12) | StatData (T2.3) |
+| Racial weapon bonuses in `modifier` | **none on Forever**: no racial adds weapon skill | **sourced** (DB2 wowf 1.60.1.71139, issue #10) | Bonuses (`Racials_Forever.byRace` is empty) |
+| `UnitResistance(unit, school)` | `base, real, effective, bonus`; the paper doll shows the 3rd | **sourced** (Forever API docs, UnitDocumentation:3014; Camelot/PaperDollFrame.lua:718, 71139) | StatData (T2.3) |
 | `GetCritChance()`, `GetRangedCritChance()`, `GetDodgeChance()`, `GetParryChance()`, `GetBlockChance()` | a percentage | assumed (1.12) | StatData |
-| `GetHitModifier()` | hit % from gear | assumed (1.12) | StatData |
+| `GetHitModifier()` (and Ranged, Spell) | hit % from gear; the paper doll adds `GetCombatRatingBonus(CR_HIT_*)` | **sourced** (Camelot/PaperDollFrameStats.lua:524-527, 71139) | StatData (`calc = "hit"`) |
 | `GetSpellHitModifier()`, `GetSpellBonusDamage(school)`, `GetSpellCritChance(school)` | spell hit %, bonus damage, crit % | listed (inherited from live); shape assumed | StatData |
 | `GetCombatRating(id)` | a rating | listed (inherited from live); meaning on Forever unknown | StatData (left out unless it answers) |
 | `GetUnitSpeed(unit)` | `current, run, flight, swim` in yards/s (7 = 100%) | listed (inherited from live); shape assumed | StatData (run speed) |
@@ -335,6 +335,30 @@ What the build does with them (SMW-08..10), so a probe result that differs says 
   separators, 0 or none as `--`). `CRITERIA_UPDATE` is registered only while the Statistics show or one is pinned,
   debounced to one re-read a second. If the probe shows the one-argument form is the one that works
   (`statistics.retailForm`), `NS.Compat.Statistic` is the one place to change.
+
+### Forever is not vanilla 1.12 in its data (sourced, GitHub issue #10, 2026-11-27)
+
+Every Forever data table was validated from the sources (the owner's ruling: no in-game checks):
+WoW Forever's DB2 (wago.tools wowf 1.60.1.71139), ForeverDB v2026.11.27.57, Blizzard's Forever UI
+(wow-ui-source branch forever, 71139), the 1.12 server data (cMaNGOS) for what no Forever source
+holds, and the Forever guides. Where Forever departs from 1.12:
+
+- **No racial weapon-skill bonus.** Sword and Axe Specialization (20597, 20574) are now Ruthless
+  and Savage (+1% crit); Mace, Gun, Bow and Throwing Specialization are gone from SpellName.
+- **Rogues learn Axes and Druids Polearms** (SkillLineAbility 248 and 2928; SkillRaceClassInfo
+  629/630 and 2483, polearms from level 20).
+- **Riding costs 100g (75) and 1000g (150)**, at 40 and 60 (method.gg, games.gg).
+- **Cooking, First Aid and Fishing**: Expert from a book (Cooking and First Aid at level 0, Fishing
+  at 20), Artisan from a quest at skill 225, with no fee.
+- **The spell raid-boss miss is 17%** (the client's string and Camelot/PaperDollFrameStats.lua's
+  table; 1.12's 16 came from its 99% spell cap).
+- **Child profession lines** 2937-2948 mirror the classic ones with their own rank spells.
+- **The client holds no rank costs** (no SkillTiers on 71139): `Ranks_Forever` keeps 1.12's fees as
+  `unsourced`.
+
+*Do:* re-run the checks (`/dev-copilot:validate-seeds SkillMaster forever`, then
+`tools/seeds/seeds.py evidence`) on a new build. *Source:* the SM10 commits and
+`docs/seed-research/2026-11-27-forever/`.
 
 ### Trainer NPCs are not client data (offline probe, 2026-11-23)
 

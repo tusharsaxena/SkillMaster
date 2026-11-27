@@ -3,20 +3,26 @@ local _, NS = ...
 -- cast with no "your fish got away" is level + 95 (modules/Helpers.lua's FishingNeed), so a level of
 -- -70 is 25 skill, -20 is 75, 55 is 150, 130 is 225, 205 is 300 and 330 is 425.
 --
--- Unverified until the owner's smoke pass. Rows: { zone (enUS, localized through NS.L), uiMapID
--- (the Classic map IDs, used first when C_Map answers), level }.
+-- Validated for GitHub issue #10 (the owner, 2026-11-27: from the sources, not in game): every level
+-- is the 1.12 server's skill_fishing_base_level (cMaNGOS classic-db, commit 64adf9f6), and the
+-- getaway margin its formula, chance = skill - zone level + 5 on a 1..100 roll (mangos-classic
+-- GameObject.cpp, commit 1eefb7cc). The capitals are -20 (75 skill), not -70 as first recalled.
+-- Forever has no first-party fishing level (no DB2 column; ForeverDB's `fish` is empty), and the
+-- ForeverFishing addon's own zone tiers agree with every row it lists (compared, nothing copied).
+-- Rows: { zone (enUS, localized through NS.L), uiMapID (the Classic map IDs, used first when C_Map
+-- answers), level }.
 
 local L = NS.L
 
 NS.Fishing_Forever = {
-    verified = false,
-    source = "vanilla 1.12 data (zone fishing levels, recalled, not cross-checked)",
+    verified = "cmangos-classic@64adf9f6",
+    source = "1.12 server skill_fishing_base_level (cMaNGOS classic-db) and its fishing formula (mangos-classic)",
     getawayMargin = 95,
     zones = {
         { L["Elwynn Forest"], 1429, -70 }, { L["Dun Morogh"], 1426, -70 }, { L["Teldrassil"], 1438, -70 },
         { L["Durotar"], 1411, -70 }, { L["Mulgore"], 1412, -70 }, { L["Tirisfal Glades"], 1420, -70 },
-        { L["Stormwind City"], 1453, -70 }, { L["Ironforge"], 1455, -70 }, { L["Darnassus"], 1457, -70 },
-        { L["Orgrimmar"], 1454, -70 }, { L["Thunder Bluff"], 1456, -70 }, { L["Undercity"], 1458, -70 },
+        { L["Stormwind City"], 1453, -20 }, { L["Ironforge"], 1455, -20 }, { L["Darnassus"], 1457, -20 },
+        { L["Orgrimmar"], 1454, -20 }, { L["Thunder Bluff"], 1456, -20 }, { L["Undercity"], 1458, -20 },
         { L["Westfall"], 1436, -20 }, { L["Loch Modan"], 1432, -20 }, { L["Darkshore"], 1439, -20 },
         { L["The Barrens"], 1413, -20 }, { L["Silverpine Forest"], 1421, -20 },
         { L["Redridge Mountains"], 1433, 55 }, { L["Duskwood"], 1431, 55 }, { L["Wetlands"], 1437, 55 },

@@ -128,7 +128,7 @@ test("sim: the lure goes on and off, and the mount changes the speed", function(
     assertEqual(b.total, 25)
     assertEqual(b.sources[1].source, "enchant")
     assertEqual(b.sources[1].label, "Shiny Bauble")
-    assertEqual(NS.Bonuses:Breakdown("guns").sources[1].source, "racial", "the simulated Dwarf")
+    assertEqual(NS.Bonuses:Breakdown("guns").total, 0, "the simulated Dwarf: no Forever racial (#10)")
     step() step()                             -- two skill-ups
     step()                                    -- mount up
     local run = NS.StatData:Scan()

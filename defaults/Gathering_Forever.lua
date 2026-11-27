@@ -2,14 +2,19 @@ local _, NS = ...
 -- defaults/Gathering_Forever.lua — the skill each mining node and herb needs before it can be
 -- gathered (design §8), ascending. Read by modules/Helpers.lua's Nodes(key, rank).
 --
--- Unverified until the owner's smoke pass. The names are localized through NS.L so a non-enUS
--- client shows its own node names once a translator fills them in.
+-- Validated for GitHub issue #10 (the owner, 2026-11-27: from the sources, not in game): each need is
+-- the WoW Forever client's own Lock table (wago.tools wowf 1.60.1.71139; LockType 2 Herbalism, 3
+-- Mining) at the lock the 1.12 server gives that node (cMaNGOS classic-db gameobject_template data0),
+-- and every name is a ForeverDB object (the seeds run, docs/seed-research/2026-11-27-forever). All 41
+-- agree. Forever-only nodes (Starsilver, Cold Iron, Amber...) are not listed: no source gives their
+-- lock. The names are localized through NS.L so a non-enUS client shows its own node names once a
+-- translator fills them in.
 
 local L = NS.L
 
 NS.Gathering_Forever = {
     mining = {
-        verified = false, source = "vanilla 1.12 data (recalled, not cross-checked)",
+        verified = "wowf@1.60.1.71139", source = "WoW Forever DB2 Lock (wowf 1.60.1.71139) at the 1.12 node locks (cMaNGOS)",
         { name = L["Copper Vein"],            need = 1 },
         { name = L["Tin Vein"],               need = 65 },
         { name = L["Incendicite Mineral Vein"], need = 65 },
@@ -25,7 +30,7 @@ NS.Gathering_Forever = {
         { name = L["Rich Thorium Vein"],      need = 275 },
     },
     herbalism = {
-        verified = false, source = "vanilla 1.12 data (recalled, not cross-checked)",
+        verified = "wowf@1.60.1.71139", source = "WoW Forever DB2 Lock (wowf 1.60.1.71139) at the 1.12 node locks (cMaNGOS)",
         { name = L["Peacebloom"],          need = 1 },
         { name = L["Silverleaf"],          need = 1 },
         { name = L["Earthroot"],           need = 15 },

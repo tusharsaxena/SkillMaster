@@ -206,13 +206,23 @@ test("skillcatalog: the localized-name map answers each enUS name and the racial
     assertEqual(NS.SkillNameToKey["Language: Dwarven"], nil)
 end)
 
-test("skillcatalog: both data tables record a source and stay unverified until the smoke pass", function()
+test("skillcatalog: both data tables record a source and are verified against Forever's DB2 (GitHub issue #10)", function()
     for _, name in ipairs({ "SkillCatalog_Forever", "ClassWeapons_Forever" }) do
         local meta = NS.DataMeta[name]
         assertTrue(meta ~= nil, name)
         assertEqual(type(meta.source), "string", name)
-        assertEqual(meta.verified, false, name)
+        assertTrue(type(meta.verified) == "string" and meta.verified:match("^wowf@") ~= nil, name .. ": " .. tostring(meta.verified))
     end
+end)
+
+test("classweapons: Forever's own additions over 1.12, Rogue Axes and Druid Polearms (#10, DB2)", function()
+    local function has(class, key)
+        for _, k in ipairs(NS.ClassWeapons_Forever[class]) do if k == key then return true end end
+        return false
+    end
+    assertTrue(has("ROGUE", "axes"), "SkillLineAbility 248 / SkillRaceClassInfo 629, 630")
+    assertTrue(has("DRUID", "polearms"), "SkillLineAbility 2928 / SkillRaceClassInfo 2483")
+    assertFalse(has("HUNTER", "maces"), "the owner's in-game check, 2026-11-20")
 end)
 
 test("classweapons: every class lists only catalog keys", function()

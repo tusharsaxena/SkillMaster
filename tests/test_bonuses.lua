@@ -22,6 +22,17 @@ end
 local SWAPPED = { "UnitRace", "C_Item", "C_TooltipInfo", "C_UnitAuras", "GetWeaponEnchantInfo" }
 
 --- Install a world (race, skills, enchant, equipped tooltips, buffs, clock), run fn, put it all back.
+-- The racial mechanism on a client that has racials: WoW Forever ships none (#10), so the cases
+-- that exercise the attribution install the vanilla shape for their run.
+local VANILLA_RACIALS = { Human = { swords = 5, maces = 5 }, Dwarf = { guns = 5 }, Orc = { axes = 5 } }
+local function withRacials(fn)
+    local saved = NS.Racials_Forever.byRace
+    NS.Racials_Forever.byRace = VANILLA_RACIALS
+    local ok, err = pcall(fn)
+    NS.Racials_Forever.byRace = saved
+    if not ok then error(err, 0) end
+end
+
 local function withWorld(w, fn)
     local saved, savedSkill, savedNow = {}, NS.SkillData, M.__now
     for _, k in ipairs(SWAPPED) do saved[k] = M[k] end
@@ -68,7 +79,8 @@ test("bonuses: lure on the pole is one temp enchant source with its expiry", fun
     end)
 end)
 
-test("bonuses: a Dwarf's Guns +5 is one permanent racial source", function()
+test("bonuses: a Dwarf's Guns +5 is one permanent racial source (the mechanism; Forever ships none)", function()
+  withRacials(function()
     withWorld({
         race = { "Dwarf", "Dwarf" },
         skills = { guns = entry("guns", "Guns", 105, 110, 5) },
@@ -83,9 +95,11 @@ test("bonuses: a Dwarf's Guns +5 is one permanent racial source", function()
         assertTrue(s.expires == nil, "a racial never expires")
         assertTrue(s.label:find("Dwarf", 1, true) ~= nil, s.label)
     end)
+  end)
 end)
 
 test("bonuses: modifier 12 with 7 attributed leaves one Other 5", function()
+  withRacials(function()
     withWorld({
         race = { "Human", "Human" },
         skills = { swords = entry("swords", "Swords", 200, 300, 12) },
@@ -106,6 +120,7 @@ test("bonuses: modifier 12 with 7 attributed leaves one Other 5", function()
         assertEqual(other.label, "Other")
         assertEqual(sum(b), b.total, "the sources add up to the modifier")
     end)
+  end)
 end)
 
 test("bonuses: no modifier, no sources", function()
@@ -169,6 +184,7 @@ test("bonuses: a skill buff is a temp source with its aura's expiry", function()
 end)
 
 test("bonuses: more attributed than the modifier shows a negative Other, never a silent mismatch", function()
+  withRacials(function()
     withWorld({
         race = { "Orc", "Orc" },
         skills = { axes = entry("axes", "Axes", 200, 300, 3) },
@@ -179,6 +195,7 @@ test("bonuses: more attributed than the modifier shows a negative Other, never a
         assertEqual(b.sources[#b.sources].amount, -2)
         assertEqual(sum(b), 3)
     end)
+  end)
 end)
 
 test("bonuses: the 1.12 globals and a scanning tooltip are the fallback readers", function()
@@ -262,17 +279,13 @@ test("bonuses: inventory change publishes BONUSES_UPDATED; the 1 s ticker runs o
     end)
 end)
 
-test("racials: the table is Forever data, unverified, with a source, +5 per racial skill", function()
+test("racials: WoW Forever has none, verified against its DB2 (GitHub issue #10)", function()
     local R = NS.Racials_Forever
     assertTrue(type(R) == "table", "NS.Racials_Forever")
-    assertEqual(R.verified, false)
+    assertTrue(type(R.verified) == "string" and R.verified:match("^wowf@") ~= nil, tostring(R.verified))
     assertTrue(type(R.source) == "string" and #R.source > 0, "records its source")
-    assertEqual(R.byRace.Human.swords, 5)
-    assertEqual(R.byRace.Human.maces, 5)
-    assertEqual(R.byRace.Dwarf.guns, 5)
-    assertEqual(R.byRace.Orc.axes, 5)
-    assertEqual(R.byRace.Troll.bows, 5)
-    assertEqual(R.byRace.Troll.thrown, 5)
+    -- red under: vanilla's Human, Dwarf, Orc and Troll +5s, which Forever removed or made crit passives
+    assertEqual(next(R.byRace), nil, "no race carries a weapon-skill bonus")
 end)
 
 test("racials: every racial skill key is a catalog key", function()

@@ -98,13 +98,13 @@ test("test_trainers_riding_level_gate: riding 75 opens at 40, 150 at 60", functi
     local at35 = NS.Trainers:NextRank("riding", 0, 0, 35, "Alliance", "Dwarf")
     assertEqual(at35.cap, 75)
     assertEqual(at35.minLevel, 40)
-    assertEqual(at35.cost, 900000)
+    assertEqual(at35.cost, 1000000)   -- 100g (#10: the Forever mount guides)
     assertTrue(not at35.canTrain, "level 35 is below the riding gate")
     assertTrue(NS.Trainers:NextRank("riding", 0, 0, 40, "Alliance", "Dwarf").canTrain, "level 40 trains")
     local at59 = NS.Trainers:NextRank("riding", 75, 75, 59, "Alliance", "Dwarf")
     assertEqual(at59.cap, 150)
     assertEqual(at59.minLevel, 60)
-    assertEqual(at59.cost, 9000000)
+    assertEqual(at59.cost, 10000000)
     assertTrue(not at59.canTrain, "level 59 is below the epic gate")
     assertNil(NS.Trainers:NextRank("riding", 150, 150, 60, "Alliance", "Dwarf"))
 end)
@@ -205,12 +205,17 @@ test("trainer provenance: every record carries the probe's confirmation or an ex
         "NS.DataMeta.Trainers_Forever names the QuestieDB commit")
     assertEqual(type(meta.source), "string", "the probe is named")
     assertTrue(type(meta.sources) == "table" and #meta.sources > 0, "the sources and their pins")
-    local P = NS.TrainerProvenance_Forever
+    local P, E = NS.TrainerProvenance_Forever, NS.TrainerEvidence_Forever
     for _, t in ipairs(NS.Trainers_Forever) do
-        if t.verified ~= false then
+        if t.verified ~= false and P.confirmed[t.id] then
             assertEqual(t.verified, meta.verified, t.id .. ": a confirmation is the run's tag")
-            assertTrue(P.confirmed[t.id] ~= nil, t.id .. ": confirmed by the probe")
             assertNil(t.unverified, t.id .. ": a confirmed record has no reason")
+        elseif t.verified ~= false then
+            -- GitHub issue #10: confirmed by the seeds run's ForeverDB evidence instead
+            assertTrue(E ~= nil and E.confirmed[t.id] == true, t.id .. ": confirmed by the seeds evidence")
+            assertEqual(t.verified, E.tag, t.id .. ": the evidence's tag")
+            assertNil(t.unverified, t.id .. ": a confirmed record has no reason")
+            assertEqual(t.probe, P.unverified[t.id], t.id .. ": the probe's reason stays readable")
         else
             assertEqual(type(t.unverified), "string", t.id .. ": an unverified record says why")
             assertTrue(#t.unverified > 0, t.id .. ": an empty reason")
@@ -233,12 +238,28 @@ test("trainer provenance: a confirmed record still holds the values the probe co
     end
 end)
 
+test("trainer provenance: every trainer is verified, by the probe or by the seeds evidence (GitHub issue #10)", function()
+    local E = NS.TrainerEvidence_Forever
+    assertTrue(E ~= nil and type(E.tag) == "string" and E.tag:match("^foreverdb@v%d") ~= nil, "the evidence names its tag")
+    for _, t in ipairs(NS.Trainers_Forever) do
+        -- red under: round 2's Forever-only hold and the instance and side findings left 56 unverified
+        assertTrue(t.verified ~= false, t.id .. ": unverified (" .. tostring(t.unverified) .. ")")
+    end
+    for id in pairs(E.confirmed) do
+        local found = false
+        for _, t in ipairs(NS.Trainers_Forever) do if t.id == id then found = true end end
+        assertTrue(found, id .. ": evidence for a record that no longer ships")
+    end
+end)
+
 test("trainer provenance: no trainer is shown as unverified (the owner, 2026-11-25)", function()
     local open
     for _, t in ipairs(NS.Trainers_Forever) do
         if t.verified == false then open = open or t end
     end
-    assertTrue(open ~= nil, "the data still records unverified trainers")
+    -- every trainer is verified since #10; a stand-in record checks that none would show a mark
+    open = open or { name = "Stand-in", faction = "Neutral", mapID = 1453, mapName = "Stormwind City",
+                     x = 50, y = 50, teaches = { "cooking" }, verified = false, unverified = "a stand-in" }
     assertNil(NS.Waypoints.UnverifiedMark, "no mark helper ships")
     assertTrue(NS.Waypoints:Directions(open):find("unverified", 1, true) == nil, "chat names no mark")
     assertNil(NS.GetSetting and NS.GetSetting("trainers.unverified"), "no setting turns a mark on")
@@ -448,17 +469,18 @@ end)
 
 -- ---------------------------------------------------------------------------------------------
 -- Round 2: the 55 Forever-only trainers (the owner, 2026-11-23: "Go ahead and ship these 55 forever
--- only trainers"), unverified until seen in game
+-- only trainers"), held unverified until seen in game, then verified from the sources by GitHub issue #10
 -- ---------------------------------------------------------------------------------------------
 
 local FOREVER_ONLY = "Forever-only, from QuestieDB spawn, not yet seen in game"
 
-test("round2 forever-only: the 55 ship, each unverified with its reason, an npcID and a point", function()
+test("round2 forever-only: the 55 ship, each verified by the seeds evidence, with the probe's hold, an npcID and a point", function()
     local n = 0
     for _, t in ipairs(NS.Trainers_Forever) do
-        if t.unverified == FOREVER_ONLY then
+        if t.probe == FOREVER_ONLY then
             n = n + 1
-            assertEqual(t.verified, false, t.id)
+            -- red under (#10): verified = false while held for an in-game look the owner ruled out
+            assertEqual(t.verified, NS.TrainerEvidence_Forever.tag, t.id)
             assertTrue(type(t.npcID) == "number" and t.x and t.y and t.mapID, t.id .. " npcID and point")
             assertTrue(#t.teaches == 1 and type(t.ranks) == "table" and #t.ranks > 0, t.id .. " skill and ranks")
         end

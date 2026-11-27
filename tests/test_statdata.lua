@@ -36,7 +36,8 @@ local function fixture()
         GetDodgeChance = function() return 9.5 end,
         GetParryChance = function() return 5 end,
         GetBlockChance = function() return 0 end,
-        UnitResistance = function(_, school) local v = RESISTS[school] or 0 return v, v, 0, 0 end,
+        -- Forever's shape (its API docs): base, real, effective, bonus; the effective one is 3rd (#10)
+        UnitResistance = function(_, school) local v = RESISTS[school] or 0 return 0, 0, v, 0 end,
         GetUnitSpeed = function() return 0, 7, 7, 4.72 end,
         GetInventoryItemDurability = function(slot)
             if slot == 1 then return 15, 60 end
@@ -105,7 +106,21 @@ test("statdata: attack power is base plus buffs against 400, crit against 30%", 
     assertEqual(entry(model, "spell", "spellCrit").value, 4, "the best school")
 end)
 
-test("statdata (hit_markers): hit scales to 9% with markers at 5% and 9%, spell hit to 16%", function()
+test("statdata: a hit chance adds the combat rating bonus, as Forever's paper doll does (#10)", function()
+    local saved, savedCR = _G.GetCombatRatingBonus, _G.CR_HIT_MELEE
+    rawset(_G, "GetCombatRatingBonus", function(cr) return cr == 6 and 1.5 or 0 end)
+    rawset(_G, "CR_HIT_MELEE", 6)
+    local def
+    for _, d in ipairs(NS.STAT_DEFS) do if d.key == "meleeHit" then def = d end end
+    local ok, v = pcall(NS.StatData.CALC.hit, function() return 2 end, def)
+    rawset(_G, "GetCombatRatingBonus", saved)
+    rawset(_G, "CR_HIT_MELEE", savedCR)
+    assertTrue(ok, tostring(v))
+    -- red under: the modifier alone (2)
+    assertEqual(v, 3.5)
+end)
+
+test("statdata (hit_markers): hit scales to 9% with markers at 5% and 9%, spell hit to 17% (Forever's table, #10)", function()
     local model = scan()
     local hit = entry(model, "base", "meleeHit")
     assertEqual(hit.value, 4)
@@ -117,10 +132,10 @@ test("statdata (hit_markers): hit scales to 9% with markers at 5% and 9%, spell 
     assertNear(boss.at, 100, 0.001)
     assertEqual(boss.label, NS.L["vs raid boss"])
     local spellHit = entry(model, "spell", "spellHit")
-    assertEqual(spellHit.ref, 16)
+    assertEqual(spellHit.ref, 17)
     assertEqual(#spellHit.markers, 1)
     assertNear(spellHit.markers[1].at, 100, 0.001)
-    assertNear(spellHit.pct, 50, 0.001)
+    assertNear(spellHit.pct, 8 / 17 * 100, 0.001)
 end)
 
 test("statdata (armor_mitigation): 1104 armor at level 22 -> 1104/(1104+400+1870) = 32.7%, against 75%", function()
@@ -206,7 +221,7 @@ test("statdata: every def declares a known group, an api, a ref and a source rec
         assertTrue(def.ref ~= nil, def.key .. " ref")
         assertTrue(type(def.label) == "string", def.key .. " label")
     end
-    assertEqual(NS.STATS_FOREVER_META.verified, false)
+    assertTrue(type(NS.STATS_FOREVER_META.verified) == "string", "verified against the Forever UI source (#10)")
     assertTrue(type(NS.STATS_FOREVER_META.source) == "string")
 end)
 

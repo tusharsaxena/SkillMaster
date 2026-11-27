@@ -42,6 +42,7 @@ S.APIS = {
     GetParryChance             = function() return GetParryChance end,
     GetBlockChance             = function() return GetBlockChance end,
     UnitResistance             = function() return UnitResistance end,
+    GetCombatRatingBonus       = function() return GetCombatRatingBonus end,
     -- Through NS.Compat (T5.2): the simulator's seam answers the speed while a session runs.
     GetUnitSpeed               = function() return type(GetUnitSpeed) == "function" and NS.Compat.UnitSpeed or nil end,
     GetInventoryItemDurability = function() return GetInventoryItemDurability end,
@@ -96,6 +97,16 @@ end
 
 S.CALC = {
     first = function(fn) return num(fn()) end,
+    -- A hit chance as WoW Forever's paper doll reads it (Camelot/PaperDollFrameStats.lua:524-527,
+    -- issue #10): the combat rating bonus, GetCombatRatingBonus(CR_HIT_*), plus the modifier.
+    hit = function(fn, def)
+        local mod = num(fn())
+        if not mod then return nil end
+        local bonus = S.APIS.GetCombatRatingBonus()
+        local cr = def.rating and _G[def.rating]
+        local extra = (type(bonus) == "function" and type(cr) == "number") and num(bonus(cr)) or nil
+        return mod + (extra or 0)
+    end,
     -- UnitStat(unit, i): base, effective, posBuff, negBuff.
     stat = function(fn, def) return num(select(2, fn("player", def.arg))) end,
     -- Unit(Ranged)AttackPower(unit): base, posBuff, negBuff.
@@ -107,7 +118,7 @@ S.CALC = {
     bestSchool = function(fn) return bestSchool(fn) end,
     -- GetManaRegen(): base and casting regen per second; shown per 5 s.
     mp5 = function(fn) local v = num(fn()) return v and v * 5 end,
-    -- UnitArmor(unit): base, effective, armor, posBuff, negBuff. Value is the mitigation %.
+    -- UnitArmor(unit): base, effective, real, bonus (Forever's API docs). Value is the mitigation %.
     armor = function(fn, _, ctx)
         local armor = num(select(2, fn("player")))
         if not armor then return nil end
@@ -119,8 +130,9 @@ S.CALC = {
         if not num(base) then return nil end
         return base + (num(mod) or 0)
     end,
-    -- UnitResistance(unit, school): base, total, bonus, minus.
-    resist = function(fn, def) return num(select(2, fn("player", def.arg))) end,
+    -- UnitResistance(unit, school): base, real, effective, bonus (Forever's API docs); the paper doll
+    -- shows the effective one (Camelot/PaperDollFrame.lua:718-722, issue #10).
+    resist = function(fn, def) return num(select(3, fn("player", def.arg))) end,
     -- GetUnitSpeed(unit): current, run, flight, swim (yards/s).
     speed = function(fn, def)
         local v = num(select(def.arg, fn("player")))
