@@ -308,7 +308,7 @@ for _, r in ipairs({
     { "Velma Warnam", "Horde", "Scourge", "Brill", "Tirisfal Glades", 1420, 4773, 60.1, 52.6 },
 }) do
     add{ name = r[1], faction = r[2], race = r[3], city = r[4], mapName = r[5], mapID = r[6],
-         npcID = r[7], x = r[8], y = r[9], cost = 900000, teaches = { "riding" }, ranks = { 75, 150 }, source = SRC_RECALL }
+         npcID = r[7], x = r[8], y = r[9], cost = 1000000, teaches = { "riding" }, ranks = { 75, 150 }, source = SRC_RECALL }
 end
 
 -- The Forever-only trainers (round 2; the owner, 2026-11-23: "Go ahead and ship these 55 forever only
@@ -390,8 +390,8 @@ end
 -- Velma Warnam's spot) and Genn Fairweather (Stablemaster and Riding Trainer, Zephras Isle, both sides,
 -- Apprentice riding per Method.gg's Forever guide; no race: QuestieDB names none).
 add{ name = "Shari Stilwell", faction = "Horde", race = "Scourge", city = "Tirisfal Glades", mapName = "Tirisfal Glades",
-     mapID = 1420, npcID = 246152, x = 60.2, y = 52.7, cost = 900000, teaches = { "riding" }, ranks = { 75, 150 },
+     mapID = 1420, npcID = 246152, x = 60.2, y = 52.7, cost = 1000000, teaches = { "riding" }, ranks = { 75, 150 },
      hold = FOREVER_ONLY, source = SRC_FOREVER }
 add{ name = "Genn Fairweather", faction = "Neutral", city = "Zephras Isle", mapName = "Zephras Isle", mapID = 2521,
-     npcID = 265756, x = 53.8, y = 81.3, cost = 900000, teaches = { "riding" }, ranks = { 75 },
+     npcID = 265756, x = 53.8, y = 81.3, cost = 1000000, teaches = { "riding" }, ranks = { 75 },
      hold = FOREVER_ONLY, source = SRC_FOREVER }

@@ -23,11 +23,14 @@ local _, NS = ...
 -- NS.SkillLineIDToKey and NS.SkillNameToKey (modules/SkillData.lua) are built from these, the names
 -- through NS.L: the ID when the client's record carries one, the localized name otherwise.
 --
--- Source: the vanilla 1.12 skill list (Skills tab line names, weapon skill lines, profession rank
--- caps), as recorded for WoW Classic Era; not yet checked against WoW Forever in game.
+-- Source: the vanilla 1.12 skill list, checked against WoW Forever's own DB2 for GitHub issue #10 by
+-- the seeds run (docs/seed-research/2026-11-27-forever: every skillLineID and riding aliasID against
+-- SkillLine, every open and icon spell ID against SpellName, no flag) and the rank caps against the
+-- rank spells (defaults/Ranks_Forever.lua). A `/sm probe` confirmed the skill-line IDs on build 70862.
 
 NS.DataMeta = NS.DataMeta or {}
-NS.DataMeta.SkillCatalog_Forever = { source = "vanilla 1.12 data (WoW Classic Era skill lines)", verified = false }
+NS.DataMeta.SkillCatalog_Forever = { source = "WoW Forever DB2 SkillLine + SpellName (wowf 1.60.1.71139; "
+    .. "docs/seed-research/2026-11-27-forever)", verified = "wowf@1.60.1.71139" }
 
 local PROF = { 75, 150, 225, 300 }
 

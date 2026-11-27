@@ -153,7 +153,7 @@ test("rows: money and the riding trainer line", function()
         local text = R.UnlearnedText(skill("riding", "Riding", "other", 0, 0, 0, false))
         assertTrue(text:find("Ultham Ironhorn", 1, true) ~= nil, text)
         assertTrue(text:find("Lv 40", 1, true) ~= nil, text)
-        assertTrue(text:find("90g", 1, true) ~= nil, text)
+        assertTrue(text:find("100g", 1, true) ~= nil, text)   -- #10: Forever's riding is 100g
     end)
 end)
 

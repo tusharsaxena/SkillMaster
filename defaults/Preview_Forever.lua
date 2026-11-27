@@ -60,7 +60,7 @@ NS.Preview_Forever = {
         { "Bows", 81, 110 },
         { "Crossbows", 1, 110 },
         { "Daggers", 74, 110 },
-        { "Guns", 105, 110, modifier = 5 },
+        { "Guns", 105, 110 },
         { "Staves", 1, 110 },
         { "Swords", 1, 110 },
         { "Two-Handed Axes", 107, 110 },
@@ -70,8 +70,8 @@ NS.Preview_Forever = {
         { "Defense", 100, 110 },
     },
 
-    -- The lure the Fishing row's teal segment and its 4:12 timer show. Guns' +5 is the Dwarf racial
-    -- (defaults/Racials_Forever.lua), attributed by the same breakdown as live.
+    -- The lure the Fishing row's teal segment and its 4:12 timer show. Guns carries no bonus: WoW
+    -- Forever has no racial weapon-skill bonus (defaults/Racials_Forever.lua, GitHub issue #10).
     temp = {
         { skill = "Fishing", amount = 25, label = "Shiny Bauble", seconds = 252, source = "enchant" },
     },
