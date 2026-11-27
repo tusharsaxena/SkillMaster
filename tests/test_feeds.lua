@@ -54,7 +54,7 @@ end
 
 test("feeds: one data source per family, in the family order, the two shipped names kept", function()
     local want = {
-        professions = { "Skill Master", "Skill Master" },
+        professions = { "Skill Master Professions", "Skill Master Professions" },
         skills = { "Skill Master Skills", "Skill Master Skills" },
         stats = { "Skill Master Stats", "Skill Master Character Stats" },
         currencies = { "Skill Master Currencies", "Skill Master Currencies" },

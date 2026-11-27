@@ -283,10 +283,11 @@ test("round7 titles: each feed's tooltip reads its window's title (SMW-05), Skil
     assertTrue(lines[1]:find(STATS, 1, true) ~= nil, "Classic stats title: " .. tostring(lines[1]))
     assertEqual((Br.Heading()), STATS)
     Br.FillTooltip(tip, "professions")
-    -- The LibDataBroker names a display stores by are unchanged; the stats feed is relabeled.
-    assertEqual(Br.NAME, "Skill Master")
+    -- The stats feed keeps its LibDataBroker name, relabeled; the Professions feed is named for its family
+    -- (R7-SM-02, the owner's rename of "Skill Master").
+    assertEqual(Br.NAME, "Skill Master Professions")
     assertEqual(Br.STATS_NAME, "Skill Master Stats")
-    assertEqual(Br.Object().label, "Skill Master")
+    assertEqual(Br.Object().label, "Skill Master Professions")
     assertEqual(Br.StatsObject().label, "Skill Master Character Stats")
 end)
 

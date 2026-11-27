@@ -21,8 +21,10 @@ local _, NS = ...
 -- The window's own defaults (position, size, columns) are its profile rows, `windows.<family>`
 -- (defaults/Profile.lua), not part of this table.
 --
--- Professions holds Primary and Secondary, Skills holds Weapon and Other (the spec's call). "Skill Master"
--- and "Skill Master Stats" keep their LibDataBroker names for Professions and Character Stats.
+-- Professions holds Primary and Secondary, Skills holds Weapon and Other (the spec's call). "Skill Master Stats"
+-- keeps its LibDataBroker name for Character Stats. The Professions feed was "Skill Master" until the
+-- owner renamed it "Skill Master Professions" (R7-SM-02, owner feedback round 7), so each family's feed
+-- names its family; a display that placed the old name shows the new one as a new feed.
 
 local L = NS.L
 
@@ -41,7 +43,7 @@ NS.Families = {
     professions = family("professions", {
         title = L["Skill Master \194\183 Professions"], short = L["Professions"], blocks = { "primary", "secondary" },
         source = "skills", rowKind = "skill", message = "SKILLS_UPDATED",
-        feed = { name = "Skill Master", label = L["Skill Master"], icon = icon("Trade_BlackSmithing") },
+        feed = { name = "Skill Master Professions", label = L["Skill Master Professions"], icon = icon("Trade_BlackSmithing") },
     }),
     skills = family("skills", {
         title = L["Skill Master \194\183 Skills"], short = L["Skills"], blocks = { "weapon", "other" },

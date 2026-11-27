@@ -111,10 +111,10 @@ end
 
 test("broker: one data source per family (SMW-05), \"Skill Master\" and \"Skill Master Stats\" kept, separate from the launcher object", function()
     reset()
-    local obj = M.__ldbObjects["Skill Master"]
+    local obj = M.__ldbObjects["Skill Master Professions"]
     assertTrue(obj ~= nil, "the feed is registered")
     assertEqual(obj.type, "data source")
-    assertEqual(obj.label, "Skill Master")
+    assertEqual(obj.label, "Skill Master Professions")
     assertTrue(type(obj.OnClick) == "function" and type(obj.OnEnter) == "function"
         and type(obj.OnLeave) == "function", "its handlers")
     assertTrue(B.Object() == obj, "B.Object is it")
@@ -288,7 +288,7 @@ test("broker: clicks follow design §6.5 and never touch a secure frame", functi
     local saved = { W.Toggle, M.ToggleCharacter }
     W.Toggle = function() calls[#calls + 1] = "toggle" end
     M.ToggleCharacter = function(tab) calls[#calls + 1] = "char:" .. tab end
-    M.__ldbObjects["Skill Master"].OnClick(nil, "LeftButton")
+    M.__ldbObjects["Skill Master Professions"].OnClick(nil, "LeftButton")
     W.Toggle, M.ToggleCharacter = saved[1], saved[2]
     assertEqual(table.concat(calls, ","), "toggle", "the cell toggles its window")
     -- SMW-07: a tooltip row opens nothing (only a section's chevron acts), so the row opener is gone.
