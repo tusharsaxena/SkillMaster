@@ -301,27 +301,11 @@ No structural registry exists.
 ## Message Bus
 
 Thirteen messages, each declared once in `core/Bus.lua` as `NS.MSG.<KEY>` through LibKa0s-Bus-1.0's
-strict catalog, so a misspelled constant raises. `SkillData` sends `SKILLS_UPDATED` and `SKILL_UP`
-(the simulator's restoring stop re-sends `SKILLS_UPDATED` with the live model),
-`Bonuses` sends `BONUSES_UPDATED`, `StatData` sends `STATS_UPDATED` and `Blocks` sends
-`LAYOUT_CHANGED`; the three tree models send their own (SMW-08..10); the family windows and the feeds' tooltip say
-when they show (SMW-10); the simulator (`modules/Simulator.lua`) sends `SIM_TICK` after each step.
-
-| Constant | Wire name | Sender | Payload | Consumers |
-|---|---|---|---|---|
-| `SKILLS_UPDATED` | `Ka0s_SkillMaster_SkillsUpdated` | `modules/SkillData.lua` (T2.1); the simulator's restoring stop (`modules/Simulator.lua`) re-sends the live model | the skills model | blocks, broker, alerts, alts, Journal |
-| `SKILL_UP` | `Ka0s_SkillMaster_SkillUp` | `modules/SkillData.lua` (T2.1) | key, old, new | blocks (session gains), broker flash, alerts, session log |
-| `STATS_UPDATED` | `Ka0s_SkillMaster_StatsUpdated` | `modules/StatData.lua` (T2.3) | the stats model | stat blocks, broker |
-| `BONUSES_UPDATED` | `Ka0s_SkillMaster_BonusesUpdated` | `modules/Bonuses.lua` (T2.2) | none | bars, tooltips, broker |
-| `LAYOUT_CHANGED` | `Ka0s_SkillMaster_LayoutChanged` | `modules/Blocks.lua` (detach, dock, collapse, collapse all, move; a tree fold, `NS.Tree`; a pin, `NS.Pins`); the skin owner's look-change hook; `NS.ApplyLook` (every display row's write, `settings/OptionsSetup.lua`) | none | `modules/Blocks.lua`, which repaints the windows and the detached frames; the Journal; the trainer popup (`modules/TrainerPopup.lua`, its trainer names' color while it is shown); `modules/StatisticsData.lua` (whether to watch `CRITERIA_UPDATE`) |
-| `REPS_UPDATED` | `Ka0s_SkillMaster_RepsUpdated` | `modules/RepData.lua` (SMW-08); the simulator's stop | the reputations model | blocks, broker, alts, Journal |
-| `REP_CHANGED` | `Ka0s_SkillMaster_RepChanged` | `modules/RepData.lua`, a standing that moved between two reads (`RD.Changes`; none on the first read, the login baseline) | key, old, new, name, oldReaction, newReaction (R5-SM-10) | session log (the Journal's Log: a row per change) |
-| `CURRENCIES_UPDATED` | `Ka0s_SkillMaster_CurrenciesUpdated` | `modules/CurrencyData.lua` (SMW-09); the simulator's stop | the currencies model | blocks, broker, alts, Journal |
-| `CURRENCY_CHANGED` | `Ka0s_SkillMaster_CurrencyChanged` | `modules/CurrencyData.lua`, an amount that moved | key, old, new, name | session log, alerts (the cap alert) |
-| `STATISTICS_UPDATED` | `Ka0s_SkillMaster_StatisticsUpdated` | `modules/StatisticsData.lua` (SMW-10), the first use (unless a block's own pass asked) and each debounced re-read; the simulator's stop | the Statistics model | blocks, broker |
-| `WINDOW_TOGGLED` | `Ka0s_SkillMaster_WindowToggled` | `modules/Window.lua` (SMW-10), a family window's show, hide and `OnHide` | family id, shown | `modules/StatisticsData.lua` |
-| `FEED_TOOLTIP_TOGGLED` | `Ka0s_SkillMaster_FeedTooltipToggled` | `modules/Broker.lua` (SMW-10, `B.TooltipToggled`), a feed's tooltip up (before it fills) or down | family id, shown | `modules/StatisticsData.lua` (its first use, and whether to watch) |
-| `SIM_TICK` | `Ka0s_SkillMaster_SimTicked` | `modules/Simulator.lua` (T5.2), after each step | the step's kind | none yet (published for displays under simulation) |
+strict catalog. Data modules send the model messages (skills, stats, bonuses, and the reputations,
+currencies and statistics trees) and the change messages (`SKILL_UP`, `REP_CHANGED`,
+`CURRENCY_CHANGED`); `Blocks` sends `LAYOUT_CHANGED`; the windows and feed tooltips say when they show;
+the simulator sends `SIM_TICK`. The register, with every sender, payload and consumer, is
+[message-bus.md](message-bus.md).
 
 ## Slash Commands
 
@@ -543,7 +527,7 @@ the reputation, currency and Statistics shapes the six-windows run built on Bliz
 | `profiles.md` | Present | The Profiles page ships in the options UI |
 | `perf-analysis/README.md` | Present | The performance harness is wired (`core/PerfSetup.lua`) |
 | `compat-layer.md` | Present | `core/Compat.lua` publishes three or more addon-specific shims (10 as measured on 2026-11-10: the skill list, the player, the weapon enchant, the item tooltip, the unit speed, the spell name) |
-| `message-bus.md` | Owed | More than ten messages: 13 in `NS.MSG` as measured on 2026-11-27 (six on 2026-11-10), so the trigger has fired; until the doc is split out, `## Message Bus` above is the register |
+| `message-bus.md` | Present | More than ten messages: 13 in `NS.MSG` as measured on 2026-11-27 (six on 2026-11-10); the register, split out of `## Message Bus` above |
 | `known-limitations.md` | Present | Known Limitations ran past 60 lines (132 on 2026-11-15) |
 | `taint.md` | Not applicable | Taint Notes is under 60 lines |
 
