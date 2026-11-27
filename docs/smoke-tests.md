@@ -1460,3 +1460,18 @@ none is passed until you say so.
   Skill Master Skills, Stats, Currencies, Reputations and Statistics; no plain "Skill Master" feed is left. A cell you
   had placed for the old "Skill Master" feed is gone: add Skill Master Professions where you want it, and its text,
   tooltip and pins are the same as before. Result:
+
+## The data tables, validated from the sources (GitHub issue #10, 2026-11-27)
+
+- **SM-10-1** (new) On a **Human, Dwarf, Orc or Troll**, hover a weapon skill vanilla gave a racial +5 (a Human's Swords, a
+  Dwarf's Guns): the tooltip's Bonuses show no "Racial" line; if the skill shows a modifier at all, it comes from gear or
+  an "Other" line. `/sm test` (the sample Dwarf Hunter): Guns shows 105/110 with no bonus segment. Result:
+- **SM-10-2** (new) On a **Rogue**, the Skills window's Weapon block lists **Axes** (unlearned until trained); on a
+  **Druid** level 20 or more, **Polearms**. Result:
+- **SM-10-3** (new) Below level 40 with no Riding, hover the Riding row: the trainer line ends **100g** (was 90g); the
+  trainer popup's Riding cost reads 100g. Result:
+- **SM-10-4** (new) Open the Fishing helper (hover Fishing) in **Stormwind, Ironforge, Darnassus, Orgrimmar, Thunder Bluff
+  or Undercity**: the zone needs **75** skill to land every cast (was 25). Result:
+- **SM-10-5** (new) Character Stats, Defense & Resists: each resistance equals the number the character sheet shows for it
+  (with a resistance item or buff on, so it is not 0). Base & Combat: Melee and Ranged Hit, and Spell & Regen's Spell Hit,
+  match the sheet's hit tooltips; Spell Hit's "vs raid boss" marker sits at **17%**. Result:

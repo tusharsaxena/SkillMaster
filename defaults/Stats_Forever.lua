@@ -16,14 +16,21 @@ local _, NS = ...
 --   fmt     "int" | "pct" (one decimal) | "pct0" (whole percent) | "armor" (raw armor + mitigation).
 --   icon    the row's in-game icon, an Interface\Icons\ path (set below from STAT_ICONS).
 --
--- Every row is unverified until the owner's smoke pass on Forever (docs/forever-quirks.md, the
--- assumed-API table): the shapes are vanilla 1.12's.
+-- Validated for GitHub issue #10 (the owner, 2026-11-27: from the sources, not in game) against
+-- Blizzard's own WoW Forever UI (wow-ui-source branch forever, 1.60.1 71139: Camelot/PaperDollFrame*.lua
+-- and the generated API documentation), the kit's Forever API list and the client's icon manifest:
+-- every API is present, every icon is in the build, and each read is the one the client's own paper
+-- doll makes. Resistances read the effective value (3rd return), hits add the combat rating bonus,
+-- and the spell raid-boss marker is 17 (the client's table and string). The references (a full bar's
+-- value: 400 attack power, 30% crit...) are the design's and in no source: `unsourced`.
 
 local L = NS.L
 
 NS.STATS_FOREVER_META = {
-    source   = "vanilla 1.12 paper-doll formulas and API shapes; references per the design (§6.3, plan T2.3)",
-    verified = false,
+    source   = "Blizzard's WoW Forever paper doll (wow-ui-source forever 1.60.1 71139) and API docs; "
+        .. "references per the design (§6.3, plan T2.3)",
+    verified = "wow-ui-source@forever-71139",
+    unsourced = { "ref" },
 }
 
 local HIT_MARKERS = {
@@ -44,15 +51,15 @@ NS.STAT_DEFS = {
     { key = "rangedAttackPower", group = "base", api = "UnitRangedAttackPower", calc = "attackPower", ref = 400, fmt = "int", label = L["Ranged Attack Power"] },
     { key = "meleeCrit",  group = "base", api = "GetCritChance",        calc = "first", ref = 30,    fmt = "pct", label = L["Melee Crit"] },
     { key = "rangedCrit", group = "base", api = "GetRangedCritChance",  calc = "first", ref = 30,    fmt = "pct", label = L["Ranged Crit"] },
-    { key = "meleeHit",   group = "base", api = "GetHitModifier",       calc = "first", ref = "cap", fmt = "pct", label = L["Melee Hit"],  markers = HIT_MARKERS },
-    { key = "rangedHit",  group = "base", api = "GetRangedHitModifier", calc = "first", ref = "cap", fmt = "pct", label = L["Ranged Hit"], markers = HIT_MARKERS },
+    { key = "meleeHit",   group = "base", api = "GetHitModifier",       calc = "hit", rating = "CR_HIT_MELEE", ref = "cap", fmt = "pct", label = L["Melee Hit"],  markers = HIT_MARKERS },
+    { key = "rangedHit",  group = "base", api = "GetRangedHitModifier", calc = "hit", rating = "CR_HIT_RANGED", ref = "cap", fmt = "pct", label = L["Ranged Hit"], markers = HIT_MARKERS },
 
     -- Spell + regen. Spell damage, healing and regen references are the design's "(call)" defaults.
     { key = "spellDamage",  group = "spell", api = "GetSpellBonusDamage",  calc = "bestSchool", ref = 500,   fmt = "int", label = L["Spell Damage"] },
     { key = "spellHealing", group = "spell", api = "GetSpellBonusHealing", calc = "first",      ref = 1000,  fmt = "int", label = L["Bonus Healing"] },
     { key = "spellCrit",    group = "spell", api = "GetSpellCritChance",   calc = "bestSchool", ref = 30,    fmt = "pct", label = L["Spell Crit"] },
-    { key = "spellHit",     group = "spell", api = "GetSpellHitModifier",  calc = "first",      ref = "cap", fmt = "pct", label = L["Spell Hit"],
-      markers = { { value = 16, label = L["vs raid boss"] } } },
+    { key = "spellHit",     group = "spell", api = "GetSpellHitModifier",  calc = "hit", rating = "CR_HIT_SPELL",      ref = "cap", fmt = "pct", label = L["Spell Hit"],
+      markers = { { value = 17, label = L["vs raid boss"] } } },
     { key = "manaRegen",    group = "spell", api = "GetManaRegen",         calc = "mp5",        ref = 100,   fmt = "int", label = L["Mana Regen (per 5 s)"] },
 
     -- Defense + resists.

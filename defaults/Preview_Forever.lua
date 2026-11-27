@@ -39,6 +39,8 @@ local _, NS = ...
 NS.Preview_Forever = {
     meta = {
         source   = "the v1 design mockups (docs/superpowers/specs/2026-11-10-skill-master-mockups/)",
+        -- Not data that mirrors the game: test mode's fictional character. Sanity-checked for issue #10
+        -- (2026-11-27): its Guns no longer carry a racial Forever does not have.
         verified = false,
     },
 

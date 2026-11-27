@@ -89,7 +89,7 @@ files["tests/"] = {
 files["modules/StatData.lua"] = {
   read_globals = {
     "UnitStat", "UnitAttackPower", "UnitRangedAttackPower", "GetCritChance", "GetRangedCritChance",
-    "GetHitModifier", "GetRangedHitModifier", "GetSpellHitModifier", "GetSpellCritChance",
+    "GetHitModifier", "GetRangedHitModifier", "GetSpellHitModifier", "GetSpellCritChance", "GetCombatRatingBonus",
     "GetSpellBonusDamage", "GetSpellBonusHealing", "GetManaRegen", "UnitArmor", "UnitDefenseSkill",
     "GetDodgeChance", "GetParryChance", "GetBlockChance", "UnitResistance", "GetUnitSpeed",
     "GetInventoryItemDurability", "UnitLevel",
