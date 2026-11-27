@@ -19,7 +19,7 @@
 
 - Add the constant to `NS.MSG` in `core/Bus.lua` with its sender and payload in a comment.
 - Send with `NS.bus:SendMessage(NS.MSG.X, ...)`; subscribe on a target from `NS.NewBusTarget()`.
-- Add its row to `ARCHITECTURE.md`'s Message Bus table and to `test_bus`.
+- Add its row to [message-bus.md](message-bus.md)'s table and to `test_bus`.
 
 ## Add a locale string
 
